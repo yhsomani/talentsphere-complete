@@ -2,15 +2,16 @@
 # Dependencies
 node_modules/
 
+# Build outputs
+.next/
+
 # Environment variables
 .env.local
-*.env.*
+.env
 
-# Build outputs
-dist/
-build/
-.next/
-out/
+# IDE files
+.vscode/
+.idea/
 
 # Logs
 *.log

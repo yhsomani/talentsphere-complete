@@ -67,7 +67,7 @@ export function ProfileForm({
       
       <select
         value={formData.availability_status}
-        onChange={(e) => onChange({ availability_status: e.target.value })}
+        onChange={(e) => onChange({ availability_status: e.target.value as ProfileFormData['availability_status'] })}
       >
         <option value="available">Available</option>
         <option value="open_to_work">Open to Work</option>
@@ -77,7 +77,7 @@ export function ProfileForm({
       
       <select
         value={formData.visibility}
-        onChange={(e) => onChange({ visibility: e.target.value })}
+        onChange={(e) => onChange({ visibility: e.target.value as ProfileFormData['visibility'] })}
       >
         <option value="public">Public - Anyone can view</option>
         <option value="connections">Connections Only</option>
