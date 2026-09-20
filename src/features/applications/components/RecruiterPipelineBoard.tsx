@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { applicationService, type ApplicationRecord } from '@/services/application.service';
+import { applicationService, type ApplicationRecord, type ScorecardRecord } from '@/services/application.service';
+import { createBrowserClient } from '@/lib/supabase';
 import { Button, Avatar, Badge } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import {
@@ -21,7 +22,10 @@ import {
   List,
   RefreshCw,
   Send,
-  History
+  History,
+  Award,
+  Plus,
+  CheckCircle
 } from 'lucide-react';
 
 interface RecruiterPipelineBoardProps {
@@ -81,23 +85,87 @@ export default function RecruiterPipelineBoard({
   const [activityLogs, setActivityLogs] = useState<ActivityLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
 
+  // Scorecards state
+  const [activeModalTab, setActiveModalTab] = useState<'overview' | 'scorecards'>('overview');
+  const [scorecards, setScorecards] = useState<ScorecardRecord[]>([]);
+  const [isLoadingScorecards, setIsLoadingScorecards] = useState(false);
+  const [showNewScorecardForm, setShowNewScorecardForm] = useState(false);
+  const [scorecardDecision, setScorecardDecision] = useState<'strong_yes' | 'yes' | 'no' | 'strong_no'>('yes');
+  const [overallScore, setOverallScore] = useState(8);
+  const [technicalScore, setTechnicalScore] = useState(8);
+  const [communicationScore, setCommunicationScore] = useState(8);
+  const [cultureFitScore, setCultureFitScore] = useState(8);
+  const [scorecardComments, setScorecardComments] = useState('');
+  const [scorecardStrengths, setScorecardStrengths] = useState('');
+  const [scorecardWeaknesses, setScorecardWeaknesses] = useState('');
+  const [scorecardWouldRehire, setScorecardWouldRehire] = useState(true);
+  const [isSavingScorecard, setIsSavingScorecard] = useState(false);
+
   // Sync state if initialApplications updates
   React.useEffect(() => {
     setApplications(initialApplications);
   }, [initialApplications]);
 
-  // Open candidate details & fetch activity log
+  // Open candidate details & fetch activity log + scorecards
   const handleOpenEvaluation = async (app: ApplicationRecord) => {
     setSelectedApp(app);
     setReviewerNote('');
+    setActiveModalTab('overview');
+    setShowNewScorecardForm(false);
     setIsLoadingLogs(true);
+    setIsLoadingScorecards(true);
     try {
-      const details = await applicationService.getApplicationById(app.id);
+      const [details, scs] = await Promise.all([
+        applicationService.getApplicationById(app.id),
+        applicationService.getScorecards(app.id)
+      ]);
       setActivityLogs(details.activityLog || []);
+      setScorecards(scs || []);
     } catch {
       setActivityLogs([]);
+      setScorecards([]);
     } finally {
       setIsLoadingLogs(false);
+      setIsLoadingScorecards(false);
+    }
+  };
+
+  // Submit interview scorecard evaluation
+  const handleSaveScorecard = async () => {
+    if (!selectedApp) return;
+    setIsSavingScorecard(true);
+    try {
+      const supabase = createBrowserClient();
+      const { data: authData } = await supabase.auth.getUser();
+      const interviewerId = authData.user?.id || '00000000-0000-0000-0000-000000000000';
+
+      const created = await applicationService.createScorecard({
+        applicationId: selectedApp.id,
+        interviewerId,
+        stageId: selectedApp.current_stage_id,
+        overallDecision: scorecardDecision,
+        overallScore,
+        technicalScore,
+        communicationScore,
+        cultureFitScore,
+        comments: scorecardComments,
+        strengths: scorecardStrengths.split(',').map(s => s.trim()).filter(Boolean),
+        weaknesses: scorecardWeaknesses.split(',').map(s => s.trim()).filter(Boolean),
+        wouldRehire: scorecardWouldRehire,
+      });
+
+      if (created) {
+        setScorecards(prev => [created, ...prev]);
+      }
+      setShowNewScorecardForm(false);
+      setScorecardComments('');
+      setScorecardStrengths('');
+      setScorecardWeaknesses('');
+    } catch (err) {
+      console.error('Failed to save scorecard:', err);
+      alert('Could not save scorecard. Please verify database permissions.');
+    } finally {
+      setIsSavingScorecard(false);
     }
   };
 
@@ -569,7 +637,34 @@ export default function RecruiterPipelineBoard({
               </button>
             </div>
 
-            {/* Modal Body */}
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-200 px-6 bg-slate-50/50">
+              <button
+                onClick={() => setActiveModalTab('overview')}
+                className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeModalTab === 'overview'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Overview & Activity</span>
+              </button>
+              <button
+                onClick={() => setActiveModalTab('scorecards')}
+                className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+                  activeModalTab === 'scorecards'
+                    ? 'border-indigo-600 text-indigo-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>Interview Scorecards ({scorecards.length})</span>
+              </button>
+            </div>
+
+            {/* Modal Body - Overview */}
+            {activeModalTab === 'overview' && (
             <div className="p-6 space-y-6 overflow-y-auto flex-1">
               {/* Quick Details Card */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
@@ -735,6 +830,335 @@ export default function RecruiterPipelineBoard({
                 )}
               </div>
             </div>
+            )}
+
+            {/* Modal Body - Scorecards */}
+            {activeModalTab === 'scorecards' && (
+              <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                {/* Scorecards Header & Action */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Interviewer Rubric Evaluations</h3>
+                    <p className="text-xs text-slate-500">Structured competency assessments and hiring recommendations.</p>
+                  </div>
+                  {!showNewScorecardForm && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setShowNewScorecardForm(true)}
+                      className="text-xs gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Scorecard</span>
+                    </Button>
+                  )}
+                </div>
+
+                {/* New Scorecard Form */}
+                {showNewScorecardForm && (
+                  <div className="p-5 bg-slate-50 rounded-2xl border border-indigo-100 space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+                        <Award className="w-4 h-4 text-indigo-600" />
+                        <span>Submit Candidate Evaluation</span>
+                      </h4>
+                      <button
+                        onClick={() => setShowNewScorecardForm(false)}
+                        className="text-xs text-slate-400 hover:text-slate-600 font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    {/* Overall Recommendation */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Hiring Recommendation:
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { key: 'strong_yes', label: 'Strong Yes', color: 'bg-emerald-600 text-white' },
+                          { key: 'yes', label: 'Yes (Hire)', color: 'bg-indigo-600 text-white' },
+                          { key: 'no', label: 'No (Decline)', color: 'bg-amber-600 text-white' },
+                          { key: 'strong_no', label: 'Strong No', color: 'bg-rose-600 text-white' },
+                        ].map(rec => (
+                          <button
+                            key={rec.key}
+                            type="button"
+                            onClick={() => setScorecardDecision(rec.key as 'strong_yes' | 'yes' | 'no' | 'strong_no')}
+                            className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                              scorecardDecision === rec.key
+                                ? `${rec.color} border-transparent shadow-xs`
+                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {rec.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Numeric Competency Ratings */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Overall: <span className="font-bold text-indigo-600">{overallScore}/10</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={overallScore}
+                          onChange={e => setOverallScore(Number(e.target.value))}
+                          className="w-full accent-indigo-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Technical: <span className="font-bold text-indigo-600">{technicalScore}/10</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={technicalScore}
+                          onChange={e => setTechnicalScore(Number(e.target.value))}
+                          className="w-full accent-indigo-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Communication: <span className="font-bold text-indigo-600">{communicationScore}/10</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={communicationScore}
+                          onChange={e => setCommunicationScore(Number(e.target.value))}
+                          className="w-full accent-indigo-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Culture Fit: <span className="font-bold text-indigo-600">{cultureFitScore}/10</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          value={cultureFitScore}
+                          onChange={e => setCultureFitScore(Number(e.target.value))}
+                          className="w-full accent-indigo-600"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Strengths & Weaknesses */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Key Strengths (comma-separated):
+                        </label>
+                        <input
+                          type="text"
+                          value={scorecardStrengths}
+                          onChange={e => setScorecardStrengths(e.target.value)}
+                          placeholder="e.g. Clean Code, Systems Design, Ownership"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">
+                          Growth Areas (comma-separated):
+                        </label>
+                        <input
+                          type="text"
+                          value={scorecardWeaknesses}
+                          onChange={e => setScorecardWeaknesses(e.target.value)}
+                          placeholder="e.g. Kubernetes, Observability"
+                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Detailed Notes */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">
+                        Interviewer Evaluation Notes:
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={scorecardComments}
+                        onChange={e => setScorecardComments(e.target.value)}
+                        placeholder="Detailed qualitative feedback on problem solving, architecture design, and technical depth..."
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between pt-2">
+                      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={scorecardWouldRehire}
+                          onChange={e => setScorecardWouldRehire(e.target.checked)}
+                          className="rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span>Recommend candidate for future hiring</span>
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowNewScorecardForm(false)}
+                          disabled={isSavingScorecard}
+                          className="text-xs"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={handleSaveScorecard}
+                          disabled={isSavingScorecard}
+                          className="text-xs gap-1.5"
+                        >
+                          {isSavingScorecard ? (
+                            <LoadingSpinner size="sm" />
+                          ) : (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Save Scorecard</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scorecards Feed */}
+                {isLoadingScorecards ? (
+                  <div className="py-8 text-center">
+                    <LoadingSpinner size="md" />
+                  </div>
+                ) : scorecards.length === 0 && !showNewScorecardForm ? (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    <Award className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <h4 className="text-sm font-semibold text-slate-700">No scorecards submitted yet</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                      Record structured interview feedback and competency scores for this candidate.
+                    </p>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setShowNewScorecardForm(true)}
+                      className="text-xs mt-4 gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add First Scorecard</span>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {scorecards.map((sc, index) => {
+                      const decisionBadge = {
+                        strong_yes: { label: 'Strong Yes', variant: 'success' as const },
+                        yes: { label: 'Yes (Hire)', variant: 'info' as const },
+                        no: { label: 'No (Decline)', variant: 'warning' as const },
+                        strong_no: { label: 'Strong No', variant: 'danger' as const },
+                      }[sc.overall_decision] || { label: sc.overall_decision, variant: 'default' as const };
+
+                      return (
+                        <div
+                          key={sc.id || index}
+                          className="p-5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-3"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <Avatar
+                                src={sc.users?.avatar_url || undefined}
+                                alt={sc.users?.full_name || 'Interviewer'}
+                                fallback={sc.users?.full_name?.charAt(0) || 'I'}
+                                size="sm"
+                              />
+                              <div>
+                                <h4 className="text-xs font-bold text-slate-900">
+                                  {sc.users?.full_name || 'Interviewer Scorecard'}
+                                </h4>
+                                <span className="text-[11px] text-slate-400">
+                                  {sc.submitted_at
+                                    ? new Date(sc.submitted_at).toLocaleDateString('en-US', {
+                                        dateStyle: 'medium',
+                                      })
+                                    : 'Recent'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded-lg">
+                                {sc.overall_score !== null ? `${sc.overall_score}/10` : 'Score N/A'}
+                              </span>
+                              <Badge variant={decisionBadge.variant}>{decisionBadge.label}</Badge>
+                            </div>
+                          </div>
+
+                          {/* Scores breakdown */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                            {sc.technical_score !== null && (
+                              <div className="bg-slate-50 p-2 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Technical</span>
+                                <span className="font-bold text-slate-800">{sc.technical_score}/10</span>
+                              </div>
+                            )}
+                            {sc.communication_score !== null && (
+                              <div className="bg-slate-50 p-2 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Communication</span>
+                                <span className="font-bold text-slate-800">{sc.communication_score}/10</span>
+                              </div>
+                            )}
+                            {sc.culture_fit_score !== null && (
+                              <div className="bg-slate-50 p-2 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Culture Fit</span>
+                                <span className="font-bold text-slate-800">{sc.culture_fit_score}/10</span>
+                              </div>
+                            )}
+                            {sc.problem_solving_score !== null && (
+                              <div className="bg-slate-50 p-2 rounded-xl text-center">
+                                <span className="text-slate-400 text-[10px] uppercase font-bold block">Problem Solving</span>
+                                <span className="font-bold text-slate-800">{sc.problem_solving_score}/10</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Comments */}
+                          {sc.comments && (
+                            <p className="text-xs text-slate-700 bg-slate-50/70 p-3 rounded-xl border border-slate-100 italic">
+                              &quot;{sc.comments}&quot;
+                            </p>
+                          )}
+
+                          {/* Strengths & Weaknesses chips */}
+                          {(sc.strengths?.length || 0) > 0 && (
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+                              <span className="text-[11px] font-bold text-emerald-700">Strengths:</span>
+                              {sc.strengths?.map((str, sIdx) => (
+                                <span key={sIdx} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[11px] font-medium border border-emerald-100">
+                                  {str}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Modal Footer */}
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">

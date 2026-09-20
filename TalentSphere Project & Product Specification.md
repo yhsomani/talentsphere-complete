@@ -341,11 +341,137 @@ Primary actors: Anonymous visitors, Candidates, Recruiters, Institution Admins, 
 | AUTH-016 | Institutional SSO: SAML 2.0 and OIDC federation with Microsoft Entra ID, Google Workspace, and Okta. Just-in-time learner provisioning on first SSO login. SSO is optional and never mandatory for institutional MVP. | Phase 6 | RECOMMENDED ADDITION |
 | AUTH-017 | Managed-learner credential bridging: learners provisioned via institutional SSO must be able to create a personal credential (password or personal OAuth) during the graduation transition (J-12) without losing verified signals. | Phase 3 | RECOMMENDED ADDITION |
 | AUTH-018 | Account type field on profile: INDEPENDENT / MANAGED / GRADUATION_PENDING / ALUMNI, driving permission and visibility differences. | Phase 3 | RECOMMENDED ADDITION |
+Acceptance criteria: Login p95 latency < 500ms; session token validation < 20ms; zero plaintext secrets in client bundles or git history; brute force rate limiting enforced at gateway; role normalization claims enforced on all private API and page routes.
 
-Acceptance criteria: Login p95 latency  or iframe HTML stored in lesson content.
-Provider-specific renderers with strict provider allowlists.
-Allowed provider domains only (youtube.com, youtu.be, vimeo.com, approved provider domains). Reject javascript:, data:, unknown iframe sources, unsafe embed code.
-Apply: URL validation, domain allowlisting, SSRF protections, CSP frame-src, iframe sandboxing where compatible, secure headers, input sanitization, authentication/authorization, rate limiting, audit logs.
+---
+
+### 10.2 FR-M02 — Candidate Profile, Career Identity & Portfolio
+
+**Purpose:** Comprehensive professional identity, verified skills portfolio, career history, and credentials showcasing candidate capabilities to recruiters and employers.
+
+| ID | Requirement | Priority | Status |
+|---|---|---|---|
+| PROFILE-001 | Candidate profile container with personal summary, headline, bio, location, timezone, and visibility toggles | MVP | CONFIRMED |
+| PROFILE-002 | Candidate basic profile form persistence to candidate_profiles table with live validation | MVP | CONFIRMED |
+| PROFILE-003 | Avatar image upload to dedicated avatars storage bucket with CDN URL generation and display | MVP | CONFIRMED |
+| PROFILE-004 | Interactive skills taxonomy management with proficiency level selectors (Beginner, Intermediate, Advanced, Expert) | MVP | CONFIRMED |
+| PROFILE-005 | Work experience history management (role, company, start/end dates, description, current job toggle) | MVP | CONFIRMED |
+| PROFILE-006 | Education qualifications management (institution, degree, field of study, graduation year, grade) | MVP | CONFIRMED |
+| PROFILE-007 | Professional certifications management (title, issuing organization, issue date, credential ID/URL) | MVP | CONFIRMED |
+| PROFILE-008 | Asynchronous aggregate sub-entity loading for seamless profile rendering and editing | MVP | CONFIRMED |
+| PROFILE-009 | Public-facing candidate profile view respecting visibility and privacy preferences | Post-MVP | CONFIRMED |
+| PROFILE-010 | Profile completeness score calculator with actionable improvement suggestions | MVP | CONFIRMED |
+| RESUME-001 | Resume PDF document upload, private bucket storage, and profile linkage | MVP | CONFIRMED |
+| RESUME-002 | Multi-version resume management allowing candidates to maintain targeted resumes for different roles | Phase 2 | CONFIRMED |
+| RESUME-003 | In-browser resume PDF preview drawer and structured text extraction for autofill | Phase 2 | CONFIRMED |
+| PORTFOLIO-001 | Portfolio projects showcase with project title, live demo URL, GitHub repository link, media assets, and tech stack tags | MVP | CONFIRMED |
+
+---
+
+### 10.3 FR-M03 — Organizations, Teams & Employer Verification
+
+**Purpose:** Multi-user organization workspace, employer branding, team collaboration, and verification for trusted hiring.
+
+| ID | Requirement | Priority | Status |
+|---|---|---|---|
+| ORG-001 | Organization profile creation with brand assets (logo, banner), website, industry, and company overview | MVP | CONFIRMED |
+| ORG-002 | Employer domain verification via corporate email matching or DNS TXT records | Phase 2 | CONFIRMED |
+| ORG-003 | Multi-user team membership with invitation workflow and member seat management | MVP | CONFIRMED |
+| ORG-004 | Organization-level RBAC: Owner, Admin, Recruiter, and Hiring Manager permissions | MVP | CONFIRMED |
+| ORG-005 | Public employer company profile page showcasing active requisitions and culture | Phase 2 | CONFIRMED |
+| ORG-006 | Verified employer trust badge displayed on job listings and company profiles | Phase 2 | CONFIRMED |
+| ORG-007 | Organization subscription and billing plan assignment with seat allocation | Phase 2 | CONFIRMED |
+| ORG-008 | Organization administrative audit log tracking member changes, requisition updates, and billing actions | Phase 2 | CONFIRMED |
+| RECRUIT-001 | Recruiter workspace hub for managing posted requisitions, applicant volume, and pipeline velocity | MVP | CONFIRMED |
+| RECRUIT-002 | Candidate talent search and discovery with verified skill and XP filters | Phase 2 | CONFIRMED |
+| RECRUIT-003 | Requisition candidate pipeline assignment and stage routing | MVP | CONFIRMED |
+| RECRUIT-004 | Contextual direct messaging with candidates linked to specific requisitions | Phase 2 | CONFIRMED |
+| RECRUIT-005 | Hiring team collaboration: shared evaluation notes, ratings, and scorecard rubrics | MVP | CONFIRMED |
+
+---
+
+### 10.4 FR-M04 — Requisitions, Jobs & Talent Marketplace
+
+**Purpose:** Comprehensive talent marketplace for publishing, discovering, filtering, and managing career opportunities.
+
+| ID | Requirement | Priority | Status |
+|---|---|---|---|
+| JOB-001 | Public and authenticated job marketplace listing with server-side rendering, pagination, and empty states | MVP | CONFIRMED |
+| JOB-002 | Sticky multi-facet filter sidebar: keyword, location, work mode (Remote/Hybrid/On-site), job type, level, and salary | MVP | CONFIRMED |
+| JOB-003 | Comprehensive job requisition detail page with company overview, responsibilities, requirements, and apply CTA | MVP | CONFIRMED |
+| JOB-004 | Recruiter job posting studio with multi-step validation, drafting, and publishing workflows | MVP | CONFIRMED |
+| JOB-005 | Candidate job bookmarks and saved listings management with quick access collection | MVP | CONFIRMED |
+| JOB-006 | Requisition lifecycle state machine: Draft, Published, Paused, Closed, Archived | MVP | CONFIRMED |
+| JOB-007 | Salary transparency disclosure and standardized compensation badge display | MVP | CONFIRMED |
+| JOB-008 | Required skills tagging on requisitions with candidate skills match percentage indicator | MVP | CONFIRMED |
+| JOB-009 | Automated requisition expiration and archival after 30 days unless extended by recruiter | Phase 2 | CONFIRMED |
+| JOB-010 | Requisition templates for rapid job drafting across engineering, design, and product roles | Phase 2 | CONFIRMED |
+| JOB-011 | Saved search alerts and automated notification delivery on newly matching requisitions | Phase 2 | CONFIRMED |
+| JOB-012 | Similar jobs recommendation engine based on role, skills, and industry | Phase 2 | CONFIRMED |
+| JOB-013 | Support for both native TalentSphere ATS application and external application URL redirects | MVP | CONFIRMED |
+| JOB-014 | Requisition performance analytics: view impressions, application starts, and conversion rate | Phase 2 | CONFIRMED |
+| JOB-015 | Multi-location and remote-first work mode support with regional compensation tagging | MVP | CONFIRMED |
+| JOB-016 | Requisition cloning and rapid duplication studio for high-volume hiring teams | Phase 2 | CONFIRMED |
+
+---
+
+### 10.5 FR-M05 — Applications & Candidate Review Pipeline
+
+**Purpose:** End-to-end applicant tracking system (ATS) covering candidate submissions, recruiter review pipelines, evaluation rubrics, and hiring stage transitions.
+
+| ID | Requirement | Priority | Status |
+|---|---|---|---|
+| APPL-001 | Candidate application submission flow with resume attachment, cover note, and portfolio linking | MVP | CONFIRMED |
+| APPL-002 | Candidate application tracker displaying active, interview, offer, and archived application statuses | MVP | CONFIRMED |
+| APPL-003 | Application detail view with complete submission snapshot, timeline of stage updates, and recruiter feedback | MVP | CONFIRMED |
+| APPL-004 | Recruiter review 7-stage Kanban board: Submitted, Screening, Review, Interview, Evaluation, Offer, Rejected | MVP | CONFIRMED |
+| APPL-005 | Structured interview scorecards with multi-dimensional rating rubrics (1-10), recommendations, and feedback notes | MVP | CONFIRMED |
+| APPL-006 | Application activity audit logging tracking stage movements, reviewer timestamps, and note entries | MVP | CONFIRMED |
+| APPL-007 | Candidate application withdrawal workflow with optional withdrawal reason logging | MVP | CONFIRMED |
+| APPL-008 | Recruiter candidate rejection flow with customizable feedback templates and notification dispatch | MVP | CONFIRMED |
+| APPL-009 | Automated duplicate application prevention per candidate per job requisition | MVP | CONFIRMED |
+| APPL-010 | Interview scheduling coordination with calendar integration and meeting link generation | Phase 3 | CONFIRMED |
+| APPL-011 | Application draft autosave preventing data loss during multi-step application drafting | Phase 2 | CONFIRMED |
+| APPL-012 | Bulk candidate stage advancement and mass update communications for high-volume requisitions | Phase 3 | CONFIRMED |
+| APPL-013 | Inline candidate resume PDF drawer enabling recruiter review without navigating away from the pipeline board | MVP | CONFIRMED |
+| APPL-014 | Private internal reviewer comments feed restricted to authorized hiring team members | MVP | CONFIRMED |
+| APPL-015 | Formal offer stage tracking with compensation logging, start date, and offer status | Phase 2 | CONFIRMED |
+
+---
+
+### 10.6 FR-M06 — Learning Management System
+
+**Purpose:** Comprehensive learning platform providing skill courses, structured curriculum, interactive video lessons, progress tracking, and verified completion credentials.
+
+| ID | Requirement | Priority | Status |
+|---|---|---|---|
+| COURSE-001 | Course catalog browse and search page with category pills, difficulty chips, and search input | MVP | CONFIRMED |
+| COURSE-002 | Course detail and syllabus overview page displaying modules, lessons, learning objectives, and instructor info | MVP | CONFIRMED |
+| COURSE-003 | Candidate course enrollment and seat allocation updating enrollment state and tracking progress | MVP | CONFIRMED |
+| COURSE-004 | Instructor course studio with curriculum builder for adding sections, lessons, and metadata | Phase 2 | CONFIRMED |
+| COURSE-005 | Course completion certificate generation with unique certificate ID and verification hash | Phase 2 | CONFIRMED |
+| LMS-001 | Immersive course player layout with responsive curriculum drawer and lesson checklist | MVP | CONFIRMED |
+| LMS-002 | Embedded video player supporting platform uploads and external streams (YouTube, Vimeo) | MVP | CONFIRMED |
+| LMS-003 | Lesson progress tracking with automated completion toggle and next lesson progression | MVP | CONFIRMED |
+| LMS-004 | Aggregate course completion percentage calculation updating enrollment progress dynamically | MVP | CONFIRMED |
+| LMS-005 | In-lesson interactive quizzes and knowledge checks validating lesson comprehension | Phase 2 | CONFIRMED |
+| LMS-006 | Lesson notes and timestamped bookmarks linked to video playback positions | Phase 2 | CONFIRMED |
+| LMS-007 | Downloadable lesson resources, cheat sheets, and source code project attachments | Phase 2 | CONFIRMED |
+| LMS-008 | Lesson-level Q&A discussion forum with instructor answer pinning | Phase 2 | CONFIRMED |
+| LMS-009 | Course star reviews and qualitative feedback submission upon course completion | Phase 2 | CONFIRMED |
+| LMS-010 | Resume playback automatically seeking to the candidate's last watched timestamp | Phase 2 | CONFIRMED |
+| LMS-011 | Closed captions and multi-language subtitle track selection | Phase 2 | CONFIRMED |
+| LMS-012 | Course prerequisite verification before enrolling in advanced technical courses | Phase 2 | CONFIRMED |
+| LMS-013 | Dynamic gamification XP reward grant upon completing lessons and full courses | MVP | CONFIRMED |
+| LMS-014 | Offline lesson playback indicator and progressive download queue | Phase 3 | CONFIRMED |
+
+---
+
+### 10.7 FR-M07 — Provider-Agnostic Media Engine & Video Playback
+
+**Purpose:** Unified media abstraction decoupling learning content from video hosting providers, supporting uploaded files, YouTube, Vimeo, and enterprise video players.
+
+Acceptance criteria: No arbitrary `<script>` or `<iframe>` HTML stored in lesson content. Provider-specific renderers with strict provider allowlists. Allowed provider domains only (`youtube.com`, `youtu.be`, `vimeo.com`, approved provider domains). Reject `javascript:`, `data:`, unknown iframe sources, unsafe embed code. Apply: URL validation, domain allowlisting, SSRF protections, CSP `frame-src`, iframe sandboxing where compatible, secure headers, input sanitization, authentication/authorization, rate limiting, audit logs.
 
 10.7.5 Media Phasing
 

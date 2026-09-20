@@ -1,188 +1,131 @@
-# TalentSphere Design System
+# TalentSphere Design System — Aether Slate & Orchid
 
-## Philosophy
-Modern · Minimal · Professional · Trustworthy
+## 1. Design Philosophy
+**Aether Slate / Orchid** — Dark-First · High-Contrast · Tactile · Micro-Bordered · Ambient
 
-The design must convey credibility (this is where careers are built) while remaining
-approachable and fast for daily active use. No dark patterns. No attention traps.
-
----
-
-## Color Palette
-
-### Primary Brand
-| Token | Value | Usage |
-|-------|-------|-------|
-| `primary` | `#4F46E5` (Indigo 600) | CTA buttons, active nav, key accents |
-| `primary-hover` | `#4338CA` (Indigo 700) | Button hover state |
-| `primary-light` | `#EEF2FF` (Indigo 50) | Highlighted backgrounds, tags |
-
-### Neutrals
-| Token | Value | Usage |
-|-------|-------|-------|
-| `background` | `#F8FAFC` (Slate 50) | Page background |
-| `card` | `#FFFFFF` | Card, modal, sidebar background |
-| `text` | `#0F172A` (Slate 900) | Primary body text |
-| `text-muted` | `#64748B` (Slate 500) | Secondary text, labels |
-| `border` | `#E2E8F0` (Slate 200) | Card borders, dividers |
-
-### Semantic
-| Token | Value | Usage |
-|-------|-------|-------|
-| `success` | `#10B981` (Emerald 500) | Success states, verified badges |
-| `warning` | `#F59E0B` (Amber 500) | Pending states, warnings |
-| `error` | `#EF4444` (Red 500) | Error messages, destructive actions |
-| `info` | `#3B82F6` (Blue 500) | Informational callouts |
+TalentSphere's interface is engineered for serious technical professionals, ambitious learners, and precision recruiters. It avoids toy-like aesthetics in favor of a sleek, dark-first workspace with high-contrast typography, glassmorphic panels, and subtle ambient glows.
 
 ---
 
-## Typography
+## 2. Color System & Design Tokens
 
-### Font Family
-- **Primary**: `Inter` (via Google Fonts or system font stack)
-- **Mono**: `JetBrains Mono` or `Fira Code` (code blocks, skills tags)
-- **Fallback**: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+### Core Neutral Palette (Obsidian & Slate)
+| Token | Tailwind Value | Hex / Color | Usage |
+|---|---|---|---|
+| `bg-primary` | `slate-950` | `#020617` | Main canvas / page background |
+| `bg-surface` | `slate-900/60` | `#0f172a` (60% alpha) | Cards, modals, drawers, sidebar (`backdrop-blur-xl`) |
+| `bg-surface-elevated` | `slate-800/70` | `#1e293b` (70% alpha) | Hover states, active list items, tooltips |
+| `border-subtle` | `slate-800/80` | `#1e293b` (80% alpha) | Card boundaries, dividers, table borders |
+| `border-strong` | `slate-700` | `#334155` | Input borders, active element strokes |
+| `text-primary` | `slate-100` | `#f1f5f9` | Primary headings, candidate names, job titles |
+| `text-muted` | `slate-400` | `#94a3b8` | Subtext, labels, metadata, timestamps |
+| `text-faint` | `slate-500` | `#64748b` | Placeholders, inactive icons, breadcrumb dividers |
 
-### Scale
-| Name | Size | Weight | Usage |
-|------|------|--------|-------|
-| `display` | 36–48px | 800 | Hero section headlines |
-| `h1` | 28–32px | 700 | Page titles |
-| `h2` | 22–24px | 700 | Section headings |
-| `h3` | 18–20px | 600 | Card titles |
-| `body` | 14–16px | 400 | Standard content |
-| `body-sm` | 12–13px | 400 | Labels, metadata |
-| `caption` | 11px | 500 | Tags, timestamps, badges |
-
----
-
-## Spacing
-- Base unit: `4px`
-- Scale: `4, 8, 12, 16, 24, 32, 40, 48, 64, 80, 96`
-- Card padding: `24px` (desktop), `16px` (mobile)
-- Section gap: `24–32px`
+### Accent Glows & Semantic Colors
+| Token | Tailored Class | Color Accent | Semantics & Domain Usage |
+|---|---|---|---|
+| `accent-primary` | `indigo-500` / `orchid` | `#6366f1` / `#818cf8` | Primary CTAs, active sidebar pills, brand accents |
+| `accent-success` | `emerald-400` / `glow-emerald` | `#34d399` | Verified credentials, solved challenges, XP progress, hires |
+| `accent-challenge`| `purple-400` / `glow-purple` | `#c084fc` | Code Arena problems, algorithmic scores, difficulty tags |
+| `accent-warning` | `amber-400` / `glow-amber` | `#fbbf24` | Review pending, leaderboard gold tier, expiring licenses |
+| `accent-danger`  | `rose-400` / `glow-rose` | `#f43f5e` | Rejections, destructive deletions, test failure flags |
 
 ---
 
-## Border Radius
-| Context | Value |
-|---------|-------|
-| Cards | `16px` (`rounded-2xl`) |
-| Buttons | `12px` (`rounded-xl`) |
-| Inputs | `12px` (`rounded-xl`) |
-| Badges / Tags | `8px` (`rounded-lg`) |
-| Avatars | `9999px` (`rounded-full`) |
-| Small chips | `6px` (`rounded-md`) |
+## 3. Typography Hierarchy
+
+### Font Families
+- **Interface & Display**: `Geist Sans` (variable geometric font designed for readability)
+- **Code & Monospace**: `Geist Mono` / `JetBrains Mono` (code editor, diffs, terminal outputs, skill tags)
+- **System Fallback**: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+
+### Type Scale
+| Level | Font Size | Line Height | Weight | Application |
+|---|---|---|---|---|
+| **Display** | 36px – 48px | 1.1 | 800 (Extrabold) | Landing hero headline, milestone screens |
+| **H1** | 28px – 32px | 1.2 | 700 (Bold) | Page titles (`/jobs`, `/dashboard`, `/challenges`) |
+| **H2** | 22px – 24px | 1.3 | 700 (Bold) | Section headers, modal titles, card groups |
+| **H3** | 18px – 20px | 1.4 | 600 (Semibold) | Card titles, requisition headlines |
+| **Body** | 14px – 16px | 1.5 | 400 (Regular) | General content, job descriptions, curriculum notes |
+| **Body Small** | 12px – 13px | 1.4 | 400 / 500 | Form labels, helper captions, metadata |
+| **Micro / Tag**| 10px – 11px | 1.3 | 600 (Semibold) | Badges, status pills, XP chips, tech tags |
 
 ---
 
-## Shadows
-| Name | Value | Usage |
-|------|-------|-------|
-| `xs` | `0 1px 2px rgba(15,23,42,0.05)` | Subtle card lift |
-| `sm` | `0 4px 6px -1px rgba(15,23,42,0.07)` | Standard card |
-| `md` | `0 10px 15px -3px rgba(15,23,42,0.08)` | Modal, dropdowns |
-| `lg` | `0 20px 25px -5px rgba(15,23,42,0.10)` | Elevated elements |
+## 4. Component Primitive Suite (`src/components/ui/index.tsx`)
+
+Every component adheres to consistent variant states, focus rings, hover lifts, and accessibility standards:
+
+### 1. Button
+- **Primary**: `bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20`
+- **Secondary**: `bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700/60`
+- **Outline**: `border border-slate-700 hover:bg-slate-800/60 text-slate-200`
+- **Danger**: `bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-500/20`
+- **Ghost**: `text-slate-400 hover:text-slate-100 hover:bg-slate-800/40`
+- **Sizes**: `sm (32px)`, `md (40px)`, `lg (48px)`
+- **Mandatory States**: `loading` (spinner + disabled), `disabled` (`opacity-50 cursor-not-allowed`), `focus-visible` ring.
+
+### 2. Card
+- Dark glass surface: `bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-sm`
+- Interactive hover: `hover:border-slate-700 hover:shadow-md hover:shadow-slate-950/40 transition-all duration-150`
+
+### 3. Input & Select
+- Dark input field: `bg-slate-900/80 border border-slate-800 text-slate-100 rounded-xl px-4 py-2.5`
+- Focus: `focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500`
+- Error: `border-rose-500 focus:ring-rose-500/30`
+- Label: uppercase tracking or clean semibold above input with required asterisk.
+
+### 4. Badge / Tag
+- Rounded pill (`rounded-full px-2.5 py-0.5 text-xs font-semibold`)
+- Variants:
+  - `emerald`: `bg-emerald-500/10 text-emerald-400 border border-emerald-500/20`
+  - `indigo`: `bg-indigo-500/10 text-indigo-400 border border-indigo-500/20`
+  - `purple`: `bg-purple-500/10 text-purple-400 border border-purple-500/20`
+  - `amber`: `bg-amber-500/10 text-amber-400 border border-amber-500/20`
+  - `rose`: `bg-rose-500/10 text-rose-400 border border-rose-500/20`
+
+### 5. ProgressBar
+- Ambient progress track with gradient indicator (`bg-gradient-to-r from-indigo-500 to-emerald-400`) and level markers.
+
+### 6. EmptyState
+- Elevated dark panel with icon container, headline, descriptive copy, and primary action CTA button.
 
 ---
 
-## Components
+## 5. Domain-Specific UI Patterns
 
-### Button
-- **Primary**: `bg-indigo-600 text-white` — apply, submit, primary CTA
-- **Secondary**: `bg-slate-100 text-slate-800` — cancel, secondary actions
-- **Outline**: `border border-slate-300 bg-white` — ghost/stroke variant
-- **Danger**: `bg-rose-600 text-white` — delete, destructive
-- **Ghost**: `text-slate-600 hover:bg-slate-100` — inline actions
+### Recruiter 7-Stage Kanban Board (`src/app/jobs/[id]/applications`)
+- 7 horizontal swimlanes: `Submitted` → `Screening` → `Review` → `Interview` → `Evaluation` → `Offer` → `Rejected`.
+- Candidate card with applicant name, match %, applied date, and one-click quick actions.
+- Slide-over evaluation drawer with full resume PDF preview and Scorecard evaluation rubric.
 
-Sizes: `sm (28px)`, `md (36px)`, `lg (44px)`
+### Interview Scorecards Rubric (`src/features/applications/components/RecruiterPipelineBoard.tsx`)
+- 1–10 numeric evaluation sliders across Technical, Communication, Culture Fit, and Problem Solving.
+- Decision pills: `Strong Yes`, `Yes`, `No`, `Strong No`.
+- Strengths and growth tags, qualitative feedback box, and historical scorecard review stream.
 
-All buttons must have: loading state, disabled state, keyboard focus ring.
+### HackerRank-Grade Code Arena (`src/app/challenges/[id]`)
+- Two-column split layout: Left side problem description & I/O examples; Right side Monaco-style dark code editor.
+- Bottom drawer for test case execution with input, output, expected output, and stdout log views.
+- Success modal with XP celebration burst and dynamic level progress update.
 
-### Cards
-- `bg-white rounded-2xl border border-slate-200 shadow-sm`
-- Padding: `p-6` (24px)
-- Hover state for clickable cards: `hover:shadow-md hover:border-slate-300 transition-all`
-
-### Inputs
-- `bg-white border border-slate-300 rounded-xl px-4 py-2.5`
-- Focus: `ring-2 ring-indigo-500/20 border-indigo-400`
-- Error: `border-red-400 ring-red-500/20`
-- Label: always above input, `text-sm font-medium text-slate-700`
-
-### Badges
-- Skill tags: `bg-indigo-50 text-indigo-700 border border-indigo-100`
-- Status: context color (green=active, amber=pending, red=rejected)
-- XP/Level: `bg-amber-50 text-amber-700`
-
-### Navigation (Sidebar)
-- Width: `256px` (desktop), full-screen drawer (mobile)
-- Active item: left border accent + `bg-indigo-50/80 text-indigo-700`
-- Hover: `hover:bg-slate-50 hover:text-slate-900`
+### Immersive LMS Course Player (`src/app/courses/[id]/learn`)
+- Centered video/lesson player with auto-play next lesson action.
+- Collapsible curriculum sidebar drawer showing sections, completed checkmarks, and lesson duration.
+- Bottom action bar with "Complete Lesson" toggle and dynamic XP credit trigger.
 
 ---
 
-## UX Requirements
-
-### Responsive Breakpoints
-| Name | Min Width | Context |
-|------|-----------|---------|
-| `sm` | 375px | Small phones (min support) |
-| `md` | 768px | Tablets, large phones |
-| `lg` | 1024px | Laptop, desktop (sidebar shows) |
-| `xl` | 1280px | Large desktop |
-
-### Required States (Every Feature)
-- ✅ **Loading state** — Skeleton placeholders, not spinners where possible
-- ✅ **Empty state** — Illustrated callout with action CTA
-- ✅ **Error state** — Red alert with retry option + error message
-- ✅ **Success state** — Green toast or inline confirmation
-- ✅ **Hover / Focus** — Visible keyboard focus rings (WCAG 2.1 AA)
-- ✅ **Disabled** — `opacity-50 cursor-not-allowed`
-
-### Accessibility
-- All interactive elements must be keyboard accessible
-- `aria-label` on icon-only buttons
-- Color is never the only indicator (always add icon/text)
-- Minimum touch target: `44×44px`
-- Color contrast: at least 4.5:1 for body text (WCAG AA)
-- All form inputs must have `<label>` elements
-
-### Animation
-- Transitions: `duration-150` for interactions, `duration-200` for panels
-- Easing: `ease-out` for enter, `ease-in` for exit
-- No jarring animations; subtle transforms (`scale-[0.98]` active states)
+## 6. Accessibility & Responsiveness (WCAG 2.2 AA)
+- **Keyboard Navigation**: Full Tab/Shift+Tab traversal with visible `ring-2 ring-indigo-400` focus outlines.
+- **Color Contrast**: All body text maintains minimum 4.5:1 contrast against `#020617` and `#0f172a`.
+- **Touch Targets**: Minimum 44×44px hit targets on all mobile buttons and links.
+- **Responsive Breakpoints**:
+  - `sm (375px)`: Single-column stacked layouts, mobile bottom/slide navigation drawer.
+  - `md (768px)`: Two-column card grids, condensed filter bar.
+  - `lg (1024px)`: Fixed 256px tactile sidebar, sticky header, full multi-column views.
+  - `xl (1280px+)`: Wide desktop layout with expanded split-pane workspaces.
 
 ---
 
-## Layout Patterns
-
-### Dashboard Layout
-```
-┌─────────────────────────────────────────────────────┐
-│  [Sidebar 256px] │ [Header sticky]                   │
-│                  │─────────────────────────────────  │
-│  Logo            │  [Page Content]                   │
-│  Navigation      │                                   │
-│  User XP         │                                   │
-│                  │                                   │
-└─────────────────────────────────────────────────────┘
-```
-
-### Card Grid
-```
-[Card 1] [Card 2] [Card 3]    (3-up, lg+)
-[Card 1] [Card 2]              (2-up, md)
-[Card 1]                       (1-up, sm)
-```
-
-### Form Layout
-```
-Label
-[Input]
-Error message (if any)
-```
-
----
-
-*Design System v1.0 — TalentSphere*
+*Authoritative Design System v2.0.0 — Reconciled with Live Application Tokens.*

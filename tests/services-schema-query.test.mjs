@@ -195,3 +195,15 @@ test('Database application_activity_log query and columns succeed', async () => 
   assert.ok(Array.isArray(res.rows), 'application_activity_log query returned rows array');
 });
 
+test('Database scorecards query and columns succeed', async () => {
+  const res = await client.query(`
+    SELECT id, application_id, interviewer_id, stage_id, overall_decision, overall_score,
+           technical_score, communication_score, culture_fit_score, problem_solving_score,
+           leadership_score, comments, strengths, weaknesses, would_rehire, submitted_at
+    FROM scorecards
+    LIMIT 5;
+  `);
+
+  assert.ok(Array.isArray(res.rows), 'scorecards query returned rows array');
+});
+

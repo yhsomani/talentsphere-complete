@@ -63,6 +63,48 @@ export interface ApplicationRecord {
   } | null;
 }
 
+export interface ScorecardRecord {
+  id: string;
+  application_id: string;
+  interviewer_id: string;
+  stage_id: string | null;
+  overall_decision: 'strong_yes' | 'yes' | 'no' | 'strong_no';
+  overall_score: number | null;
+  technical_score: number | null;
+  communication_score: number | null;
+  culture_fit_score: number | null;
+  problem_solving_score: number | null;
+  leadership_score: number | null;
+  comments: string | null;
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+  would_rehire: boolean | null;
+  submitted_at: string;
+  users?: {
+    id: string;
+    full_name: string | null;
+    email: string;
+    avatar_url: string | null;
+  } | null;
+}
+
+export interface CreateScorecardInput {
+  applicationId: string;
+  interviewerId: string;
+  stageId?: string | null;
+  overallDecision: 'strong_yes' | 'yes' | 'no' | 'strong_no';
+  overallScore: number;
+  technicalScore?: number | null;
+  communicationScore?: number | null;
+  cultureFitScore?: number | null;
+  problemSolvingScore?: number | null;
+  leadershipScore?: number | null;
+  comments?: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  wouldRehire?: boolean;
+}
+
 const supabase = createBrowserClient();
 
 export const applicationService = {
@@ -529,6 +571,75 @@ export const applicationService = {
     } catch (error) {
       console.error('Error fetching recruiter overview:', error);
       return { jobs: [], recentApplications: [] };
+    }
+  },
+
+  /**
+   * Get all scorecards submitted for an application
+   */
+  async getScorecards(applicationId: string): Promise<ScorecardRecord[]> {
+    try {
+      const { data, error } = await supabase
+        .from('scorecards')
+        .select(`
+          *,
+          users!interviewer_id (
+            id,
+            full_name,
+            email,
+            avatar_url
+          )
+        `)
+        .eq('application_id', applicationId)
+        .order('submitted_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as unknown as ScorecardRecord[];
+    } catch (err) {
+      console.error('Error fetching scorecards:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Submit an interview scorecard evaluation
+   */
+  async createScorecard(input: CreateScorecardInput): Promise<ScorecardRecord | null> {
+    try {
+      const { data, error } = await supabase
+        .from('scorecards')
+        .insert({
+          application_id: input.applicationId,
+          interviewer_id: input.interviewerId,
+          stage_id: input.stageId || null,
+          overall_decision: input.overallDecision,
+          overall_score: input.overallScore,
+          technical_score: input.technicalScore ?? null,
+          communication_score: input.communicationScore ?? null,
+          culture_fit_score: input.cultureFitScore ?? null,
+          problem_solving_score: input.problemSolvingScore ?? null,
+          leadership_score: input.leadershipScore ?? null,
+          comments: input.comments || null,
+          strengths: input.strengths || [],
+          weaknesses: input.weaknesses || [],
+          would_rehire: input.wouldRehire ?? true,
+        })
+        .select(`
+          *,
+          users!interviewer_id (
+            id,
+            full_name,
+            email,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+      return data as unknown as ScorecardRecord;
+    } catch (err) {
+      console.error('Error creating scorecard:', err);
+      throw err;
     }
   },
 };

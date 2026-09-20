@@ -1,41 +1,74 @@
-# Dependencies
+# ==============================================================================
+# TalentSphere Project - Comprehensive .gitignore
+# Frameworks/Tools: Next.js 16, React, Tailwind, Supabase, Playwright, Node.js
+# ==============================================================================
+
+# 1. Dependencies
 node_modules/
 
-# Build outputs
+# 2. Build Outputs & Next.js Artifacts
 .next/
-*/.next
-*/cache/
+*/.next/
 out/
 build/
 dist/
 *.tsbuildinfo
+.vercel/
 
-# Environment variables
-.env*.local
+# 3. Caches
+.turbo/
+.cache/
+node_modules/.cache/
+*/cache/
+eslintcache
+
+# 4. Testing & Coverage
+coverage/
+.coverage
+htmlcov/
+playwright-report/
+test-results/
+.playwright/
+playwright/.cache/
+
+# 5. Environment Variables & Secrets
+# (Note: .env.example and .env.template are safe to commit)
 .env
+.env.local
+.env.*.local
 .env.development
 .env.test
 .env.production
+.env.production.local
 
-# IDE files
-.vscode/
-.idea/
+# 6. Database / Backend (Supabase)
+supabase/.env
+supabase/.env.*
+supabase/.branches/
+supabase/.temp/
 
-# Logs
+# 7. Logs & Debug
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# OS generated files
+# 8. Temporary & Scratch Files
+*.tmp
+*.temp
+scratch/
+.Jules
+
+# 9. IDE, Editor, & OS Metadata
+.vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
 
-# Editor files
-*.swp
-*.swo
-
-# Python specific
+# 10. Python (Preserved from original)
 __pycache__/
 *.pyc
 *.pyo
@@ -44,17 +77,3 @@ __pycache__/
 env/
 venv/
 .venv/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Database
-supabase/.env
-
-# Temporary files
-*.tmp
-*.temp
-.Jules
-*/.next

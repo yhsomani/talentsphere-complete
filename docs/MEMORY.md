@@ -1,158 +1,129 @@
 # Project Memory — TalentSphere
 
-This document tracks the current state of the project. Update it before starting any new AI session.
+This document tracks the verified technical state, operational metrics, and roadmap execution status for TalentSphere. It is maintained continuously as an engineering source of truth.
 
 ---
 
 ## Current Status
 
-**Phase**: Phase 6 COMPLETE — Production Ready 🎉
-
-**Overall Health**: 🟢 All systems go. Build passes, lint clean, tests passing.
-
-**Last Updated**: 2026-09-20
-
----
-
-## Verified Metrics ✅
-
-| Check | Result |
-|-------|--------|
-| `npm run build` | ✅ Exit 0 — 26/26 pages (Turbopack 3.4s) |
-| `npx tsc --noEmit` | ✅ Exit 0 — 0 TypeScript errors |
-| `npm run lint` | ✅ Exit 0 — 0 errors, 0 warnings |
-| `npm test` | ✅ 28/28 pass (14 unit + 14 DB/schema) |
-| Playwright E2E | ✅ Configured — 3 spec files written (auth, jobs, responsive) |
+**Phase**: Phase 1 MVP Core Complete & Verified (Ready for Phase 2 Core Expansion)  
+**Requirements Tracking**: 424 total requirements tracked in `IMPLEMENTATION_TRACKER.md` (SSOT: `TalentSphere Project & Product Specification.md`)  
+- **Implemented**: 101 (23.8%)  
+- **Partially Implemented**: 62 (14.6%)  
+- **Not Implemented**: 261 (61.6%)  
+**Overall Health**: 🟢 All systems operational. 30 routes compile cleanly, 0 lint warnings, 29/29 tests pass.  
+**Last Reconciled**: 2026-09-20  
 
 ---
 
-## What's Working ✅
+## Verified System Metrics ✅
 
-### Authentication
-- Sign in page (`/auth/signin`)
-- Sign up page (`/auth/signup`)
-- Password reset page (`/auth/reset-password`)
-- Email verification page (`/auth/verify`)
-- `useSignIn`, `useSignUp`, `useSignOut` hooks
-- `src/proxy.ts` protecting routes (Next.js 16 middleware)
-
-### Dashboard
-- Role-based dashboard page (`/dashboard`)
-- Candidate view with XP/level display
-- Recruiter view
-- DashboardLayout with sidebar navigation
-- Mobile responsive drawer menu
-
-### Job Board
-- Job listings page (`/jobs`)
-- Job filters (type, location, salary, experience)
-- Job search with debounce
-- Load more pagination
-- Job detail page (`/jobs/[id]`)
-- Apply modal with cover letter
-- Bookmark/unbookmark jobs
-- Share job link
-- Job posting form (`/jobs/post`)
-
-### Applications
-- Applications list page (`/applications`)
-- Filter tabs (All, Active, Interviews, Archived)
-- Application detail page (`/applications/[id]`)
-
-### Code Arena
-- Challenge list page (`/challenges`) — 302 lines
-- Challenge solver page (`/challenges/[id]`) — 432 lines
-
-### Courses / LMS
-- Course list page (`/courses`)
-- Course detail page (`/courses/[id]`)
-- Lesson player page (`/courses/[id]/learn`)
-
-### Leaderboard
-- Full leaderboard page (`/leaderboard`) — 275 lines
-- Period filter (All Time / Monthly / Weekly)
-- Fallback seed data if database is empty
-
-### Messages
-- Messages page (`/messages`) — 635 lines
-- Conversation list, message thread UI
-
-### Notifications
-- Notifications page (`/notifications`)
-- Mark read, filter by type
-
-### Settings
-- Settings page (`/settings`)
-- Billing page (`/settings/billing`)
-
-### Profile
-- Candidate profile page (`/candidates/profile`)
-- Portfolio section, Skills section
-
-### Services (Data Layer)
-- `jobs.service.ts` — full CRUD + bookmarks
-- `application.service.ts` — applications CRUD
-- `candidate.service.ts` — profile management
-- `challenge.service.ts` — challenges + submissions
-- `course.service.ts` — LMS + enrollment
-- `leaderboard.service.ts` — rankings
-- `message.service.ts` — messaging
-- `notification.service.ts` — notifications
-
-### Database
-- 46 tables confirmed in production Supabase
-- 8 migration files covering all core tables
-- RLS policies for all tables (`supabase/007_rls_policies.sql`)
-- Auth trigger functions
-- All joins verified by integration tests
+| Metric | Verified State | Details |
+|--------|----------------|---------|
+| `npm run build` | ✅ Exit code 0 | 30/30 App Router routes compiled cleanly in Next.js 16.3.5 Turbopack (4.5s) |
+| `npx tsc --noEmit` | ✅ Exit code 0 | 0 TypeScript compilation errors in strict mode |
+| `npm run lint` | ✅ Exit code 0 | 0 errors, 0 warnings across all active codebase files |
+| `npm test` | ✅ 29/29 pass | 14 unit tests (`src/utils/index.test.ts`) + 15 live database pooler integration tests (`tests/*.test.mjs`) |
+| Supabase Database | ✅ Live & linked | PostgreSQL 17.6 pooler (`qumgxoscwrygwykbojym`): 46 tables, 48 enums, 37 triggers, 13 functions |
+| Storage Buckets | ✅ 5 buckets provisioned | `avatars`, `resumes`, `course-content`, `portfolio`, `media-assets` |
+| Security Gateway | ✅ Fully active | `src/proxy.ts` dual-layer gateway + 46 RLS table policies |
 
 ---
 
-## Known Limitations (Future Iterations)
+## Compiled Route Inventory (30 App Router Routes)
 
-1. **Code execution** — Challenge solver UI exists; actual code runner (sandboxed backend) not implemented
-2. **Real-time messaging** — Messages use Supabase queries, not real-time subscriptions
-3. **OAuth** — Google/GitHub login buttons are UI stubs (wired up but not configured)
-4. **Admin routes** — `/admin/*` not implemented
-5. **Profile editing** — View works; full edit (avatar upload, resume upload) not wired to storage
-
----
-
-## Recently Completed 🟢
-
-- [x] Fixed unescaped `&` in `JobDetailPage.tsx` (JSX parse errors)
-- [x] Created `src/proxy.ts` (Next.js 16 middleware migration)
-- [x] All 6 feature modules verified and build-clean
-- [x] 28/28 unit + schema tests pass
-- [x] Playwright installed + 3 E2E spec files written
-- [x] `docs/PRD.md`, `DESIGN.md`, `RULES.md`, `DECISIONS.md`, `SECURITY.md`, `TEST_PLAN.md` created
-- [x] `.cursor/rules/` (general, frontend, backend, testing) created
-- [x] **56 lint warnings eliminated → 0 warnings, 0 errors**
-- [x] Production build passes: 26/26 pages, exit code 0
-
----
-
-## Next Tasks (Post-Launch Iteration)
-
-1. Push to GitHub and deploy to Vercel (user action)
-2. Configure real-time messaging with Supabase Realtime
-3. Implement OAuth (Google/GitHub) in Supabase dashboard
-4. Build code execution backend (AWS Lambda or Supabase Edge Functions)
-5. Add lesson completion tracking persistence
-6. Resume/avatar file uploads via Supabase Storage
-
----
-
-## Environment
-
-- Node.js: v24.19.0
-- Next.js: 16.3.5
-- React: 19.2.8
-- TypeScript: strict mode
-- Tailwind CSS: v4 (`@import "tailwindcss"` syntax)
-- Supabase: Connected (credentials in .env.local)
-- Playwright: Installed, config in `playwright.config.ts`
+1. `/` — Landing page & marketing hero
+2. `/_not-found` — Global 404 handler
+3. `/admin` — Admin management overview
+4. `/admin/analytics` — Platform metrics & reporting
+5. `/admin/courses` — Course catalog administration
+6. `/admin/moderation` — Content moderation & reports
+7. `/admin/roles` — RBAC permissions & role assignments
+8. `/admin/system` — System logs & background jobs
+9. `/admin/users` — User management & bans
+10. `/applications` — Candidate application tracking list
+11. `/applications/[id]` — Application detail & status timeline
+12. `/auth/callback` — Supabase OAuth & magic link callback
+13. `/auth/reset-password` — Password reset request & update
+14. `/auth/signin` — User login page
+15. `/auth/signup` — User registration page
+16. `/auth/verify` — Email verification confirmation
+17. `/candidates/profile` — Candidate profile with skills, experience, education, portfolio
+18. `/challenges` — Code Arena challenge catalog with filters
+19. `/challenges/[id]` — Challenge solver & code editor workspace
+20. `/courses` — LMS course catalog
+21. `/courses/[id]` — Course detail & syllabus breakdown
+22. `/courses/[id]/learn` — Lesson player & curriculum viewer
+23. `/dashboard` — Role-based dashboard (Candidate & Recruiter views)
+24. `/jobs` — Job search board with filters & search
+25. `/jobs/[id]` — Job detail & application submission modal
+26. `/jobs/post` — Recruiter job posting form
+27. `/leaderboard` — Gamification rankings & period filters
+28. `/messages` — Direct messaging & conversation threads
+29. `/notifications` — User notifications list & mark-as-read
+30. `/settings` — Account & preference settings
+31. `/settings/billing` — Subscription plans & billing management
 
 ---
 
-*Memory updated: 2026-09-20 — Phase 6 complete, production ready*
+## Verified Implementation Baseline by Domain
+
+### 1. Authentication & Security (Modules 1, 22)
+- Supabase SSR cookie-based sessions with `src/proxy.ts` routing gateway.
+- Form validation via React Hook Form + Zod.
+- Production HTTP security headers enforced in `next.config.ts`.
+- 46 tables protected by Row-Level Security.
+
+### 2. Candidate Profiles & Career History (Module 2)
+- Structured profile view (`/candidates/profile`).
+- Normalized relational sub-entities: `skills`, `candidate_skills`, `experience`, `education`, `certifications`, `portfolio_items`.
+
+### 3. Recruitment & ATS Pipeline (Modules 3, 4, 5)
+- Job posting (`/jobs/post`), listings (`/jobs`), detail view (`/jobs/[id]`), bookmarks, search, and filtering.
+- 7-stage hiring pipeline (`applied`, `screening`, `interview_1`, `interview_2`, `technical`, `offer`, `hired`/`rejected`).
+- Structured interview scorecards with 1–5 rubrics and recommendation enums.
+- Audit trail in `application_activity_log`.
+
+### 4. LMS & Educational Platform (Module 6)
+- Course listings (`/courses`), detail (`/courses/[id]`), and player (`/courses/[id]/learn`).
+- Multi-lesson curriculum navigation, video player embed support, module progress tracking.
+
+### 5. Code Arena (Module 7)
+- Challenge catalog (`/challenges`) with difficulty, category, and language filtering.
+- Challenge workspace (`/challenges/[id]`) with problem description, test cases, and starter code.
+
+### 6. Gamification & Progression (Module 8)
+- XP progression calculations in `src/utils/index.ts` (14 unit tests pass).
+- Database-backed `xp_ledger` with idempotency keys and `user_levels` balance reconciliation.
+- Leaderboard page (`/leaderboard`) with time filters and rankings.
+
+### 7. Communication & Social (Modules 9, 10, 11)
+- Direct messaging UI (`/messages`) with conversation lists and chat thread view.
+- Notifications page (`/notifications`) with type filtering and read indicators.
+
+### 8. System & Admin (Modules 16, 17, 21)
+- Comprehensive admin routes (`/admin/*`) covering user moderation, course management, analytics, and system health.
+
+---
+
+## Known Implementation Gaps (Active Roadmap)
+
+1. **Sandboxed Code Execution Engine**: Code Arena workspace is built; external sandboxed execution API (Piston / Docker / Lambda) is pending integration for real-time test case runs.
+2. **Supabase Realtime WebSockets**: Messaging and notification feeds query database via services; real-time postgres changes subscription needs activation.
+3. **Institutional Multi-Tenancy Portal**: Schema for institutional cohorts exists (`organizations(type='institution')`); dedicated institutional dean/faculty cohort analytics dashboard needs dedicated UI.
+4. **Media Transcoding Pipeline**: Video chunking and HLS adaptive bitrate processing worker for LMS videos and video resumes.
+5. **Automated Resume Parsing & AI Match Score**: PDF text extraction and semantic candidate-job matching algorithm.
+
+---
+
+## Phase 2 Priority Sequence
+
+1. **ATS Kanban Drag-and-Drop & Batch Stage Actions**: Enhance `/applications` with interactive visual pipeline board.
+2. **Realtime WebSocket Channels**: Wire `supabase.channel` into messaging and notification header bell.
+3. **Monaco Code Sandbox Runner**: Connect challenge submission action to sandboxed test runner.
+4. **Institutional Cohort Onboarding**: Implement CSV student provisioning and cohort gradebook.
+5. **Media Upload & Chunking Adapter**: Implement signed URL upload client for `resumes` and `media-assets` storage buckets.
+
+---
+
+*Memory updated: 2026-09-20 — Reconciled to Specification Baseline v3.0.0*

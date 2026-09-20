@@ -48,7 +48,12 @@ file_size_limit = "50MiB"
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback", "http://localhost:3000/dashboard"]
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "http://localhost:3000/dashboard",
+  "http://localhost:3000/auth/verify",
+  "http://localhost:3000/auth/reset-password"
+]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false
@@ -65,8 +70,8 @@ recovery = ""
 invite = ""
 
 [auth.sms]
-enable_signup = false
-max_frequency = 10s
+enable_signup = true
+max_frequency = "10s"
 
 [analytics]
 enabled = false
