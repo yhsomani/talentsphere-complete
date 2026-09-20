@@ -160,22 +160,50 @@ CREATE POLICY skills_modify_admin ON skills
 -- EXPERIENCE, EDUCATION, CERTIFICATIONS, PORTFOLIO POLICIES
 -- ============================================================================
 
--- Users can manage their own records
+-- Users can manage their own records (via candidate_profiles)
 CREATE POLICY experience_own ON experience
     FOR ALL
-    USING (user_id = auth.uid() OR is_admin());
+    USING (
+        EXISTS (
+            SELECT 1 FROM candidate_profiles
+            WHERE candidate_profiles.id = experience.candidate_profile_id
+            AND candidate_profiles.user_id = auth.uid()
+        )
+        OR is_admin()
+    );
 
 CREATE POLICY education_own ON education
     FOR ALL
-    USING (user_id = auth.uid() OR is_admin());
+    USING (
+        EXISTS (
+            SELECT 1 FROM candidate_profiles
+            WHERE candidate_profiles.id = education.candidate_profile_id
+            AND candidate_profiles.user_id = auth.uid()
+        )
+        OR is_admin()
+    );
 
 CREATE POLICY certifications_own ON certifications
     FOR ALL
-    USING (user_id = auth.uid() OR is_admin());
+    USING (
+        EXISTS (
+            SELECT 1 FROM candidate_profiles
+            WHERE candidate_profiles.id = certifications.candidate_profile_id
+            AND candidate_profiles.user_id = auth.uid()
+        )
+        OR is_admin()
+    );
 
 CREATE POLICY portfolio_own ON portfolio_items
     FOR ALL
-    USING (user_id = auth.uid() OR is_admin());
+    USING (
+        EXISTS (
+            SELECT 1 FROM candidate_profiles
+            WHERE candidate_profiles.id = portfolio_items.candidate_profile_id
+            AND candidate_profiles.user_id = auth.uid()
+        )
+        OR is_admin()
+    );
 
 -- ============================================================================
 -- JOBS POLICIES
@@ -184,30 +212,30 @@ CREATE POLICY portfolio_own ON portfolio_items
 -- Everyone can view published jobs
 CREATE POLICY jobs_view_published ON jobs
     FOR SELECT
-    USING (status = 'published' OR is_admin());
+    USING (status = 'active' OR is_admin());
 
 -- Employers can view their own jobs (including drafts)
 CREATE POLICY jobs_view_own ON jobs
     FOR SELECT
-    USING (posted_by = auth.uid() OR is_admin());
+    USING (employer_id = auth.uid() OR is_admin());
 
 -- Employers can create jobs
 CREATE POLICY jobs_insert_employer ON jobs
     FOR INSERT
     WITH CHECK (
-        posted_by = auth.uid() 
+        employer_id = auth.uid() 
         AND is_employer()
     );
 
 -- Employers can update their own jobs
 CREATE POLICY jobs_update_own ON jobs
     FOR UPDATE
-    USING (posted_by = auth.uid() OR is_admin());
+    USING (employer_id = auth.uid() OR is_admin());
 
 -- Employers can delete their own jobs
 CREATE POLICY jobs_delete_own ON jobs
     FOR DELETE
-    USING (posted_by = auth.uid() OR is_admin());
+    USING (employer_id = auth.uid() OR is_admin());
 
 -- ============================================================================
 -- APPLICATIONS POLICIES
@@ -216,12 +244,12 @@ CREATE POLICY jobs_delete_own ON jobs
 -- Candidates can view their own applications
 CREATE POLICY applications_view_own ON applications
     FOR SELECT
-    USING (candidate_id = auth.uid() OR is_admin());
+    USING (EXISTS (SELECT 1 FROM candidate_profiles WHERE candidate_profiles.id = applications.candidate_profile_id AND candidate_profiles.user_id = auth.uid()) OR is_admin());
 
 -- Candidates can create applications
 CREATE POLICY applications_insert_own ON applications
     FOR INSERT
-    WITH CHECK (candidate_id = auth.uid());
+    WITH CHECK (EXISTS (SELECT 1 FROM candidate_profiles WHERE candidate_profiles.id = applications.candidate_profile_id AND candidate_profiles.user_id = auth.uid()));
 
 -- Employers can view applications for their jobs
 CREATE POLICY applications_view_employer ON applications
@@ -230,7 +258,7 @@ CREATE POLICY applications_view_employer ON applications
         EXISTS (
             SELECT 1 FROM jobs 
             WHERE jobs.id = applications.job_id 
-            AND jobs.posted_by = auth.uid()
+            AND jobs.employer_id = auth.uid()
         )
         OR is_admin()
     );
@@ -242,7 +270,7 @@ CREATE POLICY applications_update_employer ON applications
         EXISTS (
             SELECT 1 FROM jobs 
             WHERE jobs.id = applications.job_id 
-            AND jobs.posted_by = auth.uid()
+            AND jobs.employer_id = auth.uid()
         )
         OR is_admin()
     );
@@ -259,7 +287,7 @@ CREATE POLICY scorecards_employer ON scorecards
             SELECT 1 FROM applications 
             JOIN jobs ON jobs.id = applications.job_id
             WHERE applications.id = scorecards.application_id
-            AND jobs.posted_by = auth.uid()
+            AND jobs.employer_id = auth.uid()
         )
         OR is_admin()
     );

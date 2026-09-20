@@ -177,7 +177,7 @@ CREATE TABLE experience (
     is_current BOOLEAN DEFAULT FALSE,
     description TEXT,
     achievements TEXT[],
-    skills_used UUID[] REFERENCES skills(id),
+    skills_used UUID[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
@@ -230,7 +230,7 @@ CREATE TABLE certifications (
     credential_id VARCHAR(100),
     credential_url VARCHAR(500),
     is_verified BOOLEAN DEFAULT FALSE,
-    skills_validated UUID[] REFERENCES skills(id),
+    skills_validated UUID[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -254,7 +254,7 @@ CREATE TABLE portfolio_items (
     media_urls TEXT[],
     thumbnail_url VARCHAR(500),
     tags VARCHAR(100)[],
-    skills_demonstrated UUID[] REFERENCES skills(id),
+    skills_demonstrated UUID[],
     is_featured BOOLEAN DEFAULT FALSE,
     view_count INTEGER DEFAULT 0,
     like_count INTEGER DEFAULT 0,
