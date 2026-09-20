@@ -288,7 +288,7 @@ BEGIN
         SELECT 1 FROM public.challenge_submissions
         WHERE challenge_id = NEW.challenge_id
         AND user_id = NEW.user_id
-        AND status = 'accepted'
+        AND status = 'passed'
         AND submitted_at < NEW.submitted_at
     ) INTO is_first_solve;
     
@@ -297,7 +297,7 @@ BEGIN
     END IF;
     
     -- Award XP
-    IF NEW.status = 'accepted' AND OLD.status != 'accepted' THEN
+    IF NEW.status = 'passed' AND OLD.status != 'passed' THEN
         INSERT INTO public.xp_ledger (user_id, amount, transaction_type, source_type, source_id, description, balance_after)
         SELECT 
             NEW.user_id,
@@ -349,7 +349,7 @@ DROP TRIGGER IF EXISTS on_challenge_submission_complete ON public.challenge_subm
 CREATE TRIGGER on_challenge_submission_complete
     AFTER UPDATE ON public.challenge_submissions
     FOR EACH ROW
-    WHEN (NEW.status = 'accepted' AND OLD.status IS DISTINCT FROM 'accepted')
+    WHEN (NEW.status = 'passed' AND OLD.status IS DISTINCT FROM 'passed')
     EXECUTE FUNCTION award_challenge_xp();
 
 -- ============================================================================
