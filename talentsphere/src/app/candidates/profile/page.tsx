@@ -408,7 +408,7 @@ export default function CandidateProfilePage() {
   const completionPercentage = calculateCompletionPercentage(formData, skills, experiences, educations);
 
   return (
-    <DashboardLayout userRole="candidate" userName={user?.full_name || 'Candidate'}>
+    <DashboardLayout userRole="candidate" userName={user?.user_metadata?.full_name || 'Candidate'}>
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -452,7 +452,7 @@ export default function CandidateProfilePage() {
               <div className="flex items-center gap-4">
                 <Avatar
                   src={user?.user_metadata?.avatar_url}
-                  alt={user?.full_name || 'User'}
+                  alt={user?.user_metadata?.full_name || 'User'}
                   size="xl"
                 />
                 <div>
