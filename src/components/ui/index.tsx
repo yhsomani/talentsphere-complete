@@ -252,3 +252,7 @@ export function Skeleton({ className, variant = 'text' }: SkeletonProps) {
     <div className={cn('animate-pulse bg-gray-200', variants[variant], className)} />
   );
 }
+
+// LoadingSpinner
+export { default as LoadingSpinner } from './LoadingSpinner';
+export type { LoadingSpinnerProps } from './LoadingSpinner';
