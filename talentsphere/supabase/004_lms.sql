@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS course_enrollments (
     enrolled_at TIMESTAMPTZ DEFAULT NOW(),
     completed_at TIMESTAMPTZ,
     progress_percentage NUMERIC(5,2) DEFAULT 0,
-    status enrollment_status DEFAULT 'active',
+    status enrollment_status DEFAULT 'enrolled',
     UNIQUE(course_id, user_id)
 );
 
