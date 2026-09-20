@@ -121,300 +121,412 @@ END $$;
 -- Application & Hiring Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE application_status AS ENUM (
-    'submitted',
-    'screening',
-    'under_review',
-    'interview_scheduled',
-    'interviewed',
-    'offer_extended',
-    'offer_accepted',
-    'offer_declined',
-    'rejected',
-    'withdrawn'
-);
+DO $$ BEGIN
+    CREATE TYPE application_status AS ENUM (
+        'submitted',
+        'screening',
+        'under_review',
+        'interview_scheduled',
+        'interviewed',
+        'offer_extended',
+        'offer_accepted',
+        'offer_declined',
+        'rejected',
+        'withdrawn'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE scorecard_decision AS ENUM (
-    'strong_yes',
-    'yes',
-    'no',
-    'strong_no'
-);
+DO $$ BEGIN
+    CREATE TYPE scorecard_decision AS ENUM (
+        'strong_yes',
+        'yes',
+        'no',
+        'strong_no'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Learning & Course Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE course_level AS ENUM (
-    'beginner',
-    'intermediate',
-    'advanced',
-    'all_levels'
-);
+DO $$ BEGIN
+    CREATE TYPE course_level AS ENUM (
+        'beginner',
+        'intermediate',
+        'advanced',
+        'all_levels'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE content_type AS ENUM (
-    'video',
-    'text',
-    'quiz',
-    'assignment',
-    'interactive',
-    'download'
-);
+DO $$ BEGIN
+    CREATE TYPE content_type AS ENUM (
+        'video',
+        'text',
+        'quiz',
+        'assignment',
+        'interactive',
+        'download'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE enrollment_status AS ENUM (
-    'enrolled',
-    'in_progress',
-    'completed',
-    'dropped',
-    'expired',
-    'active'
-);
+DO $$ BEGIN
+    CREATE TYPE enrollment_status AS ENUM (
+        'enrolled',
+        'in_progress',
+        'completed',
+        'dropped',
+        'expired',
+        'active'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE certificate_status AS ENUM (
-    'pending',
-    'issued',
-    'revoked',
-    'expired'
-);
+DO $$ BEGIN
+    CREATE TYPE certificate_status AS ENUM (
+        'pending',
+        'issued',
+        'revoked',
+        'expired'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Challenge & Assessment Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE challenge_type AS ENUM (
-    'coding',
-    'multiple_choice',
-    'practical',
-    'portfolio_review',
-    'take_home'
-);
+DO $$ BEGIN
+    CREATE TYPE challenge_type AS ENUM (
+        'coding',
+        'multiple_choice',
+        'practical',
+        'portfolio_review',
+        'take_home'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE challenge_status AS ENUM (
-    'draft',
-    'published',
-    'archived',
-    'deprecated'
-);
+DO $$ BEGIN
+    CREATE TYPE challenge_status AS ENUM (
+        'draft',
+        'published',
+        'archived',
+        'deprecated'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE challenge_difficulty AS ENUM (
-    'easy',
-    'medium',
-    'hard',
-    'expert'
-);
+DO $$ BEGIN
+    CREATE TYPE challenge_difficulty AS ENUM (
+        'easy',
+        'medium',
+        'hard',
+        'expert'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE submission_status AS ENUM (
-    'pending',
-    'passed',
-    'failed',
-    'compilation_error',
-    'timeout',
-    'runtime_error'
-);
+DO $$ BEGIN
+    CREATE TYPE submission_status AS ENUM (
+        'pending',
+        'passed',
+        'failed',
+        'compilation_error',
+        'timeout',
+        'runtime_error'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Gamification Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE xp_source AS ENUM (
-    'profile_completion',
-    'skill_verification',
-    'challenge_completed',
-    'course_completed',
-    'job_applied',
-    'job_posted',
-    'application_received',
-    'interview_completed',
-    'job_hired',
-    'referral',
-    'badge_earned',
-    'daily_login',
-    'streak_milestone',
-    'community_contribution',
-    'content_created',
-    'review_submitted'
-);
+DO $$ BEGIN
+    CREATE TYPE xp_source AS ENUM (
+        'profile_completion',
+        'skill_verification',
+        'challenge_completed',
+        'course_completed',
+        'job_applied',
+        'job_posted',
+        'application_received',
+        'interview_completed',
+        'job_hired',
+        'referral',
+        'badge_earned',
+        'daily_login',
+        'streak_milestone',
+        'community_contribution',
+        'content_created',
+        'review_submitted'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE badge_category AS ENUM (
-    'skill',
-    'achievement',
-    'milestone',
-    'social',
-    'learning',
-    'challenge',
-    'job_search',
-    'special'
-);
+DO $$ BEGIN
+    CREATE TYPE badge_category AS ENUM (
+        'skill',
+        'achievement',
+        'milestone',
+        'social',
+        'learning',
+        'challenge',
+        'job_search',
+        'special'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Notification & Messaging Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE notification_type AS ENUM (
-    'system',
-    'application_update',
-    'job_recommendation',
-    'message_received',
-    'challenge_result',
-    'course_enrollment',
-    'assignment_grade',
-    'badge_earned',
-    'level_up',
-    'mention',
-    'invitation'
-);
+DO $$ BEGIN
+    CREATE TYPE notification_type AS ENUM (
+        'system',
+        'application_update',
+        'job_recommendation',
+        'message_received',
+        'challenge_result',
+        'course_enrollment',
+        'assignment_grade',
+        'badge_earned',
+        'level_up',
+        'mention',
+        'invitation'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE notification_channel AS ENUM (
-    'in_app',
-    'email',
-    'push',
-    'sms'
-);
+DO $$ BEGIN
+    CREATE TYPE notification_channel AS ENUM (
+        'in_app',
+        'email',
+        'push',
+        'sms'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE notification_priority AS ENUM (
-    'low',
-    'medium',
-    'high',
-    'urgent'
-);
+DO $$ BEGIN
+    CREATE TYPE notification_priority AS ENUM (
+        'low',
+        'medium',
+        'high',
+        'urgent'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE message_status AS ENUM (
-    'sent',
-    'delivered',
-    'read',
-    'deleted'
-);
+DO $$ BEGIN
+    CREATE TYPE message_status AS ENUM (
+        'sent',
+        'delivered',
+        'read',
+        'deleted'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- B2B & Institutional Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE license_type AS ENUM (
-    'trial',
-    'standard',
-    'premium',
-    'enterprise'
-);
+DO $$ BEGIN
+    CREATE TYPE license_type AS ENUM (
+        'trial',
+        'standard',
+        'premium',
+        'enterprise'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE license_status AS ENUM (
-    'active',
-    'suspended',
-    'expired',
-    'cancelled'
-);
+DO $$ BEGIN
+    CREATE TYPE license_status AS ENUM (
+        'active',
+        'suspended',
+        'expired',
+        'cancelled'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE cohort_status AS ENUM (
-    'draft',
-    'active',
-    'completed',
-    'archived'
-);
+DO $$ BEGIN
+    CREATE TYPE cohort_status AS ENUM (
+        'draft',
+        'active',
+        'completed',
+        'archived'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Analytics & Audit Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE event_category AS ENUM (
-    'auth',
-    'profile',
-    'job',
-    'application',
-    'challenge',
-    'course',
-    'messaging',
-    'notification',
-    'gamification',
-    'admin',
-    'system'
-);
+DO $$ BEGIN
+    CREATE TYPE event_category AS ENUM (
+        'auth',
+        'profile',
+        'job',
+        'application',
+        'challenge',
+        'course',
+        'messaging',
+        'notification',
+        'gamification',
+        'admin',
+        'system'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE audit_action AS ENUM (
-    'create',
-    'read',
-    'update',
-    'delete',
-    'restore',
-    'export',
-    'import'
-);
+DO $$ BEGIN
+    CREATE TYPE audit_action AS ENUM (
+        'create',
+        'read',
+        'update',
+        'delete',
+        'restore',
+        'export',
+        'import'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- LMS Enums (for Migration 004)
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE course_category AS ENUM (
-    'development',
-    'design',
-    'business',
-    'data_science',
-    'marketing',
-    'devops',
-    'security',
-    'other'
-);
+DO $$ BEGIN
+    CREATE TYPE course_category AS ENUM (
+        'development',
+        'design',
+        'business',
+        'data_science',
+        'marketing',
+        'devops',
+        'security',
+        'other'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE lesson_content_type AS ENUM (
-    'video',
-    'text',
-    'quiz',
-    'assignment',
-    'interactive',
-    'download',
-    'code_challenge'
-);
+DO $$ BEGIN
+    CREATE TYPE lesson_content_type AS ENUM (
+        'video',
+        'text',
+        'quiz',
+        'assignment',
+        'interactive',
+        'download',
+        'code_challenge'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE quiz_question_type AS ENUM (
-    'multiple_choice',
-    'true_false',
-    'short_answer',
-    'code_completion',
-    'matching'
-);
+DO $$ BEGIN
+    CREATE TYPE quiz_question_type AS ENUM (
+        'multiple_choice',
+        'true_false',
+        'short_answer',
+        'code_completion',
+        'matching'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Gamification & Messaging Enums (for Migration 006)
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE xp_transaction_type AS ENUM (
-    'signup_bonus',
-    'profile_milestone',
-    'profile_complete',
-    'skill_verification',
-    'challenge_completed',
-    'course_completed',
-    'job_applied',
-    'job_posted',
-    'application_received',
-    'interview_completed',
-    'job_hired',
-    'referral',
-    'badge_earned',
-    'daily_login',
-    'streak_milestone',
-    'community_contribution',
-    'content_created',
-    'review_submitted'
-);
+DO $$ BEGIN
+    CREATE TYPE xp_transaction_type AS ENUM (
+        'signup_bonus',
+        'profile_milestone',
+        'profile_complete',
+        'skill_verification',
+        'challenge_completed',
+        'course_completed',
+        'job_applied',
+        'job_posted',
+        'application_received',
+        'interview_completed',
+        'job_hired',
+        'referral',
+        'badge_earned',
+        'daily_login',
+        'streak_milestone',
+        'community_contribution',
+        'content_created',
+        'review_submitted'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE leaderboard_period AS ENUM (
-    'daily',
-    'weekly',
-    'monthly',
-    'all_time'
-);
+DO $$ BEGIN
+    CREATE TYPE leaderboard_period AS ENUM (
+        'daily',
+        'weekly',
+        'monthly',
+        'all_time'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE conversation_type AS ENUM (
-    'direct',
-    'group'
-);
+DO $$ BEGIN
+    CREATE TYPE conversation_type AS ENUM (
+        'direct',
+        'group'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE message_type AS ENUM (
-    'text',
-    'image',
-    'file',
-    'link',
-    'system'
-);
+DO $$ BEGIN
+    CREATE TYPE message_type AS ENUM (
+        'text',
+        'image',
+        'file',
+        'link',
+        'system'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Common Timestamp Trigger Function
