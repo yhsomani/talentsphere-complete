@@ -2,15 +2,16 @@
 # Dependencies
 node_modules/
 
+# Build outputs
+.next/
+
 # Environment variables
 .env.local
-*.env.*
+.env
 
-# Build outputs
-dist/
-build/
-.next/
-out/
+# IDE files
+.vscode/
+.idea/
 
 # Logs
 *.log
@@ -18,32 +19,4 @@ out/
 # OS generated files
 .DS_Store
 Thumbs.db
-
-# Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Database
-supabase/.env
-
-# Temporary files
-*.tmp
-*.temp
 ```

@@ -73,7 +73,7 @@ export default function CandidateProfilePage() {
   }
 
   return (
-    <DashboardLayout userRole="candidate" userName={`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Candidate'} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
+    <DashboardLayout userRole="candidate" userName={`${(user?.user_metadata as any)?.first_name || ''} ${(user?.user_metadata as any)?.last_name || ''}`.trim() || 'Candidate'} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
       <div className={styles.container}>
         <header className={styles.header}>
           <h1 className={styles.title}>Candidate Profile</h1>
