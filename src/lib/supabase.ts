@@ -25,9 +25,6 @@ export function createBrowserClient() {
           autoRefreshToken: false,
           persistSession: false,
         },
-        db: {
-          schema: 'public',
-        },
       }
     );
   }
@@ -41,9 +38,6 @@ export function createBrowserClient() {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-        },
-        db: {
-          schema: 'public',
         },
       }
     );

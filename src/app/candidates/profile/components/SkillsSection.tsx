@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { Button, Badge, Input, Card } from '@/components/ui';
-import { X, Sparkles, Plus, Award } from 'lucide-react';
+import { X, Sparkles, Plus } from 'lucide-react';
 
 export interface SkillItem {
   id: string;

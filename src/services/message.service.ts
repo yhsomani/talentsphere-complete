@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createBrowserClient } from '@/lib/supabase';
 
 export interface ParticipantInfo {

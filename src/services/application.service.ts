@@ -44,6 +44,18 @@ export interface ApplicationRecord {
       industry: string | null;
     } | null;
   } | null;
+  candidate_profiles?: {
+    id: string;
+    headline: string | null;
+    summary: string | null;
+    location_city: string | null;
+    users?: {
+      id: string;
+      full_name: string | null;
+      email: string;
+      avatar_url: string | null;
+    } | null;
+  } | null;
   hiring_pipeline_stages?: {
     id: string;
     name: string;
@@ -339,15 +351,40 @@ export const applicationService = {
   /**
    * Update application stage/status (Recruiter action)
    */
-  async updateApplicationStage(applicationId: string, stageId: string, status: string): Promise<boolean> {
+  async updateApplicationStage(applicationId: string, stageId: string | null, status: string, note?: string): Promise<boolean> {
+    return this.updateApplicationStatus(applicationId, status as ApplicationRecord['status'], stageId, note);
+  },
+
+  /**
+   * Update application status and stage with full activity logging
+   */
+  async updateApplicationStatus(
+    applicationId: string,
+    status: ApplicationRecord['status'],
+    stageId?: string | null,
+    note?: string
+  ): Promise<boolean> {
     try {
+      const updatePayload: Record<string, unknown> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (stageId !== undefined) {
+        updatePayload.current_stage_id = stageId;
+      }
+
+      if (['offer_extended', 'offer_accepted', 'offer_declined', 'rejected'].includes(status)) {
+        updatePayload.decision_at = new Date().toISOString();
+      }
+
+      if (status !== 'submitted') {
+        updatePayload.reviewed_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('applications')
-        .update({
-          current_stage_id: stageId,
-          status,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq('id', applicationId);
 
       if (error) throw error;
@@ -357,17 +394,141 @@ export const applicationService = {
         await supabase.from('application_activity_log').insert({
           application_id: applicationId,
           actor_id: userData?.user?.id || null,
-          action: 'stage_updated',
-          new_value: { stage_id: stageId, status },
+          action: `status_changed_to_${status}`,
+          new_value: { status, stage_id: stageId || null, note: note || null },
+          metadata: { timestamp: new Date().toISOString(), note: note || null },
         });
-      } catch {
-        // Non-blocking
+      } catch (logErr) {
+        console.warn('Non-blocking activity log failed:', logErr);
       }
 
       return true;
     } catch (error) {
-      console.error('Error updating application stage:', error);
+      console.error('Error updating application status:', error);
       throw error;
+    }
+  },
+
+  /**
+   * Fetch pipeline stages (default system stages + organization custom stages)
+   */
+  async getPipelineStages(organizationId?: string | null): Promise<Array<{
+    id: string;
+    organization_id: string | null;
+    name: string;
+    order_index: number;
+    type: string;
+    description: string | null;
+    is_default: boolean;
+  }>> {
+    try {
+      let query = supabase
+        .from('hiring_pipeline_stages')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (organizationId) {
+        query = query.or(`organization_id.is.null,organization_id.eq.${organizationId}`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as unknown as Array<{
+        id: string;
+        organization_id: string | null;
+        name: string;
+        order_index: number;
+        type: string;
+        description: string | null;
+        is_default: boolean;
+      }>;
+    } catch (error) {
+      console.error('Error fetching pipeline stages:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Get all recruiter jobs and their incoming applications
+   */
+  async getRecruiterOverview(recruiterUserId: string, organizationId?: string | null): Promise<{
+    jobs: Array<{
+      id: string;
+      title: string;
+      department: string | null;
+      location_city: string | null;
+      work_mode: string;
+      status: string;
+      created_at: string;
+      application_count: number;
+    }>;
+    recentApplications: ApplicationRecord[];
+  }> {
+    try {
+      let jobsQuery = supabase
+        .from('jobs')
+        .select('id, title, department, location_city, work_mode, status, created_at, application_count')
+        .order('created_at', { ascending: false });
+
+      if (organizationId) {
+        jobsQuery = jobsQuery.or(`employer_id.eq.${recruiterUserId},organization_id.eq.${organizationId}`);
+      } else {
+        jobsQuery = jobsQuery.eq('employer_id', recruiterUserId);
+      }
+
+      const { data: jobs, error: jobsError } = await jobsQuery;
+      if (jobsError) throw jobsError;
+
+      if (!jobs || jobs.length === 0) {
+        return { jobs: [], recentApplications: [] };
+      }
+
+      const jobIds = jobs.map(j => j.id);
+
+      const { data: apps, error: appsError } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          jobs (
+            id,
+            title,
+            slug,
+            job_type,
+            work_mode,
+            location_city,
+            status
+          ),
+          candidate_profiles (
+            id,
+            headline,
+            summary,
+            location_city,
+            users (
+              id,
+              full_name,
+              email,
+              avatar_url
+            )
+          ),
+          hiring_pipeline_stages (
+            id,
+            name,
+            type
+          )
+        `)
+        .in('job_id', jobIds)
+        .order('applied_at', { ascending: false })
+        .limit(50);
+
+      if (appsError) throw appsError;
+
+      return {
+        jobs: jobs || [],
+        recentApplications: (apps || []) as unknown as ApplicationRecord[],
+      };
+    } catch (error) {
+      console.error('Error fetching recruiter overview:', error);
+      return { jobs: [], recentApplications: [] };
     }
   },
 };

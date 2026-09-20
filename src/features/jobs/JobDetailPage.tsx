@@ -37,14 +37,18 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
   const [existingApplication, setExistingApplication] = useState<ApplicationRecord | null>(null);
   const [copied, setCopied] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ id: string; role?: string } | null>(null);
 
-  // Check if user has already applied
+  // Check if user has already applied & get user role
   useEffect(() => {
     const checkApplied = async () => {
       try {
         const supabase = createBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
+
+        const { data: userRec } = await supabase.from('users').select('id, role').eq('id', user.id).single();
+        setCurrentUser({ id: user.id, role: userRec?.role });
 
         const profileResult = await candidateService.getProfile(user.id);
         if (profileResult?.profile?.id) {
@@ -154,6 +158,15 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
           </Link>
 
           <div className="flex items-center gap-2">
+            {(currentUser?.role === 'recruiter' || currentUser?.role === 'hiring_manager' || (job && currentUser?.id === job.employer_id)) && (
+              <Link
+                href={`/jobs/${jobId}/applications`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-200 shadow-2xs transition-colors"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Review Pipeline ({job?.application_count || 0})</span>
+              </Link>
+            )}
             <button
               onClick={handleBookmarkToggle}
               disabled={bookmarkLoading}
@@ -252,6 +265,19 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
 
               {/* Apply / Status CTA */}
               <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-gray-100">
+                {(currentUser?.role === 'recruiter' || currentUser?.role === 'hiring_manager' || (job && currentUser?.id === job.employer_id)) && (
+                  <Link href={`/jobs/${job.id}/applications`}>
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="w-full sm:w-auto px-6 gap-2 border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>Review Pipeline ({job.application_count || 0})</span>
+                    </Button>
+                  </Link>
+                )}
+
                 {existingApplication ? (
                   <div className="w-full sm:w-auto flex items-center gap-3 px-5 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600" />

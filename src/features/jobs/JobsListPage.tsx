@@ -25,7 +25,11 @@ export default function JobsListPage() {
     hasMore,
     total,
     currentPage,
-    totalPages
+    totalPages,
+    bookmarkedIds,
+    bookmarkJob,
+    removeBookmark,
+    isBookmarked
   } = useJobs({ pageSize: 20 });
 
   if (error) {
@@ -133,7 +137,17 @@ export default function JobsListPage() {
               />
             ) : (
               <>
-                <JobList jobs={jobs} />
+                <JobList
+                  jobs={jobs}
+                  bookmarkedIds={bookmarkedIds}
+                  onBookmark={async (jobId) => {
+                    if (isBookmarked(jobId)) {
+                      await removeBookmark(jobId);
+                    } else {
+                      await bookmarkJob(jobId);
+                    }
+                  }}
+                />
 
                 {/* Load More Action */}
                 {hasMore && (

@@ -11,8 +11,8 @@ import { test, expect } from '@playwright/test';
  * - Accessing auth routes when already authenticated
  */
 
-const TEST_EMAIL = process.env.E2E_TEST_EMAIL || 'test@example.com';
-const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || 'test-password-123';
+const _TEST_EMAIL = process.env.E2E_TEST_EMAIL || 'test@example.com';
+const _TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || 'test-password-123';
 
 test.describe('Authentication', () => {
   test('sign-in page loads correctly', async ({ page }) => {

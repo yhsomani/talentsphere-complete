@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn, getLevelDetails } from '@/utils';
-import { Avatar, Badge } from '@/components/ui';
+import { Avatar } from '@/components/ui';
 import { createBrowserClient } from '@/lib/supabase';
 import { 
   LayoutDashboard, 
@@ -23,7 +23,6 @@ import {
   LogOut,
   Menu,
   X,
-  Search,
   Sparkles,
   ChevronRight
 } from 'lucide-react';

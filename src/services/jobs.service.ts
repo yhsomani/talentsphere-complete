@@ -483,3 +483,6 @@ export const jobService = {
     }
   }
 };
+
+export const jobsService = jobService;
+

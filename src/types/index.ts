@@ -151,7 +151,7 @@ export interface PortfolioItem {
   candidate_id: string;
   title: string;
   description: string;
-  project_type: 'personal' | 'academic' | 'professional' | 'open_source' | 'freelance';
+  project_type: 'personal' | 'academic' | 'professional' | 'open_source' | 'freelance' | 'web_app' | 'mobile_app' | 'library' | 'design' | 'writing' | 'video' | 'other';
   url?: string;
   repository_url?: string;
   demo_url?: string;

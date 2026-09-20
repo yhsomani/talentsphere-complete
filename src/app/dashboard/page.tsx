@@ -18,32 +18,92 @@ export default async function DashboardPage() {
   const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
   const avatarUrl = user.user_metadata?.avatar_url;
   
-  // Fetch user profile data based on role
+  // 1. Fetch user level & XP from user_levels
+  const { data: userLevel } = await supabase
+    .from('user_levels')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const xpPoints = userLevel?.total_xp_earned || 0;
+  const level = userLevel?.current_level || 1;
+  const currentXp = userLevel?.current_xp || 0;
+  const xpToNextLevel = userLevel?.xp_to_next_level || 500;
+  const progressToNext = userLevel?.level_progress !== undefined 
+    ? Number(userLevel.level_progress) 
+    : Math.min(100, (currentXp / xpToNextLevel) * 100);
+
+  // 2. Fetch role-specific data & real metrics
   let profileData = null;
-  
+  let candidateStats = { applications: 0, interviews: 0, skills: 0 };
+  let recruiterStats = { jobsPosted: 0, totalCandidates: 0, inReview: 0 };
+
   if (userRole === 'candidate') {
-    const { data } = await supabase
+    const { data: candidateProf } = await supabase
       .from('candidate_profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single();
-    profileData = data;
+      .maybeSingle();
+    profileData = candidateProf;
+
+    if (candidateProf?.id) {
+      const [appsRes, interviewsRes, skillsRes] = await Promise.all([
+        supabase
+          .from('applications')
+          .select('id', { count: 'exact', head: true })
+          .eq('candidate_profile_id', candidateProf.id),
+        supabase
+          .from('applications')
+          .select('id', { count: 'exact', head: true })
+          .eq('candidate_profile_id', candidateProf.id)
+          .in('status', ['interview_scheduled', 'interviewed']),
+        supabase
+          .from('candidate_skills')
+          .select('id', { count: 'exact', head: true })
+          .eq('candidate_profile_id', candidateProf.id),
+      ]);
+
+      candidateStats = {
+        applications: appsRes.count || 0,
+        interviews: interviewsRes.count || 0,
+        skills: skillsRes.count || 0,
+      };
+    }
   } else if (userRole === 'recruiter' || userRole === 'hiring_manager') {
-    const { data } = await supabase
-      .from('recruiter_profiles')
-      .select('*, organizations(*)')
-      .eq('user_id', user.id)
-      .single();
-    profileData = data;
+    // Get employer jobs
+    const { data: employerJobs } = await supabase
+      .from('jobs')
+      .select('id')
+      .eq('employer_id', user.id);
+
+    const jobIds = (employerJobs || []).map(j => j.id);
+
+    let totalApplicants = 0;
+    let inReviewApplicants = 0;
+
+    if (jobIds.length > 0) {
+      const [totalRes, inReviewRes] = await Promise.all([
+        supabase
+          .from('applications')
+          .select('id', { count: 'exact', head: true })
+          .in('job_id', jobIds),
+        supabase
+          .from('applications')
+          .select('id', { count: 'exact', head: true })
+          .in('job_id', jobIds)
+          .in('status', ['submitted', 'under_review', 'screening']),
+      ]);
+      totalApplicants = totalRes.count || 0;
+      inReviewApplicants = inReviewRes.count || 0;
+    }
+
+    recruiterStats = {
+      jobsPosted: employerJobs?.length || 0,
+      totalCandidates: totalApplicants,
+      inReview: inReviewApplicants,
+    };
   }
-  
-  // Calculate XP progress
-  const xpPoints = profileData?.xp_points || 0;
-  const level = profileData?.level || 1;
-  const nextLevelXp = Math.floor(500 * Math.pow(1.5, level - 1));
-  const prevLevelXp = Math.floor(500 * Math.pow(1.5, level - 2)) || 0;
-  const progressToNext = ((xpPoints - prevLevelXp) / (nextLevelXp - prevLevelXp)) * 100;
-  
+
   return (
     <DashboardLayout
       userRole={userRole}
@@ -71,8 +131,8 @@ export default async function DashboardPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{prevLevelXp} XP</span>
-                <span>{nextLevelXp} XP</span>
+                <span>{currentXp} XP</span>
+                <span>{xpToNextLevel} XP</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
@@ -90,7 +150,7 @@ export default async function DashboardPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">Applications</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{candidateStats.applications}</span>
                 </div>
                 <p className="text-xs text-gray-500">Track your job applications</p>
               </div>
@@ -98,7 +158,7 @@ export default async function DashboardPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">Interviews</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{candidateStats.interviews}</span>
                 </div>
                 <p className="text-xs text-gray-500">Upcoming interviews</p>
               </div>
@@ -106,7 +166,7 @@ export default async function DashboardPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">Skills Verified</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{candidateStats.skills}</span>
                 </div>
                 <p className="text-xs text-gray-500">Verified skills</p>
               </div>
@@ -116,29 +176,29 @@ export default async function DashboardPage() {
           {/* Jobs Posted Card (for recruiters) */}
           {(userRole === 'recruiter' || userRole === 'hiring_manager') && (
             <>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <Link href="/jobs" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-indigo-200 transition-colors">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">Jobs Posted</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{recruiterStats.jobsPosted}</span>
                 </div>
                 <p className="text-xs text-gray-500">Active job listings</p>
-              </div>
+              </Link>
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <Link href="/applications" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-indigo-200 transition-colors">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">Candidates</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{recruiterStats.totalCandidates}</span>
                 </div>
-                <p className="text-xs text-gray-500">Total applicants</p>
-              </div>
+                <p className="text-xs text-indigo-600 font-medium">Review talent pool →</p>
+              </Link>
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <Link href="/applications" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-indigo-200 transition-colors">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-600">In Review</span>
-                  <span className="text-2xl font-bold text-gray-900">0</span>
+                  <span className="text-2xl font-bold text-gray-900">{recruiterStats.inReview}</span>
                 </div>
-                <p className="text-xs text-gray-500">Applications to review</p>
-              </div>
+                <p className="text-xs text-amber-600 font-medium">Applications to review →</p>
+              </Link>
             </>
           )}
         </div>
@@ -223,6 +283,21 @@ export default async function DashboardPage() {
                   <div>
                     <p className="font-medium text-gray-900">Post a Job</p>
                     <p className="text-sm text-gray-500">Create new listing</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/applications"
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Review Applications</p>
+                    <p className="text-sm text-gray-500">Pipeline & candidates</p>
                   </div>
                 </Link>
                 

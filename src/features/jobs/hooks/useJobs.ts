@@ -34,6 +34,7 @@ interface UseJobsReturn {
   refresh: () => Promise<void>;
   
   // Actions
+  bookmarkedIds: Set<string>;
   bookmarkJob: (jobId: string) => Promise<void>;
   removeBookmark: (jobId: string) => Promise<void>;
   isBookmarked: (jobId: string) => boolean;
@@ -81,7 +82,22 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
       setJobs(prev => append ? [...prev, ...result.jobs] : result.jobs);
       setTotal(result.total);
       setPage(result.page);
-      setBookmarkedIds(new Set(result.jobs.filter(j => j.is_bookmarked).map(j => j.id)));
+      
+      // Load user bookmarks from job_bookmarks table
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData?.user) {
+          const { data: bData } = await supabase
+            .from('job_bookmarks')
+            .select('job_id')
+            .eq('user_id', authData.user.id);
+          if (bData) {
+            setBookmarkedIds(new Set(bData.map((b: { job_id: string }) => b.job_id)));
+          }
+        }
+      } catch (bErr) {
+        console.warn('Bookmarks load non-blocking error:', bErr);
+      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to load jobs'));
       console.error('useJobs: Error loading jobs:', err);
@@ -202,6 +218,7 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
     refresh,
     
     // Actions
+    bookmarkedIds,
     bookmarkJob,
     removeBookmark,
     isBookmarked,

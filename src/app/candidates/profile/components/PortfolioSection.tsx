@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { Button, Card, Input } from '@/components/ui';
 import { PortfolioItem } from '@/types';
-import { Plus, Trash2, FolderGit2, ExternalLink, Code2, Globe } from 'lucide-react';
+import { Plus, Trash2, FolderGit2, Code2, Globe } from 'lucide-react';
 
 interface PortfolioSectionProps {
   portfolioItems: PortfolioItem[];

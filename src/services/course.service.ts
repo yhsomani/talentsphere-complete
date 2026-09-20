@@ -102,6 +102,7 @@ export const courseService = {
       const { data, error } = await query;
       if (error) throw error;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (data || []).map((c: any) => {
         const u = c.users;
         const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
@@ -160,6 +161,7 @@ export const courseService = {
       const moduleIds = (modulesData || []).map(m => m.id);
 
       // 3. Fetch lessons
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let lessonsData: any[] = [];
       if (moduleIds.length > 0) {
         const { data: lessons } = await supabase

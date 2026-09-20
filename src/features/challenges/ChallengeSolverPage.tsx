@@ -9,7 +9,7 @@ import {
   type SubmissionResult
 } from '@/services/challenge.service';
 import { createBrowserClient } from '@/lib/supabase';
-import { Button, Badge } from '@/components/ui';
+import { Button } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import {
   ArrowLeft,
@@ -21,7 +21,6 @@ import {
   Terminal,
   RotateCcw,
   Sparkles,
-  ChevronRight,
   BookOpen,
   HelpCircle,
   Clock,
@@ -35,7 +34,7 @@ interface ChallengeSolverPageProps {
 export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPageProps) {
   const router = useRouter();
   const [challenge, setChallenge] = useState<ChallengeRecord | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [_userId, setUserId] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
   const [isLoading, setIsLoading] = useState(true);

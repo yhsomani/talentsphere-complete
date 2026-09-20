@@ -91,7 +91,7 @@ export function LeaderboardPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setPeriod(tab.id as any)}
+                onClick={() => setPeriod(tab.id as 'all_time' | 'weekly' | 'monthly')}
                 className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
                   period === tab.id
                     ? 'bg-amber-500 text-white shadow-sm'

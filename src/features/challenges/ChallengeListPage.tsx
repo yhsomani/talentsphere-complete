@@ -8,16 +8,13 @@ import { Button, Badge, Card, EmptyState } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import {
-  Trophy,
   Code2,
   CheckCircle2,
   Search,
-  Sparkles,
   Flame,
   Zap,
   Award,
   Terminal,
-  ArrowRight,
   ChevronRight
 } from 'lucide-react';
 

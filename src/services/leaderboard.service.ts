@@ -20,19 +20,18 @@ export const leaderboardService = {
    * Fetch leaderboard rankings for a period
    */
   async getLeaderboard(
-    period: 'all_time' | 'weekly' | 'monthly' = 'all_time',
+    _period: 'all_time' | 'weekly' | 'monthly' = 'all_time',
     currentUserId?: string
   ): Promise<LeaderboardRankItem[]> {
     try {
-      // Query candidate_profiles joined with users, ordered by xp_points desc
+      // Query user_levels joined with users, ordered by total_xp_earned desc
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
-        .from('candidate_profiles')
+        .from('user_levels')
         .select(`
-          id,
           user_id,
-          headline,
-          xp_points,
-          level,
+          current_level,
+          total_xp_earned,
           user:users (
             id,
             email,
@@ -40,7 +39,7 @@ export const leaderboardService = {
             avatar_url
           )
         `)
-        .order('xp_points', { ascending: false })
+        .order('total_xp_earned', { ascending: false })
         .limit(50);
 
       if (error || !data || data.length === 0) {
@@ -104,6 +103,7 @@ export const leaderboardService = {
         ];
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return data.map((item: any, index: number) => {
         const u = Array.isArray(item.user) ? item.user[0] : item.user;
         const name =
@@ -114,10 +114,10 @@ export const leaderboardService = {
           userId: item.user_id,
           name,
           email: u?.email || '',
-          headline: item.headline || 'Software Engineer',
-          level: item.level || 1,
-          xpPoints: item.xp_points || 0,
-          badgesCount: Math.floor((item.xp_points || 0) / 300),
+          headline: 'Software Engineer',
+          level: item.current_level || 1,
+          xpPoints: item.total_xp_earned || 0,
+          badgesCount: Math.floor((item.total_xp_earned || 0) / 300),
           isCurrentUser: currentUserId === item.user_id,
         };
       });

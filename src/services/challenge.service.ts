@@ -111,6 +111,7 @@ export const challengeService = {
         (attempts || []).forEach(a => attemptMap.set(a.challenge_id, a));
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (data || []).map((c: any) => ({
         ...c,
         category: c.challenge_categories,
@@ -300,31 +301,71 @@ export const challengeService = {
     // 3. Award XP if first-time solved
     if (isAllPassed && !existingAttempt?.is_solved) {
       try {
-        await supabase.from('xp_ledger').insert({
-          user_id: userId,
-          amount: xpReward,
-          source_type: 'challenge_completion',
-          source_id: challengeId,
-          description: `Solved code arena challenge (+${xpReward} XP)`,
-        });
-
-        // Increment candidate xp_points
-        const { data: prof } = await supabase
-          .from('candidate_profiles')
-          .select('id, xp_points')
+        // Fetch or initialize user_level
+        let userLevel = null;
+        const { data: levelData } = await supabase
+          .from('user_levels')
+          .select('*')
           .eq('user_id', userId)
           .maybeSingle();
 
-        if (prof) {
-          await supabase
-            .from('candidate_profiles')
-            .update({
-              xp_points: (prof.xp_points || 0) + xpReward,
+        if (levelData) {
+          userLevel = levelData;
+        } else {
+          const { data: newLevel } = await supabase
+            .from('user_levels')
+            .insert({
+              user_id: userId,
+              current_level: 1,
+              current_xp: 0,
+              xp_to_next_level: 500,
+              total_xp_earned: 0,
+              level_progress: 0,
             })
-            .eq('id', prof.id);
+            .select()
+            .single();
+          userLevel = newLevel;
         }
+
+        const newTotalXp = (userLevel?.total_xp_earned || 0) + xpReward;
+        const xpToNext = userLevel?.xp_to_next_level || 500;
+        let newCurrentXp = (userLevel?.current_xp || 0) + xpReward;
+        let newLevelNum = userLevel?.current_level || 1;
+        let leveledUp = false;
+
+        while (newCurrentXp >= xpToNext) {
+          newLevelNum += 1;
+          newCurrentXp -= xpToNext;
+          leveledUp = true;
+        }
+
+        const levelProgress = Number(((newCurrentXp / xpToNext) * 100).toFixed(2));
+
+        // Insert into xp_ledger
+        await supabase.from('xp_ledger').insert({
+          user_id: userId,
+          amount: xpReward,
+          transaction_type: 'earned',
+          source_type: 'challenge_completion',
+          source_id: challengeId,
+          description: `Solved code arena challenge (+${xpReward} XP)`,
+          balance_after: newTotalXp,
+        });
+
+        // Update user_levels
+        await supabase
+          .from('user_levels')
+          .update({
+            total_xp_earned: newTotalXp,
+            current_xp: newCurrentXp,
+            current_level: newLevelNum,
+            level_progress: levelProgress,
+            last_level_up_at: leveledUp ? new Date().toISOString() : userLevel?.last_level_up_at,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
       } catch (xpErr) {
-        console.warn('XP ledger update non-blocking error:', xpErr);
+        console.warn('XP award non-blocking error:', xpErr);
       }
     }
 
