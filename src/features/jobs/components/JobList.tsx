@@ -30,21 +30,21 @@ function JobCard({ job }: { job: JobListing }) {
         {/* Company Logo */}
         <div className={styles.logo}>
           <Avatar
-            src={job.organizations?.logo_url}
-            alt={job.organizations?.name || 'Company'}
-            size="large"
-            fallback={job.organizations?.name?.charAt(0) || 'C'}
+            src={job.organization?.logo_url}
+            alt={job.organization?.name || 'Company'}
+            size="lg"
+            fallback={job.organization?.name?.charAt(0) || 'C'}
           />
         </div>
 
         {/* Job Info */}
         <div className={styles.info}>
           <h3 className={styles.title}>{job.title}</h3>
-          <p className={styles.company}>{job.organizations?.name}</p>
+          <p className={styles.company}>{job.organization?.name}</p>
           
           <div className={styles.meta}>
             <span className={styles.location}>
-              📍 {job.work_location === 'remote' ? 'Remote' : job.location}
+              📍 {job.work_mode === 'remote' ? 'Remote' : job.location}
             </span>
             <span className={styles.type}>
               💼 {formatJobType(job.job_type)}
@@ -67,16 +67,10 @@ function JobCard({ job }: { job: JobListing }) {
       {/* Tags */}
       <div className={styles.tags}>
         {job.skills?.slice(0, 5).map((skill, index) => (
-          <Badge key={index} variant="secondary" size="small">
-            {skill}
+          <Badge key={index} variant="secondary" size="sm">
+            {skill.name}
           </Badge>
         ))}
-        {job.is_new && (
-          <Badge variant="success" size="small">New</Badge>
-        )}
-        {job.is_urgent && (
-          <Badge variant="danger" size="small">Urgent</Badge>
-        )}
       </div>
 
       {/* Footer */}

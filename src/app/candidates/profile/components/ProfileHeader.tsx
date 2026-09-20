@@ -23,7 +23,7 @@ export function ProfileHeader({ avatarUrl, onAvatarUpload, uploading }: ProfileH
 
   return (
     <div className="profile-header">
-      <Avatar src={avatarUrl} size="large" />
+      <Avatar src={avatarUrl} alt="Profile Avatar" size="large" />
       <label className="avatar-upload-label">
         <input
           type="file"

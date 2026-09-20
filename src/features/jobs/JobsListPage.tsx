@@ -102,7 +102,7 @@ export default function JobsListPage() {
                     onClick={loadMore}
                     disabled={isLoadingMore}
                     variant="secondary"
-                    size="large"
+                    size="lg"
                   >
                     {isLoadingMore ? 'Loading...' : 'Load More Jobs'}
                   </Button>

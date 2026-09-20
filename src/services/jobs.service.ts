@@ -1,9 +1,12 @@
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@/lib/supabase';
 import type { Job, JobListing, JobFilters, JobStatus, JobType, WorkLocation } from '@/types';
 import type { Database } from '@/types/database.types';
 
 type JobInsert = Database['public']['Tables']['jobs']['Insert'];
 type JobUpdate = Database['public']['Tables']['jobs']['Update'];
+
+// Create client instance for service
+const supabase = createBrowserClient();
 
 /**
  * Job Service - Data access layer for job-related operations
