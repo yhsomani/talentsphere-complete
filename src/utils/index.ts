@@ -120,6 +120,46 @@ export function calculateLevel(xp: number): number {
 }
 
 /**
+ * Get comprehensive level, threshold, and percentage information
+ */
+export function getLevelDetails(xp: number = 0) {
+  const thresholds = [
+    { level: 1, xp: 0 },
+    { level: 2, xp: 500 },
+    { level: 3, xp: 1500 },
+    { level: 4, xp: 3000 },
+    { level: 5, xp: 5000 },
+    { level: 6, xp: 8000 },
+    { level: 7, xp: 12000 },
+    { level: 8, xp: 17000 },
+    { level: 9, xp: 23000 },
+    { level: 10, xp: 30000 },
+    { level: 11, xp: 40000 },
+    { level: 12, xp: 52000 },
+    { level: 13, xp: 66000 },
+    { level: 14, xp: 82000 },
+    { level: 15, xp: 100000 },
+  ];
+
+  const level = calculateLevel(xp);
+  const currentThreshold = thresholds.find(t => t.level === level)?.xp || 0;
+  const nextThreshold = thresholds.find(t => t.level === level + 1)?.xp || (currentThreshold + 20000);
+  const xpInCurrentLevel = Math.max(0, xp - currentThreshold);
+  const xpNeeded = Math.max(1, nextThreshold - currentThreshold);
+  const percentage = Math.min(100, Math.max(0, Math.round((xpInCurrentLevel / xpNeeded) * 100)));
+
+  return {
+    level,
+    currentThreshold,
+    nextThreshold,
+    xpInCurrentLevel,
+    xpNeeded,
+    percentage,
+    totalXp: xp,
+  };
+}
+
+/**
  * Calculate progress percentage
  */
 export function calculateProgress(current: number, total: number): number {

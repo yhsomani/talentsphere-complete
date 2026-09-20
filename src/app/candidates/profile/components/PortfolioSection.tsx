@@ -1,110 +1,193 @@
 /**
  * PortfolioSection Component
  * 
- * Displays and manages candidate portfolio items.
+ * Displays and manages candidate portfolio items with interactive add/delete.
  */
 
-import React from 'react';
-import { Button, Card, Badge } from '@/components/ui';
+'use client';
+
+import React, { useState } from 'react';
+import { Button, Card, Input } from '@/components/ui';
 import { PortfolioItem } from '@/types';
+import { Plus, Trash2, FolderGit2, ExternalLink, Code2, Globe } from 'lucide-react';
 
 interface PortfolioSectionProps {
   portfolioItems: PortfolioItem[];
-  onAdd: (item: Partial<PortfolioItem>) => Promise<void>;
-  onUpdate: (id: string, updates: Partial<PortfolioItem>) => Promise<void>;
+  onAdd: (item: {
+    title: string;
+    description?: string;
+    url?: string;
+    repository_url?: string;
+    started_at?: string;
+    completed_at?: string;
+  }) => Promise<void>;
+  onUpdate?: (id: string, updates: Partial<PortfolioItem>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
 
-export function PortfolioSection({ portfolioItems, onAdd, onUpdate, onDelete }: PortfolioSectionProps) {
-  const projectTypeLabels: Record<string, string> = {
-    personal: 'Personal',
-    academic: 'Academic',
-    professional: 'Professional',
-    open_source: 'Open Source',
-    freelance: 'Freelance',
+export function PortfolioSection({ portfolioItems, onAdd, onDelete }: PortfolioSectionProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    url: '',
+    repository_url: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) return;
+
+    try {
+      setSubmitting(true);
+      await onAdd({
+        title: formData.title,
+        description: formData.description || undefined,
+        url: formData.url || undefined,
+        repository_url: formData.repository_url || undefined,
+      });
+      setFormData({
+        title: '',
+        description: '',
+        url: '',
+        repository_url: '',
+      });
+      setIsAdding(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <section className="bg-white rounded-lg shadow p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Portfolio</h2>
-        <Button size="sm" onClick={() => onAdd({
-          title: '',
-          description: '',
-          project_type: 'personal',
-          media_urls: [],
-          skills_demonstrated: [],
-          is_featured: false,
-          visibility: 'public',
-          started_at: new Date().toISOString().split('T')[0],
-        })}>
-          Add Project
-        </Button>
+    <Card className="p-6 sm:p-8 border-slate-200/80 shadow-sm mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+            <FolderGit2 className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Featured Projects & Portfolio</h2>
+            <p className="text-xs text-slate-500">Open-source contributions, web applications, and repositories</p>
+          </div>
+        </div>
+        {!isAdding && (
+          <Button size="sm" variant="outline" onClick={() => setIsAdding(true)} className="gap-1.5 font-semibold">
+            <Plus className="h-4 w-4" />
+            Add Project
+          </Button>
+        )}
       </div>
-      
-      {portfolioItems.length === 0 ? (
-        <p className="text-sm text-gray-500">No portfolio items added yet.</p>
+
+      {isAdding && (
+        <form onSubmit={handleSubmit} className="mb-6 p-5 sm:p-6 border border-indigo-100 bg-indigo-50/40 rounded-2xl space-y-4">
+          <h3 className="text-sm font-bold text-slate-900">Add New Project</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Project Title *</label>
+              <Input
+                required
+                placeholder="e.g. Distributed Task Queue, AI Code Reviewer"
+                value={formData.title}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Live Application URL</label>
+              <Input
+                placeholder="https://myproject.app"
+                value={formData.url}
+                onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Repository / Source URL</label>
+              <Input
+                placeholder="https://github.com/username/project"
+                value={formData.repository_url}
+                onChange={(e) => setFormData(prev => ({ ...prev, repository_url: e.target.value }))}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Project Overview & Architecture</label>
+              <textarea
+                rows={3}
+                className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                placeholder="Describe key design patterns, technical challenges overcome, and scale metrics..."
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setIsAdding(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" variant="primary" disabled={submitting}>
+              {submitting ? 'Saving...' : 'Save Project'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {portfolioItems.length === 0 && !isAdding ? (
+        <p className="text-sm text-slate-500 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          No portfolio projects featured yet. Add your flagship projects to stand out to hiring managers.
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {portfolioItems.map((item) => (
-            <Card key={item.id} className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium text-gray-900">{item.title}</h3>
-                {item.is_featured && (
-                  <Badge variant="success" size="small">Featured</Badge>
+            <div
+              key={item.id}
+              className="p-5 rounded-2xl border border-slate-200/80 bg-slate-50/40 hover:bg-slate-50/80 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-slate-900 text-base">{item.title}</h3>
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    className="text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                    aria-label="Delete project"
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                {item.description && (
+                  <p className="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed line-clamp-3">
+                    {item.description}
+                  </p>
                 )}
               </div>
-              <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="default" size="small">
-                  {projectTypeLabels[item.project_type] || item.project_type}
-                </Badge>
-                <Badge variant={item.visibility === 'public' ? 'success' : 'default'} size="small">
-                  {item.visibility}
-                </Badge>
-              </div>
-              {item.skills_demonstrated.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {item.skills_demonstrated.slice(0, 5).map((skill, idx) => (
-                    <Badge key={idx} variant="default" size="small">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              <div className="flex gap-2 mt-3">
+              
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-200/60 text-xs">
                 {item.url && (
-                  <a 
-                    href={item.url} 
-                    target="_blank" 
+                  <a
+                    href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+                    className="inline-flex items-center gap-1.5 font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
                   >
-                    View Project
+                    <Globe className="h-3.5 w-3.5" />
+                    Live Demo
                   </a>
                 )}
                 {item.repository_url && (
-                  <a 
-                    href={item.repository_url} 
-                    target="_blank" 
+                  <a
+                    href={item.repository_url.startsWith('http') ? item.repository_url : `https://${item.repository_url}`}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+                    className="inline-flex items-center gap-1.5 font-semibold text-slate-700 hover:text-slate-900 transition-colors"
                   >
-                    Repository
+                    <Code2 className="h-3.5 w-3.5" />
+                    Source Code
                   </a>
                 )}
-                <button
-                  onClick={() => onDelete(item.id)}
-                  className="text-red-600 hover:text-red-800 text-sm ml-auto"
-                  aria-label="Delete portfolio item"
-                >
-                  Delete
-                </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
-    </section>
+    </Card>
   );
 }

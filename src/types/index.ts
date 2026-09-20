@@ -36,10 +36,13 @@ export interface User {
 }
 
 export interface CandidateProfile {
+  id?: string;
   user_id: string;
   headline?: string;
   bio?: string;
+  summary?: string;
   location?: string;
+  avatar_url?: string;
   timezone?: string;
   availability_status: 'available' | 'employed' | 'open_to_work' | 'not_interested';
   xp_points: number;
@@ -175,13 +178,17 @@ export interface Job {
   employer_id: string;
   title: string;
   description: string;
+  responsibilities?: string[];
   requirements: string[];
   nice_to_have: string[];
   required_skills: string[];
   preferred_skills: string[];
+  application_count?: number;
   job_type: JobType;
   work_mode: WorkMode;
   location?: string;
+  location_city?: string | null;
+  location_country?: string | null;
   salary_min?: number;
   salary_max?: number;
   currency: string;
@@ -733,12 +740,17 @@ export interface JobListing extends Job {
     name: string;
     logo_url?: string;
     industry?: string;
+    description?: string;
+    website?: string;
+    size?: string;
   };
   posted_by?: {
     id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    avatar_url?: string;
   };
   skills?: Array<{
     id: string;
@@ -746,7 +758,9 @@ export interface JobListing extends Job {
     category?: string;
   }>;
   applications_count?: number;
+  application_count?: number;
   is_bookmarked?: boolean;
+  is_featured?: boolean;
 }
 
 export interface JobFilters {

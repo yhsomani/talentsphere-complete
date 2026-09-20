@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default async function DashboardPage() {
@@ -49,6 +50,7 @@ export default async function DashboardPage() {
       userName={fullName}
       userAvatar={avatarUrl}
       notificationCount={0}
+      userXp={xpPoints}
     >
       <div className="space-y-6">
         {/* Welcome Section */}
@@ -147,7 +149,7 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {userRole === 'candidate' ? (
               <>
-                <a
+                <Link
                   href="/candidates/profile"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -160,9 +162,9 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Complete Profile</p>
                     <p className="text-sm text-gray-500">Add your skills & experience</p>
                   </div>
-                </a>
+                </Link>
                 
-                <a
+                <Link
                   href="/jobs"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -175,10 +177,25 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Browse Jobs</p>
                     <p className="text-sm text-gray-500">Find your dream role</p>
                   </div>
-                </a>
+                </Link>
+
+                <Link
+                  href="/applications"
+                  className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                    <svg className="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">My Applications</p>
+                    <p className="text-sm text-gray-500">Track interview progress</p>
+                  </div>
+                </Link>
                 
-                <a
-                  href="/assessments"
+                <Link
+                  href="/challenges"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
@@ -190,11 +207,11 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Code Arena</p>
                     <p className="text-sm text-gray-500">Prove your skills</p>
                   </div>
-                </a>
+                </Link>
               </>
             ) : (
               <>
-                <a
+                <Link
                   href="/jobs/post"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -207,9 +224,9 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Post a Job</p>
                     <p className="text-sm text-gray-500">Create new listing</p>
                   </div>
-                </a>
+                </Link>
                 
-                <a
+                <Link
                   href="/candidates"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -222,9 +239,9 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Find Candidates</p>
                     <p className="text-sm text-gray-500">Browse talent pool</p>
                   </div>
-                </a>
+                </Link>
                 
-                <a
+                <Link
                   href="/company"
                   className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -237,7 +254,7 @@ export default async function DashboardPage() {
                     <p className="font-medium text-gray-900">Company Profile</p>
                     <p className="text-sm text-gray-500">Manage your page</p>
                   </div>
-                </a>
+                </Link>
               </>
             )}
           </div>
@@ -257,12 +274,12 @@ export default async function DashboardPage() {
                 <p className="text-blue-700 mt-1">
                   Profiles with complete information receive 5x more interview requests. Add your skills, experience, and upload your resume to get started.
                 </p>
-                <a
+                <Link
                   href="/candidates/profile"
                   className="inline-flex items-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                   Complete Profile →
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -292,12 +309,12 @@ export default async function DashboardPage() {
                 <p className="text-sm text-yellow-700 mt-1">
                   Add your headline, location, and skills to increase your visibility to employers by 10x.
                 </p>
-                <a
+                <Link
                   href="/candidates/profile"
                   className="inline-block mt-3 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
                 >
                   Complete Profile →
-                </a>
+                </Link>
               </div>
             </div>
           </div>

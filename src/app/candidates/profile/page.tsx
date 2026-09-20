@@ -13,7 +13,6 @@ import { useAuth } from '@/hooks';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui';
 import { useCandidateProfile } from '@/features/candidates/hooks/useCandidateProfile';
-import type { Experience, Education, Certification, PortfolioItem } from '@/types';
 import { ProfileHeader } from './components/ProfileHeader';
 import { ProfileForm } from './components/ProfileForm';
 import { SkillsSection } from './components/SkillsSection';
@@ -24,7 +23,6 @@ import { PortfolioSection } from './components/PortfolioSection';
 import { LoadingState } from './components/LoadingState';
 import { ErrorBanner } from './components/ErrorBanner';
 import { SuccessBanner } from './components/SuccessBanner';
-import styles from './CandidateProfilePage.module.css';
 
 export default function CandidateProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -38,6 +36,7 @@ export default function CandidateProfilePage() {
     success,
     formData,
     skills,
+    newSkill,
     experiences,
     educations,
     certifications,
@@ -62,7 +61,7 @@ export default function CandidateProfilePage() {
     );
   }
 
-  // Show error state
+  // Show error state if profile failed completely and no profile object
   if (error && !profile) {
     return (
       <DashboardLayout userRole="candidate" userName="Error">
@@ -74,28 +73,27 @@ export default function CandidateProfilePage() {
   const meta = user?.user_metadata as Record<string, unknown> | undefined;
   const firstName = typeof meta?.first_name === 'string' ? meta.first_name : '';
   const lastName = typeof meta?.last_name === 'string' ? meta.last_name : '';
-  const userName = `${firstName} ${lastName}`.trim() || 'Candidate';
+  const fullName = typeof meta?.full_name === 'string' ? meta.full_name : `${firstName} ${lastName}`.trim();
+  const userName = fullName || user?.email?.split('@')[0] || 'Candidate';
+  const avatarUrl = profile?.avatar_url || (meta?.avatar_url as string | undefined);
 
   return (
-    <DashboardLayout userRole="candidate" userName={userName} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Candidate Profile</h1>
-          <p className={styles.subtitle}>
-            Complete your profile to increase visibility to recruiters
-          </p>
-        </header>
-
+    <DashboardLayout userRole="candidate" userName={userName} userAvatar={avatarUrl}>
+      <div className="max-w-5xl mx-auto space-y-6">
         {error && <ErrorBanner message={error} onDismiss={clearError} />}
         {success && <SuccessBanner message={success} onDismiss={clearSuccess} />}
 
         <ProfileHeader
-          avatarUrl={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}
+          avatarUrl={avatarUrl}
+          userName={userName}
+          headline={formData.headline || 'Software Engineer'}
+          location={formData.location}
+          availability={formData.availability_status}
           onAvatarUpload={uploadAvatar}
           uploading={saving}
         />
 
-        <main className={styles.main}>
+        <main className="space-y-6">
           <ProfileForm
             formData={formData}
             onChange={updateFormData}
@@ -109,46 +107,49 @@ export default function CandidateProfilePage() {
             skills={skills}
             onAddSkill={addSkill}
             onRemoveSkill={removeSkill}
+            newSkill={newSkill}
             setNewSkill={setNewSkill}
           />
 
           <ExperienceSection
             experiences={experiences}
-            onAdd={(exp) => profileHook.addExperience(exp as unknown as Omit<Experience, 'id' | 'candidate_id' | 'created_at' | 'verified' | 'verified_by'>)}
-            onUpdate={(id, updates) => profileHook.updateExperience(id, updates)}
-            onDelete={(id) => profileHook.deleteExperience(id)}
+            onAdd={profileHook.addExperience}
+            onUpdate={profileHook.updateExperience}
+            onDelete={profileHook.deleteExperience}
           />
 
           <EducationSection
             educations={educations}
-            onAdd={(edu) => profileHook.addEducation(edu as unknown as Omit<Education, 'id' | 'candidate_id' | 'created_at'>)}
-            onDelete={(id) => profileHook.deleteEducation(id)}
+            onAdd={profileHook.addEducation}
+            onDelete={profileHook.deleteEducation}
           />
 
           <CertificationsSection
             certifications={certifications}
-            onAdd={(cert) => profileHook.addCertification(cert as unknown as Omit<Certification, 'id' | 'candidate_id' | 'created_at'>)}
-            onDelete={(id) => profileHook.deleteCertification(id)}
+            onAdd={profileHook.addCertification}
+            onDelete={profileHook.deleteCertification}
           />
 
           <PortfolioSection
             portfolioItems={portfolioItems}
-            onAdd={(item) => profileHook.addPortfolioItem(item as unknown as Omit<PortfolioItem, 'id' | 'candidate_id' | 'created_at' | 'updated_at'>)}
-            onUpdate={(id, updates) => profileHook.updatePortfolioItem(id, updates)}
-            onDelete={(id) => profileHook.deletePortfolioItem(id)}
+            onAdd={profileHook.addPortfolioItem}
+            onUpdate={profileHook.updatePortfolioItem}
+            onDelete={profileHook.deletePortfolioItem}
           />
         </main>
 
-        <footer className={styles.footer}>
+        <div className="pt-6 border-t border-slate-200/80 flex items-center justify-end">
           <Button
             variant="primary"
             size="lg"
             onClick={saveProfile}
             disabled={saving}
+            isLoading={saving}
+            className="shadow-md shadow-indigo-500/20"
           >
-            {saving ? 'Saving...' : 'Save Profile'}
+            Save All Profile Changes
           </Button>
-        </footer>
+        </div>
       </div>
     </DashboardLayout>
   );

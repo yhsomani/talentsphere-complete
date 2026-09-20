@@ -27,11 +27,11 @@ export const jobService = {
             logo_url,
             industry
           ),
-          users (
+          users:users!employer_id (
             id,
-            first_name,
-            last_name,
-            email
+            full_name,
+            email,
+            avatar_url
           )
         `, { count: 'exact' });
 
@@ -81,8 +81,56 @@ export const jobService = {
 
       if (error) throw error;
 
+      // Extract all skill IDs across the returned jobs to fetch names in a single batch
+      const allSkillIds = new Set<string>();
+      (data || []).forEach((job: Record<string, unknown>) => {
+        if (Array.isArray(job.required_skills)) {
+          job.required_skills.forEach((id: unknown) => {
+            if (typeof id === 'string') allSkillIds.add(id);
+          });
+        }
+        if (Array.isArray(job.preferred_skills)) {
+          job.preferred_skills.forEach((id: unknown) => {
+            if (typeof id === 'string') allSkillIds.add(id);
+          });
+        }
+      });
+
+      const skillMap = new Map<string, { id: string; name: string; category?: string }>();
+      if (allSkillIds.size > 0) {
+        const { data: skillsData } = await supabase
+          .from('skills')
+          .select('id, name, category')
+          .in('id', Array.from(allSkillIds));
+        (skillsData || []).forEach((s) => skillMap.set(s.id, s));
+      }
+
+      const jobsWithSkills = (data || []).map((job: Record<string, unknown>) => {
+        const u = job.users as { id: string; full_name?: string; email?: string; avatar_url?: string } | null;
+        const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
+        const lastName = rest.join(' ');
+        return {
+          ...job,
+          posted_by: u ? {
+            id: u.id,
+            full_name: u.full_name || '',
+            first_name: firstName,
+            last_name: lastName,
+            email: u.email || '',
+            avatar_url: u.avatar_url || '',
+          } : undefined,
+          skills: [
+            ...(Array.isArray(job.required_skills)
+              ? job.required_skills
+                  .map((id: unknown) => (typeof id === 'string' ? skillMap.get(id) : null))
+                  .filter(Boolean)
+              : [])
+          ]
+        };
+      });
+
       return {
-        jobs: (data || []) as unknown as JobListing[],
+        jobs: jobsWithSkills as unknown as JobListing[],
         total: count || 0,
         page,
         limit,
@@ -112,18 +160,49 @@ export const jobService = {
             website,
             size
           ),
-          users (
+          users:users!employer_id (
             id,
-            first_name,
-            last_name,
-            email
+            full_name,
+            email,
+            avatar_url
           )
         `)
         .eq('id', jobId)
         .single();
 
       if (error) throw error;
-      return data as unknown as JobListing;
+
+      // Resolve skill names from required_skills and preferred_skills
+      let skillsList: Array<{ id: string; name: string; category?: string }> = [];
+      const skillIds = [
+        ...(Array.isArray(data.required_skills) ? data.required_skills : []),
+        ...(Array.isArray(data.preferred_skills) ? data.preferred_skills : []),
+      ].filter((id: unknown): id is string => typeof id === 'string');
+
+      if (skillIds.length > 0) {
+        const { data: skillsData } = await supabase
+          .from('skills')
+          .select('id, name, category')
+          .in('id', skillIds);
+        skillsList = skillsData || [];
+      }
+
+      const u = data.users as { id: string; full_name?: string; email?: string; avatar_url?: string } | null;
+      const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
+      const lastName = rest.join(' ');
+
+      return {
+        ...data,
+        posted_by: u ? {
+          id: u.id,
+          full_name: u.full_name || '',
+          first_name: firstName,
+          last_name: lastName,
+          email: u.email || '',
+          avatar_url: u.avatar_url || '',
+        } : undefined,
+        skills: skillsList,
+      } as unknown as JobListing;
     } catch (error) {
       console.error('Error fetching job:', error);
       throw error;
@@ -301,7 +380,7 @@ export const jobService = {
       const { data, error } = await supabase
         .from('jobs')
         .select('location_city')
-        .eq('status', 'published')
+        .in('status', ['active', 'published'])
         .not('location_city', 'is', null);
 
       if (error) throw error;

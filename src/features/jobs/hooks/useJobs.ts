@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jobService } from '@/services/jobs.service';
+import { createBrowserClient } from '@/lib/supabase';
 import type { Job, JobListing, JobFilters, JobStatus } from '@/types';
+
+const supabase = createBrowserClient();
 
 interface UseJobsOptions {
   initialFilters?: JobFilters;
@@ -124,12 +127,14 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
   // Bookmark actions
   const bookmarkJob = useCallback(async (jobId: string) => {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) {
+        throw new Error('Please sign in to save jobs');
+      }
+
       // Optimistic update
       setBookmarkedIds(prev => new Set(prev).add(jobId));
-      
-      // In a real app, you'd get userId from auth context
-      const userId = 'current-user-id'; // TODO: Get from auth
-      await jobService.bookmarkJob(jobId, userId);
+      await jobService.bookmarkJob(jobId, authData.user.id);
     } catch (err) {
       // Revert on error
       setBookmarkedIds(prev => {
@@ -138,11 +143,17 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
         return next;
       });
       console.error('Failed to bookmark job:', err);
+      throw err;
     }
   }, []);
 
   const removeBookmark = useCallback(async (jobId: string) => {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) {
+        throw new Error('Please sign in to modify saved jobs');
+      }
+
       // Optimistic update
       setBookmarkedIds(prev => {
         const next = new Set(prev);
@@ -150,12 +161,12 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
         return next;
       });
       
-      const userId = 'current-user-id'; // TODO: Get from auth
-      await jobService.removeBookmark(jobId, userId);
+      await jobService.removeBookmark(jobId, authData.user.id);
     } catch (err) {
       // Revert on error
       setBookmarkedIds(prev => new Set(prev).add(jobId));
       console.error('Failed to remove bookmark:', err);
+      throw err;
     }
   }, []);
 
@@ -224,7 +235,20 @@ export function useJob(jobId: string | undefined) {
         
         const data = await jobService.getJobById(jobId);
         setJob(data);
-        setIsBookmarked(data.is_bookmarked ?? false);
+
+        // Check if bookmarked by current user
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData?.user) {
+          const { data: bookmarkData } = await supabase
+            .from('job_bookmarks')
+            .select('id')
+            .eq('job_id', jobId)
+            .eq('user_id', authData.user.id)
+            .maybeSingle();
+          setIsBookmarked(Boolean(bookmarkData));
+        } else {
+          setIsBookmarked(false);
+        }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to load job'));
         console.error('useJob: Error loading job:', err);
@@ -239,26 +263,32 @@ export function useJob(jobId: string | undefined) {
   const bookmark = async () => {
     if (!jobId) return;
     
-    setIsBookmarked(true);
-    const userId = 'current-user-id'; // TODO: Get from auth
     try {
-      await jobService.bookmarkJob(jobId, userId);
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) throw new Error('Please sign in to save jobs');
+
+      setIsBookmarked(true);
+      await jobService.bookmarkJob(jobId, authData.user.id);
     } catch (err) {
       setIsBookmarked(false);
       console.error('Failed to bookmark job:', err);
+      throw err;
     }
   };
 
   const removeBookmark = async () => {
     if (!jobId) return;
     
-    setIsBookmarked(false);
-    const userId = 'current-user-id'; // TODO: Get from auth
     try {
-      await jobService.removeBookmark(jobId, userId);
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) throw new Error('Please sign in to modify bookmarks');
+
+      setIsBookmarked(false);
+      await jobService.removeBookmark(jobId, authData.user.id);
     } catch (err) {
       setIsBookmarked(true);
       console.error('Failed to remove bookmark:', err);
+      throw err;
     }
   };
 

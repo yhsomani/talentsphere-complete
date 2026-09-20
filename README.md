@@ -162,10 +162,100 @@ talentsphere/
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server |
+| `npm run dev` | Start development server (Turbopack) |
 | `npm run build` | Create production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests (Node.js test runner) |
+| `npx tsc --noEmit` | TypeScript type checking |
+| `npx playwright test` | Run E2E browser tests |
+
+## Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed documentation on:
+- Folder structure and organization
+- Separation of concerns
+- Data flow
+- Security (RLS, proxy)
+- Deployment
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [docs/PRD.md](./docs/PRD.md) | Product Requirements Document |
+| [docs/DESIGN.md](./docs/DESIGN.md) | Design System |
+| [docs/RULES.md](./docs/RULES.md) | Development Rules |
+| [docs/DECISIONS.md](./docs/DECISIONS.md) | Architecture Decision Records |
+| [docs/SECURITY.md](./docs/SECURITY.md) | Security Requirements |
+| [docs/TEST_PLAN.md](./docs/TEST_PLAN.md) | Test Plan |
+| [docs/MEMORY.md](./docs/MEMORY.md) | Project State |
+| [TASKS.md](./TASKS.md) | Task Breakdown |
+
+## Implementation Status
+
+### ✅ Build & Quality
+- ✅ Production build passes (0 errors) — `npm run build`
+- ✅ TypeScript check passes (0 errors) — `npx tsc --noEmit`
+- ✅ All 17 unit tests pass — `npm test`
+- ✅ Database connected (46 tables, 8 migration files)
+- ✅ Next.js 16 proxy (migrated from deprecated middleware)
+
+### ✅ Authentication
+- Sign-in, Sign-up, Password Reset, Email Verify pages
+- Route protection via proxy.ts
+- Role-based dashboard (Candidate / Recruiter)
+
+### ✅ Candidate Features
+- Job Board with search and filters
+- Job Detail page with Apply modal
+- Application Tracker (list + detail)
+- Code Arena (Challenge list + Solver)
+- LMS Courses (list + detail + lesson player)
+- Leaderboard
+- Messages
+- Notifications
+- Settings
+- Profile page
+
+### ✅ Recruiter Features
+- Post new jobs
+- View applications
+- Candidate directory
+
+### ⏳ Planned
+- OAuth buttons (Google/GitHub) — currently disabled stubs
+- Real-time messaging subscriptions
+- Admin panel
+- Company profile pages
+- Resume uploads
+- E2E test execution (Playwright configured, needs test user)
+
+## Key Architecture Decisions
+
+1. **Modular Monolith** - Single codebase with clear feature boundaries
+2. **Server-First** - Next.js Server Components where possible
+3. **RLS Authorization** - Row-Level Security as the primary security boundary
+4. **Thin Page Files** - `app/**/page.tsx` are entry points only; logic in `features/`
+5. **Service Layer** - All Supabase calls encapsulated in `services/*.service.ts`
+
+## Contributing
+
+1. Read `docs/RULES.md` before making any changes
+2. Create a feature branch: `feature/<name>` or `fix/<name>`
+3. Make small, atomic commits with conventional format
+4. Run `npm test && npm run lint && npm run build` before pushing
+5. Submit a pull request with description of changes
+
+## License
+
+Proprietary - All rights reserved
+
+---
+
+**TalentSphere v0.1.0** — The Unified Talent Operating System  
+*Next.js 16 · TypeScript · Tailwind CSS v4 · Supabase · Vercel*
+
 
 ## Architecture
 

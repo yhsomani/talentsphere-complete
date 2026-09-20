@@ -13,21 +13,43 @@ import { AppConfig } from '@/config';
 // For client-side operations
 // ============================================================================
 
+let browserClientInstance: ReturnType<typeof createClient> | null = null;
+
 export function createBrowserClient() {
-  return createClient(
-    AppConfig.supabase.url,
-    AppConfig.supabase.anonKey,
-    {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-      },
-      db: {
-        schema: 'public',
-      },
-    }
-  );
+  if (typeof window === 'undefined') {
+    return createClient(
+      AppConfig.supabase.url,
+      AppConfig.supabase.anonKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+        db: {
+          schema: 'public',
+        },
+      }
+    );
+  }
+
+  if (!browserClientInstance) {
+    browserClientInstance = createClient(
+      AppConfig.supabase.url,
+      AppConfig.supabase.anonKey,
+      {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+        db: {
+          schema: 'public',
+        },
+      }
+    );
+  }
+
+  return browserClientInstance;
 }
 
 // ============================================================================

@@ -1,0 +1,42 @@
+---
+description: Frontend / UI rules for React and Tailwind CSS
+globs:
+  - "**/*.tsx"
+  - "src/components/**"
+  - "src/features/**"
+---
+
+# Frontend Rules
+
+## Component Architecture
+- Server Components by default (no 'use client' unless needed)
+- Add 'use client' for: event handlers, hooks, browser APIs, zustand
+- Thin page.tsx files — import from features/
+
+## UI Components
+- Always use components from `src/components/ui/index.tsx`
+- Use `cn()` for conditional class merging
+- Never hardcode colors — use Tailwind utilities
+
+## Required States
+Every data-fetching component must handle:
+1. Loading state — use Skeleton component
+2. Empty state — use EmptyState component  
+3. Error state — show error message + retry button
+
+## Design System (from DESIGN.md)
+- Primary: `bg-indigo-600` / `text-indigo-600`
+- Cards: `bg-white rounded-2xl border border-slate-200 shadow-sm p-6`
+- Buttons: Use Button component from UI (not raw buttons for CTAs)
+- Border radius: `rounded-xl` for inputs, `rounded-2xl` for cards
+
+## Accessibility
+- All icon-only buttons must have `aria-label`
+- All interactive elements must have visible focus rings
+- Use semantic HTML (button vs div, nav, main, header)
+- Min touch target: 44×44px
+
+## Mobile First
+- Test at 375px, 768px, 1280px
+- Mobile hamburger menu in DashboardLayout (already implemented)
+- Use responsive Tailwind prefixes: sm:, md:, lg:, xl:

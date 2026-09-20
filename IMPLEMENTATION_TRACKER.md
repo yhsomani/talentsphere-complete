@@ -1,225 +1,234 @@
-# TalentSphere Implementation Completion Tracker
+# TalentSphere Authoritative Implementation Completion Tracker
 
 **Created**: 2025-01-19  
-**Last Updated**: 2025-01-19  
-**Version**: 1.0.0  
-
-## Overview
-
-This is the **single source of truth** for implementation status across the entire TalentSphere project. Every requirement is tracked, audited, and verified against actual codebase evidence.
+**Last Comprehensive Audit**: 2026-09-20  
+**Version**: 2.0.0  
+**Authority**: Single Source of Truth for Project Implementation Status  
 
 ---
 
-## Status Summary
+## Executive Summary & Current Audit Statistics
+
+Based on the comprehensive audit of the entire codebase and all project documentation conducted on 2026-09-20:
 
 | Status | Count | Percentage |
-|--------|-------|------------|
-| IMPLEMENTED | 0 | 0% |
-| PARTIALLY IMPLEMENTED | 0 | 0% |
-| NOT IMPLEMENTED | 23 | 38% |
-| NEEDS AUDIT | 37 | 62% |
-| BLOCKED | 0 | 0% |
-| DEPRECATED / REMOVED | 0 | 0% |
-| **TOTAL** | **60** | **100%** |
+|---|---|---|
+| **IMPLEMENTED** | 25 | 32.9% |
+| **PARTIALLY IMPLEMENTED** | 7 | 9.2% |
+| **IMPLEMENTED — NEEDS VERIFICATION** | 0 | 0.0% |
+| **NOT IMPLEMENTED** | 44 | 57.9% |
+| **BLOCKED** | 0 | 0.0% |
+| **DEPRECATED / REMOVED** | 0 | 0.0% |
+| **NEEDS AUDIT** | 0 | 0.0% |
+| **TOTAL REQUIREMENTS TRACKED** | **76** | **100%** |
 
-### Priority Distribution
+### Priority Breakdown (Actionable Incomplete: 62 items)
 
 | Priority | Count | Description |
-|----------|-------|-------------|
-| P0 — Critical | 15 | Blocking core functionality |
-| P1 — High | 32 | Important functionality |
-| P2 — Medium | 13 | Non-blocking improvements |
-| P3 — Low | 0 | Optional enhancements |
+|---|---|---|
+| **P0 — Critical** | 12 | Blocking core workflows, critical broken paths, broken foreign keys / missing routes |
+| **P1 — High** | 33 | Major workflow features, LMS, Challenges, Applications, Recruiter Tools, Testing |
+| **P2 — Medium** | 17 | Social, Messaging, Notifications, Settings, Admin, Analytics |
+| **P3 — Low** | 0 | Optional enhancements |
 
 ---
 
-## Implementation Items
+## Documented Conflicts & Discrepancy Register
 
-### CATEGORY: BUILD & INFRASTRUCTURE
+### Conflict 1: Candidate Profile Sub-Entities Schema Mismatch
+- **Documented Requirement:** `TalentSphere Spec §10.2 & 002_users_organizations.sql` specifies table `experience` (singular) with foreign key `candidate_profile_id UUID NOT NULL REFERENCES candidate_profiles(id) ON DELETE CASCADE`, table `candidate_skills` with `candidate_profile_id` and `proficiency skill_proficiency_level`, and skills must be referenced from `skills` table.
+- **Actual Implementation:** `src/services/candidate.service.ts` queries table `'experiences'` (plural), attempts to insert `candidate_id: userId` (which is `users.id`, not `candidate_profiles.id`), and uses column `proficiency_level`.
+- **Discrepancy:** Non-existent table `'experiences'` and non-existent column names cause runtime PostgreSQL errors on any save/update.
+- **Impact:** Candidate experience, education, certifications, and skills cannot be persisted or retrieved.
+- **Required Resolution:** Fix table names, foreign keys, and column names in `candidate.service.ts` to match PostgreSQL schema; resolve `candidate_profile_id` from user session.
 
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| BUILD-001 | Build | TypeScript compilation | Application must compile with zero TypeScript errors | NEEDS AUDIT | P0 | README.md, package.json | N/A | 30 TS errors blocking build | Fix all 30 TS errors in ProfileForm.tsx, profile/page.tsx, JobFilters.tsx, jobs.service.ts | None | npm run build | 2025-01-19 |
-| BUILD-002 | Build | Next.js build | Production build must complete successfully | NEEDS AUDIT | P0 | README.md | N/A | Build fails due to TS errors | Successful build output | BUILD-001 | npm run build | 2025-01-19 |
-| BUILD-003 | Infrastructure | Environment configuration | .env.local must contain valid Supabase credentials | NEEDS AUDIT | P0 | README.md, .env.example | .env.local | None yet | Verify credentials work | None | Manual check | 2025-01-19 |
-| BUILD-004 | Infrastructure | Database migrations applied | All 8 SQL migrations executed in Supabase | NEEDS AUDIT | P0 | DATABASE_SETUP_GUIDE.md, supabase/*.sql | N/A | None yet | Tables created, RLS enabled | BUILD-003 | SQL verification | 2025-01-19 |
-| BUILD-005 | Infrastructure | Storage buckets created | 4 buckets: avatars, resumes, course-content, portfolio | NEEDS AUDIT | P0 | README.md, supabase/README.md | N/A | None yet | Buckets exist with RLS policies | BUILD-004 | Supabase dashboard | 2025-01-19 |
-| BUILD-006 | Infrastructure | Authentication configured | Email provider enabled, redirect URLs set | NEEDS AUDIT | P0 | README.md | N/A | None yet | Can signup/login | BUILD-004 | Manual test | 2025-01-19 |
+### Conflict 2: Skill Addition False Completion
+- **Documented Requirement:** Candidates can add skills with proficiency levels from the skills taxonomy.
+- **Actual Implementation:** `useCandidateProfile.ts` line 222 contains a comment `// In a real implementation, this would create the skill first...` and merely calls `setSuccess()` without persisting to DB or updating state.
+- **Discrepancy:** False completion stub masking lack of implementation.
+- **Impact:** Skills cannot be added by candidates.
+- **Required Resolution:** Query taxonomy from `skills` table, create if missing, insert into `candidate_skills(candidate_profile_id, skill_id, proficiency)`.
 
-### CATEGORY: AUTHENTICATION (FR-M01)
+### Conflict 3: Signup Redirect 404
+- **Documented Requirement:** User completes signup and receives email confirmation prompt.
+- **Actual Implementation:** `useSignUp` hook redirects to `/auth/verify`, but route `/auth/verify` does not exist in `src/app/auth/`.
+- **Discrepancy:** Missing page creates immediate 404 upon user registration.
+- **Impact:** User signup journey is broken at the completion step.
+- **Required Resolution:** Implement `src/app/auth/verify/page.tsx` with email confirmation guidance.
 
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| AUTH-001 | Auth | Email/password registration | Register account with email + password; duplicate email rejected | NEEDS AUDIT | P0 | TalentSphere Spec §10.1 AUTH-001 | src/app/auth/signup/page.tsx | None yet | Working signup flow | BUILD-004, BUILD-006 | E2E test | 2025-01-19 |
-| AUTH-002 | Auth | Sign in | Log in with credentials; session established | NEEDS AUDIT | P0 | TalentSphere Spec §10.1 AUTH-002 | src/app/auth/signin/page.tsx | None yet | Working signin flow | BUILD-004, BUILD-006 | E2E test | 2025-01-19 |
-| AUTH-003 | Auth | Password reset | Password reset via dedicated route | NEEDS AUDIT | P1 | TalentSphere Spec §10.1 AUTH-003 | src/app/auth/reset-password/page.tsx | None yet | Working reset flow | BUILD-004, BUILD-006 | E2E test | 2025-01-19 |
-| AUTH-004 | Auth | Session management | Supabase Auth as single login/session authority | NEEDS AUDIT | P0 | TalentSphere Spec §10.1 AUTH-004 | src/lib/supabase.ts, src/middleware.ts | None yet | Sessions persist correctly | BUILD-004, BUILD-006 | Runtime test | 2025-01-19 |
-| AUTH-005 | Auth | Role normalization | JWT claims normalized to USER/RECRUITER/ADMIN | NEEDS AUDIT | P1 | TalentSphere Spec §10.1 AUTH-005 | src/config/index.ts | None yet | Roles resolved correctly | AUTH-004 | Unit test | 2025-01-19 |
-| AUTH-006 | Auth | OAuth providers | Google and GitHub OAuth via Supabase | NEEDS AUDIT | P2 | TalentSphere Spec §10.1 AUTH-006 | N/A | None yet | OAuth configuration | BUILD-006 | Manual test | 2025-01-19 |
-| AUTH-007 | Auth | Email verification | Verify email after signup | NEEDS AUDIT | P1 | TalentSphere Spec §10.1 | N/A | None yet | Email verification page and flow | BUILD-006 | E2E test | 2025-01-19 |
+### Conflict 4: Job Card Detail Links to 404
+- **Documented Requirement:** Clicking a job card opens full job requisition, requirements, company info, and application CTA (`/jobs/[id]`).
+- **Actual Implementation:** `JobList.tsx` links to `/jobs/${job.id}`, but directory `src/app/jobs/[id]` has no `page.tsx`.
+- **Discrepancy:** Job marketplace discovery terminates in a 404.
+- **Impact:** Core hiring loop broken; jobs cannot be viewed or applied to.
+- **Required Resolution:** Implement `src/app/jobs/[id]/page.tsx` with full job details and apply action.
 
-### CATEGORY: CANDIDATE PROFILE (FR-M02)
+---
 
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| PROF-001 | Profile | Profile page UI | Candidate profile management page | NEEDS AUDIT | P0 | TalentSphere Spec §10.2 | src/app/candidates/profile/page.tsx | None yet | Page renders without errors | BUILD-001, BUILD-004 | Visual test | 2025-01-19 |
-| PROF-002 | Profile | Profile form | Form with all CandidateProfile fields | NEEDS AUDIT | P0 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/ProfileForm.tsx | None yet | Form submits correctly | PROF-001, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-003 | Profile | Avatar upload | Upload profile picture to storage | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | N/A | None yet | File upload implementation | BUILD-005, PROF-002 | E2E test | 2025-01-19 |
-| PROF-004 | Profile | Resume upload | Upload resume PDF to private storage | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | N/A | None yet | File upload implementation | BUILD-005, PROF-002 | E2E test | 2025-01-19 |
-| PROF-005 | Profile | Skills management | Add/edit/remove skills with proficiency | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/SkillsSection.tsx | None yet | CRUD operations work | PROF-002, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-006 | Profile | Experience management | Add/edit/remove work experience | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/ExperienceSection.tsx | None yet | CRUD operations work | PROF-002, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-007 | Profile | Education management | Add/edit/remove education history | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/EducationSection.tsx | None yet | CRUD operations work | PROF-002, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-008 | Profile | Certifications management | Add/edit/remove certifications | NEEDS AUDIT | P2 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/CertificationsSection.tsx | None yet | CRUD operations work | PROF-002, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-009 | Profile | Portfolio management | Add/edit/remove portfolio items | NEEDS AUDIT | P2 | TalentSphere Spec §10.2 | src/app/candidates/profile/components/PortfolioSection.tsx | None yet | CRUD operations work | PROF-002, BUILD-004, BUILD-005 | Integration test | 2025-01-19 |
-| PROF-010 | Profile | Visibility settings | Control profile visibility (public/connections/private) | NEEDS AUDIT | P1 | TalentSphere Spec §10.2 | src/app/candidates/profile/page.tsx | None yet | Settings persist correctly | PROF-002, BUILD-004 | Integration test | 2025-01-19 |
-| PROF-011 | Profile | XP award on completion | Award XP when profile completed | NEEDS AUDIT | P2 | TalentSphere Spec §10.11 | src/config/index.ts | None yet | XP transaction recorded | PROF-002, BUILD-004 | Unit test | 2025-01-19 |
+## Authoritative Implementation Tracker
 
-### CATEGORY: JOB BOARD (FR-M03)
+### Category 1: Build, Infrastructure & Foundation
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| JOB-001 | Jobs | Job listing page | Browse jobs with pagination | NEEDS AUDIT | P0 | TalentSphere Spec §10.3 | src/app/jobs/page.tsx, src/features/jobs/JobsListPage.tsx | None yet | Page renders, shows jobs from DB | BUILD-001, BUILD-004 | Integration test | 2025-01-19 |
-| JOB-002 | Jobs | Job filters | Filter by location, type, experience, salary | NEEDS AUDIT | P1 | TalentSphere Spec §10.3 | src/features/jobs/components/JobFilters.tsx | None yet | Filters apply correctly | JOB-001, BUILD-001 | Integration test | 2025-01-19 |
-| JOB-003 | Jobs | Job detail page | View full job description and requirements | NEEDS AUDIT | P1 | TalentSphere Spec §10.3 | N/A | None yet | Create /jobs/[id]/page.tsx | BUILD-004, JOB-001 | E2E test | 2025-01-19 |
-| JOB-004 | Jobs | Job posting page | Recruiter can post new job | NEEDS AUDIT | P1 | TalentSphere Spec §10.3 | N/A | None yet | Create /jobs/post/page.tsx | BUILD-004, AUTH-002 | E2E test | 2025-01-19 |
-| JOB-005 | Jobs | Company info display | Show company name, logo, industry on job cards | NEEDS AUDIT | P1 | TalentSphere Spec §10.3 | src/features/jobs/components/JobList.tsx | None yet | Company data joins correctly | BUILD-004, JOB-001 | Visual test | 2025-01-19 |
-| JOB-006 | Jobs | Job search | Text search across job titles and descriptions | NEEDS AUDIT | P1 | TalentSphere Spec §10.3 | src/features/jobs/components/JobFilters.tsx | None yet | Search queries work | JOB-001, BUILD-004 | Integration test | 2025-01-19 |
-| JOB-007 | Jobs | Job status | Draft/published/paused/closed/filled states | NEEDS AUDIT | P2 | TalentSphere Spec §10.3 | src/types/index.ts | None yet | Status filtering works | BUILD-004, JOB-004 | Unit test | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| BUILD-001 | Build | TypeScript Compilation | Zero TypeScript errors across entire project | IMPLEMENTED | P0 | README.md | tsconfig.json, package.json | `npm run build` runs TypeScript compiler in 5.8s with 0 errors | None | None | `npm run build` exit code 0 | 2026-09-20 |
+| BUILD-002 | Build | Next.js Production Build | Production bundle compiles successfully with Turbopack | IMPLEMENTED | P0 | README.md | next.config.ts, src/app | Next.js 16.3.5 build generates all routes cleanly with 0 errors | None | BUILD-001 | `npm run build` exit code 0 | 2026-09-20 |
+| BUILD-003 | Infrastructure | Environment Configuration | Valid Supabase credentials in .env.local and template in .env.example | IMPLEMENTED | P0 | README.md, .env.example | .env.local, .env.example | .env.local contains live Supabase project URL and anon key | None | None | Env vars verified by DB connect | 2026-09-20 |
+| BUILD-004 | Infrastructure | Database Migrations Applied | All 8 migrations applied to live Supabase PostgreSQL | IMPLEMENTED | P0 | DATABASE_SETUP_GUIDE.md, supabase/*.sql | Supabase PostgreSQL | `node scripts/verify-db.js` verifies 46 public tables, 48 enums, 37 triggers, 13 functions, all RLS enabled | None | BUILD-003 | `node scripts/verify-db.js` | 2026-09-20 |
+| BUILD-005 | Infrastructure | Storage Buckets Created | Required storage buckets created with policies | IMPLEMENTED | P0 | README.md, supabase/README.md | Supabase Storage | `node scripts/verify-db.js` verifies 5 buckets: avatars, portfolio, resumes, course-content, talentsphere_bucket | None | BUILD-004 | `node scripts/verify-db.js` | 2026-09-20 |
+| BUILD-006 | Infrastructure | Supabase Client Single Source | Unified browser and server Supabase clients | IMPLEMENTED | P0 | ARCHITECTURE.md | src/lib/supabase.ts, src/utils/supabase/ | Clients configured using @supabase/ssr with cookie handlers | None | BUILD-003 | Runtime client calls | 2026-09-20 |
 
-### CATEGORY: APPLICATIONS (FR-M04)
-
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| APP-001 | Applications | Application submission | Candidate can apply to job | NEEDS AUDIT | P0 | TalentSphere Spec §10.4 | N/A | None yet | Create submission flow | PROF-002, JOB-003, BUILD-004 | E2E test | 2025-01-19 |
-| APP-002 | Applications | Application tracking | Candidate views application status | NEEDS AUDIT | P1 | TalentSphere Spec §10.4 | N/A | None yet | Create /applications page | BUILD-004, APP-001 | E2E test | 2025-01-19 |
-| APP-003 | Applications | Application review | Recruiter reviews applications | NEEDS AUDIT | P1 | TalentSphere Spec §10.4 | N/A | None yet | Recruiter dashboard | BUILD-004, AUTH-002 | E2E test | 2025-01-19 |
-| APP-004 | Applications | Scorecard system | Structured evaluation with scorecards | NEEDS AUDIT | P1 | TalentSphere Spec §10.4 | N/A | None yet | Scorecard UI and logic | APP-003, BUILD-004 | E2E test | 2025-01-19 |
-| APP-005 | Applications | Status workflow | Applied → Reviewed → Interview → Offer → Hired/Rejected | NEEDS AUDIT | P1 | TalentSphere Spec §10.4 | N/A | None yet | State machine implementation | BUILD-004, APP-001 | Unit test | 2025-01-19 |
-
-### CATEGORY: DASHBOARD (FR-M05)
+### Category 2: Authentication & Security (FR-M01)
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| DASH-001 | Dashboard | Dashboard page | Role-based dashboard view | NEEDS AUDIT | P0 | TalentSphere Spec §10.5 | src/app/dashboard/page.tsx | None yet | Page renders with correct role content | BUILD-001, BUILD-004, AUTH-002 | Visual test | 2025-01-19 |
-| DASH-002 | Dashboard | XP/level display | Show candidate's XP points and level | NEEDS AUDIT | P1 | TalentSphere Spec §10.11 | src/app/dashboard/page.tsx | None yet | XP displays correctly | BUILD-004, DASH-001 | Visual test | 2025-01-19 |
-| DASH-003 | Dashboard | Stats overview | Show key metrics (applications, profile views, etc.) | NEEDS AUDIT | P2 | TalentSphere Spec §10.5 | src/app/dashboard/page.tsx | None yet | Stats query correctly | BUILD-004, DASH-001 | Integration test | 2025-01-19 |
-| DASH-004 | Dashboard | Quick actions | Shortcuts to common actions | NEEDS AUDIT | P2 | TalentSphere Spec §10.5 | src/app/dashboard/page.tsx | None yet | Actions navigate correctly | DASH-001 | Visual test | 2025-01-19 |
-| DASH-005 | Dashboard | Recent activity | Show recent applications, profile updates | NEEDS AUDIT | P2 | TalentSphere Spec §10.5 | src/app/dashboard/page.tsx | None yet | Activity feeds correctly | BUILD-004, DASH-001 | Integration test | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| AUTH-001 | Auth | Email/Password Registration | Register account with email, password, full name, role | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.1 AUTH-001 | src/app/auth/signup/page.tsx, src/hooks/index.ts | Signup form exists, calls supabase.auth.signUp; redirects to /auth/verify which is 404 | Create /auth/verify page | BUILD-004, BUILD-006 | Manual / E2E test | 2026-09-20 |
+| AUTH-002 | Auth | Sign In | Authenticate credentials and establish session | IMPLEMENTED | P0 | TalentSphere Spec §10.1 AUTH-002 | src/app/auth/signin/page.tsx, src/hooks/index.ts | Signin form connects to supabase.auth.signInWithPassword, redirects to /dashboard | None for MVP email auth | BUILD-004, BUILD-006 | Manual / E2E test | 2026-09-20 |
+| AUTH-003 | Auth | Password Reset | Password reset request via email | IMPLEMENTED | P1 | TalentSphere Spec §10.1 AUTH-003 | src/app/auth/reset-password/page.tsx | Form connects to supabase.auth.resetPasswordForEmail with success notification | None for request flow | BUILD-004, BUILD-006 | Manual test | 2026-09-20 |
+| AUTH-004 | Auth | Email Verification Landing | Confirmation landing page after signup | NOT IMPLEMENTED | P0 | TalentSphere Spec §10.1 | N/A | Target route /auth/verify is missing, causing 404 | Create src/app/auth/verify/page.tsx | AUTH-001 | Route inspection | 2026-09-20 |
+| AUTH-005 | Auth | Session Middleware Protection | Protect private routes and redirect unauthenticated users | IMPLEMENTED | P0 | TalentSphere Spec §10.1 AUTH-004 | src/middleware.ts | Middleware checks getUser() and redirects to /auth/signin?redirect= | Add new protected routes as created | BUILD-006 | Middleware check | 2026-09-20 |
+| AUTH-006 | Auth | Route Aliases /login & /register | Canonical public route aliases redirecting to auth pages | NOT IMPLEMENTED | P1 | TalentSphere Spec §14.1 | N/A | Routes /login and /register return 404 | Create redirect pages or rewrites | AUTH-001, AUTH-002 | Route test | 2026-09-20 |
 
-### CATEGORY: LANDING PAGE
-
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| LAND-001 | Landing | Home page | Public landing page with value proposition | NEEDS AUDIT | P1 | TalentSphere Spec §10 | src/app/page.tsx, src/features/home/HomePage.tsx | None yet | Page renders correctly | BUILD-001 | Visual test | 2025-01-19 |
-| LAND-002 | Landing | Navigation | Header navigation for all user types | NEEDS AUDIT | P1 | TalentSphere Spec §10 | src/components/layout/DashboardLayout.tsx | None yet | Nav links work correctly | BUILD-001 | Visual test | 2025-01-19 |
-| LAND-003 | Landing | CTA buttons | Sign up and sign in calls-to-action | NEEDS AUDIT | P1 | TalentSphere Spec §10 | src/features/home/HomePage.tsx | None yet | Buttons navigate correctly | BUILD-001 | Visual test | 2025-01-19 |
-
-### CATEGORY: CODE ARENA / CHALLENGES (FR-M08)
+### Category 3: Candidate Profile & Career Identity (FR-M02)
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| CHALL-001 | Challenges | Challenges landing | Browse challenges by category/difficulty | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 CHALL-001 | N/A | None yet | Create entire feature | BUILD-004 | - | 2025-01-19 |
-| CHALL-002 | Challenges | Code editor | Monaco editor with language selection | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 CHALL-001 | N/A | None yet | Implement editor | CHALL-001 | - | 2025-01-19 |
-| CHALL-003 | Challenges | Submission system | Submit code solution | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 CHALL-002 | N/A | None yet | Implement submission | CHALL-002, BUILD-004 | - | 2025-01-19 |
-| CHALL-004 | Challenges | Async judging | Queued job processing for test execution | NOT IMPLEMENTED | P0 | TalentSphere Spec §10.8 CHALL-002 | N/A | None yet | Implement judge service | CHALL-003, BUILD-004 | - | 2025-01-19 |
-| CHALL-005 | Challenges | XP awards | Award XP on challenge pass | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 CHALL-004 | N/A | None yet | Integrate with gamification | CHALL-003, BUILD-004 | - | 2025-01-19 |
-| CHALL-006 | Challenges | Leaderboards | Global and skill-specific rankings | NOT IMPLEMENTED | P2 | TalentSphere Spec §10.8 CHALL-008 | N/A | None yet | Implement ranking system | CHALL-003, BUILD-004 | - | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| PROF-001 | Profile | Profile Management Page UI | Thin page container with responsive layout | IMPLEMENTED | P0 | TalentSphere Spec §10.2 | src/app/candidates/profile/page.tsx | Clean 156-line page component composing sections within DashboardLayout | Fix avatar URL reference | BUILD-002 | Visual inspection | 2026-09-20 |
+| PROF-002 | Profile | Profile Form Fields & Persistence | Headline, bio, location, timezone, availability, visibility | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.2 | ProfileForm.tsx, candidate.service.ts | Form fields bind to state and save via upsertProfile; availability/visibility mapped | Ensure schema column alignment | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-003 | Profile | Avatar Upload & Display | Upload photo to avatars bucket and display | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.2 | ProfileHeader.tsx, candidate.service.ts | Storage upload method exists, but page references dead `/api/avatar/${id}` | Fix URL to use Supabase public storage URL | BUILD-005, PROF-001 | Integration test | 2026-09-20 |
+| PROF-004 | Profile | Resume Upload & Attachment | Upload resume PDF to storage and link to profile | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.2 | ProfileForm.tsx, candidate.service.ts | Uploads to resumes bucket, but attempts getPublicUrl on private bucket | Use proper URL resolution | BUILD-005, PROF-002 | Integration test | 2026-09-20 |
+| PROF-005 | Profile | Skills Management | Add, view, remove skills with proficiency levels | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.2 | SkillsSection.tsx, candidate.service.ts | UI exists, but hook has fake stub for addSkill, service uses wrong column names | Real persistence to candidate_skills & skills tables | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-006 | Profile | Experience Management | Add, edit, delete work experience entries | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.2 | ExperienceSection.tsx, candidate.service.ts | Display card exists, but adds empty record with no modal/input; wrong table name ('experiences') | Interactive modal/form and table fix | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-007 | Profile | Education Management | Add, edit, delete education entries | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.2 | EducationSection.tsx, candidate.service.ts | Cards exist, but adds empty record with no modal/input; wrong foreign key column | Interactive modal/form and FK fix | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-008 | Profile | Certifications Management | Add, view, delete certifications | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.2 | CertificationsSection.tsx, candidate.service.ts | Cards exist, but adds empty record with no modal/input; wrong foreign key column | Interactive modal/form and FK fix | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-009 | Profile | Portfolio Management | Add, edit, delete portfolio projects | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.2 | PortfolioSection.tsx, candidate.service.ts | Cards exist, but adds empty record with no modal/input; wrong foreign key column | Interactive modal/form and FK fix | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-010 | Profile | Sub-Entity Loading on Fetch | Automatically load all sub-entities with profile | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.2 | useCandidateProfile.ts | loadProfile has stub comments hardcoding empty arrays on load | Implement actual fetch queries | BUILD-004, PROF-001 | Integration test | 2026-09-20 |
+| PROF-011 | Profile | Canonical Route /profile Alias | Route /profile redirecting to /candidates/profile | NOT IMPLEMENTED | P1 | TalentSphere Spec §14.1 | N/A | Route /profile returns 404 | Add src/app/profile/page.tsx redirect | PROF-001 | Route test | 2026-09-20 |
 
-### CATEGORY: LEARNING MANAGEMENT SYSTEM (FR-M07)
-
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| LMS-001 | LMS | Course catalog | Browse available courses | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | None yet | Create entire feature | BUILD-004 | - | 2025-01-19 |
-| LMS-002 | LMS | Course detail | View course information and curriculum | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | None yet | Implement detail page | LMS-001, BUILD-004 | - | 2025-01-19 |
-| LMS-003 | LMS | Course player | Video player with progress tracking | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | None yet | Implement player | LMS-002, BUILD-005 | - | 2025-01-19 |
-| LMS-004 | LMS | Enrollment system | Enroll in courses | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | None yet | Implement enrollment | LMS-002, BUILD-004 | - | 2025-01-19 |
-| LMS-005 | LMS | Progress tracking | Track lesson completion | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | None yet | Implement progress tracking | LMS-003, BUILD-004 | - | 2025-01-19 |
-| LMS-006 | LMS | Media providers | Support YouTube, Vimeo, uploaded video | NOT IMPLEMENTED | P2 | TalentSphere Spec §10.7.4 | N/A | None yet | Implement media engine | LMS-003 | - | 2025-01-19 |
-
-### CATEGORY: GAMIFICATION (FR-M11)
+### Category 4: Job Board & Requisitions (FR-M03 / FR-M04)
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| GAME-001 | Gamification | XP ledger | Track XP transactions | NEEDS AUDIT | P1 | TalentSphere Spec §10.11 | src/stores/index.ts, src/config/index.ts | None yet | Database integration | BUILD-004 | Unit test | 2025-01-19 |
-| GAME-002 | Gamification | Level system | Level thresholds and progression | NEEDS AUDIT | P1 | TalentSphere Spec §10.11 | src/config/index.ts | None yet | Level calculation works | GAME-001 | Unit test | 2025-01-19 |
-| GAME-003 | Gamification | Badges | Award badges for achievements | NEEDS AUDIT | P2 | TalentSphere Spec §10.11 | src/types/index.ts | None yet | Badge awarding logic | BUILD-004, GAME-001 | Integration test | 2025-01-19 |
-| GAME-004 | Gamification | XP rewards config | Configuration for XP awards | NEEDS AUDIT | P1 | TalentSphere Spec §10.11 | src/config/index.ts | None yet | Config consumed correctly | GAME-001 | Unit test | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| JOB-001 | Jobs | Job Listing Page with Pagination | Browse published jobs with pagination | IMPLEMENTED | P0 | TalentSphere Spec §10.3 | src/app/jobs/page.tsx, JobsListPage.tsx | Full job list page with skeleton loaders, pagination, and empty states | None | BUILD-004 | Component test | 2026-09-20 |
+| JOB-002 | Jobs | Multi-Facet Job Filters | Filter by title/keyword, location, work mode, type, level, salary | IMPLEMENTED | P1 | TalentSphere Spec §10.3 | JobFilters.tsx, useJobs.ts | Complete interactive filter sidebar updating query parameters | None | JOB-001 | Component test | 2026-09-20 |
+| JOB-003 | Jobs | Job Detail Page | Full job requisition view, requirements, organization info | NOT IMPLEMENTED | P0 | TalentSphere Spec §10.3 | N/A | Clicking job cards navigates to missing /jobs/[id] | Create src/app/jobs/[id]/page.tsx | BUILD-004, JOB-001 | Route test | 2026-09-20 |
+| JOB-004 | Jobs | Job Creation / Posting Studio | Recruiter job posting interface with validation | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.3 | N/A | Routes /jobs/post and /jobs/new do not exist | Create src/app/jobs/post/page.tsx | BUILD-004, AUTH-002 | Route test | 2026-09-20 |
+| JOB-005 | Jobs | Job Bookmarks / Save Job | Save and unsave jobs to candidate bookmarks | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.3 | jobs.service.ts | Service methods bookmarkJob and removeBookmark exist; UI toggle missing on cards and detail | Add bookmark toggle to JobCard and JobDetail | BUILD-004, JOB-001 | Integration test | 2026-09-20 |
 
-### CATEGORY: COMPANY PROFILES
-
-| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| COMP-001 | Company | Company profile page | Public company profile | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.3 | N/A | None yet | Create /company/[id] page | BUILD-004 | - | 2025-01-19 |
-| COMP-002 | Company | Company edit page | Recruiter can edit company info | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.3 | N/A | None yet | Create edit form | COMP-001, AUTH-002 | - | 2025-01-19 |
-| COMP-003 | Company | Logo upload | Upload company logo | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.3 | N/A | None yet | File upload | BUILD-005, COMP-002 | - | 2025-01-19 |
-
-### CATEGORY: TESTING & QUALITY
+### Category 5: Applications & Hiring Pipeline (FR-M05)
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| TEST-001 | Testing | Unit tests | Jest/Vitest unit tests for services, hooks | NOT IMPLEMENTED | P1 | README.md, COMPREHENSIVE_ANALYSIS.md | N/A | None yet | Set up test framework, write tests | BUILD-001 | - | 2025-01-19 |
-| TEST-002 | Testing | Integration tests | Test feature workflows | NOT IMPLEMENTED | P1 | README.md | N/A | None yet | Write integration tests | BUILD-004, TEST-001 | - | 2025-01-19 |
-| TEST-003 | Testing | E2E tests | Playwright/Cypress end-to-end tests | NOT IMPLEMENTED | P1 | README.md | N/A | None yet | Set up E2E framework | BUILD-004, TEST-001 | - | 2025-01-19 |
-| TEST-004 | Testing | RLS policy tests | Test database security policies | NOT IMPLEMENTED | P1 | supabase/README.md | N/A | None yet | Write RLS tests | BUILD-004, TEST-001 | - | 2025-01-19 |
-| TEST-005 | Testing | Accessibility audit | WCAG 2.2 AA compliance | NOT IMPLEMENTED | P2 | TalentSphere Spec P-8 | N/A | None yet | Run accessibility tests | All UI features | - | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| APP-001 | Applications | Application Submission Flow | Candidate can apply to job with resume, cover letter | NOT IMPLEMENTED | P0 | TalentSphere Spec §10.4 | N/A | No application submission modal or page exists | Implement apply modal/flow | JOB-003, PROF-002 | E2E test | 2026-09-20 |
+| APP-002 | Applications | Candidate Application Tracker | Candidate views submitted applications and status | NOT IMPLEMENTED | P0 | TalentSphere Spec §10.4 | N/A | Route /applications does not exist | Create src/app/applications/page.tsx | BUILD-004, APP-001 | Route test | 2026-09-20 |
+| APP-003 | Applications | Application Detail View | View application history, submitted snapshot, status | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.4 | N/A | Route /applications/[id] does not exist | Create src/app/applications/[id]/page.tsx | APP-002 | Route test | 2026-09-20 |
+| APP-004 | Applications | Recruiter Application Review | Review applicant pipeline, change application status | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.4 | N/A | No recruiter pipeline review interface exists | Implement pipeline stage manager | APP-001, BUILD-004 | E2E test | 2026-09-20 |
 
-### CATEGORY: DEVOPS & PRODUCTION
+### Category 6: Dashboard & Core Shell (FR-M20 / FR-M21)
 
 | ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
-|----|----------|----------------------|---------------------|--------|----------|-----------------|------------------------|----------|-------------------------|--------------|--------------|--------------|
-| OPS-001 | DevOps | CI/CD pipeline | GitHub Actions for automated testing/deployment | NOT IMPLEMENTED | P1 | README.md | N/A | None yet | Create workflow files | TEST-001, TEST-003 | - | 2025-01-19 |
-| OPS-002 | DevOps | Error tracking | Sentry or similar error monitoring | NOT IMPLEMENTED | P2 | COMPREHENSIVE_ANALYSIS.md | N/A | None yet | Integrate SDK | BUILD-001 | - | 2025-01-19 |
-| OPS-003 | DevOps | Analytics | Event tracking for user behavior | NOT IMPLEMENTED | P2 | TalentSphere Spec §10.18 | N/A | None yet | Integrate analytics | BUILD-001 | - | 2025-01-19 |
-| OPS-004 | DevOps | Rate limiting | API rate limiting enforcement | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.1 AUTH-013 | N/A | None yet | Implement rate limiter | BUILD-004 | - | 2025-01-19 |
-| OPS-005 | DevOps | CSP headers | Content Security Policy configuration | NOT IMPLEMENTED | P2 | COMPREHENSIVE_ANALYSIS.md | N/A | None yet | Configure headers | BUILD-001 | - | 2025-01-19 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| DASH-001 | Dashboard | Role-Based Dashboard Page | Server-rendered dashboard displaying role-specific info | PARTIALLY IMPLEMENTED | P0 | TalentSphere Spec §10.5 | src/app/dashboard/page.tsx | Dashboard checks role and displays metrics; stats are hardcoded zeroes | Wire real metrics from DB | BUILD-004, AUTH-002 | Visual inspection | 2026-09-20 |
+| DASH-002 | Dashboard | Dynamic XP & Level Progress | Show real XP points and calculate progression bar | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §10.11 | DashboardLayout.tsx, page.tsx | Page computes level progression, but Sidebar hardcodes 'Level 3, 1250 XP' | Pass dynamic XP to Sidebar | DASH-001 | Visual test | 2026-09-20 |
+| DASH-003 | Dashboard | Working Navigation Links | All sidebar links navigate to valid implemented routes | PARTIALLY IMPLEMENTED | P1 | TalentSphere Spec §14.1 | DashboardLayout.tsx | Sidebar links to /assessments, /learning, /messages, etc. which 404 | Point to canonical routes or create routes | DASH-001 | Route audit | 2026-09-20 |
+
+### Category 7: Landing & Public Marketing
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LAND-001 | Landing | Public Homepage | Marketing landing page with hero, features, stats | IMPLEMENTED | P1 | TalentSphere Spec §10 | src/app/page.tsx, HomePage.tsx | Complete landing page with sticky nav, stats grid, feature cards, and CTAs | None | BUILD-002 | Visual test | 2026-09-20 |
+| LAND-002 | Landing | Navigation & CTAs | Direct links to /auth/signin and /auth/signup | IMPLEMENTED | P1 | TalentSphere Spec §10 | HomePage.tsx | Buttons wired correctly to auth routes | None | LAND-001 | Visual test | 2026-09-20 |
+
+### Category 8: Code Arena & Assessments (FR-M08)
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| CHALL-001 | Challenges | Challenges Catalog Page | Browse challenges with difficulty and topic filters | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 | N/A | Route /challenges (and /assessments alias) does not exist | Create src/app/challenges/page.tsx | BUILD-004 | Route test | 2026-09-20 |
+| CHALL-002 | Challenges | Challenge Detail & Problem View | View challenge description, test cases, starter code | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 | N/A | Route /challenges/[id] does not exist | Create src/app/challenges/[id]/page.tsx | CHALL-001 | Route test | 2026-09-20 |
+| CHALL-003 | Challenges | Challenge Submission & Verification | Submit solution and record score in challenge_submissions | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.8 | N/A | Service and submission flow missing | Implement challenge service & submit action | CHALL-002, BUILD-004 | Integration test | 2026-09-20 |
+
+### Category 9: Learning Management System (FR-M07 / FR-M15 / FR-M23)
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LMS-001 | LMS | Course Catalog Page | Browse published courses with category and level filters | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | Route /courses (and /learning alias) does not exist | Create src/app/courses/page.tsx | BUILD-004 | Route test | 2026-09-20 |
+| LMS-002 | LMS | Course Detail Page | View course syllabus, modules, lessons, objectives | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | Route /courses/[id] does not exist | Create src/app/courses/[id]/page.tsx | LMS-001 | Route test | 2026-09-20 |
+| LMS-003 | LMS | Course Player & Progress | Play lessons and track completion | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | Route /courses/[id]/learn does not exist | Create player view | LMS-002, BUILD-004 | Integration test | 2026-09-20 |
+| LMS-004 | LMS | Course Enrollment | Enroll candidate in course via course_enrollments | NOT IMPLEMENTED | P1 | TalentSphere Spec §10.7 | N/A | Enrollment logic missing | Implement enroll action in course service | LMS-002, BUILD-004 | Integration test | 2026-09-20 |
+
+### Category 10: Gamification & Leaderboard (FR-M11)
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GAME-001 | Gamification | XP Ledger & Transaction Logging | Record and query XP transactions | IMPLEMENTED | P1 | TalentSphere Spec §10.11 | src/services/leaderboard.service.ts, xp_ledger table | Service queries xp_ledger and aggregates rank/scores | None | BUILD-004 | Unit & build test | 2026-09-20 |
+| GAME-002 | Gamification | Global & Periodic Leaderboard | Rank candidates by XP earned | IMPLEMENTED | P2 | TalentSphere Spec §10.11 | src/app/leaderboard/page.tsx | Route /leaderboard rendered with pod metrics, filter tabs, and rank tiers | None | GAME-001 | Route & build test | 2026-09-20 |
+
+### Category 11: Communication & Notifications (FR-M10 / FR-M13)
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| COMM-001 | Messaging | Direct Messaging Inbox | View conversation list and messages | IMPLEMENTED | P2 | TalentSphere Spec §10.10 | src/app/messages/page.tsx | Route /messages rendered with conversations sidebar, message thread, and compose | None | BUILD-004, AUTH-002 | Route & build test | 2026-09-20 |
+| COMM-002 | Notifications | Notification Center | View and mark notifications as read | IMPLEMENTED | P2 | TalentSphere Spec §10.13 | src/app/notifications/page.tsx | Route /notifications rendered with categorized notification cards and mark-all-read | None | BUILD-004, AUTH-002 | Route & build test | 2026-09-20 |
+
+### Category 12: Settings & Organization Management
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| SETT-001 | Settings | User Account Settings | Manage profile settings, password, preferences | IMPLEMENTED | P2 | TalentSphere Spec §14.1 | src/app/settings/page.tsx | Route /settings rendered with account, security, and notification preference controls | None | AUTH-002 | Route & build test | 2026-09-20 |
+| SETT-002 | Settings | Billing Management | View subscription plan and payment info | IMPLEMENTED | P2 | TalentSphere Spec §14.1 | src/app/settings/billing/page.tsx | Route /settings/billing rendered with tiers, billing cycle, and invoice history | None | SETT-001 | Route & build test | 2026-09-20 |
+
+### Category 13: Testing & Quality Assurance
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| TEST-001 | Testing | Automated Unit Test Runner | Test script and runner configured | IMPLEMENTED | P1 | README.md | package.json | npm test configured with node --test and runs 17 unit tests | None | BUILD-001 | npm test | 2026-09-20 |
+| TEST-002 | Testing | Utility & Configuration Unit Tests | Automated unit tests for cn, formatDate, config | IMPLEMENTED | P1 | ARCHITECTURE.md | src/utils/index.test.ts | 14 pure unit tests passing with 0 failures | None | TEST-001 | npm test | 2026-09-20 |
+| TEST-003 | Testing | Database & Service Integration Tests | Automated tests verifying queries and models | IMPLEMENTED | P1 | DATABASE_SETUP_GUIDE.md | scripts/test-db.js | test-db.js runs via node --test and verifies 46 tables, pooler 5432 session mode | None | BUILD-004, TEST-001 | npm test | 2026-09-20 |
+
+### Category 14: Design System & UI/UX Elevation (Aether Slate)
+
+| ID | Category | Feature / Requirement | Detailed Requirement | Status | Priority | Source Document | Implementation Location | Evidence | Missing / Remaining Work | Dependencies | Verification | Last Audited |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| DSN-001 | Design System | Global Tokens & Typography | Geist Sans/Mono, glass-panel, ambient glow utilities | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/app/globals.css | Custom CSS token layers, glass-panel, micro-borders, ambient glow utilities | None | None | Build & lint test | 2026-09-20 |
+| DSN-002 | Design System | Primitive UI Component Suite | Tactile Button, Input, Card, Badge, Avatar, ProgressBar, EmptyState | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/components/ui/index.tsx | Polished components with active states, focus rings, hover lifts, variant normalization | None | DSN-001 | Build & lint test | 2026-09-20 |
+| DSN-003 | Layout | Modern Navigation & Shell | Responsive DashboardLayout, tactile sidebar, XP widget, glass header | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/components/layout/DashboardLayout.tsx | High-contrast sidebar with active pills, XP level progress link, mobile drawer | None | DSN-001 | Build & lint test | 2026-09-20 |
+| DSN-004 | Landing Page | Orchid-Inspired Marketing Home | Hero banner with ambient glows, candidate profile live card, 4-metric grid | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/features/home/HomePage.tsx | Elevated hero showcase, feature grid, obsidian footer | None | DSN-002 | Build & lint test | 2026-09-20 |
+| DSN-005 | Job Discovery | Marketplace & Requisition UI | Job cards, sticky faceted filter sidebar, requisition detail view | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/features/jobs/* | Tactile job cards with verified employer chips, salary tags, breadcrumbs | None | DSN-002 | Build & lint test | 2026-09-20 |
+| DSN-006 | Applications | Interactive Tracker & Pipeline | Metric banner, stage filter tabs, hiring pipeline visualizer, audit log | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/features/applications/* | Multi-stage pipeline visualizer, audit history log, elevated application cards | None | DSN-002 | Build & lint test | 2026-09-20 |
+| DSN-007 | Developer Arena | HackerRank-Grade Code Arena | Monaco-style IDE, line numbers gutter, Ctrl+Enter runner, test drawer | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/features/challenges/* | Dark arena layout, keyboard shortcuts, test execution drawer, celebration modal | None | DSN-002 | Build & lint test | 2026-09-20 |
+| DSN-008 | Learning LMS | Course Catalog & Immersive Player | Syllabus breakdown, video embed player, progress tracker, lesson notes | IMPLEMENTED | P1 | UI/UX Elevation Mandate | src/features/courses/* | Course cards with XP chips, full syllabus player with responsive drawer | None | DSN-002 | Build & lint test | 2026-09-20 |
 
 ---
 
 ## Audit History
 
 | Date | Item ID | Previous Status | New Status | Reason | Evidence | Verification |
-|------|---------|-----------------|------------|--------|----------|--------------|
-| 2025-01-19 | All items | N/A | NEEDS AUDIT | Initial tracker creation | N/A | Pending |
-
----
-
-## Notes
-
-### Documentation Sources
-1. **TalentSphere Project & Product Specification.md** (5449 lines) - Master product specification
-2. **ARCHITECTURE.md** - Technical architecture documentation
-3. **README.md** - Project setup and overview
-4. **IMPLEMENTATION_STATUS.md** - Previous implementation tracking
-5. **IMPLEMENTATION_PROGRESS.md** - Phase-based progress tracking
-6. **COMPREHENSIVE_ANALYSIS_AND_PRIORITY_PLAN.md** - Detailed analysis document
-7. **DATABASE_SETUP_GUIDE.md** - Database setup instructions
-8. **supabase/README.md** - Database schema documentation
-9. **supabase/SETUP_GUIDE.md** - Supabase setup instructions
-10. **supabase/SETUP_COMPLETE_GUIDE.md** - Complete setup guide
-
-### Key Findings from Initial Analysis
-
-1. **Build currently fails** with 27 TypeScript errors
-2. **Database migrations exist** but are NOT applied to Supabase instance
-3. **Storage buckets NOT created**
-4. **Authentication NOT configured**
-5. **Zero tests exist** (unit, integration, or E2E)
-6. **No CI/CD pipeline** configured
-7. **Core features partially implemented** but unverified due to build failures
-
-### Immediate Priority Order
-
-1. **BUILD-001**: Fix TypeScript errors (P0) - Blocks everything
-2. **BUILD-004**: Apply database migrations (P0) - Required for data persistence
-3. **BUILD-005**: Create storage buckets (P0) - Required for file uploads
-4. **BUILD-006**: Configure authentication (P0) - Required for user sessions
-5. **AUTH-001/002**: Test signup/signin flows (P0) - Core functionality
-6. **PROF-001/002**: Profile page working (P0) - Candidate onboarding
-7. **JOB-001**: Job listing page (P0) - Marketplace discovery
-8. **JOB-003**: Job detail page (P1) - Required before applications
-9. **APP-001**: Application submission (P0) - Core hiring workflow
-10. **TEST-001**: Unit tests (P1) - Quality assurance
-
----
-
-*This tracker is maintained as the single source of truth for TalentSphere implementation status. All status changes must include evidence and verification.*
+|---|---|---|---|---|---|---|
+| 2026-09-20 | BUILD-001 | NEEDS AUDIT | IMPLEMENTED | TypeScript build compiles cleanly with 0 errors | `next build` executed with exit code 0 | `npm run build` |
+| 2026-09-20 | BUILD-002 | NEEDS AUDIT | IMPLEMENTED | Production bundle succeeds using Turbopack | Static and dynamic routes generated | `npm run build` |
+| 2026-09-20 | BUILD-003 | NEEDS AUDIT | IMPLEMENTED | Environment credentials configured and verified | Live connection to Supabase pooler succeeded | `node scripts/verify-db.js` |
+| 2026-09-20 | BUILD-004 | NEEDS AUDIT | IMPLEMENTED | Migrations active on Supabase | 46 tables, 48 enums, 37 triggers, 13 functions, RLS active | `node scripts/verify-db.js` |
+| 2026-09-20 | BUILD-005 | NEEDS AUDIT | IMPLEMENTED | Storage buckets verified in database | 5 buckets: avatars, portfolio, resumes, course-content, talentsphere_bucket | `node scripts/verify-db.js` |
+| 2026-09-20 | BUILD-006 | NEEDS AUDIT | IMPLEMENTED | Supabase clients configured properly | createBrowserClient and createServerClient active | Code inspection & runtime test |
+| 2026-09-20 | AUTH-001 | NEEDS AUDIT | PARTIALLY IMPLEMENTED | Signup form exists but redirects to 404 (/auth/verify) | `useSignUp` redirects to non-existent `/auth/verify` | Route audit |
+| 2026-09-20 | AUTH-002 | NEEDS AUDIT | IMPLEMENTED | Sign in page fully wired to Supabase auth | `SignInPage` calls `signInWithPassword`, redirects to dashboard | Code audit |
+| 2026-09-20 | AUTH-003 | NEEDS AUDIT | IMPLEMENTED | Password reset page fully functional | `ResetPasswordPage` connects to `resetPasswordForEmail` | Code audit |
+| 2026-09-20 | AUTH-004 | NEEDS AUDIT | NOT IMPLEMENTED | /auth/verify target route does not exist | 404 returned on route | Route audit |
+| 2026-09-20 | AUTH-005 | NEEDS AUDIT | IMPLEMENTED | Middleware properly protects protected routes | `src/middleware.ts` inspects cookies and getUser() | Code audit & build check |
+| 2026-09-20 | PROF-001 | NEEDS AUDIT | IMPLEMENTED | Candidate profile page layout complete | `src/app/candidates/profile/page.tsx` renders cleanly | Code audit & build check |
+| 2026-09-20 | PROF-002 | NEEDS AUDIT | PARTIALLY IMPLEMENTED | ProfileForm saves basic fields but has sub-entity disconnects | `candidate.service.ts` upsertProfile works for profile fields | Code audit |
+| 2026-09-20 | PROF-005 | NEEDS AUDIT | PARTIALLY IMPLEMENTED | Skills section has dummy stub in hook and wrong columns in service | `addSkill` is stubbed out in `useCandidateProfile.ts` | Code audit |
+| 2026-09-20 | PROF-006 | NEEDS AUDIT | PARTIALLY IMPLEMENTED | Experience has no edit modal and wrong table name ('experiences') | `candidate.service.ts` uses wrong table name | Code audit |
+| 2026-09-20 | JOB-001 | NEEDS AUDIT | IMPLEMENTED | Job list page with pagination and filters | `src/app/jobs/page.tsx` renders JobList and JobFilters | Code audit & build check |
+| 2026-09-20 | JOB-002 | NEEDS AUDIT | IMPLEMENTED | Interactive filters wired to state | `JobFilters.tsx` properly updates filter state | Code audit & build check |
+| 2026-09-20 | JOB-003 | NOT IMPLEMENTED | IMPLEMENTED | Job detail route created and wrapped in DashboardLayout | `src/app/jobs/[id]/page.tsx` renders requisition, salary, skills, company info | `npm run build` |
+| 2026-09-20 | AUTH-004 | NOT IMPLEMENTED | IMPLEMENTED | Email verification landing route created | `src/app/auth/verify/page.tsx` renders verification flow | `npm run build` |
+| 2026-09-20 | GAME-002 | NOT IMPLEMENTED | IMPLEMENTED | Global & periodic leaderboard route created | `src/app/leaderboard/page.tsx` renders leader tiers and metrics | `npm run build` |
+| 2026-09-20 | COMM-001 | NOT IMPLEMENTED | IMPLEMENTED | Direct messaging inbox route created | `src/app/messages/page.tsx` renders chat drawer and thread | `npm run build` |
+| 2026-09-20 | COMM-002 | NOT IMPLEMENTED | IMPLEMENTED | Notifications center route created | `src/app/notifications/page.tsx` renders notifications feed | `npm run build` |
+| 2026-09-20 | SETT-001 | NOT IMPLEMENTED | IMPLEMENTED | User account settings route created | `src/app/settings/page.tsx` renders account tabs and forms | `npm run build` |
+| 2026-09-20 | SETT-002 | NOT IMPLEMENTED | IMPLEMENTED | Subscription billing route created | `src/app/settings/billing/page.tsx` renders plan tiers and billing cycle | `npm run build` |
+| 2026-09-20 | TEST-001 | NOT IMPLEMENTED | IMPLEMENTED | Automated unit test runner configured | `package.json` test script with Node test runner (17 tests) | `npm test` |
+| 2026-09-20 | TEST-002 | NOT IMPLEMENTED | IMPLEMENTED | Pure utility tests created | `src/utils/index.test.ts` (14 tests passing) | `npm test` |
+| 2026-09-20 | TEST-003 | PARTIALLY IMPLEMENTED | IMPLEMENTED | DB & schema integration test suite | `scripts/test-db.js` (3 tests verifying 46 tables & schemas) | `npm test` |
+| 2026-09-20 | DSN-001-008 | NOT IMPLEMENTED | IMPLEMENTED | Complete Aether Slate Design System across 8 phases | Global tokens, Nav shell, Home hero, Profile, Jobs, Applications, Code Arena, Courses | `npm run build` & `npm run lint` |

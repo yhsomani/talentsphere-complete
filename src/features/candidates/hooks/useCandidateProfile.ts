@@ -3,12 +3,20 @@
  * 
  * Custom hook for managing candidate profile state and operations.
  * Extracts business logic from CandidateProfilePage component.
+ * Fully wired to Supabase via candidateService.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
 import type { CandidateProfile, Experience, Education, Certification, PortfolioItem } from '@/types';
 import { candidateService, type ProfileUpdateData } from '@/services/candidate.service';
+
+export interface CandidateSkill {
+  id: string;
+  skill_id: string;
+  name: string;
+  proficiency_level: string;
+}
 
 interface UseCandidateProfileReturn {
   // State
@@ -19,31 +27,62 @@ interface UseCandidateProfileReturn {
   success: string | null;
   
   // Skills
-  skills: Array<{ id: string; name: string; proficiency_level: string }>;
+  skills: CandidateSkill[];
   newSkill: string;
   setNewSkill: (skill: string) => void;
-  addSkill: () => Promise<void>;
+  addSkill: (proficiency?: 'beginner' | 'intermediate' | 'advanced' | 'expert') => Promise<void>;
   removeSkill: (skillId: string) => Promise<void>;
   
   // Experiences
   experiences: Experience[];
-  addExperience: (experience: Omit<Experience, 'id' | 'candidate_id' | 'created_at' | 'verified' | 'verified_by'>) => Promise<void>;
+  addExperience: (experience: {
+    company_name: string;
+    job_title: string;
+    start_date: string;
+    end_date?: string;
+    is_current?: boolean;
+    location?: string;
+    description?: string;
+  }) => Promise<void>;
   updateExperience: (id: string, updates: Partial<Experience>) => Promise<void>;
   deleteExperience: (id: string) => Promise<void>;
   
   // Education
   educations: Education[];
-  addEducation: (education: Omit<Education, 'id' | 'candidate_id' | 'created_at'>) => Promise<void>;
+  addEducation: (education: {
+    institution_name: string;
+    degree?: string;
+    field_of_study?: string;
+    start_date: string;
+    end_date?: string;
+    is_current?: boolean;
+    grade?: string;
+    description?: string;
+  }) => Promise<void>;
   deleteEducation: (id: string) => Promise<void>;
   
   // Certifications
   certifications: Certification[];
-  addCertification: (certification: Omit<Certification, 'id' | 'candidate_id' | 'created_at'>) => Promise<void>;
+  addCertification: (certification: {
+    name: string;
+    issuing_organization: string;
+    issue_date: string;
+    expiration_date?: string;
+    credential_id?: string;
+    credential_url?: string;
+  }) => Promise<void>;
   deleteCertification: (id: string) => Promise<void>;
   
   // Portfolio
   portfolioItems: PortfolioItem[];
-  addPortfolioItem: (item: Omit<PortfolioItem, 'id' | 'candidate_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  addPortfolioItem: (item: {
+    title: string;
+    description?: string;
+    url?: string;
+    repository_url?: string;
+    started_at?: string;
+    completed_at?: string;
+  }) => Promise<void>;
   updatePortfolioItem: (id: string, updates: Partial<PortfolioItem>) => Promise<void>;
   deletePortfolioItem: (id: string) => Promise<void>;
   
@@ -69,7 +108,7 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
   const [success, setSuccess] = useState<string | null>(null);
   
   // Skills state
-  const [skills, setSkills] = useState<Array<{ id: string; name: string; proficiency_level: string }>>([]);
+  const [skills, setSkills] = useState<CandidateSkill[]>([]);
   const [newSkill, setNewSkill] = useState('');
   
   // Related data state
@@ -90,6 +129,23 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
   });
 
   /**
+   * Helper to ensure profile exists and return its ID
+   */
+  const ensureProfileId = useCallback(async (): Promise<string | null> => {
+    if (profile?.id) return profile.id;
+    if (!user) return null;
+
+    // Create default profile if not yet created
+    const created = await candidateService.upsertProfile(user.id, {
+      headline: '',
+      availability_status: 'open_to_work',
+      visibility: 'public',
+    });
+    setProfile(created);
+    return created.id || null;
+  }, [profile, user]);
+
+  /**
    * Load profile data from Supabase
    */
   const loadProfile = useCallback(async () => {
@@ -99,28 +155,32 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setLoading(true);
       setError(null);
       
-      const data = await candidateService.getProfile(user.id);
+      const res = await candidateService.getProfile(user.id);
       
-      if (data) {
-        setProfile(data);
+      if (res.profile) {
+        setProfile(res.profile);
         setFormData({
-          headline: data.headline || '',
-          bio: data.bio || '',
-          location: data.location || '',
-          timezone: data.timezone || formData.timezone,
-          availability_status: data.availability_status,
-          visibility: data.visibility,
-          resume_url: data.resume_url || '',
+          headline: res.profile.headline || '',
+          bio: res.profile.summary || res.profile.bio || '',
+          location: res.profile.location || '',
+          timezone: res.profile.timezone || formData.timezone,
+          availability_status: res.profile.availability_status,
+          visibility: res.profile.visibility,
+          resume_url: res.profile.resume_url || '',
         });
-        
-        // Load related data
-        // Note: In a real implementation, these would be loaded via separate service calls
-        // For now, we'll initialize empty arrays
-        setSkills([]);
-        setExperiences([]);
-        setEducations([]);
-        setCertifications([]);
-        setPortfolioItems([]);
+        setSkills(res.skills);
+        setExperiences(res.experiences);
+        setEducations(res.educations);
+        setCertifications(res.certifications);
+        setPortfolioItems(res.portfolioItems);
+      } else {
+        // Automatically initialize profile shell for new candidate
+        const defaultProf = await candidateService.upsertProfile(user.id, {
+          headline: '',
+          availability_status: 'open_to_work',
+          visibility: 'public',
+        });
+        setProfile(defaultProf);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -142,21 +202,16 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setSaving(true);
       setError(null);
       
-      await candidateService.upsertProfile(user.id, formData);
-      
+      const updated = await candidateService.upsertProfile(user.id, formData);
+      setProfile(prev => ({ ...(prev || updated), ...updated }));
       setSuccess('Profile saved successfully!');
-      
-      // Reload to get updated data including XP changes
-      await loadProfile();
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSaving(false);
     }
-  }, [user, formData, loadProfile]);
+  }, [user, formData]);
 
   /**
    * Upload resume file
@@ -172,10 +227,8 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setError(null);
       
       const resumeUrl = await candidateService.uploadResume(file, user.id);
-      
       setFormData(prev => ({ ...prev, resume_url: resumeUrl }));
       setSuccess('Resume uploaded successfully!');
-      
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload resume');
@@ -197,12 +250,9 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setSaving(true);
       setError(null);
       
-      await candidateService.uploadAvatar(file, user.id);
-      
-      // Update auth metadata with new avatar URL
-      // This would typically be done via a server action or API route
+      const avatarUrl = await candidateService.uploadAvatar(file, user.id);
+      setProfile(prev => prev ? { ...prev, avatar_url: avatarUrl } : null);
       setSuccess('Avatar uploaded successfully!');
-      
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload avatar');
@@ -214,56 +264,69 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
   /**
    * Add a new skill
    */
-  const addSkill = useCallback(async () => {
-    if (!user || !newSkill.trim()) return;
+  const addSkill = useCallback(async (proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert' = 'intermediate') => {
+    if (!newSkill.trim()) return;
 
     try {
       setError(null);
-      // In a real implementation, this would create the skill first if it doesn't exist
-      // Then link it to the candidate with the selected proficiency level
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      const added = await candidateService.addSkill(profileId, newSkill, proficiency);
+      setSkills(prev => [...prev.filter(s => s.skill_id !== added.skill_id), added]);
       setNewSkill('');
       setSuccess('Skill added successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add skill');
     }
-  }, [user, newSkill]);
+  }, [newSkill, ensureProfileId]);
 
   /**
    * Remove a skill
    */
   const removeSkill = useCallback(async (skillId: string) => {
-    if (!user) return;
-
     try {
       setError(null);
-      await candidateService.removeSkill(user.id, skillId);
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      await candidateService.removeSkill(profileId, skillId);
       setSkills(prev => prev.filter(s => s.id !== skillId));
       setSuccess('Skill removed successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove skill');
     }
-  }, [user]);
+  }, [ensureProfileId]);
 
   /**
    * Add experience entry
    */
   const addExperience = useCallback(async (
-    experience: Omit<Experience, 'id' | 'candidate_id' | 'created_at' | 'verified' | 'verified_by'>
+    experience: {
+      company_name: string;
+      job_title: string;
+      start_date: string;
+      end_date?: string;
+      is_current?: boolean;
+      location?: string;
+      description?: string;
+    }
   ) => {
-    if (!user) return;
-
     try {
       setError(null);
-      const newExperience = await candidateService.addExperience(user.id, experience);
-      setExperiences(prev => [...prev, newExperience]);
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      const newExperience = await candidateService.addExperience(profileId, experience);
+      setExperiences(prev => [newExperience, ...prev]);
       setSuccess('Experience added successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add experience');
     }
-  }, [user]);
+  }, [ensureProfileId]);
 
   /**
    * Update experience entry
@@ -302,20 +365,30 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
    * Add education entry
    */
   const addEducation = useCallback(async (
-    education: Omit<Education, 'id' | 'candidate_id' | 'created_at'>
+    education: {
+      institution_name: string;
+      degree?: string;
+      field_of_study?: string;
+      start_date: string;
+      end_date?: string;
+      is_current?: boolean;
+      grade?: string;
+      description?: string;
+    }
   ) => {
-    if (!user) return;
-
     try {
       setError(null);
-      const newEducation = await candidateService.addEducation(user.id, education);
-      setEducations(prev => [...prev, newEducation]);
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      const newEducation = await candidateService.addEducation(profileId, education);
+      setEducations(prev => [newEducation, ...prev]);
       setSuccess('Education added successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add education');
     }
-  }, [user]);
+  }, [ensureProfileId]);
 
   /**
    * Delete education entry
@@ -336,20 +409,28 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
    * Add certification entry
    */
   const addCertification = useCallback(async (
-    certification: Omit<Certification, 'id' | 'candidate_id' | 'created_at'>
+    certification: {
+      name: string;
+      issuing_organization: string;
+      issue_date: string;
+      expiration_date?: string;
+      credential_id?: string;
+      credential_url?: string;
+    }
   ) => {
-    if (!user) return;
-
     try {
       setError(null);
-      const newCertification = await candidateService.addCertification(user.id, certification);
-      setCertifications(prev => [...prev, newCertification]);
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      const newCert = await candidateService.addCertification(profileId, certification);
+      setCertifications(prev => [newCert, ...prev]);
       setSuccess('Certification added successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add certification');
     }
-  }, [user]);
+  }, [ensureProfileId]);
 
   /**
    * Delete certification entry
@@ -370,20 +451,28 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
    * Add portfolio item
    */
   const addPortfolioItem = useCallback(async (
-    item: Omit<PortfolioItem, 'id' | 'candidate_id' | 'created_at' | 'updated_at'>
+    item: {
+      title: string;
+      description?: string;
+      url?: string;
+      repository_url?: string;
+      started_at?: string;
+      completed_at?: string;
+    }
   ) => {
-    if (!user) return;
-
     try {
       setError(null);
-      const newItem = await candidateService.addPortfolioItem(user.id, item);
-      setPortfolioItems(prev => [...prev, newItem]);
+      const profileId = await ensureProfileId();
+      if (!profileId) throw new Error('Profile not initialized');
+
+      const newItem = await candidateService.addPortfolioItem(profileId, item);
+      setPortfolioItems(prev => [newItem, ...prev]);
       setSuccess('Portfolio item added successfully!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add portfolio item');
     }
-  }, [user]);
+  }, [ensureProfileId]);
 
   /**
    * Update portfolio item
@@ -454,51 +543,41 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
         visibility: 'public',
         resume_url: '',
       });
+      setSkills([]);
+      setExperiences([]);
+      setEducations([]);
+      setCertifications([]);
+      setPortfolioItems([]);
     }
   }, [user, loadProfile]);
 
   return {
-    // State
     profile,
     loading,
     saving,
     error,
     success,
-    
-    // Skills
     skills,
     newSkill,
     setNewSkill,
     addSkill,
     removeSkill,
-    
-    // Experiences
     experiences,
     addExperience,
     updateExperience,
     deleteExperience,
-    
-    // Education
     educations,
     addEducation,
     deleteEducation,
-    
-    // Certifications
     certifications,
     addCertification,
     deleteCertification,
-    
-    // Portfolio
     portfolioItems,
     addPortfolioItem,
     updatePortfolioItem,
     deletePortfolioItem,
-    
-    // Form data
     formData,
     updateFormData,
-    
-    // Actions
     loadProfile,
     saveProfile,
     uploadResume,
