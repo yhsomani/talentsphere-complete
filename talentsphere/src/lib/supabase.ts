@@ -6,7 +6,6 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { AppConfig } from '@/config';
 
 // ============================================================================
@@ -34,10 +33,12 @@ export function createBrowserClient() {
 // ============================================================================
 // SERVER CLIENT
 // For server-side operations (Route Handlers, Server Components)
+// Call this function in your server components/route handlers, not at module level
 // ============================================================================
 
 export async function createServerClient() {
-  const cookieStore = await cookies();
+  const { cookies: nextCookies } = await import('next/headers');
+  const cookieStore = await nextCookies();
   
   return createClient(
     AppConfig.supabase.url,
