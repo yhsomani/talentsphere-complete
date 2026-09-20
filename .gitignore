@@ -46,4 +46,5 @@ supabase/.env
 # Temporary files
 *.tmp
 *.temp
+.Jules
 ```
