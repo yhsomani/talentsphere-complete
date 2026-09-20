@@ -2,15 +2,16 @@
 # Dependencies
 node_modules/
 
-# Build outputs
+# Build artifacts
 dist/
 build/
 .next/
 out/
 
 # Environment variables
-.env.local
 .env
+.env.local
+*.env.*
 
 # Python
 __pycache__/
@@ -21,29 +22,37 @@ __pycache__/
 env/
 venv/
 .venv/
-.ENV
-.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.pot
+*.po
+*~
 .pytest_cache/
 .mypy_cache/
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+.hypothesis/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
 ```
