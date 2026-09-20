@@ -25,7 +25,7 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
           <Button
             onClick={onReset}
             variant="ghost"
-            size="small"
+            size="sm"
             className={styles.resetButton}
           >
             Reset
@@ -39,7 +39,6 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
           placeholder="Search jobs..."
           value={filters.search || ''}
           onChange={(e) => onChange({ search: e.target.value })}
-          icon="search"
         />
       </div>
 
@@ -80,7 +79,7 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
           <div className={styles.section}>
             <label className={styles.label}>Job Type</label>
             <div className={styles.checkboxGroup}>
-              {(['full-time', 'part-time', 'contract', 'internship'] as JobType[]).map((type) => (
+              {(['full_time', 'part_time', 'contract', 'internship'] as JobType[]).map((type) => (
                 <label key={type} className={styles.checkbox}>
                   <input
                     type="checkbox"
@@ -99,7 +98,7 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
             <select
               className={styles.select}
               value={filters.workLocation || ''}
-              onChange={(e) => onChange({ workLocation: e.target.value as WorkLocation || undefined })}
+              onChange={(e) => onChange({ workLocation: (e.target.value as WorkLocation) || undefined })}
             >
               <option value="">Any Arrangement</option>
               <option value="onsite">On-site</option>
@@ -114,7 +113,7 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
             <select
               className={styles.select}
               value={filters.experienceLevel || ''}
-              onChange={(e) => onChange({ experienceLevel: e.target.value as ExperienceLevel || undefined })}
+              onChange={(e) => onChange({ experienceLevel: (e.target.value as ExperienceLevel) || undefined })}
             >
               <option value="">Any Experience</option>
               <option value="entry">Entry Level</option>
@@ -133,24 +132,18 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
                 type="number"
                 placeholder="Min"
                 className={styles.numberInput}
-                value={filters.salaryRange?.min || ''}
+                value={filters.salaryMin ?? ''}
                 onChange={(e) => onChange({ 
-                  salaryRange: { 
-                    min: e.target.value ? parseInt(e.target.value) : undefined,
-                    max: filters.salaryRange?.max 
-                  }
+                  salaryMin: e.target.value ? parseInt(e.target.value) : undefined,
                 })}
               />
               <input
                 type="number"
                 placeholder="Max"
                 className={styles.numberInput}
-                value={filters.salaryRange?.max || ''}
+                value={filters.salaryMax ?? ''}
                 onChange={(e) => onChange({ 
-                  salaryRange: { 
-                    min: filters.salaryRange?.min,
-                    max: e.target.value ? parseInt(e.target.value) : undefined
-                  }
+                  salaryMax: e.target.value ? parseInt(e.target.value) : undefined,
                 })}
               />
             </div>
@@ -163,10 +156,11 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
 
 function formatJobType(type: JobType): string {
   const map: Record<JobType, string> = {
-    'full-time': 'Full-time',
-    'part-time': 'Part-time',
+    'full_time': 'Full-time',
+    'part_time': 'Part-time',
     'contract': 'Contract',
-    'internship': 'Internship'
+    'internship': 'Internship',
+    'apprenticeship': 'Apprenticeship',
   };
-  return map[type];
+  return map[type] || type;
 }

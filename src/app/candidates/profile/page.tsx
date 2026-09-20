@@ -9,11 +9,11 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui';
 import { useCandidateProfile } from '@/features/candidates/hooks/useCandidateProfile';
+import type { Experience, Education, Certification, PortfolioItem } from '@/types';
 import { ProfileHeader } from './components/ProfileHeader';
 import { ProfileForm } from './components/ProfileForm';
 import { SkillsSection } from './components/SkillsSection';
@@ -27,7 +27,6 @@ import { SuccessBanner } from './components/SuccessBanner';
 import styles from './CandidateProfilePage.module.css';
 
 export default function CandidateProfilePage() {
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const profileHook = useCandidateProfile(user);
   
@@ -72,8 +71,13 @@ export default function CandidateProfilePage() {
     );
   }
 
+  const meta = user?.user_metadata as Record<string, unknown> | undefined;
+  const firstName = typeof meta?.first_name === 'string' ? meta.first_name : '';
+  const lastName = typeof meta?.last_name === 'string' ? meta.last_name : '';
+  const userName = `${firstName} ${lastName}`.trim() || 'Candidate';
+
   return (
-    <DashboardLayout userRole="candidate" userName={`${(user?.user_metadata as any)?.first_name || ''} ${(user?.user_metadata as any)?.last_name || ''}`.trim() || 'Candidate'} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
+    <DashboardLayout userRole="candidate" userName={userName} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
       <div className={styles.container}>
         <header className={styles.header}>
           <h1 className={styles.title}>Candidate Profile</h1>
@@ -110,26 +114,26 @@ export default function CandidateProfilePage() {
 
           <ExperienceSection
             experiences={experiences}
-            onAdd={(exp) => profileHook.addExperience(exp)}
+            onAdd={(exp) => profileHook.addExperience(exp as unknown as Omit<Experience, 'id' | 'candidate_id' | 'created_at' | 'verified' | 'verified_by'>)}
             onUpdate={(id, updates) => profileHook.updateExperience(id, updates)}
             onDelete={(id) => profileHook.deleteExperience(id)}
           />
 
           <EducationSection
             educations={educations}
-            onAdd={(edu) => profileHook.addEducation(edu)}
+            onAdd={(edu) => profileHook.addEducation(edu as unknown as Omit<Education, 'id' | 'candidate_id' | 'created_at'>)}
             onDelete={(id) => profileHook.deleteEducation(id)}
           />
 
           <CertificationsSection
             certifications={certifications}
-            onAdd={(cert) => profileHook.addCertification(cert)}
+            onAdd={(cert) => profileHook.addCertification(cert as unknown as Omit<Certification, 'id' | 'candidate_id' | 'created_at'>)}
             onDelete={(id) => profileHook.deleteCertification(id)}
           />
 
           <PortfolioSection
             portfolioItems={portfolioItems}
-            onAdd={(item) => profileHook.addPortfolioItem(item)}
+            onAdd={(item) => profileHook.addPortfolioItem(item as unknown as Omit<PortfolioItem, 'id' | 'candidate_id' | 'created_at' | 'updated_at'>)}
             onUpdate={(id, updates) => profileHook.updatePortfolioItem(id, updates)}
             onDelete={(id) => profileHook.deletePortfolioItem(id)}
           />

@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Target, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
 import { useSignIn } from '@/hooks';
 
 export default function SignInPage() {
-  const router = useRouter();
   const { signIn, loading } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

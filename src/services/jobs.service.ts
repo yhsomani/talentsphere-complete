@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@/lib/supabase';
-import type { Job, JobListing, JobFilters, JobStatus, JobType, WorkLocation } from '@/types';
+import type { Job, JobListing, JobFilters, JobStatus } from '@/types';
 import type { Database } from '@/types/database.types';
 
 type JobInsert = Database['public']['Tables']['jobs']['Insert'];
@@ -41,7 +41,7 @@ export const jobService = {
       }
 
       if (filters.location) {
-        query = query.eq('location', filters.location);
+        query = query.eq('location_city', filters.location);
       }
 
       if (filters.jobType) {
@@ -49,18 +49,19 @@ export const jobService = {
       }
 
       if (filters.workLocation) {
-        query = query.eq('work_location', filters.workLocation);
+        query = query.eq('work_mode', filters.workLocation);
       }
 
       if (filters.experienceLevel) {
         query = query.eq('experience_level', filters.experienceLevel);
       }
 
-      if (filters.salaryRange) {
-        query = query.gte('salary_min', filters.salaryRange.min);
-        if (filters.salaryRange.max) {
-          query = query.lte('salary_max', filters.salaryRange.max);
-        }
+      if (filters.salaryMin !== undefined) {
+        query = query.gte('salary_min', filters.salaryMin);
+      }
+
+      if (filters.salaryMax !== undefined) {
+        query = query.lte('salary_max', filters.salaryMax);
       }
 
       if (filters.organizationId) {
@@ -81,11 +82,11 @@ export const jobService = {
       if (error) throw error;
 
       return {
-        jobs: data as JobListing[],
+        jobs: (data || []) as unknown as JobListing[],
         total: count || 0,
         page,
         limit,
-        hasMore: from + data.length < (count || 0)
+        hasMore: from + (data?.length || 0) < (count || 0)
       };
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -107,7 +108,7 @@ export const jobService = {
             name,
             logo_url,
             industry,
-            description as company_description,
+            description,
             website,
             size
           ),
@@ -122,7 +123,7 @@ export const jobService = {
         .single();
 
       if (error) throw error;
-      return data as JobListing;
+      return data as unknown as JobListing;
     } catch (error) {
       console.error('Error fetching job:', error);
       throw error;
@@ -144,7 +145,7 @@ export const jobService = {
             logo_url
           )
         `)
-        .eq('recruiter_id', recruiterId)
+        .eq('employer_id', recruiterId)
         .order('created_at', { ascending: false });
 
       if (status) {
@@ -154,7 +155,7 @@ export const jobService = {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Job[];
+      return (data || []) as unknown as Job[];
     } catch (error) {
       console.error('Error fetching recruiter jobs:', error);
       throw error;
@@ -249,7 +250,7 @@ export const jobService = {
       });
 
       if (error) throw error;
-      return data as JobListing[];
+      return (data || []) as unknown as JobListing[];
     } catch (error) {
       console.error('Error searching jobs:', error);
       return [];
@@ -267,7 +268,7 @@ export const jobService = {
       });
 
       if (error) throw error;
-      return data as JobListing[];
+      return (data || []) as unknown as JobListing[];
     } catch (error) {
       console.error('Error getting recommended jobs:', error);
       return [];
@@ -285,7 +286,7 @@ export const jobService = {
       });
 
       if (error) throw error;
-      return data as JobListing[];
+      return (data || []) as unknown as JobListing[];
     } catch (error) {
       console.error('Error getting similar jobs:', error);
       return [];
@@ -299,15 +300,15 @@ export const jobService = {
     try {
       const { data, error } = await supabase
         .from('jobs')
-        .select('location')
-        .eq('status', 'active')
-        .not('location', 'is', null);
+        .select('location_city')
+        .eq('status', 'published')
+        .not('location_city', 'is', null);
 
       if (error) throw error;
 
-      const locations = data
-        .map(j => j.location)
-        .filter((loc, index, self) => loc && self.indexOf(loc) === index)
+      const locations = (data || [])
+        .map((j: { location_city: string | null }) => j.location_city)
+        .filter((loc: string | null, index: number, self: (string | null)[]): loc is string => Boolean(loc) && self.indexOf(loc) === index)
         .sort();
 
       return locations as string[];
@@ -323,26 +324,13 @@ export const jobService = {
   async getUniqueSkills() {
     try {
       const { data, error } = await supabase
-        .from('job_skills')
-        .select(`
-          skills (
-            id,
-            name,
-            category
-          )
-        `)
-        .join('jobs', 'job_skills.job_id', 'jobs.id')
-        .eq('jobs.status', 'active');
+        .from('skills')
+        .select('id, name, category')
+        .order('name');
 
       if (error) throw error;
 
-      const skills = data
-        .map(js => js.skills)
-        .filter((skill, index, self) => 
-          skill && self.findIndex(s => s?.id === skill?.id) === index
-        );
-
-      return skills as Array<{ id: string; name: string; category: string }>;
+      return (data || []) as Array<{ id: string; name: string; category: string }>;
     } catch (error) {
       console.error('Error fetching skills:', error);
       return [];
@@ -408,7 +396,8 @@ export const jobService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data.map(b => b.jobs) as JobListing[];
+      const jobs = (data || []).map((b: { jobs: unknown }) => b.jobs).filter(Boolean);
+      return jobs as unknown as JobListing[];
     } catch (error) {
       console.error('Error fetching bookmarked jobs:', error);
       return [];

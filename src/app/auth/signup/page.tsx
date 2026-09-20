@@ -2,14 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Target, Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Target, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
 import { useSignUp } from '@/hooks';
 import type { UserRole } from '@/types';
 
 export default function SignUpPage() {
-  const router = useRouter();
   const { signUp, loading } = useSignUp();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');

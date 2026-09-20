@@ -6,10 +6,15 @@
 
 import React from 'react';
 import { Button, Badge, Input } from '@/components/ui';
-import { SkillMatch } from '@/types';
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  proficiency_level: string;
+}
 
 interface SkillsSectionProps {
-  skills: SkillMatch[];
+  skills: SkillItem[];
   onAddSkill: () => Promise<void>;
   onRemoveSkill: (skillId: string) => Promise<void>;
   setNewSkill: (skill: string) => void;

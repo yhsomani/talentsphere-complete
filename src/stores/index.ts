@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 import type { User } from '@supabase/supabase-js';
-import type { UserRole, CandidateProfile } from '@/types';
+import type { CandidateProfile } from '@/types';
 
 interface AuthState {
   user: User | null;
@@ -58,7 +58,7 @@ interface UIState {
   closeAll: () => void;
 }
 
-export const useUIStore = create<UIState>((set, get) => ({
+export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: true,
   mobileMenuOpen: false,
   theme: 'system',

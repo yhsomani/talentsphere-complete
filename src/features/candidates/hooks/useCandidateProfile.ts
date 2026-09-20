@@ -6,7 +6,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import type { CandidateProfile, Experience, Education, Certification, PortfolioItem } from '@/types';
 import { candidateService, type ProfileUpdateData } from '@/services/candidate.service';
@@ -62,8 +61,6 @@ interface UseCandidateProfileReturn {
 }
 
 export function useCandidateProfile(user: User | null): UseCandidateProfileReturn {
-  const router = useRouter();
-  
   // Main state
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -200,7 +197,7 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setSaving(true);
       setError(null);
       
-      const avatarUrl = await candidateService.uploadAvatar(file, user.id);
+      await candidateService.uploadAvatar(file, user.id);
       
       // Update auth metadata with new avatar URL
       // This would typically be done via a server action or API route

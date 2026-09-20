@@ -6,7 +6,7 @@
  */
 
 import { createBrowserClient } from '@/lib/supabase';
-import type { CandidateProfile, Experience, Education, Certification, PortfolioItem, SkillMatch } from '@/types';
+import type { CandidateProfile, Experience, Education, Certification, PortfolioItem } from '@/types';
 
 export interface ProfileUpdateData {
   headline?: string;
