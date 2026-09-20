@@ -86,6 +86,7 @@ talentsphere/
 - Node.js 20+
 - npm or pnpm
 - Supabase account (for backend integration)
+- Supabase CLI (optional, for database migrations): `npm install -g supabase`
 
 ### Installation
 
@@ -94,24 +95,68 @@ talentsphere/
    npm install
    ```
 
-2. Copy environment variables:
+2. Copy environment variables template:
    ```bash
    cp .env.example .env.local
    ```
 
 3. Configure Supabase in `.env.local`:
+   - Go to [Supabase](https://supabase.com) and create a new project
+   - Navigate to Settings → API
+   - Copy your credentials to `.env.local`:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_key
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    ```
 
-4. Run development server:
+4. Set up the database:
+   
+   **Option A: Automated (using Supabase CLI)**
+   ```bash
+   # Login to Supabase
+   supabase login
+   
+   # Link your project (replace with your project ID from the URL)
+   supabase link --project-ref your-project-id
+   
+   # Run the setup script
+   ./scripts/setup-database.sh
+   ```
+   
+   **Option B: Manual**
+   - Go to SQL Editor in your Supabase dashboard
+   - Execute each migration file in order:
+     - `supabase/001_core_extensions_enums.sql`
+     - `supabase/002_users_organizations.sql`
+     - `supabase/003_jobs_applications.sql`
+     - `supabase/004_lms.sql`
+     - `supabase/005_challenges.sql`
+     - `supabase/006_gamification_notifications.sql`
+     - `supabase/007_rls_policies.sql`
+     - `supabase/008_auth_trigger_functions.sql`
+   
+   See [Database Setup Guide](./supabase/SETUP_GUIDE.md) for detailed instructions.
+
+5. Create Storage Buckets in Supabase Dashboard:
+   - Go to Storage → Create bucket
+   - Create these buckets:
+     - `avatars` (Public bucket)
+     - `resumes` (Private bucket)
+     - `course-content` (Private bucket)
+     - `portfolio` (Public bucket)
+
+6. Configure Authentication:
+   - Go to Authentication → Providers
+   - Enable Email provider
+   - Optionally configure OAuth providers (Google, GitHub)
+
+7. Run development server:
    ```bash
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000)
+8. Open [http://localhost:3000](http://localhost:3000)
 
 ## Available Scripts
 
@@ -121,6 +166,14 @@ talentsphere/
 - `npm run lint` - ESLint check
 
 ## Implementation Status
+
+**Phase 0: Environment & Database Setup** ✅ COMPLETE
+
+- ✅ `.env.example` template created
+- ✅ Database setup script (`scripts/setup-database.sh`)
+- ✅ Database migrations (8 SQL files)
+- ✅ Setup guide with verification steps
+- ✅ Storage bucket configuration documented
 
 **Phase 1: Foundation Setup** ✅ COMPLETE
 
@@ -136,15 +189,17 @@ talentsphere/
 - ✅ UI component library
 - ✅ Layout components
 - ✅ Landing page
+- ✅ Authentication pages (signin, signup, reset-password)
+- ✅ Middleware for route protection
 
 **Next Phases**:
-1. Database schema (Supabase migrations)
-2. Authentication flows
-3. User profile management
-4. Job board functionality
-5. Code Arena implementation
-6. LMS integration
-7. Application tracking system
+1. ✅ Create dashboard page (authenticated user home)
+2. ⏳ User profile management (create/edit)
+3. ⏳ Job board functionality (post/list/apply)
+4. ⏳ Company profiles
+5. ⏳ Application tracking system
+6. ⏳ Code Arena implementation
+7. ⏳ LMS integration
 
 ## Key Architecture Decisions
 
