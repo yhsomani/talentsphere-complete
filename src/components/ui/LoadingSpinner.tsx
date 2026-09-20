@@ -1,6 +1,6 @@
 import styles from './LoadingSpinner.module.css';
 
-interface LoadingSpinnerProps {
+export interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
   fullScreen?: boolean;
   text?: string;

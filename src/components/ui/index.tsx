@@ -120,8 +120,8 @@ export function Card({ children, className, title, description, action }: CardPr
 
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
-  size?: 'sm' | 'md';
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'secondary';
+  size?: 'sm' | 'md' | 'small';
   className?: string;
 }
 
@@ -132,11 +132,13 @@ export function Badge({ children, variant = 'default', size = 'md', className }:
     warning: 'bg-yellow-100 text-yellow-800',
     danger: 'bg-red-100 text-red-800',
     info: 'bg-blue-100 text-blue-800',
+    secondary: 'bg-gray-100 text-gray-700',
   };
   
   const sizes = {
     sm: 'px-2 py-0.5 text-xs',
     md: 'px-2.5 py-0.5 text-sm',
+    small: 'px-2 py-0.5 text-xs',
   };
   
   return (
@@ -149,7 +151,7 @@ export function Badge({ children, variant = 'default', size = 'md', className }:
 export interface AvatarProps {
   src?: string;
   alt: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'large';
   fallback?: string;
   className?: string;
 }
@@ -160,6 +162,7 @@ export function Avatar({ src, alt, size = 'md', fallback, className }: AvatarPro
     md: 'h-10 w-10',
     lg: 'h-12 w-12',
     xl: 'h-16 w-16',
+    large: 'h-16 w-16',
   };
   
   const initials = fallback || alt.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

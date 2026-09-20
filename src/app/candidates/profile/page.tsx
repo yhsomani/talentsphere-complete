@@ -57,7 +57,7 @@ export default function CandidateProfilePage() {
   // Show loading state during auth check
   if (authLoading || loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout userRole="candidate" userName="Loading...">
         <LoadingState />
       </DashboardLayout>
     );
@@ -66,14 +66,14 @@ export default function CandidateProfilePage() {
   // Show error state
   if (error && !profile) {
     return (
-      <DashboardLayout>
+      <DashboardLayout userRole="candidate" userName="Error">
         <ErrorBanner message={error} onDismiss={clearError} />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout userRole="candidate" userName={`${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Candidate'} userAvatar={profile?.user_id ? `/api/avatar/${profile.user_id}` : undefined}>
       <div className={styles.container}>
         <header className={styles.header}>
           <h1 className={styles.title}>Candidate Profile</h1>
@@ -138,7 +138,7 @@ export default function CandidateProfilePage() {
         <footer className={styles.footer}>
           <Button
             variant="primary"
-            size="large"
+            size="lg"
             onClick={saveProfile}
             disabled={saving}
           >

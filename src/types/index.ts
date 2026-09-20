@@ -25,7 +25,8 @@ export type UserRole =
 export interface User {
   id: string;
   email: string;
-  full_name: string;
+  first_name?: string | null;
+  last_name?: string | null;
   avatar_url?: string;
   role: UserRole;
   is_verified: boolean;
@@ -71,8 +72,10 @@ export interface Skill {
 }
 
 export interface SkillMatch {
+  id: string;
   skill_id: string;
   skill: Skill;
+  name: string;
   proficiency_level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   verification_source: 'course_completion' | 'challenge' | 'assessment' | 'work_sample' | 'peer_endorsement';
   verified_at: string;
@@ -719,3 +722,46 @@ export interface FilterOption {
   operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'in' | 'contains';
   value: unknown;
 }
+
+// ============================================================================
+// JOB LISTING & FILTERS (for job board)
+// ============================================================================
+
+export interface JobListing extends Job {
+  organization?: {
+    id: string;
+    name: string;
+    logo_url?: string;
+    industry?: string;
+  };
+  posted_by?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  skills?: Array<{
+    id: string;
+    name: string;
+    category?: string;
+  }>;
+  applications_count?: number;
+  is_bookmarked?: boolean;
+}
+
+export interface JobFilters {
+  search?: string;
+  location?: string;
+  jobType?: JobType;
+  workLocation?: WorkMode;
+  experienceLevel?: ExperienceLevel;
+  salaryMin?: number;
+  salaryMax?: number;
+  skills?: string[];
+  postedWithin?: '24h' | '7d' | '30d' | '90d';
+  organizationId?: string;
+  status?: JobStatus;
+}
+
+export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
+export type WorkLocation = WorkMode;

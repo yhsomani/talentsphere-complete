@@ -8,13 +8,13 @@ import React from 'react';
 import { Input } from '@/components/ui';
 
 interface ProfileFormData {
-  headline: string;
-  bio: string;
-  location: string;
-  timezone: string;
-  availability_status: string;
-  visibility: string;
-  resume_url: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  timezone?: string;
+  availability_status?: 'available' | 'employed' | 'open_to_work' | 'not_interested';
+  visibility?: 'public' | 'connections' | 'private';
+  resume_url?: string;
 }
 
 interface ProfileFormProps {
