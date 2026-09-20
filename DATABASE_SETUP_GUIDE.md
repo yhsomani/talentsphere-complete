@@ -90,7 +90,7 @@ TalentSphere requires 5 dedicated storage buckets with specific Row Level Securi
 | `portfolio` | **Public** | Images, videos, PDFs | Candidate project portfolio artifacts |
 | `resumes` | **Private** | `application/pdf`, `.doc`, `.docx` | Candidate CVs & resumes |
 | `course-content` | **Private** | Documents, videos, lesson files | LMS course instructor materials |
-| `talentsphere_bucket` | **Private** | General documents | System backups & asset attachments |
+| `media-assets` | **Private** | HLS chunks, video files, async interview recordings | Provider-agnostic media engine storage |
 
 ### Automated Storage Setup Script
 Instead of configuring buckets and RLS policies manually in the dashboard, run the automated setup script:

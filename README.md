@@ -8,10 +8,10 @@ TalentSphere closes the structural gap between learning, verifiable skill evalua
 
 | Check | Result |
 |-------|--------|
-| `npm run build` | ✅ 0 errors — 26 pages generated |
+| `npm run build` | ✅ 0 errors — 30 pages generated |
 | `npx tsc --noEmit` | ✅ 0 TypeScript errors |
 | `npm run lint` | ✅ 0 errors, 0 warnings |
-| `npm test` | ✅ 28/28 pass |
+| `npm test` | ✅ 29/29 pass (14 unit + 15 integration) |
 | E2E tests | ✅ Playwright configured (3 spec files) |
 
 ---
