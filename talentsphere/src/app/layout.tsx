@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   keywords: ["career", "jobs", "learning", "skills", "assessment", "hiring", "talent"],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

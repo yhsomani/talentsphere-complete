@@ -1,0 +1,322 @@
+-- ============================================================================
+-- Migration 001: Core Extensions and Enum Types
+-- ============================================================================
+-- Purpose: Sets up PostgreSQL extensions and all enum types used throughout
+--          the TalentSphere database schema.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- PostgreSQL Extensions
+-- ----------------------------------------------------------------------------
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ----------------------------------------------------------------------------
+-- User & Role Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE user_role AS ENUM (
+    'candidate',
+    'recruiter',
+    'hiring_manager',
+    'interviewer',
+    'admin',
+    'institution_admin',
+    'instructor'
+);
+
+CREATE TYPE candidate_availability_status AS ENUM (
+    'available',
+    'employed',
+    'open_to_work',
+    'not_interested'
+);
+
+CREATE TYPE profile_visibility AS ENUM (
+    'public',
+    'connections',
+    'private'
+);
+
+-- ----------------------------------------------------------------------------
+-- Skill & Proficiency Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE skill_proficiency_level AS ENUM (
+    'beginner',
+    'intermediate',
+    'advanced',
+    'expert'
+);
+
+-- ----------------------------------------------------------------------------
+-- Job-Related Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE job_type AS ENUM (
+    'full_time',
+    'part_time',
+    'contract',
+    'internship',
+    'apprenticeship'
+);
+
+CREATE TYPE work_mode AS ENUM (
+    'onsite',
+    'remote',
+    'hybrid'
+);
+
+CREATE TYPE job_status AS ENUM (
+    'draft',
+    'active',
+    'paused',
+    'closed',
+    'filled'
+);
+
+CREATE TYPE experience_level AS ENUM (
+    'entry',
+    'mid',
+    'senior',
+    'lead',
+    'principal',
+    'executive'
+);
+
+-- ----------------------------------------------------------------------------
+-- Application & Hiring Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE application_status AS ENUM (
+    'submitted',
+    'screening',
+    'under_review',
+    'interview_scheduled',
+    'interviewed',
+    'offer_extended',
+    'offer_accepted',
+    'offer_declined',
+    'rejected',
+    'withdrawn'
+);
+
+CREATE TYPE scorecard_decision AS ENUM (
+    'strong_yes',
+    'yes',
+    'no',
+    'strong_no'
+);
+
+-- ----------------------------------------------------------------------------
+-- Learning & Course Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE course_level AS ENUM (
+    'beginner',
+    'intermediate',
+    'advanced',
+    'all_levels'
+);
+
+CREATE TYPE content_type AS ENUM (
+    'video',
+    'text',
+    'quiz',
+    'assignment',
+    'interactive',
+    'download'
+);
+
+CREATE TYPE enrollment_status AS ENUM (
+    'enrolled',
+    'in_progress',
+    'completed',
+    'dropped',
+    'expired'
+);
+
+CREATE TYPE certificate_status AS ENUM (
+    'pending',
+    'issued',
+    'revoked',
+    'expired'
+);
+
+-- ----------------------------------------------------------------------------
+-- Challenge & Assessment Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE challenge_type AS ENUM (
+    'coding',
+    'multiple_choice',
+    'practical',
+    'portfolio_review',
+    'take_home'
+);
+
+CREATE TYPE challenge_status AS ENUM (
+    'draft',
+    'published',
+    'archived',
+    'deprecated'
+);
+
+CREATE TYPE challenge_difficulty AS ENUM (
+    'easy',
+    'medium',
+    'hard',
+    'expert'
+);
+
+CREATE TYPE submission_status AS ENUM (
+    'pending',
+    'passed',
+    'failed',
+    'compilation_error',
+    'timeout',
+    'runtime_error'
+);
+
+-- ----------------------------------------------------------------------------
+-- Gamification Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE xp_source AS ENUM (
+    'profile_completion',
+    'skill_verification',
+    'challenge_completed',
+    'course_completed',
+    'job_applied',
+    'job_posted',
+    'application_received',
+    'interview_completed',
+    'job_hired',
+    'referral',
+    'badge_earned',
+    'daily_login',
+    'streak_milestone',
+    'community_contribution',
+    'content_created',
+    'review_submitted'
+);
+
+CREATE TYPE badge_category AS ENUM (
+    'skill',
+    'achievement',
+    'milestone',
+    'social',
+    'learning',
+    'challenge',
+    'job_search',
+    'special'
+);
+
+-- ----------------------------------------------------------------------------
+-- Notification & Messaging Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE notification_type AS ENUM (
+    'system',
+    'application_update',
+    'job_recommendation',
+    'message_received',
+    'challenge_result',
+    'course_enrollment',
+    'assignment_grade',
+    'badge_earned',
+    'level_up',
+    'mention',
+    'invitation'
+);
+
+CREATE TYPE notification_channel AS ENUM (
+    'in_app',
+    'email',
+    'push',
+    'sms'
+);
+
+CREATE TYPE notification_priority AS ENUM (
+    'low',
+    'medium',
+    'high',
+    'urgent'
+);
+
+CREATE TYPE message_status AS ENUM (
+    'sent',
+    'delivered',
+    'read',
+    'deleted'
+);
+
+-- ----------------------------------------------------------------------------
+-- B2B & Institutional Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE license_type AS ENUM (
+    'trial',
+    'standard',
+    'premium',
+    'enterprise'
+);
+
+CREATE TYPE license_status AS ENUM (
+    'active',
+    'suspended',
+    'expired',
+    'cancelled'
+);
+
+CREATE TYPE cohort_status AS ENUM (
+    'draft',
+    'active',
+    'completed',
+    'archived'
+);
+
+-- ----------------------------------------------------------------------------
+-- Analytics & Audit Enums
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE event_category AS ENUM (
+    'auth',
+    'profile',
+    'job',
+    'application',
+    'challenge',
+    'course',
+    'messaging',
+    'notification',
+    'gamification',
+    'admin',
+    'system'
+);
+
+CREATE TYPE audit_action AS ENUM (
+    'create',
+    'read',
+    'update',
+    'delete',
+    'restore',
+    'export',
+    'import'
+);
+
+-- ----------------------------------------------------------------------------
+-- Common Timestamp Trigger Function
+-- ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ----------------------------------------------------------------------------
+-- End of Migration 001
+-- ----------------------------------------------------------------------------
