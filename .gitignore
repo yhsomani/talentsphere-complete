@@ -1,7 +1,6 @@
 ```
 # Database migration files
 *.sql
-!talentsphere/supabase/**/*.sql
 
 # Dependencies
 node_modules/
