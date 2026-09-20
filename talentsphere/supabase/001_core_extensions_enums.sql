@@ -16,74 +16,106 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- User & Role Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE user_role AS ENUM (
-    'candidate',
-    'recruiter',
-    'hiring_manager',
-    'interviewer',
-    'admin',
-    'institution_admin',
-    'instructor'
-);
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM (
+        'candidate',
+        'recruiter',
+        'hiring_manager',
+        'interviewer',
+        'admin',
+        'institution_admin',
+        'instructor'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE candidate_availability_status AS ENUM (
-    'available',
-    'employed',
-    'open_to_work',
-    'not_interested'
-);
+DO $$ BEGIN
+    CREATE TYPE candidate_availability_status AS ENUM (
+        'available',
+        'employed',
+        'open_to_work',
+        'not_interested'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE profile_visibility AS ENUM (
-    'public',
-    'connections',
-    'private'
-);
+DO $$ BEGIN
+    CREATE TYPE profile_visibility AS ENUM (
+        'public',
+        'connections',
+        'private'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Skill & Proficiency Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE skill_proficiency_level AS ENUM (
-    'beginner',
-    'intermediate',
-    'advanced',
-    'expert'
-);
+DO $$ BEGIN
+    CREATE TYPE skill_proficiency_level AS ENUM (
+        'beginner',
+        'intermediate',
+        'advanced',
+        'expert'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Job-Related Enums
 -- ----------------------------------------------------------------------------
 
-CREATE TYPE job_type AS ENUM (
-    'full_time',
-    'part_time',
-    'contract',
-    'internship',
-    'apprenticeship'
-);
+DO $$ BEGIN
+    CREATE TYPE job_type AS ENUM (
+        'full_time',
+        'part_time',
+        'contract',
+        'internship',
+        'apprenticeship'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE work_mode AS ENUM (
-    'onsite',
-    'remote',
-    'hybrid'
-);
+DO $$ BEGIN
+    CREATE TYPE work_mode AS ENUM (
+        'onsite',
+        'remote',
+        'hybrid'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE job_status AS ENUM (
-    'draft',
-    'active',
-    'paused',
-    'closed',
-    'filled'
-);
+DO $$ BEGIN
+    CREATE TYPE job_status AS ENUM (
+        'draft',
+        'active',
+        'paused',
+        'closed',
+        'filled'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE experience_level AS ENUM (
-    'entry',
-    'mid',
-    'senior',
-    'lead',
-    'principal',
-    'executive'
-);
+DO $$ BEGIN
+    CREATE TYPE experience_level AS ENUM (
+        'entry',
+        'mid',
+        'senior',
+        'lead',
+        'principal',
+        'executive'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- Application & Hiring Enums

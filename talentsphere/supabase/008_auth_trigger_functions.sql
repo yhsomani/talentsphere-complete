@@ -145,83 +145,93 @@ CREATE OR REPLACE FUNCTION calculate_profile_completion()
 RETURNS TRIGGER AS $$
 DECLARE
     completion INTEGER := 0;
-    has_headline BOOLEAN;
-    has_bio BOOLEAN;
-    has_location BOOLEAN;
-    has_avatar BOOLEAN;
-    experience_count INTEGER;
-    education_count INTEGER;
+    profile_rec RECORD;
+    exp_count INTEGER;
+    edu_count INTEGER;
     skills_count INTEGER;
-    certifications_count INTEGER;
+    cert_count INTEGER;
     portfolio_count INTEGER;
+    target_user_id UUID;
 BEGIN
-    -- Check basic fields (30%)
-    SELECT 
-        (headline IS NOT NULL AND headline != ''),
-        (bio IS NOT NULL AND bio != ''),
-        (location IS NOT NULL AND location != ''),
-        (avatar_url IS NOT NULL AND avatar_url != '')
-    INTO has_headline, has_bio, has_location, has_avatar
+    -- Determine the user_id based on which table triggered this
+    IF TG_TABLE_NAME = 'candidate_profiles' THEN
+        target_user_id := NEW.user_id;
+    ELSIF TG_TABLE_NAME IN ('experience', 'education', 'certifications', 'portfolio_items') THEN
+        -- Get user_id from candidate_profiles via candidate_profile_id
+        SELECT cp.user_id INTO target_user_id
+        FROM public.candidate_profiles cp
+        WHERE cp.id = NEW.candidate_profile_id;
+    ELSIF TG_TABLE_NAME = 'candidate_skills' THEN
+        -- Get user_id from candidate_profiles via candidate_profile_id
+        SELECT cp.user_id INTO target_user_id
+        FROM public.candidate_profiles cp
+        WHERE cp.id = NEW.candidate_profile_id;
+    ELSE
+        target_user_id := NEW.user_id;
+    END IF;
+    
+    -- Get the candidate profile record
+    SELECT * INTO profile_rec
     FROM public.candidate_profiles
-    WHERE user_id = NEW.user_id;
+    WHERE user_id = target_user_id;
     
-    IF has_headline THEN completion := completion + 6; END IF;
-    IF has_bio THEN completion := completion + 6; END IF;
-    IF has_location THEN completion := completion + 6; END IF;
-    IF has_avatar THEN completion := completion + 6; END IF;
+    IF profile_rec IS NULL THEN
+        RETURN NEW;
+    END IF;
     
-    -- Count related records (70%)
-    SELECT COUNT(*) INTO experience_count FROM public.experience WHERE user_id = NEW.user_id;
-    SELECT COUNT(*) INTO education_count FROM public.education WHERE user_id = NEW.user_id;
-    SELECT COUNT(*) INTO skills_count FROM public.candidate_skills WHERE user_id = NEW.user_id;
-    SELECT COUNT(*) INTO certifications_count FROM public.certifications WHERE user_id = NEW.user_id;
-    SELECT COUNT(*) INTO portfolio_count FROM public.portfolio_items WHERE user_id = NEW.user_id;
+    -- Headline (10%)
+    IF profile_rec.headline IS NOT NULL AND profile_rec.headline != '' THEN
+        completion := completion + 10;
+    END IF;
     
-    IF experience_count > 0 THEN completion := completion + 14; END IF;
-    IF education_count > 0 THEN completion := completion + 14; END IF;
-    IF skills_count > 0 THEN completion := completion + 14; END IF;
-    IF certifications_count > 0 THEN completion := completion + 14; END IF;
-    IF portfolio_count > 0 THEN completion := completion + 14; END IF;
+    -- Summary (15%)
+    IF profile_rec.summary IS NOT NULL AND profile_rec.summary != '' THEN
+        completion := completion + 15;
+    END IF;
     
-    -- Update profile completion
+    -- Location (5%)
+    IF profile_rec.location_city IS NOT NULL OR profile_rec.location_country IS NOT NULL THEN
+        completion := completion + 5;
+    END IF;
+    
+    -- Experience (20%)
+    SELECT COUNT(*) INTO exp_count FROM public.experience WHERE candidate_profile_id = profile_rec.id;
+    IF exp_count > 0 THEN
+        completion := completion + 20;
+    END IF;
+    
+    -- Education (15%)
+    SELECT COUNT(*) INTO edu_count FROM public.education WHERE candidate_profile_id = profile_rec.id;
+    IF edu_count > 0 THEN
+        completion := completion + 15;
+    END IF;
+    
+    -- Skills (15%)
+    SELECT COUNT(*) INTO skills_count FROM public.candidate_skills WHERE candidate_profile_id = profile_rec.id;
+    IF skills_count > 0 THEN
+        completion := completion + 15;
+    END IF;
+    
+    -- Portfolio (10%)
+    SELECT COUNT(*) INTO portfolio_count FROM public.portfolio_items WHERE candidate_profile_id = profile_rec.id;
+    IF portfolio_count > 0 THEN
+        completion := completion + 10;
+    END IF;
+    
+    -- Resume/Certifications (10%)
+    SELECT COUNT(*) INTO cert_count FROM public.certifications WHERE candidate_profile_id = profile_rec.id;
+    IF cert_count > 0 OR profile_rec.resume_url IS NOT NULL THEN
+        completion := completion + 10;
+    END IF;
+    
+    -- Update the profile
     UPDATE public.candidate_profiles
     SET 
         profile_completion_percentage = completion,
         updated_at = NOW()
-    WHERE user_id = NEW.user_id;
-    
-    -- Award XP for reaching milestones
-    IF completion >= 50 AND OLD.profile_completion_percentage < 50 THEN
-        INSERT INTO public.xp_ledger (user_id, amount, transaction_type, source_type, description, balance_after)
-        SELECT 
-            NEW.user_id,
-            100,
-            'profile_milestone',
-            'profile',
-            'Profile 50% complete!',
-            COALESCE(SUM(amount), 0) + 100
-        FROM public.xp_ledger
-        WHERE user_id = NEW.user_id;
-    END IF;
-    
-    IF completion >= 100 AND OLD.profile_completion_percentage < 100 THEN
-        INSERT INTO public.xp_ledger (user_id, amount, transaction_type, source_type, description, balance_after)
-        SELECT 
-            NEW.user_id,
-            200,
-            'profile_complete',
-            'profile',
-            'Profile 100% complete! 🎉',
-            COALESCE(SUM(amount), 0) + 200
-        FROM public.xp_ledger
-        WHERE user_id = NEW.user_id;
-    END IF;
+    WHERE user_id = target_user_id;
     
     RETURN NEW;
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE LOG 'Error in calculate_profile_completion: %', SQLERRM;
-        RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
