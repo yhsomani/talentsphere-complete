@@ -298,7 +298,7 @@ SELECT * FROM candidate_profiles WHERE user_id = 'other-user-uuid';
 After applying these migrations:
 
 1. **Seed initial data** - Add default skills taxonomy
-2. **Create storage buckets** - For resumes, avatars, course content
+2. **Create storage buckets** - For resumes, avatars, course content, portfolio, media-assets (5 buckets total)
 3. **Set up Edge Functions** - For code execution, email sending
 4. **Configure auth providers** - Email/password, OAuth providers
 5. **Build frontend** - Connect UI to database via Supabase client
@@ -307,4 +307,4 @@ After applying these migrations:
 
 **Version**: 1.0.0  
 **Last Updated**: 2024  
-**Database**: PostgreSQL 15+ (via Supabase)
+**Database**: PostgreSQL 17.6 (via Supabase)

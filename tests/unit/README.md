@@ -22,4 +22,4 @@ This directory contains unit tests for TalentSphere utility functions and indivi
 npm test
 ```
 
-Expected: **28/28 pass** (14 utility + 14 DB/schema integration tests)
+Expected: **29/29 pass** (15 utility function tests + 14 database integration tests)

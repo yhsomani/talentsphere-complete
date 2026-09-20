@@ -29,6 +29,7 @@
    - `resumes` (Private)
    - `course-content` (Private)
    - `portfolio` (Public)
+   - `media-assets` (Private)
 
 5. **Configure Authentication**: Go to Authentication → Providers
    - Enable Email provider
@@ -121,6 +122,7 @@ SELECT 'organizations', COUNT(*) FROM organizations;
 | `resumes` | Private | Candidate resumes (PDF/DOC) |
 | `course-content` | Private | Course materials |
 | `portfolio` | Public | Portfolio projects/media |
+| `media-assets` | Private | HLS chunked media, async interview videos |
 
 ### Using SQL (Alternative)
 
@@ -130,7 +132,8 @@ INSERT INTO storage.buckets (id, name, public) VALUES
   ('avatars', 'avatars', true),
   ('resumes', 'resumes', false),
   ('course-content', 'course-content', false),
-  ('portfolio', 'portfolio', true);
+  ('portfolio', 'portfolio', true),
+  ('media-assets', 'media-assets', false);
 ```
 
 ### RLS Policies for Storage

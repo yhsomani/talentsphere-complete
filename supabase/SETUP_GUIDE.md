@@ -230,4 +230,4 @@ For issues or questions:
 
 **Last Updated**: 2024  
 **Schema Version**: 1.0.0  
-**Compatible With**: Supabase PostgreSQL 15+
+**Compatible With**: Supabase PostgreSQL 17+
