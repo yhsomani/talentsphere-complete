@@ -140,7 +140,7 @@ export function Header({ userName, userAvatar, notificationCount = 0, className 
           </div>
           
           {/* Notifications */}
-          <button className="relative p-2 text-gray-400 hover:text-gray-600">
+          <button className="relative p-2 text-gray-400 hover:text-gray-600" aria-label="View notifications">
             <Bell className="h-6 w-6" />
             {notificationCount > 0 && (
               <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
