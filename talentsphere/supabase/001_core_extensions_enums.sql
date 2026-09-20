@@ -134,7 +134,8 @@ CREATE TYPE enrollment_status AS ENUM (
     'in_progress',
     'completed',
     'dropped',
-    'expired'
+    'expired',
+    'active'
 );
 
 CREATE TYPE certificate_status AS ENUM (
@@ -303,6 +304,84 @@ CREATE TYPE audit_action AS ENUM (
     'restore',
     'export',
     'import'
+);
+
+-- ----------------------------------------------------------------------------
+-- LMS Enums (for Migration 004)
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE course_category AS ENUM (
+    'development',
+    'design',
+    'business',
+    'data_science',
+    'marketing',
+    'devops',
+    'security',
+    'other'
+);
+
+CREATE TYPE lesson_content_type AS ENUM (
+    'video',
+    'text',
+    'quiz',
+    'assignment',
+    'interactive',
+    'download',
+    'code_challenge'
+);
+
+CREATE TYPE quiz_question_type AS ENUM (
+    'multiple_choice',
+    'true_false',
+    'short_answer',
+    'code_completion',
+    'matching'
+);
+
+-- ----------------------------------------------------------------------------
+-- Gamification & Messaging Enums (for Migration 006)
+-- ----------------------------------------------------------------------------
+
+CREATE TYPE xp_transaction_type AS ENUM (
+    'signup_bonus',
+    'profile_milestone',
+    'profile_complete',
+    'skill_verification',
+    'challenge_completed',
+    'course_completed',
+    'job_applied',
+    'job_posted',
+    'application_received',
+    'interview_completed',
+    'job_hired',
+    'referral',
+    'badge_earned',
+    'daily_login',
+    'streak_milestone',
+    'community_contribution',
+    'content_created',
+    'review_submitted'
+);
+
+CREATE TYPE leaderboard_period AS ENUM (
+    'daily',
+    'weekly',
+    'monthly',
+    'all_time'
+);
+
+CREATE TYPE conversation_type AS ENUM (
+    'direct',
+    'group'
+);
+
+CREATE TYPE message_type AS ENUM (
+    'text',
+    'image',
+    'file',
+    'link',
+    'system'
 );
 
 -- ----------------------------------------------------------------------------
