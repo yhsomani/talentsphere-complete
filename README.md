@@ -96,6 +96,7 @@ Or use the combined migration: `supabase/ALL_MIGRATIONS_COMBINED.sql`
 | `resumes` | Private |
 | `course-content` | Private |
 | `portfolio` | Public |
+| `media-assets` | Private |
 
 ---
 
@@ -146,7 +147,6 @@ talentsphere-complete/
 │   ├── e2e/                      # Playwright E2E tests
 │   └── *.test.mjs                # Node.js test runner tests
 ├── supabase/                     # Database migrations + RLS
-├── TASKS.md                      # Master task list
 ├── ARCHITECTURE.md               # Detailed architecture docs
 ├── .env.example                  # Environment variable template
 └── playwright.config.ts          # E2E test configuration
@@ -200,7 +200,6 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details.
 | [docs/SECURITY.md](./docs/SECURITY.md) | How do we protect it? |
 | [docs/TEST_PLAN.md](./docs/TEST_PLAN.md) | How do we verify it works? |
 | [docs/MEMORY.md](./docs/MEMORY.md) | What is the current project state? |
-| [TASKS.md](./TASKS.md) | What should we build next? |
 
 ---
 

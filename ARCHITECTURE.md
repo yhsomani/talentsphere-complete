@@ -50,7 +50,15 @@ talentsphere/
 │   ├── lib/                      # Library configurations & clients
 │   │   └── supabase.ts           # Supabase client setup
 │   │
-│   ├── services/                 # API & data access services (future)
+│   ├── services/                 # API & data access services (8 service files)
+│   │   ├── application.service.ts
+│   │   ├── candidate.service.ts
+│   │   ├── challenge.service.ts
+│   │   ├── course.service.ts
+│   │   ├── jobs.service.ts
+│   │   ├── leaderboard.service.ts
+│   │   ├── message.service.ts
+│   │   └── notification.service.ts
 │   │
 │   ├── stores/                   # Zustand state management
 │   │   └── index.ts              # Auth store, UI store, Gamification store
@@ -100,9 +108,9 @@ talentsphere/
 - **Examples**: `useAuth`, `useSignIn`, `usePagination`
 
 ### Data Access (Services/Lib)
-- **Location**: `src/lib/`, `src/services/` (future)
+- **Location**: `src/lib/`, `src/services/`
 - **Responsibility**: API calls, database operations
-- **Examples**: `supabase.ts` client configuration
+- **Examples**: `supabase.ts` client configuration, 8 service files (`application.service.ts`, `candidate.service.ts`, `challenge.service.ts`, `course.service.ts`, `jobs.service.ts`, `leaderboard.service.ts`, `message.service.ts`, `notification.service.ts`)
 
 ### Types
 - **Location**: `src/types/`

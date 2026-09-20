@@ -1443,7 +1443,7 @@ CONFIRMED — No deviation without formal governance approval.
 | Layer | Technology | Purpose |
 |---|---|---|
 | Frontend | Next.js (App Router), React 18+, TypeScript strict, Tailwind CSS | Server-rendered + interactive UI |
-| Database & Auth | Supabase (PostgreSQL 15+, PostgREST, Auth, Realtime, Storage, Edge Functions) | Full backend-as-a-service |
+| Database & Auth | Supabase (PostgreSQL 17+, PostgREST, Auth, Realtime, Storage, Edge Functions) | Full backend-as-service |
 | AI | Multi-model router (lib/ai/service.ts): Gemini (workhorse) + Claude (deep reasoning) + Heuristic (always-on fallback) | LLM capabilities with deterministic baseline |
 | Hosting | Vercel (serverless, edge, previews) | CI/CD + global edge |
 | Payments | Stripe (subscriptions, metered billing, webhooks, B2B invoicing) | Monetization |
@@ -4586,7 +4586,7 @@ Verified hires → platform credibility → more institutions join
 | Layer | Technology | Purpose |
 |---|---|---|
 | Frontend | Next.js (App Router), React 18+, TypeScript strict, Tailwind CSS 4.x | Server-rendered + interactive UI |
-| Database & Auth | Supabase (PostgreSQL 15+, PostgREST, Auth, Realtime, Storage, Edge Functions) | Full BaaS |
+| Database & Auth | Supabase (PostgreSQL 17+, PostgREST, Auth, Realtime, Storage, Edge Functions) | Full BaaS |
 | AI | Multi-Model Router: Gemini + Claude + Heuristic | LLM with deterministic baseline |
 | Hosting | Vercel (serverless, edge, previews) | CI/CD + global edge |
 | Payments | Stripe (Subscriptions, Metered Billing, Webhooks) | Monetization |
