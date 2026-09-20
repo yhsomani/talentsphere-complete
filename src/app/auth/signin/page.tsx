@@ -4,15 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Target, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
-import { useSignIn } from '@/hooks';
+import { useSignIn, useSignInOAuth } from '@/hooks';
 
 export default function SignInPage() {
   const { signIn, loading } = useSignIn();
+  const { signInWithOAuth, loading: oauthLoading } = useSignInOAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    try {
+      await signInWithOAuth(provider);
+      // Redirect is handled by the hook
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'OAuth sign in failed');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,11 +160,21 @@ export default function SignInPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" disabled>
-                Google
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleOAuthSignIn('google')}
+                disabled={oauthLoading}
+              >
+                {oauthLoading ? 'Signing in...' : 'Google'}
               </Button>
-              <Button variant="outline" className="w-full" disabled>
-                GitHub
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleOAuthSignIn('github')}
+                disabled={oauthLoading}
+              >
+                {oauthLoading ? 'Signing in...' : 'GitHub'}
               </Button>
             </div>
           </div>

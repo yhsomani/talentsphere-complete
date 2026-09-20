@@ -142,6 +142,45 @@ export function useSignOut() {
 }
 
 /**
+ * Hook for OAuth sign in functionality
+ */
+export function useSignInOAuth() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const supabase = createBrowserClient();
+
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'github') => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+
+      // User will be redirected to OAuth provider
+      // After successful auth, they'll be redirected back to /auth/callback
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'OAuth sign in failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [router, supabase.auth]);
+
+  return { signInWithOAuth, loading, error };
+}
+
+/**
  * Hook for pagination
  */
 export function usePagination<T>(

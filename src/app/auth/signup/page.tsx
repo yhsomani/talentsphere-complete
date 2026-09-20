@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Target, Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
-import { useSignUp } from '@/hooks';
+import { useSignUp, useSignInOAuth } from '@/hooks';
 import type { UserRole } from '@/types';
 
 export default function SignUpPage() {
   const { signUp, loading } = useSignUp();
+  const { signInWithOAuth, loading: oauthLoading } = useSignInOAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +17,15 @@ export default function SignUpPage() {
   const [role, setRole] = useState<UserRole>('candidate');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const handleOAuthSignUp = async (provider: 'google' | 'github') => {
+    try {
+      await signInWithOAuth(provider);
+      // Redirect is handled by the hook
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'OAuth sign up failed');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,11 +225,21 @@ export default function SignUpPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full" disabled>
-                Google
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleOAuthSignUp('google')}
+                disabled={oauthLoading}
+              >
+                {oauthLoading ? 'Signing up...' : 'Google'}
               </Button>
-              <Button variant="outline" className="w-full" disabled>
-                GitHub
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => handleOAuthSignUp('github')}
+                disabled={oauthLoading}
+              >
+                {oauthLoading ? 'Signing up...' : 'GitHub'}
               </Button>
             </div>
           </div>
