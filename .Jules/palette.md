@@ -1,3 +1,0 @@
-## 2024-05-18 - Missing ARIA Labels on Icon-only Buttons
-**Learning:** Found multiple instances across the application (Dashboard layout, Auth forms) where icon-only `<button>`s were implemented without `aria-label`s. This makes it impossible for screen reader users to understand the purpose of the button (e.g., toggling password visibility or viewing notifications).
-**Action:** When implementing or reviewing icon-only buttons, always check for the presence of an `aria-label` or visually hidden text to convey the button's action. For toggle states, ensure the label updates dynamically to reflect the current state (e.g., "Show password" vs "Hide password").
