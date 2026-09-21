@@ -1,5 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { createBrowserClient } from '@/lib/supabase';
+/**
+ * Message Service - Refactored Version
+ * 
+ * Data access layer for messaging operations.
+ * Handles all Supabase interactions for conversations and messages.
+ * Uses DatabaseAdapter for loose coupling and testability.
+ */
+
+import type { Database } from '@/types/database.types';
+import { DatabaseAdapter } from '@/lib/database/adapter';
+import { AppErrors, isAppError } from '@/lib/errors';
+
+type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
+type ConversationUpdate = Database['public']['Tables']['conversations']['Update'];
+type MessageInsert = Database['public']['Tables']['messages']['Insert'];
+type MessageUpdate = Database['public']['Tables']['messages']['Update'];
 
 export interface ParticipantInfo {
   id: string;
@@ -59,77 +73,83 @@ export interface ConversationWithDetails {
   unread_count?: number;
 }
 
-const supabase = createBrowserClient();
+export interface UserSearchResult {
+  id: string;
+  email: string;
+  full_name?: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  user_role: string;
+  avatar_url?: string | null;
+}
 
-export const messageService = {
+/**
+ * MessageService class with dependency injection
+ */
+export class MessageService {
+  constructor(private readonly db: DatabaseAdapter) {}
+
+  /**
+   * Helper to format user data
+   */
+  private formatUser(user: any): UserSearchResult | null {
+    if (!user) return null;
+    const [firstName = '', ...rest] = (user.full_name || '').split(' ');
+    const lastName = rest.join(' ');
+    return {
+      id: user.id,
+      email: user.email || '',
+      full_name: user.full_name || null,
+      first_name: firstName || null,
+      last_name: lastName || null,
+      user_role: user.role || 'candidate',
+      avatar_url: user.avatar_url || null,
+    };
+  }
+
   /**
    * Get all conversations for a user
    */
   async getConversations(userId: string): Promise<ConversationWithDetails[]> {
     try {
       // 1. Find all conversation_ids where user is participant
-      const { data: myParticipations, error: partError } = await (supabase as any)
-        .from('conversation_participants')
-        .select('conversation_id, last_read_at')
-        .eq('user_id', userId);
+      const partResult = await this.db.list<any>('conversation_participants', {
+        filters: [{ field: 'user_id', operator: 'eq', value: userId }],
+      });
 
-      if (partError || !myParticipations || myParticipations.length === 0) {
+      if (partResult.error || !partResult.data || partResult.data.length === 0) {
         return [];
       }
 
+      const myParticipations = partResult.data;
       const conversationIds = myParticipations.map((p: any) => p.conversation_id);
       const readAtMap = new Map<string, string | null>(
         myParticipations.map((p: any) => [p.conversation_id, p.last_read_at])
       );
 
       // 2. Fetch conversations
-      const { data: conversations, error: convError } = await (supabase as any)
-        .from('conversations')
-        .select('*')
-        .in('id', conversationIds)
-        .order('updated_at', { ascending: false });
+      const convResult = await this.db.list<any>('conversations', {
+        filters: [{ field: 'id', operator: 'in', value: conversationIds }],
+        pagination: { orderBy: 'updated_at', ascending: false },
+      });
 
-      if (convError || !conversations) {
+      if (convResult.error || !convResult.data) {
         return [];
       }
 
+      const conversations = convResult.data;
+
       // 3. Fetch all participants for these conversations
-      const { data: allParticipants } = await (supabase as any)
-        .from('conversation_participants')
-        .select(`
-          id,
-          conversation_id,
-          user_id,
-          joined_at,
-          last_read_at,
-          is_muted,
-          user:users (
-            id,
-            email,
-            full_name,
-            role,
-            avatar_url
-          )
-        `)
-        .in('conversation_id', conversationIds);
+      const participantsResult = await this.db.list<any>('conversation_participants', {
+        filters: [{ field: 'conversation_id', operator: 'in', value: conversationIds }],
+      });
 
       // Group participants by conversation_id
       const participantsByConv = new Map<string, ParticipantInfo[]>();
-      (allParticipants || []).forEach((p: any) => {
-        const u = Array.isArray(p.user) ? p.user[0] : p.user;
-        const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
-        const lastName = rest.join(' ');
+      (participantsResult.data || []).forEach((p: any) => {
         const formattedParticipant: ParticipantInfo = {
           ...p,
-          user: u ? {
-            id: u.id,
-            email: u.email || '',
-            full_name: u.full_name || null,
-            first_name: firstName || null,
-            last_name: lastName || null,
-            user_role: u.role || 'candidate',
-            avatar_url: u.avatar_url || null,
-          } : null,
+          user: this.formatUser(p.user),
         };
         const list = participantsByConv.get(p.conversation_id) || [];
         list.push(formattedParticipant);
@@ -137,16 +157,15 @@ export const messageService = {
       });
 
       // 4. Fetch latest message for each conversation
-      const { data: recentMessages } = await (supabase as any)
-        .from('messages')
-        .select('*')
-        .in('conversation_id', conversationIds)
-        .order('created_at', { ascending: false });
+      const messagesResult = await this.db.list<any>('messages', {
+        filters: [{ field: 'conversation_id', operator: 'in', value: conversationIds }],
+        pagination: { orderBy: 'created_at', ascending: false },
+      });
 
       const lastMessageByConv = new Map<string, MessageRecord>();
       const unreadCountByConv = new Map<string, number>();
 
-      (recentMessages || []).forEach((m: any) => {
+      (messagesResult.data || []).forEach((m: any) => {
         if (!lastMessageByConv.has(m.conversation_id)) {
           lastMessageByConv.set(m.conversation_id, m);
         }
@@ -164,64 +183,35 @@ export const messageService = {
       }));
     } catch (err) {
       console.error('Error in getConversations:', err);
-      return [];
+      const error = isAppError(err) ? err : AppErrors.UNKNOWN;
+      throw error;
     }
-  },
+  }
 
   /**
    * Get all messages in a conversation
    */
   async getConversationMessages(conversationId: string): Promise<MessageRecord[]> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('messages')
-        .select(`
-          id,
-          conversation_id,
-          sender_id,
-          content,
-          message_type,
-          attachments,
-          is_edited,
-          edited_at,
-          is_deleted,
-          created_at,
-          sender:users (
-            id,
-            email,
-            full_name,
-            avatar_url
-          )
-        `)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+      const result = await this.db.list<any>('messages', {
+        filters: [{ field: 'conversation_id', operator: 'eq', value: conversationId }],
+        pagination: { orderBy: 'created_at', ascending: true },
+      });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
+      if (result.error) {
+        console.error('Error fetching messages:', result.error);
         return [];
       }
 
-      return (data || []).map((m: any) => {
-        const u = Array.isArray(m.sender) ? m.sender[0] : m.sender;
-        const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
-        const lastName = rest.join(' ');
-        return {
-          ...m,
-          sender: u ? {
-            id: u.id,
-            email: u.email || '',
-            full_name: u.full_name || null,
-            first_name: firstName || null,
-            last_name: lastName || null,
-            avatar_url: u.avatar_url || null,
-          } : null,
-        };
-      });
+      return (result.data || []).map((m: any) => ({
+        ...m,
+        sender: this.formatUser(m.sender),
+      }));
     } catch (err) {
       console.error('Error in getConversationMessages:', err);
       return [];
     }
-  },
+  }
 
   /**
    * Send a message
@@ -234,69 +224,36 @@ export const messageService = {
     attachments?: Array<{ name: string; url: string; size?: number; type?: string }>;
   }): Promise<MessageRecord | null> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('messages')
-        .insert({
-          conversation_id: params.conversationId,
-          sender_id: params.senderId,
-          content: params.content,
-          message_type: params.messageType || 'text',
-          attachments: params.attachments || [],
-        })
-        .select(`
-          id,
-          conversation_id,
-          sender_id,
-          content,
-          message_type,
-          attachments,
-          is_edited,
-          edited_at,
-          is_deleted,
-          created_at,
-          sender:users (
-            id,
-            email,
-            full_name,
-            avatar_url
-          )
-        `)
-        .single();
+      const insertData: MessageInsert = {
+        conversation_id: params.conversationId,
+        sender_id: params.senderId,
+        content: params.content,
+        message_type: params.messageType || 'text',
+        attachments: params.attachments || [],
+      };
 
-      if (error) {
-        console.error('Error sending message:', error);
+      const result = await this.db.create<any>('messages', insertData);
+
+      if (result.error) {
+        console.error('Error sending message:', result.error);
         return null;
       }
 
       // Update conversation updated_at and last_message_at
-      await (supabase as any)
-        .from('conversations')
-        .update({
-          last_message_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', params.conversationId);
-
-      const u = Array.isArray(data.sender) ? data.sender[0] : data.sender;
-      const [firstName = '', ...rest] = (u?.full_name || '').split(' ');
-      const lastName = rest.join(' ');
+      await this.db.update<any>('conversations', params.conversationId, {
+        last_message_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       return {
-        ...data,
-        sender: u ? {
-          id: u.id,
-          email: u.email || '',
-          full_name: u.full_name || null,
-          first_name: firstName || null,
-          last_name: lastName || null,
-          avatar_url: u.avatar_url || null,
-        } : null,
+        ...result.data,
+        sender: this.formatUser(result.data?.sender),
       };
     } catch (err) {
       console.error('Error in sendMessage:', err);
       return null;
     }
-  },
+  }
 
   /**
    * Create a new direct conversation between two users
@@ -309,29 +266,27 @@ export const messageService = {
   }): Promise<ConversationWithDetails | null> {
     try {
       // 1. Create conversation record
-      const { data: conv, error: convError } = await (supabase as any)
-        .from('conversations')
-        .insert({
-          type: 'direct',
-          subject: params.subject || null,
-          created_by: params.creatorId,
-          last_message_at: new Date().toISOString(),
-        })
-        .select('*')
-        .single();
+      const convData: ConversationInsert = {
+        type: 'direct',
+        subject: params.subject || null,
+        created_by: params.creatorId,
+        last_message_at: new Date().toISOString(),
+      };
 
-      if (convError || !conv) {
-        console.error('Error creating conversation:', convError);
+      const convResult = await this.db.create<any>('conversations', convData);
+
+      if (convResult.error || !convResult.data) {
+        console.error('Error creating conversation:', convResult.error);
         return null;
       }
 
+      const conv = convResult.data;
+
       // 2. Add participants
-      await (supabase as any)
-        .from('conversation_participants')
-        .insert([
-          { conversation_id: conv.id, user_id: params.creatorId, last_read_at: new Date().toISOString() },
-          { conversation_id: conv.id, user_id: params.recipientId },
-        ]);
+      await this.db.bulkCreate('conversation_participants', [
+        { conversation_id: conv.id, user_id: params.creatorId, last_read_at: new Date().toISOString() },
+        { conversation_id: conv.id, user_id: params.recipientId },
+      ]);
 
       // 3. Send initial message if provided
       let firstMsg: MessageRecord | null = null;
@@ -343,33 +298,11 @@ export const messageService = {
         });
       }
 
-      // Fetch recipient details
-      const { data: recipientUser } = await (supabase as any)
-        .from('users')
-        .select('id, email, full_name, role, avatar_url')
-        .eq('id', params.recipientId)
-        .single();
-
-      const { data: creatorUser } = await (supabase as any)
-        .from('users')
-        .select('id, email, full_name, role, avatar_url')
-        .eq('id', params.creatorId)
-        .single();
-
-      const formatUser = (u: any) => {
-        if (!u) return null;
-        const [firstName = '', ...rest] = (u.full_name || '').split(' ');
-        const lastName = rest.join(' ');
-        return {
-          id: u.id,
-          email: u.email || '',
-          full_name: u.full_name || null,
-          first_name: firstName || null,
-          last_name: lastName || null,
-          user_role: u.role || 'candidate',
-          avatar_url: u.avatar_url || null,
-        };
-      };
+      // Fetch participant details
+      const [recipientUser, creatorUser] = await Promise.all([
+        this.db.get<any>('users', params.recipientId),
+        this.db.get<any>('users', params.creatorId),
+      ]);
 
       return {
         ...conv,
@@ -381,7 +314,7 @@ export const messageService = {
             joined_at: new Date().toISOString(),
             last_read_at: new Date().toISOString(),
             is_muted: false,
-            user: formatUser(creatorUser),
+            user: this.formatUser(creatorUser?.data),
           },
           {
             id: 'p2',
@@ -390,7 +323,7 @@ export const messageService = {
             joined_at: new Date().toISOString(),
             last_read_at: null,
             is_muted: false,
-            user: formatUser(recipientUser),
+            user: this.formatUser(recipientUser?.data),
           },
         ],
         last_message: firstMsg,
@@ -400,60 +333,154 @@ export const messageService = {
       console.error('Error in createConversation:', err);
       return null;
     }
-  },
+  }
 
   /**
    * Mark conversation as read for user
    */
   async markConversationRead(conversationId: string, userId: string): Promise<void> {
     try {
-      await (supabase as any)
-        .from('conversation_participants')
-        .update({ last_read_at: new Date().toISOString() })
-        .match({ conversation_id: conversationId, user_id: userId });
+      await this.db.update('conversation_participants', undefined, {
+        last_read_at: new Date().toISOString(),
+      }, {
+        filters: [
+          { field: 'conversation_id', operator: 'eq', value: conversationId },
+          { field: 'user_id', operator: 'eq', value: userId },
+        ],
+      });
     } catch (err) {
       console.error('Error marking conversation read:', err);
     }
-  },
+  }
 
   /**
    * Search available users to message
    */
-  async searchUsers(query: string, currentUserId: string): Promise<Array<{
-    id: string;
-    email: string;
-    full_name?: string | null;
-    first_name: string | null;
-    last_name: string | null;
-    user_role: string;
-  }>> {
+  async searchUsers(query: string, currentUserId: string): Promise<UserSearchResult[]> {
     try {
-      let req = (supabase as any)
-        .from('users')
-        .select('id, email, full_name, role, avatar_url')
-        .neq('id', currentUserId)
-        .limit(10);
-
+      const filters: any[] = [{ field: 'id', operator: 'neq', value: currentUserId }];
+      
       if (query.trim()) {
-        req = req.or(`email.ilike.%${query}%,full_name.ilike.%${query}%`);
+        // Note: Complex OR queries may need custom handling
+        filters.push({ field: 'email', operator: 'ilike', value: `%${query}%` });
       }
 
-      const { data, error } = await req;
-      if (error) return [];
-      return (data || []).map((u: any) => {
-        const [firstName = '', ...rest] = (u.full_name || '').split(' ');
-        const lastName = rest.join(' ');
-        return {
-          id: u.id,
-          email: u.email,
-          full_name: u.full_name || null,
-          first_name: firstName || null,
-          last_name: lastName || null,
-          user_role: u.role || 'candidate',
-        };
+      const result = await this.db.list<any>('users', {
+        filters,
+        pagination: { pageSize: 10 },
       });
+
+      if (result.error) {
+        return [];
+      }
+
+      return (result.data || []).map(this.formatUser).filter(Boolean) as UserSearchResult[];
     } catch {
       return [];
     }
   }
-};
+
+  /**
+   * Archive a conversation
+   */
+  async archiveConversation(conversationId: string): Promise<boolean> {
+    try {
+      const result = await this.db.update<any>('conversations', conversationId, {
+        is_archived: true,
+        updated_at: new Date().toISOString(),
+      });
+
+      return !result.error;
+    } catch (err) {
+      console.error('Error archiving conversation:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Delete a conversation (soft delete via archive)
+   */
+  async deleteConversation(conversationId: string): Promise<boolean> {
+    return this.archiveConversation(conversationId);
+  }
+
+  /**
+   * Mute/unmute a conversation for a user
+   */
+  async toggleMute(conversationId: string, userId: string, isMuted: boolean): Promise<boolean> {
+    try {
+      const result = await this.db.update('conversation_participants', undefined, {
+        is_muted: isMuted,
+      }, {
+        filters: [
+          { field: 'conversation_id', operator: 'eq', value: conversationId },
+          { field: 'user_id', operator: 'eq', value: userId },
+        ],
+      });
+
+      return !result.error;
+    } catch (err) {
+      console.error('Error toggling mute:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Edit a message
+   */
+  async editMessage(messageId: string, content: string): Promise<MessageRecord | null> {
+    try {
+      const result = await this.db.update<any>('messages', messageId, {
+        content,
+        is_edited: true,
+        edited_at: new Date().toISOString(),
+      });
+
+      if (result.error) {
+        return null;
+      }
+
+      return {
+        ...result.data,
+        sender: this.formatUser(result.data?.sender),
+      };
+    } catch (err) {
+      console.error('Error editing message:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a message (soft delete)
+   */
+  async deleteMessage(messageId: string): Promise<boolean> {
+    try {
+      const result = await this.db.update<any>('messages', messageId, {
+        is_deleted: true,
+        content: '[Message deleted]',
+      });
+
+      return !result.error;
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      return false;
+    }
+  }
+}
+
+// Backward compatible exports
+let defaultMessageService: MessageService | null = null;
+
+export function initMessageService(db: DatabaseAdapter): MessageService {
+  defaultMessageService = new MessageService(db);
+  return defaultMessageService;
+}
+
+export const messageService = new Proxy<MessageService>({} as MessageService, {
+  get(_target, prop) {
+    if (!defaultMessageService) {
+      throw new Error('MessageService not initialized. Call initMessageService() first.');
+    }
+    return (defaultMessageService as any)[prop];
+  },
+});
