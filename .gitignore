@@ -6,82 +6,45 @@
 node_modules/
 
 # Environment variables
-.env.local
 .env
-.env.*
+.env.local
+*.env.*
 
 # Logs
 *.log
+
+# Editor directories
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build outputs
+dist/
+build/
+target/
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE specific files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Build artifacts
-dist/
-build/
-target/
+# Coverage reports
 coverage/
 htmlcov/
-.nyc_output/
-.mypy_cache/
-.pytest_cache/
-.gradle/
-.TemporaryItems
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# TypeScript/JavaScript build output
-*.js.map
-*.tsbuildinfo
-*.jsx
-*.tsx
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Authentication and security
-*.pem
-*.key
-*.crt
-*.cert
-
-# CI/CD
-.github/
-.gitlab/
+*.coverage
 
 # Temporary files
 *.tmp
-*.temp
-*~
+*.swp
+*.swo
+
+# Cache directories
+.cache/
+.mypy_cache/
+.pytest_cache/
+.gradle/
 ```

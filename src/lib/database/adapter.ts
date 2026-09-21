@@ -864,7 +864,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
    */
   from<T = unknown>(table: string): TableOperations<T> {
     const client = this.getSupabase();
-    return new SupabaseTableOperations<T>(client, table);
+    return new SupabaseTableOperations<T>(client as any, table);
   }
 
   /**
@@ -970,7 +970,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
   async getById<T>(table: string, id: string): Promise<QueryResult<T>> {
     return this.executeWithResilience(async () => {
-      const client = this.getSupabase();
+      const client = await this.getSupabase();
       const response = await client
         .from(table)
         .select('*')
@@ -989,13 +989,13 @@ export class SupabaseAdapter implements DatabaseAdapter {
     },
   ): Promise<ListResult<T>> {
     return this.executeWithResilience(async () => {
-      const client = this.getSupabase();
+      const client = await this.getSupabase();
       let query = client.from(table).select('*', { count: 'exact' });
 
       // Apply filters
       if (options?.filters) {
         Object.entries(options.filters).forEach(([key, value]) => {
-          query = query.eq(key, value);
+          query = query.eq(key, value as string);
         });
       }
 
@@ -1018,8 +1018,8 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
   async insert<T>(table: string, data: Record<string, unknown>): Promise<QueryResult<T>> {
     return this.executeWithResilience(async () => {
-      const client = this.getSupabase();
-      const response = await client.from(table).insert(data).select().single();
+      const client = await this.getSupabase();
+      const response = await client.from(table).insert(data as any).select().single();
       return this.toQueryResult<T>(response);
     });
   }
@@ -1030,10 +1030,10 @@ export class SupabaseAdapter implements DatabaseAdapter {
     data: Record<string, unknown>,
   ): Promise<QueryResult<T>> {
     return this.executeWithResilience(async () => {
-      const client = this.getSupabase();
+      const client = await this.getSupabase();
       const response = await client
         .from(table)
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .select()
         .single();
@@ -1043,7 +1043,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
   async delete<T>(table: string, id: string): Promise<QueryResult<T>> {
     return this.executeWithResilience(async () => {
-      const client = this.getSupabase();
+      const client = await this.getSupabase();
       const response = await client
         .from(table)
         .delete()
@@ -1074,7 +1074,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
   async healthCheck(): Promise<boolean> {
     try {
-      const client = this.getSupabase();
+      const client = await this.getSupabase();
       // Try a simple query to check connectivity
       const response = await client.from('users').select('id', { count: 'exact', head: true });
       return !response.error;
