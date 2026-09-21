@@ -185,8 +185,12 @@ export interface QueryBuilder<T> {
   /**
    * Thenable interface for async/await support
    * Returns array of results (T[])
+   * This enables: await db.from('table').select('*').eq('id', id)
    */
-  then(): Promise<{ data: T[] | null; error: Error | null }>;
+  then<TResult1 = { data: T[] | null; error: Error | null }, TResult2 = never>(
+    onfulfilled?: (value: { data: T[] | null; error: Error | null }) => TResult1 | PromiseLike<TResult1>,
+    onrejected?: (reason: unknown) => TResult2 | PromiseLike<TResult2>,
+  ): Promise<TResult1 | TResult2>;
 }
 
 /**
@@ -625,6 +629,17 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
     const response = await query;
     return { count: response.count, error: response.error };
   }
+
+  /**
+   * Thenable interface for async/await support
+   * Allows: await db.from('table').select('*').eq('id', id)
+   */
+  then<TResult1 = { data: T[] | null; error: Error | null }, TResult2 = never>(
+    onfulfilled?: (value: { data: T[] | null; error: Error | null }) => TResult1 | PromiseLike<TResult1>,
+    onrejected?: (reason: unknown) => TResult2 | PromiseLike<TResult2>,
+  ): Promise<TResult1 | TResult2> {
+    return this.execute().then(onfulfilled, onrejected);
+  }
 }
 
 /**
@@ -823,12 +838,11 @@ export class SupabaseAdapter implements DatabaseAdapter {
   /**
    * Get or create Supabase client (lazy initialization)
    */
-  private getSupabase() {
+  private async getSupabase(): Promise<ReturnType<typeof import('@supabase/supabase-js').createClient>> {
     if (!this.supabase) {
       try {
         // Dynamic import to avoid circular dependencies and enable lazy loading
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { createClient } = require('@supabase/supabase-js');
+        const { createClient } = await import('@supabase/supabase-js');
         this.supabase = createClient(this._options.supabaseUrl, this._options.supabaseKey);
         
         // Initialize auth and storage operations now that we have the client
@@ -1062,7 +1076,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
     try {
       const client = this.getSupabase();
       // Try a simple query to check connectivity
-      const response = await client.from('_health').select('count').limit(1);
+      const response = await client.from('users').select('id', { count: 'exact', head: true });
       return !response.error;
     } catch {
       return false;
@@ -1389,20 +1403,7 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
     return cloned;
   }
 
-  async single(): Promise<{ data: T | null; error: Error | null }> {
-    const result = await this.then();
-    if (result.error) {
-      return { data: null, error: result.error };
-    }
-    const dataArray = result.data as unknown as T[];
-    return { data: dataArray && dataArray.length > 0 ? dataArray[0] : null, error: null };
-  }
-
-  async maybeSingle(): Promise<{ data: T | null; error: Error | null }> {
-    return this.single();
-  }
-
-  async then(): Promise<{ data: T[] | null; error: Error | null }> {
+  private async _executeQuery(): Promise<{ data: T[] | null; error: Error | null }> {
     const tableData = this._store.get(this._tableName) || new Map();
     let data = Array.from(tableData.values()) as T[];
 
@@ -1443,24 +1444,24 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
 
     // Handle different operations
     if (this._operation === 'insert' && this._insertData) {
-      const id = ((this._insertData.id as string) || crypto.randomUUID()) as string;
-      const record = { ...this._insertData, id };
+      const id = ((this._insertData as Record<string, unknown>).id as string) || crypto.randomUUID();
+      const record = { ...(this._insertData as Record<string, unknown>), id } as unknown as T;
       if (!this._store.has(this._tableName)) {
         this._store.set(this._tableName, new Map());
       }
-      this._store.get(this._tableName)!.set(id, record);
-      return { data: [record] as unknown as T[], error: null };
+      this._store.get(this._tableName)!.set(id, record as Record<string, unknown>);
+      return { data: [record], error: null };
     }
 
     if (this._operation === 'update' && this._updateData) {
       // Update all matching records
       const updated = data.map(item => {
         const id = (item as Record<string, unknown>).id as string;
-        const updatedRecord = { ...(item as Record<string, unknown>), ...this._updateData };
-        tableData.set(id, updatedRecord);
+        const updatedRecord = { ...(item as Record<string, unknown>), ...this._updateData } as unknown as T;
+        tableData.set(id, updatedRecord as Record<string, unknown>);
         return updatedRecord;
       });
-      return { data: updated as unknown as T[], error: null };
+      return { data: updated, error: null };
     }
 
     if (this._operation === 'delete') {
@@ -1468,22 +1469,42 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
         const id = (item as Record<string, unknown>).id as string;
         tableData.delete(id);
       });
-      return { data: [] as unknown as T[], error: null };
+      return { data: [], error: null };
     }
 
     return { data: data as unknown as T[], error: null };
   }
 
+  async then<TResult1 = { data: T[] | null; error: Error | null }, TResult2 = never>(
+    onfulfilled?: (value: { data: T[] | null; error: Error | null }) => TResult1 | PromiseLike<TResult1>,
+    onrejected?: (reason: unknown) => TResult2 | PromiseLike<TResult2>,
+  ): Promise<TResult1 | TResult2> {
+    return this._executeQuery().then(onfulfilled, onrejected);
+  }
+
+  async single(): Promise<{ data: T | null; error: Error | null }> {
+    const result = await this._executeQuery();
+    if (result.error) {
+      return { data: null, error: result.error };
+    }
+    const dataArray = result.data as unknown as T[];
+    return { data: dataArray && dataArray.length > 0 ? dataArray[0] : null, error: null };
+  }
+
+  async maybeSingle(): Promise<{ data: T | null; error: Error | null }> {
+    return this.single();
+  }
+
+  async execute(): Promise<{ data: T[] | null; error: Error | null }> {
+    return this._executeQuery();
+  }
+
   async count(): Promise<{ count: number | null; error: Error | null }> {
-    const result = await this.then();
+    const result = await this._executeQuery();
     if (result.error) {
       return { count: null, error: result.error };
     }
     const dataArray = result.data as unknown as any[];
     return { count: Array.isArray(dataArray) ? dataArray.length : (dataArray ? 1 : 0), error: null };
-  }
-
-  async execute(): Promise<{ data: T[] | null; error: Error | null }> {
-    return this.then();
   }
 }
