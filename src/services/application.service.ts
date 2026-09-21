@@ -1,4 +1,6 @@
-import { createBrowserClient } from '@/lib/supabase';
+import type { DatabaseAdapter } from '@/lib/database/adapter';
+import { AppErrors, isAppError } from '@/lib/errors';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface SubmitApplicationInput {
   jobId: string;
@@ -105,16 +107,34 @@ export interface CreateScorecardInput {
   wouldRehire?: boolean;
 }
 
-const supabase = createBrowserClient();
+/**
+ * ApplicationService - Manages job applications and interview scorecards
+ * 
+ * Dependency Injection Pattern: Requires DatabaseAdapter instance
+ * Usage: const service = new ApplicationService(databaseAdapter);
+ */
+export class ApplicationService {
+  private db: DatabaseAdapter;
 
-export const applicationService = {
+  constructor(db: DatabaseAdapter) {
+    this.db = db;
+  }
+
   /**
    * Submit a new job application
+   * Failure Isolation: Activity log failure does not block application submission
    */
   async submitApplication(input: SubmitApplicationInput): Promise<ApplicationRecord> {
     try {
-      // 1. Insert application
-      const { data, error } = await supabase
+      // Validate required fields
+      if (!input.jobId || !input.candidateProfileId) {
+        throw AppErrors.validation('Job ID and Candidate Profile ID are required', {
+          context: { jobId: !!input.jobId, candidateProfileId: !!input.candidateProfileId },
+        });
+      }
+
+      // Insert application
+      const { data, error } = await this.db
         .from('applications')
         .insert({
           job_id: input.jobId,
@@ -150,35 +170,51 @@ export const applicationService = {
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to submit application', {
+          cause: error,
+          context: { jobId: input.jobId, candidateProfileId: input.candidateProfileId },
+        });
+      }
 
-      // 2. Log activity entry
+      // Log activity entry (non-blocking - graceful degradation)
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        await supabase.from('application_activity_log').insert({
-          application_id: data.id,
-          actor_id: userData?.user?.id || null,
+        const authResult = await this.db.auth.getUser();
+        const insertResult = await this.db.from('application_activity_log').insert({
+          application_id: data?.id as string || '',
+          actor_id: authResult.data?.user?.id || null,
           action: 'application_submitted',
           new_value: { status: 'submitted' },
           metadata: { timestamp: new Date().toISOString() },
-        });
+        }).execute();
+        
+        if (insertResult.error) {
+          console.warn('Activity log insert returned error:', insertResult.error);
+        }
       } catch (logErr) {
+        // Non-blocking: Activity log failure should not affect application submission
         console.warn('Non-blocking activity log failed:', logErr);
       }
 
       return data as unknown as ApplicationRecord;
     } catch (error) {
-      console.error('Error submitting application:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error submitting application', {
+        cause: error,
+        context: { jobId: input.jobId, candidateProfileId: input.candidateProfileId },
+      });
     }
-  },
+  }
 
   /**
    * Check if candidate has already applied to a specific job
+   * Returns null if no application found or on error (graceful degradation)
    */
   async checkHasApplied(jobId: string, candidateProfileId: string): Promise<ApplicationRecord | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('applications')
         .select(`
           id,
@@ -197,20 +233,29 @@ export const applicationService = {
         .eq('candidate_profile_id', candidateProfileId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to check application status', {
+          cause: error,
+          context: { jobId, candidateProfileId },
+        });
+      }
       return data as unknown as ApplicationRecord | null;
     } catch (error) {
-      console.error('Error checking application status:', error);
-      return null;
+      if (isAppError(error)) {
+        console.error('Error checking application status:', error.toSafeObject());
+      } else {
+        console.error('Error checking application status:', error);
+      }
+      return null; // Graceful degradation
     }
-  },
+  }
 
   /**
    * Get all applications submitted by a candidate profile
    */
   async getCandidateApplications(candidateProfileId: string): Promise<ApplicationRecord[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('applications')
         .select(`
           *,
@@ -242,13 +287,23 @@ export const applicationService = {
         .eq('candidate_profile_id', candidateProfileId)
         .order('applied_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to fetch candidate applications', {
+          cause: error,
+          context: { candidateProfileId },
+        });
+      }
       return (data || []) as unknown as ApplicationRecord[];
     } catch (error) {
-      console.error('Error fetching candidate applications:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error fetching candidate applications', {
+        cause: error,
+        context: { candidateProfileId },
+      });
     }
-  },
+  }
 
   /**
    * Get single application details with activity log
@@ -258,7 +313,7 @@ export const applicationService = {
     activityLog: Array<{ id: string; action: string; created_at: string; previous_value?: unknown; new_value?: unknown }>;
   }> {
     try {
-      const { data: application, error: appError } = await supabase
+      const { data: application, error: appError } = await this.db
         .from('applications')
         .select(`
           *,
@@ -298,30 +353,44 @@ export const applicationService = {
         .eq('id', applicationId)
         .single();
 
-      if (appError) throw appError;
+      if (appError) {
+        throw AppErrors.database('Failed to fetch application', {
+          cause: appError,
+          context: { applicationId },
+        });
+      }
 
-      const { data: activityLog } = await supabase
+      const { data: activityLog, error: logError } = await this.db
         .from('application_activity_log')
         .select('*')
         .eq('application_id', applicationId)
         .order('created_at', { ascending: false });
+
+      if (logError) {
+        console.warn('Failed to fetch activity log, continuing without it:', logError);
+      }
 
       return {
         application: application as unknown as ApplicationRecord,
         activityLog: activityLog || [],
       };
     } catch (error) {
-      console.error('Error fetching application by id:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error fetching application', {
+        cause: error,
+        context: { applicationId },
+      });
     }
-  },
+  }
 
   /**
    * Withdraw an application
    */
   async withdrawApplication(applicationId: string, candidateProfileId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
+      const { error } = await this.db
         .from('applications')
         .update({
           status: 'withdrawn',
@@ -330,34 +399,44 @@ export const applicationService = {
         .eq('id', applicationId)
         .eq('candidate_profile_id', candidateProfileId);
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to withdraw application', {
+          cause: error,
+          context: { applicationId, candidateProfileId },
+        });
+      }
 
-      // Activity log
+      // Activity log (non-blocking)
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        await supabase.from('application_activity_log').insert({
+        const authResult = await this.db.auth.getUser();
+        await this.db.from('application_activity_log').insert({
           application_id: applicationId,
-          actor_id: userData?.user?.id || null,
+          actor_id: authResult.data?.user?.id || null,
           action: 'application_withdrawn',
           new_value: { status: 'withdrawn' },
         });
       } catch {
-        // Non-blocking
+        // Non-blocking: Continue even if activity log fails
       }
 
       return true;
     } catch (error) {
-      console.error('Error withdrawing application:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error withdrawing application', {
+        cause: error,
+        context: { applicationId, candidateProfileId },
+      });
     }
-  },
+  }
 
   /**
    * Get applications for a job (Recruiter view)
    */
   async getJobApplications(jobId: string): Promise<ApplicationRecord[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('applications')
         .select(`
           *,
@@ -382,20 +461,30 @@ export const applicationService = {
         .eq('job_id', jobId)
         .order('applied_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to fetch job applications', {
+          cause: error,
+          context: { jobId },
+        });
+      }
       return (data || []) as unknown as ApplicationRecord[];
     } catch (error) {
-      console.error('Error fetching job applications:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error fetching job applications', {
+        cause: error,
+        context: { jobId },
+      });
     }
-  },
+  }
 
   /**
    * Update application stage/status (Recruiter action)
    */
   async updateApplicationStage(applicationId: string, stageId: string | null, status: string, note?: string): Promise<boolean> {
     return this.updateApplicationStatus(applicationId, status as ApplicationRecord['status'], stageId, note);
-  },
+  }
 
   /**
    * Update application status and stage with full activity logging
@@ -424,18 +513,24 @@ export const applicationService = {
         updatePayload.reviewed_at = new Date().toISOString();
       }
 
-      const { error } = await supabase
+      const { error } = await this.db
         .from('applications')
         .update(updatePayload)
         .eq('id', applicationId);
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to update application status', {
+          cause: error,
+          context: { applicationId, status, stageId },
+        });
+      }
 
+      // Activity log (non-blocking)
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        await supabase.from('application_activity_log').insert({
+        const authResult = await this.db.auth.getUser();
+        await this.db.from('application_activity_log').insert({
           application_id: applicationId,
-          actor_id: userData?.user?.id || null,
+          actor_id: authResult.data?.user?.id || null,
           action: `status_changed_to_${status}`,
           new_value: { status, stage_id: stageId || null, note: note || null },
           metadata: { timestamp: new Date().toISOString(), note: note || null },
@@ -446,10 +541,15 @@ export const applicationService = {
 
       return true;
     } catch (error) {
-      console.error('Error updating application status:', error);
-      throw error;
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error updating application status', {
+        cause: error,
+        context: { applicationId, status, stageId },
+      });
     }
-  },
+  }
 
   /**
    * Fetch pipeline stages (default system stages + organization custom stages)
@@ -464,7 +564,7 @@ export const applicationService = {
     is_default: boolean;
   }>> {
     try {
-      let query = supabase
+      let query = this.db
         .from('hiring_pipeline_stages')
         .select('*')
         .order('order_index', { ascending: true });
@@ -474,7 +574,12 @@ export const applicationService = {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to fetch pipeline stages', {
+          cause: error,
+          context: { organizationId },
+        });
+      }
       return (data || []) as unknown as Array<{
         id: string;
         organization_id: string | null;
@@ -485,10 +590,14 @@ export const applicationService = {
         is_default: boolean;
       }>;
     } catch (error) {
-      console.error('Error fetching pipeline stages:', error);
-      return [];
+      if (isAppError(error)) {
+        console.error('Error fetching pipeline stages:', error.toSafeObject());
+      } else {
+        console.error('Error fetching pipeline stages:', error);
+      }
+      return []; // Graceful degradation
     }
-  },
+  }
 
   /**
    * Get all recruiter jobs and their incoming applications
@@ -507,7 +616,7 @@ export const applicationService = {
     recentApplications: ApplicationRecord[];
   }> {
     try {
-      let jobsQuery = supabase
+      let jobsQuery = this.db
         .from('jobs')
         .select('id, title, department, location_city, work_mode, status, created_at, application_count')
         .order('created_at', { ascending: false });
@@ -519,7 +628,12 @@ export const applicationService = {
       }
 
       const { data: jobs, error: jobsError } = await jobsQuery;
-      if (jobsError) throw jobsError;
+      if (jobsError) {
+        throw AppErrors.database('Failed to fetch recruiter jobs', {
+          cause: jobsError,
+          context: { recruiterUserId, organizationId },
+        });
+      }
 
       if (!jobs || jobs.length === 0) {
         return { jobs: [], recentApplications: [] };
@@ -527,7 +641,7 @@ export const applicationService = {
 
       const jobIds = jobs.map(j => j.id);
 
-      const { data: apps, error: appsError } = await supabase
+      const { data: apps, error: appsError } = await this.db
         .from('applications')
         .select(`
           *,
@@ -562,24 +676,33 @@ export const applicationService = {
         .order('applied_at', { ascending: false })
         .limit(50);
 
-      if (appsError) throw appsError;
+      if (appsError) {
+        throw AppErrors.database('Failed to fetch recent applications', {
+          cause: appsError,
+          context: { jobIds },
+        });
+      }
 
       return {
         jobs: jobs || [],
         recentApplications: (apps || []) as unknown as ApplicationRecord[],
       };
     } catch (error) {
-      console.error('Error fetching recruiter overview:', error);
-      return { jobs: [], recentApplications: [] };
+      if (isAppError(error)) {
+        console.error('Error fetching recruiter overview:', error.toSafeObject());
+      } else {
+        console.error('Error fetching recruiter overview:', error);
+      }
+      return { jobs: [], recentApplications: [] }; // Graceful degradation
     }
-  },
+  }
 
   /**
    * Get all scorecards submitted for an application
    */
   async getScorecards(applicationId: string): Promise<ScorecardRecord[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('scorecards')
         .select(`
           *,
@@ -593,20 +716,29 @@ export const applicationService = {
         .eq('application_id', applicationId)
         .order('submitted_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to fetch scorecards', {
+          cause: error,
+          context: { applicationId },
+        });
+      }
       return (data || []) as unknown as ScorecardRecord[];
-    } catch (err) {
-      console.error('Error fetching scorecards:', err);
-      return [];
+    } catch (error) {
+      if (isAppError(error)) {
+        console.error('Error fetching scorecards:', error.toSafeObject());
+      } else {
+        console.error('Error fetching scorecards:', error);
+      }
+      return []; // Graceful degradation
     }
-  },
+  }
 
   /**
    * Submit an interview scorecard evaluation
    */
   async createScorecard(input: CreateScorecardInput): Promise<ScorecardRecord | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('scorecards')
         .insert({
           application_id: input.applicationId,
@@ -635,11 +767,31 @@ export const applicationService = {
         `)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to create scorecard', {
+          cause: error,
+          context: { applicationId: input.applicationId, interviewerId: input.interviewerId },
+        });
+      }
       return data as unknown as ScorecardRecord;
-    } catch (err) {
-      console.error('Error creating scorecard:', err);
-      throw err;
+    } catch (error) {
+      if (isAppError(error)) {
+        throw error;
+      }
+      throw AppErrors.database('Unexpected error creating scorecard', {
+        cause: error,
+        context: { applicationId: input.applicationId, interviewerId: input.interviewerId },
+      });
     }
-  },
-};
+  }
+}
+
+// Backward compatibility export - creates instance with default adapter
+import { createDatabaseAdapter } from '@/lib/database/adapter';
+import { AppConfig } from '@/config';
+
+const defaultAdapter = createDatabaseAdapter({
+  supabaseUrl: AppConfig.supabase.url,
+  supabaseKey: AppConfig.supabase.anonKey,
+});
+export const applicationService = new ApplicationService(defaultAdapter);
