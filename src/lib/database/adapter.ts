@@ -1031,9 +1031,10 @@ export class SupabaseAdapter implements DatabaseAdapter {
   ): Promise<QueryResult<T>> {
     return this.executeWithResilience(async () => {
       const client = await this.getSupabase();
-      const response = await client
+      const supabaseClient = client as any;
+      const response = await supabaseClient
         .from(table)
-        .update(data as any)
+        .update(data)
         .eq('id', id)
         .select()
         .single();
