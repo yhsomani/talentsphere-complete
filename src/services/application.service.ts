@@ -1,6 +1,5 @@
 import type { DatabaseAdapter } from '@/lib/database/adapter';
 import { AppErrors, isAppError } from '@/lib/errors';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface SubmitApplicationInput {
   jobId: string;

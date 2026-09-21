@@ -1,40 +1,37 @@
 ```
+# Next.js
+.next/
+out/
+
 # Dependencies
 node_modules/
 
-# TypeScript build output
-dist/
-build/
-*.js
-*.js.map
-*.d.ts
-*.d.ts.map
+# Environment variables
+.env.local
+.env
+.env.*
+
+# Cache
+.cache/
+.nyc_output/
+coverage/
+.nyc-output/
 
 # Logs
 *.log
 
-# Environment variables
-.env
-.env.local
-*.env.*
+# OS generated files
+.DS_Store
+Thumbs.db
 
-# IDE files
+# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Test cache
-.jest/
-.nyc_output/
-
-# OS generated files
-.DS_Store
-Thumbs.db
+# Build outputs
+dist/
+build/
+target/
 ```
