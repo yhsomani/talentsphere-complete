@@ -1,4 +1,12 @@
 ```
+# Next.js build outputs
+.next/
+.cursor/
+playwright-report/
+
+# TypeScript build output
+.tsbuildinfo
+
 # Dependencies
 node_modules/
 
