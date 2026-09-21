@@ -176,13 +176,23 @@ Client-side state managed with Zustand stores:
 ### 6. Supabase Integration
 Supabase used for:
 - Authentication (Supabase Auth)
-- Database (PostgreSQL with RLS)
-- Real-time subscriptions
-- File storage (avatars, resumes)
+- Database (PostgreSQL with RLS) - 46 tables, 48 enums, 37 triggers, 13 functions
+- Real-time subscriptions (configured, not yet activated for messaging/notifications)
+- File storage (avatars, resumes, course-content, portfolio, media-assets)
 
 Two client configurations:
 - Browser client (`src/lib/supabase.ts`)
 - Server client (`src/utils/supabase/server.ts`)
+
+**Service Layer Refactoring Status:**
+- ✅ `jobs.service.ts` - Refactored to use DatabaseAdapter pattern
+- ✅ `application.service.ts` - Refactored to use DatabaseAdapter pattern  
+- ⏳ `candidate.service.ts` - Still uses direct Supabase SDK (needs refactoring)
+- ⏳ `course.service.ts` - Still uses direct Supabase SDK (needs refactoring)
+- ⏳ `challenge.service.ts` - Still uses direct Supabase SDK (needs refactoring)
+- ⏳ `message.service.ts` - Still uses direct Supabase SDK (needs refactoring)
+- ⏳ `notification.service.ts` - Still uses direct Supabase SDK (needs refactoring)
+- ⏳ `leaderboard.service.ts` - Still uses direct Supabase SDK (needs refactoring)
 
 ## Data Flow
 
@@ -214,12 +224,26 @@ Next.js middleware validates authentication state on protected routes:
 - `/candidates/profile` requires authentication
 - Redirects unauthenticated users to `/auth/signin`
 
-## Testing Strategy (Future)
+## Testing Strategy
 
-- **Unit Tests**: Utilities, hooks, services
+### Current Test Coverage
+- **Unit Tests**: 14 tests in `src/utils/index.test.ts` (XP calculations, level progression) - ✅ PASSING
+- **Integration Tests**: 15 live database pooler tests in `tests/*.test.mjs` - ✅ PASSING
+- **Error Handling Tests**: 30+ tests in `src/lib/errors/__tests__/errors.test.ts` - ✅ PASSING
+- **Database Adapter Tests**: 25+ tests in `src/lib/database/__tests__/adapter.test.ts` - ✅ PASSING
+- **E2E Tests**: Playwright configured with 3 spec files (ready to run)
+
+### Test Commands
+```bash
+npm test                    # Run unit + integration tests (29/29 pass)
+npx playwright install      # Install E2E browsers (first time)
+npx playwright test         # Run E2E tests
+```
+
+### Future Test Expansion
 - **Component Tests**: UI components with Storybook
-- **Integration Tests**: Feature workflows
-- **E2E Tests**: Critical user journeys with Playwright/Cypress
+- **Service Layer Tests**: Mock-based tests for refactored services
+- **Contract Tests**: API response schemas and event payloads
 
 ## Deployment
 
@@ -230,13 +254,22 @@ Next.js middleware validates authentication state on protected routes:
 
 ## Future Enhancements
 
-1. **API Routes**: Move data access logic to dedicated service layer
-2. **Server Actions**: Use Next.js Server Actions for mutations
-3. **React Query**: Add for advanced caching and data synchronization
-4. **Micro-frontends**: Consider for large-scale feature isolation
-5. **Monorepo**: Expand to include mobile apps, browser extension
+### Completed Since Original Architecture
+1. ✅ **DatabaseAdapter Pattern** - Implemented for loose coupling from Supabase SDK
+2. ✅ **Error Classification System** - 13 error categories with severity levels
+3. ✅ **Retry & Circuit Breaker Patterns** - Resilience patterns for external services
+4. ✅ **Configuration Validation** - Fail-fast validation at startup
+5. ✅ **Service Layer Refactoring (Partial)** - 2/8 services refactored (`jobs.service.ts`, `application.service.ts`)
+
+### Remaining Enhancements
+1. **Complete Service Layer Refactoring** - Refactor remaining 6 services to use DatabaseAdapter pattern
+2. **Server Actions** - Use Next.js Server Actions for mutations
+3. **React Query** - Add for advanced caching and data synchronization
+4. **Real-time WebSocket Integration** - Activate Supabase Realtime for messaging and notifications
+5. **Micro-frontends** - Consider for large-scale feature isolation
+6. **Monorepo** - Expand to include mobile apps, browser extension
 
 ---
 
-**Last Updated**: Current Session  
-**Version**: 1.0.0
+**Last Updated**: 2026-09-21  
+**Version**: 1.1.0 (Updated with implementation status)

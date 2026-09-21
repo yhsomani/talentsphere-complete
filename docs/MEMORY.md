@@ -30,7 +30,7 @@ This document tracks the verified technical state, operational metrics, and road
 
 ---
 
-## Compiled Route Inventory (30 App Router Routes)
+## Compiled Route Inventory (31 App Router Routes)
 
 1. `/` — Landing page & marketing hero
 2. `/_not-found` — Global 404 handler
