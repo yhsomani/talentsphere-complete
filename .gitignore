@@ -3,6 +3,7 @@
 .next/
 .cursor/
 playwright-report/
+/scratch/
 
 # TypeScript build output
 .tsbuildinfo
