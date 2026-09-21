@@ -1,45 +1,40 @@
 ```
-# Environment variables
-.env.local
-*.env.*
-
 # Dependencies
 node_modules/
 
-# Build outputs
+# TypeScript build output
 dist/
 build/
-.next/
-out/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.python-version
-*.so
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
 
 # Logs
 *.log
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Environment variables
+.env
+.env.local
+*.env.*
 
-# Editor files
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+*.tmp
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Test cache
+.jest/
+.nyc_output/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```
