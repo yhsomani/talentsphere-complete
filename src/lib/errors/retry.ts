@@ -2,7 +2,7 @@
  * Retry utilities with exponential backoff and circuit breaker patterns
  */
 
-import { AppError, AppErrors, ErrorCategory, RetryStrategy } from './index';
+import { AppError, AppErrors, RetryStrategy } from './index';
 import { toAppError } from './index';
 
 export interface RetryOptions {

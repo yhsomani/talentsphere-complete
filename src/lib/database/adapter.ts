@@ -181,6 +181,12 @@ export interface QueryBuilder<T> {
    * Get count of matching records
    */
   count(options?: { foreignTable?: string; head?: boolean }): Promise<{ count: number | null; error: Error | null }>;
+
+  /**
+   * Thenable interface for async/await support
+   * Returns array of results (T[])
+   */
+  then(): Promise<{ data: T[] | null; error: Error | null }>;
 }
 
 /**
@@ -820,6 +826,8 @@ export class SupabaseAdapter implements DatabaseAdapter {
   private getSupabase() {
     if (!this.supabase) {
       try {
+        // Dynamic import to avoid circular dependencies and enable lazy loading
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { createClient } = require('@supabase/supabase-js');
         this.supabase = createClient(this._options.supabaseUrl, this._options.supabaseKey);
         
@@ -1473,5 +1481,9 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
     }
     const dataArray = result.data as unknown as any[];
     return { count: Array.isArray(dataArray) ? dataArray.length : (dataArray ? 1 : 0), error: null };
+  }
+
+  async execute(): Promise<{ data: T[] | null; error: Error | null }> {
+    return this.then();
   }
 }

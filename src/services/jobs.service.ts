@@ -399,7 +399,10 @@ export const jobService = new JobService(
     return {
       get db() {
         if (!_db) {
+          // Synchronous fallback for backward compatibility
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const { createDatabaseAdapter } = require('@/lib/database/adapter');
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const { getConfig } = require('@/lib/config/validation');
           const config = getConfig();
           _db = createDatabaseAdapter({
@@ -412,5 +415,17 @@ export const jobService = new JobService(
     };
   })().db as DatabaseAdapter
 );
+
+// Async initialization helper for modern usage
+export const initJobService = async (): Promise<JobService> => {
+  const { createDatabaseAdapter } = await import('@/lib/database/adapter');
+  const { getConfig } = await import('@/lib/config/validation');
+  const config = getConfig();
+  const db = createDatabaseAdapter({
+    supabaseUrl: config.required.supabaseUrl,
+    supabaseKey: config.required.supabaseAnonKey,
+  });
+  return new JobService(db);
+};
 
 export const jobsService = jobService;
