@@ -1,38 +1,47 @@
-# Logs and temp files
-*.log
-*.tmp
-*.swp
+```
+# Next.js build outputs
+.next/
 
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.idea/
+# TypeScript build output
+.tsbuildinfo
 
 # Dependencies
 node_modules/
-.venv/
-venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
 
 # Build artifacts
 dist/
 build/
 target/
-.coverage
+
+# Python cache (if any Python files exist in the project)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Coverage reports
 coverage/
 htmlcov/
+.coverage
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Compression archives
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -55,3 +64,4 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```
