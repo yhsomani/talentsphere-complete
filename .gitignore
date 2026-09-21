@@ -1,7 +1,6 @@
 ```
-# Next.js
+# Next.js build output
 .next/
-out/
 
 # Dependencies
 node_modules/
@@ -9,13 +8,9 @@ node_modules/
 # Environment variables
 .env.local
 .env
-.env.*
 
-# Cache
-.cache/
-.nyc_output/
-coverage/
-.nyc-output/
+# TypeScript build output
+tsconfig.tsbuildinfo
 
 # Logs
 *.log
@@ -24,14 +19,14 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Editor
+# Editor directories
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Build outputs
-dist/
-build/
-target/
+# Temporary files
+*.tmp
+*.swp
+
+# Coverage directory used by tools like istanbul
+coverage/
 ```
