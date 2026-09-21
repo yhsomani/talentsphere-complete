@@ -10,7 +10,7 @@
  * Usage: const service = new NetworkService(databaseAdapter);
  */
 
-import type { DatabaseAdapter } from '@/lib/database/adapter';
+import { createDatabaseAdapter, type DatabaseAdapter } from '@/lib/database/adapter';
 import { AppErrors, isAppError } from '@/lib/errors';
 
 export interface BlockedUserRecord {
@@ -97,7 +97,7 @@ export class NetworkService {
         });
       }
 
-      return data as BlockedUserRecord;
+      return data as unknown as BlockedUserRecord;
     } catch (error) {
       if (isAppError(error)) {
         throw error;
@@ -176,7 +176,7 @@ export class NetworkService {
         });
       }
 
-      return (data as BlockedUserRecord[]) || [];
+      return (data as unknown as BlockedUserRecord[]) || [];
     } catch (error) {
       if (isAppError(error)) {
         throw error;
@@ -270,9 +270,6 @@ export function getNetworkService(): NetworkService {
     return _instance;
   }
 
-  // Lazy import to avoid circular dependencies
-  const { createDatabaseAdapter } = require('@/lib/database/adapter');
-  
   const adapter = createDatabaseAdapter({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

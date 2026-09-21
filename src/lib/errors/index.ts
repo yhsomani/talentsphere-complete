@@ -209,6 +209,13 @@ export const AppErrors = {
       context,
     }),
 
+  unauthorized: (message: string, context?: Record<string, unknown>) =>
+    new AppError(message, {
+      category: ErrorCategory.AUTHENTICATION,
+      severity: ErrorSeverity.HIGH,
+      context,
+    }),
+
   notFound: (resource: string, id?: string | number, context?: Record<string, unknown>) =>
     new AppError(`${resource} not found${id ? `: ${id}` : ''}`, {
       category: ErrorCategory.NOT_FOUND,

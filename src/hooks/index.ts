@@ -147,7 +147,6 @@ export function useSignOut() {
 export function useSignInOAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const supabase = createBrowserClient();
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'github') => {
@@ -175,7 +174,7 @@ export function useSignInOAuth() {
     } finally {
       setLoading(false);
     }
-  }, [router, supabase.auth]);
+  }, [supabase.auth]);
 
   return { signInWithOAuth, loading, error };
 }

@@ -5575,8 +5575,11 @@ This edition consolidates the complete TalentSphere specification, integrating:
 
 *This document is the Single Source of Truth for product, design, development, QA, deployment, and future maintenance. All content is target-state specification; nothing described is implemented or verified until independently confirmed.*
 
+---
+---
+---
 
-# PART 1 — CONSOLIDATION & RECONCILIATION REPORT (v2 → p2: v3.1 → … → p7: v3.6 → p8: v3.7)
+# PART 1 — CONSOLIDATION & RECONCILIATION REPORT (v2 → passes 2–8: v3.1…v3.7 → final consolidation: v4.0)
 
 > This report supersedes the prior "Analysis & Reconciliation Report (v1)". It documents the full consolidation of the raw source file — which contained **nineteen overlapping document versions** stacked end-to-end (~14,000 lines) — into the single production-ready master in Part 2. Nothing normative was deleted; duplicates were collapsed to one authority each; conflicts were adjudicated per the governance rules of the document itself (§16.7) and the founder-delegated engineering authority recorded in §1.1.
 
@@ -5683,6 +5686,8 @@ Dispositions D-1..D-25 below are made under the founder-delegated engineering au
 
 ## F. Edition Statement
 
+**v4.0 (this edition)** = v3.7+A1+A2 ⊕ final consolidation (founder directive T10): Appendix H added — implementation-status register (six-state vocabulary; all features honestly NOT STARTED / spec-complete; zero-code workspace re-verified), category audit (partially-implemented and implemented-but-undocumented categories provably empty), directive coverage index (T1–T10, zero unmapped), documentation-coverage map (every checklist item → normative home), and the final verification-chain audit (counts consistent across all three register surfaces: 0 mismatches; 8/8 graphs parse-validated). §16.6.4 gains the ten-step roadmap-category mapping. No register counts changed; no requirements added or removed.
+
 **v3.7 amendments** — **A1:** CF-11..15/17 closed by FC-04..09 (stale-status correction; conflicts register 18/18 resolved). **A2:** execution analysis folded in — Part 1 §E refreshed (stale GAP-T item corrected; decision-debt deadline triage; bottleneck statement) + new **§16.6.4 Wave 0 Execution Charter** (W0-1..W0-7 work orders with exit criteria, founder provisioning checklist, early-falsification spikes, do-not-start list, documentation discipline). No register counts changed.
 
 **v3.7 (this edition)** = v3.6 ⊕ pass-8 design-system amendment (Part 1 §M): Aura Dense Profile adopted normatively (§5.4.1, ADR-011, U-11/U-12) — 13px/32px/−0.01em density (desktop app surfaces) · flat depth (3 surface values + 8% hairline borders; decorative shadows deprecated, focus ring retained) · single indigo accent (status = icon+text) · 80ms hover / ≤150ms motion / no bounce · keyboard-visible shortcuts (WCAG 2.1.4-compliant) · labels-left/numbers-right/4px-grid alignment. Accessibility carve-outs outrank the aesthetic (D-35..D-39). Register deltas: ADR→11, U→12.
@@ -5699,7 +5704,7 @@ Dispositions D-1..D-25 below are made under the founder-delegated engineering au
 
 **v3.1** = v3.0 ⊕ pass-2 deep audit (Part 1 §G): 15 phantom section references fixed · phantom ID families remapped (R-GAM/OS-P4/SEC-FILE-01/SIR) · authoritative operational-table ledger §7.1.2 closing GAP-T2/T4/T6/T7 · requisitions + interviews + api_keys/webhooks specified · F-33 video rooms and EXT-008 packaging completed · GAP-021 cutover criteria · status-page spec · EVT mislabels corrected · Mermaid system dependency graphs + wave plan (§16.6.3) · single authoritative production-ready definition (§10.10.2). **No locked register count changed.**
 
-**v3.0** = S-02 baseline ⊕ institutional/media/B2B2C expansion (FC-18/FC-19, S-05..S-10) ⊕ LinkedIn-independence (FC-20, S-11/S-15/S-16) ⊕ native professional-network parity (S-12/S-13, ratified draft) ⊕ security priority stack (S-14) ⊕ final-edition resolutions (S-18/S-19). Canonical footprint: **18 top-level sections (§1–§18) + Appendices A–G**. All registers reconciled to the counts locked in §16.5.1. The raw source file is retained unmodified as the historical archive (a superseded-banner note points to this document).
+**v3.0** = S-02 baseline ⊕ institutional/media/B2B2C expansion (FC-18/FC-19, S-05..S-10) ⊕ LinkedIn-independence (FC-20, S-11/S-15/S-16) ⊕ native professional-network parity (S-12/S-13, ratified draft) ⊕ security priority stack (S-14) ⊕ final-edition resolutions (S-18/S-19). Canonical footprint: **18 top-level sections (§1–§18) + Appendices A–H**. All registers reconciled to the counts locked in §16.5.1. The raw source file is retained unmodified as the historical archive (a superseded-banner note points to this document).
 
 ## G. Pass-2 Deep Audit (v3.1) — full-corpus re-analysis
 
@@ -5935,14 +5940,14 @@ Token contrast proofs (indigo on both themes; hairline border vs surface where i
 # PART 2 — MASTER DOCUMENT (PRODUCTION-READY CONSOLIDATED EDITION)
 
 # TalentSphere — Master Single Source of Truth (SSOT)
-**Target-State Engineering Specification & Unified Web OS Architecture — Edition v3.7**
+**Target-State Engineering Specification & Unified Web OS Architecture — Edition v4.0 (Final Consolidated Release)**
 
 | Document Property | Value |
 |---|---|
-| **Edition** | v3.7 (amendments A1+A2) — Production-Ready Consolidated Edition (pass-2 structural §G · pass-3 semantic §H · pass-4 gap-closure §I · pass-5 LinkedIn parity §J · pass-6 learning platform §K · pass-7 combined architecture §L · pass-8 Aura Dense Profile §M · A1 CF-closure · A2 execution charter §16.6.4) |
+| **Edition** | **v4.0 — Final Consolidated Release** (pass-2 structural §G · pass-3 semantic §H · pass-4 gap-closure §I · pass-5 LinkedIn parity §J · pass-6 learning platform §K · pass-7 combined architecture §L · pass-8 Dense Profile §M · A1 CF-closure · A2 execution charter · v4.0 status register + coverage index, Appendix H) |
 | **Document Authority** | Single Source of Truth (SSOT); supersedes all prior editions and fragments in the raw archive (Part 1 §A) |
 | **Reality Baseline** | Documentation only — nothing implemented unless independently verified (§1.10) |
-| **Canonical Footprint** | 18 Top-Level Sections (§1–§18) + Appendices A–G |
+| **Canonical Footprint** | 18 Top-Level Sections (§1–§18) + Appendices A–H |
 | **Consolidates** | Baseline platform (17§) · Institutional/B2B managed learning (FC-18) · Provider-agnostic media engine (FC-19) · B2B2C graduation flywheel · LinkedIn-independence & migration (FC-20) · Native professional-network parity (ratified draft) · Security priority stack |
 | **Audience** | Product, Design, Engineering, Architecture, QA, DevOps/SRE, Security, Legal/Compliance, Executive, AI coding agents |
 
@@ -9633,6 +9638,8 @@ flowchart LR
 
 **Immediately after Wave 0 (Wave 1 first slice):** the J-1 candidate loop vertical (profile → course → complete → challenge → XP → apply → track) as one fully-finished slice per FDR-007/008 (DoR→DoD with evidence), and — parallelizable, needs only Profile + Storage — Migration v1 (F-64: archive upload → parse → preview → commit). **Do-not-start list (SEQ-008 binding):** institutional, media engine builds beyond upload-path prerequisites, parity social, learning commerce, talent-os Tier 3–4, extension, i18n, agency — all fully specced, all gated behind their waves; touching them early is an anti-overbuild violation, not ambition.
 
+**Roadmap-category mapping (the ten-step implementation order mandated at final consolidation — satisfied by the wave plan, shown explicitly):** ① Foundation & architecture = W0-1/W0-2 (scaffold + schema + ARCH lint) · ② Critical dependencies = W0-3/W0-4 (RLS boundary + auth — everything downstream assumes them) · ③ Core functionality = W1 + W2 (J-1 candidate loop, then marketplace loops J-2/J-3) · ④ Supporting functionality = W3 (institutional, community, assignments/programs, reviews) · ⑤ Integrations = W2–W4 as gated (media adapters Ph2, migration v1 Ph1/v2 Ph3, AI copilot Ph4, syndication Ph6 — each behind ADR-009 seam + flags) · ⑥ UI/UX completion = continuous per wave (six-state standard + UXC gates ship with each surface; Dense Profile tokens locked at W0-5) · ⑦ Security hardening = W0-3 baseline → §8.12 Tier 0 before first user → Tier 1 by W3 → Tier 2 before W4 AI → Tier 3 at W6 · ⑧ Testing = concurrent, never trailing (gate-per-wave: V-01..V-10 at W0; VER suites bind each wave's exit; §10.4 rows activate with their modules) · ⑨ Performance optimization = W5 (load/soak at 50k simulated; PERF budgets measured from W2 onward — no optimization without measurement, §13.8 rule) · ⑩ Production readiness = §10.10.2 checklist + PROD-001..021 artifacts, then domain launch gates. Dependencies are respected by construction: SEQ-004 forbids starting a tier whose prerequisite gate is red, and the do-not-start list above enforces it at wave granularity.
+
 **Documentation discipline from here (TRC-004):** no further standalone analysis passes of the specification; the SSOT updates only when code findings, gate results, or governance decisions change it — Code ↔ Architecture (§6.17) ↔ Requirements (registers) ↔ Documentation move in one change.
 
 ### 16.7 Governance RACI, Change Classes & Document Governance
@@ -10254,4 +10261,806 @@ The niche = the complete talent lifecycle (learn → prove → showcase → netw
 
 ---
 
-*End of TalentSphere Master SSOT — v3.7 Production-Ready Consolidated Edition.* This document is the complete, self-contained single source of truth for product, design, engineering, QA, DevOps, security, legal/compliance, and governance — from original concept through institutional expansion, the provider-agnostic media engine, the B2B2C graduation flywheel, LinkedIn independence, and the native professional-network parity program — with every register reconciled to a single authority, every conflict dispositioned in Part 1, and every claim held to the zero-trust reality baseline. **Nothing herein is implemented or verified until independently proven (§1.10, §10, §14.1).**
+## APPENDIX H — Implementation Status Register & Directive Coverage Index (v4.0 final consolidation)
+
+### H.1 Status methodology
+
+Feature/workflow status uses the founder-mandated six-state vocabulary, evidenced per §10.10.2 (a state advances only with an artifact in `verification_evidence` — never by claim):
+
+| State | Meaning | Evidence required to enter |
+|---|---|---|
+| NOT STARTED | Specified (or not); zero code | — (default state of this project) |
+| PLANNED | Spec-complete, scheduled in a wave (§16.6.3/§16.6.4), DoR satisfiable | Spec sections + wave assignment |
+| PARTIALLY IMPLEMENTED | Some layers built (e.g., DB but no UI) | Migration/code artifacts + gap list of what remains |
+| IMPLEMENTED | All layers built per spec | Code + unit/integration green |
+| TESTED | Gate suites green for its scope | VER-/V-gate artifacts (§10.9) |
+| PRODUCTION-READY | §10.10.2 items + applicable PROD gates green | Immutable evidence ledger rows |
+
+**Workspace verification (v4.0, 2026-09-21):** the project workspace contains exactly two files — this SSOT and the superseded raw archive. **Zero source files, zero infrastructure configuration, zero migrations exist** (independently re-verified this pass). Therefore: every feature below is **NOT STARTED**; the "partially implemented" and "implemented but undocumented" categories are **provably empty**; "documented but not implemented" describes the entire register by design (§1.10 zero-trust baseline). This is the honest status — it is not a documentation deficiency.
+
+### H.2 Per-feature status register (F-01..F-70, grouped by delivery wave; §2.1 holds the per-feature phase/surface detail — not duplicated here)
+
+| Wave (§16.6.3) | Features | Status | Finish-to-production criteria |
+|---|---|---|---|
+| **W0 Foundation (Ph0)** | F-01 Auth, F-02 Landing, F-03 Dashboard, F-15 Settings, F-21 Error Recovery, F-17 Admin Console (shell) | NOT STARTED (spec-complete) | W0-1..W0-7 exits (§16.6.4); V-01..V-10 artifacts |
+| **W1 Candidate Core (Ph1)** | F-12 Profile, F-13 Resume Builder, F-26 Portfolio, F-07 LMS (core), F-08 Challenges Arena, F-22 Gamification/XP, F-64 Migration Center v1 (+AUTH-016/017, PROFILE-011..024 depth) | NOT STARTED (spec-complete) | J-1 loop E2E (MVP exit ①); XP idempotency (V-06); VER-022 migration suite |
+| **W2 Marketplace + Media + Social v1 (Ph2)** | F-04 Job Marketplace, F-05 Post Job Studio, F-25 Job Detail, F-36 Draft Autosave, F-37 Job Templates, F-32 Saved Searches, F-06 Candidate Pipeline (core), F-42 Media Foundations, F-53 Social Graph & Feed v1, F-54 Content Publishing (core), F-66 Course Q&A, F-18 Chrome Extension, F-20 Command Search, F-27/F-28 extension features | NOT STARTED (spec-complete) | MVP exits ①–⑦; J-2/WF-01 loops; VER-018 adapter conformance; feed chronological-parity regression |
+| **W3 Recruiter + Institutional + Community (Ph3)** | F-06 (full ATS), F-33 Video Rooms, F-10 Messaging (full), F-40/46/47/50/52 Institutional suite, F-41 Licensing (basics), F-43 Graduation Flywheel, F-67 Assignments, F-68 QB/Practice (partial), F-69 Programs, F-55 Communities, F-56 Pages, F-57 Events, F-59 Outreach, F-60 Profile Views/Privacy, F-65 Employer Reviews, F-24 Trust & Safety, F-29/F-30/F-31 digests/rollups, F-09 Networking (full), F-64 Migration v2 | NOT STARTED (spec-complete) | MVP exits ②③ + institutional exits ①–⑤ (§1.8); VER-017/019/020; PROD-019 |
+| **W4 AI + Content depth + Commerce (Ph4)** | F-11 AI Assistant (LLM copilot), F-44 AI Media Enrichment, F-54 long-form (articles/newsletters), F-53 ranking v2, F-58 Recommendations, F-68 mocks/contests (complete), F-70 Course Commerce, F-16 Billing (production checkout), F-19 Analytics (full), F-23 Leaderboards | NOT STARTED (spec-complete) | AI gates (V-07/V-08, AIQ/FAIR); GAP-021 cutover exits; PROD-021; VER-023/025 |
+| **W5 Trust & Scale (Ph5)** | F-34 Multi-Entity Search, F-35 Flag Console, moderation-at-scale, IDV (within F-60 scope), F-48/F-49 OS-layer items (Tier-gated §16.6.1) | NOT STARTED (spec-complete) | 50k-simulated load; two-human suspension drills; Tier-3 deferral rule satisfied before any OS build |
+| **W6 Enterprise (Ph6)** | F-41 Procurement (full PO/Net-terms), F-45 Proctoring (vendor, OD-28), institutional SSO/HRIS, enterprise video providers, white-label (OD-20) | NOT STARTED (spec-complete) | DOR-020/021/023/024 closed; PROD gates; enterprise pilot signed |
+| **Decision-gated (no commitment)** | F-61 Premium Candidate (OD-34), F-62 Sponsored/Ads (OD-32), F-63 BD Graph (OD-31), LIVE-001 live video (OD-33) | NOT STARTED (gated) | Founder decision at OD gate before any spec-to-build promotion |
+| **DEPRECATED — DO NOT BUILD** | F-38 Legacy Chat, F-39 Unified Backend Stub | n/a | Superseded by ADR-004 / App Router; revival is a C2 defect |
+| **DEFERRED (no commitment, isolation invariant)** | Tier-3 differentiators (§16.6.1), SCORM/xAPI (§2.7.1), native mobile (SCOPE/PWA-first) | NOT STARTED (deferred) | §16.6.1 deferral rule + C3 |
+
+### H.3 Category audit (requirement: classify every major feature)
+
+- **Implemented / Tested / Production-ready:** none — 0 artifacts exist (H.1 verification). The §10.10.1 scorecards (Verification 5.0/10, Production 4.0/10) are *plan-completeness* baselines and do not move until artifacts exist.
+- **Partially implemented:** none (category provably empty at zero code).
+- **Implemented but not documented:** none (no code exists).
+- **Documented but not implemented:** the entire register (F-01..F-70, all families) — by design, per the zero-trust baseline; each carries wave placement + finish criteria (H.2).
+- **Known issues / limitations:** open OD decisions (§16.3.4, deadline-triaged in Part 1 §E.2) · DOR blockers (§16.1) · GAP register (§16.2) · ASM-01..08 empirical assumptions requiring validation (§16.4) · `VERIFY-AT-BUILD` platform facts (§18.1, Module 29) · scalability ceilings documented not proven (§13.2).
+- **Technical debt:** DEBT register (§7.4.3) is empty at spec stage by construction; it activates at first commit (debt logged, never silent).
+
+### H.4 Directive coverage index (every founder directive → where it landed; nothing lost)
+
+| # | Directive (conversation turn) | Landed in | Edition |
+|---|---|---|---|
+| T1 | Analyse raw docs; refine duplicates/conflicts; create improved file; iterate to production-ready | Whole document; Part 1 §A–F (19 sources, D-1..D-25) | v3.0 |
+| T2 | Complete re-analysis; gaps; finish partials; consistency; dependency graph; implementation order; production audit; doc-sync; traceability | Part 1 §G (V3-1..18); §7.1.2 ledger; F-33/EXT-008 completions; §16.6.3 graphs G-1..G-4 + waves; §10.10.2 | v3.1 |
+| T3 | (repeat of T2 — deeper) | Part 1 §H (V3B-1..14); OD-01..37 rebuild; MEC/IEC/ASM recovery; semantic fixes | v3.2 |
+| T4 | Find gaps/problems; add related features; fix all | Part 1 §I (V4-1..10); AUTH-017, NTF-012, SRCH-011, F-65/REV, JOB-020, privileged MFA, status page, checkout exits | v3.3 |
+| T5 | LinkedIn-class features natively; LinkedIn strictly optional; import convenience; integration layer; multi-source profiles; data ownership; feature analysis | Part 1 §J (V5-1..8); §18.5 matrix + exclusions; PROFILE-022..024; FEED-006; §4.2 Assembly Contract; G-5 | v3.4 |
+| T6 | Complete Udemy/Coursera feature set natively; zero dependency; all-platform coverage (LinkedIn/Glassdoor/HackerRank too); graphs; order | Part 1 §K (D-32..34); QNA/ASGN/QB/PROG; LMS-015..024; BILL-015..022; F-66..70; EVT-081..090; SCI-26..28; G-6; Appendix G | v3.5 |
+| T7 | Combine DDD + Feature-Based + Atomic Design; analyse before restructuring; dependency rules; diagrams; doc-sync | Part 1 §L; §6.17 (contexts, layout, contracts); ADR-010; ARCH-013..020; G-7/G-8; §14.2 conventions | v3.6 |
+| T8 | Five design decisions (density/borders/one-color/keyboard/alignment) | Part 1 §M (D-35..39); §5.4.1 Dense Profile; ADR-011; U-11/U-12; token deltas | v3.7 |
+| T9 | Analyse everything; what to focus next; what to improve; why | Amendment A1 (CF-11..15/17 closed) + A2 (Part 1 §E refresh; §16.6.4 Wave 0 charter; deadline triage; do-not-start list) | v3.7 A1/A2 |
+| T10 | Final consolidation; status audit; coverage cross-check; roadmap order; no information loss | **This appendix (H.1–H.6)** + §16.6.4 roadmap mapping; edition v4.0 | v4.0 |
+
+### H.5 Documentation-coverage map (the T10 completeness checklist → normative home)
+
+Product vision §1.2 · goals/metrics §1.5 · scope §1.8 · out-of-scope guardrails §1.9 · functional requirements §1.8 (FR-01..28) + §4 (29 modules) · non-functional §13.1 (NFR-01..07) · complete feature list §2.1 (F-01..70) · roles & permissions §1.7 (two-tier, 20 contextual roles, permission matrix) · journeys & workflows §3 (J-1..17, WF-01..25) + integrity traces §17.2 · UI/UX §5 (IA §5.1, routes §5.2–5.3, states §5.9–5.11, SEO §5.12) · design system §5.4 + Dense Profile §5.4.1 · frontend architecture §6.2 + §6.17 · backend architecture §6.2–6.5, §6.10 queues · database & schema §7 (canonical 50 §7.1, operational ledgers §7.1.1–2, constraints §7.2, RLS §7.3, idempotency/indexes §7.4, state machines §7.5, retention §7.6) · APIs §9 (SCI-01..28, CON-001..016, envelope/errors §9.4–9.5, domain surfaces §9.8) · integrations §2.7.1 + §6.15 + §18 · authN/authZ §6.7–6.8 + §7.3 + §8.1 · security §8 (incl. hardening §8.9, AI governance §8.10, runtime §8.11, priority stack §8.12) · privacy §7.7 (GDPR/CCPA/EEOC/FERPA/DSR) · error handling §9.5 + §3.5 (FEC-001..026) + §5.11 (UXC-001..018) · validation §7.2 + CON contracts + Zod rules §14.4 · edge cases §10.4 (EC-01..31, MEC/IEC) · notifications §4.12 (product) + §2.6 (delivery + matrices) · file/media handling §6.6 + §6.16 · performance §13.1/§13.8 (PERF-001..013) · scalability §13.2 · accessibility §5.8 (WCAG 2.2 AA + A11Y-001..010) · testing strategy §10.1–10.3 · test matrix/coverage §10.4 · security testing §10.5 · AI quality §10.6 · a11y testing §10.7 · regression §10.8 · gates §10.9 (VER-001..025) · readiness §10.10–10.10.2 · CI/CD §11.3–11.5 · deployment/environments §11.1 · environment config §14.4 (typed env) + §14.5 · dependency governance §11.2 · backup/DR §11.8 · go-live gates §11.10 (PROD-001..021) · monitoring/observability §12 (triad §12.1, metrics §12.2, tracing §12.3, incidents §12.5, runbooks R-001..015 §12.6, health score §12.7, support §12.8) · logging §12.1 + CON-016 · third-party services §2.7/§2.7.1/§11.2 · development tooling §14 (standards §14.1, coding §14.2, boundaries ARCH-001..020 §14.3, supply chain §14.6) · code quality §14.1–14.3 + §7.4.3 (TRC/ENG/DEBT) · architecture decisions §6.13 (ADR-001..011) + rejected §6.14 · known limitations §13.2 ceilings + Part 1 §E · technical debt §7.4.3 · partially implemented Appendix H.3 (none — zero code) · planned functionality §2.1 phases + §16.6 waves · future improvements Appendix D (PROPOSED 1–16) + decision-gated items · dependencies & prerequisites §16.6.1 (FDR/SEQ) + §11.2 · implementation priorities §16.6.3 waves + §16.6.4 charter · acceptance criteria §15 (+ per-domain gates §10.10.2) · definition of done §11.4 + FDR-008 + §10.10.2 · implementation status **this appendix** · roadmap §16.6 + §16.6.4.
+
+### H.6 Final verification chain (T10 requirement) — audit results at v4.0
+
+| Layer | Artifact | Verification result (machine-audited this pass) |
+|---|---|---|
+| Discussion → Requirements | H.4 directive index | All 10 directives mapped to landed sections; zero unmapped |
+| Requirements → Documents | H.5 coverage map | Every checklist item has a normative home; no orphan requirements |
+| Documents → Features | §2.1 F-01..70 ↔ families §17.1 | Register counts consistent across front notice = §16.5.1 = §17.1 (script: 0 mismatches) |
+| Features → Architecture | §6.17 context map ↔ §4 modules ↔ G-1..G-8 | Every module belongs to a context; every graph node maps to a register ID; 8/8 Mermaid parse-validated (mermaid v11) |
+| Architecture → Implementation status | H.1–H.3 | Zero code verified; statuses honest (all NOT STARTED / spec-complete); no inflated claims |
+| Implementation → Tests | §10.4 matrix + §10.9 gates | Every module/domain has a test lane row; every gate names its artifact class |
+| Tests → Security | §8.12 Tier 0–3 + VER suite | Security gates bound to release phases; privileged-MFA + key-leakage + tenant-isolation suites specified |
+| Security → Deployment | §11 (envs, CI/CD, PROD-001..021, DR) | Go-live gates require artifacts; DR RPO/RTO drills specified |
+| Deployment → Roadmap | §16.6.3/§16.6.4 | Wave plan dependency-ordered; do-not-start list enforced (SEQ-008); roadmap-category mapping in §16.6.4 |
+
+**Open items at v4.0 (explicit, not invented):** the OD/DOR/GAP/ASM/VERIFY-AT-BUILD registers (Part 1 §E) — each with owner + gate; nothing else is unknown. **No unresolved contradictions** (CF 18/18 resolved; CLAR 5/5 resolved; 39 adjudications D-1..D-39 recorded in Part 1 §C/§K.2/§M.1). **No orphaned requirements** (H.5 map complete). **No partially specified workflows** (WIT-001..025 all carry terminal exits + guards; missing terminal exit = C2 defect).
+
+---
+
+*End of TalentSphere Master SSOT — v4.0 Final Consolidated Release.* This document is the complete, self-contained single source of truth for the TalentSphere project — product, design, engineering, data, security, QA, DevOps, governance, and execution status — consolidated from the full project history and every founder directive (Appendix H.4), machine-audited for consistency (Appendix F, H.6), and honest about implementation state (§1.10, Appendix H.1). **Nothing herein is implemented or verified until independently proven; the active work order is §16.6.4 (Wave 0).** This document is the complete, self-contained single source of truth for product, design, engineering, QA, DevOps, security, legal/compliance, and governance — from original concept through institutional expansion, the provider-agnostic media engine, the B2B2C graduation flywheel, LinkedIn independence, and the native professional-network parity program — with every register reconciled to a single authority, every conflict dispositioned in Part 1, and every claim held to the zero-trust reality baseline. **Nothing herein is implemented or verified until independently proven (§1.10, §10, §14.1).**
+
+
+---
+---
+---
+
+TalentSphere — Master Project Documentation (SSOT)
+Complete Consolidated Edition v6.0 — Final Authoritative Reference
+
+| Property | Value |
+|---|---|
+| Document | SSOT.md — Single Source of Truth (updates and supersedes all prior editions) |
+| Edition | v6.0 — Full Consolidation (baseline + institutional + media + LinkedIn-parity + learning/social/insights/assessment parity + combined architecture + Phase 0 artifacts) |
+| Status | Target-state specification. Implementation: 0% (see §3) |
+| Supersedes | Master Project Document v4.8 · SSOT Document (institutional/media editions) · Combined Architecture spec · LinkedIn Independence Alignment · Full Platform Expansion spec · Phase 0 artifact set |
+| Governance | Locked registers change only via ratified C3 change (§27) |
+
+§1 How to Read This Document
+
+1.1 Authority hierarchy
+Verified production code > automated tests > migrations/RLS > this document > ADRs > archived legacy docs (§28, DO NOT BUILD)
+
+1.2 Status taxonomy (applies to every row in this document)
+
+| Label | Meaning |
+|---|---|
+| SPECIFIED | Locked requirement; build to it |
+| EXPANDED | Added by a ratified expansion (institutional, media, parity) |
+| PROPOSED | Designed, not ratified — requires decision (§26) |
+| RECOMMENDED | Author-added best practice; adopt or reject explicitly |
+| ASSUMPTION | Inferred to complete spec; validate before build |
+| TBD | Requires decision — owner named in §26 |
+| SUPERSEDED | Replaced; retained for history only |
+| DEPRECATED / HISTORICAL | Do not build |
+
+1.3 Reading paths — Executive: §2, §4, §25, §26 · Product/Design: §5–§9, §12 · Engineering: §13–§16, §21–§23 · Security: §19 · QA: §22 · Ops: §20, §23 · New contributor: §1, §3, §29.
+
+1.4 Document set (no new documents created)
+This file is the SSOT. Two companions remain in force and are referenced, not duplicated:
+CHANGELOG.md — correction ledger (COR-*), session map, revision history.
+supabase/migrations/ + tests/ — machine-verifiable truth once built.
+
+§2 Product Definition
+
+2.1 Vision. Make career growth transparent, verifiable, and accessible: one ecosystem where Learn → Prove → Showcase → Match → Apply → Hire → Grow is a continuous loop, and every action emits a verified signal.
+
+2.2 Product class (EXPANDED, ratified FC-20). TalentSphere is a self-contained professional platform providing natively the capability sets of four market categories, with zero functional dependency on any of them:
+
+| Category | Reference platforms | TalentSphere stance |
+|---|---|---|
+| Learning marketplace | Udemy, Coursera | Native authoring studio, categories, quizzes/assignments/peer review, learning paths, coupons, instructor earnings, reviews, Q&A, certificates |
+| Professional network | LinkedIn | Native profiles, follows, feed, posts/articles/newsletters, reactions/comments/reposts, endorsements, written recommendations, profile views, communities, events |
+| Employer insights | Glassdoor | Native company reviews, culture ratings, salary reports, interview experiences/questions, benefits, CEO approval |
+| Competitive assessment | HackerRank | Native contests, leaderboards, skill certification exams, practice sets, interview prep kits, problem discussions, editorials |
+| Institutional B2B | (LMS/EdTech) | Seat licensing, cohorts/batches, bulk import, procurement, branded certificates, B2B2C graduation flywheel |
+
+LinkedIn is an optional import source and optional syndication target only (§22). Udemy/Coursera/Glassdoor/HackerRank are not integrations, providers, or dependencies in any form — capability parity only, built natively.
+
+2.3 Value flywheels.
+Core: Learn → Prove → Showcase → Match → Apply → Hire → Grow → Learn.
+B2B2C: Institution provisions managed learners → verified signals earned → licence expiry/graduation → independent candidate (signals retained, FERPA severed) → marketplace supply → hires → placement proof → more institutions.
+Content: Publish → engage → followers → reach → opportunities → more publishing.
+Data: More verified signals → better matching → more hires → more employers → more candidates.
+
+2.4 Principles (P-1..P-10, immutable). Verified Over Claimed · Candidate Dignity First · Human-in-the-Loop AI · Progressive Disclosure · Single Source of Truth · Defense in Depth · Observable by Default · Accessibility Is Not Optional (WCAG 2.2 AA gate) · Monetization Follows Value · Build for the Last User.
+
+2.5 Scope guardrails (SCOPE-001..008). Not a real OS · browser-delivered only · niche-bound (talent/career lifecycle) · no hardware integration · no general filesystem · no arbitrary code execution beyond the quota'd sandbox · no open app marketplace beyond governed plugins · niche-creep requires C3 + founder sign-off.
+
+2.6 Explicit non-goals (documented exclusions).
+
+| Excluded | Reason |
+|---|---|
+| Sales-prospecting suite (Sales Navigator equivalent) | Outside talent/career niche (SCOPE-003); conflicts P-2 |
+| Self-serve advertising platform | Conflicts P-9; sponsored listings only (OD-32) |
+| Live streaming | High cost, low career relevance at current scale (OD-33) |
+| Voice/video DM | High complexity, low value |
+| Showcase sub-pages | Premature at current scale |
+| Opaque feed ranking | Conflicts transparency; ranking factors must be disclosed (FEED-005) |
+| Pay-to-rank recruiting | Conflicts P-1, P-9 |
+| Patents profile section | Negligible relevance to target segments |
+| Any LinkedIn/Udemy/Coursera/Glassdoor/HackerRank runtime dependency | Independence invariant (§22, INV-IND) |
+
+§3 Implementation Status Audit (Zero-Trust Baseline)
+
+3.1 Reality statement. No runtime code, tests, migrations, deployments, or integrations exist. Every ✅ / "implemented" token in any prior document denotes documented intent. Historical claims (846 unit tests, 28 E2E specs, 50 live tables, 119 live RLS policies, 26 microservices) are UNVERIFIED DOCUMENTED INTENT or artifacts of a rejected architecture.
+
+3.2 Status by workstream
+
+| Workstream | Status | Completeness | What remains |
+|---|---|---|---|
+| Product/business specification | Specified | 100% of intent | Ratify open decisions (§26) |
+| Data model (50 canonical) | Specified | Schema designed | Author migrations; fix drift (§3.4) |
+| Operational tables (~150) | Specified | Design-level | Author per phase; RLS at creation |
+| RLS policies | Specified (119 baseline) | Policy categories defined | Generate via template (§16.4); fuzz-test |
+| Auth/identity | Specified | Complete | Build Phase 0 |
+| Core B2C/B2B features F-01..F-37 | Specified | Complete | Build Phases 1–4 |
+| Institutional F-40..F-47, F-50, F-52 | Specified | Complete | Build Phases 3, 6, 10 |
+| Media engine F-42, F-44, F-51 | Specified | Complete | Build Phases 2, 4 |
+| Migration/decoupling F-64, F-65 | Specified | Complete | Build Phase 1–2 |
+| Learning marketplace F-66..F-74, F-82 | Specified (this edition) | Requirements + data + states | Build Phase 7 |
+| Social parity F-53..F-63, F-79..F-81 | Specified (this edition) | Requirements + data + states | Build Phase 8 |
+| Employer insights F-75 | Specified (this edition) | Requirements + data | Build Phase 9 |
+| Contests/certification F-76..F-78 | Specified (this edition) | Requirements + data | Build Phase 9 |
+| Admin expansion F-83 | Specified (this edition) | Requirements | Build Phase 8–10 |
+| Web OS layer F-48, F-49 | Specified | Tier-gated | Tiers 3–4 |
+| Tests / CI / observability | Specified | 0 executed | Build Phase 0 harness first |
+| Deployment / DR | Specified | 0 provisioned | Provision + drill |
+
+3.3 Nothing is Implemented, Tested, or Production-ready. Any future status change requires a VER-* evidence artifact (§22.5).
+
+3.4 Known specification defects to fix during Phase 0 (tracked, not hidden)
+
+| ID | Defect | Fix |
+|---|---|---|
+| DEF-01 | "50 tables" treated as a total; actual effective schema ≈200 | §14 states canonical 50 (locked) + operational clusters; total fixed by migrations |
+| DEF-02 | RLS count 119 impossible for ~200 tables | Replace hand-count with generated policies; count becomes derived, verified by fuzz suite |
+| DEF-03 | Route count drift (22 vs 25 vs +extensions) | Terminology: Core / Domain / Extension routes; registry is authority |
+| DEF-04 | Single Postgres queue for heavy jobs (transcode, 5k-row imports) | Dual-queue boundary (§16.6) — transactional vs heavy async |
+| DEF-05 | coursemodules/moduleprogress overlap media contentitems/mediaprogress | Media model is authority for content; legacy tables become course structure only (sections) — see §14.5 |
+| DEF-06 | FERPA "cryptographic severance" not implementable relationally | Logical anonymization pattern (§19.6) |
+| DEF-07 | Extension sync had no conflict rule | Server-authoritative sync, last-write-wins + local draft merge (§9.17) |
+| DEF-08 | Requirement-family ID collisions (IMP- bulk vs migration; COMM- community vs commerce; PROF-/PROFILE-; FED-/FEED-; REC-) | Renamed per §29.2 collision-resolution table |
+| DEF-09 | Register counts stale (SCOPE 10 vs 8, HDN, FEC, CON, PROD, UXC, PERF, REG, DOR) | Corrected in §29.1 |
+| DEF-10 | Realtime used for feeds → connection/cost blowup | Feeds use cursor polling/hybrid fan-out; Realtime limited to DM + badges + presence (§16.7) |
+
+§4 Goals, Metrics & Monetization
+
+4.1 North-Star: Verified Hires per Month.
+
+4.2 Metric framework (MVP / 12mo / 24mo) — retained: candidates 1k/25k/150k · employers 10/100/500 · WAU 30/40/50% · completion 25/35/45% · verified-signal profiles 50/70/85% · app→interview 10/18/25% · time-to-fill 45/30/21d · verified hires 5/50/300 · candidate retention 40/55/65% · employer retention 60/75/85% · MRR $500/$8k/$50k · NPS 30/45/60 & 35/50/65 · AI acceptance 40/60/75% · uptime 99.5/99.9/99.95%.
+
+EXPANDED metrics: institutions 0/5/25 · managed seats 0/2.5k/25k · seat utilization —/70/80% · graduation conversion —/40/60% · institutional renewal —/—/85%.
+NEW (learning marketplace): course GMV, instructor count, paid-course conversion, course rating avg, refund rate, path completion rate.
+NEW (social): MAU posters, feed DAU/WAU, avg post engagement, follower growth, article/newsletter subscribers.
+NEW (insights): company reviews count, salary reports count, review moderation SLA.
+NEW (assessment): contest participation, certification pass rate, practice problems solved.
+All new metrics are PROPOSED targets — numeric targets TBD (§26 OD-40).
+
+4.3 Health indicators — retained (ratio 70%@module 3; AI rejection >60%; tickets >5% WAU; seat utilization 2%). NEW: review-moderation backlog >SLA; contest abandonment >30%; coupon abuse rate; instructor payout failure rate.
+
+4.4 Pricing. Free / Pro $19 / Team $49-seat / Enterprise custom (entitlement matrix retained). EXPANDED institutional tiers: Starter ≤500 seats (card), Pro ≤5,000 (+invoice, Google SSO), Enterprise L&D (PO/Net-terms, SAML/OIDC, white-label, T2–T4).
+NEW revenue lines (PROPOSED, pricing TBD §26): per-course purchases + coupons · course marketplace revenue share (70/30 baseline) · instructor payouts · learning-path bundles · Premium Candidate tier (OD-34) · sponsored content (OD-32) · certification exam fees · contest entry (free by default).
+
+4.5 Unit economics. Free $0/$0.03/$0.05 · Pro $19/$0.25/$3.50 (80.3%) · Recruiter $149/$4.50/$18 (84.9%) · Enterprise $799+/$22/$85 (86.6%) · Institution Starter ~89% · Institution Pro ~86%. Guardrails: ≥75% blended margin; AI metered via aiauditlog; breaker at 115% budget; NEW: media egress + transcode metered per tenant (RG-013), video storage quotas, cold archival after 12 months without enrolment.
+
+§5 Users, Roles, Personas & Permissions
+
+5.1 Two-tier authorization. Tier 1 JWT: ROLEUSER, ROLERECRUITER, ROLE_ADMIN. Tier 2 contextual (24 roles): Candidate, Recruiter, Hiring Manager, Interviewer, Org Admin, Agency Recruiter, Finance Admin, Support Agent, Moderator, Platform Admin, Service Account, Instructor, Mentor, Course Author, Institution Admin, Department Admin, Faculty/Proctor, Managed Learner, Billing/Procurement Manager, Student (EXPANDED — managed or independent learner), Peer Reviewer (EXPANDED), Contest Participant (EXPANDED), Content Author (EXPANDED — posts/articles/newsletters), Company Reviewer (EXPANDED — anonymous-capable).
+Resolution: ADMIN override (audited) → workspace grants → RECRUITER (org membership) → USER.
+
+5.2 Master permission matrix (additions only; baseline retained)
+
+| Capability | Student | Instructor | Course Author | Peer Reviewer | Content Author | Company Reviewer | Faculty | Inst Admin | Moderator | Platform Admin |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Publish course (own) | ⛔ | ✅(assigned) | ✅ | ⛔ | ⛔ | ⛔ | ⛔ | ✅(inst) | ⛔ | ✅ |
+| Approve course for marketplace | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ✅ | ✅ |
+| Grade assignments | ⛔ | ✅(own courses) | ✅(own) | ✅(assigned, rubric) | ⛔ | ⛔ | ✅(assigned batches) | ⛔ | ⛔ | ✅ |
+| Peer-review submissions | ⛔ | ⛔ | ⛔ | ✅(assigned only) | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ✅ |
+| Create posts/articles | ✅ | ✅ | ✅ | ✅ | ✅ | ⛔ | ✅ | ✅ | ✅ | ✅ |
+| Moderate UGC | ⛔ | ⛔ | own content only | ⛔ | own only | ⛔ | ⛔ | inst-scoped | ✅ | ✅ |
+| Write company review | ✅(verified employment optional) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⛔(own org) | ✅ | ✅ |
+| Submit salary report | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⛔ | ⛔ | ✅ |
+| Create/grade contest | ⛔ | ✅(own) | ✅(own) | ⛔ | ⛔ | ⛔ | ⛔ | ✅(inst) | ⛔ | ✅ |
+| Manage coupons/pricing | ⛔ | ⛔ | ✅(own, within bounds) | ⛔ | ⛔ | ⛔ | ⛔ | ✅(inst) | ⛔ | ✅ |
+| View instructor earnings | ⛔ | ⛔ | ✅(own) | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ✅ |
+| Refunds | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ⛔ | ✅ (+Finance Admin own org) |
+
+Boundary principles (unchanged + new): no cross-user mutation without consent/legal basis · recruiter access application-scoped · moderation escalations quorum-based · faculty scoped to assigned batches · managed learners cannot self-enrol outside licence pool nor apply pre-graduation · NEW: peer reviewers see only the submission under review, never reviewer identity (double-blind until both reviews complete) · NEW: anonymous company reviews hide identity from employer and from other users, but never from Platform Admin/legal · NEW: instructors cannot review or rate their own courses (BR-110).
+
+5.3 Personas. P-A Aisha · P-B Rohan · P-C Priya · P-D Dev · P-E Elena · P-F Farid · P-G Grace · P-H Hugo · P-I Ivy · P-J Dr. Rao · P-K Meera · P-L Tomas. NEW: P-M Sam — Self-Paced Learner (buys individual courses, wants certificates + practice) · P-N Nina — Content Creator/Influencer (publishes articles/newsletters, grows following) · P-O Omar — Job Researcher (compares employers via reviews/salaries before applying) · P-Q Quinn — Competitive Programmer (contests, certifications, interview prep).
+
+5.4 Lifecycles. Account: REGISTERED→UNVERIFIED→VERIFIED→ACTIVE⇄SUSPENDED→DEACTIVATED→DELETED | TERMINATED. Managed learner: provisioned→invited→claimed→activemanaged→graduationpending→independent | revoked→archived. NEW Instructor: applicant→underreview→approved→active⇄suspended→retired (verification badge optional, OD-27). NEW Course: draft→submittedforreview→underreview→approved→published→updating→archived|unpublished (+rejected with feedback → draft). NEW Contest: draft→scheduled→registrationopen→active→ended→resultspublished→archived.
+
+§6 Feature Register (F-01..F-83)
+
+Baseline F-01..F-37 (auth, landing, dashboard, jobs, post-job, pipeline, LMS, arena, networking, messaging, AI, profile, resume, notifications, settings, billing, admin, extension, analytics, command search, error recovery, gamification, leaderboard, trust, job detail, portfolio, resume-match, scanner, digest, nudges, KPI, saved searches, video rooms, multi-entity search, flags, autosave, templates) — SPECIFIED. F-38/F-39 DEPRECATED.
+
+EXPANDED F-40..F-52 — Institutional Managed Learning · Procurement & Seat Licensing · Provider-Agnostic Media Engine · B2B2C Graduation Flywheel · AI Media Enrichment · Proctoring (Phase 10, vendor-gated OD-35) · Institutional Analytics · Faculty Dashboard · OS Shell & Workbench · Automation/Healing/Agent Layer · Institutional Course Marketplace · Media Health Monitoring · Certificate Verification.
+
+Migration/independence F-64, F-65 — LinkedIn Migration Engine · LinkedIn Decoupling & Independence (§22).
+
+NEW — Learning marketplace parity (Phase 7)
+
+| ID | Feature | Key families |
+|---|---|---|
+| F-66 | Course Creation Studio & Publishing Pipeline | STUDIO-001..020 |
+| F-67 | Course Categories, Discovery & Comparison | DISC-001..016 |
+| F-68 | Quizzes, Practice Tests & Final Exams | ASSESS-001..007, 014..016 |
+| F-69 | Assignments & Peer Review | ASSESS-008..013 |
+| F-70 | Learning Paths, Programs & Specializations | PATH-001..012 |
+| F-71 | Course Q&A, Discussions, Notes & Bookmarks | CCM-001..012 |
+| F-72 | Course Reviews & Ratings | REV-001..010 |
+| F-73 | Course Commerce: per-course purchase, coupons, bundles, refunds | COM-001..016 |
+| F-74 | Instructor Platform (profile, verification, dashboard, earnings, students) | INSTR-001..014 |
+| F-82 | Student Learning Analytics Dashboard | SANA-001..011 |
+
+NEW — Professional social parity (Phase 8)
+
+| ID | Feature | Key families |
+|---|---|---|
+| F-53 | Professional Social Graph & Feed | SOC-001..011, FEED-001..005 |
+| F-54 | Content Publishing (posts, media, polls, documents) | CNT-001..005, ENG-001..005 |
+| F-79 | Articles & Newsletters | CNT-006..007, NEWS-001..005 |
+| F-55 | Groups & Communities (expanded) | GRP-001..011 |
+| F-56 | Organization & Institution Pages | PAGE-001..010 |
+| F-57 | Events & Webinars | EVNT-001..011 |
+| F-58 | Written Recommendations | REC-001..008 |
+| F-59 | Outreach Credits (TalentMail) | OUT-001..006 |
+| F-60 | Profile Views & Privacy Controls | PV-001..004, PRIV-001..007 |
+| F-80 | Profile Enhancements (sections, vanity URL, signals, featured) | PROFILE-011..035 |
+| F-81 | Identity Verification (person) | IDV-001..002 |
+
+NEW — Employer insights & competitive assessment (Phase 9)
+
+| ID | Feature | Key families |
+|---|---|---|
+| F-75 | Employer Insights: company reviews, culture ratings, salary reports, interview experiences/questions, benefits, CEO approval, responses | GLASS-001..017 |
+| F-76 | Coding Contests & Live Leaderboards | CONTEST-001..006, 011, 015 |
+| F-77 | Skill Certification Exams | CONTEST-007..008 |
+| F-78 | Practice Sets, Interview Prep Kits, Editorials, Problem Discussions | CONTEST-009..014, 016 |
+| F-83 | Admin Platform Expansion (course/instructor/category/review/order/coupon/revenue/certificate/contest/featured moderation) | ADMX-001..015 |
+
+Deferred (documented, not deleted): F-61 Premium Candidate (OD-34) · F-62 Sponsored Content (OD-32) · F-63 Business-Development Graph (OD-31) · LIVE-001 live video (OD-33) · white-label portals (Phase 10) · native mobile apps.
+
+§7 Journeys, Workflows & Healing
+
+7.1 Journeys. J-1..J-11 baseline; J-12 Graduation Flywheel; J-13 Institutional Media Authoring; J-14 Institutional Procurement; J-15 Faculty Teach→Monitor→Intervene; J-16 Corporate L&D Mandate→Certify; J-17 LinkedIn Migration.
+NEW: J-18 Creator: Author → Publish → Sell → Payout (studio → review → publish → pricing/coupon → enrolments → monthly settlement) · J-19 Self-Paced Learner: Discover → Compare → Buy → Learn → Assess → Certify → Path · J-20 Learner: Path → Courses → Capstone → Program Certificate · J-21 Contestant: Register → Compete → Rank → Editorial → Certify · J-22 Researcher: Company → Reviews/Salaries/Interviews → Compare → Apply · J-23 Author: Post → Engage → Article → Newsletter → Audience · J-24 Reviewer: Write Review → Moderation → Published → Company Response · J-25 Peer Reviewer: Assigned → Rubric Review → Feedback → Grade Finalized.
+
+7.2 Workflows. WF-01..WF-23 retained. NEW: WF-24 Course Publish Review · WF-25 Course Purchase & Enrolment · WF-26 Coupon Redemption · WF-27 Refund Request → Review → Refund/Deny · WF-28 Instructor Payout Settlement · WF-29 Quiz Attempt & Grading · WF-30 Assignment Submit → Grade / Peer Review · WF-31 Path Enrolment & Progression · WF-32 Contest Lifecycle · WF-33 Certification Exam Attempt · WF-34 Post Publish → Feed Distribution · WF-35 Newsletter Issue Send · WF-36 Company Review Moderation · WF-37 Salary Report Aggregation · WF-38 Recommendation Request → Give → Accept → Display · WF-39 Outreach Credit Send → Reply → Refund · WF-40 Profile View Logging (privacy modes) · WF-41 LinkedIn Migration Import (see §22.4).
+
+7.3 Healing & ownership. HEAL-001..010, WOM-001..008, INV-TERMINAL, and the circular-breaker table retained. NEW breakers: course-publish review loop (max 3 rejections → mandatory admin escalation) · refund request loop (deny → re-request cooldown 30d, then human) · peer-review non-delivery (SLA → reassign to next reviewer → instructor fallback) · contest dispute loop (single ruling, appeal once) · newsletter send failure (retry ×3 → paused + author notified, never silent).
+
+7.4 Failure/edge register FEC-001..014 retained + NEW FEC-015..026: import partial failure · seat oversell · external media unavailable · provider rate-limit during validation · licence expiry mid-assessment · graduation transition partial failure · transcode failure · duplicate students across batches · coupon exhausted/racing (atomic decrement) · payout provider failure (hold, never lose ledger) · refund after partial consumption (prorate per policy) · peer-review deadlock (both reviewers inactive) · contest clock skew (server-authoritative timing) · feed fan-out storm (bounded queues + coalescing) · UGC moderation backlog (degrade to post-hoc review with visibility limits) · anonymous review abuse (rate limits + verification weighting).
+
+§8 Business Rules (BR-01..BR-140)
+
+8.1 Retained: BR-01..35 canonical · BR-036..071 expanded (incl. healing timers BR-069..071) · BR-072..082 institutional · BR-083..090 media.
+
+8.2 NEW — Learning marketplace (BR-091..BR-115)
+
+| ID | Rule | Enforcement |
+|---|---|---|
+| BR-091 | Course submission requires ≥5 lessons and ≥30 min total content | Validation |
+| BR-092 | Course requires ≥1 video or text lesson (no quiz-only courses) | Validation |
+| BR-093 | Structural edits to a published course require a new version | State machine |
+| BR-094 | Free-preview lessons ≤20% of course content | Validation |
+| BR-095 | Rating requires ≥20% course progress and verified enrolment | Enrolment check |
+| BR-096 | Category assignment required before submission | Validation |
+| BR-097 | Instructor must have an approved profile before publishing | Auth check |
+| BR-098 | Course image ≥750×422, ≤4MB | Upload pipeline |
+| BR-099 | Coupon cannot reduce price below platform minimum | Validation |
+| BR-100 | Refund window 30 days from purchase (configurable), pro-rated after | Order state machine |
+| BR-101 | Instructor earnings = 70% of net revenue after platform commission (configurable) | Calculation |
+| BR-102 | Course announcements limited to 1/day/course | Rate limit |
+| BR-103 | Peer review requires ≥2 completed reviews per submission | Assignment logic |
+| BR-104 | Instructor cannot review or rate own course | Validation |
+| BR-105 | Course version preserves existing student progress | Version logic |
+| BR-106 | Learning-path courses complete in declared order when sequenced | Enrolment check |
+| BR-107 | Quiz attempts bounded by configured max; practice quizzes unlimited | Quiz config |
+| BR-108 | Graded quiz contributes to course grade; passing score configurable | Grading |
+| BR-109 | Final exam cumulative; required for course completion when configured | Completion rules |
+| BR-110 | Program certificate issued only when all required path courses complete | Path logic |
+| BR-111 | Assignment late submission flagged, graded per instructor policy | Assignment logic |
+| BR-112 | Auto-grading for code assignments reuses the challenge sandbox | Sandbox |
+| BR-113 | Question-bank reuse preserves per-attempt snapshots (no retroactive edits) | Versioning |
+| BR-114 | Course archive/unpublish preserves enrolled-student access per policy | State machine |
+| BR-115 | All course purchases are idempotent and webhook-owned (never client-trusted) | Billing |
+
+8.3 NEW — Social/content (BR-116..BR-128)
+
+| ID | Rule |
+|---|---|
+| BR-116 | One reaction per user per target; changeable, never additive |
+| BR-117 | One repost per user per post |
+| BR-118 | Post edits retain an "edited" marker and version history |
+| BR-119 | Comment authors and post authors may moderate; authors may disable comments |
+| BR-120 | Mentions notify only if the recipient allows mentions |
+| BR-121 | Follows unique; blocked/muted targets cannot be followed |
+| BR-122 | Post visibility enforced server-side (public / connections / org / private) |
+| BR-123 | Newsletter subscriptions opt-in only; one-click unsubscribe (RFC 8058) |
+| BR-124 | Feed must always offer a chronological view; ranking factors disclosed on demand |
+| BR-125 | UGC passes pre-publish abuse scan; post rate limits per actor |
+| BR-126 | Sponsored content labelled as sponsored; never undisclosed in organic ranking |
+| BR-127 | Mute hides content without unfollowing and without notifying the muted party |
+| BR-128 | Minors (16+) get private-by-default profiles and restricted outreach |
+
+8.4 NEW — Outreach, recommendations, privacy (BR-129..BR-134)
+
+| ID | Rule |
+|---|---|
+| BR-129 | Outreach credit consumed on send to a non-connection; refunded on reply within 7 days |
+| BR-130 | Outreach weekly caps: 20 (Pro), 50 (Team), custom (Enterprise) |
+| BR-131 | Endorsements require an existing connection |
+| BR-132 | Written recommendations display only after recipient acceptance |
+| BR-133 | Profile-view logging honours the viewer's privacy mode; recruiter views always audited |
+| BR-134 | Identity-verification badges only via approved partners; failure never blocks core use |
+
+8.5 NEW — Employer insights (BR-135..BR-138)
+
+| ID | Rule |
+|---|---|
+| BR-135 | Salary aggregates displayed only with ≥5 reports for a role/location cell |
+| BR-136 | Anonymous reviews hide identity from employer and public, never from Platform Admin/legal |
+| BR-137 | Company responses are appended, never edit the original review |
+| BR-138 | Interview questions require moderation before public display |
+
+8.6 NEW — Contests/certification & migration (BR-139..BR-140 + MIG rules)
+
+| ID | Rule |
+|---|---|
+| BR-139 | Contest submissions locked at server-authoritative end time; clock skew never extends |
+| BR-140 | Certification exam pass requires the configured score in a single attempt (retake policy configurable) |
+| MIG-01 | Imported data becomes project-owned; user may edit/delete/replace/export |
+| MIG-02 | Migration is one-way and user-initiated; no continuous sync by default |
+| MIG-03 | Migration never auto-publishes; imported posts land as drafts |
+| MIG-04 | Imported skills are self-reported until natively verified |
+| MIG-05 | Connection graphs are never imported; hashed-email mutual-consent discovery only, hashes TTL-bound |
+| MIG-06 | Provider tokens server-side, short-lived, revocable; disconnect purges tokens + raw archive |
+| MIG-07 | External provider IDs are never primary keys, auth claims, URLs, or analytics keys |
+| MIG-08 | Every provider surface is feature-flagged and removable without core schema change |
+
+§9 Functional Modules (1–41)
+
+9.1–9.21 Modules 1–21 (baseline) — unchanged: Identity/Auth (AUTH-001..015) · Profile & Portfolio (PROFILE-001..010, RESUME-001..003, PORTFOLIO-001) · Organizations (ORG-001..008, RECRUIT-001..005) · Jobs (JOB-001..016) · Applications/ATS (APPL-001..015) · LMS (COURSE-001..005, LMS-001..014) · Challenges (CHALL-001..013) · Networking (NET-001..013) · Messaging (MSG-001..016) · Gamification (GAMI-001..004, GAM-005..011) · Search (SEARCH/SRCH) · Notifications (NOTIF/NTF) · Billing (BILL-001..014) · Trust (TRUST/TRU) · Admin (ADMIN/ADM) · Analytics (ANALYTICS/ANA) · Extension (EXT-001..012) · Core Shell (CORE-001..013) · Reporting · Integrations/API · Localization (L10N-001..012).
+
+9.22 Module 22 — Institutional Managed Learning (INST-001..030, LIC-001..018) — unchanged.
+9.23 Module 23 — Provider-Agnostic Media Engine (MEDIA-001..048) — unchanged.
+9.24 Module 24 — B2B2C Graduation Flywheel — unchanged.
+
+9.25 Module 25 — Course Creation Studio & Publishing (STUDIO-001..020). Wizard (title/subtitle/description/category/difficulty/language/tags) · drag-drop curriculum builder · lesson types (video, text/article, PDF, downloadable resource, quiz, assignment, external link) · video upload via media engine · rich-text editor (markdown + WYSIWYG) · resource upload with limits · thumbnail · free-preview configuration · objectives/outcomes · prerequisites (course- or skill-based) · skill mapping into TIG · duration estimation · metadata/breadcrumb · draft autosave 30s + version history · submission with checklist validation · admin review queue (approve/reject/request-changes with feedback) · versioning preserving enrolments · update announcements · unpublish/archive with enrolled-student handling · instructor course dashboard.
+
+9.26 Module 26 — Categories & Discovery (DISC-001..016). 3-level taxonomy with admin management (create/edit/reorder/deprecate) · browse with filters (difficulty, duration, rating, price, language, instructor) · FTS search (SMR roadmap) · sort (relevance, rating, newest, most enrolled, price) · course card component · detail page (curriculum preview, instructor bio, reviews, related) · comparison (max 3, side-by-side) · wishlist · recently viewed · popular · trending · new arrivals · personalized recommendations · "continue learning".
+
+9.27 Module 27 — Quizzes, Assessments & Assignments (ASSESS-001..016). Quiz builder (single/multi choice, true/false, fill-in-blank, matching) · question bank by topic/skill · config (time limit, passing score, attempts, shuffle) · graded vs practice · results with per-question explanations · full-length practice tests · assignments (title, description, due date, max score, submission type: text/file/URL/code) · instructor manual grading with rubric · peer review with configurable rubric · auto-grading for code via sandbox · assessment analytics (pass rate, avg score, hardest questions) · cumulative final exam · section-end gating quizzes.
+
+9.28 Module 28 — Learning Paths & Programs (PATH-001..012). Path creation (ordered courses toward skill/goal) · types (skill-based, role-based, custom) · aggregate progress · prerequisite ordering · specializations with capstone · program certificate · TIG-based path recommendation from skill gaps · single enrolment granting all courses · path analytics (completion, drop-off) · admin path management · skill progression (beginner→intermediate→advanced→expert) · milestone achievements.
+
+9.29 Module 29 — Course Community (CCM-001..012). Per-lesson/per-course Q&A with threading and upvotes · instructor best-answer marking · announcements to enrolled students · private per-lesson notes · bookmarks · course discussion forum · mentions · reporting · instructor response-time tracking · in-course search of Q&A/discussions · "my notes & bookmarks" dashboard.
+
+9.30 Module 30 — Reviews & Ratings (REV-001..010). 1–5 stars after ≥20% progress · optional written review · breakdown display · edit own review · instructor response · moderation (report/review/remove) · helpfulness voting · eligibility gate · recency- and enrolment-weighted aggregation · instructor review analytics.
+
+9.31 Module 31 — Course Commerce (COM-001..016). Pricing models (free, one-time, subscription-included) · cart → payment → enrolment · instructor-set price within platform bounds · coupons (percentage/fixed/free; expiry, max uses, per-user limit, course scope) · promotional pricing and platform events · purchase history · refund request → admin review → refund/deny · configurable refund window · instructor earnings with 70/30 default · order management · tax via Stripe Tax · bundles.
+
+9.32 Module 32 — Instructor Platform (INSTR-001..014). Instructor profile (bio, expertise, photo, links, courses) · optional verification badge · dashboard (courses, students, revenue, reviews) · student management · individual/bulk messaging · performance analytics (enrolments, completions, ratings, revenue) · engagement analytics (watch time, quiz scores, drop-off per lesson) · review management (respond, flag) · announcements · Q&A management · grading queue · course update workflow with changelog + student notification · earnings/payout dashboard with history · onboarding (application → approval → profile → first course).
+
+9.33 Module 33 — Employer Insights (GLASS-001..017). Company reviews (current/former employee) with structure (overall 1–5, pros, cons, advice) · category ratings (work-life, culture, management, compensation, growth) · anonymous reviews · CEO approval · salary reports (role, location, experience) with aggregation (median/range/count) · interview experiences (difficulty, process, questions, outcome) · interview-questions database searchable by company/role · benefits reviews · company responses · moderation + optional employment verification (credibility badge) · culture aggregate display · company comparison · "would recommend to a friend".
+
+9.34 Module 34 — Contests & Certification (CONTEST-001..016). Contest creation (title, duration, problems, window, eligibility) · types (timed competition, practice, company-specific) · live leaderboard · problems with difficulty/points/partial scoring · registration + reminders · post-contest editorials · skill certification exams (timed, optionally proctored, pass/fail) · certification badge on profile · employer-custom assessments · practice sets by topic/difficulty/skill · per-problem discussions · full submission history · interview prep kits by role/company · difficulty progression recommendations · code review (peer/instructor).
+
+9.35 Module 35 — Social Feed & Content (SOC-, CNT-, ENG-, FEED-). Posts (text ≤3000 chars, 1–9 images ≤10MB, document/carousel ≤100 pages, video via media engine, polls 2–4 options with 24h/72h/1w duration) · visibility (public/connections/org/private) · edit with marker + history · soft delete · reactions (like, celebrate, support, insightful, love) · threaded comments ≤3 levels with author moderation · repost with/without thought · bookmarks in user collections · send-to-connection via DM · hashtags + follows · mentions · feed (ranked + mandatory chronological toggle, filters by connections/org/community/hashtag/type, "why am I seeing this?" disclosure) · creator mode (follow-forward, follower count, analytics, newsletters).
+
+9.36 Module 36 — Articles, Newsletters & Publishing (CNT-006..007, NEWS-001..005). Long-form articles ≤50,000 words with headings/images/embeds/code, versioned · newsletters (name, description, frequency weekly/biweekly/monthly) · issues (draft/scheduled/sent) with open/click counts · opt-in subscriptions with one-click unsubscribe · distribution via notification + email spine.
+
+9.37 Module 37 — Groups, Pages & Events (GRP-, PAGE-, EVNT-). Communities (open/restricted/private) with owners/managers, posts, moderation, recommendations · organization pages (about, specialties, locations, followers, posts, jobs tab, culture/life tab, employees) · institution pages with alumni graph · showcase sub-pages (PROPOSED) · page analytics · employee advocacy sharing · events (online/offline) with speakers, agenda, RSVP, tickets via Stripe, updates, analytics, recommendations, ICS export.
+
+9.38 Module 38 — Endorsements, Recommendations & Outreach (REC-, OUT-, ENDORSE-). Skill endorsements between connections with counts and top-skills highlighting · endorsement requests · written recommendations (request → draft → give → accept/decline → display; revocable) · relationship context shown · TalentMail outreach credits with reply-refund and caps · talent pools (org-scoped, notes, tags, bulk actions, candidates not notified).
+
+9.39 Module 39 — Profile Enhancements (PROFILE-011..035). Cover/banner image · custom vanity URL (/in/{slug}, 3–100 chars, unique, ≤3 changes/12mo, 30-day redirect) · Open-to-Work signal (all / recruiters-only excluding current employer / private) · Open-to-Hire signal · career-break entries (never penalized in matching) · pronouns + name pronunciation · employment-type enumeration · experience media attachments · education activities/grade/field · skill categories · certifications (issuer, dates, credential ID/URL, verification status) · projects (team, skills, URLs, dates) · learning history display (courses, challenges, XP — per-item visibility) · honors/awards · publications · test scores · volunteer · languages (ISO 639-1 + proficiency) · professional interests · featured section · profile-view analytics.
+
+9.40 Module 40 — Student Analytics & Learning Dashboard (SANA-001..011). Enrolled courses/progress/next steps · time spent (course/week/total) · assessment performance · skill progress · streaks · milestones · goals with targets · certificate collection · chronological learning history · skill-gap analysis vs target role · recommended next actions.
+
+9.41 Module 41 — Admin Expansion (ADMX-001..015). Course management (approve/reject/feature) · instructor management (applications, status) · category taxonomy management · review moderation queue (course + company) · Q&A/discussion moderation · order management + refunds · platform-wide coupons · revenue reporting (platform, instructor payouts) · course analytics (enrolment/completion trends) · content moderation · certificate management (revoke/reissue) · contest management · featured-content curation · skill taxonomy management.
+
+§10 State Machines (additions)
+
+Retained: Application (CF-16) · Job (BR-11) · Offer · Enrollment · Organization · Interview · Mentor · Certificate · Moderation · Submission · Background Job · Licence/Seat · Managed Learner · Media Asset · Purchase Request.
+
+NEW
+
+| Entity | States |
+|---|---|
+| Course (authoring) | draft → submittedforreview → underreview → approved → published → updating → archived \| unpublished; underreview → rejected → draft |
+| Course version | draft → submitted → approved → current → superseded |
+| Quiz attempt | notstarted → inprogress → submitted → graded; retry allowed while attempts remain |
+| Assignment | notsubmitted → submitted → underreview → graded → returned; submitted(late) flagged |
+| Peer review | assigned → in_progress → submitted → completed \| reassigned |
+| Learning path enrolment | enrolled → in_progress → completed \| dropped |
+| Course order | pending → paid → enrolled → completed; cancelled; refundrequested → refundapproved → refunded \| refund_denied |
+| Coupon | active → exhausted \| expired \| revoked |
+| Payout | pending → processing → paid \| failed → retry |
+| Company review | draft → submitted → pendingverification → published; flagged → underreview → published \| removed |
+| Salary report | submitted → validated → aggregated |
+| Interview question | submitted → pending_moderation → published \| rejected |
+| Contest | draft → scheduled → registrationopen → active → ended → resultspublished → archived |
+| Certification attempt | registered → in_progress → submitted → passed \| failed \| expired |
+| Post | draft → published → edited → deleted(soft) \| hiddenbymoderation; scheduled → published |
+| Comment | published → edited → deleted(soft) \| removedbymoderation |
+| Newsletter issue | draft → scheduled → sent \| failed |
+| Recommendation | requested → drafted → given → displayed \| declined \| withdrawn |
+| Outreach message | sent → replied \| expired |
+| Group membership | requested → approved \| rejected → left \| removed |
+| Event | draft → published → ongoing → completed \| cancelled |
+| Migration job | initiated → uploading → parsing → mapping → preview → committing → completed \| failed \| cancelled |
+| Instructor | applicant → under_review → approved → active ⇄ suspended → retired |
+
+Invariants: no skipped states · every transition audited · terminal states irreversible without a new entity · server authoritative · INV-TERMINAL (acyclic path to a terminal state for every machine).
+
+§11 UI/UX & Design System
+
+11.1 Aura tokens (unchanged): semantic light/dark ramps, 4px spacing base (0..192), radius 6/10/16/50%, elevation 1–4 + 2px focus ring (3:1), motion 120/200/320ms + reduced-motion, type xs..4xl, z 30/40/50/60, single generator, lint blocks raw hex.
+
+11.2 Atomic Design mapping (ratified FC-22)
+
+| Level | Contents |
+|---|---|
+| Atoms (14+) | Button, Input, Badge, Icon, Avatar, Skeleton, Spinner, Text, Divider, SourceStatusBadge, Checkbox, Radio, Toggle, Tag |
+| Molecules (12+) | SearchField, FormField, Pagination, Toast, Dropdown, Tabs, Modal, EmptyState, SelectField, FileInput, DateRangePicker, ConfirmationDialog |
+| Organisms (16+) | DataTable, NavigationSidebar, TopBar, CommandPalette, NotificationBell, FileUploader, CourseCard, JobCard, ProfileCard, QuizPanel, MediaSourceForm, LicenseUtilizationChart, SixStateRenderer, UnifiedPlayer, ObjectPreviewCard, PostComposer, PostCard, CommentThread, ReviewSummary, CurriculumTree, LeaderboardTable |
+| Templates (8) | DashboardLayout, AuthLayout, SettingsLayout, AdminLayout, InstitutionLayout, LearningLayout, CourseBuilderLayout, FeedLayout |
+| Pages | Live inside features (domains//features//pages/) |
+
+Rule: components used by only one feature stay in that feature; promotion to shared/ui/ happens on second use, never preemptively.
+
+11.3 Routes. Core (auth/landing) · Domain (jobs, courses, challenges, applications, messages, notifications, settings, admin) · Extension: OS (9), institutional (13), media (2) · NEW learning: /courses/[id]/curriculum, /courses/[id]/quiz/[quizId], /courses/[id]/assignment/[id], /paths, /paths/[id], /teach (studio), /teach/courses/[id], /teach/analytics, /teach/earnings, /cart, /checkout, /orders, /coupons/redeem · NEW social: /feed, /posts/[id], /articles/[id], /newsletters/[id], /communities, /communities/[id], /events, /events/[id], /in/[slug], /companies/[slug], /companies/[slug]/reviews, /companies/[slug]/salaries, /salaries, /interview-questions, /contests, /contests/[id], /certifications/[id], /practice, /bookmarks, /notifications/mentions · NEW admin: /admin/courses, /admin/instructors, /admin/categories, /admin/reviews, /admin/orders, /admin/coupons, /admin/revenue, /admin/certificates, /admin/contests, /admin/featured.
+Registry (config/routes.ts) remains the single navigation/permission authority; additions are C3 changes.
+
+11.4 States. Six-state standard (idle/loading/populated/empty/error/stale) + UXC-001..015. NEW: UXC-016 course builder (autosaving/saved/save-failed/publish-blocked) · UXC-017 checkout (cart/processing/paid/failed/refunded) · UXC-018 quiz attempt (in-progress/time-warning/submitted/graded/timed-out) · UXC-019 contest (pre-start/live/ended/results) · UXC-020 feed (loading/empty/error/stale/offline/end-of-feed) · UXC-021 migration wizard (upload/parsing/preview/conflicts/committing/partial/failed) · UXC-022 review composition (draft/submitting/pending-moderation/published/removed).
+
+11.5 Accessibility. WCAG 2.2 AA gate; A11Y-001..010 evidence; NEW: quiz timers announce remaining time and support extended-time accommodations; contest leaderboards expose a data-table alternative; media player keyboard-operable with caption toggle; feed infinite scroll has a "load more" non-scroll alternative; drag-drop curriculum builder has a keyboard reorder path (mandatory, §11.6 DnD contract).
+
+11.6 Responsive/PWA. Breakpoints and bottom-nav retained; Workbox tiers retained; NEW: offline course notes/bookmarks; course content available offline only where the author enabled download (DRM-lite: signed URL expiry + encrypted IndexedDB, auto-purge on entitlement expiry).
+
+§12 Error Handling & Validation
+
+12.1 Error contract (CON-001). RFC 9457 {type,title,status,detail,instance,code,correlationId,errors[]}; stable machine codes in errorcodecatalog; no stack traces, SQL, or provider detail; RLS denials return 404-equivalent (no existence leakage).
+
+12.2 Taxonomy. 422 validation (field-level) · 401 auth · 403/404 authorization · 409 conflict (optimistic concurrency, duplicate) · 429 rate limit (+Retry-After) · 503 dependency failure with degraded mode (never false success) · 504 timeout with idempotent resume · Realtime failure → resubscribe + reconcile · AI failure → heuristic fallback + badge · billing failure → entitlements unchanged · scheduler failure → retry/DLQ.
+
+12.3 Validation rules (consolidated). Zod schemas at every boundary · profile: headline ≤120, summary ≤2000 · post body ≤3000 (articles ≤50,000 words) · comment ≤2000 · course title ≤60, subtitle ≤120, description ≤5000 · quiz question ≤500, options 2–6 · assignment description ≤5000 · review ≤2000 with rating 1–5 · salary report: currency + minor units + role + location · contest problem statement limits per sandbox spec · upload caps (TD-02): avatar ≤4MB, resume ≤10MB, portfolio ≤50MB, course video ≤2GB, post image ≤10MB, document ≤100 pages, assignment file ≤50MB · coupon code format + max discount bound · vanity slug 3–100 [a-z0-9-], reserved-word blocklist.
+
+12.4 Edge cases EC-01..025 retained + NEW EC-26..040. Coupon race (atomic decrement, 409 on exhaustion) · price change between cart and checkout (re-validate, show new price) · refund after course completion (policy-driven) · instructor deleted while course published (course → unpublished, students refunded or migrated per policy) · quiz timer expiry mid-answer (auto-submit with partial grading) · assignment submitted after due date (late flag) · peer reviewer never submits (SLA → reassign → instructor fallback) · path course unpublished mid-path (path progress preserved, substitute suggested) · contest starts while problem set edited (snapshot problems at active) · certification attempt after window (expired, re-register) · post deleted while being commented (comments orphan-safe, 410 on submit) · newsletter send failure (paused, author notified) · recommendation request to non-connection (blocked) · outreach to a user who blocked sender (403, credit not consumed) · anonymous review by unverified employment (allowed, credibility badge absent) · migration archive with unknown schema version (graceful degradation + manual path).
+
+§13 Combined Architecture (DDD + Feature-Based + Atomic Design)
+
+13.1 Ratified model (FC-22). DDD defines domains/bounded contexts/aggregates/rules · Feature-Based organizes implementation per capability · Atomic Design organizes reusable UI. Flow: Bounded Context → Aggregate/Entity/VO/Event → Application Service/Use Case → Feature → Feature UI → Atomic components.
+
+13.2 Dependency direction (lint-enforced).
+app/ (thin router) → domains//features/ → domains//application/ → domains//domain/ (pure TS); domains//infrastructure/ implements domain repository interfaces; shared/ consumed by features + infrastructure, never consumes domains; forbidden: domain→React/Next/Supabase, feature→another feature's internals, shared/ui→domain logic, app/→business logic, infrastructure→feature UI, domain→domain.
+
+13.3 Bounded contexts (RECOMMENDED default 7 + shared kernel — confirmation pending, §26 D-1)
+
+| Context | Contents | Aggregates |
+|---|---|---|
+| identity | Auth, profiles, orgs, tenancy, managed learners, instructor approval | User, Profile, Organization, Membership |
+| marketplace | Jobs, requisitions, applications, offers, interviews, employer insights (reviews/salaries/interviews) | Job, Application, Offer, CompanyReview |
+| learning | Courses, lessons/content items, media, enrolments, progress, quizzes, assignments, paths, certificates, XP/gamification, contests, certifications | Course, Enrolment, Assessment, XPLedger, Contest |
+| community | Connections, follows, posts/articles/newsletters, comments/reactions/reposts, groups, events, messaging, notifications | Thread, Post, Community |
+| billing | Subscriptions, entitlements, course commerce, coupons, orders, refunds, licence pools, procurement, payouts | Subscription, Order, LicencePool, Payout |
+| governance | Admin, moderation, trust, audit, flags, verification | Report, ModerationAction, FeatureFlag |
+| analytics | Event tracking, KPIs, dashboards, experimentation | AnalyticsEvent, KPISnapshot |
+| Shared kernel | Event backbone, UOM, TIG, automation, agents, healing, liquidity, DQ, health, media engine, integrations (incl. LinkedIn), AI service, UI kit, types, utilities | DomainEvent, MediaSource, ProviderAdapter |
+
+Rationale for consolidation: gamification is a learning signal (not a domain); media is shared infrastructure serving learning + institutional + community; institutional is a tenancy/licensing concern spanning identity + billing + learning; the Web OS is a shared kernel, not a domain. If D-1 is rejected, the 16-context variant remains valid; folder structure is unaffected in shape, only in grouping.
+
+13.4 Repository layout
+
+src/
+├── app/                      # Next.js router: thin shell only
+│   ├── (auth)/ (platform)/ api/v1/ api/health/
+├── domains/
+│   ├── identity/ marketplace/ learning/ community/ billing/ governance/ analytics/
+│   │   ├── domain/{entities,value-objects,aggregates,events,rules,repositories}
+│   │   ├── application/{use-cases,services}
+│   │   ├── infrastructure/{repositories,adapters}
+│   │   └── features//{index.ts,pages,components,hooks,services,api,models,validators,tests}
+├── shared/
+│   ├── platform/{events,object-model,graph,automation,agents,healing,liquidity,data-quality,health}
+│   ├── infrastructure/{supabase,media,integrations/{linkedin,stripe,resend,oauth,hris},ai,jobs,heavy-jobs,email}
+│   ├── ui/{tokens,atoms,molecules,organisms,templates,patterns,index.ts}
+│   ├── types/  utilities/
+└── config/{routes.ts,roles.ts,env.ts,feature-flags.ts}
+
+13.5 ADRs (updated). ADR-001 Supabase sole session authority · ADR-002 modular monolith · ADR-003 50 canonical tables + RLS deny-by-default · ADR-004 Realtime messaging authority · ADR-005 Stripe webhook idempotency + demo stubs · ADR-006 extension local-first · ADR-007 provider-agnostic media · ADR-008 institutional tenancy · ADR-009 dual-queue boundary (transactional Postgres queue vs heavy async worker) · ADR-010 RLS policy template generator (policies generated, not hand-counted) · ADR-011 media contentitems/mediaprogress are the authority for lesson content; coursemodules/moduleprogress are course-structure/legacy-progress compatibility only · ADR-012 DDD + Feature-Based + Atomic Design combination · ADR-013 cross-domain communication via events or application-service interfaces only.
+
+§14 Data Architecture
+
+14.1 Canonical 50 tables (locked). profiles, profileskills, userprofiles(2a), usersettings(2b), profileexperience, profileeducation, profileportfolios, resumes, organizations, orgmemberships, jobs, jobskills, jobapplications, applicationstatusevents, scorecards, offers, requisitions, courses, coursemodules, courseenrollments, moduleprogress, coursereviews, challenges, challengesubmissions, badges, userbadges, xptransactions, leaderboards, messages, messagethreads, threadparticipants, connections, feedactivities, notifications, subscriptions, invoices, entitlements, paymentmethods, billingevents, reports, moderationflags, auditlogs, featureflags, platformconfig, aiauditlog, savedjobs, savedsearches, jobalerts, emailtemplates, systemannouncements, mentorshiprelationships, coursecohorts.
+
+14.2 Operational clusters (non-canonical; RLS at creation; additive migrations only)
+
+| Cluster | Tables (count) |
+|---|---|
+| Journey (20) | connectionrequests, skillendorsements, jobreferrals, careerroadmaps, cohorts, cohortmembers, cohortcurriculum, payoutprofiles, creatorpayouts, mentorprofiles, mentorshipsessions, mentorshipnotes, mentorreviews, institutionalshowcases, agencyclientcontracts, agencyplacements, agencyinvoices, jobtrackers, coursechallenges, talentpool |
+| OS layer (27+4) | workspaces, savedworkspacelayouts, workspacewidgets, usertasks, osobjects, osobjectlinks, ostags, osbookmarks, osfavorites, oshistory, knowledgegraphnodes, knowledgegraphedges, domainevents, eventsubscriptions, workbenchboards, automationrules, automationruns, journeyinstances, interventions, liquiditysignals, dataqualityfindings, agents, agentruns, agentmemory, devicetrust, sessionriskscores, fraudcases, auditfindings + osclipboarditems, osundolog, osmentions, notificationcenterevents |
+| Institutional (12) | departments, batches, batchmemberships, licensepools, licenseassignments, purchaserequests, procurementorders, institutionalcourses, certificates, organizationinvitations, importbatches, studentconsentrecords |
+| Media (10) | contentitems, mediasources, mediaassets, mediaversions, playlistsources, playlistitems, mediaprogress, mediaevents, mediaproviderconfigs, mediahealthchecks |
+| Readiness/evidence (3) | verificationevidence, readinessgates, errorcodecatalog |
+| Migration/LinkedIn (5) | migrationjobs, migrationimportbatches, importedrecords, migrationconsents, externalidentity_references |
+| Learning marketplace (27, NEW) | coursecategories, courseversions, lessons, lessonresources, quizzes, quizquestions, quizattempts, assignments, assignmentsubmissions, peerreviews, courseqna, courseqnareplies, coursediscussions, coursediscussionreplies, lessonnotes, lessonbookmarks, coursewishlist, courseannouncements, learningpaths, learningpathcourses, learningpathenrollments, pathprogress, coursepricing, coupons, couponredemptions, courseorders, instructor_earnings |
+| Social/content (24, NEW) | follows, posts, postmedia, comments, reactions, reposts, bookmarks, hashtags, posthashtags, mentions, polls, pollvotes, articles, articleversions, newsletters, newsletterissues, newslettersubscriptions, postanalytics, feedrankingsignals, mutedaccounts, communities, communitymemberships, communitymoderationlog, profileviews |
+| Profile expansion (11, NEW) | profilemedia, careersignals, profilecertifications, profileachievements, profilepublications, profiletestscores, profilevolunteer, profilelanguages, profileinterests, experiencemedia, identityverifications |
+| Recommendations/outreach/pools (5, NEW) | writtenrecommendations, outreachcredits, outreachmessages, talentpools, talentpoolmembers |
+| Pages/events (6, NEW) | organizationpages, showcasepages, events, eventspeakers, eventrsvps, event_updates |
+| Employer insights (6, NEW) | companyreviews, companyreviewratings, salaryreports, interviewexperiences, interviewquestions, company_responses |
+| Contests/certification (9, NEW) | codingcontests, contestproblems, contestregistrations, contestsubmissions, contestleaderboard, skillcertifications, certificationattempts, practiceproblems, problem_discussions |
+| Commerce ops (2, NEW) | refunds, instructor_payouts |
+
+Effective schema ≈ 200 tables. The exact count is fixed by migrations and verified by VER-002; the "50 canonical" lock is unchanged and refers only to the baseline cluster.
+
+14.3 Key constraints (additions). follows UNIQUE(follower, followedtype, followedid) · reactions UNIQUE(user, targettype, targetid) · reposts UNIQUE(user, post) · bookmarks UNIQUE(user, post) · pollvotes UNIQUE(poll, voter) · newslettersubscriptions UNIQUE(newsletter, subscriber) · writtenrecommendations UNIQUE(requester, recommender) WHERE status≠withdrawn · courseorders UNIQUE(user, course) WHERE status IN (paid, enrolled) · couponredemptions UNIQUE(coupon, user) when per-user limit=1 · courseenrollments extended: one active per (user, course) incl. path-sourced · quizattempts UNIQUE(quiz, user, attemptno) · peerreviews UNIQUE(submission, reviewer) · learningpathenrollments UNIQUE(path, user) active · certificationattempts UNIQUE(certification, user, attemptno) · contestsubmissions UNIQUE(contest, challenge, user, submissionkey) · companyreviews UNIQUE(user, organization) active · profileviews rate-limited at app layer · profiles.customslug UNIQUE partial · coursepricing UNIQUE(course) active · instructorearnings append-only.
+
+14.4 Index additions (Q-20..Q-34). Feed by followed authors (authorid, publishedat DESC) · post engagement (postid, createdat) · comments (postid, parentid, createdat) · course catalog (categoryid, publishedat, rating) · course search GIN · enrolments by course (courseid, status) · quiz attempts (quizid, userid) · assignments due (assignmentid, duedate) · path progress (enrollmentid, courseid) · orders by user (userid, createdat) · coupon lookup (code) UNIQUE · company reviews (organizationid, createdat) · salary aggregates (organizationid, jobtitle, location) · contest leaderboard (contestid, totalscore DESC) · profile views (vieweduserid, viewed_at DESC).
+
+14.5 Legacy reconciliation (ADR-011). coursemodules = sections (structure/ordering); moduleprogress retained for backward compatibility of aggregate progress; contentitems + mediaprogress are authoritative for lesson-level content and playback. New builds write both during transition; after Phase 7 verification, module_progress becomes read-only projection. TBD: final retirement date (OD-41).
+
+14.6 Retention additions. Course orders/refunds/payouts 7y (financial) · coupon redemptions 2y · quiz attempts/assignment submissions: life of enrolment + 2y · peer reviews: life of submission · posts/articles: until author deletion (soft) + 30d · comments/reactions: cascade with post · company reviews: life of platform (moderation-removable) · salary reports: indefinite aggregated, raw 5y · contest submissions: 12mo then summary · certification attempts: indefinite · profile views: 90d (free) / 1y (premium) · migration archives: purge on completion or 30d · migration audit: 7y.
+
+§15 APIs & Integrations
+
+15.1 Two-tier access (PostgREST with RLS boundary; Server Actions/Edge for cross-table, secrets, webhooks, AI). /api/v1 versioning, 6-month deprecation, additive-only within a major.
+
+15.2 Contracts. SCI-01..08 core · SCI-09..18 institutional/media · NEW SCI-19..034: create course version · submit course for review · approve/reject course · purchase course (idempotent, webhook-owned) · redeem coupon (atomic) · request refund · settle instructor payout · attempt quiz (server-timed) · submit assignment · assign peer review · enrol in path · create contest · submit contest entry · attempt certification · publish post · send newsletter issue.
+Interface contracts CON-001..016 unchanged (errors, pagination, filters, idempotency, rate limits, webhooks, retry, UTC, money minor units, uploads, concurrency 409, forward-only migrations, no RLS-unsafe caching, retention propagation, redacted logging).
+
+15.3 Rate limits (consolidated). auth 10/min/IP · reads 300/min/user · writes 60/min/user · AI 20/min/user · posts 20/hour/user · comments 60/hour · reactions 300/hour · follows 100/hour · outreach 20–50/week (tier) · company reviews 3/day · salary reports 5/day · contest submissions 10/min (TD-05) · course publish 5/day · coupon redeem 10/min · migration upload 3/day.
+
+15.4 Integration register. Supabase · Stripe (incl. Connect for instructor payouts, Invoicing for B2B PO/Net-terms) · Google/GitHub OAuth · Resend/Postmark · Gemini/Claude/heuristic via lib/ai/service.ts · BYO AI key · Vercel · Sentry · PostHog · HaveIBeenPwned · Mux/Cloudflare Stream (transcode+CDN, OD-14) · Jitsi/Zoom · LinkedIn (optional: job cross-post, extension scan, migration source, optional OIDC login — never required) · Slack/Cal.com · Workday/SAP/BambooHR (Phase 10) · Moodle/Canvas/Blackboard/college ERP (Phase 10, API/webhooks only) · Zapier/Make (future) · identity-verification vendor (OD-27) · proctoring vendor (OD-35).
+Principles: server-side only for secrets · idempotency keys on webhook-triggered ops · circuit breakers with degraded modes · status visible in admin health · every dependency has an owner and a documented degraded mode.
+
+§16 Infrastructure Decisions from the Architecture Audit
+
+16.1 Table-count policy. "50 canonical" is a governance lock on the baseline cluster, not a total. Documentation must never present 50 as the schema size.
+
+16.2 Route policy. Core / Domain / Extension classification; config/routes.ts is the sole authority; counts are derived, never asserted.
+
+16.3 Domain overlap resolution. Media engine supersedes video-only LMS assumptions (ADR-011).
+
+16.4 RLS generator (ADR-010). generatetenantrlspolicy(table, tenantcolumn, ownercolumn, ispublicread) creates admin-override, owner, org-member, and optional public-read policies. Helpers: authisadmin(), authisorgmember(org), authisowner(user). Every migration must invoke it; tables without generated RLS fail CI (VER-001). Policy count is derived and reported, never hand-maintained.
+
+16.5 RLS fuzzing (CI gate). On every migration: create Tenant A/B users + orgs, seed rows, assert cross-tenant SELECT returns 0 rows and UPDATE/DELETE fail; assert owner-only tables deny non-owners; assert public-read tables expose no PII columns. Blocks merge on any failure.
+
+16.6 Dual-queue boundary (ADR-009).
+
+| Queue | Infra | Workloads | SLA |
+|---|---|---|---|
+| Transactional | Postgres background_jobs (SKIP LOCKED) | XP settle, notifications, webhooks, digests, rollups, retention purge, search reindex | /hash, set studentconsentrecords.status='SEVERED', retain relational links so xptransactions/certificates remain intact and verifiable; never hard-delete rows referenced by aggregates.
+
+16.9 Extension sync. Server-authoritative: client downloads server state, merges local-only drafts, then pushes; conflicts resolve last-write-wins per field with a user-visible diff; Idempotency-Key per sync batch; ≤20 syncs/hour.
+
+§17 Non-Functional Requirements
+
+NFR-01..07 retained. NEW: NFR-08 UGC moderation latency (pre-publish scan p95 , allow-listed properties, no PII, ev versioning, clientevent_id idempotency, server-written append-only).
+Observability: x-request-id + W3C traceparent · Sentry/Vercel/Supabase triad · P0–P3 severities · runbooks R-001..015 (+ NEW R-016 payout settlement failure, R-017 feed fan-out storm, R-018 UGC moderation backlog, R-019 coupon abuse spike, R-020 contest infra overload) · PHS health score · SHEAL self-healing (reversible only) · CQA continuous audit.
+
+§19 Security & Privacy
+
+19.1 Defense-in-depth (5 layers), PII field encryption, immutable hash-chained audit, secrets governance, headers/CSP, vulnerability lifecycle, RFC 9116 disclosure, anti-scraping — retained (HDN-001..016, SGC, ZTR, RTD, TIT, RST/PED/IAB, STRIDE trace).
+
+19.2 NEW controls (HDN-017..024).
+
+| ID | Control |
+|---|---|
+| HDN-017 | UGC sanitization: rich text/markdown allow-list, DOMPurify, no raw HTML/script; media URLs allow-listed |
+| HDN-018 | UGC abuse pipeline: pre-publish heuristics + rate limits + hash-based duplicate/spam detection + post-hoc moderation |
+| HDN-019 | Anonymous-review integrity: identity stored server-side only; never in API responses; admin/legal access audited |
+| HDN-020 | Quiz/answer confidentiality: correct answers encrypted and never sent to client before grading; hidden test cases RLS-protected |
+| HDN-021 | Contest integrity: server-authoritative clock, sandbox isolation, plagiarism/AST checks, IP+device anomaly detection |
+| HDN-022 | Payment/commerce hardening: price re-validation server-side at checkout (never trust client price), coupon atomicity, refund dual-control |
+| HDN-023 | Instructor payout security: KYC before first payout, payout ledger append-only, dual approval above threshold |
+| HDN-024 | Peer-review fairness: double-blind until completion, reviewer identity never exposed, rubric-bound scoring |
+
+19.3 Privacy. GDPR (Arts 5/15/17/20/22/33/35), CCPA/CPRA, EEOC, FERPA matrices retained; DSR-001..012 queue (30d SLA, 72h export links, 30d erasure cooling-off, legal-hold pseudonymization); cookie consent zero-default; sub-processor register (+ transcode provider, verification vendor, proctoring vendor when adopted); residency/EU egress rule; SOC2→ISO→SOC2 II roadmap.
+NEW: UGC deletion cascades to feeds/projections/caches within SLA · company reviews are personal data (reviewer rights apply) · salary reports aggregated with a ≥5-cell minimum (BR-135) · migration archives encrypted, TTL-purged, never used for training · imported third-party contacts never persisted beyond a TTL-bound hashed matching window.
+
+19.4 AI safety. Redaction table,  delimiter, canary tripwire, Zod output enforcement, evidence layer (AIE), prohibited-use list, confidence gates, EU residency routing — unchanged. AI never grades peer reviews, never decides refunds, never auto-publishes courses.
+
+19.5 Independence invariant (INV-IND). No core flow may require LinkedIn availability, identity, or data. Enforced by LIN-001..010 and VER-021 removal drill.
+
+19.6 FERPA severance pattern. Logical anonymization (§16.8) — replaces the previously specified "cryptographic severance".
+
+§20 Operations, Deployment & DR
+
+Environments (local/CI/staging/prod) with parity and promotion · CI/CD gates (lint, tsc, unit ≥80%, RLS allow+deny 100%, E2E critical 100%, axe 0 critical/serious, npm audit 0 high/crit, build, bundle warn, RLS fuzzing, enum parity, migration round-trip) · feature flags with owner/default-safe/expiry · progressive rollout 5→25→50→GA with 15s auto-rollback · forward-only expand-contract migrations · backups daily + 15-min PITR (RPO ≤15m, RTO ≤2h); DR Tier 1 active, Tier 2/3 deferred with triggers · supply-chain governance (lockfiles, provenance, license allowlist, SBOM) · PROD-001..020 go-live gates NEW PROD-021 commerce verified (checkout, coupon atomicity, refund, payout reconciliation) · PROD-022 UGC moderation live with SLA dashboard · PROD-023 contest infra load-proven · PROD-024 migration engine privacy-proven (no third-party PII persisted).
+
+§21 Phase 0 Implementation Assets (built artifacts, not yet executed)
+
+| Asset | Path | Purpose | Status |
+|---|---|---|---|
+| RLS template generator | supabase/migrations/*rlsgenerator.sql | Generates owner/org/admin/public policies per table | Authored, unexecuted |
+| Foundation migration | supabase/migrations/00001phase0foundation.sql | profiles, usersettings, organizations, orgmemberships, auditlogs, featureflags + RLS + handlenewuser() trigger | Authored, unexecuted |
+| Env schema | src/config/env.ts | Zod fail-fast server/client env validation | Authored |
+| CI pipeline | .github/workflows/ci.yml | lint/type/unit/RLS-fuzz/build/bundle gates | Authored |
+| RLS fuzz suite | tests/rls-fuzz/rls-isolation.test.ts | Tenant A/B cross-tenant denial proof (VER-001/017) | Authored |
+| AI service stub | src/shared/infrastructure/ai/service.ts | Router interface, redaction hook,  fencing, canary, heuristic fallback | Authored |
+| Heavy-job boundary | src/shared/infrastructure/heavy-jobs/ | Worker interface separate from Postgres queue (ADR-009) | Designed |
+
+All are SPECIFIED/authored drafts; none executed or verified. Verification Readiness and Production Readiness remain 5.0/10 and 4.0/10 until artifacts exist.
+
+§22 LinkedIn Strategy (Independence-First)
+
+22.1 Role. Optional migration source + optional job syndication + optional OIDC login + extension job-page scanning. Never a dependency for auth, identity, profile, graph, content, jobs, learning, or messaging.
+
+22.2 Touchpoints & disposition. L-1 extension scanner → KEEP, ISOLATE · L-2 job cross-post → ISOLATE, flag-gated, partner-API-gated with fallbacks (partner API → member share post → deep-link handoff) · L-3 profile URL field → KEEP (plain string) · L-4 optional OIDC login → ISOLATE, bootstrap only · L-5 migration archive import → ISOLATE (MIG engine).
+
+22.3 Constraints (VERIFY-AT-BUILD). General-developer API surface ≈ OpenID Connect lite (name, photo, email, vanity URL); full-profile APIs are partner-restricted; the legitimate bulk path is the user's own data-export archive; scraping prohibited by LinkedIn terms; connection emails in archives are third-party PII (hash-match only, TTL-bound, no outreach without separate consent); messages not importable; rate limits apply to API paths only.
+
+22.4 Migration paths & matrix. Path A OIDC bootstrap (seconds) · Path B export-archive import (async) · Path C guided manual. Importable: name/photo/email/vanity, headline, about, location, experience, education, skills (self-reported), certifications/licenses, projects, publications, honors, volunteer, languages, interests, links, recommendations received (as drafts), posts (as attributed drafts), endorsement counts (historical display only). Not transferable: connection graph as relationships (consent-gated hashed-email discovery instead), endorser identities, messages, groups memberships, follower counts, third-party content.
+Engine: MIG-001..020 — job entity with status/progress/idempotency/resume cursor · encrypted archive upload with AV scan, size cap, TTL · versioned parser adapters · versioned field-mapping registry · normalization + row-level error report · duplicate detection (email, company+title+dates, skill name, cert name+issuer) · dry-run side-by-side preview · per-field conflict resolution (keep/replace/merge/skip) · idempotent resumable commit keyed (migrationid, section, rowhash) · provenance tags (source, importedat, migrationid, archive_hash) until user edits · post-import completion checklist · rollback within 30 days · immutable audit trail · archive purge on completion or 30d · partial/selective import · re-import merges without duplication · disconnect preserves all imported data.
+
+22.5 Independence ladder. 1 Assisted → 2 Core Ownership → 3 TalentSphere-First → 4 Optional → 5 Removal-Ready → 6 Fully Independent. Proof gates: migration E2E green · import provenance audit · core E2E without LinkedIn · flag-off E2E green · static analysis + full suite on deletion branch · production operation without LinkedIn.
+
+22.6 Decoupling rules (LIN-001..010). All LinkedIn code in shared/infrastructure/integrations/linkedin/ behind ProviderAdapter · no LinkedIn ID as PK/identity/URL/analytics key · every surface flag-gated · LIN-004 CI gate: all core E2E journeys pass with every LinkedIn flag off · server-only secrets · degraded mode hides the feature with zero core impact · LIN-REM removal drill (VER-021) · post-import TalentSphere is canonical · no continuous sync by default · partner-restricted APIs never assumed available.
+
+§23 Testing & Verification
+
+23.1 Pyramid. Unit (Vitest ≥80%, critical ≥90%) · Integration (RLS allow+deny per policy) · E2E (Playwright, 100% critical journeys) · Contract (AI, Stripe, providers, adapters).
+
+23.2 Module test matrix additions. Learning marketplace (studio validation, publish pipeline, pricing/coupon atomicity, quiz grading, peer review, path progression; RLS author/enrolled/instructor scopes; E2E J-18/J-19/J-20) · Social (post/comment/reaction/repost idempotency, feed ranking + chronological parity, visibility enforcement, mute/block; RLS per visibility; E2E J-23) · Insights (review moderation, anonymity protection, salary aggregation minimum, response append-only; E2E J-22/J-24) · Contests (server clock, sandbox reuse, leaderboard determinism, certification single-attempt; E2E J-21) · Migration (parse/normalize/map/validate/preview/conflict/commit/rollback/resume; privacy scan asserting no third-party PII persisted; E2E J-17).
+
+23.3 Fixtures additions. Courses in each lifecycle state · quizzes/assignments/peer-review sets · learning paths (sequential + optional) · coupons (valid/expired/exhausted/per-user) · orders in each state incl. refunded · instructors (applicant/approved/suspended) · posts/articles/newsletters · communities (open/restricted/private) · events · company reviews (anonymous/verified) · salary reports (7y | 7 vs 10 vs configurable | 7y default | Legal | Phase 3 |
+| OD-20 | White-label scope | Full vs co-branded | Co-branded first | Founder | Phase 10 |
+| OD-21 | Import row limit | 1k/5k/10k | 5k per batch, chunked | Eng | Phase 3 |
+| OD-22 | Media analytics attribution | Platform vs provider vs hybrid | Hybrid with labels | Product | Phase 4 |
+| OD-23 | Faculty certificate issuance | IA-only vs configurable | Configurable per faculty | Product | Phase 3 |
+| OD-24 | Archive max size | 25/50/100MB | 50MB | Eng | Phase 1 |
+| OD-25 | Migration rollback window | 14/30/60d | 30d | Product | Phase 1 |
+| OD-26 | Contact-hash TTL | 7/30/90d | 30d | Legal | Phase 1 |
+| OD-27 | Instructor verification requirement | Required vs optional badge | Optional badge at launch | Product | Phase 7 |
+| OD-28 | Course revenue share | 70/30 vs tiered vs category-based | 70/30 default, tiered later | Founder | Phase 7 |
+| OD-29 | Refund window/policy | 14/30 days, consumption-based | 30 days, pro-rated after 20% consumed | Founder | Phase 7 |
+| OD-30 | Quiz attempt defaults | 1/3/unlimited | 3 graded, unlimited practice | Product | Phase 7 |
+| OD-31 | Business-development graph | Build vs exclude | Exclude (SCOPE-003) unless ratified | Founder | Phase 10 |
+| OD-32 | Sponsored content/ads | Sponsored listings only vs self-serve | Listings only | Founder | Phase 10 |
+| OD-33 | Live video | Build vs defer vs vendor | Defer; vendor evaluate | Founder | Phase 10 |
+| OD-34 | Premium Candidate tier | Benefits + price | Profile views + outreach + insights; price TBD | Founder | Phase 10 |
+| OD-35 | Proctoring | In-house vs vendor vs none | Vendor at Phase 10 | Founder | Phase 10 |
+| OD-36 | Default profile-view privacy | Named vs semi vs anonymous | Semi-anonymous default | Product | Phase 8 |
+| OD-37 | Peer-review minimum | 1/2/3 reviews | 2 | Product | Phase 7 |
+| OD-38 | Salary aggregation minimum | 3/5/10 reports | 5 | Legal | Phase 9 |
+| OD-39 | Certification retake policy | Single attempt vs cooldown | Cooldown 7d, configurable | Product | Phase 9 |
+| OD-40 | Numeric targets for new metrics | — | Set after 90 days of data | Product | Analytics |
+| OD-41 | module_progress retirement date | — | After Phase 7 verification | Eng | Data cleanup |
+| OD-42 | Course publish review SLA | 24/72h | 72h | Ops | Phase 7 |
+| OD-43 | Coupon max discount bound | 50/75/100% | 75% | Finance | Phase 7 |
+| OD-44 | Contest infrastructure | Reuse sandbox vs dedicated | Reuse sandbox with separate pool | Eng | Phase 9 |
+| OD-45 | Anonymous reviews allowed? | Yes vs verified-only | Yes with credibility badge | Legal | Phase 9 |
+| OQ-15 | LinkedIn current API entitlements | — | VERIFY-AT-BUILD | Eng | Phase 6 syndication |
+
+Prior open items resolved and retained in §27 registers: FC-01..19, MVD-01..05, CF resolutions, TD-01..26, GAP-001..030, DOR-001..019.
+
+§27 Governance Registers (Locked Counts)
+
+| Register | Count | Note |
+|---|---|---|
+| Canonical tables | 50 (+2 extensions) | Locked; operational tables tracked separately |
+| RLS policies | Generated (baseline reference 119) | Count derived via generator; VER-027 enforces coverage |
+| Business rules | BR-01..BR-140 | + MIG-01..08 |
+| Features | F-01..F-83 (F-38/39 deprecated) | |
+| Modules | 1..41 | |
+| Journeys / Workflows | J-1..J-25 / WF-01..WF-41 | WIT traces 1:1 |
+| Analytics events | EVT-001..032 locked; 033..072 PROPOSED (C3 required) | |
+| Founder decisions | FC-01..FC-23 | FC-20 parity expansion · FC-21 LinkedIn independence · FC-22 combined architecture · FC-23 Phase 0 artifacts |
+| ADRs | ADR-001..013 | |
+| Technical defaults | TD-01..TD-26 | |
+| Gaps | GAP-001..030 + GAP-SYS/SEC/UX/INT/OPS/DOC/DATA/ARCH/PROD/TEST/LEGAL (this edition) | |
+| Blockers | DOR-001..024 | |
+| Verification gates | VER-001..027 | |
+| Production gates | PROD-001..024 | |
+| Runbooks | R-001..R-020 | |
+| Hardening | HDN-001..024 | |
+| Failure/edge | FEC-001..026 · EC-01..040 | |
+| UX states | UXC-001..022 | |
+| Scope guardrails | SCOPE-001..008 | Count corrected from 10 |
+| Open decisions | OD-01..OD-45 (+D-1..D-5, OQ-15) | |
+| Requirement families | ~110 prefixes | Full inventory §29.3 |
+
+Change classes C1–C7, RACI, solo-founder collapse, and continuous verification framework retained.
+
+§28 Historical & Rejected (DO NOT BUILD)
+
+26 Spring Boot microservices · Kubernetes/Helm · RabbitMQ/Kafka · Redis · Express/tRPC/MySQL · MongoDB/STOMP chat · Elasticsearch at MVP · Citus sharding · Aurora tokens · NextAuth · Prisma · legacy chat service (F-38) · unified backend stub (F-39) · "50 tables = total schema" claim · "119 policies = total" claim · feeds over Realtime · single Postgres queue for transcoding · LinkedIn as identity/data foundation · Udemy/Coursera/Glassdoor/HackerRank as integrations or providers.
+
+§29 Appendices
+
+29.1 Register corrections applied in this edition
+SCOPE 10→8 · HDN 16→24 · FEC 14→26 · EC 17→40 · UXC 15→22 · VER 20→27 · PROD 20→24 · R 15→20 · DOR 19→24 · TD 18→26 · FC 17→23 · ADR 8→13 · BR 90→140 · F 65→83 · Modules 24→41 · J 17→25 · WF 23→41 · EVT 48→72 (033+ PROPOSED) · SCI 18→34 · NFR 7→15 · Q 19→34.
+
+29.2 Requirement-family collision resolutions
+| Collision | Resolution |
+|---|---|
+| IMP-001..014 (bulk ingestion) vs IMP-001..020 (LinkedIn migration) | Bulk ingestion keeps IMP-; migration renamed MIG-001..020 |
+| COMM- course community vs commerce | Community → CCM-001..012; Commerce → COM-001..016 |
+| PROF-001..018 vs PROFILE-022..027 | Merged into single PROFILE-001..035 |
+| FED-001..005 vs FEED-001..018 | Single FEED-001..018; FED- deprecated alias |
+| REC- recommendations vs recruiter | Recruiter stays RECRUIT-; REC-001..008 = talent pools + written recommendations |
+| ENDORSE- vs NET-009 | NET-009 is the requirement; ENDORSE- merged into it |
+| SOC-001..005 vs SOC-006..011 | Merged into SOC-001..011 |
+| CNT-/NEWS- overlap | CNT-001..007 content types; NEWS-001..005 newsletter mechanics |
+
+29.3 Requirement-family inventory (prefix → domain)
+AUTH · PROFILE · RESUME · PORTFOLIO · ORG · RECRUIT · JOB · APPL · COURSE · LMS · CHALL · NET · MSG · GAMI/GAM · SEARCH/SRCH · NOTIF/NTF · BILL · LIC · INST · MEDIA · TRUST/TRU · ADMIN/ADM · ANALYTICS/ANA · EXT · CORE · AI · F · NFR · BR · MIG · WF · J · WIT · CF · OD · SEC · RSK · R · V · Q · P · U · EVT · SCI · CON · GAP · TD · FC · FR · AU · EC · MVD · ADR · SCHED · REALTIME · WOS · UOM · TIG · DEB · OSUX · WB · AUTO · HEAL · LIQ · DQ · AG · ASF · ZTR · SGC · RTD · SHEAL · CQA · FDR · SEQ · EVG · WOM · RG · TIT · AIE · SMR · PHS · RST · PED · IAB · OSX · HDN · FEC · SCOPE · DOR · VER · PROD · UXC · ARCH · PERF · REG · AIQ · FAIR · DSR · L10N · A11Y · COST · CAP · EXP · SUP · DOC · VOC · TRC · ENG · DEBT · EML · CHAN · LMSG · IMP · PORT · IOP · LIN · IND · STUDIO · DISC · ASSESS · PATH · CCM · REV · COM · INSTR · SANA · ADMX · GLASS · CONTEST · SOC · CNT · ENG(agement) · FEED · NEWS · GRP · PAGE · EVNT · ENDORSE · OUT · PV · PRIV · IDV · CRT.
+
+29.4 Naming conventions
+DB snakecase · code camelCase/PascalCase · domains/features kebab-case · files *.entity.ts, *.vo.ts, *.aggregate.ts, *.event.ts, *.rules.ts, *.repository.ts, supabase-*.repository.ts, *.use-case.ts, *.service.ts, *.adapter.ts, *.api.ts, *.model.ts, *.validator.ts, *Page.tsx, use*.ts, *.test.ts(x) · domain event types . · registers uppercase zero-padded.
+
+29.5 Definition of Ready / Done
+DoR: requirement ID or traceable OD/BR/FC · Given/When/Then acceptance criteria mapped to a §23.2 test lane · RLS/security impact declared · analytics + audit events listed · a11y impact mapped · dependency prerequisites VERIFIED.
+DoD: code behind a flag · registry/route updates · unit+integration+RLS tests green (≤1 flake exemption) · no new high/critical security finding · no budget regression · E2E journey passes incl. empty/error/stale states · docs + feature matrix updated · evidence artifact recorded (verification_evidence).
+
+29.6 Glossary additions
+Course Studio · ContentItem · Learning Path · Program Certificate · Question Bank · Peer Review · Coupon · Course Order · Instructor Earnings · Company Review · Salary Report · Interview Experience · Contest · Skill Certification · Practice Set · Editorial · Post · Article · Newsletter · Community · Organization Page · Event · TalentMail/Outreach Credit · Written Recommendation · Profile View · Vanity URL · Career Signal · Migration Job · Provenance Tag · Provider Adapter · Heavy Async Worker · RLS Generator · RLS Fuzzing · Bounded Context · Aggregate · Use Case · Feature Boundary · Atom/Molecule/Organism/Template.
+
+§30 Final Cross-Check (Discussion → Requirements → Docs → Features → Architecture → Status → Tests → Security → Deployment → Roadmap)
+
+| Layer | Verified consistent? | Notes |
+|---|---|---|
+| Discussions → requirements | ✅ | Institutional, media, LinkedIn, parity expansions, architecture refinement, Phase 0 artifacts all captured |
+| Requirements → features | ✅ | F-01..F-83 map to families; deprecated features flagged |
+| Features → architecture | ✅ | 7 contexts (D-1 pending) + shared kernel; folder layout defined |
+| Architecture → data | ✅ | ~200 tables across clusters; ADR-011 resolves LMS/media overlap |
+| Data → APIs | ✅ | SCI-01..034 + CON-001..016 |
+| APIs → security | ✅ | HDN-001..024, RLS generator + fuzzing, STRIDE trace |
+| Security → tests | ✅ | VER-001..027 incl. removal drill, commerce reconciliation, contest integrity |
+| Tests → deployment | ✅ | CI gates + PROD-001..024 |
+| Deployment → roadmap | ✅ | Phases 0–10 dependency-ordered; moderation before UGC |
+| Status honesty | ✅ | Everything SPECIFIED; nothing claimed implemented |
+| Contradictions | ✅ resolved | §10 conflict log, §29.1 corrections, §29.2 collisions |
+| Orphaned requirements | ✅ none | Every family has a module home and a test lane |
+| Unexplained gaps | ✅ none | §24 gaps all have closure paths or §26 owners |
+
+Readiness verdict: SPECIFICATION-COMPLETE / IMPLEMENTATION-PENDING. Phase 0 may begin immediately; Phases 7–10 require the §26 decisions marked as blocking before work starts.
+
+End of TalentSphere SSOT v6.0.

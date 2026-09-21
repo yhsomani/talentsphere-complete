@@ -7,17 +7,15 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Button, Avatar, Badge, EmptyState, Modal, TextField } from '@/components/ui';
+import { Button, Avatar, Badge, EmptyState, Input } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { getNetworkService, type BlockedUserRecord } from '@/services/network.service';
 import { createBrowserClient } from '@/lib/supabase';
-import { Shield, UserX, Trash2, PlusCircle, AlertTriangle, Info } from 'lucide-react';
+import { Shield, UserX, Trash2, PlusCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 export default function NetworkSettingsPage() {
-  const router = useRouter();
   const [blockedUsers, setBlockedUsers] = useState<BlockedUserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +26,9 @@ export default function NetworkSettingsPage() {
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<'candidate' | 'recruiter'>('candidate');
 
-  const networkService = getNetworkService();
+  const networkService = useMemo(() => getNetworkService(), []);
 
-  useEffect(() => {
-    fetchBlockedUsers();
-    checkUserRole();
-  }, []);
-
-  const checkUserRole = async () => {
+  const checkUserRole = useCallback(async () => {
     try {
       const supabase = createBrowserClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -53,9 +46,9 @@ export default function NetworkSettingsPage() {
     } catch (err) {
       console.error('Error checking user role:', err);
     }
-  };
+  }, []);
 
-  const fetchBlockedUsers = async () => {
+  const fetchBlockedUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -67,7 +60,12 @@ export default function NetworkSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [networkService]);
+
+  useEffect(() => {
+    fetchBlockedUsers();
+    checkUserRole();
+  }, [fetchBlockedUsers, checkUserRole]);
 
   const handleBlockUser = async () => {
     if (!blockUserId.trim()) {
@@ -89,9 +87,10 @@ export default function NetworkSettingsPage() {
       await fetchBlockedUsers();
       
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to block user:', err);
-      setError(err.message || 'Failed to block user. Please check the user ID and try again.');
+      const message = err instanceof Error ? err.message : 'Failed to block user. Please check the user ID and try again.';
+      setError(message);
     }
   };
 
@@ -105,9 +104,10 @@ export default function NetworkSettingsPage() {
       await fetchBlockedUsers();
       
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to unblock user:', err);
-      setError(err.message || 'Failed to unblock user');
+      const message = err instanceof Error ? err.message : 'Failed to unblock user';
+      setError(message);
     } finally {
       setUnblockingId(null);
     }
@@ -173,7 +173,7 @@ export default function NetworkSettingsPage() {
               <li>Blocked users cannot send you messages</li>
               <li>Blocked users cannot see your profile details</li>
               <li>Blocked users cannot interact with your content</li>
-              <li>You won't receive notifications from blocked users</li>
+              <li>You won&apos;t receive notifications from blocked users</li>
             </ul>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function NetworkSettingsPage() {
           {blockedUsers.length === 0 ? (
             <div className="p-12 text-center">
               <EmptyState
-                icon={Shield}
+                icon={<Shield className="w-8 h-8" />}
                 title="No Blocked Users"
                 description="You haven't blocked any users yet. Use the button above to block users who violate community guidelines."
               />
@@ -280,53 +280,65 @@ export default function NetworkSettingsPage() {
 
       {/* Block User Modal */}
       {showBlockModal && (
-        <Modal
-          isOpen={showBlockModal}
-          onClose={closeBlockModal}
-          title="Block User"
-          size="md"
-        >
-          <div className="space-y-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <p className="text-sm text-amber-800 flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Warning:</strong> Blocking a user will prevent them from contacting you or viewing your profile. This action can be undone later.
-                </span>
-              </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden my-8">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-900">Block User</h2>
+              <button
+                onClick={closeBlockModal}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                aria-label="Close dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <TextField
-              label="User ID or Email"
-              placeholder="Enter user ID or email address"
-              value={blockUserId}
-              onChange={(e) => setBlockUserId(e.target.value)}
-              required
-            />
+            <div className="p-6 space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-800 flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Warning:</strong> Blocking a user will prevent them from contacting you or viewing your profile. This action can be undone later.
+                  </span>
+                </p>
+              </div>
 
-            <TextField
-              label="Reason (Optional)"
-              placeholder="Why are you blocking this user?"
-              value={blockReason}
-              onChange={(e) => setBlockReason(e.target.value)}
-              multiline
-              rows={3}
-            />
+              <Input
+                label="User ID or Email"
+                placeholder="Enter user ID or email address"
+                value={blockUserId}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBlockUserId(e.target.value)}
+                required
+              />
 
-            <div className="flex items-center justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={closeBlockModal}>
-                Cancel
-              </Button>
-              <Button 
-                variant="danger" 
-                onClick={handleBlockUser}
-                disabled={!blockUserId.trim()}
-              >
-                Block User
-              </Button>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                  Reason (Optional)
+                </label>
+                <textarea
+                  className="block w-full px-3.5 py-2.5 bg-white border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 shadow-2xs"
+                  placeholder="Why are you blocking this user?"
+                  value={blockReason}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBlockReason(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <Button variant="outline" onClick={closeBlockModal}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="danger" 
+                  onClick={handleBlockUser}
+                  disabled={!blockUserId.trim()}
+                >
+                  Block User
+                </Button>
+              </div>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </DashboardLayout>
   );

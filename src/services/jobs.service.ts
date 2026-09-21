@@ -407,7 +407,7 @@ export const initJobService = async (): Promise<JobService> => {
 // Lazy-initialized service instance for backward compatibility
 // Uses dynamic imports to avoid circular dependencies
 let _cachedDb: Promise<DatabaseAdapter> | null = null;
-const getDbAsync = async (): Promise<DatabaseAdapter> => {
+const _getDbAsync = async (): Promise<DatabaseAdapter> => {
   if (!_cachedDb) {
     const { createDatabaseAdapter } = await import('@/lib/database/adapter');
     const { getConfig } = await import('@/lib/config/validation');
