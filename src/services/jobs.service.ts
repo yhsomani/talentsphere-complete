@@ -392,30 +392,6 @@ export class JobService {
 }
 
 // Backward compatibility export
-export const jobService = new JobService(
-  (() => {
-    // Lazy initialization for backward compatibility
-    let _db: DatabaseAdapter | null = null;
-    return {
-      get db() {
-        if (!_db) {
-          // Synchronous fallback for backward compatibility
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { createDatabaseAdapter } = require('@/lib/database/adapter');
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { getConfig } = require('@/lib/config/validation');
-          const config = getConfig();
-          _db = createDatabaseAdapter({
-            supabaseUrl: config.required.supabaseUrl,
-            supabaseKey: config.required.supabaseAnonKey,
-          });
-        }
-        return _db;
-      }
-    };
-  })().db as DatabaseAdapter
-);
-
 // Async initialization helper for modern usage
 export const initJobService = async (): Promise<JobService> => {
   const { createDatabaseAdapter } = await import('@/lib/database/adapter');
@@ -427,5 +403,48 @@ export const initJobService = async (): Promise<JobService> => {
   });
   return new JobService(db);
 };
+
+// Lazy-initialized service instance for backward compatibility
+// Uses dynamic imports to avoid circular dependencies
+let _cachedDb: Promise<DatabaseAdapter> | null = null;
+const getDbAsync = async (): Promise<DatabaseAdapter> => {
+  if (!_cachedDb) {
+    const { createDatabaseAdapter } = await import('@/lib/database/adapter');
+    const { getConfig } = await import('@/lib/config/validation');
+    const config = getConfig();
+    _cachedDb = Promise.resolve(createDatabaseAdapter({
+      supabaseUrl: config.required.supabaseUrl,
+      supabaseKey: config.required.supabaseAnonKey,
+    }));
+  }
+  return _cachedDb;
+};
+
+// Initialize service asynchronously
+let _jobServiceInstance: JobService | null = null;
+const initServiceSync = () => {
+  if (!_jobServiceInstance) {
+    try {
+      // Try synchronous initialization for Node.js environments
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { createDatabaseAdapter } = require('@/lib/database/adapter');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getConfig } = require('@/lib/config/validation');
+      const config = getConfig();
+      const db = createDatabaseAdapter({
+        supabaseUrl: config.required.supabaseUrl,
+        supabaseKey: config.required.supabaseAnonKey,
+      });
+      _jobServiceInstance = new JobService(db);
+    } catch (err) {
+      // Fall back to async initialization
+      console.warn('[JobService] Synchronous initialization failed. Use initJobService() for async usage.');
+      throw err;
+    }
+  }
+  return _jobServiceInstance;
+};
+
+export const jobService = initServiceSync();
 
 export const jobsService = jobService;

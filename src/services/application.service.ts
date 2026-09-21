@@ -179,8 +179,9 @@ export class ApplicationService {
       // Log activity entry (non-blocking - graceful degradation)
       try {
         const authResult = await this.db.auth.getUser();
+        const applicationId = (data as any)?.id as string || '';
         const insertResult = await this.db.from('application_activity_log').insert({
-          application_id: data?.id as string || '',
+          application_id: applicationId,
           actor_id: authResult.data?.user?.id || null,
           action: 'application_submitted',
           new_value: { status: 'submitted' },
@@ -371,7 +372,7 @@ export class ApplicationService {
 
       return {
         application: application as unknown as ApplicationRecord,
-        activityLog: activityLog || [],
+        activityLog: (activityLog || []) as any[],
       };
     } catch (error) {
       if (isAppError(error)) {
@@ -638,7 +639,7 @@ export class ApplicationService {
         return { jobs: [], recentApplications: [] };
       }
 
-      const jobIds = jobs.map(j => j.id);
+      const jobIds = (jobs as any[]).map(j => j.id);
 
       const { data: apps, error: appsError } = await this.db
         .from('applications')
@@ -683,8 +684,8 @@ export class ApplicationService {
       }
 
       return {
-        jobs: jobs || [],
-        recentApplications: (apps || []) as unknown as ApplicationRecord[],
+        jobs: (jobs || []) as any[],
+        recentApplications: (apps || []) as any[],
       };
     } catch (error) {
       if (isAppError(error)) {
