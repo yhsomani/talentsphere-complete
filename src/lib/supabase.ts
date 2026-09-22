@@ -6,7 +6,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { AppConfig } from '@/config';
+import { AppConfig } from '../config/index';
 
 // ============================================================================
 // BROWSER CLIENT

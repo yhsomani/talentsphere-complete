@@ -1,4 +1,15 @@
-import { createBrowserClient } from '@/lib/supabase';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * Challenge Service - Data access layer for Code Arena
+ * 
+ * Refactored to use DatabaseAdapter for loose coupling, resilience,
+ * and testability via Dependency Injection.
+ */
+
+import type { DatabaseAdapter } from '../lib/database/adapter';
+import { createDatabaseAdapter } from '../lib/database/adapter';
+import { AppConfig } from '../config/index';
+import { AppErrors, isAppError } from '../lib/errors/index';
 
 export interface ChallengeRecord {
   id: string;
@@ -48,33 +59,59 @@ export interface SubmissionResult {
   }>;
 }
 
-const supabase = createBrowserClient();
+export interface SubmissionHistoryItem {
+  id: string;
+  challenge_id: string;
+  user_id: string;
+  code: string;
+  language: string;
+  status: 'pending' | 'passed' | 'failed' | 'compilation_error' | 'timeout' | 'runtime_error';
+  passed_tests: number;
+  total_tests: number;
+  execution_time_ms: number;
+  test_results?: Array<{
+    name: string;
+    passed: boolean;
+    input: string;
+    expected: string;
+    actual?: string;
+  }>;
+  submitted_at: string;
+}
 
-export const challengeService = {
+export class ChallengeService {
+  constructor(private readonly db: DatabaseAdapter) {}
+
   /**
    * Get challenge categories
    */
   async getCategories() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.db
         .from('challenge_categories')
         .select('*')
         .order('order_index', { ascending: true });
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        throw AppErrors.database('Failed to fetch challenge categories', { cause: error });
+      }
+      return (data as unknown as any[]) || [];
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error fetching categories:', err);
       return [];
     }
-  },
+  }
 
   /**
    * Get all challenges with optional filters
    */
-  async getChallenges(filters: { difficulty?: string; categoryId?: string; search?: string } = {}, userId?: string): Promise<ChallengeRecord[]> {
+  async getChallenges(
+    filters: { difficulty?: string; categoryId?: string; search?: string } = {},
+    userId?: string
+  ): Promise<ChallengeRecord[]> {
     try {
-      let query = supabase
+      let query = this.db
         .from('challenges')
         .select(`
           *,
@@ -99,36 +136,42 @@ export const challengeService = {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        throw AppErrors.database('Failed to fetch challenges', {
+          cause: error,
+          context: filters,
+        });
+      }
 
       // If user is signed in, fetch their attempts
       const attemptMap = new Map<string, { is_solved: boolean; attempts_count: number; best_score: number }>();
       if (userId) {
-        const { data: attempts } = await supabase
+        const { data: attempts } = await this.db
           .from('challenge_attempts')
           .select('challenge_id, is_solved, attempts_count, best_score')
           .eq('user_id', userId);
-        (attempts || []).forEach(a => attemptMap.set(a.challenge_id, a));
+        ((attempts as unknown as any[]) || []).forEach(a => attemptMap.set(a.challenge_id, a));
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data || []).map((c: any) => ({
+       
+      return ((data as unknown as any[]) || []).map((c: any) => ({
         ...c,
         category: c.challenge_categories,
         attempt: attemptMap.get(c.id) || null,
       })) as ChallengeRecord[];
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error fetching challenges:', err);
       return [];
     }
-  },
+  }
 
   /**
    * Get challenge by ID with test cases and attempt status
    */
   async getChallengeById(challengeId: string, userId?: string): Promise<ChallengeRecord | null> {
     try {
-      const { data, error } = await supabase
+      const { data: rawData, error } = await this.db
         .from('challenges')
         .select(`
           *,
@@ -141,12 +184,15 @@ export const challengeService = {
         .eq('id', challengeId)
         .maybeSingle();
 
-      if (error || !data) return null;
+      if (error || !rawData) return null;
+
+       
+      const data = rawData as unknown as any;
 
       // Fetch user's attempt record
       let attempt = null;
       if (userId) {
-        const { data: attemptData } = await supabase
+        const { data: attemptData } = await this.db
           .from('challenge_attempts')
           .select('*')
           .eq('challenge_id', challengeId)
@@ -156,11 +202,13 @@ export const challengeService = {
       }
 
       // Fetch test cases
-      const { data: testCases } = await supabase
+      const { data: testCasesData } = await this.db
         .from('challenge_test_cases')
         .select('*')
         .eq('challenge_id', challengeId)
         .order('order_index', { ascending: true });
+
+      const testCases = (testCasesData as unknown as any[]) || [];
 
       const parsedTestCases = (testCases && testCases.length > 0)
         ? testCases.map(tc => ({
@@ -179,10 +227,48 @@ export const challengeService = {
         attempt,
       } as ChallengeRecord;
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error fetching challenge by id:', err);
       return null;
     }
-  },
+  }
+
+  /**
+   * Get historical submissions for a challenge and user
+   */
+  async getSubmissions(challengeId: string, userId: string): Promise<SubmissionHistoryItem[]> {
+    try {
+      const { data, error } = await this.db
+        .from('challenge_submissions')
+        .select('*')
+        .eq('challenge_id', challengeId)
+        .eq('user_id', userId)
+        .order('submitted_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching challenge submissions:', error);
+        return [];
+      }
+
+       
+      return ((data as unknown as any[]) || []).map((sub: any) => ({
+        id: sub.id,
+        challenge_id: sub.challenge_id,
+        user_id: sub.user_id,
+        code: sub.code || '',
+        language: sub.language || sub.programming_language || 'javascript',
+        status: sub.status || 'failed',
+        passed_tests: sub.passed_tests ?? sub.passed_test_cases ?? 0,
+        total_tests: sub.total_tests ?? sub.total_test_cases ?? 0,
+        execution_time_ms: sub.execution_time_ms ?? 0,
+        test_results: sub.test_results || [],
+        submitted_at: sub.submitted_at || sub.created_at || new Date().toISOString(),
+      }));
+    } catch (err) {
+      console.error('Error fetching challenge submissions:', err);
+      return [];
+    }
+  }
 
   /**
    * Submit challenge code and record results
@@ -250,69 +336,80 @@ export const challengeService = {
         passed,
         input: tc.input,
         expected: tc.expected,
-        actual,
+        actual: String(actual),
       });
     }
 
     const duration = Date.now() - startTime;
-    const isAllPassed = passedTests === testCases.length || testCases.length === 0;
+    const isAllPassed = passedTests === testCases.length && testCases.length > 0;
     const status: SubmissionResult['status'] = isAllPassed ? 'passed' : 'failed';
 
-    // 1. Record submission
-    const { data: subData } = await supabase
-      .from('challenge_submissions')
-      .insert({
-        challenge_id: challengeId,
-        user_id: userId,
-        code,
-        language,
-        status: isAllPassed ? 'passed' : 'failed',
-        passed_tests: passedTests,
-        total_tests: testCases.length,
-        execution_time_ms: duration,
-        test_results: testResults,
-      })
-      .select()
-      .single();
-
-    // 2. Update challenge attempts
-    const { data: existingAttempt } = await supabase
+    // 1. Check existing attempt
+    const { data: existingAttemptData } = await this.db
       .from('challenge_attempts')
       .select('*')
       .eq('challenge_id', challengeId)
       .eq('user_id', userId)
       .maybeSingle();
 
-    const attemptsCount = (existingAttempt?.attempts_count || 0) + 1;
-    const isSolved = (existingAttempt?.is_solved || false) || isAllPassed;
-    const bestScore = Math.max(existingAttempt?.best_score || 0, isAllPassed ? 100 : Math.round((passedTests / Math.max(1, testCases.length)) * 100));
+     
+    const existingAttempt = existingAttemptData as unknown as any;
 
-    await supabase
+    const currentAttempts = (existingAttempt?.attempts_count || 0) + 1;
+    const score = testCases.length > 0 ? Math.round((passedTests / testCases.length) * 100) : 100;
+    const bestScore = Math.max(existingAttempt?.best_score || 0, score);
+    const isSolved = Boolean(existingAttempt?.is_solved || isAllPassed);
+
+    await this.db
       .from('challenge_attempts')
-      .upsert({
+      .upsert(
+        {
+          challenge_id: challengeId,
+          user_id: userId,
+          is_solved: isSolved,
+          attempts_count: currentAttempts,
+          best_score: bestScore,
+          last_attempt_at: new Date().toISOString(),
+        },
+        { onConflict: 'challenge_id,user_id' }
+      );
+
+    // 2. Insert into challenge_submissions
+    const { data: subDataRaw } = await this.db
+      .from('challenge_submissions')
+      .insert({
         challenge_id: challengeId,
         user_id: userId,
-        attempts_count: attemptsCount,
-        is_solved: isSolved,
-        best_score: bestScore,
-        completed_at: isSolved ? new Date().toISOString() : null,
-      }, { onConflict: 'challenge_id,user_id' });
+        code,
+        language,
+        status,
+        passed_tests: passedTests,
+        total_tests: testCases.length,
+        execution_time_ms: duration,
+        test_results: testResults,
+        submitted_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+     
+    const subData = subDataRaw as unknown as any;
 
     // 3. Award XP if first-time solved
     if (isAllPassed && !existingAttempt?.is_solved) {
       try {
         // Fetch or initialize user_level
         let userLevel = null;
-        const { data: levelData } = await supabase
+        const { data: levelData } = await this.db
           .from('user_levels')
           .select('*')
           .eq('user_id', userId)
           .maybeSingle();
 
         if (levelData) {
-          userLevel = levelData;
+          userLevel = levelData as unknown as any;
         } else {
-          const { data: newLevel } = await supabase
+          const { data: newLevel } = await this.db
             .from('user_levels')
             .insert({
               user_id: userId,
@@ -324,7 +421,7 @@ export const challengeService = {
             })
             .select()
             .single();
-          userLevel = newLevel;
+          userLevel = newLevel as unknown as any;
         }
 
         const newTotalXp = (userLevel?.total_xp_earned || 0) + xpReward;
@@ -342,7 +439,7 @@ export const challengeService = {
         const levelProgress = Number(((newCurrentXp / xpToNext) * 100).toFixed(2));
 
         // Insert into xp_ledger
-        await supabase.from('xp_ledger').insert({
+        await this.db.from('xp_ledger').insert({
           user_id: userId,
           amount: xpReward,
           transaction_type: 'earned',
@@ -353,7 +450,7 @@ export const challengeService = {
         });
 
         // Update user_levels
-        await supabase
+        await this.db
           .from('user_levels')
           .update({
             total_xp_earned: newTotalXp,
@@ -377,5 +474,12 @@ export const challengeService = {
       execution_time_ms: duration,
       test_results: testResults,
     };
-  },
-};
+  }
+}
+
+// Export singleton instance for backward compatibility
+const defaultAdapter = createDatabaseAdapter({
+  supabaseUrl: AppConfig.supabase.url,
+  supabaseKey: AppConfig.supabase.anonKey,
+});
+export const challengeService = new ChallengeService(defaultAdapter);

@@ -1,3 +1,0 @@
-module.exports=[10222,a=>{a.v(b=>Promise.all(["server/chunks/ssr/node_modules_date-fns_index_02161i7.js"].map(b=>a.l(b))).then(()=>b(54175)))},64447,a=>{"use strict";var b=a.i(64831);let c={name:"check-check",size:24,node:[["path",{d:"M18 6 7 17l-5-5",key:"116fxf"}],["path",{d:"m22 10-7.5 7.5L13 16",key:"ke71qq"}]]};c.node;let d=(0,b.default)(c);a.s(["CheckCheck",0,d],64447)},98103,a=>{a.v(b=>Promise.all(["server/chunks/ssr/node_modules_next_1u_1m0n._.js"].map(b=>a.l(b))).then(()=>b(17097)))},16433,a=>{"use strict";var b=a.i(49483);a.s(["LoadingSpinner",()=>b.default])}];
-
-//# sourceMappingURL=_10oo-l0._.js.map

@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { courseService, type CourseRecord, type EnrollmentRecord } from '@/services/course.service';
+import {
+  courseService,
+  type CourseRecord,
+  type EnrollmentRecord,
+  type CourseRatingSummary,
+} from '@/services/course.service';
+import CourseReviewsSection from './components/CourseReviewsSection';
 import { createBrowserClient } from '@/lib/supabase';
 import { Button, Avatar, Card, ProgressBar } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -17,7 +23,8 @@ import {
   FileText,
   CheckCircle2,
   GraduationCap,
-  Sparkles
+  Sparkles,
+  Star,
 } from 'lucide-react';
 
 interface CourseDetailPageProps {
@@ -28,6 +35,14 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
   const router = useRouter();
   const [course, setCourse] = useState<CourseRecord | null>(null);
   const [enrollment, setEnrollment] = useState<EnrollmentRecord | null>(null);
+  const [certificateNumber, setCertificateNumber] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [continueLessonId, setContinueLessonId] = useState<string | null>(null);
+  const [ratingSummary, setRatingSummary] = useState<CourseRatingSummary>({
+    averageRating: 0,
+    totalReviews: 0,
+    distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,12 +56,33 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
         const supabase = createBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        const courseData = await courseService.getCourseById(courseId, user?.id);
+        const [courseData, ratings] = await Promise.all([
+          courseService.getCourseById(courseId, user?.id),
+          courseService.getCourseRatingSummary(courseId),
+        ]);
+
         setCourse(courseData);
+        setRatingSummary(ratings);
 
         if (user) {
+          setCurrentUserId(user.id);
           const enroll = await courseService.getEnrollment(courseId, user.id);
           setEnrollment(enroll);
+
+          if (enroll) {
+            // Check for last watched lesson (LMS-010)
+            const lastWatched = await courseService.getLastWatchedLesson(user.id, courseId);
+            if (lastWatched?.lesson_id) {
+              setContinueLessonId(lastWatched.lesson_id);
+            }
+
+            if (enroll.progress_percentage >= 100 || enroll.status === 'completed') {
+              const cert = await courseService.getCertificate(courseId, user.id);
+              if (cert) {
+                setCertificateNumber(cert.certificate_number);
+              }
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to load course details:', err);
@@ -149,6 +185,10 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
                   <Award className="w-3.5 h-3.5 text-amber-600" />
                   +{course.xp_reward || 250} XP
                 </span>
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/70">
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                  {ratingSummary.averageRating > 0 ? ratingSummary.averageRating.toFixed(1) : 'New'} ({ratingSummary.totalReviews} {ratingSummary.totalReviews === 1 ? 'review' : 'reviews'})
+                </span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
@@ -239,6 +279,15 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
                 ))}
               </div>
             </Card>
+
+            {/* Course Reviews & Student Feedback Section (LMS-009) */}
+            <CourseReviewsSection
+              courseId={courseId}
+              currentUserId={currentUserId}
+              isEnrolled={Boolean(enrollment)}
+              isCompleted={enrollment?.status === 'completed' || (enrollment?.progress_percentage ?? 0) >= 100}
+              onReviewSubmitted={(newSummary) => setRatingSummary(newSummary)}
+            />
           </div>
 
           {/* Right Sidebar */}
@@ -256,12 +305,36 @@ export default function CourseDetailPage({ courseId }: CourseDetailPageProps) {
                     <ProgressBar value={enrollment.progress_percentage} variant="indigo" size="md" />
                   </div>
 
-                  <Link href={`/courses/${courseId}/learn`} className="block w-full">
+                  <Link
+                    href={
+                      continueLessonId
+                        ? `/courses/${courseId}/learn?lessonId=${continueLessonId}`
+                        : `/courses/${courseId}/learn`
+                    }
+                    className="block w-full"
+                  >
                     <Button variant="primary" size="lg" className="w-full gap-2 shadow-lg shadow-indigo-500/25">
                       <PlayCircle className="w-5 h-5" />
-                      Continue Learning
+                      {enrollment.progress_percentage >= 100
+                        ? 'Review Course Material'
+                        : continueLessonId
+                        ? 'Resume Learning'
+                        : 'Continue Learning'}
                     </Button>
                   </Link>
+
+                  {certificateNumber && (
+                    <Link href={`/certificates/${certificateNumber}`} target="_blank" className="block w-full">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full gap-2 border-amber-300 bg-amber-50/50 hover:bg-amber-100/60 text-amber-900 font-bold shadow-sm"
+                      >
+                        <Award className="w-5 h-5 text-amber-600" />
+                        <span>View Verified Certificate</span>
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">

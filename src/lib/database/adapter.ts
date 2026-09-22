@@ -11,8 +11,9 @@
  * to handle the full range of Supabase query patterns used in services.
  */
 
-import { AppError, AppErrors } from '../errors';
-import { withRetry, withTimeout, CircuitBreaker } from '../errors/retry';
+import { AppError, AppErrors } from '../errors/index';
+import { withRetry, withTimeout, CircuitBreaker, CircuitState } from '../errors/retry';
+import { logger, metrics, circuitEvents } from '../observability/index';
 
 /**
  * Generic query result type matching Supabase pattern
@@ -203,14 +204,19 @@ export interface TableOperations<T = unknown> {
   select(columns?: string): QueryBuilder<T[]>;
 
   /**
-   * Insert a new record
+   * Insert a new record or multiple records
    */
-  insert(data: Record<string, unknown>): QueryBuilder<T>;
+  insert(data: Record<string, unknown> | Array<Record<string, unknown>>): QueryBuilder<T>;
 
   /**
    * Update matching records
    */
   update(data: Record<string, unknown>): QueryBuilder<T>;
+
+  /**
+   * Upsert a record or multiple records
+   */
+  upsert(data: Record<string, unknown> | Array<Record<string, unknown>>, options?: { onConflict?: string }): QueryBuilder<T>;
 
   /**
    * Delete matching records
@@ -244,13 +250,29 @@ export interface AuthOperations {
 }
 
 /**
+ * Storage bucket operations interface
+ */
+export interface StorageBucketOperations {
+  upload(path: string, file: File | Blob, options?: { upsert?: boolean; contentType?: string }): Promise<{ data: { path: string } | null; error: Error | null }>;
+  download(path: string): Promise<{ data: Blob | null; error: Error | null }>;
+  getPublicUrl(path: string): { data: { publicUrl: string }; error: Error | null };
+  remove(paths: string[]): Promise<{ data: unknown | null; error: Error | null }>;
+  list(path?: string, options?: { limit?: number; offset?: number; sortBy?: { column?: string; order?: string } }): Promise<{ data: any[] | null; error: Error | null }>;
+}
+
+/**
  * Storage operations interface
  */
 export interface StorageOperations {
   /**
+   * Scoped bucket operations (matching Supabase storage.from(bucket) API)
+   */
+  from(bucket: string): StorageBucketOperations;
+
+  /**
    * Upload a file
    */
-  upload(bucket: string, path: string, file: File | Blob): Promise<{ data: { path: string } | null; error: Error | null }>;
+  upload(bucket: string, path: string, file: File | Blob, options?: { upsert?: boolean; contentType?: string }): Promise<{ data: { path: string } | null; error: Error | null }>;
 
   /**
    * Download a file
@@ -266,6 +288,11 @@ export interface StorageOperations {
    * Delete a file
    */
   remove(bucket: string, paths: string[]): Promise<{ data: unknown | null; error: Error | null }>;
+
+  /**
+   * List files in a bucket
+   */
+  list(bucket: string, path?: string, options?: { limit?: number; offset?: number; sortBy?: { column?: string; order?: string } }): Promise<{ data: any[] | null; error: Error | null }>;
 }
 
 /**
@@ -375,9 +402,10 @@ interface QueryState {
   limitCount?: number;
   rangeFrom?: number;
   rangeTo?: number;
-  operation: 'select' | 'insert' | 'update' | 'delete';
+  operation: 'select' | 'insert' | 'update' | 'upsert' | 'delete';
   insertData?: Record<string, unknown>;
   updateData?: Record<string, unknown>;
+  upsertOptions?: { onConflict?: string };
 }
 
 /**
@@ -499,7 +527,8 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
   }
 
   async single(): Promise<{ data: T | null; error: Error | null }> {
-    const client = this._supabase.from(this._state.table);
+    const supabase = await this._supabase;
+    const client = supabase.from(this._state.table);
     let query: any;
 
     if (this._state.operation === 'select') {
@@ -508,6 +537,8 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
       query = client.insert(this._state.insertData!).select();
     } else if (this._state.operation === 'update') {
       query = client.update(this._state.updateData!).select();
+    } else if (this._state.operation === 'upsert') {
+      query = client.upsert(this._state.insertData!, this._state.upsertOptions).select();
     } else if (this._state.operation === 'delete') {
       query = client.delete().select();
     }
@@ -561,7 +592,8 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
   }
 
   async execute(): Promise<{ data: T[] | null; error: Error | null }> {
-    const client = this._supabase.from(this._state.table);
+    const supabase = await this._supabase;
+    const client = supabase.from(this._state.table);
     let query: any;
 
     if (this._state.operation === 'select') {
@@ -570,6 +602,8 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
       query = client.insert(this._state.insertData!).select();
     } else if (this._state.operation === 'update') {
       query = client.update(this._state.updateData!).select();
+    } else if (this._state.operation === 'upsert') {
+      query = client.upsert(this._state.insertData!, this._state.upsertOptions).select();
     } else if (this._state.operation === 'delete') {
       query = client.delete().select();
     }
@@ -610,7 +644,8 @@ class SupabaseQueryBuilder<T> implements QueryBuilder<T> {
   }
 
   async count(options?: { foreignTable?: string; head?: boolean }): Promise<{ count: number | null; error: Error | null }> {
-    const client = this._supabase.from(this._state.table);
+    const supabase = await this._supabase;
+    const client = supabase.from(this._state.table);
     let query = client.select('*', { count: 'exact', head: options?.head ?? false });
 
     // Apply filters
@@ -684,6 +719,17 @@ class SupabaseTableOperations<T> implements TableOperations<T> {
     return new SupabaseQueryBuilder<T>(this._supabase, state);
   }
 
+  upsert(data: Record<string, unknown>, options?: { onConflict?: string }): QueryBuilder<T> {
+    const state: QueryState = {
+      table: this._tableName,
+      filters: [],
+      operation: 'upsert',
+      insertData: data,
+      upsertOptions: options,
+    };
+    return new SupabaseQueryBuilder<T>(this._supabase, state);
+  }
+
   delete(): QueryBuilder<null> {
     const state: QueryState = {
       table: this._tableName,
@@ -751,9 +797,21 @@ class SupabaseStorageOperations implements StorageOperations {
     this._supabase = supabase;
   }
 
-  async upload(bucket: string, path: string, file: File | Blob): Promise<{ data: { path: string } | null; error: Error | null }> {
+  from(bucket: string): StorageBucketOperations {
+    return {
+      upload: (path: string, file: File | Blob, options?: { upsert?: boolean; contentType?: string }) =>
+        this.upload(bucket, path, file, options),
+      download: (path: string) => this.download(bucket, path),
+      getPublicUrl: (path: string) => this.getPublicUrl(bucket, path),
+      remove: (paths: string[]) => this.remove(bucket, paths),
+      list: (path?: string, options?: { limit?: number; offset?: number; sortBy?: { column?: string; order?: string } }) =>
+        this.list(bucket, path, options),
+    };
+  }
+
+  async upload(bucket: string, path: string, file: File | Blob, options?: { upsert?: boolean; contentType?: string }): Promise<{ data: { path: string } | null; error: Error | null }> {
     try {
-      const response = await this._supabase.storage.from(bucket).upload(path, file);
+      const response = await this._supabase.storage.from(bucket).upload(path, file, options);
       return response;
     } catch (error) {
       return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
@@ -781,6 +839,15 @@ class SupabaseStorageOperations implements StorageOperations {
   async remove(bucket: string, paths: string[]): Promise<{ data: unknown | null; error: Error | null }> {
     try {
       const response = await this._supabase.storage.from(bucket).remove(paths);
+      return response;
+    } catch (error) {
+      return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
+    }
+  }
+
+  async list(bucket: string, path?: string, options?: { limit?: number; offset?: number; sortBy?: { column?: string; order?: string } }): Promise<{ data: any[] | null; error: Error | null }> {
+    try {
+      const response = await this._supabase.storage.from(bucket).list(path, options);
       return response;
     } catch (error) {
       return { data: null, error: error instanceof Error ? error : new Error(String(error)) };
@@ -815,14 +882,21 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
     // Initialize circuit breaker if enabled
     if (options.enableCircuitBreaker !== false) {
+      circuitEvents.register('supabase');
       this.circuitBreaker = new CircuitBreaker('supabase', {
         failureThreshold: options.circuitBreakerThreshold ?? 5,
         resetTimeoutMs: options.circuitBreakerResetMs ?? 60000,
         onOpen: () => {
-          console.warn('[SupabaseAdapter] Circuit breaker opened - Supabase may be unavailable');
+          circuitEvents.recordTransition('supabase', CircuitState.OPEN, {
+            failureCount: this.circuitBreaker?.getState().failureCount,
+            reason: 'Failure threshold exceeded',
+          });
         },
         onClose: () => {
-          console.info('[SupabaseAdapter] Circuit breaker closed - Supabase recovered');
+          circuitEvents.recordTransition('supabase', CircuitState.CLOSED);
+        },
+        onHalfOpen: () => {
+          circuitEvents.recordTransition('supabase', CircuitState.HALF_OPEN);
         },
       });
     }
@@ -868,24 +942,54 @@ export class SupabaseAdapter implements DatabaseAdapter {
   }
 
   /**
-   * Execute operation with resilience patterns
+   * Execute operation with resilience patterns and observability instrumentation
    */
-  private async executeWithResilience<T>(operation: () => Promise<T>): Promise<T> {
+  private async executeWithResilience<T>(operation: () => Promise<T>, opName = 'db_operation'): Promise<T> {
+    const start = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    metrics.counter('db_queries_total').inc({ operation: opName });
+
     const op = async () => {
       return withTimeout(
         operation,
         this.timeoutMs,
-        'database_operation',
+        opName,
       );
     };
 
-    if (this.circuitBreaker) {
-      return this.circuitBreaker.execute(() => 
-        withRetry(op, { maxAttempts: this.maxRetries })
-      );
-    }
+    try {
+      let result: T;
+      if (this.circuitBreaker) {
+        result = await this.circuitBreaker.execute(() => 
+          withRetry(op, { maxAttempts: this.maxRetries })
+        );
+      } else {
+        result = await withRetry(op, { maxAttempts: this.maxRetries });
+      }
 
-    return withRetry(op, { maxAttempts: this.maxRetries });
+      const duration = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - start;
+      metrics.histogram('db_query_duration_ms').observe(duration, { operation: opName, status: 'success' });
+
+      if (duration > 500) {
+        logger.warn(`[SupabaseAdapter] Slow database operation: ${opName}`, {
+          durationMs: Math.round(duration),
+          operation: opName,
+        });
+      }
+
+      return result;
+    } catch (error) {
+      const duration = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - start;
+      metrics.counter('db_query_errors_total').inc({ operation: opName });
+      metrics.histogram('db_query_duration_ms').observe(duration, { operation: opName, status: 'error' });
+
+      logger.error(`[SupabaseAdapter] Database operation failed: ${opName}`, {
+        durationMs: Math.round(duration),
+        operation: opName,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      throw error;
+    }
   }
 
   /**
@@ -978,7 +1082,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
         .single();
 
       return this.toQueryResult<T>(response);
-    });
+    }, `getById:${table}`);
   }
 
   async list<T>(
@@ -1013,7 +1117,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
 
       const response = await query;
       return this.toListResult<T>(response);
-    });
+    }, `list:${table}`);
   }
 
   async insert<T>(table: string, data: Record<string, unknown>): Promise<QueryResult<T>> {
@@ -1021,7 +1125,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
       const client = await this.getSupabase();
       const response = await client.from(table).insert(data as any).select().single();
       return this.toQueryResult<T>(response);
-    });
+    }, `insert:${table}`);
   }
 
   async update<T>(
@@ -1039,7 +1143,7 @@ export class SupabaseAdapter implements DatabaseAdapter {
         .select()
         .single();
       return this.toQueryResult<T>(response);
-    });
+    }, `update:${table}`);
   }
 
   async delete<T>(table: string, id: string): Promise<QueryResult<T>> {
@@ -1052,10 +1156,10 @@ export class SupabaseAdapter implements DatabaseAdapter {
         .select()
         .single();
       return this.toQueryResult<T>(response);
-    });
+    }, `delete:${table}`);
   }
 
-  async query<T>(sql: string, params?: unknown[]): Promise<ListResult<T>> {
+  async query<T>(_sql: string, _params?: unknown[]): Promise<ListResult<T>> {
     // Note: Supabase doesn't support raw SQL directly
     // This would need to be implemented via RPC functions or a different approach
     return {
@@ -1111,6 +1215,7 @@ export function createDatabaseAdapter(options: SupabaseAdapterOptions): Database
  */
 export class MockDatabaseAdapter implements DatabaseAdapter {
   private store: Map<string, Map<string, any>> = new Map();
+  private storageStore: Map<string, Map<string, { path: string; file: any; metadata?: any; created_at: string }>> = new Map();
   public auth: AuthOperations;
   public storage: StorageOperations;
 
@@ -1122,11 +1227,73 @@ export class MockDatabaseAdapter implements DatabaseAdapter {
       async signUp() { return { data: null, error: null }; },
       async signOut() { return { error: null }; },
     };
+
+    const getBucket = (bucket: string) => {
+      if (!this.storageStore.has(bucket)) {
+        this.storageStore.set(bucket, new Map());
+      }
+      return this.storageStore.get(bucket)!;
+    };
+
     this.storage = {
-      async upload() { return { data: null, error: null }; },
-      async download() { return { data: null, error: null }; },
-      getPublicUrl() { return { data: { publicUrl: '' }, error: null }; },
-      async remove() { return { data: null, error: null }; },
+      from: (bucket: string) => ({
+        upload: async (path: string, file?: any, options?: { upsert?: boolean; contentType?: string }) => {
+          const b = getBucket(bucket);
+          const size = file?.size ?? (typeof file === 'string' ? file.length : 1024);
+          b.set(path, {
+            path,
+            file,
+            metadata: { size, mimetype: options?.contentType || 'application/octet-stream' },
+            created_at: new Date().toISOString(),
+          });
+          return { data: { path }, error: null };
+        },
+        download: async (path: string) => {
+          const item = getBucket(bucket).get(path);
+          return { data: item?.file || null, error: item ? null : new Error('Not found') };
+        },
+        getPublicUrl: (path: string) => ({ data: { publicUrl: `https://mock.storage/${bucket}/${path}` }, error: null }),
+        remove: async (paths: string[]) => {
+          const b = getBucket(bucket);
+          paths.forEach(p => b.delete(p));
+          return { data: null, error: null };
+        },
+        list: async (folder?: string) => {
+          const b = getBucket(bucket);
+          const prefix = folder ? (folder.endsWith('/') ? folder : `${folder}/`) : '';
+          const results: Array<{ id: string; name: string; metadata: any; created_at: string }> = [];
+          
+          for (const [key, val] of b.entries()) {
+            if (!prefix || key.startsWith(prefix)) {
+              const fileName = prefix ? key.slice(prefix.length) : key;
+              if (!fileName.includes('/')) {
+                results.push({
+                  id: key,
+                  name: fileName,
+                  metadata: val.metadata,
+                  created_at: val.created_at,
+                });
+              }
+            }
+          }
+          return { data: results, error: null };
+        },
+      }),
+      async upload(bucket: string, path: string, file?: any, options?: { upsert?: boolean; contentType?: string }) {
+        return this.from(bucket).upload(path, file, options);
+      },
+      async download(bucket: string, path: string) {
+        return this.from(bucket).download(path);
+      },
+      getPublicUrl(bucket: string, path: string) {
+        return this.from(bucket).getPublicUrl(path);
+      },
+      async remove(bucket: string, paths: string[]) {
+        return this.from(bucket).remove(paths);
+      },
+      async list(bucket: string, path?: string) {
+        return this.from(bucket).list(path);
+      },
     };
   }
 
@@ -1206,7 +1373,7 @@ export class MockDatabaseAdapter implements DatabaseAdapter {
     return { data: deleted as T, error: null, status: 200 };
   }
 
-  async query<T>(sql: string, params?: unknown[]): Promise<ListResult<T>> {
+  async query<T>(_sql: string, _params?: unknown[]): Promise<ListResult<T>> {
     return { data: [], error: new Error('Not implemented in mock'), count: null, status: 501 };
   }
 
@@ -1238,6 +1405,7 @@ export class MockDatabaseAdapter implements DatabaseAdapter {
    */
   clear() {
     this.store.clear();
+    this.storageStore.clear();
   }
 }
 
@@ -1257,12 +1425,16 @@ class MockTableOperations<T> implements TableOperations<T> {
     return new MockQueryBuilder<T[]>(this._store, this._tableName, 'select', columns) as unknown as QueryBuilder<T[]>;
   }
 
-  insert(data: Record<string, unknown>): QueryBuilder<T> {
-    return new MockQueryBuilder<T>(this._store, this._tableName, 'insert', undefined, data) as unknown as QueryBuilder<T>;
+  insert(data: Record<string, unknown> | Array<Record<string, unknown>>): QueryBuilder<T> {
+    return new MockQueryBuilder<T>(this._store, this._tableName, 'insert', undefined, data as any) as unknown as QueryBuilder<T>;
   }
 
   update(data: Record<string, unknown>): QueryBuilder<T> {
     return new MockQueryBuilder<T>(this._store, this._tableName, 'update', undefined, undefined, data) as unknown as QueryBuilder<T>;
+  }
+
+  upsert(data: Record<string, unknown> | Array<Record<string, unknown>>, _options?: { onConflict?: string }): QueryBuilder<T> {
+    return new MockQueryBuilder<T>(this._store, this._tableName, 'upsert', undefined, data as any) as unknown as QueryBuilder<T>;
   }
 
   delete(): QueryBuilder<null> {
@@ -1278,7 +1450,7 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
   private _tableName: string;
   private _operation: string;
   private _columns?: string;
-  private _insertData?: Record<string, unknown>;
+  private _insertData?: Record<string, unknown> | Array<Record<string, unknown>>;
   private _updateData?: Record<string, unknown>;
   private _filters: Array<{ column: string; operator: string; value: unknown }> = [];
   private _orderBy?: { column: string; ascending: boolean };
@@ -1289,7 +1461,7 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
     tableName: string,
     operation: string,
     columns?: string,
-    insertData?: Record<string, unknown>,
+    insertData?: Record<string, unknown> | Array<Record<string, unknown>>,
     updateData?: Record<string, unknown>,
   ) {
     this._store = store;
@@ -1300,7 +1472,7 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
     this._updateData = updateData;
   }
 
-  select(columns?: string): QueryBuilder<T> {
+  select(_columns?: string): QueryBuilder<T> {
     return new MockQueryBuilder<T>(this._store, this._tableName, this._operation, this._columns, this._insertData, this._updateData);
   }
 
@@ -1404,13 +1576,28 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
     return cloned;
   }
 
-  private async _executeQuery(): Promise<{ data: T[] | null; error: Error | null }> {
+  private async _executeQuery(): Promise<{ data: T[] | null; error: Error | null; count?: number | null }> {
     const tableData = this._store.get(this._tableName) || new Map();
     let data = Array.from(tableData.values()) as T[];
 
     // Apply filters
     data = data.filter(item => {
       return this._filters.every(filter => {
+        if (filter.operator === 'or') {
+          const clauses = String(filter.value).split(',');
+          return clauses.some(clause => {
+            const [col, op, ...valParts] = clause.split('.');
+            const val = valParts.join('.').replace(/^%|%$/g, '');
+            const itemVal = String((item as Record<string, unknown>)[col] || '');
+            if (op === 'ilike' || op === 'like') {
+              return itemVal.toLowerCase().includes(val.toLowerCase());
+            }
+            if (op === 'eq') {
+              return itemVal === val;
+            }
+            return false;
+          });
+        }
         const itemValue = (item as Record<string, unknown>)[filter.column];
         switch (filter.operator) {
           case 'eq': return itemValue === filter.value;
@@ -1445,6 +1632,40 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
 
     // Handle different operations
     if (this._operation === 'insert' && this._insertData) {
+      if (Array.isArray(this._insertData)) {
+        const records = this._insertData.map(item => {
+          const id = (item.id as string) || crypto.randomUUID();
+          const record = { ...item, id } as unknown as T;
+          if (!this._store.has(this._tableName)) {
+            this._store.set(this._tableName, new Map());
+          }
+          this._store.get(this._tableName)!.set(id, record as Record<string, unknown>);
+          return record;
+        });
+        return { data: records, error: null };
+      }
+      const id = ((this._insertData as Record<string, unknown>).id as string) || crypto.randomUUID();
+      const record = { ...(this._insertData as Record<string, unknown>), id } as unknown as T;
+      if (!this._store.has(this._tableName)) {
+        this._store.set(this._tableName, new Map());
+      }
+      this._store.get(this._tableName)!.set(id, record as Record<string, unknown>);
+      return { data: [record], error: null };
+    }
+
+    if (this._operation === 'upsert' && this._insertData) {
+      if (Array.isArray(this._insertData)) {
+        const records = this._insertData.map(item => {
+          const id = (item.id as string) || crypto.randomUUID();
+          const record = { ...item, id } as unknown as T;
+          if (!this._store.has(this._tableName)) {
+            this._store.set(this._tableName, new Map());
+          }
+          this._store.get(this._tableName)!.set(id, record as Record<string, unknown>);
+          return record;
+        });
+        return { data: records, error: null };
+      }
       const id = ((this._insertData as Record<string, unknown>).id as string) || crypto.randomUUID();
       const record = { ...(this._insertData as Record<string, unknown>), id } as unknown as T;
       if (!this._store.has(this._tableName)) {
@@ -1473,11 +1694,15 @@ class MockQueryBuilder<T> implements QueryBuilder<T> {
       return { data: [], error: null };
     }
 
-    return { data: data as unknown as T[], error: null };
+    return {
+      data: data as unknown as T[],
+      error: null,
+      count: Array.isArray(data) ? data.length : 0,
+    };
   }
 
-  async then<TResult1 = { data: T[] | null; error: Error | null }, TResult2 = never>(
-    onfulfilled?: (value: { data: T[] | null; error: Error | null }) => TResult1 | PromiseLike<TResult1>,
+  async then<TResult1 = { data: T[] | null; error: Error | null; count?: number | null }, TResult2 = never>(
+    onfulfilled?: (value: { data: T[] | null; error: Error | null; count?: number | null }) => TResult1 | PromiseLike<TResult1>,
     onrejected?: (reason: unknown) => TResult2 | PromiseLike<TResult2>,
   ): Promise<TResult1 | TResult2> {
     return this._executeQuery().then(onfulfilled, onrejected);

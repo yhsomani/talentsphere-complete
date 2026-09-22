@@ -1,16 +1,41 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createBrowserClient } from '@/lib/supabase';
+/**
+ * Notification Service - Data access layer for user notifications
+ * 
+ * Refactored to use DatabaseAdapter for loose coupling, resilience,
+ * and testability via Dependency Injection.
+ */
+
+import type { DatabaseAdapter } from '../lib/database/adapter';
+import { createDatabaseAdapter } from '../lib/database/adapter';
+import { AppConfig } from '../config/index';
+import { AppErrors, isAppError } from '../lib/errors/index';
+
+export type NotificationType =
+  | 'system'
+  | 'application_update'
+  | 'job_recommendation'
+  | 'message_received'
+  | 'challenge_result'
+  | 'course_enrollment'
+  | 'assignment_grade'
+  | 'badge_earned'
+  | 'level_up'
+  | 'mention'
+  | 'invitation'
+  | (string & {});
 
 export interface NotificationRecord {
   id: string;
   user_id: string;
-  type: string;
+  type: NotificationType;
   title: string;
   message: string;
   link_url: string | null;
   link_label: string | null;
   is_read: boolean;
   read_at: string | null;
+  is_archived?: boolean;
   channel: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
@@ -30,38 +55,107 @@ export interface NotificationPreferencesRecord {
   marketing_emails: boolean;
 }
 
-const supabase = createBrowserClient();
+export class NotificationService {
+  constructor(private readonly db: DatabaseAdapter) {}
 
-export const notificationService = {
   /**
-   * Fetch all notifications for a given user
+   * Fetch notifications for a given user with optional archive filters (NTF-009)
    */
-  async getNotifications(userId: string): Promise<NotificationRecord[]> {
+  async getNotifications(
+    userId: string,
+    options?: { includeArchived?: boolean; onlyArchived?: boolean }
+  ): Promise<NotificationRecord[]> {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (this.db as any)
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching notifications:', error);
-        return [];
+        throw AppErrors.database('Error fetching notifications', { cause: error, context: { userId } });
       }
 
-      return (data || []) as NotificationRecord[];
+      const all = ((data as unknown as any[]) || []) as NotificationRecord[];
+      if (options?.onlyArchived) {
+        return all.filter((n) => Boolean(n.is_archived));
+      }
+      if (!options?.includeArchived) {
+        return all.filter((n) => !n.is_archived);
+      }
+      return all;
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error in getNotifications:', err);
       return [];
     }
-  },
+  }
+
+  /**
+   * Get unread notifications count for a user (NOTIF-001)
+   */
+  async getUnreadCount(userId: string): Promise<number> {
+    try {
+      const { data, error } = await (this.db as any)
+        .from('notifications')
+        .select('id, is_read, is_archived')
+        .eq('user_id', userId);
+
+      if (error) {
+        return 0;
+      }
+
+      const unread = (data || []).filter((n: any) => !n.is_read && !n.is_archived);
+      return unread.length;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
+   * Archive a single notification (NTF-009)
+   */
+  async archiveNotification(notificationId: string): Promise<boolean> {
+    try {
+      const { error } = await (this.db as any)
+        .from('notifications')
+        .update({
+          is_archived: true,
+        })
+        .eq('id', notificationId);
+
+      return !error;
+    } catch (err) {
+      console.error('Error in archiveNotification:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Unarchive a single notification (NTF-009)
+   */
+  async unarchiveNotification(notificationId: string): Promise<boolean> {
+    try {
+      const { error } = await (this.db as any)
+        .from('notifications')
+        .update({
+          is_archived: false,
+        })
+        .eq('id', notificationId);
+
+      return !error;
+    } catch (err) {
+      console.error('Error in unarchiveNotification:', err);
+      return false;
+    }
+  }
 
   /**
    * Mark a single notification as read
    */
   async markAsRead(notificationId: string): Promise<boolean> {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (this.db as any)
         .from('notifications')
         .update({
           is_read: true,
@@ -74,14 +168,14 @@ export const notificationService = {
       console.error('Error in markAsRead:', err);
       return false;
     }
-  },
+  }
 
   /**
    * Mark all notifications as read for a user
    */
   async markAllAsRead(userId: string): Promise<boolean> {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (this.db as any)
         .from('notifications')
         .update({
           is_read: true,
@@ -95,14 +189,14 @@ export const notificationService = {
       console.error('Error in markAllAsRead:', err);
       return false;
     }
-  },
+  }
 
   /**
    * Delete a notification
    */
   async deleteNotification(notificationId: string): Promise<boolean> {
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (this.db as any)
         .from('notifications')
         .delete()
         .eq('id', notificationId);
@@ -112,7 +206,7 @@ export const notificationService = {
       console.error('Error deleting notification:', err);
       return false;
     }
-  },
+  }
 
   /**
    * Get user notification preferences
@@ -132,7 +226,7 @@ export const notificationService = {
     };
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (this.db as any)
         .from('notification_preferences')
         .select('*')
         .eq('user_id', userId)
@@ -149,7 +243,7 @@ export const notificationService = {
     } catch {
       return defaultPrefs;
     }
-  },
+  }
 
   /**
    * Update user notification preferences
@@ -159,7 +253,7 @@ export const notificationService = {
     updates: Partial<NotificationPreferencesRecord>
   ): Promise<NotificationPreferencesRecord | null> {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (this.db as any)
         .from('notification_preferences')
         .upsert(
           {
@@ -173,23 +267,23 @@ export const notificationService = {
         .single();
 
       if (error) {
-        console.error('Error updating preferences:', error);
-        return null;
+        throw AppErrors.database('Error updating notification preferences', { cause: error, context: { userId } });
       }
 
       return data as NotificationPreferencesRecord;
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error in updatePreferences:', err);
       return null;
     }
-  },
+  }
 
   /**
    * Create a notification (system / trigger helper)
    */
   async createNotification(params: {
     userId: string;
-    type: string;
+    type: NotificationType;
     title: string;
     message: string;
     linkUrl?: string;
@@ -198,7 +292,7 @@ export const notificationService = {
     metadata?: Record<string, unknown>;
   }): Promise<NotificationRecord | null> {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (this.db as any)
         .from('notifications')
         .insert({
           user_id: params.userId,
@@ -210,19 +304,27 @@ export const notificationService = {
           channel: params.channel || 'in_app',
           metadata: params.metadata || {},
           is_read: false,
+          is_archived: false,
         })
         .select('*')
         .single();
 
       if (error) {
-        console.error('Error creating notification:', error);
-        return null;
+        throw AppErrors.database('Error creating notification', { cause: error, context: params });
       }
 
       return data as NotificationRecord;
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error in createNotification:', err);
       return null;
     }
-  },
-};
+  }
+}
+
+// Export singleton instance for backward compatibility
+const defaultAdapter = createDatabaseAdapter({
+  supabaseUrl: AppConfig.supabase.url,
+  supabaseKey: AppConfig.supabase.anonKey,
+});
+export const notificationService = new NotificationService(defaultAdapter);

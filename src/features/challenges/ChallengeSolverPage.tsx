@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import {
   challengeService,
   type ChallengeRecord,
-  type SubmissionResult
+  type SubmissionResult,
+  type SubmissionHistoryItem,
 } from '@/services/challenge.service';
 import { createBrowserClient } from '@/lib/supabase';
 import { Button } from '@/components/ui';
@@ -24,7 +25,10 @@ import {
   BookOpen,
   HelpCircle,
   Clock,
-  Layers
+  Layers,
+  History,
+  Check,
+  Calendar,
 } from 'lucide-react';
 
 interface ChallengeSolverPageProps {
@@ -40,8 +44,23 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
   const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
-  const [activeTab, setActiveTab] = useState<'problem' | 'hints'>('problem');
+  const [activeTab, setActiveTab] = useState<'problem' | 'hints' | 'submissions'>('problem');
+  const [submissions, setSubmissions] = useState<SubmissionHistoryItem[]>([]);
+  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+  const [restoredId, setRestoredId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+
+  const fetchSubmissions = useCallback(async (uid: string) => {
+    try {
+      setIsLoadingSubmissions(true);
+      const history = await challengeService.getSubmissions(challengeId, uid);
+      setSubmissions(history);
+    } catch (err) {
+      console.error('Failed to load submissions history:', err);
+    } finally {
+      setIsLoadingSubmissions(false);
+    }
+  }, [challengeId]);
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -50,7 +69,10 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
         const supabase = createBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (user) setUserId(user.id);
+        if (user) {
+          setUserId(user.id);
+          fetchSubmissions(user.id);
+        }
 
         const data = await challengeService.getChallengeById(challengeId, user?.id);
         if (data) {
@@ -68,7 +90,19 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
     if (challengeId) {
       loadChallenge();
     }
-  }, [challengeId]);
+  }, [challengeId, fetchSubmissions]);
+
+  const handleRestoreCode = (submission: SubmissionHistoryItem) => {
+    if (code.trim() && code !== submission.code) {
+      if (!window.confirm(`Load submission from ${new Date(submission.submitted_at).toLocaleTimeString()} into the code editor? Unsaved edits will be replaced.`)) {
+        return;
+      }
+    }
+    setCode(submission.code);
+    if (submission.language) setLanguage(submission.language);
+    setRestoredId(submission.id);
+    setTimeout(() => setRestoredId(null), 3000);
+  };
 
   const handleRunOrSubmit = useCallback(async () => {
     if (!challenge) return;
@@ -97,12 +131,15 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
       if (res.status === 'passed') {
         setShowCelebration(true);
       }
+
+      // Re-fetch submissions history so new attempt immediately displays
+      await fetchSubmissions(user.id);
     } catch (err) {
       console.error('Error submitting code:', err);
     } finally {
       setIsRunning(false);
     }
-  }, [challenge, challengeId, code, language, router]);
+  }, [challenge, challengeId, code, fetchSubmissions, language, router]);
 
   // Keyboard shortcut Ctrl/Cmd + Enter to run
   useEffect(() => {
@@ -243,6 +280,17 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
               <HelpCircle className="w-3.5 h-3.5" />
               Algorithm Hints ({challenge.hints?.length || 0})
             </button>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className={`h-full flex items-center gap-1.5 border-b-2 transition-colors px-1 ${
+                activeTab === 'submissions'
+                  ? 'border-indigo-500 text-white font-bold'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              Submissions ({submissions.length})
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -283,7 +331,7 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
                   </div>
                 )}
               </>
-            ) : (
+            ) : activeTab === 'hints' ? (
               <div className="space-y-4">
                 <h3 className="font-bold text-white text-sm flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-400" />
@@ -298,6 +346,122 @@ export default function ChallengeSolverPage({ challengeId }: ChallengeSolverPage
                   ))
                 ) : (
                   <p className="text-xs text-slate-500 italic">No hints unlocked for this challenge. Analyze constraints carefully.</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                    <History className="w-4 h-4 text-indigo-400" />
+                    Attempt & Submission History
+                  </h3>
+                  <span className="text-xs text-slate-400">
+                    {submissions.length} {submissions.length === 1 ? 'record' : 'records'}
+                  </span>
+                </div>
+
+                {isLoadingSubmissions ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-slate-400">
+                    <LoadingSpinner size="sm" />
+                    <p className="text-xs mt-3">Loading past submissions...</p>
+                  </div>
+                ) : submissions.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-400">
+                      <History className="w-6 h-6" />
+                    </div>
+                    <p className="text-sm font-semibold text-slate-300">No Submissions Yet</p>
+                    <p className="text-xs max-w-xs mx-auto">
+                      Click <span className="text-indigo-400 font-semibold">Run & Submit</span> to test your code against verified test cases and record your snapshot.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {submissions.map((sub, index) => {
+                      const isPassed = sub.status === 'passed';
+                      const isRestored = restoredId === sub.id;
+                      const dateFormatted = new Date(sub.submitted_at).toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+
+                      return (
+                        <div
+                          key={sub.id || index}
+                          className={`p-4 rounded-2xl border transition-all ${
+                            isPassed
+                              ? 'bg-slate-950/70 border-emerald-900/40 hover:border-emerald-700/60'
+                              : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3 mb-2">
+                            <div className="flex items-center gap-2">
+                              {isPassed ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Passed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                                  <XCircle className="w-3 h-3" />
+                                  {sub.status === 'compilation_error' ? 'Syntax Error' : 'Failed'}
+                                </span>
+                              )}
+                              <span className="text-[11px] text-slate-400 font-mono">
+                                {sub.passed_tests}/{sub.total_tests} tests
+                              </span>
+                            </div>
+
+                            <button
+                              onClick={() => handleRestoreCode(sub)}
+                              className={`text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 transition-colors ${
+                                isRestored
+                                  ? 'bg-emerald-600 text-white'
+                                  : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 hover:text-white'
+                              }`}
+                              title="Load this code snapshot into your editor"
+                            >
+                              {isRestored ? (
+                                <>
+                                  <Check className="w-3 h-3 text-white" />
+                                  <span>Restored!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <RotateCcw className="w-3 h-3" />
+                                  <span>Load Code</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-slate-400">
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-slate-500" />
+                                {dateFormatted}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-500" />
+                                {sub.execution_time_ms}ms
+                              </span>
+                            </div>
+                            <span className="uppercase text-[10px] font-mono tracking-wider text-slate-500">
+                              {sub.language}
+                            </span>
+                          </div>
+
+                          {/* Code Preview snippet */}
+                          <div className="mt-3 bg-slate-900/90 rounded-xl p-2.5 border border-slate-800/80 font-mono text-[11px] text-slate-400 max-h-20 overflow-hidden relative group">
+                            <pre className="line-clamp-2">{sub.code.trim()}</pre>
+                            <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-slate-900 to-transparent pointer-events-none" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             )}

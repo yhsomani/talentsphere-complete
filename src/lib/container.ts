@@ -11,16 +11,31 @@
 
 import { DatabaseAdapter, createDatabaseAdapter } from './database/adapter';
 import { getConfig } from './config/validation';
+import { logger } from './observability/index';
+import { JobService } from '../services/jobs.service';
+import { ApplicationService } from '../services/application.service';
+import { CandidateService } from '../services/candidate.service';
+import { CourseService } from '../services/course.service';
+import { ChallengeService } from '../services/challenge.service';
+import { MessageService } from '../services/message.service';
+import { NotificationService } from '../services/notification.service';
+import { LeaderboardService } from '../services/leaderboard.service';
+import { NetworkService } from '../services/network.service';
 
 /**
  * Service registry interface
  */
 export interface ServiceRegistry {
   database: DatabaseAdapter;
-  // Add other services as they are refactored
-  // auth: AuthService;
-  // job: JobService;
-  // etc.
+  jobs: JobService;
+  applications: ApplicationService;
+  candidates: CandidateService;
+  courses: CourseService;
+  challenges: ChallengeService;
+  messages: MessageService;
+  notifications: NotificationService;
+  leaderboard: LeaderboardService;
+  network: NetworkService;
 }
 
 /**
@@ -41,7 +56,7 @@ export function initializeServices(): ServiceRegistry {
   const config = getConfig();
 
   // Initialize database adapter with production settings
-  _registry.database = createDatabaseAdapter({
+  const db = createDatabaseAdapter({
     supabaseUrl: config.required.supabaseUrl,
     supabaseKey: config.required.supabaseAnonKey,
     timeoutMs: 30000,
@@ -51,7 +66,21 @@ export function initializeServices(): ServiceRegistry {
     circuitBreakerResetMs: 60000,
   });
 
+  _registry.database = db;
+  _registry.jobs = new JobService(db);
+  _registry.applications = new ApplicationService(db);
+  _registry.candidates = new CandidateService(db);
+  _registry.courses = new CourseService(db);
+  _registry.challenges = new ChallengeService(db);
+  _registry.messages = new MessageService(db);
+  _registry.notifications = new NotificationService(db);
+  _registry.leaderboard = new LeaderboardService(db);
+  _registry.network = new NetworkService(db);
+
   _initialized = true;
+  logger.info('[ServiceContainer] Production services initialized', {
+    serviceCount: Object.keys(_registry).length,
+  });
   return getServices();
 }
 
@@ -75,6 +104,9 @@ export function getServices(): ServiceRegistry {
 export function overrideServices(overrides: Partial<ServiceRegistry>): void {
   _registry = { ..._registry, ...overrides };
   _initialized = true;
+  logger.debug('[ServiceContainer] Overriding services in container', {
+    overriddenKeys: Object.keys(overrides),
+  });
 }
 
 /**
@@ -83,6 +115,7 @@ export function overrideServices(overrides: Partial<ServiceRegistry>): void {
 export function resetServices(): void {
   _registry = {};
   _initialized = false;
+  logger.debug('[ServiceContainer] Services reset to uninitialized state');
 }
 
 /**
@@ -98,14 +131,24 @@ export function getService<K extends keyof ServiceRegistry>(service: K): Service
  * Useful for advanced scenarios or isolated service instances
  */
 export function createServiceContainer(customRegistry: Partial<ServiceRegistry>): ServiceRegistry {
+  const db = customRegistry.database ?? (() => {
+    const config = getConfig();
+    return createDatabaseAdapter({
+      supabaseUrl: config.required.supabaseUrl,
+      supabaseKey: config.required.supabaseAnonKey,
+    });
+  })();
+
   return {
-    database: customRegistry.database ?? (() => {
-      const config = getConfig();
-      return createDatabaseAdapter({
-        supabaseUrl: config.required.supabaseUrl,
-        supabaseKey: config.required.supabaseAnonKey,
-      });
-    })(),
-    ...customRegistry,
-  } as ServiceRegistry;
+    database: db,
+    jobs: customRegistry.jobs ?? new JobService(db),
+    applications: customRegistry.applications ?? new ApplicationService(db),
+    candidates: customRegistry.candidates ?? new CandidateService(db),
+    courses: customRegistry.courses ?? new CourseService(db),
+    challenges: customRegistry.challenges ?? new ChallengeService(db),
+    messages: customRegistry.messages ?? new MessageService(db),
+    notifications: customRegistry.notifications ?? new NotificationService(db),
+    leaderboard: customRegistry.leaderboard ?? new LeaderboardService(db),
+    network: customRegistry.network ?? new NetworkService(db),
+  };
 }

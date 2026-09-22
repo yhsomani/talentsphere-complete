@@ -1,4 +1,14 @@
-import { createBrowserClient } from '@/lib/supabase';
+/**
+ * Leaderboard Service - Data access layer for global XP rankings
+ * 
+ * Refactored to use DatabaseAdapter for loose coupling, resilience,
+ * and testability via Dependency Injection.
+ */
+
+import type { DatabaseAdapter } from '../lib/database/adapter';
+import { createDatabaseAdapter } from '../lib/database/adapter';
+import { AppConfig } from '../config/index';
+import { isAppError } from '../lib/errors/index';
 
 export interface LeaderboardRankItem {
   rank: number;
@@ -13,9 +23,9 @@ export interface LeaderboardRankItem {
   isCurrentUser?: boolean;
 }
 
-const supabase = createBrowserClient();
+export class LeaderboardService {
+  constructor(private readonly db: DatabaseAdapter) {}
 
-export const leaderboardService = {
   /**
    * Fetch leaderboard rankings for a period
    */
@@ -26,7 +36,7 @@ export const leaderboardService = {
     try {
       // Query user_levels joined with users, ordered by total_xp_earned desc
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (this.db as any)
         .from('user_levels')
         .select(`
           user_id,
@@ -118,12 +128,21 @@ export const leaderboardService = {
           level: item.current_level || 1,
           xpPoints: item.total_xp_earned || 0,
           badgesCount: Math.floor((item.total_xp_earned || 0) / 300),
+          avatarUrl: u?.avatar_url || undefined,
           isCurrentUser: currentUserId === item.user_id,
         };
       });
     } catch (err) {
+      if (isAppError(err)) throw err;
       console.error('Error fetching leaderboard:', err);
       return [];
     }
-  },
-};
+  }
+}
+
+// Export singleton instance for backward compatibility
+const defaultAdapter = createDatabaseAdapter({
+  supabaseUrl: AppConfig.supabase.url,
+  supabaseKey: AppConfig.supabase.anonKey,
+});
+export const leaderboardService = new LeaderboardService(defaultAdapter);

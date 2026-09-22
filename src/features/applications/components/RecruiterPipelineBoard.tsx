@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { applicationService, type ApplicationRecord, type ScorecardRecord } from '@/services/application.service';
+import { applicationService, type ApplicationRecord, type ScorecardRecord, type OfferDetails } from '@/services/application.service';
 import { createBrowserClient } from '@/lib/supabase';
 import { Button, Avatar, Badge } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -25,7 +25,11 @@ import {
   History,
   Award,
   Plus,
-  CheckCircle
+  CheckCircle,
+  Mail,
+  HeartHandshake,
+  DollarSign,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface RecruiterPipelineBoardProps {
@@ -60,6 +64,57 @@ const PIPELINE_STAGES: StageDefinition[] = [
   { key: 'interviewed', label: 'Interviewed', badgeVariant: 'secondary', color: 'text-fuchsia-600', bgLight: 'bg-fuchsia-50/70 border-fuchsia-200/80' },
   { key: 'offer_extended', label: 'Offer & Hired', badgeVariant: 'success', color: 'text-emerald-600', bgLight: 'bg-emerald-50/70 border-emerald-200/80' },
   { key: 'rejected', label: 'Not Selected', badgeVariant: 'danger', color: 'text-rose-600', bgLight: 'bg-rose-50/70 border-rose-200/80' },
+];
+
+export interface RejectionTemplate {
+  key: string;
+  name: string;
+  badge: string;
+  description: string;
+  getBody: (candidateName: string, roleTitle: string) => string;
+}
+
+export const REJECTION_TEMPLATES: RejectionTemplate[] = [
+  {
+    key: 'standard',
+    name: 'Kind & Respectful Standard',
+    badge: 'Recommended',
+    description: 'Empathetic recognition of candidate effort and qualifications.',
+    getBody: (name, role) =>
+      `Dear ${name || 'Candidate'},\n\nThank you so much for taking the time to apply and interview for the ${role || 'open position'} with our team. We truly enjoyed learning more about your background and accomplishments.\n\nAfter careful evaluation alongside our current business needs, we have decided to move forward with another applicant whose profile more closely aligns with this specific opening. We were genuinely impressed with your experience and enthusiasm, and we wish you every success in your ongoing search.\n\nWarm regards,\nThe Hiring Team`,
+  },
+  {
+    key: 'skills_alignment',
+    name: 'Competency & Skill Depth Gap',
+    badge: 'Constructive',
+    description: 'Constructive explanation focusing on role-specific requirements.',
+    getBody: (name, role) =>
+      `Dear ${name || 'Candidate'},\n\nThank you for exploring opportunities with us for the ${role || 'position'}. We deeply appreciate the time you invested in discussing your experience with us.\n\nWhile your skills and dedication are evident, our team is currently prioritizing candidates who possess specialized hands-on experience in certain key domains required immediately for this role. We will keep your profile on file as new openings that better match your technical strengths develop.\n\nSincerely,\nThe Hiring Team`,
+  },
+  {
+    key: 'high_volume',
+    name: 'High Volume & Competitive Pool',
+    badge: 'Competitive',
+    description: 'Gracefully acknowledges a competitive applicant pool.',
+    getBody: (name, role) =>
+      `Dear ${name || 'Candidate'},\n\nThank you for your interest in joining our team as a ${role || 'team member'}. We received an exceptionally high volume of applications from talented professionals for this role.\n\nBecause of the competitive nature of this search, we had to make some difficult choices and are unable to advance your candidacy further at this time. We are grateful for your interest in our company and welcome you to apply for future requisitions.\n\nBest regards,\nThe Talent Acquisition Team`,
+  },
+  {
+    key: 'future_talent_pool',
+    name: 'Future Talent Network & Keep in Touch',
+    badge: 'Relationship',
+    description: 'Keeps candidate warm for future requisition openings.',
+    getBody: (name, role) =>
+      `Dear ${name || 'Candidate'},\n\nThank you for your application for the ${role || 'role'}. Although we have selected another candidate for this immediate position, our hiring team was very impressed by your perspective and experience.\n\nWith your permission, we would love to keep your profile active in our priority talent network so that our recruiters can reach out directly when matching roles become available.\n\nBest regards,\nThe Hiring Team`,
+  },
+  {
+    key: 'custom',
+    name: 'Custom Personalized Feedback',
+    badge: 'Custom',
+    description: 'Write a bespoke personalized response for the candidate.',
+    getBody: (name, role) =>
+      `Dear ${name || 'Candidate'},\n\nThank you for taking the time to interview for the ${role || 'position'} with our team.\n\n[Add personalized feedback here]\n\nBest regards,\nThe Hiring Team`,
+  },
 ];
 
 export default function RecruiterPipelineBoard({
@@ -100,6 +155,123 @@ export default function RecruiterPipelineBoard({
   const [scorecardWeaknesses, setScorecardWeaknesses] = useState('');
   const [scorecardWouldRehire, setScorecardWouldRehire] = useState(true);
   const [isSavingScorecard, setIsSavingScorecard] = useState(false);
+
+  // Rejection modal state (APPL-008)
+  const [rejectionModalApp, setRejectionModalApp] = useState<ApplicationRecord | null>(null);
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState<string>('standard');
+  const [rejectionNote, setRejectionNote] = useState<string>('');
+  const [sendCandidateNotification, setSendCandidateNotification] = useState<boolean>(true);
+  const [isSubmittingRejection, setIsSubmittingRejection] = useState<boolean>(false);
+
+  const handleOpenRejectionModal = (app: ApplicationRecord) => {
+    const candidateName = app.candidate_profiles?.users?.full_name || 'Candidate';
+    const role = jobTitle || 'Job Opening';
+    setRejectionModalApp(app);
+    setSelectedTemplateKey('standard');
+    const tmpl = REJECTION_TEMPLATES[0];
+    setRejectionNote(tmpl.getBody(candidateName, role));
+    setSendCandidateNotification(true);
+  };
+
+  const handleSelectTemplate = (templateKey: string) => {
+    setSelectedTemplateKey(templateKey);
+    const tmpl = REJECTION_TEMPLATES.find(t => t.key === templateKey);
+    if (tmpl && rejectionModalApp) {
+      const candidateName = rejectionModalApp.candidate_profiles?.users?.full_name || 'Candidate';
+      const role = jobTitle || 'Job Opening';
+      setRejectionNote(tmpl.getBody(candidateName, role));
+    }
+  };
+
+  const handleConfirmRejection = async () => {
+    if (!rejectionModalApp) return;
+    setIsSubmittingRejection(true);
+    try {
+      const noteToSend = sendCandidateNotification ? rejectionNote.trim() : 'Candidate not selected (notification suppressed)';
+      await handleStageChange(rejectionModalApp.id, 'rejected', noteToSend);
+      setRejectionModalApp(null);
+    } catch (err) {
+      console.error('Failed to reject candidate:', err);
+    } finally {
+      setIsSubmittingRejection(false);
+    }
+  };
+
+  // Offer modal state & handlers (APPL-015)
+  const [offerModalApp, setOfferModalApp] = useState<ApplicationRecord | null>(null);
+  const [offerSalary, setOfferSalary] = useState<number | ''>(125000);
+  const [offerCurrency, setOfferCurrency] = useState('USD');
+  const [offerPeriod, setOfferPeriod] = useState<'yearly' | 'monthly' | 'hourly'>('yearly');
+  const [offerStartDate, setOfferStartDate] = useState('');
+  const [offerExpirationDate, setOfferExpirationDate] = useState('');
+  const [offerBonusEquity, setOfferBonusEquity] = useState('');
+  const [offerLetterUrl, setOfferLetterUrl] = useState('');
+  const [offerNotes, setOfferNotes] = useState('');
+  const [isRecordingOffer, setIsRecordingOffer] = useState(false);
+
+  const handleOpenOfferModal = (app: ApplicationRecord) => {
+    setOfferModalApp(app);
+    if (app.jobs?.salary_max || app.jobs?.salary_min) {
+      setOfferSalary(app.jobs.salary_max || app.jobs.salary_min || 125000);
+    } else {
+      setOfferSalary(125000);
+    }
+    setOfferCurrency(app.jobs?.salary_currency || 'USD');
+    setOfferPeriod((app.jobs?.salary_period as any) || 'yearly');
+    setOfferStartDate('');
+    setOfferExpirationDate('');
+    setOfferBonusEquity('');
+    setOfferLetterUrl('');
+    setOfferNotes('');
+  };
+
+  const handleConfirmOffer = async () => {
+    if (!offerModalApp || !offerSalary) return;
+    setIsRecordingOffer(true);
+    try {
+      const offerData: OfferDetails = {
+        salary: Number(offerSalary),
+        currency: offerCurrency,
+        period: offerPeriod,
+        startDate: offerStartDate || undefined,
+        expirationDate: offerExpirationDate || undefined,
+        bonusOrEquity: offerBonusEquity.trim() || undefined,
+        offerLetterUrl: offerLetterUrl.trim() || undefined,
+        notes: offerNotes.trim() || undefined,
+      };
+
+      await applicationService.recordOffer(offerModalApp.id, offerData);
+
+      // Update local state optimistically
+      setApplications(prev =>
+        prev.map(app =>
+          app.id === offerModalApp.id
+            ? { ...app, status: 'offer_extended', updated_at: new Date().toISOString() }
+            : app
+        )
+      );
+
+      if (selectedApp && selectedApp.id === offerModalApp.id) {
+        setSelectedApp(prev => (prev ? { ...prev, status: 'offer_extended' } : null));
+        setActivityLogs(prev => [
+          {
+            id: 'temp-' + Date.now(),
+            action: 'offer_extended',
+            created_at: new Date().toISOString(),
+            new_value: { status: 'offer_extended', offer: offerData },
+          },
+          ...prev,
+        ]);
+      }
+
+      setOfferModalApp(null);
+    } catch (err) {
+      console.error('Failed to record offer:', err);
+      alert('Failed to record offer. Please check database permissions.');
+    } finally {
+      setIsRecordingOffer(false);
+    }
+  };
 
   // Sync state if initialApplications updates
   React.useEffect(() => {
@@ -171,6 +343,14 @@ export default function RecruiterPipelineBoard({
 
   // Stage change handler
   const handleStageChange = async (applicationId: string, newStatus: PipelineStageKey, note?: string) => {
+    if (newStatus === 'offer_extended' && !note) {
+      const app = applications.find(a => a.id === applicationId);
+      if (app) {
+        handleOpenOfferModal(app);
+        return;
+      }
+    }
+
     setIsUpdating(true);
     try {
       await applicationService.updateApplicationStatus(applicationId, newStatus, null, note);
@@ -457,21 +637,49 @@ export default function RecruiterPipelineBoard({
                             </span>
                           </div>
 
+                          {/* Offer Extended Banner (APPL-015) */}
+                          {app.status === 'offer_extended' && (
+                            <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-[11px] text-emerald-800 flex items-center justify-between">
+                              <span className="font-semibold flex items-center gap-1">
+                                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Offer Extended</span>
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenOfferModal(app)}
+                                className="text-emerald-700 hover:text-emerald-900 font-bold hover:underline"
+                              >
+                                Edit Offer
+                              </button>
+                            </div>
+                          )}
+
                           {/* Action Buttons */}
                           <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
-                            <button
-                              onClick={() => handleOpenEvaluation(app)}
-                              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1 py-1"
-                            >
-                              <span>Evaluate</span>
-                              <ChevronRight className="w-3 h-3" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleOpenEvaluation(app)}
+                                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline inline-flex items-center gap-1 py-1"
+                              >
+                                <span>Evaluate</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                              {app.candidate_profiles?.users?.id && (
+                                <Link
+                                  href={`/messages?recipientId=${encodeURIComponent(app.candidate_profiles.users.id)}&jobTitle=${encodeURIComponent(jobTitle || '')}`}
+                                  title="Message Candidate"
+                                  className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors inline-flex items-center"
+                                >
+                                  <MessageSquare className="w-3.5 h-3.5" />
+                                </Link>
+                              )}
+                            </div>
 
                             <div className="flex items-center gap-1">
                               {stage.key !== 'rejected' && (
                                 <button
-                                  onClick={() => handleStageChange(app.id, 'rejected', 'Candidate rejected from review')}
-                                  title="Reject Candidate"
+                                  onClick={() => handleOpenRejectionModal(app)}
+                                  title="Reject Candidate with Kind Notification"
                                   className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                                 >
                                   <XCircle className="w-4 h-4" />
@@ -571,7 +779,15 @@ export default function RecruiterPipelineBoard({
                         <div className="flex items-center justify-end gap-2">
                           <select
                             value={app.status}
-                            onChange={e => handleStageChange(app.id, e.target.value as PipelineStageKey)}
+                            onChange={e => {
+                              if (e.target.value === 'rejected') {
+                                handleOpenRejectionModal(app);
+                              } else if (e.target.value === 'offer_extended') {
+                                handleOpenOfferModal(app);
+                              } else {
+                                handleStageChange(app.id, e.target.value as PipelineStageKey);
+                              }
+                            }}
                             disabled={isUpdating}
                             className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium text-slate-700"
                           >
@@ -581,6 +797,16 @@ export default function RecruiterPipelineBoard({
                               </option>
                             ))}
                           </select>
+
+                          {app.candidate_profiles?.users?.id && (
+                            <Link
+                              href={`/messages?recipientId=${encodeURIComponent(app.candidate_profiles.users.id)}&jobTitle=${encodeURIComponent(jobTitle || '')}`}
+                              title="Message Candidate"
+                              className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors inline-flex items-center"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
 
                           <Button
                             variant="primary"
@@ -629,12 +855,24 @@ export default function RecruiterPipelineBoard({
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedApp(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                {selectedApp.candidate_profiles?.users?.id && (
+                  <Link
+                    href={`/messages?recipientId=${encodeURIComponent(selectedApp.candidate_profiles.users.id)}&jobTitle=${encodeURIComponent(jobTitle || '')}&initialMessage=${encodeURIComponent(`Hi ${selectedApp.candidate_profiles.users.full_name || 'there'}, regarding your application for ${jobTitle || 'this role'}...`)}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 shadow-2xs transition-colors"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Message Candidate</span>
+                  </Link>
+                )}
+
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Tabs */}
@@ -753,7 +991,13 @@ export default function RecruiterPipelineBoard({
                     return (
                       <button
                         key={st.key}
-                        onClick={() => handleStageChange(selectedApp.id, st.key, reviewerNote)}
+                        onClick={() => {
+                          if (st.key === 'rejected') {
+                            handleOpenRejectionModal(selectedApp);
+                          } else {
+                            handleStageChange(selectedApp.id, st.key, reviewerNote);
+                          }
+                        }}
                         disabled={isCurrent || isUpdating}
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                           isCurrent
@@ -1178,6 +1422,351 @@ export default function RecruiterPipelineBoard({
               >
                 Close Evaluation
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Candidate Rejection with Kind Notification Modal (APPL-008) */}
+      {rejectionModalApp && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-start justify-between bg-slate-50/70">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
+                  <HeartHandshake className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900">
+                      Respectful Candidate Rejection
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-100 text-rose-700">
+                      Kind Communication
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    For <span className="font-semibold text-slate-700">{rejectionModalApp.candidate_profiles?.users?.full_name || 'Candidate'}</span> • {jobTitle || 'Job Requisition'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setRejectionModalApp(null)}
+                disabled={isSubmittingRejection}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
+              {/* Template Selector */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Select Kind Communication Template
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {REJECTION_TEMPLATES.map(tmpl => {
+                    const isSelected = selectedTemplateKey === tmpl.key;
+                    return (
+                      <button
+                        key={tmpl.key}
+                        type="button"
+                        onClick={() => handleSelectTemplate(tmpl.key)}
+                        className={`text-left p-3 rounded-xl border text-xs transition-all ${
+                          isSelected
+                            ? 'bg-rose-50/50 border-rose-300 ring-1 ring-rose-400/40 shadow-2xs'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="font-semibold text-slate-800">{tmpl.name}</span>
+                          <span
+                            className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                              isSelected
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {tmpl.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 line-clamp-2">
+                          {tmpl.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Editable Notification / Feedback Text */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Notification & Feedback Message</span>
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    {rejectionNote.length} characters
+                  </span>
+                </div>
+                <textarea
+                  rows={8}
+                  value={rejectionNote}
+                  onChange={e => setRejectionNote(e.target.value)}
+                  placeholder="Enter personalized feedback or edit the respectful template above..."
+                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 focus:bg-white transition-all font-sans leading-relaxed resize-y"
+                />
+              </div>
+
+              {/* Automated In-App & Email Dispatch Checkbox */}
+              <div className="p-3 bg-amber-50/50 border border-amber-200/70 rounded-xl flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="send_notification_check"
+                  checked={sendCandidateNotification}
+                  onChange={e => setSendCandidateNotification(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                />
+                <label htmlFor="send_notification_check" className="text-xs text-slate-700 cursor-pointer">
+                  <span className="font-semibold text-slate-900 block">
+                    Deliver in-app lifecycle notification with constructive note
+                  </span>
+                  <span className="text-slate-500 text-[11px]">
+                    The candidate will immediately receive a constructive, supportive notification in their portal inbox and notification feed.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRejectionModalApp(null)}
+                disabled={isSubmittingRejection}
+              >
+                Cancel
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleConfirmRejection}
+                disabled={isSubmittingRejection}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSubmittingRejection ? (
+                  <>
+                    <LoadingSpinner size="sm" />
+                    <span>Processing Rejection...</span>
+                  </>
+                ) : (
+                  <>
+                    <HeartHandshake className="w-3.5 h-3.5" />
+                    <span>Confirm & Send Kind Rejection</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Formal Job Offer & Compensation Modal (APPL-015) */}
+      {offerModalApp && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-start justify-between bg-emerald-50/70">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900">
+                      Extend Formal Job Offer
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800">
+                      Offer Stage
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Candidate: <strong>{offerModalApp.candidate_profiles?.users?.full_name || 'Candidate'}</strong> • Role: <strong>{jobTitle || 'Open Position'}</strong>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setOfferModalApp(null)}
+                disabled={isRecordingOffer}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Base Salary / Compensation Amount
+                  </label>
+                  <input
+                    type="number"
+                    value={offerSalary}
+                    onChange={e => setOfferSalary(e.target.value ? Number(e.target.value) : '')}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    placeholder="e.g. 135000"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Currency
+                  </label>
+                  <select
+                    value={offerCurrency}
+                    onChange={e => setOfferCurrency(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="CAD">CAD ($)</option>
+                    <option value="AUD">AUD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Pay Period
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { key: 'yearly', label: 'Annual (per year)' },
+                    { key: 'monthly', label: 'Monthly' },
+                    { key: 'hourly', label: 'Hourly' },
+                  ].map(p => (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => setOfferPeriod(p.key as any)}
+                      className={`py-2 px-2.5 rounded-xl border text-center transition-all ${
+                        offerPeriod === p.key
+                          ? 'bg-emerald-600 text-white font-bold border-transparent shadow-xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Target Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={offerStartDate}
+                    onChange={e => setOfferStartDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Offer Expiration / Decision Deadline
+                  </label>
+                  <input
+                    type="date"
+                    value={offerExpirationDate}
+                    onChange={e => setOfferExpirationDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Bonus, Equity & Benefits Summary
+                </label>
+                <input
+                  type="text"
+                  value={offerBonusEquity}
+                  onChange={e => setOfferBonusEquity(e.target.value)}
+                  placeholder="e.g. $15,000 sign-on bonus, 0.25% stock options, health coverage"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Offer Letter PDF / Document URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={offerLetterUrl}
+                  onChange={e => setOfferLetterUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Internal Notes & Hiring Team Alignment
+                </label>
+                <textarea
+                  rows={2}
+                  value={offerNotes}
+                  onChange={e => setOfferNotes(e.target.value)}
+                  placeholder="Internal notes (e.g. Approved by Head of Engineering)..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOfferModalApp(null)}
+                disabled={isRecordingOffer}
+              >
+                Cancel
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleConfirmOffer}
+                disabled={isRecordingOffer || !offerSalary}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isRecordingOffer ? (
+                  <>
+                    <LoadingSpinner size="sm" />
+                    <span>Recording Offer...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Confirm & Extend Offer</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

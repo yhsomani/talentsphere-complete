@@ -2,7 +2,7 @@
  * Unit tests for Database Adapter
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '../../testing/expect';
 import {
   MockDatabaseAdapter,
   type QueryResult,

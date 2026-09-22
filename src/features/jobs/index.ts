@@ -11,7 +11,7 @@ export { jobService } from '@/services/jobs.service';
 
 // Components
 export { default as JobFilters } from './components/JobFilters';
-export { default as JobList } from './components/JobList';
+export { default as JobList, JobCard } from './components/JobList';
 export { default as JobCardSkeleton } from './components/JobCardSkeleton';
 
 // Types

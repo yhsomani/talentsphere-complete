@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { applicationService, type ApplicationRecord } from '@/services/application.service';
 import { candidateService } from '@/services/candidate.service';
+import { jobsService } from '@/services/jobs.service';
 import { createBrowserClient } from '@/lib/supabase';
 import { Button, Avatar, Badge, EmptyState } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -17,7 +18,10 @@ import {
   TrendingUp,
   Users,
   ChevronRight,
-  PlusCircle
+  PlusCircle,
+  Copy,
+  X,
+  CheckCircle,
 } from 'lucide-react';
 
 interface RecruiterOverviewData {
@@ -42,6 +46,85 @@ export default function ApplicationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filterTab, setFilterTab] = useState<'all' | 'active' | 'interviews' | 'archived'>('all');
   const [candidateProfileId, setCandidateProfileId] = useState<string | null>(null);
+  const [withdrawTargetApp, setWithdrawTargetApp] = useState<ApplicationRecord | null>(null);
+  const [withdrawReason, setWithdrawReason] = useState('Accepted another offer');
+  const [customReason, setCustomReason] = useState('');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [updatingJobId, setUpdatingJobId] = useState<string | null>(null);
+
+  const handleJobStatusChange = async (jobId: string, newStatus: string) => {
+    try {
+      setUpdatingJobId(jobId);
+      await jobsService.updateJobStatus(jobId, newStatus as any);
+      setRecruiterData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          jobs: prev.jobs.map(j => (j.id === jobId ? { ...j, status: newStatus } : j)),
+        };
+      });
+    } catch (err) {
+      console.error('Failed to update job status:', err);
+      alert('Failed to update job requisition status.');
+    } finally {
+      setUpdatingJobId(null);
+    }
+  };
+
+  // Requisition Fast Cloning State & Handlers (JOB-016)
+  const [cloneModalJob, setCloneModalJob] = useState<RecruiterOverviewData['jobs'][0] | null>(null);
+  const [cloneTitle, setCloneTitle] = useState('');
+  const [isCloning, setIsCloning] = useState(false);
+  const [cloneSuccessMsg, setCloneSuccessMsg] = useState<string | null>(null);
+
+  const handleOpenCloneModal = (job: RecruiterOverviewData['jobs'][0]) => {
+    setCloneModalJob(job);
+    setCloneTitle(`${job.title} (Copy)`);
+    setCloneSuccessMsg(null);
+  };
+
+  const handleConfirmClone = async () => {
+    if (!cloneModalJob) return;
+    try {
+      setIsCloning(true);
+      const supabase = createBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const newTitle = cloneTitle.trim() || `${cloneModalJob.title} (Copy)`;
+      const cloned = await jobsService.cloneJob(cloneModalJob.id, user.id, {
+        newTitle,
+        status: 'draft',
+      });
+
+      setRecruiterData(prev => {
+        if (!prev) return prev;
+        const newJobItem = {
+          id: cloned.id,
+          title: cloned.title,
+          department: cloned.department || null,
+          location_city: cloned.location_city || null,
+          work_mode: cloned.work_mode,
+          status: 'draft',
+          created_at: new Date().toISOString(),
+          application_count: 0,
+        };
+        return {
+          ...prev,
+          jobs: [newJobItem, ...prev.jobs],
+        };
+      });
+
+      setCloneSuccessMsg(`Requisition successfully cloned as draft: "${newTitle}"`);
+      setCloneModalJob(null);
+      setTimeout(() => setCloneSuccessMsg(null), 6000);
+    } catch (err) {
+      console.error('Failed to clone requisition:', err);
+      alert('Failed to clone job requisition. Please try again.');
+    } finally {
+      setIsCloning(false);
+    }
+  };
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -98,19 +181,22 @@ export default function ApplicationsPage() {
     fetchApplications();
   }, []);
 
-  const handleWithdraw = async (applicationId: string) => {
-    if (!candidateProfileId) return;
-    const confirmWithdraw = window.confirm('Are you sure you want to withdraw this application? This action cannot be undone.');
-    if (!confirmWithdraw) return;
+  const handleWithdrawConfirm = async () => {
+    if (!candidateProfileId || !withdrawTargetApp) return;
 
     try {
-      await applicationService.withdrawApplication(applicationId, candidateProfileId);
+      setIsWithdrawing(true);
+      const finalReason = withdrawReason === 'Other' ? customReason.trim() || 'Other' : withdrawReason;
+      await applicationService.withdrawApplication(withdrawTargetApp.id, candidateProfileId, finalReason);
       setApplications(prev =>
-        prev.map(app => (app.id === applicationId ? { ...app, status: 'withdrawn' } : app))
+        prev.map(app => (app.id === withdrawTargetApp.id ? { ...app, status: 'withdrawn' } : app))
       );
+      setWithdrawTargetApp(null);
     } catch (err) {
       console.error('Failed to withdraw application:', err);
       alert('Failed to withdraw application. Please try again.');
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -230,6 +316,19 @@ export default function ApplicationsPage() {
             </div>
           </div>
 
+          {/* Clone Success Alert */}
+          {cloneSuccessMsg && (
+            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center justify-between text-sm animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>{cloneSuccessMsg}</span>
+              </div>
+              <button onClick={() => setCloneSuccessMsg(null)} className="text-emerald-600 hover:text-emerald-800">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Requisitions Pipeline Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -259,13 +358,29 @@ export default function ApplicationsPage() {
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                          job.status === 'active'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200'
-                        }`}>
-                          {job.status}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={job.status}
+                            disabled={updatingJobId === job.id}
+                            onChange={(e) => handleJobStatusChange(job.id, e.target.value)}
+                            className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border cursor-pointer focus:outline-none focus:ring-1 transition-all ${
+                              job.status === 'active'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 focus:ring-emerald-400'
+                                : job.status === 'paused'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-400'
+                                : job.status === 'filled'
+                                ? 'bg-indigo-50 text-indigo-700 border-indigo-200 focus:ring-indigo-400'
+                                : 'bg-slate-100 text-slate-700 border-slate-200 focus:ring-slate-400'
+                            }`}
+                          >
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="closed">Closed</option>
+                            <option value="filled">Filled</option>
+                            <option value="draft">Draft</option>
+                          </select>
+                          {updatingJobId === job.id && <LoadingSpinner size="sm" />}
+                        </div>
 
                         <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full flex items-center gap-1">
                           <Users className="w-3 h-3" />
@@ -290,12 +405,23 @@ export default function ApplicationsPage() {
                     </div>
 
                     <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                      <Link
-                        href={`/jobs/${job.id}`}
-                        className="text-xs font-medium text-slate-500 hover:text-slate-800"
-                      >
-                        View Details
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/jobs/${job.id}`}
+                          className="text-xs font-medium text-slate-500 hover:text-slate-800"
+                        >
+                          View Details
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCloneModal(job)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
+                          title="Duplicate requisition as draft (JOB-016)"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Clone</span>
+                        </button>
+                      </div>
 
                       <Link href={`/jobs/${job.id}/applications`}>
                         <Button variant="primary" size="sm" className="gap-1 text-xs">
@@ -374,6 +500,73 @@ export default function ApplicationsPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Clone Requisition Modal (JOB-016) */}
+          {cloneModalJob && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+              <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                      <Copy className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold text-slate-900">Clone Requisition</h4>
+                      <p className="text-xs text-slate-500">Duplicate opening as a new draft</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setCloneModalJob(null)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    This will duplicate all job requirements, responsibilities, compensation settings, and required skills from{' '}
+                    <strong>{cloneModalJob.title}</strong> into a new draft requisition ready for review.
+                  </p>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      New Requisition Title
+                    </label>
+                    <input
+                      type="text"
+                      value={cloneTitle}
+                      onChange={(e) => setCloneTitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="e.g. Senior Frontend Engineer (Copy)"
+                    />
+                  </div>
+
+                  <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCloneModalJob(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      isLoading={isCloning}
+                      onClick={handleConfirmClone}
+                      className="gap-1.5"
+                    >
+                      <Copy className="w-4 h-4" />
+                      <span>Create Cloned Requisition</span>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -561,12 +754,12 @@ export default function ApplicationsPage() {
                         </Button>
                       </Link>
 
-                      {['submitted', 'screening'].includes(app.status) && (
+                      {['submitted', 'screening', 'under_review'].includes(app.status) && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleWithdraw(app.id)}
-                          className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                          onClick={() => setWithdrawTargetApp(app)}
+                          className="text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 cursor-pointer"
                         >
                           Withdraw
                         </Button>
@@ -579,6 +772,76 @@ export default function ApplicationsPage() {
           </div>
         )}
       </div>
+
+      {/* Withdraw Confirmation Modal with Reason */}
+      {withdrawTargetApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4 text-rose-600">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Withdraw Application?</h3>
+            <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+              Are you sure you want to withdraw your application for{' '}
+              <span className="font-semibold text-slate-900">{withdrawTargetApp.jobs?.title || 'this role'}</span> at{' '}
+              <span className="font-semibold text-slate-900">{withdrawTargetApp.jobs?.organizations?.name || 'this company'}</span>?
+              This action cannot be undone.
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Reason for withdrawal (optional)
+                </label>
+                <select
+                  value={withdrawReason}
+                  onChange={(e) => setWithdrawReason(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 cursor-pointer"
+                >
+                  <option value="Accepted another offer">Accepted another offer</option>
+                  <option value="Salary or compensation not aligned">Salary or compensation not aligned</option>
+                  <option value="Location or remote flexibility mismatch">Location or remote flexibility mismatch</option>
+                  <option value="Role scope no longer matches career goals">Role scope no longer matches career goals</option>
+                  <option value="Personal reasons">Personal reasons</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {withdrawReason === 'Other' && (
+                <div>
+                  <textarea
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    placeholder="Briefly describe why you are withdrawing..."
+                    rows={2}
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 resize-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isWithdrawing}
+                onClick={() => setWithdrawTargetApp(null)}
+              >
+                Keep Application
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={isWithdrawing}
+                onClick={handleWithdrawConfirm}
+                className="gap-1.5"
+              >
+                {isWithdrawing ? 'Withdrawing...' : 'Confirm Withdrawal'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

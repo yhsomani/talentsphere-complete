@@ -2,7 +2,7 @@
  * Unit tests for Error Classification System
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '../../testing/expect';
 import {
   AppError,
   AppErrors,

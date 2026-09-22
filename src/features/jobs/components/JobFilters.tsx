@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { JobFilters as JobFiltersType, JobType, WorkLocation, ExperienceLevel } from '@/types';
+import type { JobFilters as JobFiltersType, JobType, WorkLocation, ExperienceLevel, JobFacets } from '@/types';
 import { 
   RotateCcw, 
   Search, 
@@ -15,9 +15,10 @@ interface JobFiltersProps {
   filters: JobFiltersType;
   onChange: (filters: Partial<JobFiltersType>) => void;
   onReset: () => void;
+  facets?: JobFacets | null;
 }
 
-export default function JobFilters({ filters, onChange, onReset }: JobFiltersProps) {
+export default function JobFilters({ filters, onChange, onReset, facets }: JobFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const activeFilterCount = Object.values(filters).filter(v => v !== undefined && v !== '').length;
@@ -77,14 +78,26 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
               onChange={(e) => onChange({ location: e.target.value || undefined })}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all appearance-none cursor-pointer"
             >
-              <option value="">Any Location (Worldwide)</option>
-              <option value="Remote">Remote Only</option>
-              <option value="San Francisco, CA">San Francisco, CA</option>
-              <option value="New York, NY">New York, NY</option>
-              <option value="Seattle, WA">Seattle, WA</option>
-              <option value="Austin, TX">Austin, TX</option>
-              <option value="Boston, MA">Boston, MA</option>
-              <option value="London, UK">London, UK</option>
+              <option value="">
+                Any Location {facets?.totalMatches !== undefined ? `(${facets.totalMatches})` : '(Worldwide)'}
+              </option>
+              {facets?.locations && facets.locations.length > 0 ? (
+                facets.locations.map((loc) => (
+                  <option key={loc.name} value={loc.name}>
+                    {loc.name} ({loc.count})
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="Remote">Remote Only</option>
+                  <option value="San Francisco, CA">San Francisco, CA</option>
+                  <option value="New York, NY">New York, NY</option>
+                  <option value="Seattle, WA">Seattle, WA</option>
+                  <option value="Austin, TX">Austin, TX</option>
+                  <option value="Boston, MA">Boston, MA</option>
+                  <option value="London, UK">London, UK</option>
+                </>
+              )}
             </select>
           </div>
         </div>
@@ -96,9 +109,9 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
           </label>
           <div className="grid grid-cols-3 gap-1.5">
             {[
-              { id: 'remote', label: 'Remote' },
-              { id: 'hybrid', label: 'Hybrid' },
-              { id: 'onsite', label: 'On-site' },
+              { id: 'remote', label: 'Remote', count: facets?.workLocation?.remote },
+              { id: 'hybrid', label: 'Hybrid', count: facets?.workLocation?.hybrid },
+              { id: 'onsite', label: 'On-site', count: facets?.workLocation?.onsite },
             ].map((mode) => {
               const isSelected = filters.workLocation === mode.id;
               return (
@@ -106,13 +119,22 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
                   key={mode.id}
                   type="button"
                   onClick={() => onChange({ workLocation: isSelected ? undefined : (mode.id as WorkLocation) })}
-                  className={`py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                  className={`py-1.5 px-2 text-xs font-semibold rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${
                     isSelected
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
                       : 'bg-slate-50 text-slate-600 border-slate-200/70 hover:bg-slate-100'
                   }`}
                 >
-                  {mode.label}
+                  <span>{mode.label}</span>
+                  {mode.count !== undefined && (
+                    <span
+                      className={`text-[9px] px-1 rounded-full font-bold ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {mode.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -138,20 +160,30 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
                   Job Type
                 </label>
                 <div className="space-y-1.5">
-                  {(['full_time', 'contract', 'part_time', 'internship'] as JobType[]).map((type) => (
-                    <label
-                      key={type}
-                      className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:text-slate-900"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={filters.jobType === type}
-                        onChange={(e) => onChange({ jobType: e.target.checked ? type : undefined })}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
-                      />
-                      <span>{formatJobType(type)}</span>
-                    </label>
-                  ))}
+                  {(['full_time', 'contract', 'part_time', 'internship'] as JobType[]).map((type) => {
+                    const count = facets?.jobType?.[type as keyof typeof facets.jobType];
+                    return (
+                      <label
+                        key={type}
+                        className="flex items-center justify-between text-xs text-slate-700 cursor-pointer hover:text-slate-900"
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={filters.jobType === type}
+                            onChange={(e) => onChange({ jobType: e.target.checked ? type : undefined })}
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
+                          />
+                          <span>{formatJobType(type)}</span>
+                        </div>
+                        {count !== undefined && (
+                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                            {count}
+                          </span>
+                        )}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -166,11 +198,21 @@ export default function JobFilters({ filters, onChange, onReset }: JobFiltersPro
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all cursor-pointer"
                 >
                   <option value="">All Experience Levels</option>
-                  <option value="entry">Entry Level (0-2 yrs)</option>
-                  <option value="mid">Mid Level (2-5 yrs)</option>
-                  <option value="senior">Senior Level (5+ yrs)</option>
-                  <option value="lead">Lead / Principal</option>
-                  <option value="executive">Executive</option>
+                  <option value="entry">
+                    Entry Level (0-2 yrs) {facets?.experienceLevel?.entry !== undefined ? `(${facets.experienceLevel.entry})` : ''}
+                  </option>
+                  <option value="mid">
+                    Mid Level (2-5 yrs) {facets?.experienceLevel?.mid !== undefined ? `(${facets.experienceLevel.mid})` : ''}
+                  </option>
+                  <option value="senior">
+                    Senior Level (5+ yrs) {facets?.experienceLevel?.senior !== undefined ? `(${facets.experienceLevel.senior})` : ''}
+                  </option>
+                  <option value="lead">
+                    Lead / Principal {facets?.experienceLevel?.lead !== undefined ? `(${facets.experienceLevel.lead})` : ''}
+                  </option>
+                  <option value="executive">
+                    Executive {facets?.experienceLevel?.executive !== undefined ? `(${facets.experienceLevel.executive})` : ''}
+                  </option>
                 </select>
               </div>
 

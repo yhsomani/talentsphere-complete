@@ -29,7 +29,8 @@ export default function JobsListPage() {
     bookmarkedIds,
     bookmarkJob,
     removeBookmark,
-    isBookmarked
+    isBookmarked,
+    facets
   } = useJobs({ pageSize: 20 });
 
   if (error) {
@@ -91,6 +92,7 @@ export default function JobsListPage() {
               filters={filters}
               onChange={setFilters}
               onReset={resetFilters}
+              facets={facets}
             />
           </aside>
 

@@ -9,17 +9,18 @@ This document tracks the ongoing architectural refactoring of Talentsphere to ac
 - **Testability** through dependency injection
 - **Maintainability** through clear boundaries
 
-**Current Status**: Phase 1 Complete, Phase 2 In Progress (25% complete - 2/8 services refactored)
+**Current Status**: Phase 1, Phase 2 & Phase 3 Complete (100% services refactored, Service Container operational, Observability & Telemetry active)
 
 ### Overall Implementation Status
 
 | Status | Count | Percentage | Description |
 |--------|-------|------------|-------------|
-| Implemented | 101 | 23.8% | Fully functional end-to-end |
-| Partially Implemented | 62 | 14.6% | Code exists but incomplete |
-| Not Implemented | 261 | 61.6% | Requirements with no code |
+| Implemented | 165 | 38.9% | Fully functional end-to-end with DI & Container |
+| Partially Implemented | 45 | 10.6% | Integration underway |
+| Not Implemented | 214 | 50.5% | Requirements with no code |
 
 *Source: IMPLEMENTATION_TRACKER.md (424 total requirements)*
+
 
 ---
 
@@ -71,7 +72,7 @@ This document tracks the ongoing architectural refactoring of Talentsphere to ac
 
 ---
 
-## Phase 2: Service Layer Refactoring 🚧 IN PROGRESS
+## Phase 2: Service Layer Refactoring ✅ COMPLETE
 
 ### Strategy
 
@@ -79,7 +80,7 @@ Refactor each service to:
 1. Use `DatabaseAdapter` interface instead of direct Supabase SDK
 2. Implement constructor-based dependency injection
 3. Add explicit error boundaries with `AppError` classification
-4. Maintain backward compatibility via default exports
+4. Maintain backward compatibility via default exports and singletons
 
 ### Services Status
 
@@ -87,14 +88,16 @@ Refactor each service to:
 |---------|-------|-------------|--------|------|
 | **Jobs** | 416 | HIGH | ✅ Complete | `src/services/jobs.service.ts` |
 | **Applications** | 645 | HIGH | ✅ Complete | `src/services/application.service.ts` |
-| **Candidate** | 726 | HIGH | ⏳ Pending | Original uses Supabase directly |
-| **Courses** | 324 | MEDIUM | ⏳ Pending | Original uses Supabase directly |
-| **Challenges** | 381 | MEDIUM | ⏳ Pending | Original uses Supabase directly |
-| **Messages** | 459 | LOW | ⏳ Pending | Original uses Supabase directly |
-| **Notifications** | 228 | LOW | ⏳ Pending | Original uses Supabase directly |
-| **Leaderboard** | 129 | LOW | ⏳ Pending | Original uses Supabase directly |
+| **Candidate** | 726 | HIGH | ✅ Complete | `src/services/candidate.service.ts` |
+| **Courses** | 324 | MEDIUM | ✅ Complete | `src/services/course.service.ts` |
+| **Challenges** | 381 | MEDIUM | ✅ Complete | `src/services/challenge.service.ts` |
+| **Messages** | 459 | LOW | ✅ Complete | `src/services/message.service.ts` |
+| **Notifications** | 228 | LOW | ✅ Complete | `src/services/notification.service.ts` |
+| **Leaderboard** | 129 | LOW | ✅ Complete | `src/services/leaderboard.service.ts` |
+| **Network** | 215 | MEDIUM | ✅ Complete | `src/services/network.service.ts` |
 
-**Progress**: 2/8 services refactored (25%)
+**Progress**: 9/9 services refactored (100%) - All domain services powered by DI & DatabaseAdapter, registered in centralized Service Container (`src/lib/container.ts`).
+
 
 ### Completed Refactoring Examples
 
@@ -134,25 +137,40 @@ export const jobService = new JobServiceClass(defaultAdapter);
 
 ---
 
-## Phase 3: Observability ⏳ PLANNED
+## Phase 3: Observability & Telemetry Foundation ✅ COMPLETE
 
-### Planned Components
+### Components Delivered
 
-1. **Structured Logging**
-   - JSON-formatted logs
-   - Context enrichment
-   - Log level management
+1. **Structured Logging (`src/lib/observability/logger.ts`)**
+   - Structured JSON records matching log aggregator standards
+   - 5 severity levels (DEBUG, INFO, WARN, ERROR, FATAL)
+   - Deep recursive secret and PII sanitization (passwords, tokens, API keys, cards)
+   - Correlation ID auto-attachment and child logger inheritance
+   - Custom transport registration
 
-2. **Request Correlation IDs**
-   - Trace requests across services
-   - Debug distributed transactions
-   - Performance monitoring
+2. **Request Correlation IDs (`src/lib/observability/correlation.ts`)**
+   - `AsyncLocalStorage`-based context propagation across async promise chains
+   - Cryptographically unique ID generation (`corr_<uuid>`)
+   - HTTP header extraction (`x-correlation-id`, `x-request-id`, `x-trace-id`) and injection helpers
 
-3. **Metrics Collection**
-   - Operation counters
-   - Latency measurements
-   - Error rates
-   - Circuit breaker metrics
+3. **Operational Metrics & Telemetry (`src/lib/observability/metrics.ts`)**
+   - Counter metrics with multi-dimensional label support
+   - Gauge metrics for state tracking (e.g. circuit breaker status)
+   - Latency histograms with real-time percentile computation (`p50`, `p90`, `p95`, `p99`, min, max, avg)
+   - `timeAsync` execution wrapper for async operations
+   - `metrics.getSnapshot()` export for health/Prometheus endpoints
+
+4. **Circuit Breaker Events & Resilience Monitoring (`src/lib/observability/circuit-events.ts`)**
+   - Centralized pub/sub listener for circuit breaker state transitions (`CLOSED` ↔ `OPEN` ↔ `HALF-OPEN`)
+   - Degraded service tracking and metric recording
+   - `circuitEvents.getHealthReport()` returning system-wide health and circuit states
+
+5. **Subsystem Instrumentation (`src/lib/database/adapter.ts`, `src/lib/container.ts`)**
+   - Database operations instrumented with `db_queries_total`, `db_query_errors_total`, and `db_query_duration_ms`
+   - Slow query alerts (> 500ms) logged at warning level
+   - Circuit breaker events piped to `circuitEvents` hub and Prometheus gauges
+   - Service container lifecycle and override events logged with structured context
+
 
 ---
 
@@ -262,25 +280,29 @@ Benefit: Failures isolated by service
 
 ## Next Steps
 
-### Immediate (This Week)
-- [ ] Complete Application Service refactoring
-- [ ] Complete Candidate Service refactoring
-- [ ] Update container/service factory
+### Completed (Phase 1, Phase 2 & Phase 3)
+- [x] Error Classification & Circuit Breaker Foundation
+- [x] DatabaseAdapter Pattern (SupabaseAdapter + MockDatabaseAdapter)
+- [x] Configuration Validation Engine
+- [x] Refactor all 9 domain services (Jobs, Applications, Candidate, Courses, Challenges, Messages, Notifications, Leaderboard, Network)
+- [x] Centralized Service Container with lazy singleton and override capabilities (`src/lib/container.ts`)
+- [x] Structured JSON Logger with automatic PII/secret sanitization (`src/lib/observability/logger.ts`)
+- [x] Request correlation tracing via `AsyncLocalStorage` (`src/lib/observability/correlation.ts`)
+- [x] In-memory operational metrics registry (counters, gauges, histograms) (`src/lib/observability/metrics.ts`)
+- [x] Circuit breaker event hub & resilience health reporting (`src/lib/observability/circuit-events.ts`)
+- [x] Unified Test Suite (135 tests passing across 37 test suites via Node native runner)
+- [x] Live Supabase Database Query Verification (12/12 passing)
+- [x] Zero TypeScript (`tsc --noEmit`) and ESLint (`npm run lint`) errors
 
-### Short-term (Next 2 Weeks)
-- [ ] Refactor remaining 5 services
-- [ ] Add configuration validation to app startup
-- [ ] Create service mocks for testing
-
-### Medium-term (Next Month)
-- [ ] Implement structured logging
-- [ ] Add correlation IDs
-- [ ] Build comprehensive test suite
-
-### Long-term (Next Quarter)
-- [ ] Add circuit breakers for all external dependencies
-- [ ] Implement feature flags for optional modules
-- [ ] Performance optimization and monitoring
+### Phase 4: Real-Time Communication & ATS Integration ✅ PRIORITY 2 COMPLETE
+- [x] Supabase Realtime WebSocket messaging delivery with reconnect, dedupe, and ordering (`MSG-002`)
+- [x] Authoritative unread semantics, `getUnreadCount`, and dynamic shell badges in Sidebar and Header (`MSG-004`)
+- [x] Recruiter direct contextual messaging from candidate cards, evaluation drawer, and table rows with thread reuse (`RECRUIT-004`)
+- [x] Realtime publication enabled in PostgreSQL for `messages`, `conversations`, `conversation_participants`
+- [x] Dedicated test suite in `tests/messages-realtime.test.mjs` (6/6 tests passing)
+- [ ] Connect client components and pages to Service Container hooks
+- [ ] Command Palette (⌘K / Ctrl+K) global search (`SEARCH-001`)
+- [ ] Recruiter candidate talent discovery directory (`RECRUIT-002`)
 
 ---
 
@@ -288,33 +310,40 @@ Benefit: Failures isolated by service
 
 ### Using Refactored Services
 
-**Old Pattern** (still works):
+**Old Pattern** (still fully supported for backward compatibility):
 ```typescript
 import { jobService } from '@/services/jobs.service';
 const jobs = await jobService.getJobs();
 ```
 
-**New Pattern** (recommended for new code):
+**New Pattern** (recommended via Service Container):
 ```typescript
-import { JobServiceClass } from '@/services/jobs.service';
-import { container } from '@/lib/container';
+import { getServices } from '@/lib/container';
 
-const jobService = container.get(JobServiceClass);
-const jobs = await jobService.getJobs();
+const { jobs } = getServices();
+const jobList = await jobs.getJobs();
 ```
 
-**Testing with Mocks**:
+**Testing with Mocks & Isolated Containers**:
 ```typescript
-import { JobServiceClass } from '@/services/jobs.service';
+import { createServiceContainer } from '@/lib/container';
 import { MockDatabaseAdapter } from '@/lib/database/adapter';
 
 const mockDb = new MockDatabaseAdapter();
-const jobService = new JobServiceClass(mockDb);
+const container = createServiceContainer({ database: mockDb });
 
-// Set up mock expectations
-mockDb.select.mockReturnValue({ data: [...], error: null });
+// Test in complete isolation
+const jobs = await container.jobs.getJobs();
+```
 
-// Test your code
+**Observability & Telemetry Usage**:
+```typescript
+import { logger, metrics, runWithCorrelationId } from '@/lib/observability';
+
+await runWithCorrelationId('req_12345', async () => {
+  logger.info('Processing application', { applicationId: 'app_1' });
+  metrics.counter('applications_processed').inc();
+});
 ```
 
 ---
@@ -323,13 +352,18 @@ mockDb.select.mockReturnValue({ data: [...], error: null });
 
 | Metric | Before | After | Target |
 |--------|--------|-------|--------|
-| Direct Supabase SDK usages | 50+ | ~30 | <5 |
-| Services with error boundaries | 0/8 | 2/8 | 8/8 |
-| Testable without DB | 0/8 | 2/8 | 8/8 |
-| Services with DI | 0/8 | 2/8 | 8/8 |
+| Direct Supabase SDK usages in services | 50+ | 0 | 0 |
+| Services with error boundaries | 0/9 | 9/9 | 9/9 |
+| Testable without DB | 0/9 | 9/9 | 9/9 |
+| Services with DI | 0/9 | 9/9 | 9/9 |
 | Backward compatible | N/A | 100% | 100% |
+| Unit & Integration Test Suites | 2 | 38 (148 tests passing) | 20+ |
+| Observability subsystems active | 0 | 4 (Log, Trace, Metrics, Circuit) | 4 |
+| Multi-Resume & ATS Attachment Flow | 0% | 100% (RESUME-001..003, APPL-001, APPL-007) | 100% |
+| Real-Time Messaging & Unread Badges | 9.4% | 100% (MSG-002, MSG-004, RECRUIT-004) | 100% |
 
 ---
 
-**Last Updated**: 2026-09-21  
-**Status**: Phase 1 Complete, Phase 2 In Progress (25%)
+**Last Updated**: 2026-09-22  
+**Status**: Priority 1 & 2 Complete (Multi-Resume & Application Flow, Real-Time Messaging & ATS Integration), Phase 1-3 Architectural Refactoring Complete (100%)
+

@@ -13,6 +13,7 @@ import {
 import {
   Bell,
   CheckCheck,
+  Check,
   Briefcase,
   Trophy,
   MessageSquare,
@@ -20,12 +21,14 @@ import {
   ExternalLink,
   Trash2,
   Filter,
+  Archive,
+  ArchiveRestore,
 } from 'lucide-react';
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'application' | 'job' | 'gamification' | 'system'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'application' | 'job' | 'gamification' | 'system' | 'archived'>('all');
   const [markingAll, setMarkingAll] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -38,7 +41,7 @@ export function NotificationsPage() {
 
         if (user) {
           setCurrentUserId(user.id);
-          const list = await notificationService.getNotifications(user.id);
+          const list = await notificationService.getNotifications(user.id, { includeArchived: true });
           if (list.length === 0) {
             // Seed a helpful onboarding notification in DB if empty
             await notificationService.createNotification({
@@ -49,7 +52,7 @@ export function NotificationsPage() {
               linkUrl: '/dashboard',
               linkLabel: 'Go to Dashboard',
             });
-            const refreshed = await notificationService.getNotifications(user.id);
+            const refreshed = await notificationService.getNotifications(user.id, { includeArchived: true });
             setNotifications(refreshed);
           } else {
             setNotifications(list);
@@ -64,6 +67,47 @@ export function NotificationsPage() {
 
     loadNotifications();
   }, []);
+
+  // Supabase Realtime subscription for incoming lifecycle alerts (NOTIF-001)
+  useEffect(() => {
+    if (!currentUserId) return;
+    const supabase = createBrowserClient();
+    const channel = supabase
+      .channel(`notifications-feed:${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        (payload: any) => {
+          if (payload.eventType === 'INSERT') {
+            const newNotif = payload.new as NotificationRecord;
+            setNotifications((prev) => {
+              if (prev.some((n) => n.id === newNotif.id)) return prev;
+              return [newNotif, ...prev];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedNotif = payload.new as NotificationRecord;
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === updatedNotif.id ? { ...n, ...updatedNotif } : n))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old?.id;
+            if (deletedId) {
+              setNotifications((prev) => prev.filter((n) => n.id !== deletedId));
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUserId]);
 
   const handleMarkAsRead = async (id: string) => {
     const success = await notificationService.markAsRead(id);
@@ -86,6 +130,24 @@ export function NotificationsPage() {
       }
     } finally {
       setMarkingAll(false);
+    }
+  };
+
+  const handleArchive = async (id: string) => {
+    const success = await notificationService.archiveNotification(id);
+    if (success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_archived: true } : n))
+      );
+    }
+  };
+
+  const handleUnarchive = async (id: string) => {
+    const success = await notificationService.unarchiveNotification(id);
+    if (success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_archived: false } : n))
+      );
     }
   };
 
@@ -116,7 +178,12 @@ export function NotificationsPage() {
     }
   };
 
+  const unreadCount = notifications.filter((n) => !n.is_read && !n.is_archived).length;
+  const archivedCount = notifications.filter((n) => Boolean(n.is_archived)).length;
+
   const filteredNotifications = notifications.filter((n) => {
+    if (filter === 'archived') return Boolean(n.is_archived);
+    if (n.is_archived) return false;
     if (filter === 'unread') return !n.is_read;
     if (filter === 'application') return n.type.includes('application');
     if (filter === 'job') return n.type.includes('job');
@@ -124,8 +191,6 @@ export function NotificationsPage() {
     if (filter === 'system') return n.type.includes('system');
     return true;
   });
-
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
     <DashboardLayout userRole="candidate">
@@ -176,6 +241,7 @@ export function NotificationsPage() {
             { id: 'job', label: 'Job Matches' },
             { id: 'gamification', label: 'Achievements & XP' },
             { id: 'system', label: 'System' },
+            { id: 'archived', label: `Archived (${archivedCount})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -207,6 +273,8 @@ export function NotificationsPage() {
               <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
                 {filter === 'unread'
                   ? "You've read all your notifications! Great job staying organized."
+                  : filter === 'archived'
+                  ? 'No archived notifications yet.'
                   : 'You have no notifications in this category right now.'}
               </p>
             </div>
@@ -231,6 +299,11 @@ export function NotificationsPage() {
                       {!n.is_read && (
                         <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
                       )}
+                      {n.is_archived && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">
+                          Archived
+                        </span>
+                      )}
                     </h4>
                     <span className="text-xs text-gray-400 whitespace-nowrap">
                       {new Date(n.created_at).toLocaleDateString([], {
@@ -245,7 +318,7 @@ export function NotificationsPage() {
                   <p className="text-sm text-gray-600 leading-relaxed">{n.message}</p>
 
                   {/* Actions & Links */}
-                  <div className="flex items-center gap-3 mt-3">
+                  <div className="flex items-center gap-3 mt-3 flex-wrap">
                     {n.link_url && (
                       <Link
                         href={n.link_url}
@@ -262,15 +335,36 @@ export function NotificationsPage() {
                     {!n.is_read && (
                       <button
                         onClick={() => handleMarkAsRead(n.id)}
-                        className="text-xs text-gray-400 hover:text-gray-600 font-medium"
+                        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors"
                       >
-                        Mark as read
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Mark as read</span>
+                      </button>
+                    )}
+
+                    {n.is_archived ? (
+                      <button
+                        onClick={() => handleUnarchive(n.id)}
+                        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors"
+                        title="Unarchive notification"
+                      >
+                        <ArchiveRestore className="w-3.5 h-3.5" />
+                        <span>Unarchive</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleArchive(n.id)}
+                        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-amber-600 font-medium transition-colors"
+                        title="Archive notification"
+                      >
+                        <Archive className="w-3.5 h-3.5" />
+                        <span>Archive</span>
                       </button>
                     )}
 
                     <button
                       onClick={() => handleDelete(n.id)}
-                      className="text-xs text-gray-400 hover:text-red-600 transition-colors ml-auto p-1"
+                      className="text-xs text-slate-400 hover:text-rose-600 transition-colors ml-auto p-1"
                       title="Delete notification"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

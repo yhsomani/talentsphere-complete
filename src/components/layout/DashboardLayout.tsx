@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn, getLevelDetails } from '@/utils';
 import { Avatar } from '@/components/ui';
 import { createBrowserClient } from '@/lib/supabase';
+import { messageService } from '@/services/message.service';
+import { notificationService } from '@/services/notification.service';
 import { 
   LayoutDashboard, 
   Users, 
@@ -24,12 +26,16 @@ import {
   Menu,
   X,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Search,
+  User
 } from 'lucide-react';
+import { CommandPalette } from '@/components/common/CommandPalette';
 
 const candidateNav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/candidates/profile', label: 'Profile', icon: Users },
+  { href: '/candidates/profile', label: 'Profile', icon: User },
+  { href: '/network', label: 'Network', icon: Users },
   { href: '/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/applications', label: 'Applications', icon: FileText },
   { href: '/challenges', label: 'Code Arena', icon: Trophy },
@@ -45,6 +51,7 @@ const recruiterNav = [
   { href: '/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/jobs/post', label: 'Post a Job', icon: Target },
   { href: '/candidates', label: 'Candidates', icon: Users },
+  { href: '/network', label: 'Network', icon: Users },
   { href: '/company', label: 'Company', icon: GraduationCap },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
@@ -65,11 +72,20 @@ const adminNav = [
 interface SidebarProps {
   userRole: string;
   userXp?: number;
+  unreadMessageCount?: number;
+  unreadNotificationCount?: number;
   className?: string;
   onCloseMobile?: () => void;
 }
 
-export function Sidebar({ userRole, userXp = 0, className, onCloseMobile }: SidebarProps) {
+export function Sidebar({ 
+  userRole, 
+  userXp = 0, 
+  unreadMessageCount = 0, 
+  unreadNotificationCount = 0, 
+  className, 
+  onCloseMobile 
+}: SidebarProps) {
   const pathname = usePathname();
   const xpInfo = getLevelDetails(userXp);
   
@@ -114,6 +130,10 @@ export function Sidebar({ userRole, userXp = 0, className, onCloseMobile }: Side
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
+            const isMessages = item.href === '/messages';
+            const isNotifications = item.href === '/notifications';
+            const showMessageBadge = isMessages && unreadMessageCount > 0;
+            const showNotificationBadge = isNotifications && unreadNotificationCount > 0;
             
             return (
               <Link
@@ -131,7 +151,19 @@ export function Sidebar({ userRole, userXp = 0, className, onCloseMobile }: Side
                   <Icon className={cn('h-4 w-4 transition-colors', isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600')} />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />}
+                <div className="flex items-center gap-1.5">
+                  {showMessageBadge && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-indigo-600 text-white rounded-full min-w-4 text-center leading-none">
+                      {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                    </span>
+                  )}
+                  {showNotificationBadge && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-rose-500 text-white rounded-full min-w-4 text-center leading-none">
+                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                    </span>
+                  )}
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />}
+                </div>
               </Link>
             );
           })}
@@ -169,8 +201,10 @@ interface HeaderProps {
   userAvatar?: string;
   userRole?: string;
   notificationCount?: number;
+  unreadMessageCount?: number;
   className?: string;
   onOpenMobileMenu?: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
 export function Header({ 
@@ -178,8 +212,10 @@ export function Header({
   userAvatar, 
   userRole = 'candidate',
   notificationCount = 0, 
+  unreadMessageCount = 0,
   className,
-  onOpenMobileMenu 
+  onOpenMobileMenu,
+  onOpenCommandPalette
 }: HeaderProps) {
   const router = useRouter();
 
@@ -211,8 +247,34 @@ export function Header({
           </div>
         </div>
 
+        {/* Global Search Command Bar (⌘K) - Desktop */}
+        <button
+          type="button"
+          onClick={onOpenCommandPalette}
+          className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 text-xs text-slate-400 bg-slate-100/80 hover:bg-slate-100 hover:text-slate-600 rounded-xl border border-slate-200/80 transition-all cursor-pointer shadow-2xs max-w-sm w-full"
+          title="Quick Search (⌘K / Ctrl+K)"
+          aria-label="Open command search palette"
+        >
+          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <span className="font-medium text-slate-500 truncate flex-1 text-left">Search commands, pages, jobs...</span>
+          <kbd className="font-mono text-[10px] font-semibold bg-white text-slate-500 px-1.5 py-0.5 rounded-md border border-slate-200 shadow-2xs shrink-0">
+            ⌘K
+          </kbd>
+        </button>
+
         {/* Action icons & user profile */}
         <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Mobile Search Icon */}
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            className="md:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+            title="Search (⌘K)"
+            aria-label="Open command palette"
+          >
+            <Search className="h-4.5 w-4.5" />
+          </button>
+
           {/* Messages */}
           <Link
             href="/messages"
@@ -221,6 +283,11 @@ export function Header({
             aria-label="View messages"
           >
             <MessageSquare className="h-4.5 w-4.5" />
+            {unreadMessageCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full ring-2 ring-white leading-none">
+                {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+              </span>
+            )}
           </Link>
 
           {/* Notifications */}
@@ -232,7 +299,9 @@ export function Header({
           >
             <Bell className="h-4.5 w-4.5" />
             {notificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-indigo-600 rounded-full ring-2 ring-white" />
+              <span className="absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full ring-2 ring-white leading-none">
+                {notificationCount > 9 ? '9+' : notificationCount}
+              </span>
             )}
           </Link>
 
@@ -277,6 +346,7 @@ export function DashboardLayout({
   userName = 'Member',
   userAvatar,
   notificationCount,
+  unreadMessageCount,
   userXp = 0
 }: { 
   children: React.ReactNode;
@@ -284,9 +354,86 @@ export function DashboardLayout({
   userName?: string;
   userAvatar?: string;
   notificationCount?: number;
+  unreadMessageCount?: number;
   userXp?: number;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [internalUnread, setInternalUnread] = useState(0);
+  const resolvedUnread = unreadMessageCount ?? internalUnread;
+
+  const [internalUnreadNotifications, setInternalUnreadNotifications] = useState(0);
+  const resolvedNotificationCount = notificationCount ?? internalUnreadNotifications;
+
+  // Global shortcut (⌘K / Ctrl+K) listener for Command Palette (SEARCH-001)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Poll / fetch unread message & notification count periodically and listen for realtime updates
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = createBrowserClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let notifChannel: any = null;
+
+    async function fetchCounts() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && isMounted) {
+          if (unreadMessageCount === undefined) {
+            const msgCount = await messageService.getUnreadCount(user.id);
+            if (isMounted) setInternalUnread(msgCount);
+          }
+          if (notificationCount === undefined) {
+            const notifCount = await notificationService.getUnreadCount(user.id);
+            if (isMounted) setInternalUnreadNotifications(notifCount);
+          }
+        }
+      } catch {
+        // Fallback gracefully
+      }
+    }
+
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 20000);
+    const handleFocus = () => fetchCounts();
+    window.addEventListener('focus', handleFocus);
+
+    // Setup Supabase Realtime subscription for incoming notifications
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user || !isMounted) return;
+      notifChannel = supabase
+        .channel(`shell-notifications:${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchCounts();
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      if (notifChannel) supabase.removeChannel(notifChannel);
+    };
+  }, [unreadMessageCount, notificationCount]);
 
   // Close mobile drawer on resize to desktop
   useEffect(() => {
@@ -300,7 +447,13 @@ export function DashboardLayout({
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Desktop Sidebar */}
-      <Sidebar userRole={userRole} userXp={userXp} className="hidden lg:flex" />
+      <Sidebar 
+        userRole={userRole} 
+        userXp={userXp} 
+        unreadMessageCount={resolvedUnread}
+        unreadNotificationCount={resolvedNotificationCount}
+        className="hidden lg:flex" 
+      />
 
       {/* Mobile Drawer */}
       {mobileOpen && (
@@ -313,6 +466,8 @@ export function DashboardLayout({
             <Sidebar 
               userRole={userRole} 
               userXp={userXp} 
+              unreadMessageCount={resolvedUnread}
+              unreadNotificationCount={resolvedNotificationCount}
               className="w-full"
               onCloseMobile={() => setMobileOpen(false)} 
             />
@@ -326,13 +481,22 @@ export function DashboardLayout({
           userName={userName} 
           userAvatar={userAvatar} 
           userRole={userRole}
-          notificationCount={notificationCount} 
+          notificationCount={resolvedNotificationCount} 
+          unreadMessageCount={resolvedUnread}
           onOpenMobileMenu={() => setMobileOpen(true)}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         />
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
           {children}
         </main>
       </div>
+
+      {/* Global Command Search Palette (SEARCH-001) */}
+      <CommandPalette 
+        isOpen={commandPaletteOpen} 
+        onClose={() => setCommandPaletteOpen(false)} 
+        userRole={userRole} 
+      />
     </div>
   );
 }

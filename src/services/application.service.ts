@@ -1,5 +1,5 @@
-import type { DatabaseAdapter } from '@/lib/database/adapter';
-import { AppErrors, isAppError } from '@/lib/errors';
+import type { DatabaseAdapter } from '../lib/database/adapter';
+import { AppErrors, isAppError } from '../lib/errors/index';
 
 export interface SubmitApplicationInput {
   jobId: string;
@@ -9,6 +9,17 @@ export interface SubmitApplicationInput {
   portfolioUrls?: string[];
   answersToQuestions?: Record<string, unknown>;
   referralSource?: string;
+}
+
+export interface OfferDetails {
+  salary: number;
+  currency: string;
+  period: 'yearly' | 'monthly' | 'hourly';
+  startDate?: string;
+  expirationDate?: string;
+  bonusOrEquity?: string;
+  offerLetterUrl?: string;
+  notes?: string;
 }
 
 export interface ApplicationRecord {
@@ -191,9 +202,59 @@ export class ApplicationService {
         if (insertResult.error) {
           console.warn('Activity log insert returned error:', insertResult.error);
         }
+
+        // Automated in-app lifecycle notifications (NOTIF-005, NOTIF-001)
+        const candidateUserId = authResult.data?.user?.id;
+        let jobTitle = (data as any)?.jobs?.title;
+        let jobCreatorId = (data as any)?.jobs?.created_by;
+
+        if (!jobTitle || !jobCreatorId) {
+          const { data: jobData } = await this.db
+            .from('jobs')
+            .select('title, created_by')
+            .eq('id', input.jobId)
+            .maybeSingle();
+          if (jobData) {
+            jobTitle = jobTitle || (jobData as any).title;
+            jobCreatorId = jobCreatorId || (jobData as any).created_by;
+          }
+        }
+        jobTitle = jobTitle || 'Job Opening';
+
+        // 1. Candidate confirmation
+        if (candidateUserId) {
+          await this.db.from('notifications').insert({
+            user_id: candidateUserId,
+            type: 'application_update',
+            title: 'Application Submitted',
+            message: `Your application for "${jobTitle}" has been received and is under review.`,
+            link_url: `/applications/${applicationId}`,
+            link_label: 'View Application',
+            channel: 'in_app',
+            metadata: { applicationId, jobId: input.jobId, stage: 'submitted' },
+            is_read: false,
+            is_archived: false,
+          });
+        }
+
+        // 2. Recruiter requisition alert
+        if (jobCreatorId && jobCreatorId !== candidateUserId) {
+          await this.db.from('notifications').insert({
+            user_id: jobCreatorId,
+            type: 'application_update',
+            title: 'New Applicant Received',
+            message: `A candidate submitted an application for "${jobTitle}".`,
+            link_url: `/jobs/${input.jobId}/applications`,
+            link_label: 'Review Candidates',
+            channel: 'in_app',
+            metadata: { applicationId, jobId: input.jobId },
+            is_read: false,
+            is_archived: false,
+          });
+        }
       } catch (logErr) {
-        // Non-blocking: Activity log failure should not affect application submission
-        console.warn('Non-blocking activity log failed:', logErr);
+        // Non-blocking: Activity log and notification failure should not affect application submission
+        console.warn('Non-blocking activity log or notification failed:', logErr);
       }
 
       return data as unknown as ApplicationRecord;
@@ -388,7 +449,7 @@ export class ApplicationService {
   /**
    * Withdraw an application
    */
-  async withdrawApplication(applicationId: string, candidateProfileId: string): Promise<boolean> {
+  async withdrawApplication(applicationId: string, candidateProfileId: string, reason?: string): Promise<boolean> {
     try {
       const { error } = await this.db
         .from('applications')
@@ -413,10 +474,40 @@ export class ApplicationService {
           application_id: applicationId,
           actor_id: authResult.data?.user?.id || null,
           action: 'application_withdrawn',
-          new_value: { status: 'withdrawn' },
+          new_value: { status: 'withdrawn', reason: reason || 'Not specified' },
+          metadata: { reason: reason || 'Not specified', timestamp: new Date().toISOString() },
         });
-      } catch {
-        // Non-blocking: Continue even if activity log fails
+
+        // Automated notification to recruiter on candidate withdrawal - non-blocking
+        const { data: appData } = await this.db
+          .from('applications')
+          .select(`
+            id,
+            job_id,
+            jobs (id, title, created_by)
+          `)
+          .eq('id', applicationId)
+          .single();
+
+        const recruiterId = (appData as any)?.jobs?.created_by;
+        const jobTitle = (appData as any)?.jobs?.title || 'Job Opening';
+        if (recruiterId) {
+          await this.db.from('notifications').insert({
+            user_id: recruiterId,
+            type: 'application_update',
+            title: 'Application Withdrawn',
+            message: `A candidate has withdrawn their application for "${jobTitle}".`,
+            link_url: `/jobs/${(appData as any)?.job_id}/applications`,
+            link_label: 'View Applications',
+            channel: 'in_app',
+            metadata: { applicationId, reason: reason || 'Not specified' },
+            is_read: false,
+            is_archived: false,
+          });
+        }
+      } catch (logErr) {
+        // Non-blocking: Continue even if activity log or notification fails
+        console.warn('Non-blocking withdrawal activity or notification failed:', logErr);
       }
 
       return true;
@@ -535,8 +626,69 @@ export class ApplicationService {
           new_value: { status, stage_id: stageId || null, note: note || null },
           metadata: { timestamp: new Date().toISOString(), note: note || null },
         });
+
+        // Automated in-app lifecycle notification to candidate (NOTIF-005, NOTIF-001)
+        const { data: appData } = await this.db
+          .from('applications')
+          .select(`
+            id,
+            job_id,
+            candidate_profile_id,
+            jobs (id, title),
+            candidate_profiles (id, user_id)
+          `)
+          .eq('id', applicationId)
+          .single();
+
+        let candidateUserId = (appData as any)?.candidate_profiles?.user_id;
+        let jobTitle = (appData as any)?.jobs?.title;
+
+        if (!candidateUserId && (appData as any)?.candidate_profile_id) {
+          const { data: prof } = await this.db
+            .from('candidate_profiles')
+            .select('user_id')
+            .eq('id', (appData as any).candidate_profile_id)
+            .maybeSingle();
+          if (prof) candidateUserId = (prof as any).user_id;
+        }
+
+        if (!jobTitle && (appData as any)?.job_id) {
+          const { data: job } = await this.db
+            .from('jobs')
+            .select('title')
+            .eq('id', (appData as any).job_id)
+            .maybeSingle();
+          if (job) jobTitle = (job as any).title;
+        }
+        jobTitle = jobTitle || 'Job Opening';
+
+        if (candidateUserId) {
+          const readableStatus = status.replace(/_/g, ' ');
+          let notifTitle = 'Application Status Updated';
+          let notifMessage = `Your application for "${jobTitle}" has moved to ${readableStatus}.`;
+
+          if (status === 'rejected') {
+            notifTitle = `Update on your application for ${jobTitle}`;
+            notifMessage = note
+              ? `Thank you for taking the time to apply for "${jobTitle}". Recruiter note: ${note}`
+              : `Thank you for taking the time to apply for "${jobTitle}". After careful consideration, the hiring team has decided to move forward with other candidates at this time.`;
+          }
+
+          await this.db.from('notifications').insert({
+            user_id: candidateUserId,
+            type: 'application_update',
+            title: notifTitle,
+            message: notifMessage,
+            link_url: `/applications/${applicationId}`,
+            link_label: 'View Application',
+            channel: 'in_app',
+            metadata: { applicationId, jobId: (appData as any)?.job_id, status, stageId, note: note || null },
+            is_read: false,
+            is_archived: false,
+          });
+        }
       } catch (logErr) {
-        console.warn('Non-blocking activity log failed:', logErr);
+        console.warn('Non-blocking activity log or notification failed:', logErr);
       }
 
       return true;
@@ -784,11 +936,161 @@ export class ApplicationService {
       });
     }
   }
+
+  /**
+   * Record a formal job offer with compensation details (APPL-015)
+   */
+  async recordOffer(applicationId: string, offer: OfferDetails, actorId?: string): Promise<boolean> {
+    try {
+      const now = new Date().toISOString();
+      const { error: updateError } = await this.db
+        .from('applications')
+        .update({
+          status: 'offer_extended',
+          decision_at: now,
+          updated_at: now,
+        })
+        .eq('id', applicationId);
+
+      if (updateError) {
+        throw AppErrors.database('Failed to record job offer', { cause: updateError, context: { applicationId, offer } });
+      }
+
+      // Activity log entry with offer metadata
+      try {
+        const authResult = await this.db.auth.getUser();
+        const effectiveActor = actorId || authResult.data?.user?.id || null;
+
+        await this.db.from('application_activity_log').insert({
+          application_id: applicationId,
+          actor_id: effectiveActor,
+          action: 'offer_extended',
+          new_value: { status: 'offer_extended', offer },
+          metadata: { offer, timestamp: now },
+        });
+
+        // Send celebratory notification to candidate
+        const { data: appData } = await this.db
+          .from('applications')
+          .select(`
+            id,
+            candidate_profile_id,
+            jobs (id, title),
+            candidate_profiles (id, user_id)
+          `)
+          .eq('id', applicationId)
+          .single();
+
+        let candidateUserId = (appData as any)?.candidate_profiles?.user_id;
+        const jobTitle = (appData as any)?.jobs?.title || 'the position';
+
+        if (!candidateUserId && (appData as any)?.candidate_profile_id) {
+          const { data: prof } = await this.db
+            .from('candidate_profiles')
+            .select('user_id')
+            .eq('id', (appData as any).candidate_profile_id)
+            .maybeSingle();
+          if (prof) candidateUserId = (prof as any).user_id;
+        }
+
+        if (candidateUserId) {
+          const formattedSalary = `${offer.currency} ${Number(offer.salary).toLocaleString('en-US')}/${offer.period}`;
+          await this.db.from('notifications').insert({
+            user_id: candidateUserId,
+            type: 'application_update',
+            title: '🎉 Formal Job Offer Extended!',
+            message: `Congratulations! An offer has been extended for "${jobTitle}" with compensation of ${formattedSalary}.`,
+            link_url: `/applications/${applicationId}`,
+            link_label: 'Review Offer',
+            channel: 'in_app',
+            metadata: { applicationId, offer, timestamp: now },
+            is_read: false,
+            is_archived: false,
+          });
+        }
+      } catch (logErr) {
+        console.warn('Non-fatal error logging offer activity/notification:', logErr);
+      }
+
+      return true;
+    } catch (error) {
+      if (isAppError(error)) throw error;
+      throw AppErrors.database('Unexpected error recording offer', { cause: error, context: { applicationId } });
+    }
+  }
+
+  /**
+   * Fetch the active offer details for an application (APPL-015)
+   */
+  async getOfferDetails(applicationId: string): Promise<OfferDetails | null> {
+    try {
+      const { data, error } = await this.db
+        .from('application_activity_log')
+        .select('*')
+        .eq('application_id', applicationId)
+        .eq('action', 'offer_extended')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error || !data || data.length === 0) {
+        return null;
+      }
+
+      const entry = data[0] as any;
+      const offer = entry.new_value?.offer || entry.metadata?.offer || null;
+      return offer as OfferDetails | null;
+    } catch (error) {
+      console.error('Error in getOfferDetails:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Respond to an extended offer: accept or decline (APPL-015)
+   */
+  async respondToOffer(
+    applicationId: string,
+    decision: 'offer_accepted' | 'offer_declined',
+    reason?: string
+  ): Promise<boolean> {
+    try {
+      const now = new Date().toISOString();
+      const { error: updateError } = await this.db
+        .from('applications')
+        .update({
+          status: decision,
+          updated_at: now,
+        })
+        .eq('id', applicationId);
+
+      if (updateError) {
+        throw AppErrors.database('Failed to update offer response', { cause: updateError, context: { applicationId, decision } });
+      }
+
+      try {
+        const authResult = await this.db.auth.getUser();
+        await this.db.from('application_activity_log').insert({
+          application_id: applicationId,
+          actor_id: authResult.data?.user?.id || null,
+          action: decision,
+          new_value: { status: decision, reason: reason || null },
+          metadata: { timestamp: now, reason: reason || null },
+        });
+      } catch (logErr) {
+        console.warn('Non-fatal error logging offer response activity:', logErr);
+      }
+
+      return true;
+    } catch (error) {
+      if (isAppError(error)) throw error;
+      throw AppErrors.database('Unexpected error responding to offer', { cause: error });
+    }
+  }
 }
 
 // Backward compatibility export - creates instance with default adapter
-import { createDatabaseAdapter } from '@/lib/database/adapter';
-import { AppConfig } from '@/config';
+import { createDatabaseAdapter } from '../lib/database/adapter';
+import { AppConfig } from '../config/index';
 
 const defaultAdapter = createDatabaseAdapter({
   supabaseUrl: AppConfig.supabase.url,

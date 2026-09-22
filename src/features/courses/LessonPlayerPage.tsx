@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   courseService,
   type CourseRecord,
-  type CourseLessonRecord
+  type CourseLessonRecord,
+  type QuizRecord,
+  type QuizAttemptResult,
 } from '@/services/course.service';
+import QuizRunner from './QuizRunner';
 import { createBrowserClient } from '@/lib/supabase';
 import { Button } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -21,11 +24,22 @@ import {
   ChevronRight,
   BookOpen,
   ExternalLink,
-  Check
+  Check,
+  HelpCircle,
+  Sparkles,
+  Clock,
+  Star,
+  X,
 } from 'lucide-react';
 
 interface LessonPlayerPageProps {
   courseId: string;
+}
+
+function formatSecondsToTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
 export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
@@ -36,6 +50,24 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
+
+  // Quiz & Certificate state (LMS-005, COURSE-005)
+  const [currentQuiz, setCurrentQuiz] = useState<QuizRecord | null>(null);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
+  const [certificateNumber, setCertificateNumber] = useState<string | null>(null);
+
+  // Playback Resumption State (LMS-010)
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const lastSavedTimeRef = useRef<number>(0);
+  const [resumePositionSeconds, setResumePositionSeconds] = useState<number>(0);
+  const [resumeToast, setResumeToast] = useState<string | null>(null);
+
+  // Course Review Modal State (LMS-009)
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   useEffect(() => {
     const loadPlayer = async () => {
@@ -74,6 +106,12 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
           // Select first incomplete lesson or first lesson in course
           const allLessons = (courseData.modules || []).flatMap(m => m.lessons || []);
           setCurrentLesson(firstIncompleteLesson || allLessons[0] || null);
+
+          // Check if certificate already issued
+          const cert = await courseService.getCertificate(courseId, user.id);
+          if (cert) {
+            setCertificateNumber(cert.certificate_number);
+          }
         }
       } catch (err) {
         console.error('Error loading course player:', err);
@@ -86,6 +124,34 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
       loadPlayer();
     }
   }, [courseId, router]);
+
+  // Load quiz for current lesson whenever currentLesson changes
+  useEffect(() => {
+    let isMounted = true;
+    const loadLessonQuiz = async () => {
+      if (!currentLesson) {
+        setCurrentQuiz(null);
+        return;
+      }
+
+      try {
+        setIsLoadingQuiz(true);
+        const quiz = await courseService.getLessonQuiz(currentLesson.id);
+        if (isMounted) {
+          setCurrentQuiz(quiz);
+        }
+      } catch (err) {
+        console.error('Error loading lesson quiz:', err);
+      } finally {
+        if (isMounted) setIsLoadingQuiz(false);
+      }
+    };
+
+    loadLessonQuiz();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentLesson]);
 
   const allLessons: CourseLessonRecord[] = (course?.modules || []).flatMap(m => m.lessons || []);
   const currentIndex = allLessons.findIndex(l => l.id === currentLesson?.id);
@@ -101,6 +167,12 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
 
       setCompletedLessonIds(prev => new Set(prev).add(currentLesson.id));
 
+      // Check if this completion unlocked a certificate
+      const cert = await courseService.getCertificate(courseId, userId);
+      if (cert) {
+        setCertificateNumber(cert.certificate_number);
+      }
+
       if (nextLesson) {
         setCurrentLesson(nextLesson);
       }
@@ -108,6 +180,14 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
       console.error('Error completing lesson:', err);
     } finally {
       setIsCompleting(false);
+    }
+  };
+
+  const handleQuizPass = (result: QuizAttemptResult) => {
+    if (!currentLesson) return;
+    setCompletedLessonIds(prev => new Set(prev).add(currentLesson.id));
+    if (result.certificateNumber) {
+      setCertificateNumber(result.certificateNumber);
     }
   };
 
@@ -142,6 +222,7 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
     : 0;
 
   const youtubeId = currentLesson.content_url ? extractYouTubeId(currentLesson.content_url) : null;
+  const isQuiz = currentLesson.content_type === 'quiz' || Boolean(currentQuiz);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
@@ -165,8 +246,8 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
           </div>
         </div>
 
-        {/* Header Right: Progress & XP */}
-        <div className="flex items-center gap-4">
+        {/* Header Right: Progress, XP & Certificate */}
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="hidden sm:flex items-center gap-3">
             <span className="text-xs text-slate-400 font-medium">{percentComplete}% Complete</span>
             <div className="w-28 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/50">
@@ -181,6 +262,19 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
             <Award className="w-4 h-4" />
             <span>+{course.xp_reward || 250} XP</span>
           </div>
+
+          {certificateNumber && (
+            <Link href={`/certificates/${certificateNumber}`} target="_blank">
+              <Button
+                variant="primary"
+                size="sm"
+                className="gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20 text-xs py-1.5 px-3"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Certificate</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -189,93 +283,132 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
         {/* Lesson View Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col justify-between bg-slate-950">
           <div className="max-w-4xl mx-auto w-full space-y-6">
-            {/* Video or Content Player */}
-            {currentLesson.content_type === 'video' && (
-              <div className="aspect-video w-full bg-black rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative ring-1 ring-slate-800/80">
-                {youtubeId ? (
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=0&rel=0`}
-                    title={currentLesson.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                ) : currentLesson.content_url ? (
-                  <video
-                    controls
-                    src={currentLesson.content_url}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 p-6 text-center">
-                    <PlayCircle className="w-16 h-16 mb-2 text-indigo-500/40" />
-                    <p className="font-semibold text-slate-300">{currentLesson.title}</p>
-                    <p className="text-xs text-slate-500 mt-1">Interactive instructional module</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Lesson Title & Completion Status Banner */}
-            <div className="bg-slate-900/90 rounded-3xl p-6 sm:p-7 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">
-                  {currentLesson.content_type}
-                </span>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mt-2">
-                  {currentLesson.title}
-                </h2>
-              </div>
-
-              <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
-                {isCurrentCompleted ? (
-                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
-                    <Check className="w-4 h-4" />
-                    Completed
-                  </span>
-                ) : (
+            {/* If this lesson has a quiz, render the interactive QuizRunner */}
+            {isQuiz ? (
+              currentQuiz ? (
+                <QuizRunner
+                  quiz={currentQuiz}
+                  lessonId={currentLesson.id}
+                  courseId={courseId}
+                  userId={userId || ''}
+                  isCompleted={isCurrentCompleted}
+                  onPass={handleQuizPass}
+                  onNextLesson={nextLesson ? () => setCurrentLesson(nextLesson) : undefined}
+                />
+              ) : isLoadingQuiz ? (
+                <div className="bg-slate-900/80 rounded-3xl p-12 border border-slate-800 flex flex-col items-center justify-center">
+                  <LoadingSpinner size="md" />
+                  <p className="text-xs text-slate-400 mt-3 font-mono">Loading knowledge check...</p>
+                </div>
+              ) : (
+                <div className="bg-slate-900/80 rounded-3xl p-8 border border-slate-800 text-center space-y-4">
+                  <HelpCircle className="w-12 h-12 text-amber-400 mx-auto" />
+                  <h3 className="text-lg font-bold text-white">Quiz Under Preparation</h3>
+                  <p className="text-slate-400 text-sm max-w-md mx-auto">
+                    The interactive questions for this assessment are being finalized by the instructor.
+                  </p>
                   <Button
                     variant="primary"
                     size="sm"
-                    className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-600/20"
-                    isLoading={isCompleting}
                     onClick={handleMarkComplete}
+                    isLoading={isCompleting}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Mark as Complete
+                    Mark Complete and Continue
                   </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Article / Notes */}
-            <div className="bg-slate-900/60 rounded-3xl p-6 sm:p-8 border border-slate-800 text-slate-300 leading-relaxed space-y-4">
-              <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-400" />
-                Lesson Notes & Architecture Reference
-              </h3>
-              <p className="text-sm">
-                In this module, you are exploring the foundational principles and best practices for{' '}
-                <span className="font-semibold text-white">{currentLesson.title}</span>. Follow along with the practical exercises, review the system diagrams, and apply the concepts to your portfolio.
-              </p>
-
-              {currentLesson.content_url && !youtubeId && (
-                <div className="pt-4 border-t border-slate-800">
-                  <a
-                    href={currentLesson.content_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Open Reference Material
-                  </a>
                 </div>
-              )}
-            </div>
+              )
+            ) : (
+              <>
+                {/* Video Player */}
+                {currentLesson.content_type === 'video' && (
+                  <div className="aspect-video w-full bg-black rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative ring-1 ring-slate-800/80">
+                    {youtubeId ? (
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=0&rel=0`}
+                        title={currentLesson.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    ) : currentLesson.content_url ? (
+                      <video
+                        controls
+                        src={currentLesson.content_url}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 p-6 text-center">
+                        <PlayCircle className="w-16 h-16 mb-2 text-indigo-500/40" />
+                        <p className="font-semibold text-slate-300">{currentLesson.title}</p>
+                        <p className="text-xs text-slate-500 mt-1">Interactive instructional module</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Lesson Title & Completion Status Banner */}
+                <div className="bg-slate-900/90 rounded-3xl p-6 sm:p-7 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">
+                      {currentLesson.content_type}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mt-2">
+                      {currentLesson.title}
+                    </h2>
+                  </div>
+
+                  <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
+                    {isCurrentCompleted ? (
+                      <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
+                        <Check className="w-4 h-4" />
+                        Completed
+                      </span>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-600/20"
+                        isLoading={isCompleting}
+                        onClick={handleMarkComplete}
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        Mark as Complete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Article / Notes */}
+                <div className="bg-slate-900/60 rounded-3xl p-6 sm:p-8 border border-slate-800 text-slate-300 leading-relaxed space-y-4">
+                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-indigo-400" />
+                    Lesson Notes & Architecture Reference
+                  </h3>
+                  <p className="text-sm">
+                    In this module, you are exploring the foundational principles and best practices for{' '}
+                    <span className="font-semibold text-white">{currentLesson.title}</span>. Follow along with the practical exercises, review the system diagrams, and apply the concepts to your portfolio.
+                  </p>
+
+                  {currentLesson.content_url && !youtubeId && (
+                    <div className="pt-4 border-t border-slate-800">
+                      <a
+                        href={currentLesson.content_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Open Reference Material
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Bottom Nav: Previous / Next */}
+          {/* Bottom Nav: Previous / Next / Certificate */}
           <div className="max-w-4xl mx-auto w-full pt-8 flex items-center justify-between border-t border-slate-800/80 mt-8">
             {prevLesson ? (
               <Button
@@ -301,6 +434,13 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
                 <span>Next: {nextLesson.title}</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
+            ) : certificateNumber ? (
+              <Link href={`/certificates/${certificateNumber}`} target="_blank">
+                <Button variant="primary" size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/20">
+                  <Award className="w-4 h-4" />
+                  <span>View Verified Certificate 🎉</span>
+                </Button>
+              </Link>
             ) : (
               <Link href={`/courses/${courseId}`}>
                 <Button variant="primary" size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white">
@@ -331,6 +471,7 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
                   {(module.lessons || []).map((lesson) => {
                     const isSelected = lesson.id === currentLesson.id;
                     const isCompleted = completedLessonIds.has(lesson.id);
+                    const isLessonQuiz = lesson.content_type === 'quiz';
 
                     return (
                       <button
@@ -347,17 +488,23 @@ export default function LessonPlayerPage({ courseId }: LessonPlayerPageProps) {
                         <div className="flex items-center gap-2.5 truncate">
                           {isCompleted ? (
                             <CheckCircle2 className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
+                          ) : isLessonQuiz ? (
+                            <HelpCircle className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-amber-400'}`} />
                           ) : (
                             <PlayCircle className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
                           )}
                           <span className="truncate">{lesson.title}</span>
                         </div>
 
-                        {lesson.duration_seconds && (
+                        {lesson.duration_seconds ? (
                           <span className={`text-[10px] shrink-0 ${isSelected ? 'text-indigo-200' : 'text-slate-500'}`}>
                             {Math.round(lesson.duration_seconds / 60)}m
                           </span>
-                        )}
+                        ) : isLessonQuiz ? (
+                          <span className={`text-[10px] uppercase font-bold shrink-0 ${isSelected ? 'text-indigo-200' : 'text-amber-400/80'}`}>
+                            Quiz
+                          </span>
+                        ) : null}
                       </button>
                     );
                   })}

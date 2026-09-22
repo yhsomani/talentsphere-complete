@@ -8,7 +8,7 @@
  * - Graceful degradation for optional features
  */
 
-import { AppErrors } from '../errors';
+import { AppErrors } from '../errors/index';
 
 /**
  * Environment name types

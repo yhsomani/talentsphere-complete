@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
-import type { CandidateProfile, Experience, Education, Certification, PortfolioItem } from '@/types';
+import type { CandidateProfile, Experience, Education, Certification, PortfolioItem, ResumeItem } from '@/types';
 import { candidateService, type ProfileUpdateData } from '@/services/candidate.service';
 
 export interface CandidateSkill {
@@ -25,6 +25,13 @@ interface UseCandidateProfileReturn {
   saving: boolean;
   error: string | null;
   success: string | null;
+
+  // Resumes
+  resumes: ResumeItem[];
+  loadingResumes: boolean;
+  fetchResumes: () => Promise<void>;
+  setPrimaryResume: (resumeUrl: string) => Promise<void>;
+  deleteResume: (fileName: string) => Promise<void>;
   
   // Skills
   skills: CandidateSkill[];
@@ -93,7 +100,7 @@ interface UseCandidateProfileReturn {
   // Actions
   loadProfile: () => Promise<void>;
   saveProfile: () => Promise<void>;
-  uploadResume: (file: File) => Promise<void>;
+  uploadResume: (file: File, options?: { customTitle?: string; setAsPrimary?: boolean }) => Promise<string | void>;
   uploadAvatar: (file: File) => Promise<void>;
   clearError: () => void;
   clearSuccess: () => void;
@@ -128,6 +135,10 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
     resume_url: '',
   });
 
+  // Resumes state
+  const [resumes, setResumes] = useState<ResumeItem[]>([]);
+  const [loadingResumes, setLoadingResumes] = useState(false);
+
   /**
    * Helper to ensure profile exists and return its ID
    */
@@ -144,6 +155,26 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
     setProfile(created);
     return created.id || null;
   }, [profile, user]);
+
+  /**
+   * Fetch all resumes for candidate
+   */
+  const fetchResumes = useCallback(async () => {
+    if (!user) return;
+    try {
+      setLoadingResumes(true);
+      const list = await candidateService.getResumes(user.id);
+      setResumes(list);
+      const primary = list.find(r => r.isPrimary);
+      if (primary) {
+        setFormData(prev => ({ ...prev, resume_url: primary.url }));
+      }
+    } catch (err) {
+      console.error('Failed to load resumes:', err);
+    } finally {
+      setLoadingResumes(false);
+    }
+  }, [user]);
 
   /**
    * Load profile data from Supabase
@@ -173,6 +204,8 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
         setEducations(res.educations);
         setCertifications(res.certifications);
         setPortfolioItems(res.portfolioItems);
+        // Load candidate resumes in parallel
+        await fetchResumes();
       } else {
         // Automatically initialize profile shell for new candidate
         const defaultProf = await candidateService.upsertProfile(user.id, {
@@ -187,7 +220,7 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
     } finally {
       setLoading(false);
     }
-  }, [user, formData.timezone]);
+  }, [user, formData.timezone, fetchResumes]);
 
   /**
    * Save profile data to Supabase
@@ -216,7 +249,7 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
   /**
    * Upload resume file
    */
-  const uploadResume = useCallback(async (file: File) => {
+  const uploadResume = useCallback(async (file: File, options?: { customTitle?: string; setAsPrimary?: boolean }) => {
     if (!user) {
       setError('Not authenticated');
       return;
@@ -226,16 +259,58 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
       setSaving(true);
       setError(null);
       
-      const resumeUrl = await candidateService.uploadResume(file, user.id);
+      const resumeUrl = await candidateService.uploadResume(file, user.id, options);
+      await fetchResumes();
       setFormData(prev => ({ ...prev, resume_url: resumeUrl }));
       setSuccess('Resume uploaded successfully!');
       setTimeout(() => setSuccess(null), 3000);
+      return resumeUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload resume');
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  }, [user, fetchResumes]);
+
+  /**
+   * Set primary resume
+   */
+  const setPrimaryResume = useCallback(async (resumeUrl: string) => {
+    if (!user) return;
+    try {
+      setSaving(true);
+      setError(null);
+      await candidateService.setPrimaryResume(user.id, resumeUrl);
+      setFormData(prev => ({ ...prev, resume_url: resumeUrl }));
+      setResumes(prev => prev.map(r => ({ ...r, isPrimary: r.url === resumeUrl })));
+      setSuccess('Primary resume updated!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to set primary resume');
     } finally {
       setSaving(false);
     }
   }, [user]);
+
+  /**
+   * Delete resume
+   */
+  const deleteResume = useCallback(async (fileName: string) => {
+    if (!user) return;
+    try {
+      setSaving(true);
+      setError(null);
+      await candidateService.deleteResume(user.id, fileName);
+      await fetchResumes();
+      setSuccess('Resume deleted successfully!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete resume');
+    } finally {
+      setSaving(false);
+    }
+  }, [user, fetchResumes]);
 
   /**
    * Upload avatar file
@@ -557,6 +632,11 @@ export function useCandidateProfile(user: User | null): UseCandidateProfileRetur
     saving,
     error,
     success,
+    resumes,
+    loadingResumes,
+    fetchResumes,
+    setPrimaryResume,
+    deleteResume,
     skills,
     newSkill,
     setNewSkill,

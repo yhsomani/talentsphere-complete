@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button, Input, Card, Badge, LoadingSpinner } from '@/components/ui';
@@ -14,6 +14,10 @@ import {
   candidateService,
 } from '@/services/candidate.service';
 import {
+  networkService,
+  type BlockedUserRecord,
+} from '@/services/network.service';
+import {
   User,
   Bell,
   Lock,
@@ -22,10 +26,14 @@ import {
   Check,
   AlertCircle,
   ExternalLink,
+  Building2,
+  UserX,
 } from 'lucide-react';
+import { OrganizationTeamTab } from './components/OrganizationTeamTab';
 
 export function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'security' | 'billing'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'organization' | 'notifications' | 'security' | 'privacy' | 'billing'>('profile');
+  const [userRole, setUserRole] = useState<'candidate' | 'recruiter' | 'admin'>('candidate');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -55,6 +63,43 @@ export function SettingsPage() {
   // Password reset state
   const [resetSent, setResetSent] = useState(false);
 
+  // Blocked users state (NET-005)
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUserRecord[]>([]);
+  const [loadingBlocked, setLoadingBlocked] = useState(false);
+  const [unblockingId, setUnblockingId] = useState<string | null>(null);
+
+  const loadBlockedUsers = useCallback(async () => {
+    setLoadingBlocked(true);
+    try {
+      const users = await networkService.getBlockedUsers();
+      setBlockedUsers(users);
+    } catch (err) {
+      console.error('Error loading blocked users:', err);
+    } finally {
+      setLoadingBlocked(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'privacy') {
+      loadBlockedUsers();
+    }
+  }, [activeTab, loadBlockedUsers]);
+
+  const handleUnblockUser = async (blockedUserId: string) => {
+    setUnblockingId(blockedUserId);
+    try {
+      await networkService.unblockUser(blockedUserId);
+      setBlockedUsers((prev) => prev.filter((u) => u.blocked_id !== blockedUserId));
+      setMessage({ type: 'success', text: 'User unblocked successfully.' });
+    } catch (err) {
+      console.error('Failed to unblock user:', err);
+      setMessage({ type: 'error', text: 'Failed to unblock user. Please try again.' });
+    } finally {
+      setUnblockingId(null);
+    }
+  };
+
   useEffect(() => {
     async function loadSettings() {
       setLoading(true);
@@ -73,12 +118,22 @@ export function SettingsPage() {
             setAvailability(profileData.profile.availability_status || 'open_to_work');
           }
 
-          // Fetch user row for full_name
+          // Fetch user row for full_name and role
           const { data: userRow } = await (supabase as any)
             .from('users')
-            .select('full_name')
+            .select('full_name, role')
             .eq('id', user.id)
             .maybeSingle();
+
+          if (userRow?.role) {
+            if (['recruiter', 'hiring_manager'].includes(userRow.role)) {
+              setUserRole('recruiter');
+            } else if (userRow.role === 'admin') {
+              setUserRole('admin');
+            } else {
+              setUserRole('candidate');
+            }
+          }
 
           if (userRow?.full_name) {
             const [first = '', ...rest] = userRow.full_name.split(' ');
@@ -154,13 +209,13 @@ export function SettingsPage() {
   };
 
   return (
-    <DashboardLayout userRole="candidate">
+    <DashboardLayout userRole={userRole}>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Title */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage your account preferences, notifications, and security.
+            Manage your account preferences, company workspace, notifications, and security.
           </p>
         </div>
 
@@ -183,11 +238,13 @@ export function SettingsPage() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 gap-6">
+        <div className="flex border-b border-gray-200 gap-6 overflow-x-auto">
           {[
             { id: 'profile', label: 'Account & Profile', icon: User },
+            { id: 'organization', label: 'Company & Team', icon: Building2 },
             { id: 'notifications', label: 'Notifications', icon: Bell },
             { id: 'security', label: 'Security & Access', icon: Lock },
+            { id: 'privacy', label: 'Privacy & Blocking', icon: Shield },
             { id: 'billing', label: 'Billing & Plan', icon: CreditCard },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -280,7 +337,16 @@ export function SettingsPage() {
               </form>
             )}
 
-            {/* Tab 2: Notifications */}
+            {/* Tab 2: Organization & Team (ORG-001, ORG-003, ORG-004) */}
+            {activeTab === 'organization' && (
+              <OrganizationTeamTab
+                userId={userId}
+                userEmail={email}
+                onNotify={(type, text) => setMessage({ type, text })}
+              />
+            )}
+
+            {/* Tab 3: Notifications */}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
                 <Card>
@@ -413,6 +479,101 @@ export function SettingsPage() {
                       </div>
                     </div>
                     <Badge variant="success" size="sm">Active</Badge>
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {/* Tab 5: Privacy & Blocked Users (NET-005) */}
+            {activeTab === 'privacy' && (
+              <div className="space-y-6">
+                <Card>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-indigo-600" />
+                        <span>Privacy &amp; Safety Controls</span>
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Control who can interact with you on TalentSphere. Blocked contacts cannot message you or see your active status.
+                      </p>
+                    </div>
+
+                    <Link href="/settings/network">
+                      <Button variant="outline" size="sm" className="gap-2 text-xs">
+                        <span>Advanced Network Settings</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <UserX className="w-4 h-4 text-rose-500" />
+                        <span>Blocked Users ({blockedUsers.length})</span>
+                      </span>
+                      {blockedUsers.length > 0 && (
+                        <span className="text-xs font-normal text-slate-400">
+                          Click unblock to allow interactions again
+                        </span>
+                      )}
+                    </h4>
+
+                    {loadingBlocked ? (
+                      <div className="p-8 text-center text-gray-400">
+                        <LoadingSpinner size="md" />
+                        <p className="text-xs mt-2">Loading blocked accounts...</p>
+                      </div>
+                    ) : blockedUsers.length === 0 ? (
+                      <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                          <Check className="w-6 h-6 text-emerald-500" />
+                        </div>
+                        <p className="text-sm font-semibold text-slate-700">No Blocked Users</p>
+                        <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+                          You haven&apos;t blocked any accounts. If someone harasses you or sends unwanted messages, you can block them directly from the chat header.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden bg-white">
+                        {blockedUsers.map((blocked) => (
+                          <div
+                            key={blocked.id}
+                            className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">
+                                {(blocked.blocked_user?.full_name?.[0] || blocked.blocked_user?.email?.[0] || 'U').toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-slate-900">
+                                  {blocked.blocked_user?.full_name || blocked.blocked_user?.email || 'User'}
+                                </p>
+                                <p className="text-xs text-slate-400">
+                                  {blocked.blocked_user?.email}
+                                  {blocked.reason && (
+                                    <span className="text-rose-500 font-medium ml-2">
+                                      • Reason: {blocked.reason}
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={unblockingId === blocked.blocked_id}
+                              onClick={() => handleUnblockUser(blocked.blocked_id)}
+                              className="text-xs text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border-slate-200"
+                            >
+                              {unblockingId === blocked.blocked_id ? 'Unblocking...' : 'Unblock'}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Card>
               </div>

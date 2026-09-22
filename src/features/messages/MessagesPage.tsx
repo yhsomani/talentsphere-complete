@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState, useEffect, useRef, useTransition } from 'react';
+import React, { useState, useEffect, useRef, useTransition, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button, Input, Avatar, Badge, LoadingSpinner } from '@/components/ui';
 import { createBrowserClient } from '@/lib/supabase';
@@ -10,6 +11,7 @@ import {
   ConversationWithDetails,
   MessageRecord,
 } from '@/services/message.service';
+import { networkService } from '@/services/network.service';
 import {
   Search,
   Send,
@@ -19,9 +21,17 @@ import {
   CheckCheck,
   X,
   Sparkles,
+  UserX,
+  AlertTriangle,
+  ShieldAlert,
 } from 'lucide-react';
 
 export function MessagesPage() {
+  const searchParams = useSearchParams();
+  const recipientIdParam = searchParams?.get('recipientId');
+  const jobTitleParam = searchParams?.get('jobTitle');
+  const initialMessageParam = searchParams?.get('initialMessage');
+
   const [currentUser, setCurrentUser] = useState<{ id: string; email?: string } | null>(null);
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationWithDetails | null>(null);
@@ -32,6 +42,13 @@ export function MessagesPage() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [, startTransition] = useTransition();
 
+  // Helper to find other participant in direct chat
+  const getOtherParticipant = useCallback((conv: ConversationWithDetails) => {
+    if (!currentUser) return conv.participants[0]?.user;
+    const other = conv.participants.find((p) => p.user_id !== currentUser.id);
+    return other?.user || conv.participants[0]?.user;
+  }, [currentUser]);
+
   // New Chat Modal state
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -40,6 +57,16 @@ export function MessagesPage() {
   const [initialMessageText, setInitialMessageText] = useState('');
   const [selectedRecipient, setSelectedRecipient] = useState<any | null>(null);
   const [creatingChat, setCreatingChat] = useState(false);
+
+  // User Blocking state (NET-005)
+  const [blockStatus, setBlockStatus] = useState<{ iBlockedThem: boolean; theyBlockedMe: boolean }>({
+    iBlockedThem: false,
+    theyBlockedMe: false,
+  });
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockReason, setBlockReason] = useState('Inappropriate behavior or spam');
+  const [isBlockingUser, setIsBlockingUser] = useState(false);
+  const [unblocking, setUnblocking] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +78,61 @@ export function MessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Load user & conversations
+  // Check block status whenever activeConversation changes (NET-005)
+  useEffect(() => {
+    async function checkBlock() {
+      if (!activeConversation || !currentUser) {
+        setBlockStatus({ iBlockedThem: false, theyBlockedMe: false });
+        return;
+      }
+      const other = getOtherParticipant(activeConversation);
+      if (other?.id) {
+        try {
+          const status = await networkService.getBlockStatus(other.id);
+          setBlockStatus(status);
+        } catch (err) {
+          console.error('Error checking block status:', err);
+        }
+      }
+    }
+    checkBlock();
+  }, [activeConversation, currentUser, getOtherParticipant]);
+
+  const handleBlockActiveUser = async () => {
+    const other = activeConversation ? getOtherParticipant(activeConversation) : null;
+    if (!other?.id) return;
+
+    try {
+      setIsBlockingUser(true);
+      await networkService.blockUser({
+        blockedUserId: other.id,
+        reason: blockReason,
+      });
+      setBlockStatus((prev) => ({ ...prev, iBlockedThem: true }));
+      setShowBlockModal(false);
+    } catch (err) {
+      console.error('Failed to block user:', err);
+    } finally {
+      setIsBlockingUser(false);
+    }
+  };
+
+  const handleUnblockActiveUser = async () => {
+    const other = activeConversation ? getOtherParticipant(activeConversation) : null;
+    if (!other?.id) return;
+
+    try {
+      setUnblocking(true);
+      await networkService.unblockUser(other.id);
+      setBlockStatus((prev) => ({ ...prev, iBlockedThem: false }));
+    } catch (err) {
+      console.error('Failed to unblock user:', err);
+    } finally {
+      setUnblocking(false);
+    }
+  };
+
+  // Load user & conversations with URL param support (RECRUIT-004)
   useEffect(() => {
     async function loadData() {
       setLoading(true);
@@ -61,10 +142,39 @@ export function MessagesPage() {
 
         if (user) {
           setCurrentUser({ id: user.id, email: user.email });
-          const convs = await messageService.getConversations(user.id);
-          setConversations(convs);
-          if (convs.length > 0) {
-            setActiveConversation(convs[0]);
+          let convs = await messageService.getConversations(user.id);
+
+          if (recipientIdParam && recipientIdParam !== user.id) {
+            let targetConv = convs.find(
+              (c) =>
+                c.type === 'direct' &&
+                c.participants.some((p) => p.user_id === recipientIdParam)
+            );
+
+            if (!targetConv) {
+              const created = await messageService.getOrCreateConversation({
+                creatorId: user.id,
+                recipientId: recipientIdParam,
+                subject: jobTitleParam ? `Application: ${jobTitleParam}` : undefined,
+                initialMessage: initialMessageParam || undefined,
+              });
+              if (created) {
+                convs = [created, ...convs];
+                targetConv = created;
+              }
+            }
+
+            setConversations(convs);
+            if (targetConv) {
+              setActiveConversation(targetConv);
+            } else if (convs.length > 0) {
+              setActiveConversation(convs[0]);
+            }
+          } else {
+            setConversations(convs);
+            if (convs.length > 0) {
+              setActiveConversation(convs[0]);
+            }
           }
         }
       } catch (err) {
@@ -75,7 +185,7 @@ export function MessagesPage() {
     }
 
     loadData();
-  }, []);
+  }, [recipientIdParam, jobTitleParam, initialMessageParam]);
 
   // Load messages when active conversation changes
   useEffect(() => {
@@ -91,6 +201,9 @@ export function MessagesPage() {
         setMessages(msgs);
         if (currentUser) {
           messageService.markConversationRead(activeConversation!.id, currentUser.id);
+          setConversations((prev) =>
+            prev.map((c) => (c.id === activeConversation!.id ? { ...c, unread_count: 0 } : c))
+          );
         }
       } catch (err) {
         console.error('Error loading messages:', err);
@@ -101,6 +214,144 @@ export function MessagesPage() {
 
     loadConvMessages();
   }, [activeConversation, currentUser]);
+
+  // Real-time WebSocket: Active Conversation Message Delivery & Deduplication (MSG-002)
+  useEffect(() => {
+    if (!activeConversation?.id) return;
+
+    const supabase = createBrowserClient();
+    const channel = supabase
+      .channel(`chat:${activeConversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${activeConversation.id}`,
+        },
+        async (payload) => {
+          const newMsg = payload.new as any;
+          if (!newMsg) return;
+
+          // Deduplication & optimistic reconciliation
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+
+            const optimisticIndex = prev.findIndex(
+              (m) =>
+                m.id.startsWith('temp-') &&
+                m.sender_id === newMsg.sender_id &&
+                m.content === newMsg.content
+            );
+
+            let senderInfo = newMsg.sender;
+            if (!senderInfo && currentUser) {
+              if (newMsg.sender_id === currentUser.id) {
+                senderInfo = {
+                  id: currentUser.id,
+                  email: currentUser.email || '',
+                  first_name: 'You',
+                  last_name: '',
+                };
+              } else {
+                const other = getOtherParticipant(activeConversation);
+                senderInfo = other;
+              }
+            }
+
+            const formatted: MessageRecord = {
+              ...newMsg,
+              sender: senderInfo,
+            };
+
+            let nextMessages: MessageRecord[];
+            if (optimisticIndex !== -1) {
+              nextMessages = [...prev];
+              nextMessages[optimisticIndex] = formatted;
+            } else {
+              nextMessages = [...prev, formatted];
+            }
+
+            return nextMessages.sort(
+              (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+          });
+
+          // Mark message read immediately if received while active
+          if (currentUser && newMsg.sender_id !== currentUser.id) {
+            messageService.markConversationRead(activeConversation.id, currentUser.id);
+          }
+
+          // Update sidebar conversation snippet
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === activeConversation.id
+                ? {
+                    ...c,
+                    last_message: newMsg,
+                    updated_at: newMsg.created_at,
+                    unread_count: 0,
+                  }
+                : c
+            )
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeConversation, currentUser, getOtherParticipant]);
+
+  // Real-time WebSocket: User-level inbox updates across all conversations (MSG-002 & MSG-004)
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    const supabase = createBrowserClient();
+    const userChannel = supabase
+      .channel(`user-inbox:${currentUser.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          const newMsg = payload.new as any;
+          if (!newMsg) return;
+
+          setConversations((prev) => {
+            const targetIndex = prev.findIndex((c) => c.id === newMsg.conversation_id);
+            if (targetIndex === -1) return prev;
+
+            const targetConv = prev[targetIndex];
+            const isActive = activeConversation?.id === newMsg.conversation_id;
+            const isFromMe = newMsg.sender_id === currentUser.id;
+
+            const updatedConv: ConversationWithDetails = {
+              ...targetConv,
+              last_message: newMsg,
+              updated_at: newMsg.created_at,
+              unread_count:
+                isActive || isFromMe
+                  ? targetConv.unread_count || 0
+                  : (targetConv.unread_count || 0) + 1,
+            };
+
+            const remaining = prev.filter((_, i) => i !== targetIndex);
+            return [updatedConv, ...remaining];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(userChannel);
+    };
+  }, [currentUser?.id, activeConversation?.id]);
 
   // Send message
   const handleSendMessage = async (e?: React.FormEvent) => {
@@ -139,9 +390,13 @@ export function MessagesPage() {
     });
 
     if (sent) {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimisticMsg.id ? sent : m))
-      );
+      setMessages((prev) => {
+        const hasReal = prev.some((m) => m.id === sent.id);
+        if (hasReal) {
+          return prev.filter((m) => m.id !== optimisticMsg.id);
+        }
+        return prev.map((m) => (m.id === optimisticMsg.id ? sent : m));
+      });
       // Update sidebar conversation snippet
       setConversations((prev) =>
         prev.map((c) =>
@@ -196,13 +451,6 @@ export function MessagesPage() {
     } finally {
       setCreatingChat(false);
     }
-  };
-
-  // Helper to find other participant in direct chat
-  const getOtherParticipant = (conv: ConversationWithDetails) => {
-    if (!currentUser) return conv.participants[0]?.user;
-    const other = conv.participants.find((p) => p.user_id !== currentUser.id);
-    return other?.user || conv.participants[0]?.user;
   };
 
   const filteredConversations = conversations.filter((conv) => {
@@ -380,7 +628,71 @@ export function MessagesPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Right Header Actions (Block User - NET-005) */}
+                  {activeConversation.type === 'direct' && (
+                    <div className="flex items-center gap-2">
+                      {blockStatus.iBlockedThem ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={unblocking}
+                          onClick={handleUnblockActiveUser}
+                          className="text-xs text-amber-700 border-amber-300 hover:bg-amber-50"
+                        >
+                          {unblocking ? 'Unblocking...' : 'Unblock User'}
+                        </Button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowBlockModal(true)}
+                          title="Block this user (NET-005)"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200/80 transition-colors"
+                        >
+                          <UserX className="w-3.5 h-3.5" />
+                          <span>Block</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
+
+                {/* User Blocked Warning Banners (NET-005) */}
+                {blockStatus.iBlockedThem && (
+                  <div className="px-6 py-2.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between text-xs text-amber-900 animate-in fade-in duration-150">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>You have blocked this user. Unblock them to resume messaging.</span>
+                    </div>
+                    <button
+                      onClick={handleUnblockActiveUser}
+                      disabled={unblocking}
+                      className="font-bold underline hover:text-amber-950 ml-2"
+                    >
+                      {unblocking ? 'Unblocking...' : 'Unblock'}
+                    </button>
+                  </div>
+                )}
+
+                {blockStatus.theyBlockedMe && (
+                  <div className="px-6 py-2.5 bg-rose-50 border-b border-rose-200 flex items-center gap-2 text-xs text-rose-900 animate-in fade-in duration-150">
+                    <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>You cannot send messages to this user because they have blocked interactions.</span>
+                  </div>
+                )}
+
+                {/* Contextual Requisition Banner (RECRUIT-004) */}
+                {activeConversation.subject && (
+                  <div className="px-6 py-2 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between animate-in fade-in duration-150">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-indigo-950 min-w-0">
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span className="truncate">{activeConversation.subject}</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-white px-2 py-0.5 rounded-full border border-indigo-200 shrink-0 ml-2">
+                      Requisition Thread
+                    </span>
+                  </div>
+                )}
 
                 {/* Messages Stream */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/40">
@@ -455,23 +767,31 @@ export function MessagesPage() {
                   <button
                     type="button"
                     title="Attach file"
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    disabled={blockStatus.iBlockedThem || blockStatus.theyBlockedMe}
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <Paperclip className="w-5 h-5" />
                   </button>
 
                   <input
                     type="text"
-                    placeholder="Type your message... (Press Enter to send)"
+                    disabled={blockStatus.iBlockedThem || blockStatus.theyBlockedMe}
+                    placeholder={
+                      blockStatus.iBlockedThem
+                        ? 'You have blocked this user. Unblock to send messages.'
+                        : blockStatus.theyBlockedMe
+                        ? 'Messaging disabled because this user blocked interactions.'
+                        : 'Type your message... (Press Enter to send)'
+                    }
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-gray-100 border-none rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="flex-1 px-4 py-2.5 bg-gray-100 border-none rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                   />
 
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={!inputText.trim()}
+                    disabled={!inputText.trim() || blockStatus.iBlockedThem || blockStatus.theyBlockedMe}
                     className="px-4 py-2.5 gap-2 rounded-xl"
                   >
                     <Send className="w-4 h-4" />
@@ -625,6 +945,77 @@ export function MessagesPage() {
                 onClick={handleCreateNewChat}
               >
                 Start Chat
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block User Confirmation Modal (NET-005) */}
+      {showBlockModal && activeConversation && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                  <UserX className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">
+                    Block {getOtherParticipant(activeConversation)?.first_name || 'User'}?
+                  </h3>
+                  <p className="text-xs text-gray-500">Prevent future messages & interactions</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowBlockModal(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Blocking this user will prevent them from sending you messages or interacting with your profile.
+                You can manage or unblock them anytime from your <strong>Settings &gt; Network &amp; Privacy</strong>.
+              </p>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Reason for blocking (optional)
+                </label>
+                <select
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-slate-800 cursor-pointer"
+                >
+                  <option value="Inappropriate behavior or harassment">Inappropriate behavior or harassment</option>
+                  <option value="Spam or unwanted advertising">Spam or unwanted advertising</option>
+                  <option value="Suspected fraudulent or impersonation activity">Suspected fraudulent or impersonation activity</option>
+                  <option value="Unsolicited recruiting messages">Unsolicited recruiting messages</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowBlockModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                isLoading={isBlockingUser}
+                onClick={handleBlockActiveUser}
+                className="gap-1.5"
+              >
+                <UserX className="w-4 h-4" />
+                <span>Confirm Block</span>
               </Button>
             </div>
           </div>

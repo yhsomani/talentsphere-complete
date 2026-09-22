@@ -23,7 +23,7 @@ interface ProfileFormData {
 interface ProfileFormProps {
   formData: ProfileFormData;
   onChange: (data: Partial<ProfileFormData>) => void;
-  onResumeUpload: (file: File) => Promise<void>;
+  onResumeUpload: (file: File) => Promise<unknown>;
   uploadingResume: boolean;
   onSave: () => Promise<void>;
   saving: boolean;

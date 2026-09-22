@@ -35,7 +35,7 @@ export default function JobList({ jobs, onBookmark, bookmarkedIds = new Set() }:
   );
 }
 
-function JobCard({ 
+export function JobCard({ 
   job, 
   isBookmarked = false,
   onBookmark 

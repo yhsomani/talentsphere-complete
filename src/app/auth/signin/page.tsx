@@ -129,6 +129,8 @@ export default function SignInPage() {
             <div className="flex items-center justify-between">
               <label className="flex items-center">
                 <input
+                  id="remember-me"
+                  aria-label="Remember me"
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />

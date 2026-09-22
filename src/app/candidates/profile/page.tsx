@@ -15,6 +15,7 @@ import { Button } from '@/components/ui';
 import { useCandidateProfile } from '@/features/candidates/hooks/useCandidateProfile';
 import { ProfileHeader } from './components/ProfileHeader';
 import { ProfileForm } from './components/ProfileForm';
+import { ResumeSection } from './components/ResumeSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { EducationSection } from './components/EducationSection';
@@ -23,6 +24,8 @@ import { PortfolioSection } from './components/PortfolioSection';
 import { LoadingState } from './components/LoadingState';
 import { ErrorBanner } from './components/ErrorBanner';
 import { SuccessBanner } from './components/SuccessBanner';
+import { ProfileCompletenessMeter } from './components/ProfileCompletenessMeter';
+import { BadgesSection } from './components/BadgesSection';
 
 export default function CandidateProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +37,10 @@ export default function CandidateProfilePage() {
     saving,
     error,
     success,
+    resumes,
+    loadingResumes,
+    setPrimaryResume,
+    deleteResume,
     formData,
     skills,
     newSkill,
@@ -93,49 +100,90 @@ export default function CandidateProfilePage() {
           uploading={saving}
         />
 
+        <ProfileCompletenessMeter
+          formData={formData}
+          resumes={resumes}
+          skills={skills}
+          experiences={experiences}
+          educations={educations}
+          certifications={certifications}
+          portfolioItems={portfolioItems}
+        />
+
         <main className="space-y-6">
-          <ProfileForm
-            formData={formData}
-            onChange={updateFormData}
-            onResumeUpload={uploadResume}
-            uploadingResume={saving}
-            onSave={saveProfile}
-            saving={saving}
-          />
+          <div id="basic-info-section">
+            <ProfileForm
+              formData={formData}
+              onChange={updateFormData}
+              onResumeUpload={uploadResume}
+              uploadingResume={saving}
+              onSave={saveProfile}
+              saving={saving}
+            />
+          </div>
 
-          <SkillsSection
-            skills={skills}
-            onAddSkill={addSkill}
-            onRemoveSkill={removeSkill}
-            newSkill={newSkill}
-            setNewSkill={setNewSkill}
-          />
+          <div id="resume-section">
+            <ResumeSection
+              resumes={resumes}
+              loading={loadingResumes}
+              uploading={saving}
+              onUpload={uploadResume}
+              onSetPrimary={setPrimaryResume}
+              onDelete={deleteResume}
+            />
+          </div>
 
-          <ExperienceSection
-            experiences={experiences}
-            onAdd={profileHook.addExperience}
-            onUpdate={profileHook.updateExperience}
-            onDelete={profileHook.deleteExperience}
-          />
+          <div id="badges-section">
+            <BadgesSection
+              candidateProfileId={profile?.id}
+              hasResumes={resumes.length > 0}
+              hasCompletedProfile={Boolean(formData.headline && formData.location && skills.length > 0)}
+            />
+          </div>
 
-          <EducationSection
-            educations={educations}
-            onAdd={profileHook.addEducation}
-            onDelete={profileHook.deleteEducation}
-          />
+          <div id="skills-section">
+            <SkillsSection
+              skills={skills}
+              onAddSkill={addSkill}
+              onRemoveSkill={removeSkill}
+              newSkill={newSkill}
+              setNewSkill={setNewSkill}
+            />
+          </div>
 
-          <CertificationsSection
-            certifications={certifications}
-            onAdd={profileHook.addCertification}
-            onDelete={profileHook.deleteCertification}
-          />
+          <div id="experience-section">
+            <ExperienceSection
+              experiences={experiences}
+              onAdd={profileHook.addExperience}
+              onUpdate={profileHook.updateExperience}
+              onDelete={profileHook.deleteExperience}
+            />
+          </div>
 
-          <PortfolioSection
-            portfolioItems={portfolioItems}
-            onAdd={profileHook.addPortfolioItem}
-            onUpdate={profileHook.updatePortfolioItem}
-            onDelete={profileHook.deletePortfolioItem}
-          />
+          <div id="education-section">
+            <EducationSection
+              educations={educations}
+              onAdd={profileHook.addEducation}
+              onDelete={profileHook.deleteEducation}
+            />
+          </div>
+
+          <div id="certifications-section">
+            <CertificationsSection
+              certifications={certifications}
+              onAdd={profileHook.addCertification}
+              onDelete={profileHook.deleteCertification}
+            />
+          </div>
+
+          <div id="portfolio-section">
+            <PortfolioSection
+              portfolioItems={portfolioItems}
+              onAdd={profileHook.addPortfolioItem}
+              onUpdate={profileHook.updatePortfolioItem}
+              onDelete={profileHook.deletePortfolioItem}
+            />
+          </div>
         </main>
 
         <div className="pt-6 border-t border-slate-200/80 flex items-center justify-end">

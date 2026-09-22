@@ -11,6 +11,8 @@ import { createBrowserClient } from '@/lib/supabase';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button, Badge, Avatar } from '@/components/ui';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { jobsService } from '@/services/jobs.service';
+import type { JobListing } from '@/types';
 import {
   ArrowLeft,
   Briefcase,
@@ -23,7 +25,9 @@ import {
   CheckCircle2,
   ExternalLink,
   Users,
-  Check
+  Check,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 
 interface JobDetailPageProps {
@@ -38,6 +42,8 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
   const [copied, setCopied] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; role?: string } | null>(null);
+  const [similarJobs, setSimilarJobs] = useState<JobListing[]>([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   // Check if user has already applied & get user role
   useEffect(() => {
@@ -63,6 +69,27 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
     if (jobId) {
       checkApplied();
     }
+  }, [jobId]);
+
+  // Load similar jobs recommendation (JOB-012)
+  useEffect(() => {
+    if (!jobId) return;
+    let isMounted = true;
+    const loadSimilar = async () => {
+      try {
+        setLoadingSimilar(true);
+        const similar = await jobsService.getSimilarJobs(jobId, 3);
+        if (isMounted) setSimilarJobs(similar);
+      } catch (err) {
+        console.error('Failed to load similar jobs:', err);
+      } finally {
+        if (isMounted) setLoadingSimilar(false);
+      }
+    };
+    loadSimilar();
+    return () => {
+      isMounted = false;
+    };
   }, [jobId]);
 
   const handleBookmarkToggle = async () => {
@@ -447,17 +474,30 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
             {/* Company Card */}
             {job.organization && (
               <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
-                <h3 className="text-lg font-bold text-gray-900">About the Organization</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-gray-900">About the Organization</h3>
+                  <Link
+                    href={`/companies/${job.organization.id}`}
+                    className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold inline-flex items-center gap-0.5"
+                  >
+                    <span>View Page</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
 
                 <div className="flex items-center gap-3">
-                  <Avatar
-                    src={job.organization.logo_url}
-                    alt={job.organization.name}
-                    fallback={job.organization.name.charAt(0)}
-                    size="md"
-                  />
+                  <Link href={`/companies/${job.organization.id}`} className="shrink-0 hover:opacity-85 transition-opacity">
+                    <Avatar
+                      src={job.organization.logo_url}
+                      alt={job.organization.name}
+                      fallback={job.organization.name.charAt(0)}
+                      size="md"
+                    />
+                  </Link>
                   <div>
-                    <h4 className="font-bold text-gray-900">{job.organization.name}</h4>
+                    <Link href={`/companies/${job.organization.id}`} className="hover:text-indigo-600 transition-colors">
+                      <h4 className="font-bold text-gray-900">{job.organization.name}</h4>
+                    </Link>
                     {job.organization.industry && (
                       <p className="text-xs text-gray-500">{job.organization.industry}</p>
                     )}
@@ -474,22 +514,145 @@ export default function JobDetailPage({ jobId }: JobDetailPageProps) {
                   {job.organization.size && (
                     <p>Company Size: <span className="font-semibold text-gray-700">{job.organization.size}</span></p>
                   )}
-                  {job.organization.website && (
-                    <a
-                      href={job.organization.website.startsWith('http') ? job.organization.website : `https://${job.organization.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-semibold"
+                  <div className="flex items-center gap-4 pt-1">
+                    <Link
+                      href={`/companies/${job.organization.id}`}
+                      className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
-                      Visit Website
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
+                      <span>Company Profile</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                    {job.organization.website && (
+                      <a
+                        href={job.organization.website.startsWith('http') ? job.organization.website : `https://${job.organization.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-700 font-medium"
+                      >
+                        Visit Website
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Similar Opportunities Recommendation Engine (JOB-012) */}
+        {(similarJobs.length > 0 || loadingSimilar) && (
+          <div className="mt-10 pt-8 border-t border-slate-200/80 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-1">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Recommendation Engine</span>
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">Similar Opportunities</h2>
+                <p className="text-xs text-slate-500">
+                  Ranked by shared technical skills, work mode, experience level, and employer match.
+                </p>
+              </div>
+
+              <Link
+                href="/jobs"
+                className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-semibold self-start sm:self-auto"
+              >
+                <span>Browse all jobs</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {loadingSimilar ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 animate-pulse space-y-3">
+                    <div className="w-10 h-10 bg-slate-200 rounded-xl" />
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {similarJobs.map(sJob => (
+                  <div
+                    key={sJob.id}
+                    className="bg-white rounded-2xl border border-slate-200/90 p-5 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200/60 shrink-0">
+                          {sJob.organization?.logo_url ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={sJob.organization.logo_url}
+                              alt={sJob.organization.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Briefcase className="w-5 h-5 text-slate-400" />
+                          )}
+                        </div>
+
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize">
+                          {sJob.work_mode === 'remote' ? 'Remote' : (sJob.location_city || 'On-site')}
+                        </span>
+                      </div>
+
+                      <div>
+                        <Link href={`/jobs/${sJob.id}`}>
+                          <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                            {sJob.title}
+                          </h3>
+                        </Link>
+                        <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
+                          {sJob.organization?.name || 'TalentSphere Partner'}
+                        </p>
+                      </div>
+
+                      {/* Skills Tags */}
+                      {sJob.skills && sJob.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {sJob.skills.slice(0, 3).map((sk, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-50 text-slate-700 border border-slate-200/60"
+                            >
+                              {sk.name}
+                            </span>
+                          ))}
+                          {sJob.skills.length > 3 && (
+                            <span className="text-[10px] text-slate-400 font-medium px-1 self-center">
+                              +{sJob.skills.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-800">
+                        {sJob.salary_min
+                          ? `$${Math.round(sJob.salary_min / 1000)}k${sJob.salary_max ? ` - $${Math.round(sJob.salary_max / 1000)}k` : ''}`
+                          : 'Competitive'}
+                      </span>
+
+                      <Link
+                        href={`/jobs/${sJob.id}`}
+                        className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-semibold group-hover:translate-x-0.5 transition-transform"
+                      >
+                        <span>View Role</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Application Submission Modal */}

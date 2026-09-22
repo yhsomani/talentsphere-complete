@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jobService } from '@/services/jobs.service';
 import { createBrowserClient } from '@/lib/supabase';
-import type { Job, JobListing, JobFilters, JobStatus } from '@/types';
+import type { Job, JobListing, JobFilters, JobStatus, JobFacets } from '@/types';
 
 const supabase = createBrowserClient();
 
@@ -18,6 +18,7 @@ interface UseJobsReturn {
   page: number;
   limit: number;
   hasMore: boolean;
+  facets: JobFacets | null;
   
   // Loading & Error states
   isLoading: boolean;
@@ -64,6 +65,7 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [facets, setFacets] = useState<JobFacets | null>(null);
 
   // Load jobs
   const loadJobs = useCallback(async (pageNum: number, append = false) => {
@@ -82,6 +84,9 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
       setJobs(prev => append ? [...prev, ...result.jobs] : result.jobs);
       setTotal(result.total);
       setPage(result.page);
+      if (result.facets) {
+        setFacets(result.facets);
+      }
       
       // Load user bookmarks from job_bookmarks table
       try {
@@ -202,6 +207,7 @@ export function useJobs(options: UseJobsOptions = {}): UseJobsReturn {
     page,
     limit: pageSize,
     hasMore: page * pageSize < total,
+    facets,
     
     // Loading & Error states
     isLoading,
