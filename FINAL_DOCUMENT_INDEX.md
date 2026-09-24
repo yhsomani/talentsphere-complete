@@ -34,7 +34,6 @@
 - `IMPLEMENTATION_PLAN.md`
 - `GAP_ANALYSIS.md`
 - `GOVERNANCE.md`
-- `SOURCE_RECONCILIATION.md`
 - `FINAL_VALIDATION_REPORT.md`
 
 ## Developer onboarding
