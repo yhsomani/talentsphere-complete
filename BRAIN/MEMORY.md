@@ -146,8 +146,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `supabase/seed/01_initial_seed.sql` (Default feature flags)
   - `scripts/migrate.mjs` (Migration runner)
   - `scripts/seed.mjs` (Seed runner)
-  - `tests/unit/database-migrations.test.ts` (Automated schema & RLS test suite)
-- **Result:** Migrations and seeds validated. 4 database unit tests passed. Overall tests: 18/18 PASS.
+#### Change 6: Fastify Modular API Server & Canonical Error Envelope (E-09, E-10)
+- **Why:** Implement backend server with security headers (Helmet), CORS, rate limiting, x-request-id tracing, and standard error envelope.
+- **Files:**
+  - `apps/api/package.json`
+  - `apps/api/tsconfig.json`
+  - `apps/api/src/server.ts` (Fastify app, onSend hook, error handler, health & auth routes)
+  - `apps/api/src/index.ts` (Server listener entry point)
+  - `tests/integration/api-server.test.ts` (9 integration tests)
+- **Result:** TypeScript builds clean. 9 integration tests passed. Overall tests: 27/27 PASS.
 
 ---
 
@@ -160,6 +167,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-005:** Created `BRAIN/MEMORY.md` conforming to the Master Memory specification.
 - **TASK-006:** Bootstrapped monorepo workspace toolchain (E-01): `pnpm-workspace.yaml`, `package.json`, `tsconfig.json`, `.gitignore`, 6 shared packages (`config`, `domain`, `contracts`, `observability`, `ui`, `testing`), and foundation test suite (14/14 tests PASS).
 - **TASK-007:** Implemented database schema and migration system (E-04, E-05): `00001_core_schema.sql` with 8 core tables and RLS, `01_initial_seed.sql`, migration/seed scripts, and test suite (4/4 tests PASS; 18/18 total PASS).
+- **TASK-008:** Implemented Fastify modular API server (E-09, E-10): helmet security headers, CORS, rate-limiting, canonical error envelope, request ID tracing, health and auth endpoints, and integration test suite (9/9 tests PASS; 27/27 total PASS).
 
 ---
 
