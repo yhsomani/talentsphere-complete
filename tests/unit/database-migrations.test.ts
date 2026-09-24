@@ -75,6 +75,21 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.job_skills ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.application_evidence ENABLE ROW LEVEL SECURITY;');
   });
+
+  it('contains and validates migration 00004 challenges and assessment schema', () => {
+    const migrationFile4 = path.join(migrationsDir, '00004_challenges_assessment_schema.sql');
+    expect(fs.existsSync(migrationFile4)).toBe(true);
+    const sql = fs.readFileSync(migrationFile4, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.challenges');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.assessment_sessions');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.challenge_submissions');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.xp_transactions');
+    expect(sql).toContain('ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.assessment_sessions ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.challenge_submissions ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.xp_transactions ENABLE ROW LEVEL SECURITY;');
+  });
 });
+
 
 

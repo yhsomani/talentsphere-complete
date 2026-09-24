@@ -205,3 +205,45 @@ export const TransitionApplicationInputSchema = z.object({
 });
 
 export type TransitionApplicationInput = z.infer<typeof TransitionApplicationInputSchema>;
+
+/**
+ * Challenges Arena & Assessment Contracts (F-08, BR-24..BR-51)
+ */
+export const CreateChallengeInputSchema = z.object({
+  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  title: z.string().min(3).max(150),
+  description: z.string().min(10).max(10000),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
+  category: z.string().min(2).max(100),
+  skillIds: z.array(z.string().uuid()).optional(),
+  testCases: z.array(
+    z.object({
+      id: z.string().optional(),
+      input: z.string(),
+      expectedOutput: z.string(),
+      isHidden: z.boolean().default(false),
+    })
+  ).min(2),
+  timeLimitMs: z.number().int().min(100).max(30000).default(5000),
+  memoryLimitMb: z.number().int().min(64).max(512).default(512),
+  policyMode: z.enum(['AI_PROHIBITED', 'AI_RESTRICTED', 'AI_ALLOWED', 'POST_ASSESSMENT_ONLY']).default('AI_PROHIBITED'),
+});
+
+export type CreateChallengeInput = z.infer<typeof CreateChallengeInputSchema>;
+
+export const SubmitChallengeSolutionInputSchema = z.object({
+  sessionId: z.string().uuid().optional(),
+  language: z.enum(['typescript', 'javascript', 'python', 'rust', 'go']),
+  code: z.string().min(1).max(50000),
+});
+
+export type SubmitChallengeSolutionInput = z.infer<typeof SubmitChallengeSolutionInputSchema>;
+
+/**
+ * AI Assistant & Gateway Query Contract
+ */
+export const AIAssistantQueryInputSchema = z.object({
+  prompt: z.string().min(1).max(2000),
+});
+
+export type AIAssistantQueryInput = z.infer<typeof AIAssistantQueryInputSchema>;

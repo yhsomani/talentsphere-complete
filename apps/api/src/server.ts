@@ -33,6 +33,15 @@ import {
   transitionJobStatus,
   submitJobApplication,
   transitionApplicationState,
+  Challenge,
+  AssessmentSession,
+  XpTransaction,
+  createChallenge,
+  filterChallengeForCandidate,
+  startAssessmentSession,
+  assertAIAssistanceAllowed,
+  evaluateChallengeSubmission,
+  calculateCappedXp,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -49,6 +58,9 @@ import {
   UpdateJobStatusInputSchema,
   SubmitApplicationInputSchema,
   TransitionApplicationInputSchema,
+  CreateChallengeInputSchema,
+  SubmitChallengeSolutionInputSchema,
+  AIAssistantQueryInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1053,10 +1065,224 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
+  // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)
+  const challengesById = new Map<string, Challenge>();
+  const challengesBySlug = new Map<string, Challenge>();
+  const assessmentSessionsById = new Map<string, AssessmentSession>();
+  const assessmentSessionsByCandidateId = new Map<string, AssessmentSession[]>();
+  const xpTransactionsByUserId = new Map<string, XpTransaction[]>();
+
+  // Seed baseline challenge
+  const seedChallenge = createChallenge({
+    slug: 'reverse-words-string',
+    title: 'Reverse Words in a String',
+    description: 'Given an input string s, reverse the order of the words.',
+    difficulty: 'easy',
+    category: 'Strings',
+    testCases: [
+      { id: 'tc1', input: '"the sky is blue"', expectedOutput: '"blue is sky the"', isHidden: false },
+      { id: 'tc2', input: '"  hello world  "', expectedOutput: '"world hello"', isHidden: true },
+    ],
+    actor: { userId: '00000000-0000-0000-0000-000000000000', roles: ['platform_admin'] },
+  });
+  challengesById.set(seedChallenge.id, seedChallenge);
+  challengesBySlug.set(seedChallenge.slug, seedChallenge);
+
+  // Challenges Endpoints
+  app.get('/api/v1/challenges', async () => {
+    const list = Array.from(challengesById.values()).map((c) => filterChallengeForCandidate(c));
+    return { challenges: list };
+  });
+
+  app.get('/api/v1/challenges/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = req.params;
+    const challenge = challengesById.get(id);
+    if (!challenge) {
+      throw new DomainError('NOT_FOUND', `Challenge with ID ${id} not found.`);
+    }
+    return reply.status(200).send({ challenge: filterChallengeForCandidate(challenge) });
+  });
+
+  app.post('/api/v1/challenges', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateChallengeInputSchema.parse(req.body);
+
+    if (challengesBySlug.has(input.slug)) {
+      throw new DomainError('CONFLICT', `Challenge with slug "${input.slug}" already exists.`);
+    }
+
+    const challenge = createChallenge({
+      slug: input.slug,
+      title: input.title,
+      description: input.description,
+      difficulty: input.difficulty,
+      category: input.category,
+      skillIds: input.skillIds,
+      testCases: input.testCases as any,
+      timeLimitMs: input.timeLimitMs,
+      memoryLimitMb: input.memoryLimitMb,
+      policyMode: input.policyMode,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+      },
+    });
+
+    challengesById.set(challenge.id, challenge);
+    challengesBySlug.set(challenge.slug, challenge);
+
+    return reply.status(201).send({ challenge });
+  });
+
+  // Assessment Session & Submission Endpoints
+  app.post('/api/v1/challenges/:id/start-session', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: challengeId } = req.params;
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required before starting assessment.');
+    }
+
+    const challenge = challengesById.get(challengeId);
+    if (!challenge) {
+      throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
+    }
+
+    const assessmentSession = startAssessmentSession({
+      candidateProfileId: profile.id,
+      challenge,
+    });
+
+    assessmentSessionsById.set(assessmentSession.id, assessmentSession);
+    const list = assessmentSessionsByCandidateId.get(profile.id) || [];
+    list.push(assessmentSession);
+    assessmentSessionsByCandidateId.set(profile.id, list);
+
+    return reply.status(201).send({ session: assessmentSession });
+  });
+
+  app.post('/api/v1/challenges/:id/submit', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: challengeId } = req.params;
+    const input = SubmitChallengeSolutionInputSchema.parse(req.body);
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required.');
+    }
+
+    const challenge = challengesById.get(challengeId);
+    if (!challenge) {
+      throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
+    }
+
+    let activeSession: AssessmentSession | undefined;
+    if (input.sessionId) {
+      activeSession = assessmentSessionsById.get(input.sessionId);
+    } else {
+      const candidateSessions = assessmentSessionsByCandidateId.get(profile.id) || [];
+      activeSession = candidateSessions.find(
+        (s) => s.assessmentId === challengeId && s.status === 'in_progress'
+      );
+    }
+
+    const evalResult = evaluateChallengeSubmission({
+      challenge,
+      candidateProfileId: profile.id,
+      language: input.language,
+      code: input.code,
+      session: activeSession,
+    });
+
+    let awardedXp = 0;
+    if (evalResult.status === 'passed') {
+      // 1. Store auto-minted verified evidence
+      if (evalResult.evidence) {
+        evidenceById.set(evalResult.evidence.id, evalResult.evidence);
+        const evList = evidenceBySubjectId.get(profile.id) || [];
+        evList.push(evalResult.evidence);
+        evidenceBySubjectId.set(profile.id, evList);
+
+        enqueuedWorkerJobs.push({
+          type: 'evidence.propagate',
+          payload: {
+            evidenceId: evalResult.evidence.id,
+            status: evalResult.evidence.status,
+            level: evalResult.evidence.verificationLevel,
+          },
+          enqueuedAt: new Date().toISOString(),
+        });
+      }
+
+      // 2. Calculate and award XP with 200 XP/day cap (BR-25)
+      const userTxs = xpTransactionsByUserId.get(session.userId) || [];
+      awardedXp = calculateCappedXp(evalResult.xpEarned, userTxs, 200);
+
+      if (awardedXp > 0) {
+        const tx: XpTransaction = {
+          id: crypto.randomUUID(),
+          userId: session.userId,
+          amount: awardedXp,
+          referenceType: 'challenge',
+          referenceId: challenge.id,
+          description: `Passed challenge "${challenge.title}"`,
+          createdAt: new Date().toISOString(),
+        };
+        userTxs.push(tx);
+        xpTransactionsByUserId.set(session.userId, userTxs);
+      }
+    }
+
+    // Close session if active
+    if (activeSession && activeSession.status === 'in_progress') {
+      activeSession.status = 'submitted';
+      activeSession.submittedAt = new Date().toISOString();
+      activeSession.endTime = new Date().toISOString();
+    }
+
+    return reply.status(200).send({
+      result: evalResult,
+      evidence: evalResult.evidence,
+      xpEarned: awardedXp,
+    });
+  });
+
+  // AI Assistant & Gateway Entry Point (SSOT Section D: Strict AI_PROHIBITED Enforcement)
+  app.post('/api/v1/ai/assistant/query', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = AIAssistantQueryInputSchema.parse(req.body);
+
+    const profile = profilesByUserId.get(session.userId);
+    if (profile) {
+      const activeSessions = assessmentSessionsByCandidateId.get(profile.id) || [];
+      // SSOT Section D: Mandatory server-side enforcement. Never trust UI hiding.
+      assertAIAssistanceAllowed(activeSessions);
+    }
+
+    return reply.status(200).send({
+      answer: `AI Assistant guidance for: "${input.prompt}"`,
+      disclaimer: 'AI outputs are advisory and not verified candidate evidence.',
+    });
+  });
+
+  // XP Ledger Endpoint
+  app.get('/api/v1/xp/ledger', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const txs = xpTransactionsByUserId.get(session.userId) || [];
+    const totalXp = txs.reduce((sum, t) => sum + t.amount, 0);
+
+    return reply.status(200).send({
+      totalXp,
+      transactions: txs,
+    });
+  });
+
   // Internal test helper for inspecting async job dispatch
   app.get('/api/v1/internal/worker-jobs', async () => {
     return { jobs: enqueuedWorkerJobs };
   });
+
 
 
   return app;

@@ -9,6 +9,8 @@ export * from './evidence.js';
 export * from './skills.js';
 export * from './jobs.js';
 export * from './applications.js';
+export * from './challenges.js';
+export * from './assessment.js';
 
 export type Role =
   | 'candidate'

@@ -4,35 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.3
-- **Last Updated:** 2026-09-24 12:34
+- **Memory Version:** 1.4
+- **Last Updated:** 2026-09-24 13:00
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
-- **Current Phase:** Phase 0 — Platform Trust Foundation
-- **Overall Implementation:** 2 / 173 (1.16%) [Features F-02, F-03 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 2 / 173 (1.16%) [36/36 automated tests PASS; 100% build PASS]
+- **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
+- **Overall Implementation:** 10 / 173 (5.78%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 10 / 173 (5.78%) [95/95 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `003c622`
-- **Current Primary Task:** Phase 0 / Phase 1 — Authentication, Session & Profile Loop (F-01, F-12)
-- **Next Action:** Implement authentication service and user profile domain workflows
-
+- **Last Known Commit:** `5e45e22`
+- **Current Primary Task:** Phase 2 — Learning Management System (F-07)
+- **Next Action:** Implement LMS courses, lesson progression, prerequisites, and completion certificates
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** GREENFIELD (0% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture planned; scaffolded directories present)
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (scaffolded directories present)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies, Kysely query layer
-- **Authentication:** Supabase Auth with server-side JWKS validation & session tokens
-- **AI:** Central AI Gateway & Orchestrator with cost protection & assessment session enforcement
-- **PWA:** Service worker + IndexedDB offline-first architecture planned
-- **Testing:** Vitest / Playwright / Axe / ASVS test harnesses planned
+- **Implementation Status:** IN PROGRESS (5.78% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments)
+- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004)
+- **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
+- **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`)
+- **PWA:** Service worker + IndexedDB offline-first architecture
+- **Testing:** 12 test suites, 95/95 automated unit and integration tests passing
 - **Security:** Defense in depth, strict RLS, server-authoritative authorization
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
-- **Current Focus:** Monorepo workspace bootstrap, dependency configuration, and Phase 0 trust foundation
+- **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Initialize `package.json`, `pnpm-workspace.yaml`, workspace scripts, and base configurations
+- **Next Action:** Implement LMS courses, lesson progress, and completion certificates (F-07)
 
 ---
 
@@ -51,14 +50,14 @@
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 4 | 4 | 0 | IN PROGRESS |
 | **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
-| **Evidence & Learning (Phase 2)** | 24 | 2 | 2 | 0 | IN PROGRESS |
+| **Evidence & Learning (Phase 2)** | 24 | 3 | 3 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
 | **Career Intelligence (Phase 5)** | 20 | 0 | 0 | 0 | PLANNED |
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **9** | **9** | **0** | **IN PROGRESS (5.20%)** |
+| **Total Portfolio** | **173** | **10** | **10** | **0** | **IN PROGRESS (5.78%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -69,10 +68,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 164
+- **PLANNED:** 163
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 9 (F-01, F-02, F-03, F-04, F-05, F-06, F-12, F-84, F-96)
-- **VERIFIED:** 9 (F-01, F-02, F-03, F-04, F-05, F-06, F-12, F-84, F-96)
+- **IMPLEMENTED:** 10 (F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96)
+- **VERIFIED:** 10 (F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -212,6 +211,20 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/jobs-applications.test.ts` (9 integration tests verifying end-to-end recruiter posting, candidate applying, duplicate prevention, and ATS pipeline advancement)
 - **Result:** All 10 test suites (82 tests) PASS. TypeScript builds clean. Vite web bundle verified.
 
+#### Change 12: Challenges Arena, Assessment Engine & AI Policy Enforcement (F-08)
+- **Why:** Implement skill challenge validation, proctored assessment sessions with server-authoritative `AI_PROHIBITED` enforcement (SSOT Section D), public/hidden test case separation to prevent solution leaking (BR-51), programming language allowlist (BR-24), execution timeouts and resource constraints (BR-50), daily 200 XP ledger capping (BR-25), and automatic verified evidence minting on challenge pass.
+- **Files:**
+  - `supabase/migrations/00004_challenges_assessment_schema.sql` (Challenges, assessment_sessions, challenge_submissions, xp_transactions with RLS)
+  - `packages/domain/src/challenges.ts` (Challenge creation, language allowlist, candidate view filtering, sandboxed solution evaluation)
+  - `packages/domain/src/assessment.ts` (Session lifecycle, server-authoritative AI blockage during active sessions, XP capping ledger)
+  - `packages/domain/src/index.ts` (Exports challenges & assessment domain modules)
+  - `packages/contracts/src/index.ts` (Zod schemas for challenge creation, submissions, and AI assistant queries)
+  - `apps/api/src/server.ts` (Challenge listing/creation, proctored session start, solution submission with automatic evidence minting, AI assistant gateway endpoint with assessment guard, XP ledger)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00004)
+  - `tests/unit/challenges-assessment-domain.test.ts` (8 unit tests verifying language allowlist, hidden test case stripping, sandbox execution, AI policy enforcement, and XP capping)
+  - `tests/integration/challenges-assessment.test.ts` (4 integration tests verifying end-to-end challenge lifecycle, proctored assessment session, AI assistant blockage, and verified evidence minting)
+- **Result:** All 12 test suites (95 tests) PASS. TypeScript builds clean. Vite web bundle verified.
+
 ---
 
 ## 9. Completed Work
@@ -229,6 +242,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-011:** Implemented Authentication, Session Tokens & Profile Privacy Domain Loop (F-01, F-12): PBKDF2 password hashing, HMAC-SHA256 sessions, profile provisioning, purpose-based privacy filtering, and integration test suite (9/9 tests PASS; 45/45 total PASS).
 - **TASK-012:** Implemented Skill Evidence & Digital Credentials + Skills Taxonomy Graph (F-96, F-84): Migration 00002, pure verification state machine, anti-gaming check, zero-PII public proof, acyclic cycle detection, 5-hop graph traversal, async queue event dispatch, and comprehensive test suites (18 tests added; 63/63 total PASS across 8 suites).
 - **TASK-013:** Implemented Job Marketplace, Post Job Studio & ATS Pipeline (F-04, F-05, F-06): Migration 00003, job lifecycle, recruiter-only posting, candidate-only apply, duplicate prevention, ATS pipeline advancement, and test suites (19 tests added; 82/82 total PASS across 10 suites).
+- **TASK-014:** Implemented Challenges Arena, Assessment Engine & Proctored AI Policy Enforcement (F-08): Migration 00004, hidden test case protection, sandboxed evaluator, active session AI prohibition enforcement, daily 200 XP cap, auto-minted authority evidence, and test suites (13 tests added; 95/95 total PASS across 12 suites).
 
 ---
 
