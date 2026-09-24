@@ -99,9 +99,50 @@ export const CreateEvidenceInputSchema = z.object({
   source: z.string().max(500),
   provenance: z.string().max(500),
   recencyDate: z.string(),
+  skillIds: z.array(z.string().uuid()).optional(),
 });
 
 export type CreateEvidenceInput = z.infer<typeof CreateEvidenceInputSchema>;
+
+export const VerifyEvidenceInputSchema = z.object({
+  verificationLevel: z.enum(['peer_reviewed', 'institution_verified', 'authority_verified']),
+  notes: z.string().max(1000).optional(),
+});
+
+export type VerifyEvidenceInput = z.infer<typeof VerifyEvidenceInputSchema>;
+
+export const DisputeEvidenceInputSchema = z.object({
+  reason: z.string().min(5).max(1000),
+});
+
+export type DisputeEvidenceInput = z.infer<typeof DisputeEvidenceInputSchema>;
+
+export const RevokeEvidenceInputSchema = z.object({
+  reason: z.string().min(5).max(1000),
+});
+
+export type RevokeEvidenceInput = z.infer<typeof RevokeEvidenceInputSchema>;
+
+/**
+ * Skills & Taxonomy Contracts (BR-141..147)
+ */
+export const CreateSkillInputSchema = z.object({
+  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  name: z.string().min(2).max(100),
+  category: z.string().min(2).max(100),
+  description: z.string().max(1000).optional(),
+});
+
+export type CreateSkillInput = z.infer<typeof CreateSkillInputSchema>;
+
+export const CreateSkillRelationshipInputSchema = z.object({
+  sourceSkillId: z.string().uuid(),
+  targetSkillId: z.string().uuid(),
+  relationshipType: z.enum(['prerequisite_of', 'subskill_of', 'supersedes', 'correlates_with']),
+  weight: z.number().min(0).max(1).default(1.0),
+});
+
+export type CreateSkillRelationshipInput = z.infer<typeof CreateSkillRelationshipInputSchema>;
 
 /**
  * Job Application Transition Contract

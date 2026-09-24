@@ -49,16 +49,16 @@
 
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Foundation & Auth (Phase 0)** | 16 | 0 | 0 | 0 | IN PROGRESS |
-| **Identity & Profile (Phase 1)** | 18 | 0 | 0 | 0 | PLANNED |
-| **Evidence & Learning (Phase 2)** | 24 | 0 | 0 | 0 | PLANNED |
+| **Foundation & Auth (Phase 0)** | 16 | 4 | 4 | 0 | IN PROGRESS |
+| **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
+| **Evidence & Learning (Phase 2)** | 24 | 1 | 1 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 0 | 0 | 0 | PLANNED |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
 | **Career Intelligence (Phase 5)** | 20 | 0 | 0 | 0 | PLANNED |
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **0** | **0** | **0** | **GREENFIELD (0.00%)** |
+| **Total Portfolio** | **173** | **6** | **6** | **0** | **IN PROGRESS (3.47%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -69,10 +69,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 173
+- **PLANNED:** 167
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 0
-- **VERIFIED:** 0
+- **IMPLEMENTED:** 6 (F-01, F-02, F-03, F-12, F-84, F-96)
+- **VERIFIED:** 6 (F-01, F-02, F-03, F-12, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -184,6 +184,20 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/api-server.test.ts` (Updated registration profile assertion)
 - **Result:** TypeScript builds clean. 9 auth-profile integration tests passed. Overall tests: 45/45 PASS.
 
+#### Change 10: Skill Evidence & Digital Credentials + Skills Taxonomy Graph (F-96, F-84)
+- **Why:** Implement foundational Talent & Evidence Graph core capabilities: append-only evidence lifecycle, verification level progression (`unverified` -> `peer_reviewed` -> `institution_verified` -> `authority_verified`), anti-gaming self-verification prevention, dispute/revocation workflows, zero-PII public verification proofs (BR-150, BR-155), canonical skills taxonomy (BR-141), and acyclic prerequisite validation (BR-147).
+- **Files:**
+  - `supabase/migrations/00002_evidence_skills_schema.sql` (Evidence metadata, skills, skill_relationships, evidence_skills with RLS)
+  - `packages/domain/src/evidence.ts` (Evidence creation, verification state machine, anti-gaming check, dispute, revocation, SHA-256 public proof)
+  - `packages/domain/src/skills.ts` (Canonical skills, DFS acyclic prerequisite cycle detection, 5-hop bounded graph traversal)
+  - `packages/domain/src/index.ts` (Exports evidence & skills models and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for evidence verification, dispute, revocation, skills, and relationships)
+  - `apps/api/src/server.ts` (Evidence CRUD, verification, dispute, revocation, public proof, skills list/create, relationships, graph traversal, and async worker queue dispatch)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00002)
+  - `tests/unit/evidence-skills-domain.test.ts` (10 unit tests for evidence and skills domain models)
+  - `tests/integration/evidence-skills.test.ts` (7 integration tests verifying full API lifecycle, RBAC, cycle rejection, worker job enqueue, and public verification)
+- **Result:** All 8 test suites (63 tests) PASS. TypeScript builds clean. Vite web bundle built in 3.5s.
+
 ---
 
 ## 9. Completed Work
@@ -199,6 +213,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-009:** Implemented PWA frontend shell and accessible UI system (E-13, E-14, F-02, F-03): React 19 + Vite + TanStack Query, web app manifest, WCAG skip link, offline banner, role-adaptive dashboard, and test suite (5/5 tests PASS; 32/32 total PASS).
 - **TASK-010:** Implemented Async Worker Queue Engine (E-01, Section 22): `apps/worker` with idempotency cache, bounded retries, DLQ routing, and test suite (4/4 tests PASS; 36/36 total PASS).
 - **TASK-011:** Implemented Authentication, Session Tokens & Profile Privacy Domain Loop (F-01, F-12): PBKDF2 password hashing, HMAC-SHA256 sessions, profile provisioning, purpose-based privacy filtering, and integration test suite (9/9 tests PASS; 45/45 total PASS).
+- **TASK-012:** Implemented Skill Evidence & Digital Credentials + Skills Taxonomy Graph (F-96, F-84): Migration 00002, pure verification state machine, anti-gaming check, zero-PII public proof, acyclic cycle detection, 5-hop graph traversal, async queue event dispatch, and comprehensive test suites (18 tests added; 63/63 total PASS across 8 suites).
 
 ---
 

@@ -53,4 +53,17 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(seedSql).toContain('FEATURE_LMS');
     expect(seedSql).toContain('FEATURE_CODE_ARENA');
   });
+
+  it('contains and validates migration 00002 evidence and skills schema', () => {
+    const migrationFile2 = path.join(migrationsDir, '00002_evidence_skills_schema.sql');
+    expect(fs.existsSync(migrationFile2)).toBe(true);
+    const sql = fs.readFileSync(migrationFile2, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skills');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skill_relationships');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.evidence_skills');
+    expect(sql).toContain('ALTER TABLE public.skills ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.skill_relationships ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.evidence_skills ENABLE ROW LEVEL SECURITY;');
+  });
 });
+

@@ -5,6 +5,8 @@
 
 export * from './auth.js';
 export * from './profile.js';
+export * from './evidence.js';
+export * from './skills.js';
 
 export type Role =
   | 'candidate'
@@ -73,6 +75,7 @@ export interface Evidence {
   status: EvidenceStatus;
   conflictState?: 'none' | 'disputed' | 'overridden';
   recencyDate: string;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
