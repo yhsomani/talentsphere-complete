@@ -4,17 +4,17 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.1
-- **Last Updated:** 2026-09-24 12:25
+- **Memory Version:** 1.2
+- **Last Updated:** 2026-09-24 12:32
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 — Platform Trust Foundation
-- **Overall Implementation:** 0 / 173 (0.00%) [Foundation Toolchain: 100%]
-- **Overall Verification:** 0 / 173 (0.00%) [Foundation Tests: 14/14 PASS]
-- **Current Release:** v0.0.0-greenfield
+- **Overall Implementation:** 2 / 173 (1.16%) [Features F-02, F-03 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 2 / 173 (1.16%) [32/32 automated tests PASS; 100% build PASS]
+- **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `0ded6b6`
-- **Current Primary Task:** Phase 0 — Fastify API Scaffold & Supabase Schema Migrations
-- **Next Action:** Implement `apps/api` Fastify modular monolith server with error handling plugin, health endpoint, and Supabase migrations
+- **Last Known Commit:** `687d401`
+- **Current Primary Task:** Phase 0 — Worker Queue Scaffold (E-01) & Auth/Profile Loop
+- **Next Action:** Setup `apps/worker` background queue consumer and proceed to Authentication & Profile integration
 
 ---
 
@@ -153,8 +153,20 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `apps/api/tsconfig.json`
   - `apps/api/src/server.ts` (Fastify app, onSend hook, error handler, health & auth routes)
   - `apps/api/src/index.ts` (Server listener entry point)
-  - `tests/integration/api-server.test.ts` (9 integration tests)
-- **Result:** TypeScript builds clean. 9 integration tests passed. Overall tests: 27/27 PASS.
+#### Change 7: PWA Frontend Shell, Accessible Layout & Role-Adaptive Dashboard (E-13, E-14, F-02, F-03)
+- **Why:** Provide mobile-first PWA frontend with WCAG 2.2 AA accessibility (skip link, landmark structure), offline status banner, TanStack Query provider, and role-adaptive dashboard.
+- **Files:**
+  - `apps/web/package.json`
+  - `apps/web/tsconfig.json`
+  - `apps/web/vite.config.ts`
+  - `apps/web/index.html` (PWA meta tags, theme color, manifest reference)
+  - `apps/web/public/manifest.webmanifest` (PWA standalone manifest)
+  - `apps/web/src/components/Layout.tsx` (Accessible layout, skip link, offline banner)
+  - `apps/web/src/pages/LandingPage.tsx` (Hero, value propositions, core loop)
+  - `apps/web/src/pages/DashboardPage.tsx` (Readiness metric cards, verified evidence count)
+  - `apps/web/src/App.tsx` & `apps/web/src/main.tsx` (React 19, QueryClientProvider, React Router)
+  - `tests/unit/web-shell.test.ts` (Manifest, meta, design token tests)
+- **Result:** Vite production build successful (assets generated). 5 web shell unit tests passed. Overall tests: 32/32 PASS.
 
 ---
 
@@ -168,6 +180,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-006:** Bootstrapped monorepo workspace toolchain (E-01): `pnpm-workspace.yaml`, `package.json`, `tsconfig.json`, `.gitignore`, 6 shared packages (`config`, `domain`, `contracts`, `observability`, `ui`, `testing`), and foundation test suite (14/14 tests PASS).
 - **TASK-007:** Implemented database schema and migration system (E-04, E-05): `00001_core_schema.sql` with 8 core tables and RLS, `01_initial_seed.sql`, migration/seed scripts, and test suite (4/4 tests PASS; 18/18 total PASS).
 - **TASK-008:** Implemented Fastify modular API server (E-09, E-10): helmet security headers, CORS, rate-limiting, canonical error envelope, request ID tracing, health and auth endpoints, and integration test suite (9/9 tests PASS; 27/27 total PASS).
+- **TASK-009:** Implemented PWA frontend shell and accessible UI system (E-13, E-14, F-02, F-03): React 19 + Vite + TanStack Query, web app manifest, WCAG skip link, offline banner, role-adaptive dashboard, and test suite (5/5 tests PASS; 32/32 total PASS).
 
 ---
 
