@@ -68,6 +68,17 @@ import {
   shouldDeliverNotification,
   createNotificationEntity,
   markNotificationsAsRead,
+  AIConversation,
+  AIMessage,
+  AIUsageMeter,
+  AITier,
+  AI_QUOTA_LIMITS,
+  AI_ADVISORY_DISCLAIMER,
+  createAIConversationEntity,
+  sanitizePromptInput,
+  estimateTokens,
+  assertWithinAIQuota,
+  generateCareerAssistantResponse,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -96,6 +107,8 @@ import {
   SendMessageInputSchema,
   MarkNotificationsReadInputSchema,
   UpdateNotificationPreferencesInputSchema,
+  CreateAIConversationInputSchema,
+  AIChatInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -182,6 +195,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         INVALID_STATE_TRANSITION: 422,
         ASSESSMENT_AI_PROHIBITED: 403,
         FREE_USER_AI_QUOTA_EXCEEDED: 402,
+        POLICY_VIOLATION: 422,
         RATE_LIMIT_EXCEEDED: 429,
         TENANT_ISOLATION_VIOLATION: 403,
       };
@@ -2192,6 +2206,169 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Preferences updated successfully',
       preferences: prefs,
+    });
+  });
+
+  // Central AI Gateway & Career Assistant Repositories (F-11, SSOT Section 16)
+  const aiConversationsById = new Map<string, AIConversation>();
+  const aiConversationsByUserId = new Map<string, AIConversation[]>();
+  const aiMessagesByConversationId = new Map<string, AIMessage[]>();
+  const aiUsageMetersByUserAndDate = new Map<string, AIUsageMeter>();
+
+  const getOrCreateAIUsageMeter = (userId: string, tier: AITier = 'free'): AIUsageMeter => {
+    const periodDate = new Date().toISOString().slice(0, 10);
+    const key = `${userId}:${periodDate}`;
+    let meter = aiUsageMetersByUserAndDate.get(key);
+    if (!meter) {
+      meter = {
+        id: crypto.randomUUID(),
+        userId,
+        periodDate,
+        tokensConsumed: 0,
+        requestsCount: 0,
+        tier,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      aiUsageMetersByUserAndDate.set(key, meter);
+    }
+    return meter;
+  };
+
+  // Central AI Gateway Endpoints
+  app.post('/api/v1/ai/conversations', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateAIConversationInputSchema.parse(req.body || {});
+
+    const conversation = createAIConversationEntity(session.userId, input.title, input.purpose);
+    aiConversationsById.set(conversation.id, conversation);
+
+    const userConvs = aiConversationsByUserId.get(session.userId) || [];
+    userConvs.unshift(conversation);
+    aiConversationsByUserId.set(session.userId, userConvs);
+
+    return reply.status(201).send({ conversation });
+  });
+
+  app.get('/api/v1/ai/conversations', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const conversations = aiConversationsByUserId.get(session.userId) || [];
+    return reply.status(200).send({ conversations });
+  });
+
+  app.get('/api/v1/ai/conversations/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const conversation = aiConversationsById.get(id);
+    if (!conversation) {
+      throw new DomainError('NOT_FOUND', `Conversation with ID "${id}" not found.`);
+    }
+
+    if (conversation.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to conversation.');
+    }
+
+    const messages = aiMessagesByConversationId.get(id) || [];
+    return reply.status(200).send({ conversation, messages });
+  });
+
+  app.post('/api/v1/ai/career-assistant/chat', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+
+    // 1. Mandatory server-side assessment session AI prohibition (SSOT Section D, TRD Section 7)
+    if (profile) {
+      const activeSessions = (assessmentSessionsByCandidateId.get(profile.id) || []).filter(
+        (s) => s.status === 'in_progress'
+      );
+      assertAIAssistanceAllowed(activeSessions);
+    }
+
+    const input = AIChatInputSchema.parse(req.body);
+
+    // 2. Context Firewall & Prompt Injection Defense (WIT-007, APP_FLOW.md)
+    const { sanitized } = sanitizePromptInput(input.prompt);
+
+    // 3. Entitlement Quota Check (SSOT Section 16.4: Free-User Cost Invariant)
+    const userTier: AITier = 'free'; // default free tier, strictly metered
+    const meter = getOrCreateAIUsageMeter(session.userId, userTier);
+    const requestedTokens = estimateTokens(input.prompt);
+    assertWithinAIQuota(meter, requestedTokens, userTier);
+
+    // 4. Conversation Management
+    let conversation: AIConversation;
+    if (input.conversationId) {
+      const existing = aiConversationsById.get(input.conversationId);
+      if (!existing) {
+        throw new DomainError('NOT_FOUND', `Conversation with ID "${input.conversationId}" not found.`);
+      }
+      if (existing.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to conversation.');
+      }
+      conversation = existing;
+    } else {
+      conversation = createAIConversationEntity(session.userId, input.prompt.slice(0, 30));
+      aiConversationsById.set(conversation.id, conversation);
+      const userConvs = aiConversationsByUserId.get(session.userId) || [];
+      userConvs.unshift(conversation);
+      aiConversationsByUserId.set(session.userId, userConvs);
+    }
+
+    // 5. Store user message
+    const userMsg: AIMessage = {
+      id: crypto.randomUUID(),
+      conversationId: conversation.id,
+      senderRole: 'user',
+      content: input.prompt,
+      sanitizedContent: sanitized,
+      tokensUsed: requestedTokens,
+      model: 'talentsphere-career-v1',
+      createdAt: new Date().toISOString(),
+    };
+
+    const convMessages = aiMessagesByConversationId.get(conversation.id) || [];
+    convMessages.push(userMsg);
+
+    // 6. Generate AI response with advisory provenance
+    const aiResult = generateCareerAssistantResponse({
+      conversationId: conversation.id,
+      prompt: input.prompt,
+    });
+
+    convMessages.push(aiResult.message);
+    aiMessagesByConversationId.set(conversation.id, convMessages);
+    conversation.updatedAt = new Date().toISOString();
+
+    // 7. Update usage meter
+    meter.tokensConsumed += aiResult.provenance.tokensUsed;
+    meter.requestsCount += 1;
+    meter.updatedAt = new Date().toISOString();
+
+    // 8. Enqueue async worker job for interaction telemetry
+    enqueuedWorkerJobs.push({
+      type: 'ai.interaction.logged',
+      payload: {
+        userId: session.userId,
+        conversationId: conversation.id,
+        tokensUsed: aiResult.provenance.tokensUsed,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      conversationId: conversation.id,
+      message: aiResult.message,
+      provenance: aiResult.provenance,
+    });
+  });
+
+  app.get('/api/v1/ai/usage', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const meter = getOrCreateAIUsageMeter(session.userId, 'free');
+    return reply.status(200).send({
+      usage: meter,
+      limits: AI_QUOTA_LIMITS[meter.tier],
     });
   });
 

@@ -4,34 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.7
-- **Last Updated:** 2026-09-24 13:30
+- **Memory Version:** 1.8
+- **Last Updated:** 2026-09-24 13:35
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 13 / 173 (7.51%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 13 / 173 (7.51%) [123/123 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 14 / 173 (8.09%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-11, F-12, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 14 / 173 (8.09%) [140/140 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `e9cb692`
-- **Current Primary Task:** Phase 0 — Central AI Gateway & Career Assistant (F-11)
-- **Next Action:** Implement AI career assistant gateway with token metering, context budgeting, and prompt canary fencing
+- **Last Known Commit:** `313f25a`
+- **Current Primary Task:** Phase 1 — Resume Builder & Export Engine (F-13)
+- **Next Action:** Implement resume builder schema, section builders, verified evidence embedding, and export engine
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (7.51% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications)
+- **Implementation Status:** IN PROGRESS (8.09% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway & career assistant)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007, 00008)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
-- **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`)
+- **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 16 test suites, 113/113 automated unit and integration tests passing
-- **Security:** Defense in depth, strict RLS, server-authoritative authorization
+- **Testing:** 20 test suites, 140/140 automated unit and integration tests passing
+- **Security:** Defense in depth, strict RLS, server-authoritative authorization, prompt injection canary defense
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Implement Notification Center (F-14)
+- **Next Action:** Implement Resume Builder (F-13)
 
 ---
 
@@ -49,7 +49,7 @@
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 6 | 6 | 0 | IN PROGRESS |
-| **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
+| **Identity & Profile (Phase 1)** | 18 | 2 | 2 | 0 | IN PROGRESS |
 | **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
@@ -57,7 +57,7 @@
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **13** | **13** | **0** | **IN PROGRESS (7.51%)** |
+| **Total Portfolio** | **173** | **14** | **14** | **0** | **IN PROGRESS (8.09%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -68,10 +68,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 160
+- **PLANNED:** 159
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 13 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96)
-- **VERIFIED:** 13 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96)
+- **IMPLEMENTED:** 14 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-11, F-12, F-14, F-84, F-96)
+- **VERIFIED:** 14 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-11, F-12, F-14, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -264,6 +264,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/notifications.test.ts` (5 integration tests verifying preference retrieval/patching, delivery gating, targeted and bulk mark read, unread counts, user privacy isolation, and worker dispatch)
 - **Result:** All 18 test suites (123 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.49s.
 
+#### Change 16: Central AI Gateway & Career Assistant with Cost Protection & Proctoring Isolation (F-11)
+- **Why:** Implement central AI architecture (SSOT Section 16): Free-User Cost Invariant daily token & request quota metering (SSOT 16.4), Context Firewall with prompt injection canary defense (WIT-007, APP_FLOW.md), conversation thread lifecycle, advisory disclaimers (`AI Output ≠ Verified Evidence`, drafts never auto-commit BR-33), server-authoritative proctored assessment AI blockage (`ASSESSMENT_AI_PROHIBITED`, SSOT Section D, TRD Section 7), and async worker interaction telemetry.
+- **Files:**
+  - `supabase/migrations/00008_ai_gateway_schema.sql` (ai_conversations, ai_messages, ai_usage_meters with RLS and daily unique constraints)
+  - `packages/domain/src/ai-gateway.ts` (quota limits, token estimator, prompt sanitization, canary defense, career advisory generator, provenance)
+  - `packages/domain/src/index.ts` (Exports AI gateway domain models, methods, and error codes)
+  - `packages/contracts/src/index.ts` (Zod schemas for AI conversation creation and chat messages)
+  - `apps/api/src/server.ts` (Endpoints: POST/GET /api/v1/ai/conversations, GET /api/v1/ai/conversations/:id, POST /api/v1/ai/career-assistant/chat, GET /api/v1/ai/usage, statusMap mapping)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00008)
+  - `tests/unit/ai-gateway-domain.test.ts` (11 unit tests verifying prompt sanitization, canary pattern detection, free/pro quota enforcement, conversation entities, and career response generation)
+  - `tests/integration/ai-gateway.test.ts` (5 integration tests verifying conversational chat, conversation retrieval, prompt injection rejection, quota tracking, proctored session AI prohibition, and user privacy isolation)
+- **Result:** All 20 test suites (140 tests) PASS. TypeScript composite build clean. Vite web bundle built in 2.70s.
+
 ---
 
 ## 9. Completed Work
@@ -285,6 +298,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-015:** Implemented Learning Management System (LMS Courses, Lessons, Progress Tracking, Prerequisites & Certificates) (F-07): Migration 00005, publish readiness validation, unique enrollment check, sequential module progression, prerequisite enforcement, idempotent lesson completion, zero-PII certificate issuing, and test suites (11 tests added; 106/106 total PASS across 14 suites).
 - **TASK-016:** Implemented Direct Messaging & Thread Management (F-10): Migration 00006, self-messaging prevention, participant-only thread isolation, clientMessageId deduplication, unread count tracking, and test suites (7 tests added; 113/113 total PASS across 16 suites).
 - **TASK-017:** Implemented Notification Center, Preferences, Mention Gating & Read Management (F-14): Migration 00007, delivery preference model (BR-120), mention gating, notification listing, targeted and bulk mark read, unread counts, and test suites (10 tests added; 123/123 total PASS across 18 suites).
+- **TASK-018:** Implemented Central AI Gateway & Career Assistant with Cost Protection & Proctoring Isolation (F-11): Migration 00008, quota limits (Free-User Cost Invariant SSOT 16.4), Context Firewall (WIT-007), prompt injection defense, proctored session AI prohibition (`ASSESSMENT_AI_PROHIBITED`), conversation history, advisory disclaimers, usage metering, and test suites (16 tests added; 140/140 total PASS across 20 suites).
 
 ---
 

@@ -335,5 +335,19 @@ export const UpdateNotificationPreferencesInputSchema = z.object({
 
 export type UpdateNotificationPreferencesInput = z.infer<typeof UpdateNotificationPreferencesInputSchema>;
 
+/**
+ * AI Gateway & Career Assistant Contracts (F-11, SSOT Section 16)
+ */
+export const CreateAIConversationInputSchema = z.object({
+  title: z.string().min(1).max(150).optional(),
+  purpose: z.string().min(1).max(64).default('career_guidance'),
+});
 
+export type CreateAIConversationInput = z.infer<typeof CreateAIConversationInputSchema>;
 
+export const AIChatInputSchema = z.object({
+  conversationId: z.string().uuid().optional(),
+  prompt: z.string().min(1).max(2000),
+});
+
+export type AIChatInput = z.infer<typeof AIChatInputSchema>;

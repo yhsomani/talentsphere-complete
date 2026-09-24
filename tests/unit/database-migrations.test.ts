@@ -131,7 +131,17 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.notification_preferences ENABLE ROW LEVEL SECURITY;');
   });
+
+  it('contains and validates migration 00008 ai gateway schema', () => {
+    const migrationFile8 = path.join(migrationsDir, '00008_ai_gateway_schema.sql');
+    expect(fs.existsSync(migrationFile8)).toBe(true);
+    const sql = fs.readFileSync(migrationFile8, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.ai_conversations');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.ai_messages');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.ai_usage_meters');
+    expect(sql).toContain('ALTER TABLE public.ai_conversations ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.ai_messages ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.ai_usage_meters ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('CONSTRAINT uq_ai_usage_meter UNIQUE (user_id, period_date)');
+  });
 });
-
-
-

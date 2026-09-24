@@ -14,6 +14,7 @@ export * from './assessment.js';
 export * from './lms.js';
 export * from './messaging.js';
 export * from './notifications.js';
+export * from './ai-gateway.js';
 
 export type Role =
   | 'candidate'
@@ -148,6 +149,7 @@ export type DomainErrorCode =
   | 'INVALID_STATE_TRANSITION'
   | 'ASSESSMENT_AI_PROHIBITED'
   | 'FREE_USER_AI_QUOTA_EXCEEDED'
+  | 'POLICY_VIOLATION'
   | 'RATE_LIMIT_EXCEEDED'
   | 'TENANT_ISOLATION_VIOLATION'
   | 'INTERNAL_ERROR';
