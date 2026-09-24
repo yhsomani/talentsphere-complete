@@ -51,14 +51,14 @@
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 4 | 4 | 0 | IN PROGRESS |
 | **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
-| **Evidence & Learning (Phase 2)** | 24 | 1 | 1 | 0 | IN PROGRESS |
-| **Opportunity Loop (Phase 3)** | 22 | 0 | 0 | 0 | PLANNED |
+| **Evidence & Learning (Phase 2)** | 24 | 2 | 2 | 0 | IN PROGRESS |
+| **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
 | **Career Intelligence (Phase 5)** | 20 | 0 | 0 | 0 | PLANNED |
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **6** | **6** | **0** | **IN PROGRESS (3.47%)** |
+| **Total Portfolio** | **173** | **9** | **9** | **0** | **IN PROGRESS (5.20%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -69,10 +69,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 167
+- **PLANNED:** 164
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 6 (F-01, F-02, F-03, F-12, F-84, F-96)
-- **VERIFIED:** 6 (F-01, F-02, F-03, F-12, F-84, F-96)
+- **IMPLEMENTED:** 9 (F-01, F-02, F-03, F-04, F-05, F-06, F-12, F-84, F-96)
+- **VERIFIED:** 9 (F-01, F-02, F-03, F-04, F-05, F-06, F-12, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -198,6 +198,20 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/evidence-skills.test.ts` (7 integration tests verifying full API lifecycle, RBAC, cycle rejection, worker job enqueue, and public verification)
 - **Result:** All 8 test suites (63 tests) PASS. TypeScript builds clean. Vite web bundle built in 3.5s.
 
+#### Change 11: Job Marketplace & ATS Candidate Pipeline (F-04, F-05, F-06)
+- **Why:** Implement complete opportunity loop: organization provisioning, recruiter-authorized job creation (BR-01, BR-12), job publishing state machine (BR-11), candidate discovery, application submission with attached verified evidence, recruiter anti-application rule (BR-02), duplicate active application prevention (BR-15), strict ATS pipeline state machine (BR-41: `submitted` -> `in_review` -> `shortlisted` -> `interviewing` -> `offered` -> `hired`), candidate withdrawal, and asynchronous worker queue dispatch.
+- **Files:**
+  - `supabase/migrations/00003_jobs_applications_schema.sql` (Metadata on jobs/applications, job_skills and application_evidence tables with RLS)
+  - `packages/domain/src/jobs.ts` (Job lifecycle state transitions, recruiter permissions, validation)
+  - `packages/domain/src/applications.ts` (Application submission, candidate role verification, active duplicate check, ATS stage transitions)
+  - `packages/domain/src/index.ts` (Exports jobs & applications domain modules)
+  - `packages/contracts/src/index.ts` (Zod schemas for organizations, jobs, and job applications)
+  - `apps/api/src/server.ts` (Organization, job posting/search/status, application apply/list/transition endpoints, worker queue dispatch)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00003)
+  - `tests/unit/jobs-applications-domain.test.ts` (9 unit tests for jobs lifecycle and ATS application transitions)
+  - `tests/integration/jobs-applications.test.ts` (9 integration tests verifying end-to-end recruiter posting, candidate applying, duplicate prevention, and ATS pipeline advancement)
+- **Result:** All 10 test suites (82 tests) PASS. TypeScript builds clean. Vite web bundle verified.
+
 ---
 
 ## 9. Completed Work
@@ -214,6 +228,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-010:** Implemented Async Worker Queue Engine (E-01, Section 22): `apps/worker` with idempotency cache, bounded retries, DLQ routing, and test suite (4/4 tests PASS; 36/36 total PASS).
 - **TASK-011:** Implemented Authentication, Session Tokens & Profile Privacy Domain Loop (F-01, F-12): PBKDF2 password hashing, HMAC-SHA256 sessions, profile provisioning, purpose-based privacy filtering, and integration test suite (9/9 tests PASS; 45/45 total PASS).
 - **TASK-012:** Implemented Skill Evidence & Digital Credentials + Skills Taxonomy Graph (F-96, F-84): Migration 00002, pure verification state machine, anti-gaming check, zero-PII public proof, acyclic cycle detection, 5-hop graph traversal, async queue event dispatch, and comprehensive test suites (18 tests added; 63/63 total PASS across 8 suites).
+- **TASK-013:** Implemented Job Marketplace, Post Job Studio & ATS Pipeline (F-04, F-05, F-06): Migration 00003, job lifecycle, recruiter-only posting, candidate-only apply, duplicate prevention, ATS pipeline advancement, and test suites (19 tests added; 82/82 total PASS across 10 suites).
 
 ---
 

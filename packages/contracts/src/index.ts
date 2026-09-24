@@ -145,8 +145,49 @@ export const CreateSkillRelationshipInputSchema = z.object({
 export type CreateSkillRelationshipInput = z.infer<typeof CreateSkillRelationshipInputSchema>;
 
 /**
- * Job Application Transition Contract
+ * Organization Contracts
  */
+export const CreateOrganizationInputSchema = z.object({
+  name: z.string().min(2).max(100),
+  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  website: z.string().url().optional(),
+  description: z.string().max(1000).optional(),
+});
+
+export type CreateOrganizationInput = z.infer<typeof CreateOrganizationInputSchema>;
+
+/**
+ * Job Marketplace Contracts (F-04, F-05, BR-01..BR-12)
+ */
+export const CreateJobInputSchema = z.object({
+  orgId: z.string().uuid(),
+  title: z.string().min(3).max(150),
+  description: z.string().min(10).max(10000),
+  location: z.string().min(2).max(100),
+  requiredSkillIds: z.array(z.string().uuid()).optional(),
+  salaryMinMinor: z.number().int().nonnegative().optional(),
+  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  currency: z.string().length(3).default('USD'),
+});
+
+export type CreateJobInput = z.infer<typeof CreateJobInputSchema>;
+
+export const UpdateJobStatusInputSchema = z.object({
+  status: z.enum(['draft', 'pending_approval', 'approved', 'published', 'paused', 'closed', 'archived']),
+});
+
+export type UpdateJobStatusInput = z.infer<typeof UpdateJobStatusInputSchema>;
+
+/**
+ * Job Application & ATS Pipeline Contracts (F-06, BR-02, BR-15..BR-41)
+ */
+export const SubmitApplicationInputSchema = z.object({
+  coverLetter: z.string().max(3000).optional(),
+  attachedEvidenceIds: z.array(z.string().uuid()).optional(),
+});
+
+export type SubmitApplicationInput = z.infer<typeof SubmitApplicationInputSchema>;
+
 export const TransitionApplicationInputSchema = z.object({
   applicationId: z.string().uuid(),
   targetState: z.enum([

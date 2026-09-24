@@ -7,6 +7,8 @@ export * from './auth.js';
 export * from './profile.js';
 export * from './evidence.js';
 export * from './skills.js';
+export * from './jobs.js';
+export * from './applications.js';
 
 export type Role =
   | 'candidate'

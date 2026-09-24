@@ -26,6 +26,13 @@ import {
   generatePublicProof,
   createSkillRelationship,
   traverseSkillGraph,
+  Job,
+  JobStatus,
+  JobApplication,
+  createJobPosting,
+  transitionJobStatus,
+  submitJobApplication,
+  transitionApplicationState,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -37,6 +44,11 @@ import {
   RevokeEvidenceInputSchema,
   CreateSkillInputSchema,
   CreateSkillRelationshipInputSchema,
+  CreateOrganizationInputSchema,
+  CreateJobInputSchema,
+  UpdateJobStatusInputSchema,
+  SubmitApplicationInputSchema,
+  TransitionApplicationInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -687,10 +699,365 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ graph });
   });
 
+  // Organization, Job & Application Repositories (F-04, F-05, F-06)
+  interface StoredOrganization {
+    id: string;
+    name: string;
+    slug: string;
+    website?: string;
+    description?: string;
+    createdAt: string;
+  }
+  interface StoredOrgMembership {
+    id: string;
+    orgId: string;
+    userId: string;
+    role: string;
+    createdAt: string;
+  }
+
+  const organizationsById = new Map<string, StoredOrganization>();
+  const organizationsBySlug = new Map<string, StoredOrganization>();
+  const orgMembershipsByOrgId = new Map<string, StoredOrgMembership[]>();
+  const orgMembershipsByUserId = new Map<string, StoredOrgMembership[]>();
+  const jobsById = new Map<string, Job>();
+  const jobsByOrgId = new Map<string, Job[]>();
+  const applicationsById = new Map<string, JobApplication>();
+  const applicationsByJobId = new Map<string, JobApplication[]>();
+  const applicationsByCandidateId = new Map<string, JobApplication[]>();
+
+  // Organization Endpoints
+  app.post('/api/v1/organizations', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateOrganizationInputSchema.parse(req.body);
+
+    if (organizationsBySlug.has(input.slug)) {
+      throw new DomainError('CONFLICT', `Organization with slug "${input.slug}" already exists.`);
+    }
+
+    const orgId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const org: StoredOrganization = {
+      id: orgId,
+      name: input.name,
+      slug: input.slug,
+      website: input.website,
+      description: input.description,
+      createdAt: now,
+    };
+
+    organizationsById.set(orgId, org);
+    organizationsBySlug.set(input.slug, org);
+
+    const membership: StoredOrgMembership = {
+      id: crypto.randomUUID(),
+      orgId,
+      userId: session.userId,
+      role: 'owner',
+      createdAt: now,
+    };
+
+    const orgMembers = orgMembershipsByOrgId.get(orgId) || [];
+    orgMembers.push(membership);
+    orgMembershipsByOrgId.set(orgId, orgMembers);
+
+    const userMembers = orgMembershipsByUserId.get(session.userId) || [];
+    userMembers.push(membership);
+    orgMembershipsByUserId.set(session.userId, userMembers);
+
+    return reply.status(201).send({ organization: org });
+  });
+
+  app.get('/api/v1/organizations/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = req.params;
+    const org = organizationsById.get(id);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+    }
+    return reply.status(200).send({ organization: org });
+  });
+
+  // Jobs Endpoints (F-04, F-05, BR-01..BR-12)
+  app.post('/api/v1/jobs', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateJobInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'You do not belong to the organization for this job posting (BR-12).');
+    }
+
+    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+      for (const skillId of input.requiredSkillIds) {
+        if (!skillsById.has(skillId)) {
+          throw new DomainError('NOT_FOUND', `Canonical skill ${skillId} does not exist (BR-144).`);
+        }
+      }
+    }
+
+    const job = createJobPosting({
+      orgId: input.orgId,
+      title: input.title,
+      description: input.description,
+      location: input.location,
+      requiredSkillIds: input.requiredSkillIds,
+      salaryRange:
+        input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined
+          ? {
+              minMinor: input.salaryMinMinor,
+              maxMinor: input.salaryMaxMinor,
+              currency: input.currency,
+            }
+          : undefined,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: input.orgId,
+      },
+    });
+
+    jobsById.set(job.id, job);
+    const list = jobsByOrgId.get(input.orgId) || [];
+    list.push(job);
+    jobsByOrgId.set(input.orgId, list);
+
+    auditLogs.push({
+      event: 'job.created',
+      actorId: session.userId,
+      targetId: job.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ job });
+  });
+
+  app.get('/api/v1/jobs', async () => {
+    const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
+    return { jobs: published };
+  });
+
+  app.get('/api/v1/jobs/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = req.params;
+    const job = jobsById.get(id);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+    }
+
+    const org = organizationsById.get(job.orgId);
+    const skills = job.requiredSkillIds.map((sid) => skillsById.get(sid)).filter(Boolean);
+
+    return reply.status(200).send({ job, organization: org, requiredSkills: skills });
+  });
+
+  app.patch('/api/v1/jobs/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = UpdateJobStatusInputSchema.parse(req.body);
+
+    const job = jobsById.get(id);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+    }
+
+    const updated = transitionJobStatus(job, input.status, {
+      userId: session.userId,
+      roles: session.roles,
+      orgId: job.orgId,
+    });
+
+    jobsById.set(updated.id, updated);
+    const list = jobsByOrgId.get(job.orgId) || [];
+    const idx = list.findIndex((j) => j.id === updated.id);
+    if (idx >= 0) list[idx] = updated;
+
+    return reply.status(200).send({
+      message: 'Job status updated successfully.',
+      job: updated,
+    });
+  });
+
+  // Application Endpoints (F-06, BR-02, BR-15..BR-41)
+  app.post('/api/v1/jobs/:id/apply', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: jobId } = req.params;
+    const input = SubmitApplicationInputSchema.parse(req.body);
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile required before submitting job applications.');
+    }
+
+    const job = jobsById.get(jobId);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
+    }
+
+    if (input.attachedEvidenceIds && input.attachedEvidenceIds.length > 0) {
+      for (const evId of input.attachedEvidenceIds) {
+        const ev = evidenceById.get(evId);
+        if (!ev) {
+          throw new DomainError('NOT_FOUND', `Evidence item ${evId} not found.`);
+        }
+        if (ev.subjectId !== profile.id) {
+          throw new DomainError('FORBIDDEN', `Evidence item ${evId} does not belong to your profile.`);
+        }
+      }
+    }
+
+    const existingApps = Array.from(applicationsById.values());
+    const application = submitJobApplication({
+      jobId,
+      jobStatus: job.status,
+      candidateProfileId: profile.id,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+      },
+      existingApplications: existingApps,
+      coverLetter: input.coverLetter,
+      attachedEvidenceIds: input.attachedEvidenceIds,
+    });
+
+    applicationsById.set(application.id, application);
+    const jobList = applicationsByJobId.get(jobId) || [];
+    jobList.push(application);
+    applicationsByJobId.set(jobId, jobList);
+
+    const candList = applicationsByCandidateId.get(profile.id) || [];
+    candList.push(application);
+    applicationsByCandidateId.set(profile.id, candList);
+
+    enqueuedWorkerJobs.push({
+      type: 'application.submitted',
+      payload: { applicationId: application.id, jobId, candidateId: profile.id },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    auditLogs.push({
+      event: 'application.submitted',
+      actorId: session.userId,
+      targetId: application.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Application submitted successfully.',
+      application,
+    });
+  });
+
+  app.get('/api/v1/applications/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const list = applicationsByCandidateId.get(profile.id) || [];
+    const withJobDetails = list.map((app) => ({
+      ...app,
+      job: jobsById.get(app.jobId),
+    }));
+
+    return reply.status(200).send({ applications: withJobDetails });
+  });
+
+  app.get('/api/v1/jobs/:id/applications', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: jobId } = req.params;
+
+    const job = jobsById.get(jobId);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to candidate applications is restricted to authorized recruiters for this organization (BR-40).');
+    }
+
+    const list = applicationsByJobId.get(jobId) || [];
+    const enriched = list.map((app) => ({
+      ...app,
+      candidate: profilesById.get(app.candidateId),
+      evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+    }));
+
+    return reply.status(200).send({ applications: enriched });
+  });
+
+  app.post('/api/v1/applications/:id/transition', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = TransitionApplicationInputSchema.parse(req.body);
+
+    const application = applicationsById.get(id);
+    if (!application) {
+      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+    }
+
+    const candidateProfile = profilesById.get(application.candidateId);
+    const isCandidateOwner = candidateProfile?.userId === session.userId;
+
+    const job = jobsById.get(application.jobId);
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+
+    const updated = transitionApplicationState(
+      application,
+      input.targetState,
+      {
+        userId: session.userId,
+        roles: session.roles,
+        isCandidateOwner,
+        isRecruiterForJob,
+      },
+      input.reason
+    );
+
+    applicationsById.set(updated.id, updated);
+
+    // Update candidate list
+    const candList = applicationsByCandidateId.get(application.candidateId) || [];
+    const candIdx = candList.findIndex((a) => a.id === updated.id);
+    if (candIdx >= 0) candList[candIdx] = updated;
+
+    // Update job list
+    const jobList = applicationsByJobId.get(application.jobId) || [];
+    const jobIdx = jobList.findIndex((a) => a.id === updated.id);
+    if (jobIdx >= 0) jobList[jobIdx] = updated;
+
+    enqueuedWorkerJobs.push({
+      type: 'application.status_changed',
+      payload: { applicationId: updated.id, status: updated.status },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    auditLogs.push({
+      event: 'application.status_changed',
+      actorId: session.userId,
+      targetId: updated.id,
+      metadata: { targetState: input.targetState, reason: input.reason },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Application status transitioned successfully.',
+      application: updated,
+    });
+  });
+
   // Internal test helper for inspecting async job dispatch
   app.get('/api/v1/internal/worker-jobs', async () => {
     return { jobs: enqueuedWorkerJobs };
   });
+
 
   return app;
 }
