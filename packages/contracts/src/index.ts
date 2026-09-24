@@ -315,4 +315,25 @@ export const SendMessageInputSchema = z.object({
 
 export type SendMessageInput = z.infer<typeof SendMessageInputSchema>;
 
+/**
+ * Notification Center Contracts (F-14, BR-120)
+ */
+export const MarkNotificationsReadInputSchema = z.object({
+  notificationIds: z.array(z.string().uuid()).optional(),
+  all: z.boolean().optional(),
+});
+
+export type MarkNotificationsReadInput = z.infer<typeof MarkNotificationsReadInputSchema>;
+
+export const UpdateNotificationPreferencesInputSchema = z.object({
+  allowMessages: z.boolean().optional(),
+  allowMentions: z.boolean().optional(),
+  allowApplications: z.boolean().optional(),
+  allowCourseUpdates: z.boolean().optional(),
+  emailDigestFrequency: z.enum(['realtime', 'daily', 'weekly', 'never']).optional(),
+});
+
+export type UpdateNotificationPreferencesInput = z.infer<typeof UpdateNotificationPreferencesInputSchema>;
+
+
 

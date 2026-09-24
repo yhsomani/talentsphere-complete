@@ -61,6 +61,13 @@ import {
   assertThreadParticipant,
   createMessageEntity,
   calculateUnreadCount,
+  Notification,
+  NotificationType,
+  NotificationPreferences,
+  createDefaultNotificationPreferences,
+  shouldDeliverNotification,
+  createNotificationEntity,
+  markNotificationsAsRead,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -87,6 +94,8 @@ import {
   CompleteLessonInputSchema,
   CreateThreadInputSchema,
   SendMessageInputSchema,
+  MarkNotificationsReadInputSchema,
+  UpdateNotificationPreferencesInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -395,6 +404,49 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const evidenceSkills = new Map<string, Set<string>>();
   const auditLogs: any[] = [];
   const enqueuedWorkerJobs: any[] = [];
+
+  // Notification Center Repositories & Helper (F-14, BR-120)
+  const notificationsById = new Map<string, Notification>();
+  const notificationsByRecipientId = new Map<string, Notification[]>();
+  const notificationPreferencesByUserId = new Map<string, NotificationPreferences>();
+
+  const sendNotification = (params: {
+    recipientId: string;
+    type: NotificationType;
+    title: string;
+    body: string;
+    referenceType?: string;
+    referenceId?: string;
+  }): Notification | null => {
+    let prefs = notificationPreferencesByUserId.get(params.recipientId);
+    if (!prefs) {
+      prefs = createDefaultNotificationPreferences(params.recipientId);
+      notificationPreferencesByUserId.set(params.recipientId, prefs);
+    }
+
+    if (!shouldDeliverNotification(prefs, params.type)) {
+      return null;
+    }
+
+    const notif = createNotificationEntity(params);
+    notificationsById.set(notif.id, notif);
+
+    const list = notificationsByRecipientId.get(params.recipientId) || [];
+    list.unshift(notif);
+    notificationsByRecipientId.set(params.recipientId, list);
+
+    enqueuedWorkerJobs.push({
+      type: 'notification.push',
+      payload: {
+        notificationId: notif.id,
+        recipientId: notif.recipientId,
+        type: notif.type,
+      },
+      enqueuedAt: notif.createdAt,
+    });
+
+    return notif;
+  };
 
   // Seed canonical baseline skills (BR-141)
   const seedSkills: Skill[] = [
@@ -1916,6 +1968,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
         enqueuedAt: initialMessage.createdAt,
       });
+
+      sendNotification({
+        recipientId: input.recipientId,
+        type: 'message',
+        title: `New message from ${profile.fullName}`,
+        body: initialMessage.content.slice(0, 100),
+        referenceType: 'thread',
+        referenceId: thread.id,
+      });
     }
 
     return reply.status(201).send({
@@ -2009,6 +2070,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       enqueuedAt: message.createdAt,
     });
 
+    for (const recipientId of recipientIds) {
+      sendNotification({
+        recipientId,
+        type: 'message',
+        title: `New message from ${profile.fullName}`,
+        body: message.content.slice(0, 100),
+        referenceType: 'thread',
+        referenceId: thread.id,
+      });
+    }
+
     return reply.status(201).send({ message });
   });
 
@@ -2032,6 +2104,94 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Thread marked as read',
       lastReadAt: currentParticipant.lastReadAt,
+    });
+  });
+
+  // Notification Center Endpoints (F-14, BR-120)
+  app.get('/api/v1/notifications', async (req: FastifyRequest<{ Querystring: { unreadOnly?: string; type?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const userNotifs = notificationsByRecipientId.get(profile.id) || [];
+    const unreadCount = userNotifs.filter((n) => !n.isRead).length;
+
+    let filtered = [...userNotifs];
+    if (req.query.unreadOnly === 'true') {
+      filtered = filtered.filter((n) => !n.isRead);
+    }
+    if (req.query.type) {
+      filtered = filtered.filter((n) => n.type === req.query.type);
+    }
+
+    return reply.status(200).send({
+      notifications: filtered,
+      unreadCount,
+    });
+  });
+
+  app.post('/api/v1/notifications/mark-read', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const input = MarkNotificationsReadInputSchema.parse(req.body || {});
+    const userNotifs = notificationsByRecipientId.get(profile.id) || [];
+    const targetIds = input.all ? undefined : input.notificationIds;
+
+    const markedCount = markNotificationsAsRead(userNotifs, targetIds);
+    const remainingUnread = userNotifs.filter((n) => !n.isRead).length;
+
+    return reply.status(200).send({
+      markedCount,
+      unreadCount: remainingUnread,
+    });
+  });
+
+  app.get('/api/v1/notifications/preferences', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    let prefs = notificationPreferencesByUserId.get(profile.id);
+    if (!prefs) {
+      prefs = createDefaultNotificationPreferences(profile.id);
+      notificationPreferencesByUserId.set(profile.id, prefs);
+    }
+
+    return reply.status(200).send({ preferences: prefs });
+  });
+
+  app.patch('/api/v1/notifications/preferences', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const input = UpdateNotificationPreferencesInputSchema.parse(req.body);
+    let prefs = notificationPreferencesByUserId.get(profile.id);
+    if (!prefs) {
+      prefs = createDefaultNotificationPreferences(profile.id);
+      notificationPreferencesByUserId.set(profile.id, prefs);
+    }
+
+    if (input.allowMessages !== undefined) prefs.allowMessages = input.allowMessages;
+    if (input.allowMentions !== undefined) prefs.allowMentions = input.allowMentions;
+    if (input.allowApplications !== undefined) prefs.allowApplications = input.allowApplications;
+    if (input.allowCourseUpdates !== undefined) prefs.allowCourseUpdates = input.allowCourseUpdates;
+    if (input.emailDigestFrequency !== undefined) prefs.emailDigestFrequency = input.emailDigestFrequency;
+    prefs.updatedAt = new Date().toISOString();
+
+    return reply.status(200).send({
+      message: 'Preferences updated successfully',
+      preferences: prefs,
     });
   });
 

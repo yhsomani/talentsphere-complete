@@ -4,25 +4,25 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.6
-- **Last Updated:** 2026-09-24 13:25
+- **Memory Version:** 1.7
+- **Last Updated:** 2026-09-24 13:30
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 12 / 173 (6.94%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 12 / 173 (6.94%) [113/113 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 13 / 173 (7.51%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 13 / 173 (7.51%) [123/123 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `5b141a8`
-- **Current Primary Task:** Phase 0 — Notification Center (F-14)
-- **Next Action:** Implement notification types, unread counts, mark read, and digest triggers
+- **Last Known Commit:** `e9cb692`
+- **Current Primary Task:** Phase 0 — Central AI Gateway & Career Assistant (F-11)
+- **Next Action:** Implement AI career assistant gateway with token metering, context budgeting, and prompt canary fencing
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (6.94% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging)
+- **Implementation Status:** IN PROGRESS (7.51% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`)
 - **PWA:** Service worker + IndexedDB offline-first architecture
@@ -48,7 +48,7 @@
 
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Foundation & Auth (Phase 0)** | 16 | 5 | 5 | 0 | IN PROGRESS |
+| **Foundation & Auth (Phase 0)** | 16 | 6 | 6 | 0 | IN PROGRESS |
 | **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
 | **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
@@ -57,7 +57,7 @@
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **12** | **12** | **0** | **IN PROGRESS (6.94%)** |
+| **Total Portfolio** | **173** | **13** | **13** | **0** | **IN PROGRESS (7.51%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -68,10 +68,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 161
+- **PLANNED:** 160
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 12 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96)
-- **VERIFIED:** 12 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96)
+- **IMPLEMENTED:** 13 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96)
+- **VERIFIED:** 13 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-14, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -251,6 +251,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/messaging.test.ts` (2 integration tests verifying self-messaging block, thread creation, outsider 403 access denial, read receipts, clientMessageId deduplication, and worker event dispatch)
 - **Result:** All 16 test suites (113 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.55s.
 
+#### Change 15: Notification Center, Preferences, Mention Gating & Read Management (F-14)
+- **Why:** Implement canonical event feed and notification center: user-configurable delivery preferences (BR-120: mentions, messages, applications, course updates, digest frequencies), category filtering, unread counting, granular and bulk read markers, recipient privacy isolation, and worker queue delivery event dispatch (`notification.push`).
+- **Files:**
+  - `supabase/migrations/00007_notifications_schema.sql` (notifications, notification_preferences with RLS and recipient indices)
+  - `packages/domain/src/notifications.ts` (delivery decision gating, notification entity creation, preference models, mark read operations)
+  - `packages/domain/src/index.ts` (Exports notifications domain models and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for marking notifications read and updating preferences)
+  - `apps/api/src/server.ts` (Internal sendNotification helper, GET /api/v1/notifications, POST /api/v1/notifications/mark-read, GET/PATCH /api/v1/notifications/preferences, wired messaging notifications)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00007)
+  - `tests/unit/notifications-domain.test.ts` (4 unit tests verifying default preferences, delivery rules, mention gating, and read state)
+  - `tests/integration/notifications.test.ts` (5 integration tests verifying preference retrieval/patching, delivery gating, targeted and bulk mark read, unread counts, user privacy isolation, and worker dispatch)
+- **Result:** All 18 test suites (123 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.49s.
+
 ---
 
 ## 9. Completed Work
@@ -271,6 +284,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-014:** Implemented Challenges Arena, Assessment Engine & Proctored AI Policy Enforcement (F-08): Migration 00004, hidden test case protection, sandboxed evaluator, active session AI prohibition enforcement, daily 200 XP cap, auto-minted authority evidence, and test suites (13 tests added; 95/95 total PASS across 12 suites).
 - **TASK-015:** Implemented Learning Management System (LMS Courses, Lessons, Progress Tracking, Prerequisites & Certificates) (F-07): Migration 00005, publish readiness validation, unique enrollment check, sequential module progression, prerequisite enforcement, idempotent lesson completion, zero-PII certificate issuing, and test suites (11 tests added; 106/106 total PASS across 14 suites).
 - **TASK-016:** Implemented Direct Messaging & Thread Management (F-10): Migration 00006, self-messaging prevention, participant-only thread isolation, clientMessageId deduplication, unread count tracking, and test suites (7 tests added; 113/113 total PASS across 16 suites).
+- **TASK-017:** Implemented Notification Center, Preferences, Mention Gating & Read Management (F-14): Migration 00007, delivery preference model (BR-120), mention gating, notification listing, targeted and bulk mark read, unread counts, and test suites (10 tests added; 123/123 total PASS across 18 suites).
 
 ---
 
