@@ -144,4 +144,17 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.ai_usage_meters ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('CONSTRAINT uq_ai_usage_meter UNIQUE (user_id, period_date)');
   });
+
+  it('contains and validates migration 00009 resumes schema (BR-26)', () => {
+    const migrationFile9 = path.join(migrationsDir, '00009_resumes_schema.sql');
+    expect(fs.existsSync(migrationFile9)).toBe(true);
+    const sql = fs.readFileSync(migrationFile9, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.resumes');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.resume_exports');
+    expect(sql).toContain('ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.resume_exports ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'active\'');
+    expect(sql).toContain('deleted_at TIMESTAMPTZ');
+  });
 });
+

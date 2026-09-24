@@ -351,3 +351,63 @@ export const AIChatInputSchema = z.object({
 });
 
 export type AIChatInput = z.infer<typeof AIChatInputSchema>;
+
+/**
+ * Resume Builder Contracts (F-13, BR-26)
+ */
+export const ResumeExperienceSchema = z.object({
+  id: z.string().optional(),
+  company: z.string().min(1).max(200),
+  title: z.string().min(1).max(200),
+  location: z.string().max(200).optional(),
+  startDate: z.string().min(1),
+  endDate: z.string().optional(),
+  isCurrent: z.boolean().default(false),
+  description: z.string().max(3000).optional(),
+  highlights: z.array(z.string().max(500)).optional(),
+});
+
+export const ResumeEducationSchema = z.object({
+  id: z.string().optional(),
+  institution: z.string().min(1).max(200),
+  degree: z.string().min(1).max(200),
+  fieldOfStudy: z.string().max(200).optional(),
+  startDate: z.string().min(1),
+  endDate: z.string().optional(),
+  gpa: z.string().max(20).optional(),
+});
+
+export const ResumeSkillItemSchema = z.object({
+  name: z.string().min(1).max(100),
+  category: z.string().max(100).optional(),
+  level: z.string().max(50).optional(),
+  evidenceId: z.string().uuid().optional(),
+});
+
+export const CreateResumeInputSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  template: z.enum(['modern', 'minimal', 'executive', 'technical']).default('modern'),
+  headline: z.string().max(255).optional(),
+  summary: z.string().max(5000).optional(),
+  contactEmail: z.string().email().optional(),
+  contactPhone: z.string().max(64).optional(),
+  location: z.string().max(255).optional(),
+  websiteUrl: z.string().url().max(500).optional(),
+  experience: z.array(ResumeExperienceSchema).default([]),
+  education: z.array(ResumeEducationSchema).default([]),
+  skills: z.array(ResumeSkillItemSchema).default([]),
+  evidenceIds: z.array(z.string().uuid()).default([]),
+  isPrimary: z.boolean().default(false),
+});
+
+export type CreateResumeInput = z.infer<typeof CreateResumeInputSchema>;
+
+export const UpdateResumeInputSchema = CreateResumeInputSchema.partial();
+export type UpdateResumeInput = z.infer<typeof UpdateResumeInputSchema>;
+
+export const ExportResumeInputSchema = z.object({
+  format: z.enum(['json', 'markdown', 'html', 'pdf']).default('markdown'),
+});
+
+export type ExportResumeInput = z.infer<typeof ExportResumeInputSchema>;
+
