@@ -427,4 +427,36 @@ export const RespondConnectionInputSchema = z.object({
 
 export type RespondConnectionInput = z.infer<typeof RespondConnectionInputSchema>;
 
+/**
+ * Portfolio Showcase Contracts (F-26)
+ */
+export const PortfolioProjectMediaSchema = z.object({
+  id: z.string().optional(),
+  mediaUrl: z.string().url(),
+  mediaType: z.enum(['image', 'video', 'document']).default('image'),
+  caption: z.string().max(255).optional(),
+  orderIndex: z.number().int().min(0).default(0),
+});
+
+export type PortfolioProjectMediaInput = z.infer<typeof PortfolioProjectMediaSchema>;
+
+export const CreatePortfolioProjectInputSchema = z.object({
+  title: z.string().min(2).max(200),
+  description: z.string().min(10).max(10000),
+  projectUrl: z.string().url().max(500).optional(),
+  repoUrl: z.string().url().max(500).optional(),
+  visibility: z.enum(['public', 'connections_only', 'recruiters_only', 'private']).default('public'),
+  featured: z.boolean().default(false),
+  orderIndex: z.number().int().min(0).default(0),
+  skillIds: z.array(z.string().uuid()).default([]),
+  evidenceIds: z.array(z.string().uuid()).default([]),
+  media: z.array(PortfolioProjectMediaSchema).default([]),
+});
+
+export type CreatePortfolioProjectInput = z.infer<typeof CreatePortfolioProjectInputSchema>;
+
+export const UpdatePortfolioProjectInputSchema = CreatePortfolioProjectInputSchema.partial();
+export type UpdatePortfolioProjectInput = z.infer<typeof UpdatePortfolioProjectInputSchema>;
+
+
 

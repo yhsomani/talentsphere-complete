@@ -167,6 +167,23 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('CONSTRAINT uq_connections_pair UNIQUE (sender_id, recipient_id)');
     expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'pending\'');
   });
+
+  it('contains and validates migration 00011 portfolio showcase schema (F-26)', () => {
+    const migrationFile11 = path.join(migrationsDir, '00011_portfolio_showcase_schema.sql');
+    expect(fs.existsSync(migrationFile11)).toBe(true);
+    const sql = fs.readFileSync(migrationFile11, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.portfolio_projects');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.portfolio_project_skills');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.portfolio_project_media');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.portfolio_project_evidence');
+    expect(sql).toContain('ALTER TABLE public.portfolio_projects ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.portfolio_project_skills ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.portfolio_project_media ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.portfolio_project_evidence ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('CONSTRAINT uq_portfolio_project_skill UNIQUE (project_id, skill_id)');
+    expect(sql).toContain('CONSTRAINT uq_portfolio_project_evidence UNIQUE (project_id, evidence_id)');
+  });
 });
+
 
 

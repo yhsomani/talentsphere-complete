@@ -4,34 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 2.0
-- **Last Updated:** 2026-09-24 13:45
+- **Memory Version:** 2.1
+- **Last Updated:** 2026-09-24 13:50
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 16 / 173 (9.25%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09, F-10, F-11, F-12, F-13, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 16 / 173 (9.25%) [175/175 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 17 / 173 (9.83%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09, F-10, F-11, F-12, F-13, F-14, F-26, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 17 / 173 (9.83%) [193/193 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `513bfaf`
-- **Current Primary Task:** Phase 2 — Portfolio Showcase & Media Assets (F-26)
-- **Next Action:** Implement candidate portfolio projects, media attachments, and linked verified skill evidence graph credentials
+- **Last Known Commit:** `eae0400`
+- **Current Primary Task:** Phase 1 — Gamification & Daily XP Ledger (F-22)
+- **Next Action:** Implement full XP activity breakdown, level progression curves, gamification milestone badges, and daily cap integration
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (9.25% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connection request state machine)
+- **Implementation Status:** IN PROGRESS (9.83% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase & visibility-gated projects)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007, 00008, 00009, 00010)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007, 00008, 00009, 00010, 00011)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 24 test suites, 175/175 automated unit and integration tests passing
-- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, append-only exports with soft delete (BR-26)
+- **Testing:** 26 test suites, 193/193 automated unit and integration tests passing
+- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, append-only exports with soft delete (BR-26)
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Implement Portfolio Showcase & Media Assets (F-26)
+- **Next Action:** Implement Gamification & Daily XP Ledger (F-22)
 
 ---
 
@@ -49,7 +49,7 @@
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 6 | 6 | 0 | IN PROGRESS |
-| **Identity & Profile (Phase 1)** | 18 | 4 | 4 | 0 | IN PROGRESS |
+| **Identity & Profile (Phase 1)** | 18 | 5 | 5 | 0 | IN PROGRESS |
 | **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
@@ -57,7 +57,7 @@
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **16** | **16** | **0** | **IN PROGRESS (9.25%)** |
+| **Total Portfolio** | **173** | **17** | **17** | **0** | **IN PROGRESS (9.83%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -315,6 +315,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/networking.test.ts` (9 integration tests verifying end-to-end request, notification delivery, worker telemetry, acceptance, status queries, duplicate prevention, withdrawal, rejection, and disconnection)
 - **Result:** All 24 test suites (175 tests) PASS. TypeScript composite build clean. Vite web bundle built in 2.07s.
 
+#### Change 19: Portfolio Showcase, Media Assets, and Verified Skills Link (F-26)
+- **Why:** Implement candidate portfolio project showcase, media attachments (images, video, documents), canonical skill associations (BR-144), verified skill evidence credential links (F-96), visibility gating (`public`, `connections_only`, `recruiters_only`, `private`), public/viewer showcase query with connection evaluation, owner management CRUD, and async worker telemetry (`portfolio.project.created`, `portfolio.project.updated`, `portfolio.project.removed`).
+- **Files:**
+  - `supabase/migrations/00011_portfolio_showcase_schema.sql` (portfolio_projects, portfolio_project_skills, portfolio_project_media, portfolio_project_evidence with RLS, check constraints, unique constraints, and indices)
+  - `packages/domain/src/portfolio.ts` (createPortfolioProject, updatePortfolioProject, canViewPortfolioProject)
+  - `packages/domain/src/index.ts` (Exports portfolio domain models, types, and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for CreatePortfolioProjectInput, UpdatePortfolioProjectInput, PortfolioProjectMedia)
+  - `apps/api/src/server.ts` (POST/GET /api/v1/portfolio/projects, GET/PATCH/DELETE /api/v1/portfolio/projects/:id, GET /api/v1/portfolio/showcase/:targetUserId)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00011)
+  - `tests/unit/portfolio-domain.test.ts` (10 unit tests verifying project validation, canonical tagging, media links, and visibility access matrix)
+  - `tests/integration/portfolio.test.ts` (7 integration tests verifying project creation, owner listing, stranger public filtering, connected peer visibility, recruiter visibility, privacy enforcement, and owner mutations)
+- **Result:** All 26 test suites (193 tests) PASS. TypeScript composite build clean. Vite web bundle built in 2.83s.
+
 ---
 
 ## 9. Completed Work
@@ -339,6 +352,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-018:** Implemented Central AI Gateway & Career Assistant with Cost Protection & Proctoring Isolation (F-11): Migration 00008, quota limits (Free-User Cost Invariant SSOT 16.4), Context Firewall (WIT-007), prompt injection defense, proctored session AI prohibition (`ASSESSMENT_AI_PROHIBITED`), conversation history, advisory disclaimers, usage metering, and test suites (16 tests added; 140/140 total PASS across 20 suites).
 - **TASK-019:** Implemented Resume Builder & Append-Only Export Engine with Soft Delete (F-13): Migration 00009, multi-template sections, verified evidence credential embedding, JSON/Markdown/HTML rendering, SHA-256 export integrity, soft-delete audit preservation (BR-26), and test suites (13 tests added; 153/153 total PASS across 22 suites).
 - **TASK-020:** Implemented Professional Networking & Connection Request State Machine (F-09): Migration 00010, anti-self connection check (`sender_id != recipient_id`), duplicate prevention, state transitions (`pending -> accepted | rejected | withdrawn`), authorization enforcement, notification triggers, async worker telemetry (`connection.requested`, `connection.accepted`, `connection.rejected`, `connection.withdrawn`, `connection.removed`), status queries, and test suites (21 tests added; 175/175 total PASS across 24 suites).
+- **TASK-021:** Implemented Portfolio Showcase, Media Assets, and Verified Skills Link (F-26): Migration 00011, canonical skill mapping, digital credential evidence links, multi-media asset attachments, visibility gating (`public`, `connections_only`, `recruiters_only`, `private`), connection-aware showcase view, owner project lifecycle, async worker dispatch (`portfolio.project.created`, `portfolio.project.updated`, `portfolio.project.removed`), and test suites (18 tests added; 193/193 total PASS across 26 suites).
 
 ---
 
