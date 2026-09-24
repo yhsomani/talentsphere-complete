@@ -139,7 +139,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
     - `packages/ui` (accessible design tokens conforming to WCAG 2.2 AA)
     - `packages/testing` (mock factories for User, Profile, Evidence)
   - Tests: `tests/unit/foundation.test.ts`
-- **Result:** All packages compiled with `tsc -b`. All 14 foundation unit tests passed in 1.1s. `pnpm validate` gate passed.
+#### Change 5: Database Schema & Migration Engine (E-04, E-05)
+- **Why:** Establish authoritative relational schema in PostgreSQL/Supabase with RLS policies, explicit foreign keys, indexes, and automated migration runner.
+- **Files:**
+  - `supabase/migrations/00001_core_schema.sql` (Profiles, Evidence, Organizations, Memberships, Jobs, Applications, Audit Logs, Feature Flags with RLS)
+  - `supabase/seed/01_initial_seed.sql` (Default feature flags)
+  - `scripts/migrate.mjs` (Migration runner)
+  - `scripts/seed.mjs` (Seed runner)
+  - `tests/unit/database-migrations.test.ts` (Automated schema & RLS test suite)
+- **Result:** Migrations and seeds validated. 4 database unit tests passed. Overall tests: 18/18 PASS.
 
 ---
 
@@ -151,6 +159,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-004:** Updated `FINAL_DOCUMENT_INDEX.md` and `README.md` to reference the canonical document locations.
 - **TASK-005:** Created `BRAIN/MEMORY.md` conforming to the Master Memory specification.
 - **TASK-006:** Bootstrapped monorepo workspace toolchain (E-01): `pnpm-workspace.yaml`, `package.json`, `tsconfig.json`, `.gitignore`, 6 shared packages (`config`, `domain`, `contracts`, `observability`, `ui`, `testing`), and foundation test suite (14/14 tests PASS).
+- **TASK-007:** Implemented database schema and migration system (E-04, E-05): `00001_core_schema.sql` with 8 core tables and RLS, `01_initial_seed.sql`, migration/seed scripts, and test suite (4/4 tests PASS; 18/18 total PASS).
 
 ---
 
