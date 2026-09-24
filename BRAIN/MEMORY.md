@@ -173,7 +173,16 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `apps/worker/src/queue.ts` (JobQueueEngine, idempotency keys, bounded retries, DLQ)
   - `apps/worker/src/index.ts` (Worker daemon process & background task registration)
   - `tests/unit/worker-queue.test.ts` (4 unit tests verifying execution, idempotency, retries, DLQ)
-- **Result:** TypeScript builds clean. 4 worker queue unit tests passed. Overall tests: 36/36 PASS.
+#### Change 9: Authentication & Profile Domain Loop (F-01, F-12)
+- **Why:** Implement secure authentication, PBKDF2 password hashing with salt, HMAC-SHA256 signed session tokens, automatic profile provisioning, profile editing, and purpose-based privacy filtering (`public`, `recruiters_only`, `private`).
+- **Files:**
+  - `packages/domain/src/auth.ts` (PBKDF2 password hasher, session token generator/verifier)
+  - `packages/domain/src/profile.ts` (Profile creation, update, purpose-based privacy access rules)
+  - `packages/domain/src/index.ts` (Exports auth & profile utilities)
+  - `apps/api/src/server.ts` (Auth register/login routes, Profile me/patch/:id routes)
+  - `tests/integration/auth-profile.test.ts` (9 integration tests covering registration, duplicate rejection, login, session auth, profile updates, and privacy filtering)
+  - `tests/integration/api-server.test.ts` (Updated registration profile assertion)
+- **Result:** TypeScript builds clean. 9 auth-profile integration tests passed. Overall tests: 45/45 PASS.
 
 ---
 
@@ -189,6 +198,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-008:** Implemented Fastify modular API server (E-09, E-10): helmet security headers, CORS, rate-limiting, canonical error envelope, request ID tracing, health and auth endpoints, and integration test suite (9/9 tests PASS; 27/27 total PASS).
 - **TASK-009:** Implemented PWA frontend shell and accessible UI system (E-13, E-14, F-02, F-03): React 19 + Vite + TanStack Query, web app manifest, WCAG skip link, offline banner, role-adaptive dashboard, and test suite (5/5 tests PASS; 32/32 total PASS).
 - **TASK-010:** Implemented Async Worker Queue Engine (E-01, Section 22): `apps/worker` with idempotency cache, bounded retries, DLQ routing, and test suite (4/4 tests PASS; 36/36 total PASS).
+- **TASK-011:** Implemented Authentication, Session Tokens & Profile Privacy Domain Loop (F-01, F-12): PBKDF2 password hashing, HMAC-SHA256 sessions, profile provisioning, purpose-based privacy filtering, and integration test suite (9/9 tests PASS; 45/45 total PASS).
 
 ---
 

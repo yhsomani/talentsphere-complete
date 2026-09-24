@@ -113,7 +113,7 @@ describe('Fastify Modular API Server Integration (E-09, E-10)', () => {
       expect(response.statusCode).toBe(201);
       const body = JSON.parse(response.body);
       expect(body.user.email).toBe('candidate@talentsphere.test');
-      expect(body.user.fullName).toBe('Alice Test');
+      expect(body.profile.fullName).toBe('Alice Test');
     });
 
     it('rejects invalid registration with 400 and VALIDATION_FAILED code', async () => {

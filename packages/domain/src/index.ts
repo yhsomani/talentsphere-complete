@@ -3,6 +3,9 @@
  * Pure domain representations, invariants, and business rules.
  */
 
+export * from './auth.js';
+export * from './profile.js';
+
 export type Role =
   | 'candidate'
   | 'recruiter'
