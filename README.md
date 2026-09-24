@@ -20,14 +20,16 @@ Goal → Gap → Learn → Practice → Prove → Verify
 React + TypeScript + Vite · Node.js + Fastify · PostgreSQL/Supabase · Supabase Auth/Storage/Queues · REST/OpenAPI · PWA · central AI Gateway.
 
 ## Start here
-
-1. `SSOT.md`
-2. `PRD.md`
-3. `ARCHITECTURE.md`
-4. `TRD.md`
-5. `FEATURE_REGISTRY.md`
-6. `IMPLEMENTATION_PLAN.md`
-7. `AGENTS.md`
+ 
+1. [`SSOT.md`](SSOT.md)
+2. [`BRAIN/MEMORY.md`](BRAIN/MEMORY.md)
+3. [`docs/product/PRD.md`](docs/product/PRD.md)
+4. [`docs/engineering/ARCHITECTURE.md`](docs/engineering/ARCHITECTURE.md)
+5. [`docs/engineering/TRD.md`](docs/engineering/TRD.md)
+6. [`docs/registries/FEATURE_REGISTRY.md`](docs/registries/FEATURE_REGISTRY.md)
+7. [`docs/governance/IMPLEMENTATION_PLAN.md`](docs/governance/IMPLEMENTATION_PLAN.md)
+8. [`FINAL_DOCUMENT_INDEX.md`](FINAL_DOCUMENT_INDEX.md)
+9. [`AGENTS.md`](AGENTS.md)
 
 ## Golden rule
 
