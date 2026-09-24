@@ -4,17 +4,17 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.2
-- **Last Updated:** 2026-09-24 12:32
+- **Memory Version:** 1.3
+- **Last Updated:** 2026-09-24 12:34
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 — Platform Trust Foundation
 - **Overall Implementation:** 2 / 173 (1.16%) [Features F-02, F-03 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 2 / 173 (1.16%) [32/32 automated tests PASS; 100% build PASS]
+- **Overall Verification:** 2 / 173 (1.16%) [36/36 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `687d401`
-- **Current Primary Task:** Phase 0 — Worker Queue Scaffold (E-01) & Auth/Profile Loop
-- **Next Action:** Setup `apps/worker` background queue consumer and proceed to Authentication & Profile integration
+- **Last Known Commit:** `003c622`
+- **Current Primary Task:** Phase 0 / Phase 1 — Authentication, Session & Profile Loop (F-01, F-12)
+- **Next Action:** Implement authentication service and user profile domain workflows
 
 ---
 
@@ -165,8 +165,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `apps/web/src/pages/LandingPage.tsx` (Hero, value propositions, core loop)
   - `apps/web/src/pages/DashboardPage.tsx` (Readiness metric cards, verified evidence count)
   - `apps/web/src/App.tsx` & `apps/web/src/main.tsx` (React 19, QueryClientProvider, React Router)
-  - `tests/unit/web-shell.test.ts` (Manifest, meta, design token tests)
-- **Result:** Vite production build successful (assets generated). 5 web shell unit tests passed. Overall tests: 32/32 PASS.
+#### Change 8: Async Worker Queue Engine & Dead Letter Queue (Section 22, E-01)
+- **Why:** Provide resilient, durable asynchronous job processing for evidence propagation, notification fan-out, and heavy processing with idempotency and DLQ support.
+- **Files:**
+  - `apps/worker/package.json`
+  - `apps/worker/tsconfig.json`
+  - `apps/worker/src/queue.ts` (JobQueueEngine, idempotency keys, bounded retries, DLQ)
+  - `apps/worker/src/index.ts` (Worker daemon process & background task registration)
+  - `tests/unit/worker-queue.test.ts` (4 unit tests verifying execution, idempotency, retries, DLQ)
+- **Result:** TypeScript builds clean. 4 worker queue unit tests passed. Overall tests: 36/36 PASS.
 
 ---
 
@@ -181,6 +188,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-007:** Implemented database schema and migration system (E-04, E-05): `00001_core_schema.sql` with 8 core tables and RLS, `01_initial_seed.sql`, migration/seed scripts, and test suite (4/4 tests PASS; 18/18 total PASS).
 - **TASK-008:** Implemented Fastify modular API server (E-09, E-10): helmet security headers, CORS, rate-limiting, canonical error envelope, request ID tracing, health and auth endpoints, and integration test suite (9/9 tests PASS; 27/27 total PASS).
 - **TASK-009:** Implemented PWA frontend shell and accessible UI system (E-13, E-14, F-02, F-03): React 19 + Vite + TanStack Query, web app manifest, WCAG skip link, offline banner, role-adaptive dashboard, and test suite (5/5 tests PASS; 32/32 total PASS).
+- **TASK-010:** Implemented Async Worker Queue Engine (E-01, Section 22): `apps/worker` with idempotency cache, bounded retries, DLQ routing, and test suite (4/4 tests PASS; 36/36 total PASS).
 
 ---
 
