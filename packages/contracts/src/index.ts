@@ -296,3 +296,23 @@ export const CompleteLessonInputSchema = z.object({
 
 export type CompleteLessonInput = z.infer<typeof CompleteLessonInputSchema>;
 
+/**
+ * Direct Messaging Contracts (F-10, WF-10, BR-214)
+ */
+export const CreateThreadInputSchema = z.object({
+  recipientId: z.string().uuid(),
+  initialMessage: z.string().min(1).max(5000),
+  subject: z.string().max(200).optional(),
+  clientMessageId: z.string().max(100).optional(),
+});
+
+export type CreateThreadInput = z.infer<typeof CreateThreadInputSchema>;
+
+export const SendMessageInputSchema = z.object({
+  content: z.string().min(1).max(5000),
+  clientMessageId: z.string().max(100).optional(),
+});
+
+export type SendMessageInput = z.infer<typeof SendMessageInputSchema>;
+
+

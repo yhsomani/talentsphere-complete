@@ -4,34 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.5
-- **Last Updated:** 2026-09-24 13:15
+- **Memory Version:** 1.6
+- **Last Updated:** 2026-09-24 13:25
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 11 / 173 (6.36%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 11 / 173 (6.36%) [106/106 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 12 / 173 (6.94%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 12 / 173 (6.94%) [113/113 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `8839041`
-- **Current Primary Task:** Phase 1 / Phase 2 — Direct Messaging & Notification Center (F-10, F-14)
-- **Next Action:** Implement direct messaging thread state, connection gating, read/unread status, and notifications
+- **Last Known Commit:** `5b141a8`
+- **Current Primary Task:** Phase 0 — Notification Center (F-14)
+- **Next Action:** Implement notification types, unread counts, mark read, and digest triggers
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (6.36% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates)
+- **Implementation Status:** IN PROGRESS (6.94% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`)
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 14 test suites, 106/106 automated unit and integration tests passing
+- **Testing:** 16 test suites, 113/113 automated unit and integration tests passing
 - **Security:** Defense in depth, strict RLS, server-authoritative authorization
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Implement Direct Messaging & Notifications (F-10, F-14)
+- **Next Action:** Implement Notification Center (F-14)
 
 ---
 
@@ -48,7 +48,7 @@
 
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Foundation & Auth (Phase 0)** | 16 | 4 | 4 | 0 | IN PROGRESS |
+| **Foundation & Auth (Phase 0)** | 16 | 5 | 5 | 0 | IN PROGRESS |
 | **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
 | **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
@@ -57,7 +57,7 @@
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **11** | **11** | **0** | **IN PROGRESS (6.36%)** |
+| **Total Portfolio** | **173** | **12** | **12** | **0** | **IN PROGRESS (6.94%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -68,10 +68,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 162
+- **PLANNED:** 161
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 11 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96)
-- **VERIFIED:** 11 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96)
+- **IMPLEMENTED:** 12 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96)
+- **VERIFIED:** 12 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-12, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -238,6 +238,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/lms-courses.test.ts` (4 integration tests verifying full LMS lifecycle, publish validation, duplicate enrollment rejection, sequential module enforcement, prerequisite rejection, progressive completion, public certificate lookup, auto evidence minting, and worker event dispatch)
 - **Result:** All 14 test suites (106 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.68s.
 
+#### Change 14: Direct Messaging & Thread Management (F-10)
+- **Why:** Implement real-time, participant-isolated direct messaging (WF-10, WIT-010): anti-gaming self-messaging prevention, thread lifecycle with recipient provisioning, participant-only access control (outsiders denied with 403), clientMessageId deduplication for idempotent network retries, participant read receipts, and asynchronous worker event dispatch (`messaging.message.sent`).
+- **Files:**
+  - `supabase/migrations/00006_messaging_schema.sql` (message_threads, thread_participants, messages with client_message_id unique index and RLS)
+  - `packages/domain/src/messaging.ts` (thread creation, self-messaging prevention, participant assertion, message validation, unread count computation)
+  - `packages/domain/src/index.ts` (Exports messaging domain models and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for thread creation and sending messages)
+  - `apps/api/src/server.ts` (Thread listing with unread counts, thread creation with initial message, participant-guarded message listing, idempotent message sending, thread read marker, worker queue dispatch)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00006)
+  - `tests/unit/messaging-domain.test.ts` (4 unit tests verifying thread creation rules, participant-only check, message content constraints, and unread calculation)
+  - `tests/integration/messaging.test.ts` (2 integration tests verifying self-messaging block, thread creation, outsider 403 access denial, read receipts, clientMessageId deduplication, and worker event dispatch)
+- **Result:** All 16 test suites (113 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.55s.
+
 ---
 
 ## 9. Completed Work
@@ -257,6 +270,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-013:** Implemented Job Marketplace, Post Job Studio & ATS Pipeline (F-04, F-05, F-06): Migration 00003, job lifecycle, recruiter-only posting, candidate-only apply, duplicate prevention, ATS pipeline advancement, and test suites (19 tests added; 82/82 total PASS across 10 suites).
 - **TASK-014:** Implemented Challenges Arena, Assessment Engine & Proctored AI Policy Enforcement (F-08): Migration 00004, hidden test case protection, sandboxed evaluator, active session AI prohibition enforcement, daily 200 XP cap, auto-minted authority evidence, and test suites (13 tests added; 95/95 total PASS across 12 suites).
 - **TASK-015:** Implemented Learning Management System (LMS Courses, Lessons, Progress Tracking, Prerequisites & Certificates) (F-07): Migration 00005, publish readiness validation, unique enrollment check, sequential module progression, prerequisite enforcement, idempotent lesson completion, zero-PII certificate issuing, and test suites (11 tests added; 106/106 total PASS across 14 suites).
+- **TASK-016:** Implemented Direct Messaging & Thread Management (F-10): Migration 00006, self-messaging prevention, participant-only thread isolation, clientMessageId deduplication, unread count tracking, and test suites (7 tests added; 113/113 total PASS across 16 suites).
 
 ---
 

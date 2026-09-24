@@ -12,6 +12,7 @@ export * from './applications.js';
 export * from './challenges.js';
 export * from './assessment.js';
 export * from './lms.js';
+export * from './messaging.js';
 
 export type Role =
   | 'candidate'

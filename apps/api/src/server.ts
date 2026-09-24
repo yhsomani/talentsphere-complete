@@ -54,6 +54,13 @@ import {
   verifyLessonPrerequisites,
   calculateCourseProgress,
   mintCourseCertificate,
+  MessageThread,
+  ThreadParticipant,
+  Message,
+  createThreadEntities,
+  assertThreadParticipant,
+  createMessageEntity,
+  calculateUnreadCount,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -78,6 +85,8 @@ import {
   CreateLessonInputSchema,
   EnrollCourseInputSchema,
   CompleteLessonInputSchema,
+  CreateThreadInputSchema,
+  SendMessageInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1827,6 +1836,202 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       issuedAt: cert.issuedAt,
       verificationProofHash: cert.verificationProofHash,
       isValid: cert.status === 'verified',
+    });
+  });
+
+  // Direct Messaging Repositories (F-10, WF-10, BR-214)
+  const threadsById = new Map<string, MessageThread>();
+  const threadParticipantsByThreadId = new Map<string, ThreadParticipant[]>();
+  const messagesById = new Map<string, Message>();
+  const messagesByThreadId = new Map<string, Message[]>();
+  const messagesByClientMessageId = new Map<string, Message>(); // key: `${threadId}:${clientMessageId}`
+
+  // Messaging Endpoints (F-10)
+  app.get('/api/v1/threads', async (req: FastifyRequest) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    // Find all threads where the profile is a participant
+    const userThreads: any[] = [];
+    for (const [threadId, participants] of threadParticipantsByThreadId.entries()) {
+      const currentParticipant = participants.find((p) => p.userId === profile.id);
+      if (currentParticipant) {
+        const thread = threadsById.get(threadId);
+        if (thread) {
+          const msgs = messagesByThreadId.get(threadId) || [];
+          const lastMessage = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+          const unreadCount = calculateUnreadCount(msgs, currentParticipant);
+          userThreads.push({
+            ...thread,
+            participants,
+            lastMessage,
+            unreadCount,
+          });
+        }
+      }
+    }
+
+    userThreads.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+    return { threads: userThreads };
+  });
+
+  app.post('/api/v1/threads', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
+    }
+
+    const input = CreateThreadInputSchema.parse(req.body);
+    const recipientProfile = profilesById.get(input.recipientId);
+    if (!recipientProfile) {
+      throw new DomainError('NOT_FOUND', 'Recipient profile not found.');
+    }
+
+    const { thread, participants } = createThreadEntities(profile.id, [input.recipientId], input.subject);
+    threadsById.set(thread.id, thread);
+    threadParticipantsByThreadId.set(thread.id, participants);
+    messagesByThreadId.set(thread.id, []);
+
+    let initialMessage: Message | undefined;
+    if (input.initialMessage) {
+      initialMessage = createMessageEntity(thread.id, profile.id, input.initialMessage, input.clientMessageId);
+      messagesById.set(initialMessage.id, initialMessage);
+      messagesByThreadId.set(thread.id, [initialMessage]);
+      if (input.clientMessageId) {
+        messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, initialMessage);
+      }
+      thread.lastMessageAt = initialMessage.createdAt;
+
+      enqueuedWorkerJobs.push({
+        type: 'messaging.message.sent',
+        payload: {
+          threadId: thread.id,
+          messageId: initialMessage.id,
+          senderId: profile.id,
+          recipientIds: [input.recipientId],
+        },
+        enqueuedAt: initialMessage.createdAt,
+      });
+    }
+
+    return reply.status(201).send({
+      thread,
+      participants,
+      message: initialMessage,
+    });
+  });
+
+  app.get('/api/v1/threads/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const { id } = req.params;
+    const thread = threadsById.get(id);
+    if (!thread) {
+      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+    }
+
+    const participants = threadParticipantsByThreadId.get(id) || [];
+    const currentParticipant = assertThreadParticipant(participants, profile.id);
+
+    // Automatically mark read up to now
+    currentParticipant.lastReadAt = new Date().toISOString();
+
+    const messages = messagesByThreadId.get(id) || [];
+    return reply.status(200).send({
+      thread,
+      participants,
+      messages,
+    });
+  });
+
+  app.post('/api/v1/threads/:id/messages', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const { id } = req.params;
+    const thread = threadsById.get(id);
+    if (!thread) {
+      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+    }
+
+    const participants = threadParticipantsByThreadId.get(id) || [];
+    const currentParticipant = assertThreadParticipant(participants, profile.id);
+
+    const input = SendMessageInputSchema.parse(req.body);
+
+    // ClientMessageId Deduplication (WF-10, WIT-010)
+    if (input.clientMessageId) {
+      const dedupeKey = `${thread.id}:${input.clientMessageId}`;
+      const existing = messagesByClientMessageId.get(dedupeKey);
+      if (existing) {
+        return reply.status(200).send({
+          message: existing,
+          deduplicated: true,
+        });
+      }
+    }
+
+    const message = createMessageEntity(thread.id, profile.id, input.content, input.clientMessageId);
+    messagesById.set(message.id, message);
+
+    const threadMsgs = messagesByThreadId.get(thread.id) || [];
+    threadMsgs.push(message);
+    messagesByThreadId.set(thread.id, threadMsgs);
+
+    if (input.clientMessageId) {
+      messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, message);
+    }
+
+    thread.lastMessageAt = message.createdAt;
+    thread.updatedAt = message.createdAt;
+    currentParticipant.lastReadAt = message.createdAt;
+
+    const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
+    enqueuedWorkerJobs.push({
+      type: 'messaging.message.sent',
+      payload: {
+        threadId: thread.id,
+        messageId: message.id,
+        senderId: profile.id,
+        recipientIds,
+      },
+      enqueuedAt: message.createdAt,
+    });
+
+    return reply.status(201).send({ message });
+  });
+
+  app.post('/api/v1/threads/:id/read', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const { id } = req.params;
+    const thread = threadsById.get(id);
+    if (!thread) {
+      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+    }
+
+    const participants = threadParticipantsByThreadId.get(id) || [];
+    const currentParticipant = assertThreadParticipant(participants, profile.id);
+    currentParticipant.lastReadAt = new Date().toISOString();
+
+    return reply.status(200).send({
+      message: 'Thread marked as read',
+      lastReadAt: currentParticipant.lastReadAt,
     });
   });
 

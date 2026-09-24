@@ -109,6 +109,18 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.course_certificates ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.course_skills ENABLE ROW LEVEL SECURITY;');
   });
+
+  it('contains and validates migration 00006 messaging schema', () => {
+    const migrationFile6 = path.join(migrationsDir, '00006_messaging_schema.sql');
+    expect(fs.existsSync(migrationFile6)).toBe(true);
+    const sql = fs.readFileSync(migrationFile6, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.message_threads');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.thread_participants');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.messages');
+    expect(sql).toContain('ALTER TABLE public.message_threads ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.thread_participants ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;');
+  });
 });
 
 
