@@ -1,0 +1,32 @@
+{
+  "name": "talentsphere",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TalentSphere — PWA-first Career Operating System with verified Talent & Evidence Graph",
+  "author": "TalentSphere Engineering",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "build": "pnpm --recursive --filter \"./packages/*\" build && pnpm --recursive --filter \"./apps/*\" build",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run --dir tests/e2e",
+    "test:security": "vitest run --dir tests/security",
+    "test:a11y": "vitest run --dir tests/accessibility",
+    "test:performance": "vitest run --dir tests/performance",
+    "typecheck": "tsc -b",
+    "lint": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "validate": "pnpm typecheck && pnpm test:unit",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed": "node scripts/seed.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

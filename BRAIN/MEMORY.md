@@ -4,17 +4,17 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.0
-- **Last Updated:** 2026-09-24 12:10
+- **Memory Version:** 1.1
+- **Last Updated:** 2026-09-24 12:25
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 — Platform Trust Foundation
-- **Overall Implementation:** 0 / 173 (0.00%)
-- **Overall Verification:** 0 / 173 (0.00%)
+- **Overall Implementation:** 0 / 173 (0.00%) [Foundation Toolchain: 100%]
+- **Overall Verification:** 0 / 173 (0.00%) [Foundation Tests: 14/14 PASS]
 - **Current Release:** v0.0.0-greenfield
 - **Current Branch:** `main`
-- **Last Known Commit:** `b3e0a50edfd06c94e7d905d7e6f8c3867eaf1997`
-- **Current Primary Task:** Monorepo Bootstrap & Phase 0 Foundation Setup
-- **Next Action:** Configure root `package.json`, `pnpm-workspace.yaml`, and bootstrap core packages (`config`, `contracts`, `domain`, `ui`)
+- **Last Known Commit:** `0ded6b6`
+- **Current Primary Task:** Phase 0 — Fastify API Scaffold & Supabase Schema Migrations
+- **Next Action:** Implement `apps/api` Fastify modular monolith server with error handling plugin, health endpoint, and Supabase migrations
 
 ---
 
@@ -127,15 +127,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **Result:** Successfully organized with full git move tracking.
 - **Follow-up:** Update navigation indices in `FINAL_DOCUMENT_INDEX.md` and `README.md`.
 
-#### Change 2: Source Reconciliation Document Created
-- **Why:** Establish forensic baseline and formal classification of project evidence as mandated by Section 3 and Section 76.
-- **Files:** `docs/governance/SOURCE_RECONCILIATION.md`
-- **Result:** Canonical baseline verified as GREENFIELD / 0% implementation verified.
-
-#### Change 3: Master Project Memory Initialized
-- **Why:** Fulfill core mandate to create and continuously maintain `BRAIN/MEMORY.md`.
-- **Files:** `BRAIN/MEMORY.md`
-- **Result:** Living memory active and operational.
+#### Change 4: Monorepo Toolchain & Shared Packages Bootstrap (E-01)
+- **Why:** Establish pristine, executable workspace infrastructure with TypeScript composite builds, pure domain models, API/error contracts, design tokens, observability, and test harnesses.
+- **Files:**
+  - Root: `package.json`, `pnpm-workspace.yaml`, `.gitignore`, `tsconfig.json`
+  - Packages:
+    - `packages/config` (environment validation with Zod)
+    - `packages/domain` (pure domain types, application state machine, AI assessment boundary)
+    - `packages/contracts` (error envelope, pagination, auth, evidence, application schemas)
+    - `packages/observability` (Pino structured logger, audit sink)
+    - `packages/ui` (accessible design tokens conforming to WCAG 2.2 AA)
+    - `packages/testing` (mock factories for User, Profile, Evidence)
+  - Tests: `tests/unit/foundation.test.ts`
+- **Result:** All packages compiled with `tsc -b`. All 14 foundation unit tests passed in 1.1s. `pnpm validate` gate passed.
 
 ---
 
@@ -146,6 +150,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-003:** Created `docs/governance/SOURCE_RECONCILIATION.md` documenting evidence model, repository audit, and architectural invariants.
 - **TASK-004:** Updated `FINAL_DOCUMENT_INDEX.md` and `README.md` to reference the canonical document locations.
 - **TASK-005:** Created `BRAIN/MEMORY.md` conforming to the Master Memory specification.
+- **TASK-006:** Bootstrapped monorepo workspace toolchain (E-01): `pnpm-workspace.yaml`, `package.json`, `tsconfig.json`, `.gitignore`, 6 shared packages (`config`, `domain`, `contracts`, `observability`, `ui`, `testing`), and foundation test suite (14/14 tests PASS).
 
 ---
 
