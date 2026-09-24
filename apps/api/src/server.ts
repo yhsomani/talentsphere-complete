@@ -42,6 +42,18 @@ import {
   assertAIAssistanceAllowed,
   evaluateChallengeSubmission,
   calculateCappedXp,
+  Course,
+  CourseModule,
+  Lesson,
+  CourseEnrollment,
+  LessonProgress,
+  CourseCertificate,
+  validateCoursePublishReadiness,
+  enrollUserInCourse,
+  verifySequentialModuleProgress,
+  verifyLessonPrerequisites,
+  calculateCourseProgress,
+  mintCourseCertificate,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -61,6 +73,11 @@ import {
   CreateChallengeInputSchema,
   SubmitChallengeSolutionInputSchema,
   AIAssistantQueryInputSchema,
+  CreateCourseInputSchema,
+  CreateCourseModuleInputSchema,
+  CreateLessonInputSchema,
+  EnrollCourseInputSchema,
+  CompleteLessonInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1278,12 +1295,545 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
+  // LMS & Course Platform Repositories (F-07, BR-21..23, BR-46..48, BR-91..94, BR-150)
+  const coursesById = new Map<string, Course>();
+  const coursesBySlug = new Map<string, Course>();
+  const courseModulesById = new Map<string, CourseModule>();
+  const lessonsById = new Map<string, Lesson>();
+  const enrollmentsById = new Map<string, CourseEnrollment>();
+  const enrollmentsByUserAndCourse = new Map<string, CourseEnrollment>(); // key: `${userId}:${courseId}`
+  const lessonProgressByEnrollmentAndLesson = new Map<string, LessonProgress>(); // key: `${enrollmentId}:${lessonId}`
+  const certificatesByNumber = new Map<string, CourseCertificate>();
+  const certificatesByEnrollmentId = new Map<string, CourseCertificate>();
+  const courseSkillsByCourseId = new Map<string, string[]>();
+
+  // Seed baseline course for instant onboarding & exploration
+  const seedCourseId = 'c0000000-0000-0000-0000-000000000001';
+  const seedModule1Id = 'm0000000-0000-0000-0000-000000000001';
+  const seedModule2Id = 'm0000000-0000-0000-0000-000000000002';
+  const seedLesson1Id = 'l0000000-0000-0000-0000-000000000001';
+  const seedLesson2Id = 'l0000000-0000-0000-0000-000000000002';
+  const seedLesson3Id = 'l0000000-0000-0000-0000-000000000003';
+
+  const seedCourse: Course = {
+    id: seedCourseId,
+    instructorId: '00000000-0000-0000-0000-000000000000',
+    title: 'TypeScript Full-Stack Architecture',
+    slug: 'typescript-fullstack-architecture',
+    description: 'Master enterprise TypeScript, Fastify modular architecture, and schema migrations.',
+    status: 'published',
+    level: 'intermediate',
+    estimatedDurationMinutes: 60,
+    passingScorePercent: 70,
+    xpReward: 50,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  coursesById.set(seedCourse.id, seedCourse);
+  coursesBySlug.set(seedCourse.slug, seedCourse);
+
+  const seedModule1: CourseModule = {
+    id: seedModule1Id,
+    courseId: seedCourseId,
+    title: 'Module 1: Domain-Driven Foundations',
+    description: 'Pure domain business rules and entity invariants',
+    orderIndex: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const seedModule2: CourseModule = {
+    id: seedModule2Id,
+    courseId: seedCourseId,
+    title: 'Module 2: Fastify & Async Processing',
+    description: 'High performance API endpoints and durable worker queues',
+    orderIndex: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  courseModulesById.set(seedModule1.id, seedModule1);
+  courseModulesById.set(seedModule2.id, seedModule2);
+
+  const seedLesson1: Lesson = {
+    id: seedLesson1Id,
+    moduleId: seedModule1Id,
+    title: 'Domain Entities and Pure Functions',
+    contentType: 'text',
+    contentBody: 'Writing testable, framework-independent business rules.',
+    durationMinutes: 15,
+    orderIndex: 0,
+    isFreePreview: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const seedLesson2: Lesson = {
+    id: seedLesson2Id,
+    moduleId: seedModule1Id,
+    title: 'Error Envelopes & Canonical Schemas',
+    contentType: 'text',
+    contentBody: 'Zod schemas and RFC-compliant error structures.',
+    durationMinutes: 20,
+    orderIndex: 1,
+    prerequisiteLessonId: seedLesson1Id,
+    isFreePreview: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const seedLesson3: Lesson = {
+    id: seedLesson3Id,
+    moduleId: seedModule2Id,
+    title: 'Fastify Server Hooks and Rate Limiting',
+    contentType: 'video',
+    contentBody: 'Building hardened Fastify plugins.',
+    durationMinutes: 25,
+    orderIndex: 0,
+    isFreePreview: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  lessonsById.set(seedLesson1.id, seedLesson1);
+  lessonsById.set(seedLesson2.id, seedLesson2);
+  lessonsById.set(seedLesson3.id, seedLesson3);
+
+  // LMS Endpoints (F-07)
+  app.get('/api/v1/courses', async (req: FastifyRequest<{ Querystring: { search?: string; level?: string } }>) => {
+    const { search, level } = req.query;
+    let list = Array.from(coursesById.values()).filter((c) => c.status === 'published');
+
+    if (level) {
+      list = list.filter((c) => c.level === level);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
+    }
+
+    const coursesWithSummary = list.map((c) => {
+      const modules = Array.from(courseModulesById.values()).filter((m) => m.courseId === c.id);
+      const moduleIds = new Set(modules.map((m) => m.id));
+      const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
+      return {
+        ...c,
+        moduleCount: modules.length,
+        lessonCount: lessons.length,
+        skillIds: courseSkillsByCourseId.get(c.id) || [],
+      };
+    });
+
+    return { courses: coursesWithSummary };
+  });
+
+  app.post('/api/v1/courses', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
+    }
+
+    const input = CreateCourseInputSchema.parse(req.body);
+    if (coursesBySlug.has(input.slug)) {
+      throw new DomainError('CONFLICT', `Course with slug "${input.slug}" already exists.`);
+    }
+
+    const now = new Date().toISOString();
+    const course: Course = {
+      id: crypto.randomUUID(),
+      instructorId: profile.id,
+      title: input.title,
+      slug: input.slug,
+      description: input.description,
+      status: 'draft',
+      level: input.level,
+      estimatedDurationMinutes: input.estimatedDurationMinutes,
+      passingScorePercent: input.passingScorePercent,
+      xpReward: input.xpReward,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    coursesById.set(course.id, course);
+    coursesBySlug.set(course.slug, course);
+
+    if (input.skillIds && input.skillIds.length > 0) {
+      courseSkillsByCourseId.set(course.id, input.skillIds);
+    }
+
+    return reply.status(201).send({ course });
+  });
+
+  app.get('/api/v1/courses/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { id } = req.params;
+    const course = coursesById.get(id) || coursesBySlug.get(id);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', `Course with ID or slug "${id}" not found.`);
+    }
+
+    const modules = Array.from(courseModulesById.values())
+      .filter((m) => m.courseId === course.id)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
+    const modulesWithLessons = modules.map((m) => {
+      const lessons = Array.from(lessonsById.values())
+        .filter((l) => l.moduleId === m.id)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+      return {
+        ...m,
+        lessons,
+      };
+    });
+
+    return reply.status(200).send({
+      course: {
+        ...course,
+        modules: modulesWithLessons,
+        skillIds: courseSkillsByCourseId.get(course.id) || [],
+      },
+    });
+  });
+
+  app.post('/api/v1/courses/:id/modules', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const course = coursesById.get(id);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+    }
+
+    const profile = profilesByUserId.get(session.userId);
+    if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
+      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can add modules.');
+    }
+
+    const input = CreateCourseModuleInputSchema.parse(req.body);
+    const existing = Array.from(courseModulesById.values()).find(
+      (m) => m.courseId === course.id && m.orderIndex === input.orderIndex
+    );
+    if (existing) {
+      throw new DomainError('CONFLICT', `Module with orderIndex ${input.orderIndex} already exists in this course.`);
+    }
+
+    const now = new Date().toISOString();
+    const module: CourseModule = {
+      id: crypto.randomUUID(),
+      courseId: course.id,
+      title: input.title,
+      description: input.description,
+      orderIndex: input.orderIndex,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    courseModulesById.set(module.id, module);
+    return reply.status(201).send({ module });
+  });
+
+  app.post('/api/v1/modules/:id/lessons', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const module = courseModulesById.get(id);
+    if (!module) {
+      throw new DomainError('NOT_FOUND', `Module with ID "${id}" not found.`);
+    }
+
+    const course = coursesById.get(module.courseId);
+    const profile = profilesByUserId.get(session.userId);
+    if (course?.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
+      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can add lessons.');
+    }
+
+    const input = CreateLessonInputSchema.parse(req.body);
+    if (input.prerequisiteLessonId && !lessonsById.has(input.prerequisiteLessonId)) {
+      throw new DomainError('NOT_FOUND', `Prerequisite lesson with ID "${input.prerequisiteLessonId}" not found.`);
+    }
+
+    const existing = Array.from(lessonsById.values()).find(
+      (l) => l.moduleId === module.id && l.orderIndex === input.orderIndex
+    );
+    if (existing) {
+      throw new DomainError('CONFLICT', `Lesson with orderIndex ${input.orderIndex} already exists in this module.`);
+    }
+
+    const now = new Date().toISOString();
+    const lesson: Lesson = {
+      id: crypto.randomUUID(),
+      moduleId: module.id,
+      title: input.title,
+      contentType: input.contentType,
+      contentBody: input.contentBody,
+      durationMinutes: input.durationMinutes,
+      orderIndex: input.orderIndex,
+      prerequisiteLessonId: input.prerequisiteLessonId || null,
+      isFreePreview: input.isFreePreview,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    lessonsById.set(lesson.id, lesson);
+    return reply.status(201).send({ lesson });
+  });
+
+  app.post('/api/v1/courses/:id/publish', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const course = coursesById.get(id);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+    }
+
+    const profile = profilesByUserId.get(session.userId);
+    if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
+      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can publish this course.');
+    }
+
+    const modules = Array.from(courseModulesById.values()).filter((m) => m.courseId === course.id);
+    const moduleIds = new Set(modules.map((m) => m.id));
+    const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
+
+    const readiness = validateCoursePublishReadiness(course, modules, lessons);
+    if (!readiness.valid) {
+      throw new DomainError('VALIDATION_FAILED', `Course publish requirements not met: ${readiness.errors.join('; ')}`);
+    }
+
+    course.status = 'published';
+    course.updatedAt = new Date().toISOString();
+
+    return reply.status(200).send({
+      message: 'Course published successfully',
+      course,
+    });
+  });
+
+  app.post('/api/v1/courses/:id/enroll', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const course = coursesById.get(id);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+    }
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
+    }
+
+    const existingEnrollments = Array.from(enrollmentsById.values());
+    const enrollment = enrollUserInCourse(existingEnrollments, profile.id, course);
+
+    enrollmentsById.set(enrollment.id, enrollment);
+    enrollmentsByUserAndCourse.set(`${profile.id}:${course.id}`, enrollment);
+
+    return reply.status(201).send({
+      message: 'Enrolled successfully',
+      enrollment,
+    });
+  });
+
+  app.get('/api/v1/courses/:id/progress', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const course = coursesById.get(id);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+    }
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
+    if (!enrollment) {
+      return reply.status(200).send({ enrolled: false });
+    }
+
+    const completedProgress = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
+      (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
+    );
+    const completedLessonIds = completedProgress.map((p) => p.lessonId);
+    const certificate = certificatesByEnrollmentId.get(enrollment.id);
+
+    return reply.status(200).send({
+      enrolled: true,
+      enrollment,
+      completedLessonIds,
+      certificate,
+    });
+  });
+
+  app.post('/api/v1/lessons/:id/complete', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const lesson = lessonsById.get(id);
+    if (!lesson) {
+      throw new DomainError('NOT_FOUND', `Lesson with ID "${id}" not found.`);
+    }
+
+    const module = courseModulesById.get(lesson.moduleId);
+    if (!module) {
+      throw new DomainError('NOT_FOUND', 'Module for lesson not found.');
+    }
+
+    const course = coursesById.get(module.courseId);
+    if (!course) {
+      throw new DomainError('NOT_FOUND', 'Course for lesson not found.');
+    }
+
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
+    if (!enrollment || enrollment.status === 'dropped' || enrollment.status === 'expired') {
+      throw new DomainError('FORBIDDEN', 'You must be actively enrolled in the course to complete lessons.');
+    }
+
+    const progressKey = `${enrollment.id}:${lesson.id}`;
+    // BR-21: Idempotent lesson completion
+    if (lessonProgressByEnrollmentAndLesson.has(progressKey)) {
+      return reply.status(200).send({
+        message: 'Lesson already completed',
+        progressPercent: enrollment.progressPercent,
+        alreadyCompleted: true,
+      });
+    }
+
+    // Retrieve all modules and lessons for this course to evaluate prerequisites and sequential modules
+    const courseModules = Array.from(courseModulesById.values()).filter((m) => m.courseId === course.id);
+    const courseModuleIds = new Set(courseModules.map((m) => m.id));
+    const courseLessons = Array.from(lessonsById.values()).filter((l) => courseModuleIds.has(l.moduleId));
+
+    const completedProgressList = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
+      (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
+    );
+    const completedLessonIds = new Set<string>(completedProgressList.map((p) => p.lessonId));
+
+    // BR-47: Sequential module progress
+    verifySequentialModuleProgress(courseModules, courseLessons, completedLessonIds, lesson);
+
+    // BR-22: Direct prerequisite check
+    verifyLessonPrerequisites(lesson, completedLessonIds);
+
+    // Record lesson progress
+    const now = new Date().toISOString();
+    const progress: LessonProgress = {
+      id: crypto.randomUUID(),
+      enrollmentId: enrollment.id,
+      lessonId: lesson.id,
+      status: 'completed',
+      completedAt: now,
+    };
+    lessonProgressByEnrollmentAndLesson.set(progressKey, progress);
+    completedLessonIds.add(lesson.id);
+
+    // Calculate new progress percentage
+    const newProgressPercent = calculateCourseProgress(courseLessons.length, completedLessonIds.size);
+    enrollment.progressPercent = newProgressPercent;
+    enrollment.updatedAt = now;
+
+    let certificate: CourseCertificate | undefined;
+    let awardedXp = 0;
+
+    // Check course completion (BR-23, BR-48)
+    const isCompleted = completedLessonIds.size === courseLessons.length;
+    if (isCompleted && enrollment.status !== 'completed') {
+      enrollment.status = 'completed';
+      enrollment.completedAt = now;
+
+      // Auto-mint verified Evidence in the Talent Graph (BR-23)
+      const evidence = createEvidence({
+        subjectId: profile.id,
+        type: 'course_completion',
+        title: `Course Certificate: ${course.title}`,
+        description: `Successfully completed all modules and lessons in "${course.title}".`,
+        source: 'TalentSphere LMS',
+        provenance: `course:${course.id}`,
+        recencyDate: now.split('T')[0],
+      });
+      // Authority level for platform LMS completion
+      evidence.status = 'verified';
+      evidence.verificationLevel = 'authority_verified';
+
+      evidenceById.set(evidence.id, evidence);
+      const evList = evidenceBySubjectId.get(profile.id) || [];
+      evList.push(evidence);
+      evidenceBySubjectId.set(profile.id, evList);
+
+      enqueuedWorkerJobs.push({
+        type: 'evidence.propagate',
+        payload: {
+          evidenceId: evidence.id,
+          status: evidence.status,
+          level: evidence.verificationLevel,
+        },
+        enqueuedAt: now,
+      });
+
+      // Mint zero-PII certificate (BR-150)
+      certificate = mintCourseCertificate(enrollment.id, profile.id, course, evidence.id);
+      certificatesByNumber.set(certificate.certificateNumber, certificate);
+      certificatesByEnrollmentId.set(enrollment.id, certificate);
+
+      // Award XP bonus capped by 200 XP/day (BR-25)
+      const userTxs = xpTransactionsByUserId.get(session.userId) || [];
+      awardedXp = calculateCappedXp(course.xpReward, userTxs, 200);
+
+      if (awardedXp > 0) {
+        const tx: XpTransaction = {
+          id: crypto.randomUUID(),
+          userId: session.userId,
+          amount: awardedXp,
+          referenceType: 'course',
+          referenceId: course.id,
+          description: `Completed course "${course.title}"`,
+          createdAt: now,
+        };
+        userTxs.push(tx);
+        xpTransactionsByUserId.set(session.userId, userTxs);
+      }
+
+      enqueuedWorkerJobs.push({
+        type: 'lms.course.completed',
+        payload: {
+          courseId: course.id,
+          userId: profile.id,
+          certificateNumber: certificate.certificateNumber,
+        },
+        enqueuedAt: now,
+      });
+    }
+
+    return reply.status(200).send({
+      progress: enrollment.progressPercent,
+      completed: enrollment.status === 'completed',
+      certificate,
+      xpAwarded: awardedXp,
+    });
+  });
+
+  // Public Certificate Verification Endpoint (Zero-PII verification BR-150, BR-155)
+  app.get('/api/v1/certificates/:certificateNumber', async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
+    const { certificateNumber } = req.params;
+    const cert = certificatesByNumber.get(certificateNumber);
+    if (!cert) {
+      throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+    }
+
+    const course = coursesById.get(cert.courseId);
+
+    return reply.status(200).send({
+      certificateNumber: cert.certificateNumber,
+      courseTitle: course?.title || 'Unknown Course',
+      status: cert.status,
+      issuedAt: cert.issuedAt,
+      verificationProofHash: cert.verificationProofHash,
+      isValid: cert.status === 'verified',
+    });
+  });
+
   // Internal test helper for inspecting async job dispatch
   app.get('/api/v1/internal/worker-jobs', async () => {
     return { jobs: enqueuedWorkerJobs };
   });
-
-
 
   return app;
 }

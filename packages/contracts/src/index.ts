@@ -247,3 +247,52 @@ export const AIAssistantQueryInputSchema = z.object({
 });
 
 export type AIAssistantQueryInput = z.infer<typeof AIAssistantQueryInputSchema>;
+
+/**
+ * LMS & Course Contracts (F-07, BR-21..BR-48, BR-91, BR-92)
+ */
+export const CreateCourseInputSchema = z.object({
+  title: z.string().min(3).max(200),
+  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  description: z.string().min(10).max(5000),
+  level: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
+  estimatedDurationMinutes: z.number().int().min(10).max(10000).default(60),
+  passingScorePercent: z.number().int().min(1).max(100).default(70),
+  xpReward: z.number().int().min(0).max(200).default(50),
+  skillIds: z.array(z.string().uuid()).optional(),
+});
+
+export type CreateCourseInput = z.infer<typeof CreateCourseInputSchema>;
+
+export const CreateCourseModuleInputSchema = z.object({
+  title: z.string().min(2).max(200),
+  description: z.string().max(1000).optional(),
+  orderIndex: z.number().int().min(0),
+});
+
+export type CreateCourseModuleInput = z.infer<typeof CreateCourseModuleInputSchema>;
+
+export const CreateLessonInputSchema = z.object({
+  title: z.string().min(2).max(200),
+  contentType: z.enum(['text', 'video', 'interactive', 'quiz']).default('text'),
+  contentBody: z.string().min(5).max(100000),
+  durationMinutes: z.number().int().min(1).max(300).default(10),
+  orderIndex: z.number().int().min(0),
+  prerequisiteLessonId: z.string().uuid().optional(),
+  isFreePreview: z.boolean().default(false),
+});
+
+export type CreateLessonInput = z.infer<typeof CreateLessonInputSchema>;
+
+export const EnrollCourseInputSchema = z.object({
+  courseId: z.string().uuid(),
+});
+
+export type EnrollCourseInput = z.infer<typeof EnrollCourseInputSchema>;
+
+export const CompleteLessonInputSchema = z.object({
+  lessonId: z.string().uuid(),
+});
+
+export type CompleteLessonInput = z.infer<typeof CompleteLessonInputSchema>;
+

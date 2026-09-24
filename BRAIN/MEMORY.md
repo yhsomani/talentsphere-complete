@@ -4,34 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.4
-- **Last Updated:** 2026-09-24 13:00
+- **Memory Version:** 1.5
+- **Last Updated:** 2026-09-24 13:15
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 10 / 173 (5.78%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 10 / 173 (5.78%) [95/95 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 11 / 173 (6.36%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 11 / 173 (6.36%) [106/106 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `5e45e22`
-- **Current Primary Task:** Phase 2 — Learning Management System (F-07)
-- **Next Action:** Implement LMS courses, lesson progression, prerequisites, and completion certificates
+- **Last Known Commit:** `8839041`
+- **Current Primary Task:** Phase 1 / Phase 2 — Direct Messaging & Notification Center (F-10, F-14)
+- **Next Action:** Implement direct messaging thread state, connection gating, read/unread status, and notifications
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (5.78% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments)
+- **Implementation Status:** IN PROGRESS (6.36% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`)
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 12 test suites, 95/95 automated unit and integration tests passing
+- **Testing:** 14 test suites, 106/106 automated unit and integration tests passing
 - **Security:** Defense in depth, strict RLS, server-authoritative authorization
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Implement LMS courses, lesson progress, and completion certificates (F-07)
+- **Next Action:** Implement Direct Messaging & Notifications (F-10, F-14)
 
 ---
 
@@ -50,14 +50,14 @@
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 4 | 4 | 0 | IN PROGRESS |
 | **Identity & Profile (Phase 1)** | 18 | 1 | 1 | 0 | IN PROGRESS |
-| **Evidence & Learning (Phase 2)** | 24 | 3 | 3 | 0 | IN PROGRESS |
+| **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
 | **Career Intelligence (Phase 5)** | 20 | 0 | 0 | 0 | PLANNED |
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **10** | **10** | **0** | **IN PROGRESS (5.78%)** |
+| **Total Portfolio** | **173** | **11** | **11** | **0** | **IN PROGRESS (6.36%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -68,10 +68,10 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 163
+- **PLANNED:** 162
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED:** 10 (F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96)
-- **VERIFIED:** 10 (F-01, F-02, F-03, F-04, F-05, F-06, F-08, F-12, F-84, F-96)
+- **IMPLEMENTED:** 11 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96)
+- **VERIFIED:** 11 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-12, F-84, F-96)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 0
@@ -225,6 +225,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/challenges-assessment.test.ts` (4 integration tests verifying end-to-end challenge lifecycle, proctored assessment session, AI assistant blockage, and verified evidence minting)
 - **Result:** All 12 test suites (95 tests) PASS. TypeScript builds clean. Vite web bundle verified.
 
+#### Change 13: Learning Management System (LMS Courses, Lessons, Progress & Certificates) (F-07)
+- **Why:** Implement canonical learning platform loop: course & module authoring, lesson content types (BR-92), publish readiness validation (BR-91), duplicate enrollment prevention (BR-46), strictly sequential module progress (BR-47), lesson prerequisite enforcement (BR-22), idempotent lesson completion (BR-21), zero-PII course completion certificate minting (BR-23, BR-150, BR-155), automatic verified evidence minting into the Talent Graph, daily capped XP awards (BR-25), and asynchronous worker queue dispatch.
+- **Files:**
+  - `supabase/migrations/00005_lms_courses_schema.sql` (courses, course_modules, lessons, course_enrollments, lesson_progress, course_certificates, course_skills with RLS)
+  - `packages/domain/src/lms.ts` (publish readiness rules, enrollment domain model, sequential module progress verification, prerequisite check, progress calculation, certificate minting with SHA-256 proof hash)
+  - `packages/domain/src/index.ts` (Exports LMS domain models and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for courses, modules, lessons, enrollment, and lesson completion)
+  - `apps/api/src/server.ts` (Course list/create/detail/publish, module & lesson addition, course enrollment, progress tracking, lesson completion with auto evidence & certificate minting, public certificate verification, worker queue dispatch)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00005)
+  - `tests/unit/lms-domain.test.ts` (6 unit tests verifying BR-21, BR-22, BR-23, BR-46, BR-47, BR-91, BR-92, BR-150)
+  - `tests/integration/lms-courses.test.ts` (4 integration tests verifying full LMS lifecycle, publish validation, duplicate enrollment rejection, sequential module enforcement, prerequisite rejection, progressive completion, public certificate lookup, auto evidence minting, and worker event dispatch)
+- **Result:** All 14 test suites (106 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.68s.
+
 ---
 
 ## 9. Completed Work
@@ -243,6 +256,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-012:** Implemented Skill Evidence & Digital Credentials + Skills Taxonomy Graph (F-96, F-84): Migration 00002, pure verification state machine, anti-gaming check, zero-PII public proof, acyclic cycle detection, 5-hop graph traversal, async queue event dispatch, and comprehensive test suites (18 tests added; 63/63 total PASS across 8 suites).
 - **TASK-013:** Implemented Job Marketplace, Post Job Studio & ATS Pipeline (F-04, F-05, F-06): Migration 00003, job lifecycle, recruiter-only posting, candidate-only apply, duplicate prevention, ATS pipeline advancement, and test suites (19 tests added; 82/82 total PASS across 10 suites).
 - **TASK-014:** Implemented Challenges Arena, Assessment Engine & Proctored AI Policy Enforcement (F-08): Migration 00004, hidden test case protection, sandboxed evaluator, active session AI prohibition enforcement, daily 200 XP cap, auto-minted authority evidence, and test suites (13 tests added; 95/95 total PASS across 12 suites).
+- **TASK-015:** Implemented Learning Management System (LMS Courses, Lessons, Progress Tracking, Prerequisites & Certificates) (F-07): Migration 00005, publish readiness validation, unique enrollment check, sequential module progression, prerequisite enforcement, idempotent lesson completion, zero-PII certificate issuing, and test suites (11 tests added; 106/106 total PASS across 14 suites).
 
 ---
 

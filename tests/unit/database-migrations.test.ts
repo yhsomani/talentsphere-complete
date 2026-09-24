@@ -89,6 +89,26 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.challenge_submissions ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.xp_transactions ENABLE ROW LEVEL SECURITY;');
   });
+
+  it('contains and validates migration 00005 lms courses schema', () => {
+    const migrationFile5 = path.join(migrationsDir, '00005_lms_courses_schema.sql');
+    expect(fs.existsSync(migrationFile5)).toBe(true);
+    const sql = fs.readFileSync(migrationFile5, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.courses');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.course_modules');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.lessons');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.course_enrollments');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.lesson_progress');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.course_certificates');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.course_skills');
+    expect(sql).toContain('ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.course_modules ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.course_enrollments ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.lesson_progress ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.course_certificates ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.course_skills ENABLE ROW LEVEL SECURITY;');
+  });
 });
 
 

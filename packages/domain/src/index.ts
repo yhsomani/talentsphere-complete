@@ -11,6 +11,7 @@ export * from './jobs.js';
 export * from './applications.js';
 export * from './challenges.js';
 export * from './assessment.js';
+export * from './lms.js';
 
 export type Role =
   | 'candidate'
