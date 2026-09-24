@@ -6,6 +6,8 @@ export type NotificationType =
   | 'course_completion'
   | 'challenge_passed'
   | 'mention'
+  | 'connection_request'
+  | 'connection_accepted'
   | 'system';
 
 export interface Notification {

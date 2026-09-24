@@ -4,34 +4,34 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 1.9
-- **Last Updated:** 2026-09-24 13:40
+- **Memory Version:** 2.0
+- **Last Updated:** 2026-09-24 13:45
 - **Current Milestone:** M0 — Platform Trust Foundation & Monorepo Bootstrap
 - **Current Phase:** Phase 0 / Phase 1 / Phase 2 Core Loops
-- **Overall Implementation:** 15 / 173 (8.67%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-10, F-11, F-12, F-13, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
-- **Overall Verification:** 15 / 173 (8.67%) [153/153 automated tests PASS; 100% build PASS]
+- **Overall Implementation:** 16 / 173 (9.25%) [Features F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09, F-10, F-11, F-12, F-13, F-14, F-84, F-96 verified; Foundation Epics E-01, E-04, E-05, E-09, E-10, E-13, E-14 verified]
+- **Overall Verification:** 16 / 173 (9.25%) [175/175 automated tests PASS; 100% build PASS]
 - **Current Release:** v0.0.1-foundation
 - **Current Branch:** `main`
-- **Last Known Commit:** `74ec2e3`
-- **Current Primary Task:** Phase 2 — Professional Networking & Connections (F-09)
-- **Next Action:** Implement connection request state machine, stale request nudges, and connection-gated profile access
+- **Last Known Commit:** `513bfaf`
+- **Current Primary Task:** Phase 2 — Portfolio Showcase & Media Assets (F-26)
+- **Next Action:** Implement candidate portfolio projects, media attachments, and linked verified skill evidence graph credentials
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (8.67% implementation verified)
-- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports)
+- **Implementation Status:** IN PROGRESS (9.25% implementation verified)
+- **Backend:** Fastify + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connection request state machine)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, dashboard)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007, 00008, 00009)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, RLS policies (00001, 00002, 00003, 00004, 00005, 00006, 00007, 00008, 00009, 00010)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 22 test suites, 153/153 automated unit and integration tests passing
-- **Security:** Defense in depth, strict RLS, server-authoritative authorization, append-only exports with soft delete (BR-26)
+- **Testing:** 24 test suites, 175/175 automated unit and integration tests passing
+- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, append-only exports with soft delete (BR-26)
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Feature-by-feature execution of core platform loops
 - **Major Blocker:** None
-- **Next Action:** Implement Professional Networking (F-09)
+- **Next Action:** Implement Portfolio Showcase & Media Assets (F-26)
 
 ---
 
@@ -49,7 +49,7 @@
 | System / Domain Area | Planned Features | Implemented | Verified | Released | Status |
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Foundation & Auth (Phase 0)** | 16 | 6 | 6 | 0 | IN PROGRESS |
-| **Identity & Profile (Phase 1)** | 18 | 3 | 3 | 0 | IN PROGRESS |
+| **Identity & Profile (Phase 1)** | 18 | 4 | 4 | 0 | IN PROGRESS |
 | **Evidence & Learning (Phase 2)** | 24 | 4 | 4 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 3 | 3 | 0 | IN PROGRESS |
 | **Hiring Depth (Phase 4)** | 18 | 0 | 0 | 0 | PLANNED |
@@ -57,7 +57,7 @@
 | **Trust & Ecosystem (Phase 6)** | 19 | 0 | 0 | 0 | PLANNED |
 | **Institution & Enterprise (Phase 7)** | 16 | 0 | 0 | 0 | PLANNED |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **15** | **15** | **0** | **IN PROGRESS (8.67%)** |
+| **Total Portfolio** | **173** | **16** | **16** | **0** | **IN PROGRESS (9.25%)** |
 
 *Note: Progress calculation based on explicit 173-feature portfolio count defined in `docs/registries/FEATURE_REGISTRY.md`.*
 
@@ -301,6 +301,20 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/resumes.test.ts` (6 integration tests verifying resume lifecycle, multi-format export, soft-delete query filtering, and user privacy isolation)
 - **Result:** All 22 test suites (153 tests) PASS. TypeScript composite build clean. Vite web bundle built in 3.25s.
 
+#### Change 18: Professional Networking & Connection Request State Machine (F-09)
+- **Why:** Implement professional networking connection loops, bidirectional relationship queries, state transitions (`pending -> accepted | rejected | withdrawn`), anti-self connection invariant (`sender_id != recipient_id`), duplicate request rejection, notification generation (`connection_request`, `connection_accepted`), async worker job enqueuing, and disconnection handling.
+- **Files:**
+  - `supabase/migrations/00010_networking_connections_schema.sql` (connections table with RLS, anti-self check constraint, unique pair constraint, indices)
+  - `packages/domain/src/networking.ts` (requestConnection, acceptConnection, rejectConnection, withdrawConnection, areConnected, getConnectionBetween)
+  - `packages/domain/src/notifications.ts` (Added `connection_request` and `connection_accepted` to NotificationType)
+  - `packages/domain/src/index.ts` (Exports networking domain models and methods)
+  - `packages/contracts/src/index.ts` (Zod schemas for RequestConnectionInputSchema, RespondConnectionInputSchema)
+  - `apps/api/src/server.ts` (POST /api/v1/connections/request, GET /api/v1/connections, GET /api/v1/connections/status/:targetUserId, POST /api/v1/connections/:id/respond, POST /api/v1/connections/:id/withdraw, DELETE /api/v1/connections/:id)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00010)
+  - `tests/unit/networking-domain.test.ts` (12 unit tests verifying anti-self invariant, 500-char note limits, duplicate rejection, actor permissions, state transitions, and connection helpers)
+  - `tests/integration/networking.test.ts` (9 integration tests verifying end-to-end request, notification delivery, worker telemetry, acceptance, status queries, duplicate prevention, withdrawal, rejection, and disconnection)
+- **Result:** All 24 test suites (175 tests) PASS. TypeScript composite build clean. Vite web bundle built in 2.07s.
+
 ---
 
 ## 9. Completed Work
@@ -324,6 +338,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-017:** Implemented Notification Center, Preferences, Mention Gating & Read Management (F-14): Migration 00007, delivery preference model (BR-120), mention gating, notification listing, targeted and bulk mark read, unread counts, and test suites (10 tests added; 123/123 total PASS across 18 suites).
 - **TASK-018:** Implemented Central AI Gateway & Career Assistant with Cost Protection & Proctoring Isolation (F-11): Migration 00008, quota limits (Free-User Cost Invariant SSOT 16.4), Context Firewall (WIT-007), prompt injection defense, proctored session AI prohibition (`ASSESSMENT_AI_PROHIBITED`), conversation history, advisory disclaimers, usage metering, and test suites (16 tests added; 140/140 total PASS across 20 suites).
 - **TASK-019:** Implemented Resume Builder & Append-Only Export Engine with Soft Delete (F-13): Migration 00009, multi-template sections, verified evidence credential embedding, JSON/Markdown/HTML rendering, SHA-256 export integrity, soft-delete audit preservation (BR-26), and test suites (13 tests added; 153/153 total PASS across 22 suites).
+- **TASK-020:** Implemented Professional Networking & Connection Request State Machine (F-09): Migration 00010, anti-self connection check (`sender_id != recipient_id`), duplicate prevention, state transitions (`pending -> accepted | rejected | withdrawn`), authorization enforcement, notification triggers, async worker telemetry (`connection.requested`, `connection.accepted`, `connection.rejected`, `connection.withdrawn`, `connection.removed`), status queries, and test suites (21 tests added; 175/175 total PASS across 24 suites).
 
 ---
 

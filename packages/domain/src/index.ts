@@ -16,6 +16,7 @@ export * from './messaging.js';
 export * from './notifications.js';
 export * from './ai-gateway.js';
 export * from './resumes.js';
+export * from './networking.js';
 
 export type Role =
   | 'candidate'

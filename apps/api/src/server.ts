@@ -87,6 +87,14 @@ import {
   updateResumeEntity,
   createResumeExport,
   softDeleteResumeExport,
+  Connection,
+  ConnectionStatus,
+  requestConnection,
+  acceptConnection,
+  rejectConnection,
+  withdrawConnection,
+  areConnected,
+  getConnectionBetween,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -120,6 +128,8 @@ import {
   CreateResumeInputSchema,
   UpdateResumeInputSchema,
   ExportResumeInputSchema,
+  RequestConnectionInputSchema,
+  RespondConnectionInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -2539,6 +2549,252 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Resume export soft-deleted (BR-26)',
       export: softDeleted,
+    });
+  });
+
+  // Professional Networking Repositories & Endpoints (F-09)
+  const connectionsById = new Map<string, Connection>();
+  const connectionsByUserId = new Map<string, Connection[]>();
+
+  app.post('/api/v1/connections/request', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = RequestConnectionInputSchema.parse(req.body || {});
+
+    let targetUserId = input.recipientId;
+    const targetProfile = profilesById.get(input.recipientId);
+    if (targetProfile) {
+      targetUserId = targetProfile.userId;
+    }
+
+    if (!usersById.has(targetUserId) && !profilesByUserId.has(targetUserId)) {
+      throw new DomainError('NOT_FOUND', 'Recipient user not found.');
+    }
+
+    const userConnections = connectionsByUserId.get(session.userId) || [];
+    const connection = requestConnection(
+      {
+        senderId: session.userId,
+        recipientId: targetUserId,
+        note: input.note,
+      },
+      userConnections
+    );
+
+    connectionsById.set(connection.id, connection);
+
+    // Save for sender
+    userConnections.unshift(connection);
+    connectionsByUserId.set(session.userId, userConnections);
+
+    // Save for recipient
+    const recipientConnections = connectionsByUserId.get(targetUserId) || [];
+    recipientConnections.unshift(connection);
+    connectionsByUserId.set(targetUserId, recipientConnections);
+
+    // Trigger notification to recipient
+    const senderProfile = profilesByUserId.get(session.userId);
+    const senderName = senderProfile?.fullName || 'A professional';
+    const notifRecipientProfile = profilesByUserId.get(targetUserId);
+    const notifRecipientId = notifRecipientProfile?.id || targetUserId;
+
+    sendNotification({
+      recipientId: notifRecipientId,
+      type: 'connection_request',
+      title: 'New Connection Request',
+      body: `${senderName} wants to connect with you.`,
+      referenceType: 'connection',
+      referenceId: connection.id,
+    });
+
+    // Enqueue async worker job
+    enqueuedWorkerJobs.push({
+      type: 'connection.requested',
+      payload: {
+        connectionId: connection.id,
+        senderId: session.userId,
+        recipientId: targetUserId,
+      },
+      enqueuedAt: connection.createdAt,
+    });
+
+    return reply.status(201).send({ connection });
+  });
+
+  app.get('/api/v1/connections', async (req: FastifyRequest<{ Querystring: { status?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userConnections = connectionsByUserId.get(session.userId) || [];
+    const filter = req.query.status || 'accepted';
+
+    let filtered = userConnections;
+    if (filter === 'accepted') {
+      filtered = userConnections.filter((c) => c.status === 'accepted');
+    } else if (filter === 'pending') {
+      filtered = userConnections.filter((c) => c.status === 'pending');
+    } else if (filter === 'pending_sent') {
+      filtered = userConnections.filter((c) => c.status === 'pending' && c.senderId === session.userId);
+    } else if (filter === 'pending_received') {
+      filtered = userConnections.filter((c) => c.status === 'pending' && c.recipientId === session.userId);
+    } else if (filter === 'rejected') {
+      filtered = userConnections.filter((c) => c.status === 'rejected');
+    } else if (filter === 'withdrawn') {
+      filtered = userConnections.filter((c) => c.status === 'withdrawn');
+    } else if (filter === 'all') {
+      filtered = userConnections;
+    }
+
+    return reply.status(200).send({ connections: filtered });
+  });
+
+  app.get('/api/v1/connections/status/:targetUserId', async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    let { targetUserId } = req.params;
+
+    const targetProfile = profilesById.get(targetUserId);
+    if (targetProfile) {
+      targetUserId = targetProfile.userId;
+    }
+
+    const userConnections = connectionsByUserId.get(session.userId) || [];
+    const conn = getConnectionBetween(userConnections, session.userId, targetUserId);
+
+    return reply.status(200).send({
+      status: conn ? conn.status : 'none',
+      connection: conn || null,
+      isConnected: conn?.status === 'accepted',
+    });
+  });
+
+  app.post('/api/v1/connections/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const conn = connectionsById.get(id);
+    if (!conn) {
+      throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
+    }
+
+    const input = RespondConnectionInputSchema.parse(req.body || {});
+    let updated: Connection;
+
+    if (input.action === 'accept') {
+      updated = acceptConnection(conn, session.userId);
+
+      const recipientProfile = profilesByUserId.get(session.userId);
+      const recipientName = recipientProfile?.fullName || 'A professional';
+      const senderProfile = profilesByUserId.get(conn.senderId);
+      const notifRecipientId = senderProfile?.id || conn.senderId;
+
+      sendNotification({
+        recipientId: notifRecipientId,
+        type: 'connection_accepted',
+        title: 'Connection Request Accepted',
+        body: `${recipientName} accepted your connection request.`,
+        referenceType: 'connection',
+        referenceId: conn.id,
+      });
+
+      enqueuedWorkerJobs.push({
+        type: 'connection.accepted',
+        payload: {
+          connectionId: conn.id,
+          senderId: conn.senderId,
+          recipientId: conn.recipientId,
+        },
+        enqueuedAt: updated.acceptedAt,
+      });
+    } else {
+      updated = rejectConnection(conn, session.userId);
+
+      enqueuedWorkerJobs.push({
+        type: 'connection.rejected',
+        payload: {
+          connectionId: conn.id,
+          senderId: conn.senderId,
+          recipientId: conn.recipientId,
+        },
+        enqueuedAt: updated.updatedAt,
+      });
+    }
+
+    connectionsById.set(updated.id, updated);
+
+    const senderList = connectionsByUserId.get(updated.senderId) || [];
+    const sIdx = senderList.findIndex((c) => c.id === updated.id);
+    if (sIdx !== -1) senderList[sIdx] = updated;
+
+    const recipientList = connectionsByUserId.get(updated.recipientId) || [];
+    const rIdx = recipientList.findIndex((c) => c.id === updated.id);
+    if (rIdx !== -1) recipientList[rIdx] = updated;
+
+    return reply.status(200).send({ connection: updated });
+  });
+
+  app.post('/api/v1/connections/:id/withdraw', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const conn = connectionsById.get(id);
+    if (!conn) {
+      throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
+    }
+
+    const updated = withdrawConnection(conn, session.userId);
+    connectionsById.set(updated.id, updated);
+
+    const senderList = connectionsByUserId.get(updated.senderId) || [];
+    const sIdx = senderList.findIndex((c) => c.id === updated.id);
+    if (sIdx !== -1) senderList[sIdx] = updated;
+
+    const recipientList = connectionsByUserId.get(updated.recipientId) || [];
+    const rIdx = recipientList.findIndex((c) => c.id === updated.id);
+    if (rIdx !== -1) recipientList[rIdx] = updated;
+
+    enqueuedWorkerJobs.push({
+      type: 'connection.withdrawn',
+      payload: {
+        connectionId: conn.id,
+        senderId: conn.senderId,
+        recipientId: conn.recipientId,
+      },
+      enqueuedAt: updated.updatedAt,
+    });
+
+    return reply.status(200).send({ connection: updated });
+  });
+
+  app.delete('/api/v1/connections/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const conn = connectionsById.get(id);
+    if (!conn) {
+      throw new DomainError('NOT_FOUND', `Connection with ID "${id}" not found.`);
+    }
+
+    if (conn.senderId !== session.userId && conn.recipientId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to connection.');
+    }
+
+    connectionsById.delete(id);
+
+    const senderList = connectionsByUserId.get(conn.senderId) || [];
+    connectionsByUserId.set(conn.senderId, senderList.filter((c) => c.id !== id));
+
+    const recipientList = connectionsByUserId.get(conn.recipientId) || [];
+    connectionsByUserId.set(conn.recipientId, recipientList.filter((c) => c.id !== id));
+
+    enqueuedWorkerJobs.push({
+      type: 'connection.removed',
+      payload: {
+        connectionId: conn.id,
+        removedBy: session.userId,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Connection removed successfully',
+      deletedId: id,
     });
   });
 

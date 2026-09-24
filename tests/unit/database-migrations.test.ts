@@ -156,5 +156,17 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'active\'');
     expect(sql).toContain('deleted_at TIMESTAMPTZ');
   });
+
+  it('contains and validates migration 00010 networking connections schema (F-09)', () => {
+    const migrationFile10 = path.join(migrationsDir, '00010_networking_connections_schema.sql');
+    expect(fs.existsSync(migrationFile10)).toBe(true);
+    const sql = fs.readFileSync(migrationFile10, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.connections');
+    expect(sql).toContain('ALTER TABLE public.connections ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('CONSTRAINT chk_connections_no_self CHECK (sender_id != recipient_id)');
+    expect(sql).toContain('CONSTRAINT uq_connections_pair UNIQUE (sender_id, recipient_id)');
+    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'pending\'');
+  });
 });
+
 

@@ -411,3 +411,20 @@ export const ExportResumeInputSchema = z.object({
 
 export type ExportResumeInput = z.infer<typeof ExportResumeInputSchema>;
 
+/**
+ * Professional Networking Contracts (F-09)
+ */
+export const RequestConnectionInputSchema = z.object({
+  recipientId: z.string().uuid(),
+  note: z.string().max(500).optional(),
+});
+
+export type RequestConnectionInput = z.infer<typeof RequestConnectionInputSchema>;
+
+export const RespondConnectionInputSchema = z.object({
+  action: z.enum(['accept', 'reject']),
+});
+
+export type RespondConnectionInput = z.infer<typeof RespondConnectionInputSchema>;
+
+
