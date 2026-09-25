@@ -258,6 +258,18 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('teaching_effectiveness_score NUMERIC(5, 2)');
     expect(sql).toContain('community_standing_score NUMERIC(5, 2)');
   });
+
+  it('contains and validates migration 00032 peer credibility and endorsement weights schema (F-150)', () => {
+    const migrationFile32 = path.join(migrationsDir, '00032_peer_credibility_schema.sql');
+    expect(fs.existsSync(migrationFile32)).toBe(true);
+    const sql = fs.readFileSync(migrationFile32, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skill_endorsements');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.endorsement_weights');
+    expect(sql).toContain('ALTER TABLE public.skill_endorsements ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.endorsement_weights ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('endorser_credibility NUMERIC(4, 3)');
+    expect(sql).toContain('final_weight NUMERIC(5, 3)');
+  });
 });
 
 

@@ -254,6 +254,12 @@ import {
   calculateInstructorReputation,
   createInstructorEndorsement,
   trimOutlierReviews,
+  SkillEndorsement,
+  EndorsementWeightBreakdown,
+  createSkillEndorsement,
+  computeEndorsementWeight,
+  revokeSkillEndorsement,
+  aggregateSkillEndorsements,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -352,6 +358,9 @@ import {
   SubmitInstructorMetricsInputSchema,
   CreateInstructorEndorsementInputSchema,
   SubmitInstructorReviewInputSchema,
+  CreateSkillEndorsementInputSchema,
+  RevokeSkillEndorsementInputSchema,
+  QuerySkillEndorsementsInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -5449,6 +5458,177 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
 
     return reply.status(200).send({ outcomes: list });
+  });
+
+  // Peer Credibility Networks & Skill Endorsements (F-150, F-110, F-144)
+  const skillEndorsementsById = new Map<string, SkillEndorsement>();
+  const skillEndorsementsByRecipientId = new Map<string, SkillEndorsement[]>();
+  const skillEndorsementsByEndorserId = new Map<string, SkillEndorsement[]>();
+
+  function computeGraphDistance(sourceId: string, targetId: string): number {
+    if (sourceId === targetId) return 1;
+    const graph = getAcceptedConnectionsGraph();
+    const visited = new Set<string>([sourceId]);
+    const queue: [string, number][] = [[sourceId, 0]];
+
+    while (queue.length > 0) {
+      const [current, dist] = queue.shift()!;
+      if (dist >= 4) break;
+      const neighbors = graph.get(current) || new Set();
+      for (const next of neighbors) {
+        if (next === targetId) return dist + 1;
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push([next, dist + 1]);
+        }
+      }
+    }
+    return 5;
+  }
+
+  // 1. Create a Skill Endorsement
+  app.post('/api/v1/skills/endorsements', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateSkillEndorsementInputSchema.parse(req.body);
+
+    const skill = skillsById.get(input.skillId);
+    if (!skill) {
+      throw new DomainError('NOT_FOUND', `Skill with ID ${input.skillId} not found.`);
+    }
+
+    // Check rate limit: max 5 endorsements given per week
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const endorserHistory = skillEndorsementsByEndorserId.get(session.userId) || [];
+    const recentWeeklyCount = endorserHistory.filter((e) => new Date(e.createdAt).getTime() > oneWeekAgo).length;
+
+    // Check duplicate endorsement
+    const recipientList = skillEndorsementsByRecipientId.get(input.recipientId) || [];
+    const existing = recipientList.find(
+      (e) => e.endorserId === session.userId && e.skillId === input.skillId && e.status === 'active'
+    );
+    if (existing) {
+      throw new DomainError('CONFLICT', 'You have already endorsed this skill for this user.');
+    }
+
+    // Network distance
+    const networkDistance = computeGraphDistance(session.userId, input.recipientId);
+
+    // Endorser reputation score
+    const endorserScoreObj =
+      reputationScoresByUserContextDomain.get(`${session.userId}:peer:general`) ||
+      reputationScoresByUserContextDomain.get(`${session.userId}:candidate:general`);
+    const endorserReputationScore = endorserScoreObj?.score ?? 50.0;
+
+    // Check domain specialization
+    const endorserEvidence = evidenceBySubjectId.get(session.userId) || [];
+    const hasSpecialization = endorserEvidence.some(
+      (ev) => ev.status === 'verified' && (evidenceSkills.get(ev.id)?.has(input.skillId) ?? false)
+    );
+
+    // Check reciprocal endorsement in past 30 days
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const recipientGivenEndorsements = skillEndorsementsByEndorserId.get(input.recipientId) || [];
+    const isReciprocal = recipientGivenEndorsements.some(
+      (e) => e.recipientId === session.userId && e.status === 'active' && new Date(e.createdAt).getTime() > thirtyDaysAgo
+    );
+
+    const endorsement = createSkillEndorsement({
+      recipientId: input.recipientId,
+      endorserId: session.userId,
+      skillId: input.skillId,
+      notes: input.notes,
+      networkDistance,
+      endorserReputationScore,
+      hasSpecializationInSkill: hasSpecialization,
+      isReciprocalEndorsement: isReciprocal,
+      recentEndorsementsCountThisWeek: recentWeeklyCount,
+    });
+
+    skillEndorsementsById.set(endorsement.id, endorsement);
+
+    recipientList.unshift(endorsement);
+    skillEndorsementsByRecipientId.set(input.recipientId, recipientList);
+
+    endorserHistory.unshift(endorsement);
+    skillEndorsementsByEndorserId.set(session.userId, endorserHistory);
+
+    enqueuedWorkerJobs.push({
+      type: 'skill.endorsed',
+      payload: {
+        endorsementId: endorsement.id,
+        recipientId: endorsement.recipientId,
+        skillId: endorsement.skillId,
+        weight: endorsement.weight.finalWeight,
+      },
+      enqueuedAt: endorsement.createdAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Skill endorsed successfully with credibility weight.',
+      endorsement,
+    });
+  });
+
+  // 2. Query Skill Endorsements for a Candidate (with aggregated strength)
+  app.get('/api/v1/skills/endorsements/recipients/:recipientId', async (req: FastifyRequest<{ Params: { recipientId: string }; Querystring: { skillId?: string } }>, reply: FastifyReply) => {
+    const { recipientId } = req.params;
+    const { skillId } = req.query;
+
+    let list = skillEndorsementsByRecipientId.get(recipientId) || [];
+    if (skillId) {
+      list = list.filter((e) => e.skillId === skillId);
+    }
+
+    const activeList = list.filter((e) => e.status === 'active');
+    const aggregate = aggregateSkillEndorsements(activeList);
+
+    return reply.status(200).send({
+      recipientId,
+      skillId,
+      aggregate,
+      endorsements: activeList,
+    });
+  });
+
+  // 3. Revoke Endorsement within 30-day window
+  app.delete('/api/v1/skills/endorsements/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const endorsement = skillEndorsementsById.get(id);
+    if (!endorsement) {
+      throw new DomainError('NOT_FOUND', `Endorsement with ID ${id} not found.`);
+    }
+
+    const revoked = revokeSkillEndorsement(endorsement, session.userId);
+    skillEndorsementsById.set(revoked.id, revoked);
+
+    const rList = skillEndorsementsByRecipientId.get(revoked.recipientId) || [];
+    const rIdx = rList.findIndex((e) => e.id === revoked.id);
+    if (rIdx >= 0) rList[rIdx] = revoked;
+
+    const eList = skillEndorsementsByEndorserId.get(revoked.endorserId) || [];
+    const eIdx = eList.findIndex((e) => e.id === revoked.id);
+    if (eIdx >= 0) eList[eIdx] = revoked;
+
+    return reply.status(200).send({
+      message: 'Endorsement revoked successfully.',
+      endorsement: revoked,
+    });
+  });
+
+  // 4. Query Endorsements Given by Authenticated User
+  app.get('/api/v1/skills/endorsements/my/given', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const history = skillEndorsementsByEndorserId.get(session.userId) || [];
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const weeklyGiven = history.filter((e) => new Date(e.createdAt).getTime() > oneWeekAgo).length;
+
+    return reply.status(200).send({
+      endorsements: history,
+      weeklyQuotaRemaining: Math.max(0, 5 - weeklyGiven),
+      totalGiven: history.length,
+    });
   });
 
   // Activity & Contribution Tracking Repositories & Endpoints (F-146, S-09)

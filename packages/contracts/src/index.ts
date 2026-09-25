@@ -1137,3 +1137,26 @@ export const SubmitInstructorReviewInputSchema = z.object({
 
 export type SubmitInstructorReviewInput = z.infer<typeof SubmitInstructorReviewInputSchema>;
 
+/**
+ * Peer Credibility Networks & Skill Endorsement Contracts (F-150, F-110, F-144)
+ */
+export const CreateSkillEndorsementInputSchema = z.object({
+  recipientId: z.string().uuid(),
+  skillId: z.string().min(1).max(128),
+  notes: z.string().max(1000).optional(),
+});
+
+export type CreateSkillEndorsementInput = z.infer<typeof CreateSkillEndorsementInputSchema>;
+
+export const RevokeSkillEndorsementInputSchema = z.object({
+  reason: z.string().max(500).optional(),
+});
+
+export type RevokeSkillEndorsementInput = z.infer<typeof RevokeSkillEndorsementInputSchema>;
+
+export const QuerySkillEndorsementsInputSchema = z.object({
+  skillId: z.string().optional(),
+});
+
+export type QuerySkillEndorsementsInput = z.infer<typeof QuerySkillEndorsementsInputSchema>;
+
