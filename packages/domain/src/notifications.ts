@@ -8,6 +8,10 @@ export type NotificationType =
   | 'mention'
   | 'connection_request'
   | 'connection_accepted'
+  | 'warm_intro_requested'
+  | 'warm_intro_approved'
+  | 'warm_intro_delivered'
+  | 'warm_intro_declined'
   | 'system';
 
 export interface Notification {

@@ -1022,6 +1022,33 @@ export const CompleteRecoveryTaskInputSchema = z.object({
 
 export type CompleteRecoveryTaskInput = z.infer<typeof CompleteRecoveryTaskInputSchema>;
 
+/**
+ * Warm Introduction Paths Contracts (F-121, S-11, BR-209..BR-216)
+ */
+export const UpdateWarmIntroPreferencesInputSchema = z.object({
+  optOutIntroducer: z.boolean().optional(),
+  blockAllIncomingIntros: z.boolean().optional(),
+  blockedUserIds: z.array(z.string().uuid()).optional(),
+});
+
+export type UpdateWarmIntroPreferencesInput = z.infer<typeof UpdateWarmIntroPreferencesInputSchema>;
+
+export const CreateWarmIntroRequestInputSchema = z.object({
+  targetUserId: z.string().uuid(),
+  introducerUserId: z.string().uuid(),
+  purpose: z.string().min(1).max(200),
+  note: z.string().min(1).max(500),
+});
+
+export type CreateWarmIntroRequestInput = z.infer<typeof CreateWarmIntroRequestInputSchema>;
+
+export const RespondWarmIntroRequestInputSchema = z.object({
+  decision: z.enum(['approve', 'decline']),
+  reason: z.string().max(500).optional(),
+});
+
+export type RespondWarmIntroRequestInput = z.infer<typeof RespondWarmIntroRequestInputSchema>;
+
 
 
 

@@ -33,6 +33,7 @@ export * from './application-feedback.js';
 export * from './skill-decay.js';
 export * from './technical-interview.js';
 export * from './reputation-engine.js';
+export * from './warm-introductions.js';
 
 export type Role =
   | 'candidate'
