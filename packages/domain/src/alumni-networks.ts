@@ -8,24 +8,12 @@ import crypto from 'node:crypto';
 import { DomainError } from './index.js';
 
 export type AlumniDegreeType =
-  | 'bachelors'
-  | 'masters'
-  | 'phd'
-  | 'bootcamp'
-  | 'certification'
-  | 'other';
+  'bachelors' | 'masters' | 'phd' | 'bootcamp' | 'certification' | 'other';
 
 export type AlumniVerificationMethod =
-  | 'email_domain'
-  | 'institutional_seat'
-  | 'manual_review'
-  | 'unverified';
+  'email_domain' | 'institutional_seat' | 'manual_review' | 'unverified';
 
-export type AlumniVerificationStatus =
-  | 'unverified'
-  | 'pending'
-  | 'verified'
-  | 'rejected';
+export type AlumniVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 
 export interface AlumniAffiliation {
   id: string;
@@ -326,7 +314,9 @@ export function joinAlumniGroup(params: {
 /**
  * Creates an alumni mentorship request with validation and institution matching.
  */
-export function createAlumniMentorshipRequest(params: RequestMentorshipParams): AlumniMentorshipRequest {
+export function createAlumniMentorshipRequest(
+  params: RequestMentorshipParams
+): AlumniMentorshipRequest {
   if (params.mentorId === params.menteeId) {
     throw new DomainError('FORBIDDEN', 'Cannot request mentorship from oneself');
   }
@@ -349,7 +339,7 @@ export function createAlumniMentorshipRequest(params: RequestMentorshipParams): 
     menteeId: params.menteeId,
     institutionId: params.institutionId,
     status: 'requested',
-    focusAreas: params.focusAreas ? [...new Set(params.focusAreas.map(f => f.trim()))] : [],
+    focusAreas: params.focusAreas ? [...new Set(params.focusAreas.map((f) => f.trim()))] : [],
     requestedAt: now,
   };
 }
@@ -389,10 +379,7 @@ export function respondToAlumniMentorship(params: {
 
   if (action === 'complete') {
     if (responderId !== request.mentorId && responderId !== request.menteeId) {
-      throw new DomainError(
-        'FORBIDDEN',
-        'Only participants can mark a mentorship as completed'
-      );
+      throw new DomainError('FORBIDDEN', 'Only participants can mark a mentorship as completed');
     }
     if (request.status !== 'active') {
       throw new DomainError(

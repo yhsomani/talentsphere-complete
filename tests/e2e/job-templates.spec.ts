@@ -77,7 +77,9 @@ test.describe('E2E: Job Templates & Requisition Lifecycle (F-37, F-05, BR-01, BR
     expect(body.error.code).toBe('FORBIDDEN');
   });
 
-  test('recruiter creates and manages reusable job template with screening questions and salary (F-37)', async ({ request }) => {
+  test('recruiter creates and manages reusable job template with screening questions and salary (F-37)', async ({
+    request,
+  }) => {
     // 1. Create template
     const createRes = await request.post(`${API_BASE}/job-templates`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
@@ -85,7 +87,8 @@ test.describe('E2E: Job Templates & Requisition Lifecycle (F-37, F-05, BR-01, BR
         orgId,
         templateName: 'Site Reliability Engineering Template',
         title: 'Senior Site Reliability Engineer',
-        description: 'Own production infrastructure uptime, Kubernetes clustering, and SLI/SLO monitoring.',
+        description:
+          'Own production infrastructure uptime, Kubernetes clustering, and SLI/SLO monitoring.',
         location: 'Seattle, WA',
         workMode: 'hybrid',
         jobType: 'full_time',
@@ -138,7 +141,9 @@ test.describe('E2E: Job Templates & Requisition Lifecycle (F-37, F-05, BR-01, BR
     expect(patchData.template.salaryRange.minMinor).toBe(17000000);
   });
 
-  test('recruiter instantiates job requisition, publishes it to marketplace, and clones it as new template (F-37, F-05, F-04)', async ({ request }) => {
+  test('recruiter instantiates job requisition, publishes it to marketplace, and clones it as new template (F-37, F-05, F-04)', async ({
+    request,
+  }) => {
     // 1. Instantiate job requisition from template
     const instRes = await request.post(`${API_BASE}/job-templates/${templateId}/instantiate`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
@@ -174,13 +179,16 @@ test.describe('E2E: Job Templates & Requisition Lifecycle (F-37, F-05, BR-01, BR
     expect(published.title).toBe('Principal SRE - Core Platform');
 
     // 4. Save existing job requisition as template
-    const saveTplRes = await request.post(`${API_BASE}/jobs/${instantiatedJobId}/save-as-template`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        templateName: 'Core Platform SRE Blueprint v2',
-        department: 'Core Infrastructure',
-      },
-    });
+    const saveTplRes = await request.post(
+      `${API_BASE}/jobs/${instantiatedJobId}/save-as-template`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          templateName: 'Core Platform SRE Blueprint v2',
+          department: 'Core Infrastructure',
+        },
+      }
+    );
     expect(saveTplRes.status()).toBe(201);
     const saveTplData = await saveTplRes.json();
     expect(saveTplData.template.id).toBeDefined();

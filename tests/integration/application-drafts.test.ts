@@ -117,7 +117,9 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
     expect(data.draft.jobId).toBe(jobId);
     expect(data.draft.candidateId).toBe(candidateProfileId);
     expect(data.draft.version).toBe(1);
-    expect(data.draft.coverLetter).toBe('I have 6 years experience building distributed storage nodes.');
+    expect(data.draft.coverLetter).toBe(
+      'I have 6 years experience building distributed storage nodes.'
+    );
     expect(data.draft.answers.availableInWeeks).toBe(2);
     expect(data.draft.stepIndex).toBe(1);
     expect(data.draft.isSubmitted).toBe(false);
@@ -135,7 +137,9 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
     expect(data.draft.version).toBe(1);
     expect(data.versions.length).toBe(1);
     expect(data.versions[0].version).toBe(1);
-    expect(data.versions[0].coverLetter).toBe('I have 6 years experience building distributed storage nodes.');
+    expect(data.versions[0].coverLetter).toBe(
+      'I have 6 years experience building distributed storage nodes.'
+    );
   });
 
   it('increments version on continuous autosave (BR-18)', async () => {
@@ -176,7 +180,9 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
     expect(restoreRes.statusCode).toBe(200);
     const data = JSON.parse(restoreRes.payload);
     expect(data.draft.version).toBe(3); // version advances
-    expect(data.draft.coverLetter).toBe('I have 6 years experience building distributed storage nodes.');
+    expect(data.draft.coverLetter).toBe(
+      'I have 6 years experience building distributed storage nodes.'
+    );
     expect(data.draft.stepIndex).toBe(1);
   });
 

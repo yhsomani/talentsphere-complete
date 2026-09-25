@@ -50,7 +50,9 @@ test.describe('E2E: Activity & Contribution Tracking (F-146, S-09, P-02)', () =>
     expect(body.score.totalEventsCount).toBe(0);
   });
 
-  test('records diverse activity events across categories and advances engagement band', async ({ request }) => {
+  test('records diverse activity events across categories and advances engagement band', async ({
+    request,
+  }) => {
     // 1. Learning: complete a course
     const ev1 = await request.post(`${API_BASE}/activity/events`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -100,7 +102,9 @@ test.describe('E2E: Activity & Contribution Tracking (F-146, S-09, P-02)', () =>
     expect(['active', 'power_contributor', 'luminary']).toContain(data4.score.engagementBand);
   });
 
-  test('candidate queries chronological activity feed with category filtering', async ({ request }) => {
+  test('candidate queries chronological activity feed with category filtering', async ({
+    request,
+  }) => {
     // All
     const allRes = await request.get(`${API_BASE}/activity/events`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -119,7 +123,9 @@ test.describe('E2E: Activity & Contribution Tracking (F-146, S-09, P-02)', () =>
     expect(filterBody.events[0].category).toBe('creation');
   });
 
-  test('recruiter inspects candidate aggregate engagement profile with zero event leakage (F-146, P-02)', async ({ request }) => {
+  test('recruiter inspects candidate aggregate engagement profile with zero event leakage (F-146, P-02)', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/activity/users/${candidateUserId}/score`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
     });

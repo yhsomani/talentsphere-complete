@@ -91,7 +91,8 @@ export type EvidenceType =
   | 'institution_credential'
   | 'external_verification';
 
-export type VerificationLevel = 'unverified' | 'peer_reviewed' | 'institution_verified' | 'authority_verified';
+export type VerificationLevel =
+  'unverified' | 'peer_reviewed' | 'institution_verified' | 'authority_verified';
 
 export type EvidenceStatus = 'pending' | 'verified' | 'disputed' | 'revoked' | 'expired';
 
@@ -144,10 +145,7 @@ export function canTransitionApplication(from: ApplicationState, to: Application
 }
 
 export type AssessmentPolicyMode =
-  | 'AI_PROHIBITED'
-  | 'AI_RESTRICTED'
-  | 'AI_ALLOWED'
-  | 'POST_ASSESSMENT_ONLY';
+  'AI_PROHIBITED' | 'AI_RESTRICTED' | 'AI_ALLOWED' | 'POST_ASSESSMENT_ONLY';
 
 export interface AssessmentSession {
   id: string;

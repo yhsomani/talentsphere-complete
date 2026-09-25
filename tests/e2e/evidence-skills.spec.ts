@@ -27,21 +27,22 @@ test.describe('E2E: Evidence Graph & Skills Taxonomy (F-96, F-84, BR-150, BR-155
     candidateProfileId = regData.profile.id;
 
     // 2. Generate verification staff session token with institution_admin role
-    verifierToken = createSessionToken(
-      verifierId,
-      'verifier.staff@talentsphere.internal',
-      ['institution_admin']
-    );
+    verifierToken = createSessionToken(verifierId, 'verifier.staff@talentsphere.internal', [
+      'institution_admin',
+    ]);
   });
 
-  test('creates, verifies, disputes, and issues zero-PII cryptographic verification proofs (F-96, BR-150)', async ({ request }) => {
+  test('creates, verifies, disputes, and issues zero-PII cryptographic verification proofs (F-96, BR-150)', async ({
+    request,
+  }) => {
     // 1. Create Evidence Item
     const createRes = await request.post(`${API_BASE}/evidence`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
         type: 'project',
         title: 'High-Throughput Kafka Ingestion Engine',
-        description: 'Engineered zero-loss real-time data ingestion pipeline handling 100k events/sec.',
+        description:
+          'Engineered zero-loss real-time data ingestion pipeline handling 100k events/sec.',
         source: 'GitHub / talentsphere-ingestion',
         provenance: 'git:commit:a9f82d1c',
         recencyDate: '2026-09-01',

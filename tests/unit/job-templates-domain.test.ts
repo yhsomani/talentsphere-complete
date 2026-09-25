@@ -219,8 +219,8 @@ describe('Domain: Job Templates & Requisition Instantiation (F-37, F-05, BR-01, 
 
     // Cannot instantiate from archived template
     const archived = archiveJobTemplate(template, recruiterActor);
-    expect(() =>
-      instantiateJobFromTemplate(archived, {}, recruiterActor)
-    ).toThrowError(/Cannot instantiate a job from an archived template/);
+    expect(() => instantiateJobFromTemplate(archived, {}, recruiterActor)).toThrowError(
+      /Cannot instantiate a job from an archived template/
+    );
   });
 });

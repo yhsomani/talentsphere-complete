@@ -1,13 +1,7 @@
 import { DomainError } from './index.js';
 
 export type SeniorityLevel =
-  | 'entry'
-  | 'mid'
-  | 'senior'
-  | 'lead'
-  | 'principal'
-  | 'director'
-  | 'executive';
+  'entry' | 'mid' | 'senior' | 'lead' | 'principal' | 'director' | 'executive';
 
 export type SalaryVerificationType = 'self_reported' | 'employment_verified';
 export type SalaryReportStatus = 'submitted' | 'verified' | 'flagged_outlier' | 'withdrawn';
@@ -148,8 +142,7 @@ export function detectSalaryOutlier(
   if (validActiveReports.length >= 5) {
     const values = validActiveReports.map((r) => r.baseSalaryMinor);
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance =
-      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
     const stdDev = Math.sqrt(variance);
 
     if (stdDev > 0 && Math.abs(baseSalaryMinor - mean) > 4.0 * stdDev) {
@@ -165,7 +158,10 @@ export function detectSalaryOutlier(
  */
 export function createSalaryReport(params: SubmitSalaryReportParams): SalaryReport {
   if (!params.userId || params.userId.trim().length === 0) {
-    throw new DomainError('UNAUTHENTICATED', 'User authentication required to submit salary report.');
+    throw new DomainError(
+      'UNAUTHENTICATED',
+      'User authentication required to submit salary report.'
+    );
   }
 
   if (!params.jobTitle || params.jobTitle.trim().length < 2) {
@@ -224,7 +220,10 @@ export function createSalaryReport(params: SubmitSalaryReportParams): SalaryRepo
  */
 export function withdrawSalaryReport(report: SalaryReport, requestingUserId: string): SalaryReport {
   if (report.userId !== requestingUserId) {
-    throw new DomainError('FORBIDDEN', 'Users may only withdraw their own salary reports (BR-181).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Users may only withdraw their own salary reports (BR-181).'
+    );
   }
 
   if (report.status === 'withdrawn') {
@@ -281,9 +280,7 @@ export function computeSalaryAggregates(
     const bonuses = cohortReports.map((r) => r.bonusMinor).sort((a, b) => a - b);
 
     const first = cohortReports[0];
-    const mean = Math.round(
-      baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length
-    );
+    const mean = Math.round(baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length);
 
     aggregates.set(cohortKey, {
       cohortKey,
@@ -341,9 +338,7 @@ export function querySalaryBenchmark(
   const equities = matching.map((r) => r.equityAnnualMinor).sort((a, b) => a - b);
   const bonuses = matching.map((r) => r.bonusMinor).sort((a, b) => a - b);
 
-  const mean = Math.round(
-    baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length
-  );
+  const mean = Math.round(baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length);
 
   const cohortKey = `${role || 'all'}:${level || 'all'}:${currency}`;
   return {
@@ -380,9 +375,7 @@ export function queryCompanySalarySummary(
   const normTarget = companyName.trim().toLowerCase();
   const matching = reports.filter(
     (r) =>
-      r.status === 'verified' &&
-      r.companyName &&
-      r.companyName.trim().toLowerCase() === normTarget
+      r.status === 'verified' && r.companyName && r.companyName.trim().toLowerCase() === normTarget
   );
 
   if (matching.length < minThreshold) {

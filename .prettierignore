@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.output/
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+pnpm-lock.yaml
+*.log
+*.tsbuildinfo
+SSOT.md
+BRAIN/
+docs/
+FINAL_DOCUMENT_INDEX.md

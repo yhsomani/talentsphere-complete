@@ -258,7 +258,9 @@ describe('Job Marketplace & ATS Candidate Pipeline Integration Suite (F-04, F-05
     expect(res.statusCode).toBe(403);
     const body = JSON.parse(res.body);
     expect(body.error.code).toBe('FORBIDDEN');
-    expect(body.error.message).toContain('restricted to authorized recruiters for this organization');
+    expect(body.error.message).toContain(
+      'restricted to authorized recruiters for this organization'
+    );
   });
 
   it('allows authorized recruiter to view candidate pipeline and advance stages (F-06, BR-41)', async () => {
@@ -347,7 +349,8 @@ describe('Job Marketplace & ATS Candidate Pipeline Integration Suite (F-04, F-05
     });
     const jobsBody = JSON.parse(jobsRes.body);
     const statusChangedJobs = jobsBody.jobs.filter(
-      (j: any) => j.type === 'application.status_changed' && j.payload.applicationId === application.id
+      (j: any) =>
+        j.type === 'application.status_changed' && j.payload.applicationId === application.id
     );
     expect(statusChangedJobs.length).toBeGreaterThanOrEqual(5);
   });

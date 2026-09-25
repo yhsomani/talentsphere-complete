@@ -107,7 +107,9 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     expect(blockedRes.statusCode).toBe(403);
     const blockedBody = JSON.parse(blockedRes.body);
     expect(blockedBody.error.code).toBe('ASSESSMENT_AI_PROHIBITED');
-    expect(blockedBody.error.message).toContain('AI assistance is strictly prohibited during an active proctored assessment session');
+    expect(blockedBody.error.message).toContain(
+      'AI assistance is strictly prohibited during an active proctored assessment session'
+    );
   });
 
   it('evaluates solution, closes session, auto-mints verified evidence, and unlocks AI (F-08, BR-49, BR-25)', async () => {

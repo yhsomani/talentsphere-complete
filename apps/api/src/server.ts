@@ -465,9 +465,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       error: {
         code: 'INTERNAL_SERVER_ERROR',
         message:
-          env.NODE_ENV === 'production'
-            ? 'An unexpected internal error occurred.'
-            : error.message,
+          env.NODE_ENV === 'production' ? 'An unexpected internal error occurred.' : error.message,
         request_id: req.id,
       },
     };
@@ -713,36 +711,42 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ profile: updated });
   });
 
-  app.get('/api/v1/profile/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const profile = profilesById.get(id);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', `Profile with ID ${id} not found.`);
-    }
-
-    let viewerId: string | undefined;
-    let viewerRoles: Role[] = [];
-
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const session = verifySessionToken(authHeader.substring(7).trim());
-        if (session) {
-          viewerId = session.userId;
-          viewerRoles = session.roles;
-        }
-      } catch {
-        // anonymous
+  app.get(
+    '/api/v1/profile/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const profile = profilesById.get(id);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', `Profile with ID ${id} not found.`);
       }
-    }
 
-    const allowed = canViewProfile(profile, viewerId, viewerRoles);
-    if (!allowed) {
-      throw new DomainError('FORBIDDEN', 'This profile is private or restricted to authorized roles.');
-    }
+      let viewerId: string | undefined;
+      let viewerRoles: Role[] = [];
 
-    return reply.status(200).send({ profile });
-  });
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const session = verifySessionToken(authHeader.substring(7).trim());
+          if (session) {
+            viewerId = session.userId;
+            viewerRoles = session.roles;
+          }
+        } catch {
+          // anonymous
+        }
+      }
+
+      const allowed = canViewProfile(profile, viewerId, viewerRoles);
+      if (!allowed) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'This profile is private or restricted to authorized roles.'
+        );
+      }
+
+      return reply.status(200).send({ profile });
+    }
+  );
 
   // Evidence & Skills Repositories
   const evidenceById = new Map<string, Evidence>();
@@ -881,192 +885,222 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ evidence });
   });
 
-  app.get('/api/v1/evidence/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const evidence = evidenceById.get(id);
-    if (!evidence) {
-      throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
-    }
-
-    const profile = profilesById.get(evidence.subjectId);
-    let viewerId: string | undefined;
-    let viewerRoles: Role[] = [];
-
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const session = verifySessionToken(authHeader.substring(7).trim());
-        if (session) {
-          viewerId = session.userId;
-          viewerRoles = session.roles;
-        }
-      } catch {
-        // anonymous
+  app.get(
+    '/api/v1/evidence/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const evidence = evidenceById.get(id);
+      if (!evidence) {
+        throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
       }
-    }
 
-    if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
-      throw new DomainError('FORBIDDEN', 'Access to this evidence is restricted by profile privacy.');
-    }
+      const profile = profilesById.get(evidence.subjectId);
+      let viewerId: string | undefined;
+      let viewerRoles: Role[] = [];
 
-    const mappedSkillIds = evidenceSkills.get(evidence.id);
-    const skills = mappedSkillIds
-      ? Array.from(mappedSkillIds).map((sid) => skillsById.get(sid)).filter(Boolean)
-      : [];
-
-    return reply.status(200).send({ evidence, skills });
-  });
-
-  app.get('/api/v1/evidence/subject/:subjectId', async (req: FastifyRequest<{ Params: { subjectId: string } }>, reply: FastifyReply) => {
-    const { subjectId } = req.params;
-    const profile = profilesById.get(subjectId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', `Profile with ID ${subjectId} not found.`);
-    }
-
-    let viewerId: string | undefined;
-    let viewerRoles: Role[] = [];
-
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const session = verifySessionToken(authHeader.substring(7).trim());
-        if (session) {
-          viewerId = session.userId;
-          viewerRoles = session.roles;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const session = verifySessionToken(authHeader.substring(7).trim());
+          if (session) {
+            viewerId = session.userId;
+            viewerRoles = session.roles;
+          }
+        } catch {
+          // anonymous
         }
-      } catch {
-        // anonymous
       }
+
+      if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to this evidence is restricted by profile privacy.'
+        );
+      }
+
+      const mappedSkillIds = evidenceSkills.get(evidence.id);
+      const skills = mappedSkillIds
+        ? Array.from(mappedSkillIds)
+            .map((sid) => skillsById.get(sid))
+            .filter(Boolean)
+        : [];
+
+      return reply.status(200).send({ evidence, skills });
     }
+  );
 
-    if (!canViewProfile(profile, viewerId, viewerRoles)) {
-      throw new DomainError('FORBIDDEN', 'Access to evidence is restricted by subject privacy settings.');
+  app.get(
+    '/api/v1/evidence/subject/:subjectId',
+    async (req: FastifyRequest<{ Params: { subjectId: string } }>, reply: FastifyReply) => {
+      const { subjectId } = req.params;
+      const profile = profilesById.get(subjectId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', `Profile with ID ${subjectId} not found.`);
+      }
+
+      let viewerId: string | undefined;
+      let viewerRoles: Role[] = [];
+
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const session = verifySessionToken(authHeader.substring(7).trim());
+          if (session) {
+            viewerId = session.userId;
+            viewerRoles = session.roles;
+          }
+        } catch {
+          // anonymous
+        }
+      }
+
+      if (!canViewProfile(profile, viewerId, viewerRoles)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to evidence is restricted by subject privacy settings.'
+        );
+      }
+
+      const list = evidenceBySubjectId.get(subjectId) || [];
+      return reply.status(200).send({ evidence: list });
     }
+  );
 
-    const list = evidenceBySubjectId.get(subjectId) || [];
-    return reply.status(200).send({ evidence: list });
-  });
+  app.post(
+    '/api/v1/evidence/:id/verify',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = VerifyEvidenceInputSchema.parse(req.body);
 
-  app.post('/api/v1/evidence/:id/verify', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = VerifyEvidenceInputSchema.parse(req.body);
+      const evidence = evidenceById.get(id);
+      if (!evidence) {
+        throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      }
 
-    const evidence = evidenceById.get(id);
-    if (!evidence) {
-      throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      const subjectProfile = profilesById.get(evidence.subjectId);
+      const updated = verifyEvidence(
+        evidence,
+        { userId: session.userId, role: session.roles[0] },
+        input.verificationLevel,
+        input.notes,
+        subjectProfile?.userId
+      );
+
+      evidenceById.set(updated.id, updated);
+      const list = evidenceBySubjectId.get(updated.subjectId) || [];
+      const index = list.findIndex((e) => e.id === updated.id);
+      if (index >= 0) list[index] = updated;
+
+      enqueuedWorkerJobs.push({
+        type: 'evidence.propagate',
+        payload: {
+          evidenceId: updated.id,
+          status: updated.status,
+          level: updated.verificationLevel,
+        },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      auditLogs.push({
+        event: 'evidence.verified',
+        actorId: session.userId,
+        targetId: updated.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Evidence verified successfully.',
+        evidence: updated,
+      });
     }
+  );
 
-    const subjectProfile = profilesById.get(evidence.subjectId);
-    const updated = verifyEvidence(
-      evidence,
-      { userId: session.userId, role: session.roles[0] },
-      input.verificationLevel,
-      input.notes,
-      subjectProfile?.userId
-    );
+  app.post(
+    '/api/v1/evidence/:id/dispute',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = DisputeEvidenceInputSchema.parse(req.body);
 
-    evidenceById.set(updated.id, updated);
-    const list = evidenceBySubjectId.get(updated.subjectId) || [];
-    const index = list.findIndex((e) => e.id === updated.id);
-    if (index >= 0) list[index] = updated;
+      const evidence = evidenceById.get(id);
+      if (!evidence) {
+        throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      }
 
-    enqueuedWorkerJobs.push({
-      type: 'evidence.propagate',
-      payload: { evidenceId: updated.id, status: updated.status, level: updated.verificationLevel },
-      enqueuedAt: new Date().toISOString(),
-    });
+      const updated = disputeEvidence(
+        evidence,
+        { userId: session.userId, role: session.roles[0] },
+        input.reason
+      );
 
-    auditLogs.push({
-      event: 'evidence.verified',
-      actorId: session.userId,
-      targetId: updated.id,
-      timestamp: new Date().toISOString(),
-    });
+      evidenceById.set(updated.id, updated);
+      const list = evidenceBySubjectId.get(updated.subjectId) || [];
+      const index = list.findIndex((e) => e.id === updated.id);
+      if (index >= 0) list[index] = updated;
 
-    return reply.status(200).send({
-      message: 'Evidence verified successfully.',
-      evidence: updated,
-    });
-  });
+      enqueuedWorkerJobs.push({
+        type: 'evidence.propagate',
+        payload: { evidenceId: updated.id, status: updated.status },
+        enqueuedAt: new Date().toISOString(),
+      });
 
-  app.post('/api/v1/evidence/:id/dispute', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = DisputeEvidenceInputSchema.parse(req.body);
-
-    const evidence = evidenceById.get(id);
-    if (!evidence) {
-      throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      return reply.status(200).send({
+        message: 'Evidence disputed.',
+        evidence: updated,
+      });
     }
+  );
 
-    const updated = disputeEvidence(
-      evidence,
-      { userId: session.userId, role: session.roles[0] },
-      input.reason
-    );
+  app.post(
+    '/api/v1/evidence/:id/revoke',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = RevokeEvidenceInputSchema.parse(req.body);
 
-    evidenceById.set(updated.id, updated);
-    const list = evidenceBySubjectId.get(updated.subjectId) || [];
-    const index = list.findIndex((e) => e.id === updated.id);
-    if (index >= 0) list[index] = updated;
+      const evidence = evidenceById.get(id);
+      if (!evidence) {
+        throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      }
 
-    enqueuedWorkerJobs.push({
-      type: 'evidence.propagate',
-      payload: { evidenceId: updated.id, status: updated.status },
-      enqueuedAt: new Date().toISOString(),
-    });
+      const updated = revokeEvidence(
+        evidence,
+        { userId: session.userId, role: session.roles[0] },
+        input.reason
+      );
 
-    return reply.status(200).send({
-      message: 'Evidence disputed.',
-      evidence: updated,
-    });
-  });
+      evidenceById.set(updated.id, updated);
+      const list = evidenceBySubjectId.get(updated.subjectId) || [];
+      const index = list.findIndex((e) => e.id === updated.id);
+      if (index >= 0) list[index] = updated;
 
-  app.post('/api/v1/evidence/:id/revoke', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = RevokeEvidenceInputSchema.parse(req.body);
+      enqueuedWorkerJobs.push({
+        type: 'evidence.propagate',
+        payload: { evidenceId: updated.id, status: updated.status },
+        enqueuedAt: new Date().toISOString(),
+      });
 
-    const evidence = evidenceById.get(id);
-    if (!evidence) {
-      throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      return reply.status(200).send({
+        message: 'Evidence revoked.',
+        evidence: updated,
+      });
     }
+  );
 
-    const updated = revokeEvidence(
-      evidence,
-      { userId: session.userId, role: session.roles[0] },
-      input.reason
-    );
+  app.get(
+    '/api/v1/evidence/:id/verify-public',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const evidence = evidenceById.get(id);
+      if (!evidence) {
+        throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      }
 
-    evidenceById.set(updated.id, updated);
-    const list = evidenceBySubjectId.get(updated.subjectId) || [];
-    const index = list.findIndex((e) => e.id === updated.id);
-    if (index >= 0) list[index] = updated;
-
-    enqueuedWorkerJobs.push({
-      type: 'evidence.propagate',
-      payload: { evidenceId: updated.id, status: updated.status },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Evidence revoked.',
-      evidence: updated,
-    });
-  });
-
-  app.get('/api/v1/evidence/:id/verify-public', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const evidence = evidenceById.get(id);
-    if (!evidence) {
-      throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
+      const proof = generatePublicProof(evidence);
+      return reply.status(200).send({ proof });
     }
-
-    const proof = generatePublicProof(evidence);
-    return reply.status(200).send({ proof });
-  });
+  );
 
   // Skills Taxonomy Endpoints (F-84, BR-141..147)
   app.get('/api/v1/skills', async () => {
@@ -1076,7 +1110,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post('/api/v1/skills', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     if (!session.roles.includes('platform_admin')) {
-      throw new DomainError('UNAUTHORIZED', 'Skills taxonomy is curated by Platform Admin only (BR-141).');
+      throw new DomainError(
+        'UNAUTHORIZED',
+        'Skills taxonomy is curated by Platform Admin only (BR-141).'
+      );
     }
 
     const input = CreateSkillInputSchema.parse(req.body);
@@ -1104,7 +1141,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post('/api/v1/skills/relationships', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     if (!session.roles.includes('platform_admin')) {
-      throw new DomainError('UNAUTHORIZED', 'Only Platform Admins may define skill relationships (BR-141).');
+      throw new DomainError(
+        'UNAUTHORIZED',
+        'Only Platform Admins may define skill relationships (BR-141).'
+      );
     }
 
     const input = CreateSkillRelationshipInputSchema.parse(req.body);
@@ -1127,16 +1167,19 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ relationship });
   });
 
-  app.get('/api/v1/skills/:id/graph', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const skill = skillsById.get(id);
-    if (!skill) {
-      throw new DomainError('NOT_FOUND', `Skill with ID ${id} not found.`);
-    }
+  app.get(
+    '/api/v1/skills/:id/graph',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const skill = skillsById.get(id);
+      if (!skill) {
+        throw new DomainError('NOT_FOUND', `Skill with ID ${id} not found.`);
+      }
 
-    const graph = traverseSkillGraph(skill, skillsById, skillRelationships, 5);
-    return reply.status(200).send({ graph });
-  });
+      const graph = traverseSkillGraph(skill, skillsById, skillRelationships, 5);
+      return reply.status(200).send({ graph });
+    }
+  );
 
   // Organization, Job & Application Repositories (F-04, F-05, F-06)
   interface StoredOrganization {
@@ -1224,54 +1267,62 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ organization: org });
   });
 
-  app.get('/api/v1/organizations/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const org = organizationsById.get(id);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+  app.get(
+    '/api/v1/organizations/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const org = organizationsById.get(id);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+      }
+      return reply.status(200).send({ organization: org });
     }
-    return reply.status(200).send({ organization: org });
-  });
+  );
 
-  app.post('/api/v1/organizations/:id/members', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const org = organizationsById.get(id);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+  app.post(
+    '/api/v1/organizations/:id/members',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const org = organizationsById.get(id);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isOwnerOrAdmin = userMemberships.some(
+        (m) => m.orgId === id && ['owner', 'admin'].includes(m.role)
+      );
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isOwnerOrAdmin && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Only organization owner or admin can add members.');
+      }
+
+      const body = (req.body as any) || {};
+      const targetUserId = body.userId;
+      if (!targetUserId) {
+        throw new DomainError('VALIDATION_FAILED', 'userId is required.');
+      }
+
+      const membership: StoredOrgMembership = {
+        id: crypto.randomUUID(),
+        orgId: id,
+        userId: targetUserId,
+        role: body.role || 'recruiter',
+        createdAt: new Date().toISOString(),
+      };
+
+      const orgMembers = orgMembershipsByOrgId.get(id) || [];
+      orgMembers.push(membership);
+      orgMembershipsByOrgId.set(id, orgMembers);
+
+      const targetUserMembers = orgMembershipsByUserId.get(targetUserId) || [];
+      targetUserMembers.push(membership);
+      orgMembershipsByUserId.set(targetUserId, targetUserMembers);
+
+      return reply.status(201).send({ membership });
     }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isOwnerOrAdmin = userMemberships.some((m) => m.orgId === id && ['owner', 'admin'].includes(m.role));
-    const isPlatformAdmin = session.roles.includes('platform_admin');
-    if (!isOwnerOrAdmin && !isPlatformAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only organization owner or admin can add members.');
-    }
-
-    const body = (req.body as any) || {};
-    const targetUserId = body.userId;
-    if (!targetUserId) {
-      throw new DomainError('VALIDATION_FAILED', 'userId is required.');
-    }
-
-    const membership: StoredOrgMembership = {
-      id: crypto.randomUUID(),
-      orgId: id,
-      userId: targetUserId,
-      role: body.role || 'recruiter',
-      createdAt: new Date().toISOString(),
-    };
-
-    const orgMembers = orgMembershipsByOrgId.get(id) || [];
-    orgMembers.push(membership);
-    orgMembershipsByOrgId.set(id, orgMembers);
-
-    const targetUserMembers = orgMembershipsByUserId.get(targetUserId) || [];
-    targetUserMembers.push(membership);
-    orgMembershipsByUserId.set(targetUserId, targetUserMembers);
-
-    return reply.status(201).send({ membership });
-  });
+  );
 
   // Jobs Endpoints (F-04, F-05, BR-01..BR-12)
   app.post('/api/v1/jobs', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -1283,7 +1334,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const isAdmin = session.roles.includes('platform_admin');
 
     if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'You do not belong to the organization for this job posting (BR-12).');
+      throw new DomainError(
+        'FORBIDDEN',
+        'You do not belong to the organization for this job posting (BR-12).'
+      );
     }
 
     if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
@@ -1345,53 +1399,59 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return { jobs: published };
   });
 
-  app.get('/api/v1/jobs/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const job = jobsById.get(id);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
-    }
-
-    const org = organizationsById.get(job.orgId);
-    const skills = job.requiredSkillIds.map((sid) => skillsById.get(sid)).filter(Boolean);
-
-    return reply.status(200).send({ job, organization: org, requiredSkills: skills });
-  });
-
-  app.patch('/api/v1/jobs/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = UpdateJobStatusInputSchema.parse(req.body);
-
-    const job = jobsById.get(id);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
-    }
-
-    const updated = transitionJobStatus(job, input.status, {
-      userId: session.userId,
-      roles: session.roles,
-      orgId: job.orgId,
-    });
-
-    jobsById.set(updated.id, updated);
-    const list = jobsByOrgId.get(job.orgId) || [];
-    const idx = list.findIndex((j) => j.id === updated.id);
-    if (idx >= 0) list[idx] = updated;
-
-    if (updated.status === 'published' && job.status !== 'published') {
-      const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
-      const alerts = evaluateJobAlertsForPublishedJob(updated, activeSearches);
-      for (const alert of alerts) {
-        jobAlertsById.set(alert.id, alert);
+  app.get(
+    '/api/v1/jobs/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const job = jobsById.get(id);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
       }
-    }
 
-    return reply.status(200).send({
-      message: 'Job status updated successfully.',
-      job: updated,
-    });
-  });
+      const org = organizationsById.get(job.orgId);
+      const skills = job.requiredSkillIds.map((sid) => skillsById.get(sid)).filter(Boolean);
+
+      return reply.status(200).send({ job, organization: org, requiredSkills: skills });
+    }
+  );
+
+  app.patch(
+    '/api/v1/jobs/:id/status',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = UpdateJobStatusInputSchema.parse(req.body);
+
+      const job = jobsById.get(id);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+      }
+
+      const updated = transitionJobStatus(job, input.status, {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: job.orgId,
+      });
+
+      jobsById.set(updated.id, updated);
+      const list = jobsByOrgId.get(job.orgId) || [];
+      const idx = list.findIndex((j) => j.id === updated.id);
+      if (idx >= 0) list[idx] = updated;
+
+      if (updated.status === 'published' && job.status !== 'published') {
+        const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
+        const alerts = evaluateJobAlertsForPublishedJob(updated, activeSearches);
+        for (const alert of alerts) {
+          jobAlertsById.set(alert.id, alert);
+        }
+      }
+
+      return reply.status(200).send({
+        message: 'Job status updated successfully.',
+        job: updated,
+      });
+    }
+  );
 
   // Job Templates Endpoints (F-37, F-05, BR-01, BR-12, BR-144)
   app.post('/api/v1/job-templates', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -1403,13 +1463,19 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const isAdmin = session.roles.includes('platform_admin');
 
     if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Recruiters may only create templates for their assigned organization (BR-12).');
+      throw new DomainError(
+        'FORBIDDEN',
+        'Recruiters may only create templates for their assigned organization (BR-12).'
+      );
     }
 
     if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
       for (const skillId of input.requiredSkillIds) {
         if (!skillsById.has(skillId)) {
-          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+          throw new DomainError(
+            'VALIDATION_FAILED',
+            `Skill ID ${skillId} is not a valid canonical skill (BR-144).`
+          );
         }
       }
     }
@@ -1455,209 +1521,121 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ template });
   });
 
-  app.get('/api/v1/job-templates', async (req: FastifyRequest<{ Querystring: { orgId?: string; includeArchived?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { orgId, includeArchived } = req.query;
-    const isAdmin = session.roles.includes('platform_admin');
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+  app.get(
+    '/api/v1/job-templates',
+    async (
+      req: FastifyRequest<{ Querystring: { orgId?: string; includeArchived?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { orgId, includeArchived } = req.query;
+      const isAdmin = session.roles.includes('platform_admin');
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
 
-    let templates: JobTemplate[] = [];
+      let templates: JobTemplate[] = [];
 
-    if (orgId) {
-      const isMember = userMemberships.some((m) => m.orgId === orgId);
-      if (!isMember && !isAdmin) {
-        throw new DomainError('FORBIDDEN', 'Access to templates is restricted to organization members (BR-12).');
-      }
-      templates = jobTemplatesByOrgId.get(orgId) || [];
-    } else {
-      if (isAdmin) {
-        templates = Array.from(jobTemplatesById.values());
+      if (orgId) {
+        const isMember = userMemberships.some((m) => m.orgId === orgId);
+        if (!isMember && !isAdmin) {
+          throw new DomainError(
+            'FORBIDDEN',
+            'Access to templates is restricted to organization members (BR-12).'
+          );
+        }
+        templates = jobTemplatesByOrgId.get(orgId) || [];
       } else {
-        const allowedOrgIds = new Set(userMemberships.map((m) => m.orgId));
-        templates = Array.from(jobTemplatesById.values()).filter((t) => allowedOrgIds.has(t.orgId));
-      }
-    }
-
-    if (includeArchived !== 'true') {
-      templates = templates.filter((t) => !t.isArchived);
-    }
-
-    return reply.status(200).send({ templates });
-  });
-
-  app.get('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const template = jobTemplatesById.get(id);
-    if (!template) {
-      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
-    }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
-    }
-
-    return reply.status(200).send({ template });
-  });
-
-  app.patch('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = UpdateJobTemplateInputSchema.parse(req.body);
-
-    const template = jobTemplatesById.get(id);
-    if (!template) {
-      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
-    }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
-    }
-
-    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
-      for (const skillId of input.requiredSkillIds) {
-        if (!skillsById.has(skillId)) {
-          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+        if (isAdmin) {
+          templates = Array.from(jobTemplatesById.values());
+        } else {
+          const allowedOrgIds = new Set(userMemberships.map((m) => m.orgId));
+          templates = Array.from(jobTemplatesById.values()).filter((t) =>
+            allowedOrgIds.has(t.orgId)
+          );
         }
       }
+
+      if (includeArchived !== 'true') {
+        templates = templates.filter((t) => !t.isArchived);
+      }
+
+      return reply.status(200).send({ templates });
     }
+  );
 
-    let salaryRange: { minMinor: number; maxMinor: number; currency: string } | null | undefined = undefined;
-    if (input.salaryMinMinor === null || input.salaryMaxMinor === null) {
-      salaryRange = null;
-    } else if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
-      salaryRange = {
-        minMinor: input.salaryMinMinor,
-        maxMinor: input.salaryMaxMinor,
-        currency: input.currency || template.salaryRange?.currency || 'USD',
-      };
+  app.get(
+    '/api/v1/job-templates/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const template = jobTemplatesById.get(id);
+      if (!template) {
+        throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to template is restricted to organization members (BR-12).'
+        );
+      }
+
+      return reply.status(200).send({ template });
     }
+  );
 
-    const updated = updateJobTemplate(template, {
-      templateName: input.templateName,
-      title: input.title,
-      description: input.description,
-      location: input.location,
-      workMode: input.workMode,
-      jobType: input.jobType,
-      requiredSkillIds: input.requiredSkillIds,
-      salaryRange,
-      department: input.department,
-      screeningQuestions: input.screeningQuestions,
-      isArchived: input.isArchived,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
-        orgId: template.orgId,
-      },
-    });
+  app.patch(
+    '/api/v1/job-templates/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = UpdateJobTemplateInputSchema.parse(req.body);
 
-    jobTemplatesById.set(updated.id, updated);
-    const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
-    const idx = orgList.findIndex((t) => t.id === updated.id);
-    if (idx >= 0) orgList[idx] = updated;
+      const template = jobTemplatesById.get(id);
+      if (!template) {
+        throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+      }
 
-    auditLogs.push({
-      event: 'job_template.updated',
-      actorId: session.userId,
-      targetId: updated.id,
-      timestamp: new Date().toISOString(),
-    });
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
 
-    return reply.status(200).send({
-      message: 'Job template updated successfully.',
-      template: updated,
-    });
-  });
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to template is restricted to organization members (BR-12).'
+        );
+      }
 
-  app.delete('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const template = jobTemplatesById.get(id);
-    if (!template) {
-      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
-    }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
-    }
-
-    const archived = archiveJobTemplate(template, {
-      userId: session.userId,
-      roles: session.roles,
-      orgId: template.orgId,
-    });
-
-    jobTemplatesById.set(archived.id, archived);
-    const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
-    const idx = orgList.findIndex((t) => t.id === archived.id);
-    if (idx >= 0) orgList[idx] = archived;
-
-    auditLogs.push({
-      event: 'job_template.archived',
-      actorId: session.userId,
-      targetId: archived.id,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Job template archived successfully.',
-      template: archived,
-    });
-  });
-
-  app.post('/api/v1/job-templates/:id/instantiate', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = InstantiateJobFromTemplateInputSchema.parse(req.body || {});
-
-    const template = jobTemplatesById.get(id);
-    if (!template) {
-      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
-    }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only recruiters of this organization can instantiate jobs from its templates (BR-12).');
-    }
-
-    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
-      for (const skillId of input.requiredSkillIds) {
-        if (!skillsById.has(skillId)) {
-          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+      if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+        for (const skillId of input.requiredSkillIds) {
+          if (!skillsById.has(skillId)) {
+            throw new DomainError(
+              'VALIDATION_FAILED',
+              `Skill ID ${skillId} is not a valid canonical skill (BR-144).`
+            );
+          }
         }
       }
-    }
 
-    let salaryRange = undefined;
-    if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
-      salaryRange = {
-        minMinor: input.salaryMinMinor,
-        maxMinor: input.salaryMaxMinor,
-        currency: input.currency || template.salaryRange?.currency || 'USD',
-      };
-    }
+      let salaryRange: { minMinor: number; maxMinor: number; currency: string } | null | undefined =
+        undefined;
+      if (input.salaryMinMinor === null || input.salaryMaxMinor === null) {
+        salaryRange = null;
+      } else if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
+        salaryRange = {
+          minMinor: input.salaryMinMinor,
+          maxMinor: input.salaryMaxMinor,
+          currency: input.currency || template.salaryRange?.currency || 'USD',
+        };
+      }
 
-    const job = instantiateJobFromTemplate(
-      template,
-      {
+      const updated = updateJobTemplate(template, {
+        templateName: input.templateName,
         title: input.title,
         description: input.description,
         location: input.location,
@@ -1665,88 +1643,224 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         jobType: input.jobType,
         requiredSkillIds: input.requiredSkillIds,
         salaryRange,
-      },
-      {
+        department: input.department,
+        screeningQuestions: input.screeningQuestions,
+        isArchived: input.isArchived,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+          orgId: template.orgId,
+        },
+      });
+
+      jobTemplatesById.set(updated.id, updated);
+      const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
+      const idx = orgList.findIndex((t) => t.id === updated.id);
+      if (idx >= 0) orgList[idx] = updated;
+
+      auditLogs.push({
+        event: 'job_template.updated',
+        actorId: session.userId,
+        targetId: updated.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Job template updated successfully.',
+        template: updated,
+      });
+    }
+  );
+
+  app.delete(
+    '/api/v1/job-templates/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const template = jobTemplatesById.get(id);
+      if (!template) {
+        throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to template is restricted to organization members (BR-12).'
+        );
+      }
+
+      const archived = archiveJobTemplate(template, {
         userId: session.userId,
         roles: session.roles,
         orgId: template.orgId,
+      });
+
+      jobTemplatesById.set(archived.id, archived);
+      const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
+      const idx = orgList.findIndex((t) => t.id === archived.id);
+      if (idx >= 0) orgList[idx] = archived;
+
+      auditLogs.push({
+        event: 'job_template.archived',
+        actorId: session.userId,
+        targetId: archived.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Job template archived successfully.',
+        template: archived,
+      });
+    }
+  );
+
+  app.post(
+    '/api/v1/job-templates/:id/instantiate',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = InstantiateJobFromTemplateInputSchema.parse(req.body || {});
+
+      const template = jobTemplatesById.get(id);
+      if (!template) {
+        throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
       }
-    );
 
-    jobsById.set(job.id, job);
-    const list = jobsByOrgId.get(job.orgId) || [];
-    list.push(job);
-    jobsByOrgId.set(job.orgId, list);
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
 
-    auditLogs.push({
-      event: 'job.instantiated_from_template',
-      actorId: session.userId,
-      targetId: job.id,
-      metadata: { templateId: template.id },
-      timestamp: new Date().toISOString(),
-    });
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only recruiters of this organization can instantiate jobs from its templates (BR-12).'
+        );
+      }
 
-    return reply.status(201).send({
-      message: 'Job instantiated successfully from template.',
-      job,
-    });
-  });
+      if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+        for (const skillId of input.requiredSkillIds) {
+          if (!skillsById.has(skillId)) {
+            throw new DomainError(
+              'VALIDATION_FAILED',
+              `Skill ID ${skillId} is not a valid canonical skill (BR-144).`
+            );
+          }
+        }
+      }
 
-  app.post('/api/v1/jobs/:id/save-as-template', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = SaveJobAsTemplateInputSchema.parse(req.body);
+      let salaryRange = undefined;
+      if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
+        salaryRange = {
+          minMinor: input.salaryMinMinor,
+          maxMinor: input.salaryMaxMinor,
+          currency: input.currency || template.salaryRange?.currency || 'USD',
+        };
+      }
 
-    const job = jobsById.get(id);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+      const job = instantiateJobFromTemplate(
+        template,
+        {
+          title: input.title,
+          description: input.description,
+          location: input.location,
+          workMode: input.workMode,
+          jobType: input.jobType,
+          requiredSkillIds: input.requiredSkillIds,
+          salaryRange,
+        },
+        {
+          userId: session.userId,
+          roles: session.roles,
+          orgId: template.orgId,
+        }
+      );
+
+      jobsById.set(job.id, job);
+      const list = jobsByOrgId.get(job.orgId) || [];
+      list.push(job);
+      jobsByOrgId.set(job.orgId, list);
+
+      auditLogs.push({
+        event: 'job.instantiated_from_template',
+        actorId: session.userId,
+        targetId: job.id,
+        metadata: { templateId: template.id },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Job instantiated successfully from template.',
+        job,
+      });
     }
+  );
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === job.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
+  app.post(
+    '/api/v1/jobs/:id/save-as-template',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = SaveJobAsTemplateInputSchema.parse(req.body);
 
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only recruiters of this organization can save its jobs as templates (BR-12).');
-    }
+      const job = jobsById.get(id);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+      }
 
-    const template = createJobTemplate({
-      orgId: job.orgId,
-      templateName: input.templateName,
-      title: job.title,
-      description: job.description,
-      location: job.location,
-      workMode: job.workMode,
-      jobType: job.jobType,
-      requiredSkillIds: job.requiredSkillIds,
-      salaryRange: job.salaryRange,
-      department: input.department,
-      screeningQuestions: input.screeningQuestions,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only recruiters of this organization can save its jobs as templates (BR-12).'
+        );
+      }
+
+      const template = createJobTemplate({
         orgId: job.orgId,
-      },
-    });
+        templateName: input.templateName,
+        title: job.title,
+        description: job.description,
+        location: job.location,
+        workMode: job.workMode,
+        jobType: job.jobType,
+        requiredSkillIds: job.requiredSkillIds,
+        salaryRange: job.salaryRange,
+        department: input.department,
+        screeningQuestions: input.screeningQuestions,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+          orgId: job.orgId,
+        },
+      });
 
-    jobTemplatesById.set(template.id, template);
-    const list = jobTemplatesByOrgId.get(template.orgId) || [];
-    list.push(template);
-    jobTemplatesByOrgId.set(template.orgId, list);
+      jobTemplatesById.set(template.id, template);
+      const list = jobTemplatesByOrgId.get(template.orgId) || [];
+      list.push(template);
+      jobTemplatesByOrgId.set(template.orgId, list);
 
-    auditLogs.push({
-      event: 'job_template.saved_from_job',
-      actorId: session.userId,
-      targetId: template.id,
-      metadata: { sourceJobId: job.id },
-      timestamp: new Date().toISOString(),
-    });
+      auditLogs.push({
+        event: 'job_template.saved_from_job',
+        actorId: session.userId,
+        targetId: template.id,
+        metadata: { sourceJobId: job.id },
+        timestamp: new Date().toISOString(),
+      });
 
-    return reply.status(201).send({
-      message: 'Template created from job requisition successfully.',
-      template,
-    });
-  });
+      return reply.status(201).send({
+        message: 'Template created from job requisition successfully.',
+        template,
+      });
+    }
+  );
 
   // Salary Intelligence & Compensation Benchmarks Endpoints (F-86, BR-177..BR-183)
   app.post('/api/v1/salaries/reports', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -1757,7 +1871,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const today = new Date().toISOString().slice(0, 10);
     const reportsToday = userReports.filter((r) => r.createdAt.startsWith(today));
     if (reportsToday.length >= 5) {
-      throw new DomainError('RATE_LIMIT_EXCEEDED', 'Daily salary submission limit reached (5 submissions/day).');
+      throw new DomainError(
+        'RATE_LIMIT_EXCEEDED',
+        'Daily salary submission limit reached (5 submissions/day).'
+      );
     }
 
     const existingRoleReports = Array.from(salaryReportsById.values()).filter(
@@ -1814,34 +1931,37 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ reports });
   });
 
-  app.delete('/api/v1/salaries/reports/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+  app.delete(
+    '/api/v1/salaries/reports/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const report = salaryReportsById.get(id);
-    if (!report) {
-      throw new DomainError('NOT_FOUND', `Salary report with ID ${id} not found.`);
+      const report = salaryReportsById.get(id);
+      if (!report) {
+        throw new DomainError('NOT_FOUND', `Salary report with ID ${id} not found.`);
+      }
+
+      const withdrawn = withdrawSalaryReport(report, session.userId);
+      salaryReportsById.set(withdrawn.id, withdrawn);
+
+      const userReports = salaryReportsByUserId.get(session.userId) || [];
+      const idx = userReports.findIndex((r) => r.id === withdrawn.id);
+      if (idx >= 0) userReports[idx] = withdrawn;
+
+      auditLogs.push({
+        event: 'salary_report.withdrawn',
+        actorId: session.userId,
+        targetId: withdrawn.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Salary report withdrawn successfully (BR-181).',
+        report: withdrawn,
+      });
     }
-
-    const withdrawn = withdrawSalaryReport(report, session.userId);
-    salaryReportsById.set(withdrawn.id, withdrawn);
-
-    const userReports = salaryReportsByUserId.get(session.userId) || [];
-    const idx = userReports.findIndex((r) => r.id === withdrawn.id);
-    if (idx >= 0) userReports[idx] = withdrawn;
-
-    auditLogs.push({
-      event: 'salary_report.withdrawn',
-      actorId: session.userId,
-      targetId: withdrawn.id,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Salary report withdrawn successfully (BR-181).',
-      report: withdrawn,
-    });
-  });
+  );
 
   app.get('/api/v1/salaries/benchmarks', async (req: FastifyRequest, reply: FastifyReply) => {
     const query = SalaryBenchmarkQuerySchema.parse(req.query || {});
@@ -1861,94 +1981,103 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send(result);
   });
 
-  app.get('/api/v1/salaries/company/:companyName', async (req: FastifyRequest<{ Params: { companyName: string } }>, reply: FastifyReply) => {
-    const { companyName } = req.params;
-    const allReports = Array.from(salaryReportsById.values());
+  app.get(
+    '/api/v1/salaries/company/:companyName',
+    async (req: FastifyRequest<{ Params: { companyName: string } }>, reply: FastifyReply) => {
+      const { companyName } = req.params;
+      const allReports = Array.from(salaryReportsById.values());
 
-    const result = queryCompanySalarySummary(allReports, companyName, 3);
-    return reply.status(200).send(result);
-  });
+      const result = queryCompanySalarySummary(allReports, companyName, 3);
+      return reply.status(200).send(result);
+    }
+  );
 
   // Application Endpoints (F-06, BR-02, BR-15..BR-41)
-  app.post('/api/v1/jobs/:id/apply', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: jobId } = req.params;
-    const input = SubmitApplicationInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/jobs/:id/apply',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: jobId } = req.params;
+      const input = SubmitApplicationInputSchema.parse(req.body);
 
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile required before submitting job applications.');
-    }
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile required before submitting job applications.');
+      }
 
-    const job = jobsById.get(jobId);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
-    }
+      const job = jobsById.get(jobId);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
+      }
 
-    if (input.attachedEvidenceIds && input.attachedEvidenceIds.length > 0) {
-      for (const evId of input.attachedEvidenceIds) {
-        const ev = evidenceById.get(evId);
-        if (!ev) {
-          throw new DomainError('NOT_FOUND', `Evidence item ${evId} not found.`);
-        }
-        if (ev.subjectId !== profile.id) {
-          throw new DomainError('FORBIDDEN', `Evidence item ${evId} does not belong to your profile.`);
+      if (input.attachedEvidenceIds && input.attachedEvidenceIds.length > 0) {
+        for (const evId of input.attachedEvidenceIds) {
+          const ev = evidenceById.get(evId);
+          if (!ev) {
+            throw new DomainError('NOT_FOUND', `Evidence item ${evId} not found.`);
+          }
+          if (ev.subjectId !== profile.id) {
+            throw new DomainError(
+              'FORBIDDEN',
+              `Evidence item ${evId} does not belong to your profile.`
+            );
+          }
         }
       }
-    }
 
-    const existingApps = Array.from(applicationsById.values());
-    const application = submitJobApplication({
-      jobId,
-      jobStatus: job.status,
-      candidateProfileId: profile.id,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
-      },
-      existingApplications: existingApps,
-      coverLetter: input.coverLetter,
-      attachedEvidenceIds: input.attachedEvidenceIds,
-    });
+      const existingApps = Array.from(applicationsById.values());
+      const application = submitJobApplication({
+        jobId,
+        jobStatus: job.status,
+        candidateProfileId: profile.id,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+        },
+        existingApplications: existingApps,
+        coverLetter: input.coverLetter,
+        attachedEvidenceIds: input.attachedEvidenceIds,
+      });
 
-    applicationsById.set(application.id, application);
-    const jobList = applicationsByJobId.get(jobId) || [];
-    jobList.push(application);
-    applicationsByJobId.set(jobId, jobList);
+      applicationsById.set(application.id, application);
+      const jobList = applicationsByJobId.get(jobId) || [];
+      jobList.push(application);
+      applicationsByJobId.set(jobId, jobList);
 
-    const candList = applicationsByCandidateId.get(profile.id) || [];
-    candList.push(application);
-    applicationsByCandidateId.set(profile.id, candList);
+      const candList = applicationsByCandidateId.get(profile.id) || [];
+      candList.push(application);
+      applicationsByCandidateId.set(profile.id, candList);
 
-    // Mark candidate draft as submitted if exists (F-36)
-    const draftKey = `${profile.id}:${jobId}`;
-    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-    if (draftId) {
-      const existingDraft = applicationDraftsById.get(draftId);
-      if (existingDraft && !existingDraft.isSubmitted) {
-        const submittedDraft = markDraftSubmitted(existingDraft);
-        applicationDraftsById.set(draftId, submittedDraft);
+      // Mark candidate draft as submitted if exists (F-36)
+      const draftKey = `${profile.id}:${jobId}`;
+      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+      if (draftId) {
+        const existingDraft = applicationDraftsById.get(draftId);
+        if (existingDraft && !existingDraft.isSubmitted) {
+          const submittedDraft = markDraftSubmitted(existingDraft);
+          applicationDraftsById.set(draftId, submittedDraft);
+        }
       }
+
+      enqueuedWorkerJobs.push({
+        type: 'application.submitted',
+        payload: { applicationId: application.id, jobId, candidateId: profile.id },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      auditLogs.push({
+        event: 'application.submitted',
+        actorId: session.userId,
+        targetId: application.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Application submitted successfully.',
+        application,
+      });
     }
-
-    enqueuedWorkerJobs.push({
-      type: 'application.submitted',
-      payload: { applicationId: application.id, jobId, candidateId: profile.id },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    auditLogs.push({
-      event: 'application.submitted',
-      actorId: session.userId,
-      targetId: application.id,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(201).send({
-      message: 'Application submitted successfully.',
-      application,
-    });
-  });
+  );
 
   app.get('/api/v1/applications/my', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -1966,333 +2095,381 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ applications: withJobDetails });
   });
 
-  app.get('/api/v1/applications/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const application = applicationsById.get(id);
-    if (!application) {
-      throw new DomainError('NOT_FOUND', `Application ${id} not found.`);
+  app.get(
+    '/api/v1/applications/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const application = applicationsById.get(id);
+      if (!application) {
+        throw new DomainError('NOT_FOUND', `Application ${id} not found.`);
+      }
+
+      const userProfile = profilesByUserId.get(session.userId);
+      const isCandidate = userProfile && userProfile.id === application.candidateId;
+      const job = jobsById.get(application.jobId);
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isOrgMember = job && userMemberships.some((m) => m.orgId === job.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isCandidate && !isOrgMember && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
+      }
+
+      return reply.status(200).send({ application });
     }
+  );
 
-    const userProfile = profilesByUserId.get(session.userId);
-    const isCandidate = userProfile && userProfile.id === application.candidateId;
-    const job = jobsById.get(application.jobId);
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isOrgMember = job && userMemberships.some((m) => m.orgId === job.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
+  app.get(
+    '/api/v1/jobs/:id/applications',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: jobId } = req.params;
 
-    if (!isCandidate && !isOrgMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
+      const job = jobsById.get(jobId);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to candidate applications is restricted to authorized recruiters for this organization (BR-40).'
+        );
+      }
+
+      const list = applicationsByJobId.get(jobId) || [];
+      const enriched = list.map((app) => ({
+        ...app,
+        candidate: profilesById.get(app.candidateId),
+        evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+      }));
+
+      return reply.status(200).send({ applications: enriched });
     }
+  );
 
-    return reply.status(200).send({ application });
-  });
+  app.post(
+    '/api/v1/applications/:id/transition',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = TransitionApplicationInputSchema.parse(req.body);
 
-  app.get('/api/v1/jobs/:id/applications', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: jobId } = req.params;
+      const application = applicationsById.get(id);
+      if (!application) {
+        throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+      }
 
-    const job = jobsById.get(jobId);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID ${jobId} not found.`);
+      const candidateProfile = profilesById.get(application.candidateId);
+      const isCandidateOwner = candidateProfile?.userId === session.userId;
+
+      const job = jobsById.get(application.jobId);
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+
+      const updated = transitionApplicationState(
+        application,
+        input.targetState,
+        {
+          userId: session.userId,
+          roles: session.roles,
+          isCandidateOwner,
+          isRecruiterForJob,
+        },
+        input.reason
+      );
+
+      applicationsById.set(updated.id, updated);
+
+      // Update candidate list
+      const candList = applicationsByCandidateId.get(application.candidateId) || [];
+      const candIdx = candList.findIndex((a) => a.id === updated.id);
+      if (candIdx >= 0) candList[candIdx] = updated;
+
+      // Update job list
+      const jobList = applicationsByJobId.get(application.jobId) || [];
+      const jobIdx = jobList.findIndex((a) => a.id === updated.id);
+      if (jobIdx >= 0) jobList[jobIdx] = updated;
+
+      enqueuedWorkerJobs.push({
+        type: 'application.status_changed',
+        payload: { applicationId: updated.id, status: updated.status },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      auditLogs.push({
+        event: 'application.status_changed',
+        actorId: session.userId,
+        targetId: updated.id,
+        metadata: { targetState: input.targetState, reason: input.reason },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Application status transitioned successfully.',
+        application: updated,
+      });
     }
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === job.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to candidate applications is restricted to authorized recruiters for this organization (BR-40).');
-    }
-
-    const list = applicationsByJobId.get(jobId) || [];
-    const enriched = list.map((app) => ({
-      ...app,
-      candidate: profilesById.get(app.candidateId),
-      evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
-    }));
-
-    return reply.status(200).send({ applications: enriched });
-  });
-
-  app.post('/api/v1/applications/:id/transition', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = TransitionApplicationInputSchema.parse(req.body);
-
-    const application = applicationsById.get(id);
-    if (!application) {
-      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
-    }
-
-    const candidateProfile = profilesById.get(application.candidateId);
-    const isCandidateOwner = candidateProfile?.userId === session.userId;
-
-    const job = jobsById.get(application.jobId);
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
-
-    const updated = transitionApplicationState(
-      application,
-      input.targetState,
-      {
-        userId: session.userId,
-        roles: session.roles,
-        isCandidateOwner,
-        isRecruiterForJob,
-      },
-      input.reason
-    );
-
-    applicationsById.set(updated.id, updated);
-
-    // Update candidate list
-    const candList = applicationsByCandidateId.get(application.candidateId) || [];
-    const candIdx = candList.findIndex((a) => a.id === updated.id);
-    if (candIdx >= 0) candList[candIdx] = updated;
-
-    // Update job list
-    const jobList = applicationsByJobId.get(application.jobId) || [];
-    const jobIdx = jobList.findIndex((a) => a.id === updated.id);
-    if (jobIdx >= 0) jobList[jobIdx] = updated;
-
-    enqueuedWorkerJobs.push({
-      type: 'application.status_changed',
-      payload: { applicationId: updated.id, status: updated.status },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    auditLogs.push({
-      event: 'application.status_changed',
-      actorId: session.userId,
-      targetId: updated.id,
-      metadata: { targetState: input.targetState, reason: input.reason },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Application status transitioned successfully.',
-      application: updated,
-    });
-  });
+  );
 
   // Application Feedback Loop Endpoints (F-122, BR-217..BR-224, P-02)
-  app.post('/api/v1/applications/:id/feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = CreateApplicationFeedbackInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/applications/:id/feedback',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = CreateApplicationFeedbackInputSchema.parse(req.body);
 
-    const application = applicationsById.get(id);
-    if (!application) {
-      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
-    }
+      const application = applicationsById.get(id);
+      if (!application) {
+        throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+      }
 
-    const job = jobsById.get(application.jobId);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Associated job for application ${id} not found.`);
-    }
+      const job = jobsById.get(application.jobId);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Associated job for application ${id} not found.`);
+      }
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isRecruiterForJob = userMemberships.some((m) => m.orgId === job.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isRecruiterForJob = userMemberships.some((m) => m.orgId === job.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
 
-    if (!isRecruiterForJob && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only recruiters of the hiring organization can provide feedback (BR-12).');
-    }
+      if (!isRecruiterForJob && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only recruiters of the hiring organization can provide feedback (BR-12).'
+        );
+      }
 
-    if (input.suggestedSkillIds && input.suggestedSkillIds.length > 0) {
-      for (const skillId of input.suggestedSkillIds) {
-        if (!skillsById.has(skillId)) {
-          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+      if (input.suggestedSkillIds && input.suggestedSkillIds.length > 0) {
+        for (const skillId of input.suggestedSkillIds) {
+          if (!skillsById.has(skillId)) {
+            throw new DomainError(
+              'VALIDATION_FAILED',
+              `Skill ID ${skillId} is not a valid canonical skill (BR-144).`
+            );
+          }
         }
       }
-    }
 
-    const feedback = createApplicationFeedback({
-      applicationId: application.id,
-      candidateId: application.candidateId,
-      jobId: application.jobId,
-      orgId: job.orgId,
-      stage: input.stage,
-      reasonCategory: input.reasonCategory,
-      strengths: input.strengths,
-      areasForImprovement: input.areasForImprovement,
-      actionableAdvice: input.actionableAdvice,
-      suggestedSkillIds: input.suggestedSkillIds,
-      isAiAssisted: input.isAiAssisted,
-      humanReviewed: input.humanReviewed,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
-        orgId: job.orgId,
-      },
-    });
-
-    applicationFeedbackByAppId.set(application.id, feedback);
-
-    enqueuedWorkerJobs.push({
-      type: 'application.feedback_delivered',
-      payload: { applicationId: application.id, candidateId: application.candidateId },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    auditLogs.push({
-      event: 'application.feedback_provided',
-      actorId: session.userId,
-      targetId: feedback.id,
-      metadata: {
+      const feedback = createApplicationFeedback({
         applicationId: application.id,
-        reasonCategory: feedback.reasonCategory,
-      },
-      timestamp: new Date().toISOString(),
-    });
+        candidateId: application.candidateId,
+        jobId: application.jobId,
+        orgId: job.orgId,
+        stage: input.stage,
+        reasonCategory: input.reasonCategory,
+        strengths: input.strengths,
+        areasForImprovement: input.areasForImprovement,
+        actionableAdvice: input.actionableAdvice,
+        suggestedSkillIds: input.suggestedSkillIds,
+        isAiAssisted: input.isAiAssisted,
+        humanReviewed: input.humanReviewed,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+          orgId: job.orgId,
+        },
+      });
 
-    return reply.status(201).send({
-      message: 'Application feedback provided successfully.',
-      feedback,
-    });
-  });
+      applicationFeedbackByAppId.set(application.id, feedback);
 
-  app.get('/api/v1/applications/:id/feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+      enqueuedWorkerJobs.push({
+        type: 'application.feedback_delivered',
+        payload: { applicationId: application.id, candidateId: application.candidateId },
+        enqueuedAt: new Date().toISOString(),
+      });
 
-    const application = applicationsById.get(id);
-    if (!application) {
-      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+      auditLogs.push({
+        event: 'application.feedback_provided',
+        actorId: session.userId,
+        targetId: feedback.id,
+        metadata: {
+          applicationId: application.id,
+          reasonCategory: feedback.reasonCategory,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Application feedback provided successfully.',
+        feedback,
+      });
     }
+  );
 
-    const feedback = applicationFeedbackByAppId.get(id);
-    if (!feedback) {
-      throw new DomainError('NOT_FOUND', `No feedback recorded for application ${id}.`);
-    }
+  app.get(
+    '/api/v1/applications/:id/feedback',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const candidateProfile = profilesById.get(application.candidateId);
-    const isCandidateOwner = candidateProfile?.userId === session.userId;
-
-    const job = jobsById.get(application.jobId);
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isCandidateOwner && !isRecruiterForJob && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Application feedback is private and visible only to the candidate (BR-219).');
-    }
-
-    let result = feedback;
-    if (isCandidateOwner && candidateProfile) {
-      result = markFeedbackViewed(feedback, candidateProfile.userId, session.userId);
-      applicationFeedbackByAppId.set(id, result);
-    }
-
-    return reply.status(200).send({ feedback: result });
-  });
-
-  app.post('/api/v1/applications/:id/feedback/request', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const application = applicationsById.get(id);
-    if (!application) {
-      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
-    }
-
-    const candidateProfile = profilesById.get(application.candidateId);
-    if (!candidateProfile || candidateProfile.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Candidates may only request feedback for their own applications.');
-    }
-
-    const reqResult = requestApplicationFeedback(
-      application.updatedAt,
-      candidateProfile.userId,
-      session.userId
-    );
-
-    const existingFeedback = applicationFeedbackByAppId.get(id);
-    if (existingFeedback) {
-      if (existingFeedback.status === 'provided' || existingFeedback.status === 'viewed') {
-        return reply.status(200).send({
-          message: 'Feedback has already been provided for this application.',
-          feedback: existingFeedback,
-        });
+      const application = applicationsById.get(id);
+      if (!application) {
+        throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
       }
-      existingFeedback.status = 'requested';
-      existingFeedback.requestedAt = reqResult.requestedAt;
-      applicationFeedbackByAppId.set(id, existingFeedback);
+
+      const feedback = applicationFeedbackByAppId.get(id);
+      if (!feedback) {
+        throw new DomainError('NOT_FOUND', `No feedback recorded for application ${id}.`);
+      }
+
+      const candidateProfile = profilesById.get(application.candidateId);
+      const isCandidateOwner = candidateProfile?.userId === session.userId;
+
+      const job = jobsById.get(application.jobId);
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isCandidateOwner && !isRecruiterForJob && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Application feedback is private and visible only to the candidate (BR-219).'
+        );
+      }
+
+      let result = feedback;
+      if (isCandidateOwner && candidateProfile) {
+        result = markFeedbackViewed(feedback, candidateProfile.userId, session.userId);
+        applicationFeedbackByAppId.set(id, result);
+      }
+
+      return reply.status(200).send({ feedback: result });
     }
+  );
 
-    auditLogs.push({
-      event: 'application.feedback_requested',
-      actorId: session.userId,
-      targetId: application.id,
-      timestamp: new Date().toISOString(),
-    });
+  app.post(
+    '/api/v1/applications/:id/feedback/request',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    return reply.status(200).send({
-      message: 'Feedback requested successfully from hiring team.',
-      requestedAt: reqResult.requestedAt,
-    });
-  });
+      const application = applicationsById.get(id);
+      if (!application) {
+        throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+      }
 
-  app.post('/api/v1/organizations/:orgId/feedback-templates', async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { orgId } = req.params;
-    const input = CreateFeedbackTemplateInputSchema.parse(req.body);
+      const candidateProfile = profilesById.get(application.candidateId);
+      if (!candidateProfile || candidateProfile.userId !== session.userId) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Candidates may only request feedback for their own applications.'
+        );
+      }
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === orgId);
-    const isAdmin = session.roles.includes('platform_admin');
+      const reqResult = requestApplicationFeedback(
+        application.updatedAt,
+        candidateProfile.userId,
+        session.userId
+      );
 
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only organization members can configure feedback templates (BR-224).');
+      const existingFeedback = applicationFeedbackByAppId.get(id);
+      if (existingFeedback) {
+        if (existingFeedback.status === 'provided' || existingFeedback.status === 'viewed') {
+          return reply.status(200).send({
+            message: 'Feedback has already been provided for this application.',
+            feedback: existingFeedback,
+          });
+        }
+        existingFeedback.status = 'requested';
+        existingFeedback.requestedAt = reqResult.requestedAt;
+        applicationFeedbackByAppId.set(id, existingFeedback);
+      }
+
+      auditLogs.push({
+        event: 'application.feedback_requested',
+        actorId: session.userId,
+        targetId: application.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Feedback requested successfully from hiring team.',
+        requestedAt: reqResult.requestedAt,
+      });
     }
+  );
 
-    const template = createFeedbackTemplate({
-      orgId,
-      templateName: input.templateName,
-      stage: input.stage,
-      reasonCategory: input.reasonCategory,
-      defaultStrengths: input.defaultStrengths,
-      defaultAreasForImprovement: input.defaultAreasForImprovement,
-      defaultActionableAdvice: input.defaultActionableAdvice,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
+  app.post(
+    '/api/v1/organizations/:orgId/feedback-templates',
+    async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { orgId } = req.params;
+      const input = CreateFeedbackTemplateInputSchema.parse(req.body);
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only organization members can configure feedback templates (BR-224).'
+        );
+      }
+
+      const template = createFeedbackTemplate({
         orgId,
-      },
-    });
+        templateName: input.templateName,
+        stage: input.stage,
+        reasonCategory: input.reasonCategory,
+        defaultStrengths: input.defaultStrengths,
+        defaultAreasForImprovement: input.defaultAreasForImprovement,
+        defaultActionableAdvice: input.defaultActionableAdvice,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+          orgId,
+        },
+      });
 
-    const list = feedbackTemplatesByOrgId.get(orgId) || [];
-    list.push(template);
-    feedbackTemplatesByOrgId.set(orgId, list);
+      const list = feedbackTemplatesByOrgId.get(orgId) || [];
+      list.push(template);
+      feedbackTemplatesByOrgId.set(orgId, list);
 
-    return reply.status(201).send({
-      message: 'Feedback template created successfully.',
-      template,
-    });
-  });
-
-  app.get('/api/v1/organizations/:orgId/feedback-templates', async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { orgId } = req.params;
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to feedback templates is restricted to organization members.');
+      return reply.status(201).send({
+        message: 'Feedback template created successfully.',
+        template,
+      });
     }
+  );
 
-    const templates = feedbackTemplatesByOrgId.get(orgId) || [];
-    return reply.status(200).send({ templates });
-  });
+  app.get(
+    '/api/v1/organizations/:orgId/feedback-templates',
+    async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { orgId } = req.params;
 
-  app.get('/api/v1/feedback/aggregate-insights', async (req: FastifyRequest, reply: FastifyReply) => {
-    const allFeedbacks = Array.from(applicationFeedbackByAppId.values());
-    const insights = computeFeedbackAggregateInsights(allFeedbacks, 10);
-    return reply.status(200).send({ insights });
-  });
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isMember && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access to feedback templates is restricted to organization members.'
+        );
+      }
+
+      const templates = feedbackTemplatesByOrgId.get(orgId) || [];
+      return reply.status(200).send({ templates });
+    }
+  );
+
+  app.get(
+    '/api/v1/feedback/aggregate-insights',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const allFeedbacks = Array.from(applicationFeedbackByAppId.values());
+      const insights = computeFeedbackAggregateInsights(allFeedbacks, 10);
+      return reply.status(200).send({ insights });
+    }
+  );
 
   // Skill Decay & Freshness Tracking Endpoints (F-123, BR-225..BR-232)
   app.post('/api/v1/skills/freshness', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -2304,7 +2481,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     const input = RegisterSkillFreshnessInputSchema.parse(req.body);
     if (!skillsById.has(input.skillId)) {
-      throw new DomainError('VALIDATION_FAILED', `Skill ID ${input.skillId} is not a valid canonical skill (BR-144).`);
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        `Skill ID ${input.skillId} is not a valid canonical skill (BR-144).`
+      );
     }
 
     const record = createSkillFreshnessRecord({
@@ -2344,98 +2524,123 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ records });
   });
 
-  app.get('/api/v1/candidates/:candidateProfileId/skills/freshness', async (req: FastifyRequest<{ Params: { candidateProfileId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { candidateProfileId } = req.params;
+  app.get(
+    '/api/v1/candidates/:candidateProfileId/skills/freshness',
+    async (
+      req: FastifyRequest<{ Params: { candidateProfileId: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { candidateProfileId } = req.params;
 
-    const targetProfile = profilesById.get(candidateProfileId);
-    if (!targetProfile) {
-      throw new DomainError('NOT_FOUND', `Candidate profile ${candidateProfileId} not found.`);
+      const targetProfile = profilesById.get(candidateProfileId);
+      if (!targetProfile) {
+        throw new DomainError('NOT_FOUND', `Candidate profile ${candidateProfileId} not found.`);
+      }
+
+      const isOwner = targetProfile.userId === session.userId;
+      const isAdmin = session.roles.includes('platform_admin');
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const recruiterOrgIds = new Set(userMemberships.map((m) => m.orgId));
+      const candidateApps = applicationsByCandidateId.get(candidateProfileId) || [];
+      const hasAppliedToRecruiterOrg = candidateApps.some((app) => {
+        const job = jobsById.get(app.jobId);
+        return job && recruiterOrgIds.has(job.orgId);
+      });
+
+      if (!isOwner && !isAdmin && !hasAppliedToRecruiterOrg) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Skill freshness is private to the candidate and visible to recruiters only within application context (BR-230).'
+        );
+      }
+
+      const records = Array.from(
+        skillFreshnessByCandidateId.get(candidateProfileId)?.values() || []
+      );
+      return reply.status(200).send({ records });
     }
+  );
 
-    const isOwner = targetProfile.userId === session.userId;
-    const isAdmin = session.roles.includes('platform_admin');
+  app.post(
+    '/api/v1/skills/:skillId/reverify',
+    async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { skillId } = req.params;
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile required for skill re-verification.');
+      }
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const recruiterOrgIds = new Set(userMemberships.map((m) => m.orgId));
-    const candidateApps = applicationsByCandidateId.get(candidateProfileId) || [];
-    const hasAppliedToRecruiterOrg = candidateApps.some((app) => {
-      const job = jobsById.get(app.jobId);
-      return job && recruiterOrgIds.has(job.orgId);
-    });
+      if (!skillsById.has(skillId)) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          `Skill ID ${skillId} is not a valid canonical skill (BR-144).`
+        );
+      }
 
-    if (!isOwner && !isAdmin && !hasAppliedToRecruiterOrg) {
-      throw new DomainError('FORBIDDEN', 'Skill freshness is private to the candidate and visible to recruiters only within application context (BR-230).');
-    }
+      const input = ReverifySkillInputSchema.parse(req.body || {});
 
-    const records = Array.from(skillFreshnessByCandidateId.get(candidateProfileId)?.values() || []);
-    return reply.status(200).send({ records });
-  });
+      let userMap = skillFreshnessByCandidateId.get(profile.id);
+      if (!userMap) {
+        userMap = new Map();
+        skillFreshnessByCandidateId.set(profile.id, userMap);
+      }
 
-  app.post('/api/v1/skills/:skillId/reverify', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { skillId } = req.params;
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile required for skill re-verification.');
-    }
+      let existing = userMap.get(skillId);
+      if (!existing) {
+        existing = createSkillFreshnessRecord({
+          candidateId: profile.id,
+          skillId,
+          category: 'moderate',
+          verificationSource: input.source,
+        });
+      }
 
-    if (!skillsById.has(skillId)) {
-      throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
-    }
+      const updated = reverifySkill(existing, input.source);
+      userMap.set(skillId, updated);
 
-    const input = ReverifySkillInputSchema.parse(req.body || {});
+      auditLogs.push({
+        event: 'skill_freshness.reverified',
+        actorId: session.userId,
+        targetId: updated.id,
+        metadata: { skillId, source: input.source, newScore: updated.freshnessScore },
+        timestamp: new Date().toISOString(),
+      });
 
-    let userMap = skillFreshnessByCandidateId.get(profile.id);
-    if (!userMap) {
-      userMap = new Map();
-      skillFreshnessByCandidateId.set(profile.id, userMap);
-    }
-
-    let existing = userMap.get(skillId);
-    if (!existing) {
-      existing = createSkillFreshnessRecord({
-        candidateId: profile.id,
-        skillId,
-        category: 'moderate',
-        verificationSource: input.source,
+      return reply.status(200).send({
+        message: 'Skill successfully re-verified.',
+        freshness: updated,
       });
     }
+  );
 
-    const updated = reverifySkill(existing, input.source);
-    userMap.set(skillId, updated);
-
-    auditLogs.push({
-      event: 'skill_freshness.reverified',
-      actorId: session.userId,
-      targetId: updated.id,
-      metadata: { skillId, source: input.source, newScore: updated.freshnessScore },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Skill successfully re-verified.',
-      freshness: updated,
-    });
-  });
-
-  app.post('/api/v1/skills/freshness/refresh-all', async (req: FastifyRequest, reply: FastifyReply) => {
-    for (const userMap of skillFreshnessByCandidateId.values()) {
-      for (const [skillId, record] of userMap.entries()) {
-        const { score, band, isDemoted } = calculateFreshnessScore(record.lastVerifiedAt, record.category);
-        const refreshed: SkillFreshnessRecord = {
-          ...record,
-          freshnessScore: score,
-          freshnessBand: band,
-          isDemoted,
-          updatedAt: new Date().toISOString(),
-        };
-        userMap.set(skillId, refreshed);
+  app.post(
+    '/api/v1/skills/freshness/refresh-all',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      for (const userMap of skillFreshnessByCandidateId.values()) {
+        for (const [skillId, record] of userMap.entries()) {
+          const { score, band, isDemoted } = calculateFreshnessScore(
+            record.lastVerifiedAt,
+            record.category
+          );
+          const refreshed: SkillFreshnessRecord = {
+            ...record,
+            freshnessScore: score,
+            freshnessBand: band,
+            isDemoted,
+            updatedAt: new Date().toISOString(),
+          };
+          userMap.set(skillId, refreshed);
+        }
       }
-    }
 
-    return reply.status(200).send({ message: 'Skill freshness scores updated successfully (BR-225).' });
-  });
+      return reply
+        .status(200)
+        .send({ message: 'Skill freshness scores updated successfully (BR-225).' });
+    }
+  );
 
   // Technical Interview Assessment Platform Endpoints (F-88, S-06, BR-169..BR-176)
   app.post('/api/v1/interviews/questions', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -2446,7 +2651,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const isMember = userMemberships.some((m) => m.orgId === input.orgId);
     const isAdmin = session.roles.includes('platform_admin');
     if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'User is not authorized to create questions for this organization.');
+      throw new DomainError(
+        'FORBIDDEN',
+        'User is not authorized to create questions for this organization.'
+      );
     }
 
     const question = createInterviewQuestion({
@@ -2477,28 +2685,38 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ question });
   });
 
-  app.get('/api/v1/interviews/questions', async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { orgId } = req.query;
-    if (!orgId) {
-      throw new DomainError('VALIDATION_FAILED', 'orgId query parameter is required.');
-    }
+  app.get(
+    '/api/v1/interviews/questions',
+    async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { orgId } = req.query;
+      if (!orgId) {
+        throw new DomainError('VALIDATION_FAILED', 'orgId query parameter is required.');
+      }
 
-    // BR-173: Candidate cannot view company question bank
-    if (session.roles.includes('candidate') && !session.roles.includes('recruiter') && !session.roles.includes('platform_admin')) {
-      throw new DomainError('FORBIDDEN', 'Interview question bank is company-scoped and not accessible to candidates (BR-173).');
-    }
+      // BR-173: Candidate cannot view company question bank
+      if (
+        session.roles.includes('candidate') &&
+        !session.roles.includes('recruiter') &&
+        !session.roles.includes('platform_admin')
+      ) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Interview question bank is company-scoped and not accessible to candidates (BR-173).'
+        );
+      }
 
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMember = userMemberships.some((m) => m.orgId === orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-    if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'User is not a member of the requested organization.');
-    }
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      const isAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'User is not a member of the requested organization.');
+      }
 
-    const questions = interviewQuestionsByOrgId.get(orgId) || [];
-    return reply.status(200).send({ questions });
-  });
+      const questions = interviewQuestionsByOrgId.get(orgId) || [];
+      return reply.status(200).send({ questions });
+    }
+  );
 
   app.post('/api/v1/interviews/assessments', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -2508,12 +2726,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const isMember = userMemberships.some((m) => m.orgId === input.orgId);
     const isAdmin = session.roles.includes('platform_admin');
     if (!isMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'User is not authorized to schedule interviews for this organization.');
+      throw new DomainError(
+        'FORBIDDEN',
+        'User is not authorized to schedule interviews for this organization.'
+      );
     }
 
     const candidateProfile = profilesById.get(input.candidateProfileId);
     if (!candidateProfile) {
-      throw new DomainError('NOT_FOUND', `Candidate profile ${input.candidateProfileId} not found.`);
+      throw new DomainError(
+        'NOT_FOUND',
+        `Candidate profile ${input.candidateProfileId} not found.`
+      );
     }
 
     const assessment = scheduleInterviewAssessment({
@@ -2548,311 +2772,358 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ assessment });
   });
 
-  app.get('/api/v1/interviews/assessments/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+  app.get(
+    '/api/v1/interviews/assessments/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
+
+      const userProfile = profilesByUserId.get(session.userId);
+      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
+      const isInterviewer = session.userId === assessment.interviewerUserId;
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access to this interview assessment is restricted.');
+      }
+
+      // BR-173: Candidates receive questions with hidden test cases stripped
+      const questions = assessment.questionIds
+        .map((qid) => interviewQuestionsById.get(qid))
+        .filter((q): q is InterviewQuestion => q !== undefined)
+        .map((q) => {
+          if (isCandidate) {
+            return {
+              ...q,
+              testCases: q.testCases.filter((tc) => !tc.isHidden),
+            };
+          }
+          return q;
+        });
+
+      return reply.status(200).send({ assessment, questions });
     }
+  );
 
-    const userProfile = profilesByUserId.get(session.userId);
-    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
-    const isInterviewer = session.userId === assessment.interviewerUserId;
-    const isAdmin = session.roles.includes('platform_admin');
+  app.post(
+    '/api/v1/interviews/assessments/:id/join',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
 
-    if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to this interview assessment is restricted.');
-    }
+      const userProfile = profilesByUserId.get(session.userId);
+      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+      const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
 
-    // BR-173: Candidates receive questions with hidden test cases stripped
-    const questions = assessment.questionIds
-      .map((qid) => interviewQuestionsById.get(qid))
-      .filter((q): q is InterviewQuestion => q !== undefined)
-      .map((q) => {
-        if (isCandidate) {
-          return {
-            ...q,
-            testCases: q.testCases.filter((tc) => !tc.isHidden),
-          };
-        }
-        return q;
+      const updated = joinInterviewAssessment(assessment, role);
+      interviewAssessmentsById.set(updated.id, updated);
+
+      auditLogs.push({
+        event: 'interview.joined',
+        actorId: session.userId,
+        targetId: updated.id,
+        metadata: { role, status: updated.status },
+        timestamp: new Date().toISOString(),
       });
 
-    return reply.status(200).send({ assessment, questions });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/join', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      return reply.status(200).send({ assessment: updated, meetingUrl: updated.meetingUrl });
     }
+  );
 
-    const userProfile = profilesByUserId.get(session.userId);
-    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-    const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
-
-    const updated = joinInterviewAssessment(assessment, role);
-    interviewAssessmentsById.set(updated.id, updated);
-
-    auditLogs.push({
-      event: 'interview.joined',
-      actorId: session.userId,
-      targetId: updated.id,
-      metadata: { role, status: updated.status },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({ assessment: updated, meetingUrl: updated.meetingUrl });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/consent', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    const input = SetRecordingConsentInputSchema.parse(req.body);
-    const userProfile = profilesByUserId.get(session.userId);
-    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-    const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
-
-    const updated = updateRecordingConsent(assessment, role, input.consent);
-    interviewAssessmentsById.set(updated.id, updated);
-
-    return reply.status(200).send({ assessment: updated });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/end', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    const body = (req.body as any) || {};
-    const resolution = body.resolution || 'completed';
-    if (!['completed', 'cancelled', 'no_show'].includes(resolution)) {
-      throw new DomainError('VALIDATION_FAILED', `Invalid resolution '${resolution}'. Must be completed, cancelled, or no_show.`);
-    }
-
-    const updated = endInterviewAssessment(assessment, resolution);
-    interviewAssessmentsById.set(updated.id, updated);
-
-    auditLogs.push({
-      event: 'interview.ended',
-      actorId: session.userId,
-      targetId: updated.id,
-      metadata: { resolution: updated.status },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({ assessment: updated });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/code', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    const input = ExecuteInterviewCodeInputSchema.parse(req.body);
-    let testCases = input.customTestCases || [];
-    if (input.questionId) {
-      const q = interviewQuestionsById.get(input.questionId);
-      if (q) {
-        testCases = q.testCases;
+  app.post(
+    '/api/v1/interviews/assessments/:id/consent',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
+
+      const input = SetRecordingConsentInputSchema.parse(req.body);
+      const userProfile = profilesByUserId.get(session.userId);
+      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+      const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
+
+      const updated = updateRecordingConsent(assessment, role, input.consent);
+      interviewAssessmentsById.set(updated.id, updated);
+
+      return reply.status(200).send({ assessment: updated });
     }
+  );
 
-    const result = executeInterviewCode(input.code, testCases);
-    return reply.status(200).send({ result });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/scorecard', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    // Candidate is forbidden from submitting scorecard (BR-176)
-    const userProfile = profilesByUserId.get(session.userId);
-    if (userProfile && userProfile.id === assessment.candidateProfileId) {
-      throw new DomainError('FORBIDDEN', 'Candidates are not authorized to submit interview scorecards.');
-    }
-
-    const input = SubmitInterviewScorecardInputSchema.parse(req.body);
-    const { assessment: scoredAssessment, scorecard } = submitInterviewScorecard(assessment, {
-      interviewerUserId: session.userId,
-      technicalCorrectness: input.technicalCorrectness,
-      communication: input.communication,
-      problemSolving: input.problemSolving,
-      codeQuality: input.codeQuality,
-      recommendation: input.recommendation,
-      strengths: input.strengths,
-      areasForImprovement: input.areasForImprovement,
-      privateNotes: input.privateNotes,
-    });
-
-    interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
-    const cards = interviewScorecardsByAssessmentId.get(id) || [];
-    cards.push(scorecard);
-    interviewScorecardsByAssessmentId.set(id, cards);
-
-    // If linked to job application, update application notes/evaluation
-    if (assessment.applicationId) {
-      const app = applicationsById.get(assessment.applicationId);
-      if (app) {
-        app.status = 'interviewing';
-        app.updatedAt = new Date().toISOString();
+  app.post(
+    '/api/v1/interviews/assessments/:id/end',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
+
+      const body = (req.body as any) || {};
+      const resolution = body.resolution || 'completed';
+      if (!['completed', 'cancelled', 'no_show'].includes(resolution)) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          `Invalid resolution '${resolution}'. Must be completed, cancelled, or no_show.`
+        );
+      }
+
+      const updated = endInterviewAssessment(assessment, resolution);
+      interviewAssessmentsById.set(updated.id, updated);
+
+      auditLogs.push({
+        event: 'interview.ended',
+        actorId: session.userId,
+        targetId: updated.id,
+        metadata: { resolution: updated.status },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ assessment: updated });
     }
+  );
 
-    auditLogs.push({
-      event: 'interview.scorecard_submitted',
-      actorId: session.userId,
-      targetId: scorecard.id,
-      metadata: { assessmentId: id, overallScore: scorecard.overallScore, recommendation: scorecard.recommendation },
-      timestamp: new Date().toISOString(),
-    });
+  app.post(
+    '/api/v1/interviews/assessments/:id/code',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
 
-    return reply.status(201).send({ scorecard, assessment: scoredAssessment });
-  });
+      const input = ExecuteInterviewCodeInputSchema.parse(req.body);
+      let testCases = input.customTestCases || [];
+      if (input.questionId) {
+        const q = interviewQuestionsById.get(input.questionId);
+        if (q) {
+          testCases = q.testCases;
+        }
+      }
 
-  app.post('/api/v1/interviews/assessments/:id/scorecard/compensate', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      const result = executeInterviewCode(input.code, testCases);
+      return reply.status(200).send({ result });
     }
+  );
 
-    const userProfile = profilesByUserId.get(session.userId);
-    if (userProfile && userProfile.id === assessment.candidateProfileId) {
-      throw new DomainError('FORBIDDEN', 'Candidates are not authorized to submit scorecard compensations.');
+  app.post(
+    '/api/v1/interviews/assessments/:id/scorecard',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
+
+      // Candidate is forbidden from submitting scorecard (BR-176)
+      const userProfile = profilesByUserId.get(session.userId);
+      if (userProfile && userProfile.id === assessment.candidateProfileId) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Candidates are not authorized to submit interview scorecards.'
+        );
+      }
+
+      const input = SubmitInterviewScorecardInputSchema.parse(req.body);
+      const { assessment: scoredAssessment, scorecard } = submitInterviewScorecard(assessment, {
+        interviewerUserId: session.userId,
+        technicalCorrectness: input.technicalCorrectness,
+        communication: input.communication,
+        problemSolving: input.problemSolving,
+        codeQuality: input.codeQuality,
+        recommendation: input.recommendation,
+        strengths: input.strengths,
+        areasForImprovement: input.areasForImprovement,
+        privateNotes: input.privateNotes,
+      });
+
+      interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
+      const cards = interviewScorecardsByAssessmentId.get(id) || [];
+      cards.push(scorecard);
+      interviewScorecardsByAssessmentId.set(id, cards);
+
+      // If linked to job application, update application notes/evaluation
+      if (assessment.applicationId) {
+        const app = applicationsById.get(assessment.applicationId);
+        if (app) {
+          app.status = 'interviewing';
+          app.updatedAt = new Date().toISOString();
+        }
+      }
+
+      auditLogs.push({
+        event: 'interview.scorecard_submitted',
+        actorId: session.userId,
+        targetId: scorecard.id,
+        metadata: {
+          assessmentId: id,
+          overallScore: scorecard.overallScore,
+          recommendation: scorecard.recommendation,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({ scorecard, assessment: scoredAssessment });
     }
+  );
 
-    const cards = interviewScorecardsByAssessmentId.get(id) || [];
-    if (cards.length === 0) {
-      throw new DomainError('NOT_FOUND', 'No existing scorecard found to compensate.');
+  app.post(
+    '/api/v1/interviews/assessments/:id/scorecard/compensate',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
+
+      const userProfile = profilesByUserId.get(session.userId);
+      if (userProfile && userProfile.id === assessment.candidateProfileId) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Candidates are not authorized to submit scorecard compensations.'
+        );
+      }
+
+      const cards = interviewScorecardsByAssessmentId.get(id) || [];
+      if (cards.length === 0) {
+        throw new DomainError('NOT_FOUND', 'No existing scorecard found to compensate.');
+      }
+
+      const latest = cards[cards.length - 1];
+      const input = CompensateInterviewScorecardInputSchema.parse(req.body);
+
+      const { assessment: scoredAssessment, scorecard: compensated } = compensateInterviewScorecard(
+        latest,
+        assessment,
+        {
+          interviewerUserId: session.userId,
+          technicalCorrectness: input.technicalCorrectness,
+          communication: input.communication,
+          problemSolving: input.problemSolving,
+          codeQuality: input.codeQuality,
+          recommendation: input.recommendation,
+          strengths: input.strengths,
+          areasForImprovement: input.areasForImprovement,
+          compensationReason: input.compensationReason,
+          privateNotes: input.privateNotes,
+        }
+      );
+
+      interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
+      cards.push(compensated);
+      interviewScorecardsByAssessmentId.set(id, cards);
+
+      auditLogs.push({
+        event: 'interview.scorecard_compensated',
+        actorId: session.userId,
+        targetId: compensated.id,
+        metadata: { parentScorecardId: latest.id, revisionNumber: compensated.revisionNumber },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({ scorecard: compensated, assessment: scoredAssessment });
     }
+  );
 
-    const latest = cards[cards.length - 1];
-    const input = CompensateInterviewScorecardInputSchema.parse(req.body);
+  app.get(
+    '/api/v1/interviews/assessments/:id/scorecards',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
 
-    const { assessment: scoredAssessment, scorecard: compensated } = compensateInterviewScorecard(latest, assessment, {
-      interviewerUserId: session.userId,
-      technicalCorrectness: input.technicalCorrectness,
-      communication: input.communication,
-      problemSolving: input.problemSolving,
-      codeQuality: input.codeQuality,
-      recommendation: input.recommendation,
-      strengths: input.strengths,
-      areasForImprovement: input.areasForImprovement,
-      compensationReason: input.compensationReason,
-      privateNotes: input.privateNotes,
-    });
+      const userProfile = profilesByUserId.get(session.userId);
+      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
+      const isInterviewer = session.userId === assessment.interviewerUserId;
+      const isAdmin = session.roles.includes('platform_admin');
 
-    interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
-    cards.push(compensated);
-    interviewScorecardsByAssessmentId.set(id, cards);
+      if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access to scorecards is restricted.');
+      }
 
-    auditLogs.push({
-      event: 'interview.scorecard_compensated',
-      actorId: session.userId,
-      targetId: compensated.id,
-      metadata: { parentScorecardId: latest.id, revisionNumber: compensated.revisionNumber },
-      timestamp: new Date().toISOString(),
-    });
+      const cards = interviewScorecardsByAssessmentId.get(id) || [];
 
-    return reply.status(201).send({ scorecard: compensated, assessment: scoredAssessment });
-  });
+      // BR-176: Candidate view strips private notes and revision details
+      if (isCandidate) {
+        const publicCards = cards.map((c) => ({
+          id: c.id,
+          assessmentId: c.assessmentId,
+          overallScore: c.overallScore,
+          strengths: c.strengths,
+          areasForImprovement: c.areasForImprovement,
+          recommendation: c.recommendation,
+          createdAt: c.createdAt,
+        }));
+        return reply.status(200).send({ scorecards: publicCards });
+      }
 
-  app.get('/api/v1/interviews/assessments/:id/scorecards', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      return reply.status(200).send({ scorecards: cards });
     }
+  );
 
-    const userProfile = profilesByUserId.get(session.userId);
-    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
-    const isInterviewer = session.userId === assessment.interviewerUserId;
-    const isAdmin = session.roles.includes('platform_admin');
+  app.post(
+    '/api/v1/interviews/assessments/:id/ai-feedback',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
 
-    if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access to scorecards is restricted.');
+      const feedback = generateAdvisoryAiFeedback(assessment);
+      const list = interviewAiFeedbacksByAssessmentId.get(id) || [];
+      list.push(feedback);
+      interviewAiFeedbacksByAssessmentId.set(id, list);
+
+      return reply.status(200).send({ feedback });
     }
+  );
 
-    const cards = interviewScorecardsByAssessmentId.get(id) || [];
+  app.post(
+    '/api/v1/interviews/assessments/:id/review',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const assessment = interviewAssessmentsById.get(id);
+      if (!assessment) {
+        throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+      }
 
-    // BR-176: Candidate view strips private notes and revision details
-    if (isCandidate) {
-      const publicCards = cards.map((c) => ({
-        id: c.id,
-        assessmentId: c.assessmentId,
-        overallScore: c.overallScore,
-        strengths: c.strengths,
-        areasForImprovement: c.areasForImprovement,
-        recommendation: c.recommendation,
-        createdAt: c.createdAt,
-      }));
-      return reply.status(200).send({ scorecards: publicCards });
+      const reviewed = reviewInterviewAssessment(assessment);
+      interviewAssessmentsById.set(reviewed.id, reviewed);
+
+      auditLogs.push({
+        event: 'interview.reviewed',
+        actorId: session.userId,
+        targetId: reviewed.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ assessment: reviewed });
     }
-
-    return reply.status(200).send({ scorecards: cards });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/ai-feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    const feedback = generateAdvisoryAiFeedback(assessment);
-    const list = interviewAiFeedbacksByAssessmentId.get(id) || [];
-    list.push(feedback);
-    interviewAiFeedbacksByAssessmentId.set(id, list);
-
-    return reply.status(200).send({ feedback });
-  });
-
-  app.post('/api/v1/interviews/assessments/:id/review', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const assessment = interviewAssessmentsById.get(id);
-    if (!assessment) {
-      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
-    }
-
-    const reviewed = reviewInterviewAssessment(assessment);
-    interviewAssessmentsById.set(reviewed.id, reviewed);
-
-    auditLogs.push({
-      event: 'interview.reviewed',
-      actorId: session.userId,
-      targetId: reviewed.id,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({ assessment: reviewed });
-  });
+  );
 
   // Multi-Context Reputation Engine Endpoints (F-144, S-03, BR-247..BR-254)
   app.post('/api/v1/reputation/signals', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -2883,7 +3154,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     reputationSignalsByUserId.set(targetUserId, userSignals);
 
     // Compute updated score
-    const updatedScore = calculateReputationScore(targetUserId, signal.context, signal.domain, userSignals);
+    const updatedScore = calculateReputationScore(
+      targetUserId,
+      signal.context,
+      signal.domain,
+      userSignals
+    );
     const scoreKey = `${targetUserId}:${signal.context}:${signal.domain}`;
     reputationScoresByUserContextDomain.set(scoreKey, updatedScore);
 
@@ -2891,45 +3167,59 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       event: 'reputation.signal_added',
       actorId: session.userId,
       targetId: signal.id,
-      metadata: { targetUserId, context: signal.context, domain: signal.domain, newScore: updatedScore.score },
+      metadata: {
+        targetUserId,
+        context: signal.context,
+        domain: signal.domain,
+        newScore: updatedScore.score,
+      },
       timestamp: new Date().toISOString(),
     });
 
     return reply.status(201).send({ signal, updatedScore });
   });
 
-  app.get('/api/v1/reputation/users/:userId', async (req: FastifyRequest<{ Params: { userId: string }; Querystring: { context?: string; domain?: string } }>, reply: FastifyReply) => {
-    extractUser(req); // must be authenticated
-    const { userId } = req.params;
-    const { context, domain } = req.query;
+  app.get(
+    '/api/v1/reputation/users/:userId',
+    async (
+      req: FastifyRequest<{
+        Params: { userId: string };
+        Querystring: { context?: string; domain?: string };
+      }>,
+      reply: FastifyReply
+    ) => {
+      extractUser(req); // must be authenticated
+      const { userId } = req.params;
+      const { context, domain } = req.query;
 
-    const user = usersById.get(userId);
-    if (!user) {
-      throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
-    }
-
-    const userSignals = reputationSignalsByUserId.get(userId) || [];
-    const prefix = `${userId}:`;
-    const matchingScores: ReputationScore[] = [];
-
-    // Ensure baseline score exists if no precomputed scores
-    if (userSignals.length === 0) {
-      const baseContext = (context as ReputationContext) || 'candidate';
-      const baseDomain = (domain || 'general').toLowerCase();
-      const baseScore = calculateReputationScore(userId, baseContext, baseDomain, []);
-      return reply.status(200).send({ scores: [baseScore] });
-    }
-
-    for (const [key, score] of reputationScoresByUserContextDomain.entries()) {
-      if (key.startsWith(prefix)) {
-        if (context && score.context !== context) continue;
-        if (domain && score.domain !== domain.toLowerCase()) continue;
-        matchingScores.push(score);
+      const user = usersById.get(userId);
+      if (!user) {
+        throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
       }
-    }
 
-    return reply.status(200).send({ scores: matchingScores });
-  });
+      const userSignals = reputationSignalsByUserId.get(userId) || [];
+      const prefix = `${userId}:`;
+      const matchingScores: ReputationScore[] = [];
+
+      // Ensure baseline score exists if no precomputed scores
+      if (userSignals.length === 0) {
+        const baseContext = (context as ReputationContext) || 'candidate';
+        const baseDomain = (domain || 'general').toLowerCase();
+        const baseScore = calculateReputationScore(userId, baseContext, baseDomain, []);
+        return reply.status(200).send({ scores: [baseScore] });
+      }
+
+      for (const [key, score] of reputationScoresByUserContextDomain.entries()) {
+        if (key.startsWith(prefix)) {
+          if (context && score.context !== context) continue;
+          if (domain && score.domain !== domain.toLowerCase()) continue;
+          matchingScores.push(score);
+        }
+      }
+
+      return reply.status(200).send({ scores: matchingScores });
+    }
+  );
 
   app.get('/api/v1/reputation/my/signals', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -2968,69 +3258,87 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ plan });
   });
 
-  app.post('/api/v1/reputation/recovery/:planId/tasks/:taskId/complete', async (req: FastifyRequest<{ Params: { planId: string; taskId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { planId, taskId } = req.params;
+  app.post(
+    '/api/v1/reputation/recovery/:planId/tasks/:taskId/complete',
+    async (
+      req: FastifyRequest<{ Params: { planId: string; taskId: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { planId, taskId } = req.params;
 
-    const plan = reputationRecoveryPlansById.get(planId);
-    if (!plan) {
-      throw new DomainError('NOT_FOUND', `Recovery plan ${planId} not found.`);
-    }
-
-    if (plan.userId !== session.userId && !session.roles.includes('platform_admin')) {
-      throw new DomainError('FORBIDDEN', 'Cannot complete tasks on another user recovery plan.');
-    }
-
-    const { plan: updatedPlan, completedTask, isFullyRecovered } = completeRecoveryTask(plan, taskId);
-    reputationRecoveryPlansById.set(planId, updatedPlan);
-
-    let updatedScore: ReputationScore | undefined;
-    if (isFullyRecovered) {
-      // Offset or deactivate penalty signal to restore reputation
-      const userSignals = reputationSignalsByUserId.get(plan.userId) || [];
-      const penalty = userSignals.find((s) => s.id === plan.penaltySignalId);
-      if (penalty) {
-        penalty.isActive = false;
-        updatedScore = calculateReputationScore(plan.userId, plan.context, penalty.domain, userSignals);
-        const scoreKey = `${plan.userId}:${plan.context}:${penalty.domain}`;
-        reputationScoresByUserContextDomain.set(scoreKey, updatedScore);
+      const plan = reputationRecoveryPlansById.get(planId);
+      if (!plan) {
+        throw new DomainError('NOT_FOUND', `Recovery plan ${planId} not found.`);
       }
-    }
 
-    auditLogs.push({
-      event: 'reputation.recovery_task_completed',
-      actorId: session.userId,
-      targetId: planId,
-      metadata: { taskId, isFullyRecovered },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      plan: updatedPlan,
-      completedTask,
-      isFullyRecovered,
-      updatedScore,
-    });
-  });
-
-  app.post('/api/v1/reputation/recalculate-all', async (req: FastifyRequest, reply: FastifyReply) => {
-    let updatedCount = 0;
-    for (const [userId, signals] of reputationSignalsByUserId.entries()) {
-      const distinctContextDomains = new Set(signals.map((s) => `${s.context}:${s.domain}`));
-      for (const cd of distinctContextDomains) {
-        const [context, domain] = cd.split(':') as [ReputationContext, string];
-        const score = calculateReputationScore(userId, context, domain, signals);
-        const key = `${userId}:${context}:${domain}`;
-        reputationScoresByUserContextDomain.set(key, score);
-        updatedCount++;
+      if (plan.userId !== session.userId && !session.roles.includes('platform_admin')) {
+        throw new DomainError('FORBIDDEN', 'Cannot complete tasks on another user recovery plan.');
       }
-    }
 
-    return reply.status(200).send({
-      message: 'Reputation scores recomputed successfully.',
-      updatedCount,
-    });
-  });
+      const {
+        plan: updatedPlan,
+        completedTask,
+        isFullyRecovered,
+      } = completeRecoveryTask(plan, taskId);
+      reputationRecoveryPlansById.set(planId, updatedPlan);
+
+      let updatedScore: ReputationScore | undefined;
+      if (isFullyRecovered) {
+        // Offset or deactivate penalty signal to restore reputation
+        const userSignals = reputationSignalsByUserId.get(plan.userId) || [];
+        const penalty = userSignals.find((s) => s.id === plan.penaltySignalId);
+        if (penalty) {
+          penalty.isActive = false;
+          updatedScore = calculateReputationScore(
+            plan.userId,
+            plan.context,
+            penalty.domain,
+            userSignals
+          );
+          const scoreKey = `${plan.userId}:${plan.context}:${penalty.domain}`;
+          reputationScoresByUserContextDomain.set(scoreKey, updatedScore);
+        }
+      }
+
+      auditLogs.push({
+        event: 'reputation.recovery_task_completed',
+        actorId: session.userId,
+        targetId: planId,
+        metadata: { taskId, isFullyRecovered },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        plan: updatedPlan,
+        completedTask,
+        isFullyRecovered,
+        updatedScore,
+      });
+    }
+  );
+
+  app.post(
+    '/api/v1/reputation/recalculate-all',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      let updatedCount = 0;
+      for (const [userId, signals] of reputationSignalsByUserId.entries()) {
+        const distinctContextDomains = new Set(signals.map((s) => `${s.context}:${s.domain}`));
+        for (const cd of distinctContextDomains) {
+          const [context, domain] = cd.split(':') as [ReputationContext, string];
+          const score = calculateReputationScore(userId, context, domain, signals);
+          const key = `${userId}:${context}:${domain}`;
+          reputationScoresByUserContextDomain.set(key, score);
+          updatedCount++;
+        }
+      }
+
+      return reply.status(200).send({
+        message: 'Reputation scores recomputed successfully.',
+        updatedCount,
+      });
+    }
+  );
 
   // Instructor Reputation System (F-148, F-72, F-144)
   const instructorBreakdownsById = new Map<string, InstructorReputationProfile>();
@@ -3056,169 +3364,190 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   }
 
   // 1. Get Transparent Instructor Reputation Breakdown (F-148)
-  app.get('/api/v1/reputation/instructors/:instructorId', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
-    const { instructorId } = req.params;
-    let profile = instructorBreakdownsById.get(instructorId);
-    if (!profile) {
-      const metrics = getOrCreateInstructorMetrics(instructorId);
-      profile = calculateInstructorReputation(metrics);
-      instructorBreakdownsById.set(instructorId, profile);
-    }
+  app.get(
+    '/api/v1/reputation/instructors/:instructorId',
+    async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+      const { instructorId } = req.params;
+      let profile = instructorBreakdownsById.get(instructorId);
+      if (!profile) {
+        const metrics = getOrCreateInstructorMetrics(instructorId);
+        profile = calculateInstructorReputation(metrics);
+        instructorBreakdownsById.set(instructorId, profile);
+      }
 
-    return reply.status(200).send({
-      instructorId: profile.instructorId,
-      compositeScore: profile.compositeScore,
-      band: profile.band,
-      factors: profile.factors,
-      reviewCount: profile.reviewCount,
-      completionRate: profile.completionRate,
-      avgQaResponseHours: profile.avgQaResponseHours,
-      endorsementCount: profile.endorsementCount,
-      coursesCount: profile.coursesCount,
-      lastCalculatedAt: profile.lastCalculatedAt,
-    });
-  });
+      return reply.status(200).send({
+        instructorId: profile.instructorId,
+        compositeScore: profile.compositeScore,
+        band: profile.band,
+        factors: profile.factors,
+        reviewCount: profile.reviewCount,
+        completionRate: profile.completionRate,
+        avgQaResponseHours: profile.avgQaResponseHours,
+        endorsementCount: profile.endorsementCount,
+        coursesCount: profile.coursesCount,
+        lastCalculatedAt: profile.lastCalculatedAt,
+      });
+    }
+  );
 
   // 2. Submit Operational Telemetry / Metrics (Instructor or Admin)
-  app.post('/api/v1/reputation/instructors/:instructorId/metrics', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { instructorId } = req.params;
-    const input = SubmitInstructorMetricsInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/reputation/instructors/:instructorId/metrics',
+    async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { instructorId } = req.params;
+      const input = SubmitInstructorMetricsInputSchema.parse(req.body);
 
-    const isSelf = session.userId === instructorId;
-    const isAdmin = session.roles.includes('platform_admin');
-    if (!isSelf && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Only the instructor or platform administrator can update operational metrics.');
+      const isSelf = session.userId === instructorId;
+      const isAdmin = session.roles.includes('platform_admin');
+      if (!isSelf && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only the instructor or platform administrator can update operational metrics.'
+        );
+      }
+
+      const endorsements = instructorEndorsementsByInstructorId.get(instructorId) || [];
+      const existing = getOrCreateInstructorMetrics(instructorId);
+      const updatedMetrics: InstructorOperationalMetrics = {
+        instructorId,
+        reviews: input.reviews
+          ? input.reviews.map((r) => ({
+              id: r.id,
+              rating: r.rating,
+              isVerifiedEnrollment: r.isVerifiedEnrollment,
+              createdAt: r.createdAt || new Date().toISOString(),
+            }))
+          : existing.reviews,
+        completionRate: input.completionRate,
+        daysSinceLastCourseUpdate: input.daysSinceLastCourseUpdate,
+        avgQaResponseHours: input.avgQaResponseHours,
+        qaAnsweredRate: input.qaAnsweredRate,
+        activeCoursesCount: input.activeCoursesCount,
+        peerEndorsementCount: endorsements.length,
+      };
+
+      instructorOperationalMetricsById.set(instructorId, updatedMetrics);
+      const profile = calculateInstructorReputation(updatedMetrics);
+      instructorBreakdownsById.set(instructorId, profile);
+
+      enqueuedWorkerJobs.push({
+        type: 'instructor.reputation.updated',
+        payload: { instructorId, compositeScore: profile.compositeScore, band: profile.band },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Instructor metrics submitted and reputation profile recomputed successfully.',
+        profile,
+      });
     }
-
-    const endorsements = instructorEndorsementsByInstructorId.get(instructorId) || [];
-    const existing = getOrCreateInstructorMetrics(instructorId);
-    const updatedMetrics: InstructorOperationalMetrics = {
-      instructorId,
-      reviews: input.reviews
-        ? input.reviews.map((r) => ({
-            id: r.id,
-            rating: r.rating,
-            isVerifiedEnrollment: r.isVerifiedEnrollment,
-            createdAt: r.createdAt || new Date().toISOString(),
-          }))
-        : existing.reviews,
-      completionRate: input.completionRate,
-      daysSinceLastCourseUpdate: input.daysSinceLastCourseUpdate,
-      avgQaResponseHours: input.avgQaResponseHours,
-      qaAnsweredRate: input.qaAnsweredRate,
-      activeCoursesCount: input.activeCoursesCount,
-      peerEndorsementCount: endorsements.length,
-    };
-
-    instructorOperationalMetricsById.set(instructorId, updatedMetrics);
-    const profile = calculateInstructorReputation(updatedMetrics);
-    instructorBreakdownsById.set(instructorId, profile);
-
-    enqueuedWorkerJobs.push({
-      type: 'instructor.reputation.updated',
-      payload: { instructorId, compositeScore: profile.compositeScore, band: profile.band },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Instructor metrics submitted and reputation profile recomputed successfully.',
-      profile,
-    });
-  });
+  );
 
   // 3. Endorse an Instructor (Peer Instructor or Admin)
-  app.post('/api/v1/reputation/instructors/:instructorId/endorse', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { instructorId } = req.params;
-    const input = CreateInstructorEndorsementInputSchema.parse(req.body || {});
+  app.post(
+    '/api/v1/reputation/instructors/:instructorId/endorse',
+    async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { instructorId } = req.params;
+      const input = CreateInstructorEndorsementInputSchema.parse(req.body || {});
 
-    const endorsement = createInstructorEndorsement({
-      instructorId,
-      endorserId: session.userId,
-      endorserRoles: session.roles,
-      skillDomain: input.skillDomain,
-      notes: input.notes,
-    });
+      const endorsement = createInstructorEndorsement({
+        instructorId,
+        endorserId: session.userId,
+        endorserRoles: session.roles,
+        skillDomain: input.skillDomain,
+        notes: input.notes,
+      });
 
-    const list = instructorEndorsementsByInstructorId.get(instructorId) || [];
-    const alreadyEndorsed = list.some(
-      (e) => e.endorserId === session.userId && e.skillDomain === endorsement.skillDomain
-    );
-    if (alreadyEndorsed) {
-      throw new DomainError('CONFLICT', 'You have already endorsed this instructor for this skill domain.');
+      const list = instructorEndorsementsByInstructorId.get(instructorId) || [];
+      const alreadyEndorsed = list.some(
+        (e) => e.endorserId === session.userId && e.skillDomain === endorsement.skillDomain
+      );
+      if (alreadyEndorsed) {
+        throw new DomainError(
+          'CONFLICT',
+          'You have already endorsed this instructor for this skill domain.'
+        );
+      }
+
+      list.push(endorsement);
+      instructorEndorsementsByInstructorId.set(instructorId, list);
+
+      const metrics = getOrCreateInstructorMetrics(instructorId);
+      metrics.peerEndorsementCount = list.length;
+      const profile = calculateInstructorReputation(metrics);
+      instructorBreakdownsById.set(instructorId, profile);
+
+      auditLogs.push({
+        event: 'instructor.endorsed',
+        actorId: session.userId,
+        targetId: instructorId,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Instructor endorsed successfully.',
+        endorsement,
+        profile,
+      });
     }
-
-    list.push(endorsement);
-    instructorEndorsementsByInstructorId.set(instructorId, list);
-
-    const metrics = getOrCreateInstructorMetrics(instructorId);
-    metrics.peerEndorsementCount = list.length;
-    const profile = calculateInstructorReputation(metrics);
-    instructorBreakdownsById.set(instructorId, profile);
-
-    auditLogs.push({
-      event: 'instructor.endorsed',
-      actorId: session.userId,
-      targetId: instructorId,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(201).send({
-      message: 'Instructor endorsed successfully.',
-      endorsement,
-      profile,
-    });
-  });
+  );
 
   // 4. Submit Student Review with Anti-Manipulation Outlier Trimming
-  app.post('/api/v1/reputation/instructors/:instructorId/reviews', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { instructorId } = req.params;
-    const input = SubmitInstructorReviewInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/reputation/instructors/:instructorId/reviews',
+    async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { instructorId } = req.params;
+      const input = SubmitInstructorReviewInputSchema.parse(req.body);
 
-    if (session.userId === instructorId) {
-      throw new DomainError('FORBIDDEN', 'Instructors cannot review themselves.');
+      if (session.userId === instructorId) {
+        throw new DomainError('FORBIDDEN', 'Instructors cannot review themselves.');
+      }
+
+      const metrics = getOrCreateInstructorMetrics(instructorId);
+      metrics.reviews.push({
+        id: crypto.randomUUID(),
+        rating: input.rating,
+        isVerifiedEnrollment: input.isVerifiedEnrollment,
+        createdAt: new Date().toISOString(),
+      });
+
+      const profile = calculateInstructorReputation(metrics);
+      instructorBreakdownsById.set(instructorId, profile);
+
+      return reply.status(201).send({
+        message: 'Review recorded and reputation recalculated.',
+        factorBreakdown: profile.factors,
+        compositeScore: profile.compositeScore,
+        band: profile.band,
+      });
     }
-
-    const metrics = getOrCreateInstructorMetrics(instructorId);
-    metrics.reviews.push({
-      id: crypto.randomUUID(),
-      rating: input.rating,
-      isVerifiedEnrollment: input.isVerifiedEnrollment,
-      createdAt: new Date().toISOString(),
-    });
-
-    const profile = calculateInstructorReputation(metrics);
-    instructorBreakdownsById.set(instructorId, profile);
-
-    return reply.status(201).send({
-      message: 'Review recorded and reputation recalculated.',
-      factorBreakdown: profile.factors,
-      compositeScore: profile.compositeScore,
-      band: profile.band,
-    });
-  });
+  );
 
   // 5. Nightly Batch Recalculation (SSOT F-148 Acceptance)
-  app.post('/api/v1/reputation/instructors/recompute', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.post(
+    '/api/v1/reputation/instructors/recompute',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    let recomputedCount = 0;
-    for (const [instId, metrics] of instructorOperationalMetricsById.entries()) {
-      const endorsements = instructorEndorsementsByInstructorId.get(instId) || [];
-      metrics.peerEndorsementCount = endorsements.length;
-      const profile = calculateInstructorReputation(metrics);
-      instructorBreakdownsById.set(instId, profile);
-      recomputedCount++;
+      let recomputedCount = 0;
+      for (const [instId, metrics] of instructorOperationalMetricsById.entries()) {
+        const endorsements = instructorEndorsementsByInstructorId.get(instId) || [];
+        metrics.peerEndorsementCount = endorsements.length;
+        const profile = calculateInstructorReputation(metrics);
+        instructorBreakdownsById.set(instId, profile);
+        recomputedCount++;
+      }
+
+      return reply.status(200).send({
+        message: 'Nightly instructor reputation batch recomputed successfully.',
+        recomputedCount,
+      });
     }
-
-    return reply.status(200).send({
-      message: 'Nightly instructor reputation batch recomputed successfully.',
-      recomputedCount,
-    });
-  });
+  );
 
   // =========================================================================
   // Employer Reputation & Brand System Repositories & Endpoints (F-149, F-75, F-56, F-144)
@@ -3229,155 +3558,175 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const employerMetricsByOrgId = new Map<string, EmployerOperationalMetrics>();
 
   // 1. Get Employer Reputation Profile & Factor Breakdown
-  app.get('/api/v1/reputation/organizations/:organizationId', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
-    const { organizationId } = req.params;
+  app.get(
+    '/api/v1/reputation/organizations/:organizationId',
+    async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+      const { organizationId } = req.params;
 
-    const org = organizationsById.get(organizationId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      const org = organizationsById.get(organizationId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      }
+
+      let profile = employerReputationProfilesById.get(organizationId);
+      if (!profile) {
+        const reviews = employerReviewsByOrgId.get(organizationId) || [];
+        const metrics = employerMetricsByOrgId.get(organizationId) || {};
+        profile = calculateEmployerReputation({ organizationId, reviews, metrics });
+        employerReputationProfilesById.set(organizationId, profile);
+      }
+
+      return reply.status(200).send({ profile });
     }
-
-    let profile = employerReputationProfilesById.get(organizationId);
-    if (!profile) {
-      const reviews = employerReviewsByOrgId.get(organizationId) || [];
-      const metrics = employerMetricsByOrgId.get(organizationId) || {};
-      profile = calculateEmployerReputation({ organizationId, reviews, metrics });
-      employerReputationProfilesById.set(organizationId, profile);
-    }
-
-    return reply.status(200).send({ profile });
-  });
+  );
 
   // 2. Submit Employer Review
-  app.post('/api/v1/reputation/organizations/:organizationId/reviews', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { organizationId } = req.params;
+  app.post(
+    '/api/v1/reputation/organizations/:organizationId/reviews',
+    async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { organizationId } = req.params;
 
-    const org = organizationsById.get(organizationId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
-    }
+      const org = organizationsById.get(organizationId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      }
 
-    const input = SubmitEmployerReviewInputSchema.parse(req.body);
+      const input = SubmitEmployerReviewInputSchema.parse(req.body);
 
-    const reviews = employerReviewsByOrgId.get(organizationId) || [];
-    const existing = reviews.find((r) => r.reviewerId === session.userId);
-    if (existing) {
-      throw new DomainError('CONFLICT', 'You have already submitted a review for this employer.');
-    }
+      const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const existing = reviews.find((r) => r.reviewerId === session.userId);
+      if (existing) {
+        throw new DomainError('CONFLICT', 'You have already submitted a review for this employer.');
+      }
 
-    const memberships = orgMembershipsByOrgId.get(organizationId) || [];
-    const userMembership = memberships.find((m) => m.userId === session.userId);
-    const isOwnerOrRecruiter = userMembership?.role === 'owner' || userMembership?.role === 'admin';
-    const isVerifiedEmployee = input.isVerifiedEmployee || !!userMembership;
+      const memberships = orgMembershipsByOrgId.get(organizationId) || [];
+      const userMembership = memberships.find((m) => m.userId === session.userId);
+      const isOwnerOrRecruiter =
+        userMembership?.role === 'owner' || userMembership?.role === 'admin';
+      const isVerifiedEmployee = input.isVerifiedEmployee || !!userMembership;
 
-    const review = createEmployerReview({
-      organizationId,
-      reviewerId: session.userId,
-      employmentStatus: input.employmentStatus,
-      hiringRating: input.hiringRating,
-      cultureRating: input.cultureRating,
-      growthRating: input.growthRating,
-      compensationRating: input.compensationRating,
-      leadershipRating: input.leadershipRating,
-      title: input.title,
-      feedback: input.feedback,
-      isVerifiedEmployee,
-      isOrgRecruiterOrOwner: isOwnerOrRecruiter && input.employmentStatus === 'candidate',
-    });
-
-    employerReviewsById.set(review.id, review);
-    reviews.unshift(review);
-    employerReviewsByOrgId.set(organizationId, reviews);
-
-    const metrics = employerMetricsByOrgId.get(organizationId) || {};
-    const profile = calculateEmployerReputation({ organizationId, reviews, metrics });
-    employerReputationProfilesById.set(organizationId, profile);
-
-    // Sync to multi-context reputation engine (F-144)
-    reputationScoresByUserContextDomain.set(`${organizationId}:employer:general`, {
-      id: crypto.randomUUID(),
-      userId: organizationId,
-      context: 'employer',
-      domain: 'general',
-      score: profile.overallScore,
-      band: determineReputationBand(profile.overallScore),
-      confidenceScore: Math.min(1.0, 0.5 + reviews.length * 0.05),
-      signalCount: reviews.length,
-      lastCalculatedAt: profile.updatedAt,
-      createdAt: profile.updatedAt,
-      updatedAt: profile.updatedAt,
-    });
-
-    enqueuedWorkerJobs.push({
-      type: 'employer.reputation.updated',
-      payload: {
+      const review = createEmployerReview({
         organizationId,
-        reviewId: review.id,
-        overallScore: profile.overallScore,
-        band: profile.reputationBand,
-      },
-      enqueuedAt: review.createdAt,
-    });
+        reviewerId: session.userId,
+        employmentStatus: input.employmentStatus,
+        hiringRating: input.hiringRating,
+        cultureRating: input.cultureRating,
+        growthRating: input.growthRating,
+        compensationRating: input.compensationRating,
+        leadershipRating: input.leadershipRating,
+        title: input.title,
+        feedback: input.feedback,
+        isVerifiedEmployee,
+        isOrgRecruiterOrOwner: isOwnerOrRecruiter && input.employmentStatus === 'candidate',
+      });
 
-    return reply.status(201).send({
-      message: 'Employer review submitted and reputation recalculated.',
-      review,
-      profile,
-    });
-  });
+      employerReviewsById.set(review.id, review);
+      reviews.unshift(review);
+      employerReviewsByOrgId.set(organizationId, reviews);
+
+      const metrics = employerMetricsByOrgId.get(organizationId) || {};
+      const profile = calculateEmployerReputation({ organizationId, reviews, metrics });
+      employerReputationProfilesById.set(organizationId, profile);
+
+      // Sync to multi-context reputation engine (F-144)
+      reputationScoresByUserContextDomain.set(`${organizationId}:employer:general`, {
+        id: crypto.randomUUID(),
+        userId: organizationId,
+        context: 'employer',
+        domain: 'general',
+        score: profile.overallScore,
+        band: determineReputationBand(profile.overallScore),
+        confidenceScore: Math.min(1.0, 0.5 + reviews.length * 0.05),
+        signalCount: reviews.length,
+        lastCalculatedAt: profile.updatedAt,
+        createdAt: profile.updatedAt,
+        updatedAt: profile.updatedAt,
+      });
+
+      enqueuedWorkerJobs.push({
+        type: 'employer.reputation.updated',
+        payload: {
+          organizationId,
+          reviewId: review.id,
+          overallScore: profile.overallScore,
+          band: profile.reputationBand,
+        },
+        enqueuedAt: review.createdAt,
+      });
+
+      return reply.status(201).send({
+        message: 'Employer review submitted and reputation recalculated.',
+        review,
+        profile,
+      });
+    }
+  );
 
   // 3. Submit Operational Metrics for Employer
-  app.post('/api/v1/reputation/organizations/:organizationId/metrics', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { organizationId } = req.params;
+  app.post(
+    '/api/v1/reputation/organizations/:organizationId/metrics',
+    async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { organizationId } = req.params;
 
-    const org = organizationsById.get(organizationId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      const org = organizationsById.get(organizationId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      }
+
+      const memberships = orgMembershipsByOrgId.get(organizationId) || [];
+      const isMember = memberships.some((m) => m.userId === session.userId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Access denied to submit operational metrics for this employer.'
+        );
+      }
+
+      const input = SubmitEmployerMetricsInputSchema.parse(req.body);
+      const currentMetrics = employerMetricsByOrgId.get(organizationId) || {};
+      const updatedMetrics: EmployerOperationalMetrics = {
+        ...currentMetrics,
+        ...input,
+      };
+      employerMetricsByOrgId.set(organizationId, updatedMetrics);
+
+      const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const profile = calculateEmployerReputation({
+        organizationId,
+        reviews,
+        metrics: updatedMetrics,
+      });
+      employerReputationProfilesById.set(organizationId, profile);
+
+      return reply.status(200).send({
+        message: 'Employer operational metrics updated and reputation recalculated.',
+        profile,
+      });
     }
-
-    const memberships = orgMembershipsByOrgId.get(organizationId) || [];
-    const isMember = memberships.some((m) => m.userId === session.userId);
-    const isPlatformAdmin = session.roles.includes('platform_admin');
-    if (!isMember && !isPlatformAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access denied to submit operational metrics for this employer.');
-    }
-
-    const input = SubmitEmployerMetricsInputSchema.parse(req.body);
-    const currentMetrics = employerMetricsByOrgId.get(organizationId) || {};
-    const updatedMetrics: EmployerOperationalMetrics = {
-      ...currentMetrics,
-      ...input,
-    };
-    employerMetricsByOrgId.set(organizationId, updatedMetrics);
-
-    const reviews = employerReviewsByOrgId.get(organizationId) || [];
-    const profile = calculateEmployerReputation({ organizationId, reviews, metrics: updatedMetrics });
-    employerReputationProfilesById.set(organizationId, profile);
-
-    return reply.status(200).send({
-      message: 'Employer operational metrics updated and reputation recalculated.',
-      profile,
-    });
-  });
+  );
 
   // 4. List Reviews for Employer
-  app.get('/api/v1/reputation/organizations/:organizationId/reviews', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
-    const { organizationId } = req.params;
+  app.get(
+    '/api/v1/reputation/organizations/:organizationId/reviews',
+    async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+      const { organizationId } = req.params;
 
-    const org = organizationsById.get(organizationId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      const org = organizationsById.get(organizationId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+      }
+
+      const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      return reply.status(200).send({
+        organizationId,
+        reviews,
+        total: reviews.length,
+      });
     }
-
-    const reviews = employerReviewsByOrgId.get(organizationId) || [];
-    return reply.status(200).send({
-      organizationId,
-      reviews,
-      total: reviews.length,
-    });
-  });
+  );
 
   // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)
   const challengesById = new Map<string, Challenge>();
@@ -3394,7 +3743,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     difficulty: 'easy',
     category: 'Strings',
     testCases: [
-      { id: 'tc1', input: '"the sky is blue"', expectedOutput: '"blue is sky the"', isHidden: false },
+      {
+        id: 'tc1',
+        input: '"the sky is blue"',
+        expectedOutput: '"blue is sky the"',
+        isHidden: false,
+      },
       { id: 'tc2', input: '"  hello world  "', expectedOutput: '"world hello"', isHidden: true },
     ],
     actor: { userId: '00000000-0000-0000-0000-000000000000', roles: ['platform_admin'] },
@@ -3408,14 +3762,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return { challenges: list };
   });
 
-  app.get('/api/v1/challenges/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const challenge = challengesById.get(id);
-    if (!challenge) {
-      throw new DomainError('NOT_FOUND', `Challenge with ID ${id} not found.`);
+  app.get(
+    '/api/v1/challenges/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const challenge = challengesById.get(id);
+      if (!challenge) {
+        throw new DomainError('NOT_FOUND', `Challenge with ID ${id} not found.`);
+      }
+      return reply.status(200).send({ challenge: filterChallengeForCandidate(challenge) });
     }
-    return reply.status(200).send({ challenge: filterChallengeForCandidate(challenge) });
-  });
+  );
 
   app.post('/api/v1/challenges', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -3449,118 +3806,127 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // Assessment Session & Submission Endpoints
-  app.post('/api/v1/challenges/:id/start-session', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: challengeId } = req.params;
+  app.post(
+    '/api/v1/challenges/:id/start-session',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: challengeId } = req.params;
 
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile required before starting assessment.');
-    }
-
-    const challenge = challengesById.get(challengeId);
-    if (!challenge) {
-      throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
-    }
-
-    const assessmentSession = startAssessmentSession({
-      candidateProfileId: profile.id,
-      challenge,
-    });
-
-    assessmentSessionsById.set(assessmentSession.id, assessmentSession);
-    const list = assessmentSessionsByCandidateId.get(profile.id) || [];
-    list.push(assessmentSession);
-    assessmentSessionsByCandidateId.set(profile.id, list);
-
-    return reply.status(201).send({ session: assessmentSession });
-  });
-
-  app.post('/api/v1/challenges/:id/submit', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: challengeId } = req.params;
-    const input = SubmitChallengeSolutionInputSchema.parse(req.body);
-
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile required.');
-    }
-
-    const challenge = challengesById.get(challengeId);
-    if (!challenge) {
-      throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
-    }
-
-    let activeSession: AssessmentSession | undefined;
-    if (input.sessionId) {
-      activeSession = assessmentSessionsById.get(input.sessionId);
-    } else {
-      const candidateSessions = assessmentSessionsByCandidateId.get(profile.id) || [];
-      activeSession = candidateSessions.find(
-        (s) => s.assessmentId === challengeId && s.status === 'in_progress'
-      );
-    }
-
-    const evalResult = evaluateChallengeSubmission({
-      challenge,
-      candidateProfileId: profile.id,
-      language: input.language,
-      code: input.code,
-      session: activeSession,
-    });
-
-    let awardedXp = 0;
-    if (evalResult.status === 'passed') {
-      // 1. Store auto-minted verified evidence
-      if (evalResult.evidence) {
-        evidenceById.set(evalResult.evidence.id, evalResult.evidence);
-        const evList = evidenceBySubjectId.get(profile.id) || [];
-        evList.push(evalResult.evidence);
-        evidenceBySubjectId.set(profile.id, evList);
-
-        enqueuedWorkerJobs.push({
-          type: 'evidence.propagate',
-          payload: {
-            evidenceId: evalResult.evidence.id,
-            status: evalResult.evidence.status,
-            level: evalResult.evidence.verificationLevel,
-          },
-          enqueuedAt: new Date().toISOString(),
-        });
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError(
+          'NOT_FOUND',
+          'Candidate profile required before starting assessment.'
+        );
       }
 
-      // 2. Calculate and award XP with 200 XP/day cap (BR-25)
-      const userTxs = xpTransactionsByUserId.get(session.userId) || [];
-      awardedXp = calculateCappedXp(evalResult.xpEarned, userTxs, 200);
-
-      if (awardedXp > 0) {
-        const tx: XpTransaction = {
-          id: crypto.randomUUID(),
-          userId: session.userId,
-          amount: awardedXp,
-          referenceType: 'challenge',
-          referenceId: challenge.id,
-          description: `Passed challenge "${challenge.title}"`,
-          createdAt: new Date().toISOString(),
-        };
-        userTxs.push(tx);
-        xpTransactionsByUserId.set(session.userId, userTxs);
+      const challenge = challengesById.get(challengeId);
+      if (!challenge) {
+        throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
       }
-    }
 
-    // Close session if active
-    if (activeSession && activeSession.status === 'in_progress') {
-      activeSession.status = 'submitted';
-      activeSession.submittedAt = new Date().toISOString();
-      activeSession.endTime = new Date().toISOString();
-    }
+      const assessmentSession = startAssessmentSession({
+        candidateProfileId: profile.id,
+        challenge,
+      });
 
-    return reply.status(200).send({
-      result: evalResult,
-      evidence: evalResult.evidence,
-      xpEarned: awardedXp,
-    });
-  });
+      assessmentSessionsById.set(assessmentSession.id, assessmentSession);
+      const list = assessmentSessionsByCandidateId.get(profile.id) || [];
+      list.push(assessmentSession);
+      assessmentSessionsByCandidateId.set(profile.id, list);
+
+      return reply.status(201).send({ session: assessmentSession });
+    }
+  );
+
+  app.post(
+    '/api/v1/challenges/:id/submit',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: challengeId } = req.params;
+      const input = SubmitChallengeSolutionInputSchema.parse(req.body);
+
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile required.');
+      }
+
+      const challenge = challengesById.get(challengeId);
+      if (!challenge) {
+        throw new DomainError('NOT_FOUND', `Challenge with ID ${challengeId} not found.`);
+      }
+
+      let activeSession: AssessmentSession | undefined;
+      if (input.sessionId) {
+        activeSession = assessmentSessionsById.get(input.sessionId);
+      } else {
+        const candidateSessions = assessmentSessionsByCandidateId.get(profile.id) || [];
+        activeSession = candidateSessions.find(
+          (s) => s.assessmentId === challengeId && s.status === 'in_progress'
+        );
+      }
+
+      const evalResult = evaluateChallengeSubmission({
+        challenge,
+        candidateProfileId: profile.id,
+        language: input.language,
+        code: input.code,
+        session: activeSession,
+      });
+
+      let awardedXp = 0;
+      if (evalResult.status === 'passed') {
+        // 1. Store auto-minted verified evidence
+        if (evalResult.evidence) {
+          evidenceById.set(evalResult.evidence.id, evalResult.evidence);
+          const evList = evidenceBySubjectId.get(profile.id) || [];
+          evList.push(evalResult.evidence);
+          evidenceBySubjectId.set(profile.id, evList);
+
+          enqueuedWorkerJobs.push({
+            type: 'evidence.propagate',
+            payload: {
+              evidenceId: evalResult.evidence.id,
+              status: evalResult.evidence.status,
+              level: evalResult.evidence.verificationLevel,
+            },
+            enqueuedAt: new Date().toISOString(),
+          });
+        }
+
+        // 2. Calculate and award XP with 200 XP/day cap (BR-25)
+        const userTxs = xpTransactionsByUserId.get(session.userId) || [];
+        awardedXp = calculateCappedXp(evalResult.xpEarned, userTxs, 200);
+
+        if (awardedXp > 0) {
+          const tx: XpTransaction = {
+            id: crypto.randomUUID(),
+            userId: session.userId,
+            amount: awardedXp,
+            referenceType: 'challenge',
+            referenceId: challenge.id,
+            description: `Passed challenge "${challenge.title}"`,
+            createdAt: new Date().toISOString(),
+          };
+          userTxs.push(tx);
+          xpTransactionsByUserId.set(session.userId, userTxs);
+        }
+      }
+
+      // Close session if active
+      if (activeSession && activeSession.status === 'in_progress') {
+        activeSession.status = 'submitted';
+        activeSession.submittedAt = new Date().toISOString();
+        activeSession.endTime = new Date().toISOString();
+      }
+
+      return reply.status(200).send({
+        result: evalResult,
+        evidence: evalResult.evidence,
+        xpEarned: awardedXp,
+      });
+    }
+  );
 
   // AI Assistant & Gateway Entry Point (SSOT Section D: Strict AI_PROHIBITED Enforcement)
   app.post('/api/v1/ai/assistant/query', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -3618,7 +3984,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     instructorId: '00000000-0000-0000-0000-000000000000',
     title: 'TypeScript Full-Stack Architecture',
     slug: 'typescript-fullstack-architecture',
-    description: 'Master enterprise TypeScript, Fastify modular architecture, and schema migrations.',
+    description:
+      'Master enterprise TypeScript, Fastify modular architecture, and schema migrations.',
     status: 'published',
     level: 'intermediate',
     estimatedDurationMinutes: 60,
@@ -3693,32 +4060,37 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   lessonsById.set(seedLesson3.id, seedLesson3);
 
   // LMS Endpoints (F-07)
-  app.get('/api/v1/courses', async (req: FastifyRequest<{ Querystring: { search?: string; level?: string } }>) => {
-    const { search, level } = req.query;
-    let list = Array.from(coursesById.values()).filter((c) => c.status === 'published');
+  app.get(
+    '/api/v1/courses',
+    async (req: FastifyRequest<{ Querystring: { search?: string; level?: string } }>) => {
+      const { search, level } = req.query;
+      let list = Array.from(coursesById.values()).filter((c) => c.status === 'published');
 
-    if (level) {
-      list = list.filter((c) => c.level === level);
+      if (level) {
+        list = list.filter((c) => c.level === level);
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        list = list.filter(
+          (c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+        );
+      }
+
+      const coursesWithSummary = list.map((c) => {
+        const modules = Array.from(courseModulesById.values()).filter((m) => m.courseId === c.id);
+        const moduleIds = new Set(modules.map((m) => m.id));
+        const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
+        return {
+          ...c,
+          moduleCount: modules.length,
+          lessonCount: lessons.length,
+          skillIds: courseSkillsByCourseId.get(c.id) || [],
+        };
+      });
+
+      return { courses: coursesWithSummary };
     }
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter((c) => c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
-    }
-
-    const coursesWithSummary = list.map((c) => {
-      const modules = Array.from(courseModulesById.values()).filter((m) => m.courseId === c.id);
-      const moduleIds = new Set(modules.map((m) => m.id));
-      const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
-      return {
-        ...c,
-        moduleCount: modules.length,
-        lessonCount: lessons.length,
-        skillIds: courseSkillsByCourseId.get(c.id) || [],
-      };
-    });
-
-    return { courses: coursesWithSummary };
-  });
+  );
 
   app.post('/api/v1/courses', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -3758,434 +4130,506 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ course });
   });
 
-  app.get('/api/v1/courses/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const course = coursesById.get(id) || coursesBySlug.get(id);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', `Course with ID or slug "${id}" not found.`);
-    }
-
-    const modules = Array.from(courseModulesById.values())
-      .filter((m) => m.courseId === course.id)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
-
-    const modulesWithLessons = modules.map((m) => {
-      const lessons = Array.from(lessonsById.values())
-        .filter((l) => l.moduleId === m.id)
-        .sort((a, b) => a.orderIndex - b.orderIndex);
-      return {
-        ...m,
-        lessons,
-      };
-    });
-
-    return reply.status(200).send({
-      course: {
-        ...course,
-        modules: modulesWithLessons,
-        skillIds: courseSkillsByCourseId.get(course.id) || [],
-      },
-    });
-  });
-
-  app.post('/api/v1/courses/:id/modules', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const course = coursesById.get(id);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
-    }
-
-    const profile = profilesByUserId.get(session.userId);
-    if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
-      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can add modules.');
-    }
-
-    const input = CreateCourseModuleInputSchema.parse(req.body);
-    const existing = Array.from(courseModulesById.values()).find(
-      (m) => m.courseId === course.id && m.orderIndex === input.orderIndex
-    );
-    if (existing) {
-      throw new DomainError('CONFLICT', `Module with orderIndex ${input.orderIndex} already exists in this course.`);
-    }
-
-    const now = new Date().toISOString();
-    const module: CourseModule = {
-      id: crypto.randomUUID(),
-      courseId: course.id,
-      title: input.title,
-      description: input.description,
-      orderIndex: input.orderIndex,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    courseModulesById.set(module.id, module);
-    return reply.status(201).send({ module });
-  });
-
-  app.post('/api/v1/modules/:id/lessons', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const module = courseModulesById.get(id);
-    if (!module) {
-      throw new DomainError('NOT_FOUND', `Module with ID "${id}" not found.`);
-    }
-
-    const course = coursesById.get(module.courseId);
-    const profile = profilesByUserId.get(session.userId);
-    if (course?.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
-      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can add lessons.');
-    }
-
-    const input = CreateLessonInputSchema.parse(req.body);
-    if (input.prerequisiteLessonId && !lessonsById.has(input.prerequisiteLessonId)) {
-      throw new DomainError('NOT_FOUND', `Prerequisite lesson with ID "${input.prerequisiteLessonId}" not found.`);
-    }
-
-    const existing = Array.from(lessonsById.values()).find(
-      (l) => l.moduleId === module.id && l.orderIndex === input.orderIndex
-    );
-    if (existing) {
-      throw new DomainError('CONFLICT', `Lesson with orderIndex ${input.orderIndex} already exists in this module.`);
-    }
-
-    const now = new Date().toISOString();
-    const lesson: Lesson = {
-      id: crypto.randomUUID(),
-      moduleId: module.id,
-      title: input.title,
-      contentType: input.contentType,
-      contentBody: input.contentBody,
-      durationMinutes: input.durationMinutes,
-      orderIndex: input.orderIndex,
-      prerequisiteLessonId: input.prerequisiteLessonId || null,
-      isFreePreview: input.isFreePreview,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    lessonsById.set(lesson.id, lesson);
-    return reply.status(201).send({ lesson });
-  });
-
-  app.post('/api/v1/courses/:id/publish', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const course = coursesById.get(id);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
-    }
-
-    const profile = profilesByUserId.get(session.userId);
-    if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
-      throw new DomainError('FORBIDDEN', 'Only the course instructor or platform admin can publish this course.');
-    }
-
-    const modules = Array.from(courseModulesById.values()).filter((m) => m.courseId === course.id);
-    const moduleIds = new Set(modules.map((m) => m.id));
-    const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
-
-    const readiness = validateCoursePublishReadiness(course, modules, lessons);
-    if (!readiness.valid) {
-      throw new DomainError('VALIDATION_FAILED', `Course publish requirements not met: ${readiness.errors.join('; ')}`);
-    }
-
-    course.status = 'published';
-    course.updatedAt = new Date().toISOString();
-
-    return reply.status(200).send({
-      message: 'Course published successfully',
-      course,
-    });
-  });
-
-  app.post('/api/v1/courses/:id/enroll', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const course = coursesById.get(id);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
-    }
-
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
-    }
-
-    const existingEnrollments = Array.from(enrollmentsById.values());
-    const enrollment = enrollUserInCourse(existingEnrollments, profile.id, course);
-
-    enrollmentsById.set(enrollment.id, enrollment);
-    enrollmentsByUserAndCourse.set(`${profile.id}:${course.id}`, enrollment);
-
-    return reply.status(201).send({
-      message: 'Enrolled successfully',
-      enrollment,
-    });
-  });
-
-  app.get('/api/v1/courses/:id/progress', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const course = coursesById.get(id);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
-    }
-
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
-    }
-
-    const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
-    if (!enrollment) {
-      return reply.status(200).send({ enrolled: false });
-    }
-
-    const completedProgress = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
-      (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
-    );
-    const completedLessonIds = completedProgress.map((p) => p.lessonId);
-    const certificate = certificatesByEnrollmentId.get(enrollment.id);
-
-    return reply.status(200).send({
-      enrolled: true,
-      enrollment,
-      completedLessonIds,
-      certificate,
-    });
-  });
-
-  app.post('/api/v1/lessons/:id/complete', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const lesson = lessonsById.get(id);
-    if (!lesson) {
-      throw new DomainError('NOT_FOUND', `Lesson with ID "${id}" not found.`);
-    }
-
-    const module = courseModulesById.get(lesson.moduleId);
-    if (!module) {
-      throw new DomainError('NOT_FOUND', 'Module for lesson not found.');
-    }
-
-    const course = coursesById.get(module.courseId);
-    if (!course) {
-      throw new DomainError('NOT_FOUND', 'Course for lesson not found.');
-    }
-
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
-    }
-
-    const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
-    if (!enrollment || enrollment.status === 'dropped' || enrollment.status === 'expired') {
-      throw new DomainError('FORBIDDEN', 'You must be actively enrolled in the course to complete lessons.');
-    }
-
-    const progressKey = `${enrollment.id}:${lesson.id}`;
-    // BR-21: Idempotent lesson completion
-    if (lessonProgressByEnrollmentAndLesson.has(progressKey)) {
-      return reply.status(200).send({
-        message: 'Lesson already completed',
-        progressPercent: enrollment.progressPercent,
-        alreadyCompleted: true,
-      });
-    }
-
-    // Retrieve all modules and lessons for this course to evaluate prerequisites and sequential modules
-    const courseModules = Array.from(courseModulesById.values()).filter((m) => m.courseId === course.id);
-    const courseModuleIds = new Set(courseModules.map((m) => m.id));
-    const courseLessons = Array.from(lessonsById.values()).filter((l) => courseModuleIds.has(l.moduleId));
-
-    const completedProgressList = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
-      (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
-    );
-    const completedLessonIds = new Set<string>(completedProgressList.map((p) => p.lessonId));
-
-    // BR-47: Sequential module progress
-    verifySequentialModuleProgress(courseModules, courseLessons, completedLessonIds, lesson);
-
-    // BR-22: Direct prerequisite check
-    verifyLessonPrerequisites(lesson, completedLessonIds);
-
-    // Record lesson progress
-    const now = new Date().toISOString();
-    const progress: LessonProgress = {
-      id: crypto.randomUUID(),
-      enrollmentId: enrollment.id,
-      lessonId: lesson.id,
-      status: 'completed',
-      completedAt: now,
-    };
-    lessonProgressByEnrollmentAndLesson.set(progressKey, progress);
-    completedLessonIds.add(lesson.id);
-
-    // Calculate new progress percentage
-    const newProgressPercent = calculateCourseProgress(courseLessons.length, completedLessonIds.size);
-    enrollment.progressPercent = newProgressPercent;
-    enrollment.updatedAt = now;
-
-    let certificate: CourseCertificate | undefined;
-    let awardedXp = 0;
-
-    // Check course completion (BR-23, BR-48)
-    const isCompleted = completedLessonIds.size === courseLessons.length;
-    if (isCompleted && enrollment.status !== 'completed') {
-      enrollment.status = 'completed';
-      enrollment.completedAt = now;
-
-      // Auto-mint verified Evidence in the Talent Graph (BR-23)
-      const evidence = createEvidence({
-        subjectId: profile.id,
-        type: 'course_completion',
-        title: `Course Certificate: ${course.title}`,
-        description: `Successfully completed all modules and lessons in "${course.title}".`,
-        source: 'TalentSphere LMS',
-        provenance: `course:${course.id}`,
-        recencyDate: now.split('T')[0],
-      });
-      // Authority level for platform LMS completion
-      evidence.status = 'verified';
-      evidence.verificationLevel = 'authority_verified';
-
-      evidenceById.set(evidence.id, evidence);
-      const evList = evidenceBySubjectId.get(profile.id) || [];
-      evList.push(evidence);
-      evidenceBySubjectId.set(profile.id, evList);
-
-      enqueuedWorkerJobs.push({
-        type: 'evidence.propagate',
-        payload: {
-          evidenceId: evidence.id,
-          status: evidence.status,
-          level: evidence.verificationLevel,
-        },
-        enqueuedAt: now,
-      });
-
-      // Mint zero-PII certificate (BR-150)
-      certificate = mintCourseCertificate(enrollment.id, profile.id, course, evidence.id);
-      certificatesByNumber.set(certificate.certificateNumber, certificate);
-      certificatesByEnrollmentId.set(enrollment.id, certificate);
-      certificatesByProofHash.set(certificate.verificationProofHash, certificate);
-
-      // Award XP bonus capped by 200 XP/day (BR-25)
-      const userTxs = xpTransactionsByUserId.get(session.userId) || [];
-      awardedXp = calculateCappedXp(course.xpReward, userTxs, 200);
-
-      if (awardedXp > 0) {
-        const tx: XpTransaction = {
-          id: crypto.randomUUID(),
-          userId: session.userId,
-          amount: awardedXp,
-          referenceType: 'course',
-          referenceId: course.id,
-          description: `Completed course "${course.title}"`,
-          createdAt: now,
-        };
-        userTxs.push(tx);
-        xpTransactionsByUserId.set(session.userId, userTxs);
+  app.get(
+    '/api/v1/courses/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const course = coursesById.get(id) || coursesBySlug.get(id);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID or slug "${id}" not found.`);
       }
 
-      enqueuedWorkerJobs.push({
-        type: 'lms.course.completed',
-        payload: {
-          courseId: course.id,
-          userId: profile.id,
-          certificateNumber: certificate.certificateNumber,
+      const modules = Array.from(courseModulesById.values())
+        .filter((m) => m.courseId === course.id)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+
+      const modulesWithLessons = modules.map((m) => {
+        const lessons = Array.from(lessonsById.values())
+          .filter((l) => l.moduleId === m.id)
+          .sort((a, b) => a.orderIndex - b.orderIndex);
+        return {
+          ...m,
+          lessons,
+        };
+      });
+
+      return reply.status(200).send({
+        course: {
+          ...course,
+          modules: modulesWithLessons,
+          skillIds: courseSkillsByCourseId.get(course.id) || [],
         },
-        enqueuedAt: now,
       });
     }
+  );
 
-    return reply.status(200).send({
-      progress: enrollment.progressPercent,
-      completed: enrollment.status === 'completed',
-      certificate,
-      xpAwarded: awardedXp,
-    });
-  });
+  app.post(
+    '/api/v1/courses/:id/modules',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const course = coursesById.get(id);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+      }
+
+      const profile = profilesByUserId.get(session.userId);
+      if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only the course instructor or platform admin can add modules.'
+        );
+      }
+
+      const input = CreateCourseModuleInputSchema.parse(req.body);
+      const existing = Array.from(courseModulesById.values()).find(
+        (m) => m.courseId === course.id && m.orderIndex === input.orderIndex
+      );
+      if (existing) {
+        throw new DomainError(
+          'CONFLICT',
+          `Module with orderIndex ${input.orderIndex} already exists in this course.`
+        );
+      }
+
+      const now = new Date().toISOString();
+      const module: CourseModule = {
+        id: crypto.randomUUID(),
+        courseId: course.id,
+        title: input.title,
+        description: input.description,
+        orderIndex: input.orderIndex,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      courseModulesById.set(module.id, module);
+      return reply.status(201).send({ module });
+    }
+  );
+
+  app.post(
+    '/api/v1/modules/:id/lessons',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const module = courseModulesById.get(id);
+      if (!module) {
+        throw new DomainError('NOT_FOUND', `Module with ID "${id}" not found.`);
+      }
+
+      const course = coursesById.get(module.courseId);
+      const profile = profilesByUserId.get(session.userId);
+      if (
+        course?.instructorId !== profile?.id &&
+        !session.roles.includes('platform_admin' as any)
+      ) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only the course instructor or platform admin can add lessons.'
+        );
+      }
+
+      const input = CreateLessonInputSchema.parse(req.body);
+      if (input.prerequisiteLessonId && !lessonsById.has(input.prerequisiteLessonId)) {
+        throw new DomainError(
+          'NOT_FOUND',
+          `Prerequisite lesson with ID "${input.prerequisiteLessonId}" not found.`
+        );
+      }
+
+      const existing = Array.from(lessonsById.values()).find(
+        (l) => l.moduleId === module.id && l.orderIndex === input.orderIndex
+      );
+      if (existing) {
+        throw new DomainError(
+          'CONFLICT',
+          `Lesson with orderIndex ${input.orderIndex} already exists in this module.`
+        );
+      }
+
+      const now = new Date().toISOString();
+      const lesson: Lesson = {
+        id: crypto.randomUUID(),
+        moduleId: module.id,
+        title: input.title,
+        contentType: input.contentType,
+        contentBody: input.contentBody,
+        durationMinutes: input.durationMinutes,
+        orderIndex: input.orderIndex,
+        prerequisiteLessonId: input.prerequisiteLessonId || null,
+        isFreePreview: input.isFreePreview,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      lessonsById.set(lesson.id, lesson);
+      return reply.status(201).send({ lesson });
+    }
+  );
+
+  app.post(
+    '/api/v1/courses/:id/publish',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const course = coursesById.get(id);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+      }
+
+      const profile = profilesByUserId.get(session.userId);
+      if (course.instructorId !== profile?.id && !session.roles.includes('platform_admin' as any)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only the course instructor or platform admin can publish this course.'
+        );
+      }
+
+      const modules = Array.from(courseModulesById.values()).filter(
+        (m) => m.courseId === course.id
+      );
+      const moduleIds = new Set(modules.map((m) => m.id));
+      const lessons = Array.from(lessonsById.values()).filter((l) => moduleIds.has(l.moduleId));
+
+      const readiness = validateCoursePublishReadiness(course, modules, lessons);
+      if (!readiness.valid) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          `Course publish requirements not met: ${readiness.errors.join('; ')}`
+        );
+      }
+
+      course.status = 'published';
+      course.updatedAt = new Date().toISOString();
+
+      return reply.status(200).send({
+        message: 'Course published successfully',
+        course,
+      });
+    }
+  );
+
+  app.post(
+    '/api/v1/courses/:id/enroll',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const course = coursesById.get(id);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+      }
+
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
+      }
+
+      const existingEnrollments = Array.from(enrollmentsById.values());
+      const enrollment = enrollUserInCourse(existingEnrollments, profile.id, course);
+
+      enrollmentsById.set(enrollment.id, enrollment);
+      enrollmentsByUserAndCourse.set(`${profile.id}:${course.id}`, enrollment);
+
+      return reply.status(201).send({
+        message: 'Enrolled successfully',
+        enrollment,
+      });
+    }
+  );
+
+  app.get(
+    '/api/v1/courses/:id/progress',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const course = coursesById.get(id);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID "${id}" not found.`);
+      }
+
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
+
+      const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
+      if (!enrollment) {
+        return reply.status(200).send({ enrolled: false });
+      }
+
+      const completedProgress = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
+        (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
+      );
+      const completedLessonIds = completedProgress.map((p) => p.lessonId);
+      const certificate = certificatesByEnrollmentId.get(enrollment.id);
+
+      return reply.status(200).send({
+        enrolled: true,
+        enrollment,
+        completedLessonIds,
+        certificate,
+      });
+    }
+  );
+
+  app.post(
+    '/api/v1/lessons/:id/complete',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const lesson = lessonsById.get(id);
+      if (!lesson) {
+        throw new DomainError('NOT_FOUND', `Lesson with ID "${id}" not found.`);
+      }
+
+      const module = courseModulesById.get(lesson.moduleId);
+      if (!module) {
+        throw new DomainError('NOT_FOUND', 'Module for lesson not found.');
+      }
+
+      const course = coursesById.get(module.courseId);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', 'Course for lesson not found.');
+      }
+
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
+
+      const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${course.id}`);
+      if (!enrollment || enrollment.status === 'dropped' || enrollment.status === 'expired') {
+        throw new DomainError(
+          'FORBIDDEN',
+          'You must be actively enrolled in the course to complete lessons.'
+        );
+      }
+
+      const progressKey = `${enrollment.id}:${lesson.id}`;
+      // BR-21: Idempotent lesson completion
+      if (lessonProgressByEnrollmentAndLesson.has(progressKey)) {
+        return reply.status(200).send({
+          message: 'Lesson already completed',
+          progressPercent: enrollment.progressPercent,
+          alreadyCompleted: true,
+        });
+      }
+
+      // Retrieve all modules and lessons for this course to evaluate prerequisites and sequential modules
+      const courseModules = Array.from(courseModulesById.values()).filter(
+        (m) => m.courseId === course.id
+      );
+      const courseModuleIds = new Set(courseModules.map((m) => m.id));
+      const courseLessons = Array.from(lessonsById.values()).filter((l) =>
+        courseModuleIds.has(l.moduleId)
+      );
+
+      const completedProgressList = Array.from(lessonProgressByEnrollmentAndLesson.values()).filter(
+        (p) => p.enrollmentId === enrollment.id && p.status === 'completed'
+      );
+      const completedLessonIds = new Set<string>(completedProgressList.map((p) => p.lessonId));
+
+      // BR-47: Sequential module progress
+      verifySequentialModuleProgress(courseModules, courseLessons, completedLessonIds, lesson);
+
+      // BR-22: Direct prerequisite check
+      verifyLessonPrerequisites(lesson, completedLessonIds);
+
+      // Record lesson progress
+      const now = new Date().toISOString();
+      const progress: LessonProgress = {
+        id: crypto.randomUUID(),
+        enrollmentId: enrollment.id,
+        lessonId: lesson.id,
+        status: 'completed',
+        completedAt: now,
+      };
+      lessonProgressByEnrollmentAndLesson.set(progressKey, progress);
+      completedLessonIds.add(lesson.id);
+
+      // Calculate new progress percentage
+      const newProgressPercent = calculateCourseProgress(
+        courseLessons.length,
+        completedLessonIds.size
+      );
+      enrollment.progressPercent = newProgressPercent;
+      enrollment.updatedAt = now;
+
+      let certificate: CourseCertificate | undefined;
+      let awardedXp = 0;
+
+      // Check course completion (BR-23, BR-48)
+      const isCompleted = completedLessonIds.size === courseLessons.length;
+      if (isCompleted && enrollment.status !== 'completed') {
+        enrollment.status = 'completed';
+        enrollment.completedAt = now;
+
+        // Auto-mint verified Evidence in the Talent Graph (BR-23)
+        const evidence = createEvidence({
+          subjectId: profile.id,
+          type: 'course_completion',
+          title: `Course Certificate: ${course.title}`,
+          description: `Successfully completed all modules and lessons in "${course.title}".`,
+          source: 'TalentSphere LMS',
+          provenance: `course:${course.id}`,
+          recencyDate: now.split('T')[0],
+        });
+        // Authority level for platform LMS completion
+        evidence.status = 'verified';
+        evidence.verificationLevel = 'authority_verified';
+
+        evidenceById.set(evidence.id, evidence);
+        const evList = evidenceBySubjectId.get(profile.id) || [];
+        evList.push(evidence);
+        evidenceBySubjectId.set(profile.id, evList);
+
+        enqueuedWorkerJobs.push({
+          type: 'evidence.propagate',
+          payload: {
+            evidenceId: evidence.id,
+            status: evidence.status,
+            level: evidence.verificationLevel,
+          },
+          enqueuedAt: now,
+        });
+
+        // Mint zero-PII certificate (BR-150)
+        certificate = mintCourseCertificate(enrollment.id, profile.id, course, evidence.id);
+        certificatesByNumber.set(certificate.certificateNumber, certificate);
+        certificatesByEnrollmentId.set(enrollment.id, certificate);
+        certificatesByProofHash.set(certificate.verificationProofHash, certificate);
+
+        // Award XP bonus capped by 200 XP/day (BR-25)
+        const userTxs = xpTransactionsByUserId.get(session.userId) || [];
+        awardedXp = calculateCappedXp(course.xpReward, userTxs, 200);
+
+        if (awardedXp > 0) {
+          const tx: XpTransaction = {
+            id: crypto.randomUUID(),
+            userId: session.userId,
+            amount: awardedXp,
+            referenceType: 'course',
+            referenceId: course.id,
+            description: `Completed course "${course.title}"`,
+            createdAt: now,
+          };
+          userTxs.push(tx);
+          xpTransactionsByUserId.set(session.userId, userTxs);
+        }
+
+        enqueuedWorkerJobs.push({
+          type: 'lms.course.completed',
+          payload: {
+            courseId: course.id,
+            userId: profile.id,
+            certificateNumber: certificate.certificateNumber,
+          },
+          enqueuedAt: now,
+        });
+      }
+
+      return reply.status(200).send({
+        progress: enrollment.progressPercent,
+        completed: enrollment.status === 'completed',
+        certificate,
+        xpAwarded: awardedXp,
+      });
+    }
+  );
 
   // Public Certificate Verification Endpoint (Zero-PII verification BR-150, BR-155)
-  app.get('/api/v1/certificates/:certificateNumber', async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
-    const { certificateNumber } = req.params;
-    const cert = certificatesByNumber.get(certificateNumber);
-    if (!cert) {
-      throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+  app.get(
+    '/api/v1/certificates/:certificateNumber',
+    async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
+      const { certificateNumber } = req.params;
+      const cert = certificatesByNumber.get(certificateNumber);
+      if (!cert) {
+        throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+      }
+
+      const course = coursesById.get(cert.courseId);
+
+      return reply.status(200).send({
+        certificateNumber: cert.certificateNumber,
+        courseTitle: course?.title || 'Unknown Course',
+        status: cert.status,
+        issuedAt: cert.issuedAt,
+        verificationProofHash: cert.verificationProofHash,
+        isValid: cert.status === 'verified',
+      });
     }
-
-    const course = coursesById.get(cert.courseId);
-
-    return reply.status(200).send({
-      certificateNumber: cert.certificateNumber,
-      courseTitle: course?.title || 'Unknown Course',
-      status: cert.status,
-      issuedAt: cert.issuedAt,
-      verificationProofHash: cert.verificationProofHash,
-      isValid: cert.status === 'verified',
-    });
-  });
+  );
 
   // Unified Public Zero-PII Verification Endpoint (SSOT 1132, S-02, BR-150, F-52, F-96)
-  app.get('/api/v1/verify/:hash', async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
-    const { hash } = req.params;
+  app.get(
+    '/api/v1/verify/:hash',
+    async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
+      const { hash } = req.params;
 
-    // A. Check if hash matches an issued Course Certificate
-    const cert = certificatesByProofHash.get(hash);
-    if (cert) {
+      // A. Check if hash matches an issued Course Certificate
+      const cert = certificatesByProofHash.get(hash);
+      if (cert) {
+        const course = coursesById.get(cert.courseId);
+        const proof = verifyPublicCertificateProof(hash, cert, course?.title);
+        return reply.status(200).send({
+          valid: proof.isValid,
+          type: 'course_certificate',
+          verification: proof,
+        });
+      }
+
+      // B. Check if hash matches an issued Evidence Proof
+      const allEvidence = Array.from(evidenceById.values());
+      for (const ev of allEvidence) {
+        const proof = generatePublicProof(ev);
+        if (proof.proofHash === hash) {
+          return reply.status(200).send({
+            valid: ev.status === 'verified',
+            type: 'evidence_proof',
+            verification: {
+              isValid: ev.status === 'verified',
+              status: ev.status,
+              verificationLevel: ev.verificationLevel,
+              title: proof.title,
+              type: proof.type,
+              issuedAt: ev.createdAt,
+              verifiedAt: proof.verifiedAt,
+              proofHash: proof.proofHash,
+              authority: 'TalentSphere Verifiable Evidence Registry (Zero-PII BR-150)',
+            },
+          });
+        }
+      }
+
+      throw new DomainError(
+        'NOT_FOUND',
+        `No credential or verification proof found matching hash "${hash}".`
+      );
+    }
+  );
+
+  // Direct Certificate Verification Alias (F-52)
+  app.get(
+    '/api/v1/certificates/verify/:hash',
+    async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
+      const { hash } = req.params;
+      const cert = certificatesByProofHash.get(hash);
+      if (!cert) {
+        throw new DomainError(
+          'NOT_FOUND',
+          `Certificate with verification proof hash "${hash}" not found.`
+        );
+      }
+
       const course = coursesById.get(cert.courseId);
       const proof = verifyPublicCertificateProof(hash, cert, course?.title);
       return reply.status(200).send({
         valid: proof.isValid,
-        type: 'course_certificate',
         verification: proof,
       });
     }
-
-    // B. Check if hash matches an issued Evidence Proof
-    const allEvidence = Array.from(evidenceById.values());
-    for (const ev of allEvidence) {
-      const proof = generatePublicProof(ev);
-      if (proof.proofHash === hash) {
-        return reply.status(200).send({
-          valid: ev.status === 'verified',
-          type: 'evidence_proof',
-          verification: {
-            isValid: ev.status === 'verified',
-            status: ev.status,
-            verificationLevel: ev.verificationLevel,
-            title: proof.title,
-            type: proof.type,
-            issuedAt: ev.createdAt,
-            verifiedAt: proof.verifiedAt,
-            proofHash: proof.proofHash,
-            authority: 'TalentSphere Verifiable Evidence Registry (Zero-PII BR-150)',
-          },
-        });
-      }
-    }
-
-    throw new DomainError('NOT_FOUND', `No credential or verification proof found matching hash "${hash}".`);
-  });
-
-  // Direct Certificate Verification Alias (F-52)
-  app.get('/api/v1/certificates/verify/:hash', async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
-    const { hash } = req.params;
-    const cert = certificatesByProofHash.get(hash);
-    if (!cert) {
-      throw new DomainError('NOT_FOUND', `Certificate with verification proof hash "${hash}" not found.`);
-    }
-
-    const course = coursesById.get(cert.courseId);
-    const proof = verifyPublicCertificateProof(hash, cert, course?.title);
-    return reply.status(200).send({
-      valid: proof.isValid,
-      verification: proof,
-    });
-  });
+  );
 
   // Learner's Earned Certificates (F-52)
   app.get('/api/v1/certificates/my', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -4213,37 +4657,40 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // Revoke Certificate (Admin or Instructor authority, F-52, BR-154)
-  app.post('/api/v1/certificates/:certificateNumber/revoke', async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { certificateNumber } = req.params;
-    const cert = certificatesByNumber.get(certificateNumber);
-    if (!cert) {
-      throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+  app.post(
+    '/api/v1/certificates/:certificateNumber/revoke',
+    async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { certificateNumber } = req.params;
+      const cert = certificatesByNumber.get(certificateNumber);
+      if (!cert) {
+        throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+      }
+
+      const input = RevokeCertificateInputSchema.parse(req.body);
+
+      const revoked = revokeCourseCertificate(cert, input.reason, {
+        userId: session.userId,
+        roles: session.roles,
+      });
+
+      certificatesByNumber.set(revoked.certificateNumber, revoked);
+      certificatesByProofHash.set(revoked.verificationProofHash, revoked);
+      certificatesByEnrollmentId.set(revoked.enrollmentId, revoked);
+
+      auditLogs.push({
+        event: 'certificate.revoked',
+        actorId: session.userId,
+        targetId: revoked.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Certificate revoked successfully.',
+        certificate: revoked,
+      });
     }
-
-    const input = RevokeCertificateInputSchema.parse(req.body);
-
-    const revoked = revokeCourseCertificate(cert, input.reason, {
-      userId: session.userId,
-      roles: session.roles,
-    });
-
-    certificatesByNumber.set(revoked.certificateNumber, revoked);
-    certificatesByProofHash.set(revoked.verificationProofHash, revoked);
-    certificatesByEnrollmentId.set(revoked.enrollmentId, revoked);
-
-    auditLogs.push({
-      event: 'certificate.revoked',
-      actorId: session.userId,
-      targetId: revoked.id,
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Certificate revoked successfully.',
-      certificate: revoked,
-    });
-  });
+  );
 
   // Direct Messaging Repositories (F-10, WF-10, BR-214)
   const threadsById = new Map<string, MessageThread>();
@@ -4280,7 +4727,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
     }
 
-    userThreads.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+    userThreads.sort(
+      (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+    );
     return { threads: userThreads };
   });
 
@@ -4297,14 +4746,23 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('NOT_FOUND', 'Recipient profile not found.');
     }
 
-    const { thread, participants } = createThreadEntities(profile.id, [input.recipientId], input.subject);
+    const { thread, participants } = createThreadEntities(
+      profile.id,
+      [input.recipientId],
+      input.subject
+    );
     threadsById.set(thread.id, thread);
     threadParticipantsByThreadId.set(thread.id, participants);
     messagesByThreadId.set(thread.id, []);
 
     let initialMessage: Message | undefined;
     if (input.initialMessage) {
-      initialMessage = createMessageEntity(thread.id, profile.id, input.initialMessage, input.clientMessageId);
+      initialMessage = createMessageEntity(
+        thread.id,
+        profile.id,
+        input.initialMessage,
+        input.clientMessageId
+      );
       messagesById.set(initialMessage.id, initialMessage);
       messagesByThreadId.set(thread.id, [initialMessage]);
       if (input.clientMessageId) {
@@ -4340,151 +4798,171 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
-  app.get('/api/v1/threads/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
-    }
-
-    const { id } = req.params;
-    const thread = threadsById.get(id);
-    if (!thread) {
-      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
-    }
-
-    const participants = threadParticipantsByThreadId.get(id) || [];
-    const currentParticipant = assertThreadParticipant(participants, profile.id);
-
-    // Automatically mark read up to now
-    currentParticipant.lastReadAt = new Date().toISOString();
-
-    const messages = messagesByThreadId.get(id) || [];
-    return reply.status(200).send({
-      thread,
-      participants,
-      messages,
-    });
-  });
-
-  app.post('/api/v1/threads/:id/messages', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
-    }
-
-    const { id } = req.params;
-    const thread = threadsById.get(id);
-    if (!thread) {
-      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
-    }
-
-    const participants = threadParticipantsByThreadId.get(id) || [];
-    const currentParticipant = assertThreadParticipant(participants, profile.id);
-
-    const input = SendMessageInputSchema.parse(req.body);
-
-    // ClientMessageId Deduplication (WF-10, WIT-010)
-    if (input.clientMessageId) {
-      const dedupeKey = `${thread.id}:${input.clientMessageId}`;
-      const existing = messagesByClientMessageId.get(dedupeKey);
-      if (existing) {
-        return reply.status(200).send({
-          message: existing,
-          deduplicated: true,
-        });
+  app.get(
+    '/api/v1/threads/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
       }
-    }
 
-    const message = createMessageEntity(thread.id, profile.id, input.content, input.clientMessageId);
-    messagesById.set(message.id, message);
+      const { id } = req.params;
+      const thread = threadsById.get(id);
+      if (!thread) {
+        throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+      }
 
-    const threadMsgs = messagesByThreadId.get(thread.id) || [];
-    threadMsgs.push(message);
-    messagesByThreadId.set(thread.id, threadMsgs);
+      const participants = threadParticipantsByThreadId.get(id) || [];
+      const currentParticipant = assertThreadParticipant(participants, profile.id);
 
-    if (input.clientMessageId) {
-      messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, message);
-    }
+      // Automatically mark read up to now
+      currentParticipant.lastReadAt = new Date().toISOString();
 
-    thread.lastMessageAt = message.createdAt;
-    thread.updatedAt = message.createdAt;
-    currentParticipant.lastReadAt = message.createdAt;
-
-    const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
-    enqueuedWorkerJobs.push({
-      type: 'messaging.message.sent',
-      payload: {
-        threadId: thread.id,
-        messageId: message.id,
-        senderId: profile.id,
-        recipientIds,
-      },
-      enqueuedAt: message.createdAt,
-    });
-
-    for (const recipientId of recipientIds) {
-      sendNotification({
-        recipientId,
-        type: 'message',
-        title: `New message from ${profile.fullName}`,
-        body: message.content.slice(0, 100),
-        referenceType: 'thread',
-        referenceId: thread.id,
+      const messages = messagesByThreadId.get(id) || [];
+      return reply.status(200).send({
+        thread,
+        participants,
+        messages,
       });
     }
+  );
 
-    return reply.status(201).send({ message });
-  });
+  app.post(
+    '/api/v1/threads/:id/messages',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
 
-  app.post('/api/v1/threads/:id/read', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
+      const { id } = req.params;
+      const thread = threadsById.get(id);
+      if (!thread) {
+        throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+      }
+
+      const participants = threadParticipantsByThreadId.get(id) || [];
+      const currentParticipant = assertThreadParticipant(participants, profile.id);
+
+      const input = SendMessageInputSchema.parse(req.body);
+
+      // ClientMessageId Deduplication (WF-10, WIT-010)
+      if (input.clientMessageId) {
+        const dedupeKey = `${thread.id}:${input.clientMessageId}`;
+        const existing = messagesByClientMessageId.get(dedupeKey);
+        if (existing) {
+          return reply.status(200).send({
+            message: existing,
+            deduplicated: true,
+          });
+        }
+      }
+
+      const message = createMessageEntity(
+        thread.id,
+        profile.id,
+        input.content,
+        input.clientMessageId
+      );
+      messagesById.set(message.id, message);
+
+      const threadMsgs = messagesByThreadId.get(thread.id) || [];
+      threadMsgs.push(message);
+      messagesByThreadId.set(thread.id, threadMsgs);
+
+      if (input.clientMessageId) {
+        messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, message);
+      }
+
+      thread.lastMessageAt = message.createdAt;
+      thread.updatedAt = message.createdAt;
+      currentParticipant.lastReadAt = message.createdAt;
+
+      const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
+      enqueuedWorkerJobs.push({
+        type: 'messaging.message.sent',
+        payload: {
+          threadId: thread.id,
+          messageId: message.id,
+          senderId: profile.id,
+          recipientIds,
+        },
+        enqueuedAt: message.createdAt,
+      });
+
+      for (const recipientId of recipientIds) {
+        sendNotification({
+          recipientId,
+          type: 'message',
+          title: `New message from ${profile.fullName}`,
+          body: message.content.slice(0, 100),
+          referenceType: 'thread',
+          referenceId: thread.id,
+        });
+      }
+
+      return reply.status(201).send({ message });
     }
+  );
 
-    const { id } = req.params;
-    const thread = threadsById.get(id);
-    if (!thread) {
-      throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+  app.post(
+    '/api/v1/threads/:id/read',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
+
+      const { id } = req.params;
+      const thread = threadsById.get(id);
+      if (!thread) {
+        throw new DomainError('NOT_FOUND', `Thread with ID "${id}" not found.`);
+      }
+
+      const participants = threadParticipantsByThreadId.get(id) || [];
+      const currentParticipant = assertThreadParticipant(participants, profile.id);
+      currentParticipant.lastReadAt = new Date().toISOString();
+
+      return reply.status(200).send({
+        message: 'Thread marked as read',
+        lastReadAt: currentParticipant.lastReadAt,
+      });
     }
-
-    const participants = threadParticipantsByThreadId.get(id) || [];
-    const currentParticipant = assertThreadParticipant(participants, profile.id);
-    currentParticipant.lastReadAt = new Date().toISOString();
-
-    return reply.status(200).send({
-      message: 'Thread marked as read',
-      lastReadAt: currentParticipant.lastReadAt,
-    });
-  });
+  );
 
   // Notification Center Endpoints (F-14, BR-120)
-  app.get('/api/v1/notifications', async (req: FastifyRequest<{ Querystring: { unreadOnly?: string; type?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
-    }
+  app.get(
+    '/api/v1/notifications',
+    async (
+      req: FastifyRequest<{ Querystring: { unreadOnly?: string; type?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
 
-    const userNotifs = notificationsByRecipientId.get(profile.id) || [];
-    const unreadCount = userNotifs.filter((n) => !n.isRead).length;
+      const userNotifs = notificationsByRecipientId.get(profile.id) || [];
+      const unreadCount = userNotifs.filter((n) => !n.isRead).length;
 
-    let filtered = [...userNotifs];
-    if (req.query.unreadOnly === 'true') {
-      filtered = filtered.filter((n) => !n.isRead);
-    }
-    if (req.query.type) {
-      filtered = filtered.filter((n) => n.type === req.query.type);
-    }
+      let filtered = [...userNotifs];
+      if (req.query.unreadOnly === 'true') {
+        filtered = filtered.filter((n) => !n.isRead);
+      }
+      if (req.query.type) {
+        filtered = filtered.filter((n) => n.type === req.query.type);
+      }
 
-    return reply.status(200).send({
-      notifications: filtered,
-      unreadCount,
-    });
-  });
+      return reply.status(200).send({
+        notifications: filtered,
+        unreadCount,
+      });
+    }
+  );
 
   app.post('/api/v1/notifications/mark-read', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -4522,32 +5000,37 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ preferences: prefs });
   });
 
-  app.patch('/api/v1/notifications/preferences', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Profile not found.');
+  app.patch(
+    '/api/v1/notifications/preferences',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Profile not found.');
+      }
+
+      const input = UpdateNotificationPreferencesInputSchema.parse(req.body);
+      let prefs = notificationPreferencesByUserId.get(profile.id);
+      if (!prefs) {
+        prefs = createDefaultNotificationPreferences(profile.id);
+        notificationPreferencesByUserId.set(profile.id, prefs);
+      }
+
+      if (input.allowMessages !== undefined) prefs.allowMessages = input.allowMessages;
+      if (input.allowMentions !== undefined) prefs.allowMentions = input.allowMentions;
+      if (input.allowApplications !== undefined) prefs.allowApplications = input.allowApplications;
+      if (input.allowCourseUpdates !== undefined)
+        prefs.allowCourseUpdates = input.allowCourseUpdates;
+      if (input.emailDigestFrequency !== undefined)
+        prefs.emailDigestFrequency = input.emailDigestFrequency;
+      prefs.updatedAt = new Date().toISOString();
+
+      return reply.status(200).send({
+        message: 'Preferences updated successfully',
+        preferences: prefs,
+      });
     }
-
-    const input = UpdateNotificationPreferencesInputSchema.parse(req.body);
-    let prefs = notificationPreferencesByUserId.get(profile.id);
-    if (!prefs) {
-      prefs = createDefaultNotificationPreferences(profile.id);
-      notificationPreferencesByUserId.set(profile.id, prefs);
-    }
-
-    if (input.allowMessages !== undefined) prefs.allowMessages = input.allowMessages;
-    if (input.allowMentions !== undefined) prefs.allowMentions = input.allowMentions;
-    if (input.allowApplications !== undefined) prefs.allowApplications = input.allowApplications;
-    if (input.allowCourseUpdates !== undefined) prefs.allowCourseUpdates = input.allowCourseUpdates;
-    if (input.emailDigestFrequency !== undefined) prefs.emailDigestFrequency = input.emailDigestFrequency;
-    prefs.updatedAt = new Date().toISOString();
-
-    return reply.status(200).send({
-      message: 'Preferences updated successfully',
-      preferences: prefs,
-    });
-  });
+  );
 
   // Central AI Gateway & Career Assistant Repositories (F-11, SSOT Section 16)
   const aiConversationsById = new Map<string, AIConversation>();
@@ -4596,22 +5079,25 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ conversations });
   });
 
-  app.get('/api/v1/ai/conversations/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+  app.get(
+    '/api/v1/ai/conversations/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const conversation = aiConversationsById.get(id);
-    if (!conversation) {
-      throw new DomainError('NOT_FOUND', `Conversation with ID "${id}" not found.`);
+      const conversation = aiConversationsById.get(id);
+      if (!conversation) {
+        throw new DomainError('NOT_FOUND', `Conversation with ID "${id}" not found.`);
+      }
+
+      if (conversation.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to conversation.');
+      }
+
+      const messages = aiMessagesByConversationId.get(id) || [];
+      return reply.status(200).send({ conversation, messages });
     }
-
-    if (conversation.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to conversation.');
-    }
-
-    const messages = aiMessagesByConversationId.get(id) || [];
-    return reply.status(200).send({ conversation, messages });
-  });
+  );
 
   app.post('/api/v1/ai/career-assistant/chat', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -4641,7 +5127,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     if (input.conversationId) {
       const existing = aiConversationsById.get(input.conversationId);
       if (!existing) {
-        throw new DomainError('NOT_FOUND', `Conversation with ID "${input.conversationId}" not found.`);
+        throw new DomainError(
+          'NOT_FOUND',
+          `Conversation with ID "${input.conversationId}" not found.`
+        );
       }
       if (existing.userId !== session.userId) {
         throw new DomainError('FORBIDDEN', 'Access denied to conversation.');
@@ -4738,138 +5227,157 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ resumes: userResumes });
   });
 
-  app.get('/api/v1/resumes/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+  app.get(
+    '/api/v1/resumes/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const resume = resumesById.get(id);
-    if (!resume) {
-      throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      const resume = resumesById.get(id);
+      if (!resume) {
+        throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      }
+
+      if (resume.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+      }
+
+      return reply.status(200).send({ resume });
     }
+  );
 
-    if (resume.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+  app.patch(
+    '/api/v1/resumes/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const resume = resumesById.get(id);
+      if (!resume) {
+        throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      }
+
+      if (resume.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+      }
+
+      const input = UpdateResumeInputSchema.parse(req.body || {});
+      const updated = updateResumeEntity(resume, input);
+      resumesById.set(updated.id, updated);
+
+      // Update in user list
+      const userResumes = resumesByUserId.get(session.userId) || [];
+      const idx = userResumes.findIndex((r) => r.id === updated.id);
+      if (idx !== -1) {
+        userResumes[idx] = updated;
+        resumesByUserId.set(session.userId, userResumes);
+      }
+
+      return reply.status(200).send({ resume: updated });
     }
+  );
 
-    return reply.status(200).send({ resume });
-  });
+  app.post(
+    '/api/v1/resumes/:id/export',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-  app.patch('/api/v1/resumes/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+      const resume = resumesById.get(id);
+      if (!resume) {
+        throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      }
 
-    const resume = resumesById.get(id);
-    if (!resume) {
-      throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      if (resume.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+      }
+
+      const input = ExportResumeInputSchema.parse(req.body || {});
+      const profile = profilesByUserId.get(session.userId);
+
+      const exportItem = createResumeExport(resume, input.format, profile?.fullName);
+      resumeExportsById.set(exportItem.id, exportItem);
+
+      const resumeExports = resumeExportsByResumeId.get(resume.id) || [];
+      resumeExports.unshift(exportItem);
+      resumeExportsByResumeId.set(resume.id, resumeExports);
+
+      enqueuedWorkerJobs.push({
+        type: 'resume.exported',
+        payload: {
+          userId: session.userId,
+          resumeId: resume.id,
+          exportId: exportItem.id,
+          format: exportItem.format,
+          sha256Hash: exportItem.sha256Hash,
+        },
+        enqueuedAt: exportItem.createdAt,
+      });
+
+      return reply.status(201).send({ export: exportItem });
     }
+  );
 
-    if (resume.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+  app.get(
+    '/api/v1/resumes/:id/exports',
+    async (
+      req: FastifyRequest<{ Params: { id: string }; Querystring: { includeDeleted?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const resume = resumesById.get(id);
+      if (!resume) {
+        throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
+      }
+
+      if (resume.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+      }
+
+      const allExports = resumeExportsByResumeId.get(id) || [];
+      const filtered =
+        req.query.includeDeleted === 'true'
+          ? allExports
+          : allExports.filter((e) => e.status !== 'deleted');
+
+      return reply.status(200).send({ exports: filtered });
     }
+  );
 
-    const input = UpdateResumeInputSchema.parse(req.body || {});
-    const updated = updateResumeEntity(resume, input);
-    resumesById.set(updated.id, updated);
+  app.delete(
+    '/api/v1/resumes/exports/:exportId',
+    async (req: FastifyRequest<{ Params: { exportId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { exportId } = req.params;
 
-    // Update in user list
-    const userResumes = resumesByUserId.get(session.userId) || [];
-    const idx = userResumes.findIndex((r) => r.id === updated.id);
-    if (idx !== -1) {
-      userResumes[idx] = updated;
-      resumesByUserId.set(session.userId, userResumes);
+      const exportItem = resumeExportsById.get(exportId);
+      if (!exportItem) {
+        throw new DomainError('NOT_FOUND', `Resume export with ID "${exportId}" not found.`);
+      }
+
+      if (exportItem.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to resume export.');
+      }
+
+      const softDeleted = softDeleteResumeExport(exportItem);
+      resumeExportsById.set(softDeleted.id, softDeleted);
+
+      // Update in list
+      const resumeExports = resumeExportsByResumeId.get(softDeleted.resumeId) || [];
+      const idx = resumeExports.findIndex((e) => e.id === softDeleted.id);
+      if (idx !== -1) {
+        resumeExports[idx] = softDeleted;
+        resumeExportsByResumeId.set(softDeleted.resumeId, resumeExports);
+      }
+
+      return reply.status(200).send({
+        message: 'Resume export soft-deleted (BR-26)',
+        export: softDeleted,
+      });
     }
-
-    return reply.status(200).send({ resume: updated });
-  });
-
-  app.post('/api/v1/resumes/:id/export', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const resume = resumesById.get(id);
-    if (!resume) {
-      throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
-    }
-
-    if (resume.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to resume.');
-    }
-
-    const input = ExportResumeInputSchema.parse(req.body || {});
-    const profile = profilesByUserId.get(session.userId);
-
-    const exportItem = createResumeExport(resume, input.format, profile?.fullName);
-    resumeExportsById.set(exportItem.id, exportItem);
-
-    const resumeExports = resumeExportsByResumeId.get(resume.id) || [];
-    resumeExports.unshift(exportItem);
-    resumeExportsByResumeId.set(resume.id, resumeExports);
-
-    enqueuedWorkerJobs.push({
-      type: 'resume.exported',
-      payload: {
-        userId: session.userId,
-        resumeId: resume.id,
-        exportId: exportItem.id,
-        format: exportItem.format,
-        sha256Hash: exportItem.sha256Hash,
-      },
-      enqueuedAt: exportItem.createdAt,
-    });
-
-    return reply.status(201).send({ export: exportItem });
-  });
-
-  app.get('/api/v1/resumes/:id/exports', async (req: FastifyRequest<{ Params: { id: string }; Querystring: { includeDeleted?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const resume = resumesById.get(id);
-    if (!resume) {
-      throw new DomainError('NOT_FOUND', `Resume with ID "${id}" not found.`);
-    }
-
-    if (resume.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to resume.');
-    }
-
-    const allExports = resumeExportsByResumeId.get(id) || [];
-    const filtered = req.query.includeDeleted === 'true'
-      ? allExports
-      : allExports.filter((e) => e.status !== 'deleted');
-
-    return reply.status(200).send({ exports: filtered });
-  });
-
-  app.delete('/api/v1/resumes/exports/:exportId', async (req: FastifyRequest<{ Params: { exportId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { exportId } = req.params;
-
-    const exportItem = resumeExportsById.get(exportId);
-    if (!exportItem) {
-      throw new DomainError('NOT_FOUND', `Resume export with ID "${exportId}" not found.`);
-    }
-
-    if (exportItem.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to resume export.');
-    }
-
-    const softDeleted = softDeleteResumeExport(exportItem);
-    resumeExportsById.set(softDeleted.id, softDeleted);
-
-    // Update in list
-    const resumeExports = resumeExportsByResumeId.get(softDeleted.resumeId) || [];
-    const idx = resumeExports.findIndex((e) => e.id === softDeleted.id);
-    if (idx !== -1) {
-      resumeExports[idx] = softDeleted;
-      resumeExportsByResumeId.set(softDeleted.resumeId, resumeExports);
-    }
-
-    return reply.status(200).send({
-      message: 'Resume export soft-deleted (BR-26)',
-      export: softDeleted,
-    });
-  });
+  );
 
   // Professional Networking Repositories & Endpoints (F-09)
   const connectionsById = new Map<string, Connection>();
@@ -4939,93 +5447,152 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ connection });
   });
 
-  app.get('/api/v1/connections', async (req: FastifyRequest<{ Querystring: { status?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const userConnections = connectionsByUserId.get(session.userId) || [];
-    const filter = req.query.status || 'accepted';
+  app.get(
+    '/api/v1/connections',
+    async (req: FastifyRequest<{ Querystring: { status?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const userConnections = connectionsByUserId.get(session.userId) || [];
+      const filter = req.query.status || 'accepted';
 
-    let filtered = userConnections;
-    if (filter === 'accepted') {
-      filtered = userConnections.filter((c) => c.status === 'accepted');
-    } else if (filter === 'pending') {
-      filtered = userConnections.filter((c) => c.status === 'pending');
-    } else if (filter === 'pending_sent') {
-      filtered = userConnections.filter((c) => c.status === 'pending' && c.senderId === session.userId);
-    } else if (filter === 'pending_received') {
-      filtered = userConnections.filter((c) => c.status === 'pending' && c.recipientId === session.userId);
-    } else if (filter === 'rejected') {
-      filtered = userConnections.filter((c) => c.status === 'rejected');
-    } else if (filter === 'withdrawn') {
-      filtered = userConnections.filter((c) => c.status === 'withdrawn');
-    } else if (filter === 'all') {
-      filtered = userConnections;
+      let filtered = userConnections;
+      if (filter === 'accepted') {
+        filtered = userConnections.filter((c) => c.status === 'accepted');
+      } else if (filter === 'pending') {
+        filtered = userConnections.filter((c) => c.status === 'pending');
+      } else if (filter === 'pending_sent') {
+        filtered = userConnections.filter(
+          (c) => c.status === 'pending' && c.senderId === session.userId
+        );
+      } else if (filter === 'pending_received') {
+        filtered = userConnections.filter(
+          (c) => c.status === 'pending' && c.recipientId === session.userId
+        );
+      } else if (filter === 'rejected') {
+        filtered = userConnections.filter((c) => c.status === 'rejected');
+      } else if (filter === 'withdrawn') {
+        filtered = userConnections.filter((c) => c.status === 'withdrawn');
+      } else if (filter === 'all') {
+        filtered = userConnections;
+      }
+
+      return reply.status(200).send({ connections: filtered });
     }
+  );
 
-    return reply.status(200).send({ connections: filtered });
-  });
+  app.get(
+    '/api/v1/connections/status/:targetUserId',
+    async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      let { targetUserId } = req.params;
 
-  app.get('/api/v1/connections/status/:targetUserId', async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    let { targetUserId } = req.params;
+      const targetProfile = profilesById.get(targetUserId);
+      if (targetProfile) {
+        targetUserId = targetProfile.userId;
+      }
 
-    const targetProfile = profilesById.get(targetUserId);
-    if (targetProfile) {
-      targetUserId = targetProfile.userId;
-    }
+      const userConnections = connectionsByUserId.get(session.userId) || [];
+      const conn = getConnectionBetween(userConnections, session.userId, targetUserId);
 
-    const userConnections = connectionsByUserId.get(session.userId) || [];
-    const conn = getConnectionBetween(userConnections, session.userId, targetUserId);
-
-    return reply.status(200).send({
-      status: conn ? conn.status : 'none',
-      connection: conn || null,
-      isConnected: conn?.status === 'accepted',
-    });
-  });
-
-  app.post('/api/v1/connections/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const conn = connectionsById.get(id);
-    if (!conn) {
-      throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
-    }
-
-    const input = RespondConnectionInputSchema.parse(req.body || {});
-    let updated: Connection;
-
-    if (input.action === 'accept') {
-      updated = acceptConnection(conn, session.userId);
-
-      const recipientProfile = profilesByUserId.get(session.userId);
-      const recipientName = recipientProfile?.fullName || 'A professional';
-      const senderProfile = profilesByUserId.get(conn.senderId);
-      const notifRecipientId = senderProfile?.id || conn.senderId;
-
-      sendNotification({
-        recipientId: notifRecipientId,
-        type: 'connection_accepted',
-        title: 'Connection Request Accepted',
-        body: `${recipientName} accepted your connection request.`,
-        referenceType: 'connection',
-        referenceId: conn.id,
+      return reply.status(200).send({
+        status: conn ? conn.status : 'none',
+        connection: conn || null,
+        isConnected: conn?.status === 'accepted',
       });
+    }
+  );
+
+  app.post(
+    '/api/v1/connections/:id/respond',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const conn = connectionsById.get(id);
+      if (!conn) {
+        throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
+      }
+
+      const input = RespondConnectionInputSchema.parse(req.body || {});
+      let updated: Connection;
+
+      if (input.action === 'accept') {
+        updated = acceptConnection(conn, session.userId);
+
+        const recipientProfile = profilesByUserId.get(session.userId);
+        const recipientName = recipientProfile?.fullName || 'A professional';
+        const senderProfile = profilesByUserId.get(conn.senderId);
+        const notifRecipientId = senderProfile?.id || conn.senderId;
+
+        sendNotification({
+          recipientId: notifRecipientId,
+          type: 'connection_accepted',
+          title: 'Connection Request Accepted',
+          body: `${recipientName} accepted your connection request.`,
+          referenceType: 'connection',
+          referenceId: conn.id,
+        });
+
+        enqueuedWorkerJobs.push({
+          type: 'connection.accepted',
+          payload: {
+            connectionId: conn.id,
+            senderId: conn.senderId,
+            recipientId: conn.recipientId,
+          },
+          enqueuedAt: updated.acceptedAt,
+        });
+      } else {
+        updated = rejectConnection(conn, session.userId);
+
+        enqueuedWorkerJobs.push({
+          type: 'connection.rejected',
+          payload: {
+            connectionId: conn.id,
+            senderId: conn.senderId,
+            recipientId: conn.recipientId,
+          },
+          enqueuedAt: updated.updatedAt,
+        });
+      }
+
+      connectionsById.set(updated.id, updated);
+
+      const senderList = connectionsByUserId.get(updated.senderId) || [];
+      const sIdx = senderList.findIndex((c) => c.id === updated.id);
+      if (sIdx !== -1) senderList[sIdx] = updated;
+
+      const recipientList = connectionsByUserId.get(updated.recipientId) || [];
+      const rIdx = recipientList.findIndex((c) => c.id === updated.id);
+      if (rIdx !== -1) recipientList[rIdx] = updated;
+
+      return reply.status(200).send({ connection: updated });
+    }
+  );
+
+  app.post(
+    '/api/v1/connections/:id/withdraw',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const conn = connectionsById.get(id);
+      if (!conn) {
+        throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
+      }
+
+      const updated = withdrawConnection(conn, session.userId);
+      connectionsById.set(updated.id, updated);
+
+      const senderList = connectionsByUserId.get(updated.senderId) || [];
+      const sIdx = senderList.findIndex((c) => c.id === updated.id);
+      if (sIdx !== -1) senderList[sIdx] = updated;
+
+      const recipientList = connectionsByUserId.get(updated.recipientId) || [];
+      const rIdx = recipientList.findIndex((c) => c.id === updated.id);
+      if (rIdx !== -1) recipientList[rIdx] = updated;
 
       enqueuedWorkerJobs.push({
-        type: 'connection.accepted',
-        payload: {
-          connectionId: conn.id,
-          senderId: conn.senderId,
-          recipientId: conn.recipientId,
-        },
-        enqueuedAt: updated.acceptedAt,
-      });
-    } else {
-      updated = rejectConnection(conn, session.userId);
-
-      enqueuedWorkerJobs.push({
-        type: 'connection.rejected',
+        type: 'connection.withdrawn',
         payload: {
           connectionId: conn.id,
           senderId: conn.senderId,
@@ -5033,89 +5600,55 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
         enqueuedAt: updated.updatedAt,
       });
+
+      return reply.status(200).send({ connection: updated });
     }
+  );
 
-    connectionsById.set(updated.id, updated);
+  app.delete(
+    '/api/v1/connections/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const senderList = connectionsByUserId.get(updated.senderId) || [];
-    const sIdx = senderList.findIndex((c) => c.id === updated.id);
-    if (sIdx !== -1) senderList[sIdx] = updated;
+      const conn = connectionsById.get(id);
+      if (!conn) {
+        throw new DomainError('NOT_FOUND', `Connection with ID "${id}" not found.`);
+      }
 
-    const recipientList = connectionsByUserId.get(updated.recipientId) || [];
-    const rIdx = recipientList.findIndex((c) => c.id === updated.id);
-    if (rIdx !== -1) recipientList[rIdx] = updated;
+      if (conn.senderId !== session.userId && conn.recipientId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to connection.');
+      }
 
-    return reply.status(200).send({ connection: updated });
-  });
+      connectionsById.delete(id);
 
-  app.post('/api/v1/connections/:id/withdraw', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+      const senderList = connectionsByUserId.get(conn.senderId) || [];
+      connectionsByUserId.set(
+        conn.senderId,
+        senderList.filter((c) => c.id !== id)
+      );
 
-    const conn = connectionsById.get(id);
-    if (!conn) {
-      throw new DomainError('NOT_FOUND', `Connection request with ID "${id}" not found.`);
+      const recipientList = connectionsByUserId.get(conn.recipientId) || [];
+      connectionsByUserId.set(
+        conn.recipientId,
+        recipientList.filter((c) => c.id !== id)
+      );
+
+      enqueuedWorkerJobs.push({
+        type: 'connection.removed',
+        payload: {
+          connectionId: conn.id,
+          removedBy: session.userId,
+        },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Connection removed successfully',
+        deletedId: id,
+      });
     }
-
-    const updated = withdrawConnection(conn, session.userId);
-    connectionsById.set(updated.id, updated);
-
-    const senderList = connectionsByUserId.get(updated.senderId) || [];
-    const sIdx = senderList.findIndex((c) => c.id === updated.id);
-    if (sIdx !== -1) senderList[sIdx] = updated;
-
-    const recipientList = connectionsByUserId.get(updated.recipientId) || [];
-    const rIdx = recipientList.findIndex((c) => c.id === updated.id);
-    if (rIdx !== -1) recipientList[rIdx] = updated;
-
-    enqueuedWorkerJobs.push({
-      type: 'connection.withdrawn',
-      payload: {
-        connectionId: conn.id,
-        senderId: conn.senderId,
-        recipientId: conn.recipientId,
-      },
-      enqueuedAt: updated.updatedAt,
-    });
-
-    return reply.status(200).send({ connection: updated });
-  });
-
-  app.delete('/api/v1/connections/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const conn = connectionsById.get(id);
-    if (!conn) {
-      throw new DomainError('NOT_FOUND', `Connection with ID "${id}" not found.`);
-    }
-
-    if (conn.senderId !== session.userId && conn.recipientId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to connection.');
-    }
-
-    connectionsById.delete(id);
-
-    const senderList = connectionsByUserId.get(conn.senderId) || [];
-    connectionsByUserId.set(conn.senderId, senderList.filter((c) => c.id !== id));
-
-    const recipientList = connectionsByUserId.get(conn.recipientId) || [];
-    connectionsByUserId.set(conn.recipientId, recipientList.filter((c) => c.id !== id));
-
-    enqueuedWorkerJobs.push({
-      type: 'connection.removed',
-      payload: {
-        connectionId: conn.id,
-        removedBy: session.userId,
-      },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Connection removed successfully',
-      deletedId: id,
-    });
-  });
+  );
 
   // Warm Introduction Paths Repositories & Endpoints (F-121, S-11, BR-209..BR-216)
   const warmIntroPrefsByUserId = new Map<string, WarmIntroPreferences>();
@@ -5139,237 +5672,270 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return graph;
   }
 
-  app.post('/api/v1/networking/warm-intros/preferences', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = UpdateWarmIntroPreferencesInputSchema.parse(req.body || {});
+  app.post(
+    '/api/v1/networking/warm-intros/preferences',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = UpdateWarmIntroPreferencesInputSchema.parse(req.body || {});
 
-    const current = warmIntroPrefsByUserId.get(session.userId) || {
-      userId: session.userId,
-      optOutIntroducer: false,
-      blockAllIncomingIntros: false,
-      blockedUserIds: [],
-      updatedAt: new Date().toISOString(),
-    };
+      const current = warmIntroPrefsByUserId.get(session.userId) || {
+        userId: session.userId,
+        optOutIntroducer: false,
+        blockAllIncomingIntros: false,
+        blockedUserIds: [],
+        updatedAt: new Date().toISOString(),
+      };
 
-    const updated: WarmIntroPreferences = {
-      ...current,
-      optOutIntroducer: input.optOutIntroducer ?? current.optOutIntroducer,
-      blockAllIncomingIntros: input.blockAllIncomingIntros ?? current.blockAllIncomingIntros,
-      blockedUserIds: input.blockedUserIds ?? current.blockedUserIds,
-      updatedAt: new Date().toISOString(),
-    };
+      const updated: WarmIntroPreferences = {
+        ...current,
+        optOutIntroducer: input.optOutIntroducer ?? current.optOutIntroducer,
+        blockAllIncomingIntros: input.blockAllIncomingIntros ?? current.blockAllIncomingIntros,
+        blockedUserIds: input.blockedUserIds ?? current.blockedUserIds,
+        updatedAt: new Date().toISOString(),
+      };
 
-    warmIntroPrefsByUserId.set(session.userId, updated);
-    return reply.status(200).send({ preferences: updated });
-  });
-
-  app.get('/api/v1/networking/warm-intros/preferences', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const preferences = warmIntroPrefsByUserId.get(session.userId) || {
-      userId: session.userId,
-      optOutIntroducer: false,
-      blockAllIncomingIntros: false,
-      blockedUserIds: [],
-      updatedAt: new Date().toISOString(),
-    };
-    return reply.status(200).send({ preferences });
-  });
-
-  app.get('/api/v1/networking/warm-intros/paths', async (req: FastifyRequest<{ Querystring: { targetUserId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    let { targetUserId } = req.query;
-    if (!targetUserId) {
-      throw new DomainError('VALIDATION_FAILED', 'targetUserId query parameter is required.');
+      warmIntroPrefsByUserId.set(session.userId, updated);
+      return reply.status(200).send({ preferences: updated });
     }
+  );
 
-    const targetProfile = profilesById.get(targetUserId);
-    if (targetProfile) {
-      targetUserId = targetProfile.userId;
+  app.get(
+    '/api/v1/networking/warm-intros/preferences',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const preferences = warmIntroPrefsByUserId.get(session.userId) || {
+        userId: session.userId,
+        optOutIntroducer: false,
+        blockAllIncomingIntros: false,
+        blockedUserIds: [],
+        updatedAt: new Date().toISOString(),
+      };
+      return reply.status(200).send({ preferences });
     }
+  );
 
-    const graph = getAcceptedConnectionsGraph();
-    const paths = discoverWarmIntroPaths(session.userId, targetUserId, graph, warmIntroPrefsByUserId);
+  app.get(
+    '/api/v1/networking/warm-intros/paths',
+    async (req: FastifyRequest<{ Querystring: { targetUserId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      let { targetUserId } = req.query;
+      if (!targetUserId) {
+        throw new DomainError('VALIDATION_FAILED', 'targetUserId query parameter is required.');
+      }
 
-    return reply.status(200).send({ paths });
-  });
+      const targetProfile = profilesById.get(targetUserId);
+      if (targetProfile) {
+        targetUserId = targetProfile.userId;
+      }
 
-  app.post('/api/v1/networking/warm-intros/requests', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = CreateWarmIntroRequestInputSchema.parse(req.body || {});
-
-    let targetUserId = input.targetUserId;
-    const targetProfile = profilesById.get(targetUserId);
-    if (targetProfile) {
-      targetUserId = targetProfile.userId;
-    }
-
-    let introducerUserId = input.introducerUserId;
-    const introducerProfile = profilesById.get(introducerUserId);
-    if (introducerProfile) {
-      introducerUserId = introducerProfile.userId;
-    }
-
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const requesterRequests = warmIntroRequestsByRequesterId.get(session.userId) || [];
-    const weeklyCount = requesterRequests.filter((r) => new Date(r.createdAt).getTime() > oneWeekAgo).length;
-
-    const introducerPrefs = warmIntroPrefsByUserId.get(introducerUserId);
-    const targetPrefs = warmIntroPrefsByUserId.get(targetUserId);
-
-    const introRequest = createWarmIntroRequest(
-      {
-        requesterUserId: session.userId,
+      const graph = getAcceptedConnectionsGraph();
+      const paths = discoverWarmIntroPaths(
+        session.userId,
         targetUserId,
-        introducerUserId,
-        purpose: input.purpose,
-        note: input.note,
-      },
-      weeklyCount,
-      introducerPrefs,
-      targetPrefs
-    );
+        graph,
+        warmIntroPrefsByUserId
+      );
 
-    warmIntroRequestsById.set(introRequest.id, introRequest);
-
-    requesterRequests.unshift(introRequest);
-    warmIntroRequestsByRequesterId.set(session.userId, requesterRequests);
-
-    const introList = warmIntroRequestsByIntroducerId.get(introducerUserId) || [];
-    introList.unshift(introRequest);
-    warmIntroRequestsByIntroducerId.set(introducerUserId, introList);
-
-    const targetList = warmIntroRequestsByTargetId.get(targetUserId) || [];
-    targetList.unshift(introRequest);
-    warmIntroRequestsByTargetId.set(targetUserId, targetList);
-
-    const senderProfile = profilesByUserId.get(session.userId);
-    const senderName = senderProfile?.fullName || 'A professional';
-    const notifRecipientProfile = profilesByUserId.get(introducerUserId);
-    const notifRecipientId = notifRecipientProfile?.id || introducerUserId;
-
-    sendNotification({
-      recipientId: notifRecipientId,
-      type: 'warm_intro_requested',
-      title: 'New Introduction Request',
-      body: `${senderName} requested an introduction.`,
-      referenceType: 'warm_intro',
-      referenceId: introRequest.id,
-    });
-
-    auditLogs.push({
-      event: 'warm_intro.requested',
-      actorId: session.userId,
-      targetId: introRequest.id,
-      metadata: { targetUserId, introducerUserId },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(201).send({ request: introRequest });
-  });
-
-  app.get('/api/v1/networking/warm-intros/requests/incoming', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const requests = warmIntroRequestsByIntroducerId.get(session.userId) || [];
-    return reply.status(200).send({ requests });
-  });
-
-  app.get('/api/v1/networking/warm-intros/requests/outgoing', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const requests = warmIntroRequestsByRequesterId.get(session.userId) || [];
-    return reply.status(200).send({ requests });
-  });
-
-  app.get('/api/v1/networking/warm-intros/requests/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const request = warmIntroRequestsById.get(id);
-    if (!request) {
-      throw new DomainError('NOT_FOUND', `Warm intro request with ID ${id} not found.`);
+      return reply.status(200).send({ paths });
     }
+  );
 
-    const isRequester = request.requesterUserId === session.userId;
-    const isIntroducer = request.introducerUserId === session.userId;
-    const isTargetApproved = request.targetUserId === session.userId && (request.status === 'approved' || request.status === 'completed');
-    const isAdmin = session.roles.includes('platform_admin');
+  app.post(
+    '/api/v1/networking/warm-intros/requests',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = CreateWarmIntroRequestInputSchema.parse(req.body || {});
 
-    if (!isRequester && !isIntroducer && !isTargetApproved && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this introduction request.');
-    }
+      let targetUserId = input.targetUserId;
+      const targetProfile = profilesById.get(targetUserId);
+      if (targetProfile) {
+        targetUserId = targetProfile.userId;
+      }
 
-    return reply.status(200).send({ request });
-  });
+      let introducerUserId = input.introducerUserId;
+      const introducerProfile = profilesById.get(introducerUserId);
+      if (introducerProfile) {
+        introducerUserId = introducerProfile.userId;
+      }
 
-  app.post('/api/v1/networking/warm-intros/requests/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = RespondWarmIntroRequestInputSchema.parse(req.body || {});
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const requesterRequests = warmIntroRequestsByRequesterId.get(session.userId) || [];
+      const weeklyCount = requesterRequests.filter(
+        (r) => new Date(r.createdAt).getTime() > oneWeekAgo
+      ).length;
 
-    const request = warmIntroRequestsById.get(id);
-    if (!request) {
-      throw new DomainError('NOT_FOUND', `Warm intro request with ID ${id} not found.`);
-    }
+      const introducerPrefs = warmIntroPrefsByUserId.get(introducerUserId);
+      const targetPrefs = warmIntroPrefsByUserId.get(targetUserId);
 
-    const updated = respondToIntroRequest(request, session.userId, input.decision, input.reason);
-    warmIntroRequestsById.set(updated.id, updated);
+      const introRequest = createWarmIntroRequest(
+        {
+          requesterUserId: session.userId,
+          targetUserId,
+          introducerUserId,
+          purpose: input.purpose,
+          note: input.note,
+        },
+        weeklyCount,
+        introducerPrefs,
+        targetPrefs
+      );
 
-    // Update in user arrays
-    const reqList = warmIntroRequestsByRequesterId.get(updated.requesterUserId) || [];
-    const rIdx = reqList.findIndex((r) => r.id === updated.id);
-    if (rIdx !== -1) reqList[rIdx] = updated;
+      warmIntroRequestsById.set(introRequest.id, introRequest);
 
-    const introList = warmIntroRequestsByIntroducerId.get(updated.introducerUserId) || [];
-    const iIdx = introList.findIndex((r) => r.id === updated.id);
-    if (iIdx !== -1) introList[iIdx] = updated;
+      requesterRequests.unshift(introRequest);
+      warmIntroRequestsByRequesterId.set(session.userId, requesterRequests);
 
-    const targetList = warmIntroRequestsByTargetId.get(updated.targetUserId) || [];
-    const tIdx = targetList.findIndex((r) => r.id === updated.id);
-    if (tIdx !== -1) targetList[tIdx] = updated;
+      const introList = warmIntroRequestsByIntroducerId.get(introducerUserId) || [];
+      introList.unshift(introRequest);
+      warmIntroRequestsByIntroducerId.set(introducerUserId, introList);
 
-    const notifRequesterProfile = profilesByUserId.get(updated.requesterUserId);
-    const notifRequesterId = notifRequesterProfile?.id || updated.requesterUserId;
+      const targetList = warmIntroRequestsByTargetId.get(targetUserId) || [];
+      targetList.unshift(introRequest);
+      warmIntroRequestsByTargetId.set(targetUserId, targetList);
 
-    if (updated.status === 'approved') {
+      const senderProfile = profilesByUserId.get(session.userId);
+      const senderName = senderProfile?.fullName || 'A professional';
+      const notifRecipientProfile = profilesByUserId.get(introducerUserId);
+      const notifRecipientId = notifRecipientProfile?.id || introducerUserId;
+
       sendNotification({
-        recipientId: notifRequesterId,
-        type: 'warm_intro_approved',
-        title: 'Introduction Approved',
-        body: `Your introduction request was approved! A three-way thread has been created.`,
+        recipientId: notifRecipientId,
+        type: 'warm_intro_requested',
+        title: 'New Introduction Request',
+        body: `${senderName} requested an introduction.`,
         referenceType: 'warm_intro',
-        referenceId: updated.id,
+        referenceId: introRequest.id,
       });
 
-      const notifTargetProfile = profilesByUserId.get(updated.targetUserId);
-      const notifTargetId = notifTargetProfile?.id || updated.targetUserId;
-      sendNotification({
-        recipientId: notifTargetId,
-        type: 'warm_intro_delivered',
-        title: 'New Warm Introduction',
-        body: `You have received a warm introduction!`,
-        referenceType: 'warm_intro',
-        referenceId: updated.id,
+      auditLogs.push({
+        event: 'warm_intro.requested',
+        actorId: session.userId,
+        targetId: introRequest.id,
+        metadata: { targetUserId, introducerUserId },
+        timestamp: new Date().toISOString(),
       });
-    } else {
-      sendNotification({
-        recipientId: notifRequesterId,
-        type: 'warm_intro_declined',
-        title: 'Introduction Declined',
-        body: `Your introduction request was declined by the introducer.`,
-        referenceType: 'warm_intro',
-        referenceId: updated.id,
-      });
+
+      return reply.status(201).send({ request: introRequest });
     }
+  );
 
-    auditLogs.push({
-      event: 'warm_intro.responded',
-      actorId: session.userId,
-      targetId: updated.id,
-      metadata: { status: updated.status, threadId: updated.threadId },
-      timestamp: new Date().toISOString(),
-    });
+  app.get(
+    '/api/v1/networking/warm-intros/requests/incoming',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const requests = warmIntroRequestsByIntroducerId.get(session.userId) || [];
+      return reply.status(200).send({ requests });
+    }
+  );
 
-    return reply.status(200).send({ request: updated });
-  });
+  app.get(
+    '/api/v1/networking/warm-intros/requests/outgoing',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const requests = warmIntroRequestsByRequesterId.get(session.userId) || [];
+      return reply.status(200).send({ requests });
+    }
+  );
+
+  app.get(
+    '/api/v1/networking/warm-intros/requests/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const request = warmIntroRequestsById.get(id);
+      if (!request) {
+        throw new DomainError('NOT_FOUND', `Warm intro request with ID ${id} not found.`);
+      }
+
+      const isRequester = request.requesterUserId === session.userId;
+      const isIntroducer = request.introducerUserId === session.userId;
+      const isTargetApproved =
+        request.targetUserId === session.userId &&
+        (request.status === 'approved' || request.status === 'completed');
+      const isAdmin = session.roles.includes('platform_admin');
+
+      if (!isRequester && !isIntroducer && !isTargetApproved && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this introduction request.');
+      }
+
+      return reply.status(200).send({ request });
+    }
+  );
+
+  app.post(
+    '/api/v1/networking/warm-intros/requests/:id/respond',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = RespondWarmIntroRequestInputSchema.parse(req.body || {});
+
+      const request = warmIntroRequestsById.get(id);
+      if (!request) {
+        throw new DomainError('NOT_FOUND', `Warm intro request with ID ${id} not found.`);
+      }
+
+      const updated = respondToIntroRequest(request, session.userId, input.decision, input.reason);
+      warmIntroRequestsById.set(updated.id, updated);
+
+      // Update in user arrays
+      const reqList = warmIntroRequestsByRequesterId.get(updated.requesterUserId) || [];
+      const rIdx = reqList.findIndex((r) => r.id === updated.id);
+      if (rIdx !== -1) reqList[rIdx] = updated;
+
+      const introList = warmIntroRequestsByIntroducerId.get(updated.introducerUserId) || [];
+      const iIdx = introList.findIndex((r) => r.id === updated.id);
+      if (iIdx !== -1) introList[iIdx] = updated;
+
+      const targetList = warmIntroRequestsByTargetId.get(updated.targetUserId) || [];
+      const tIdx = targetList.findIndex((r) => r.id === updated.id);
+      if (tIdx !== -1) targetList[tIdx] = updated;
+
+      const notifRequesterProfile = profilesByUserId.get(updated.requesterUserId);
+      const notifRequesterId = notifRequesterProfile?.id || updated.requesterUserId;
+
+      if (updated.status === 'approved') {
+        sendNotification({
+          recipientId: notifRequesterId,
+          type: 'warm_intro_approved',
+          title: 'Introduction Approved',
+          body: `Your introduction request was approved! A three-way thread has been created.`,
+          referenceType: 'warm_intro',
+          referenceId: updated.id,
+        });
+
+        const notifTargetProfile = profilesByUserId.get(updated.targetUserId);
+        const notifTargetId = notifTargetProfile?.id || updated.targetUserId;
+        sendNotification({
+          recipientId: notifTargetId,
+          type: 'warm_intro_delivered',
+          title: 'New Warm Introduction',
+          body: `You have received a warm introduction!`,
+          referenceType: 'warm_intro',
+          referenceId: updated.id,
+        });
+      } else {
+        sendNotification({
+          recipientId: notifRequesterId,
+          type: 'warm_intro_declined',
+          title: 'Introduction Declined',
+          body: `Your introduction request was declined by the introducer.`,
+          referenceType: 'warm_intro',
+          referenceId: updated.id,
+        });
+      }
+
+      auditLogs.push({
+        event: 'warm_intro.responded',
+        actorId: session.userId,
+        targetId: updated.id,
+        metadata: { status: updated.status, threadId: updated.threadId },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ request: updated });
+    }
+  );
 
   // Referral Request System Repositories & Endpoints (F-142, S-11, BR-233..BR-240)
   const referralRequestsById = new Map<string, ReferralRequest>();
@@ -5458,162 +6024,182 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ request });
   });
 
-  app.get('/api/v1/referrals/requests/incoming', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const requests = referralRequestsByReferrerId.get(session.userId) || [];
-    return reply.status(200).send({ requests });
-  });
-
-  app.get('/api/v1/referrals/requests/outgoing', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const requests = referralRequestsByCandidateId.get(session.userId) || [];
-    return reply.status(200).send({ requests });
-  });
-
-  app.get('/api/v1/referrals/requests/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const request = referralRequestsById.get(id);
-    if (!request) {
-      throw new DomainError('NOT_FOUND', `Referral request with ID ${id} not found.`);
+  app.get(
+    '/api/v1/referrals/requests/incoming',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const requests = referralRequestsByReferrerId.get(session.userId) || [];
+      return reply.status(200).send({ requests });
     }
+  );
 
-    const isCandidate = request.candidateId === session.userId;
-    const isReferrer = request.referrerId === session.userId;
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isOrgMember = userMemberships.some((m) => m.orgId === request.orgId);
-    const isAdmin = session.roles.includes('platform_admin');
-
-    if (!isCandidate && !isReferrer && !isOrgMember && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this referral request.');
+  app.get(
+    '/api/v1/referrals/requests/outgoing',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const requests = referralRequestsByCandidateId.get(session.userId) || [];
+      return reply.status(200).send({ requests });
     }
+  );
 
-    return reply.status(200).send({ request });
-  });
+  app.get(
+    '/api/v1/referrals/requests/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-  app.post('/api/v1/referrals/requests/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = RespondReferralRequestInputSchema.parse(req.body || {});
-
-    const request = referralRequestsById.get(id);
-    if (!request) {
-      throw new DomainError('NOT_FOUND', `Referral request with ID ${id} not found.`);
-    }
-
-    const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
-    const quarterlyCount = Array.from(referralOutcomesById.values()).filter(
-      (o) => o.referrerId === session.userId && new Date(o.createdAt).getTime() > ninetyDaysAgo
-    ).length;
-
-    const result = respondToReferralRequest(
-      request,
-      session.userId,
-      input.action,
-      quarterlyCount,
-      input.declineReason,
-      input.forwardedToUserId
-    );
-
-    referralRequestsById.set(result.request.id, result.request);
-
-    // Update in user arrays
-    const candList = referralRequestsByCandidateId.get(result.request.candidateId) || [];
-    const cIdx = candList.findIndex((r) => r.id === result.request.id);
-    if (cIdx !== -1) candList[cIdx] = result.request;
-
-    const refList = referralRequestsByReferrerId.get(session.userId) || [];
-    const rIdx = refList.findIndex((r) => r.id === result.request.id);
-    if (rIdx !== -1) refList[rIdx] = result.request;
-
-    const candidateProfile = profilesByUserId.get(result.request.candidateId);
-    const notifCandidateId = candidateProfile?.id || result.request.candidateId;
-
-    if (result.outcome) {
-      referralOutcomesById.set(result.outcome.id, result.outcome);
-      const orgOutcomes = referralOutcomesByOrgId.get(result.outcome.orgId) || [];
-      orgOutcomes.push(result.outcome);
-      referralOutcomesByOrgId.set(result.outcome.orgId, orgOutcomes);
-
-      // Tag existing active application if present (BR-235)
-      const candApps = applicationsByCandidateId.get(candidateProfile?.id || '') || [];
-      const matchingApp = candApps.find((a) => a.jobId === result.outcome!.jobId && a.status !== 'withdrawn' && a.status !== 'rejected');
-      if (matchingApp) {
-        matchingApp.isReferred = true;
-        matchingApp.referralId = result.outcome.id;
-        applicationsById.set(matchingApp.id, matchingApp);
+      const request = referralRequestsById.get(id);
+      if (!request) {
+        throw new DomainError('NOT_FOUND', `Referral request with ID ${id} not found.`);
       }
 
-      sendNotification({
-        recipientId: notifCandidateId,
-        type: 'referral_approved',
-        title: 'Referral Submitted',
-        body: 'Your referral request was approved and submitted to the hiring team!',
-        referenceType: 'referral',
-        referenceId: result.request.id,
-      });
-    } else if (input.action === 'forward' && input.forwardedToUserId) {
-      const forwardedList = referralRequestsByReferrerId.get(input.forwardedToUserId) || [];
-      forwardedList.unshift(result.request);
-      referralRequestsByReferrerId.set(input.forwardedToUserId, forwardedList);
+      const isCandidate = request.candidateId === session.userId;
+      const isReferrer = request.referrerId === session.userId;
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isOrgMember = userMemberships.some((m) => m.orgId === request.orgId);
+      const isAdmin = session.roles.includes('platform_admin');
 
-      const fwdProfile = profilesByUserId.get(input.forwardedToUserId);
-      const notifFwdId = fwdProfile?.id || input.forwardedToUserId;
-      sendNotification({
-        recipientId: notifFwdId,
-        type: 'referral_forwarded',
-        title: 'Referral Request Forwarded',
-        body: 'A colleague forwarded a referral request to you.',
-        referenceType: 'referral',
-        referenceId: result.request.id,
-      });
-    } else {
-      sendNotification({
-        recipientId: notifCandidateId,
-        type: 'referral_declined',
-        title: 'Referral Request Declined',
-        body: 'Your referral request was declined by the referrer.',
-        referenceType: 'referral',
-        referenceId: result.request.id,
-      });
-    }
-
-    auditLogs.push({
-      event: 'referral.responded',
-      actorId: session.userId,
-      targetId: result.request.id,
-      metadata: { action: input.action, outcomeId: result.outcome?.id },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      request: result.request,
-      outcome: result.outcome,
-    });
-  });
-
-  app.get('/api/v1/referrals/outcomes', async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { orgId } = req.query;
-
-    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-    const isMemberOfQueryOrg = orgId ? userMemberships.some((m) => m.orgId === orgId) : false;
-    const isAdmin = session.roles.includes('platform_admin');
-
-    let list = Array.from(referralOutcomesById.values());
-    if (orgId) {
-      if (!isMemberOfQueryOrg && !isAdmin) {
-        throw new DomainError('FORBIDDEN', 'Access denied to organization referral outcomes.');
+      if (!isCandidate && !isReferrer && !isOrgMember && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this referral request.');
       }
-      list = list.filter((o) => o.orgId === orgId);
-    } else if (!isAdmin) {
-      // Non-admins see outcomes where they are candidate or referrer
-      list = list.filter((o) => o.candidateId === session.userId || o.referrerId === session.userId);
-    }
 
-    return reply.status(200).send({ outcomes: list });
-  });
+      return reply.status(200).send({ request });
+    }
+  );
+
+  app.post(
+    '/api/v1/referrals/requests/:id/respond',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = RespondReferralRequestInputSchema.parse(req.body || {});
+
+      const request = referralRequestsById.get(id);
+      if (!request) {
+        throw new DomainError('NOT_FOUND', `Referral request with ID ${id} not found.`);
+      }
+
+      const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
+      const quarterlyCount = Array.from(referralOutcomesById.values()).filter(
+        (o) => o.referrerId === session.userId && new Date(o.createdAt).getTime() > ninetyDaysAgo
+      ).length;
+
+      const result = respondToReferralRequest(
+        request,
+        session.userId,
+        input.action,
+        quarterlyCount,
+        input.declineReason,
+        input.forwardedToUserId
+      );
+
+      referralRequestsById.set(result.request.id, result.request);
+
+      // Update in user arrays
+      const candList = referralRequestsByCandidateId.get(result.request.candidateId) || [];
+      const cIdx = candList.findIndex((r) => r.id === result.request.id);
+      if (cIdx !== -1) candList[cIdx] = result.request;
+
+      const refList = referralRequestsByReferrerId.get(session.userId) || [];
+      const rIdx = refList.findIndex((r) => r.id === result.request.id);
+      if (rIdx !== -1) refList[rIdx] = result.request;
+
+      const candidateProfile = profilesByUserId.get(result.request.candidateId);
+      const notifCandidateId = candidateProfile?.id || result.request.candidateId;
+
+      if (result.outcome) {
+        referralOutcomesById.set(result.outcome.id, result.outcome);
+        const orgOutcomes = referralOutcomesByOrgId.get(result.outcome.orgId) || [];
+        orgOutcomes.push(result.outcome);
+        referralOutcomesByOrgId.set(result.outcome.orgId, orgOutcomes);
+
+        // Tag existing active application if present (BR-235)
+        const candApps = applicationsByCandidateId.get(candidateProfile?.id || '') || [];
+        const matchingApp = candApps.find(
+          (a) =>
+            a.jobId === result.outcome!.jobId && a.status !== 'withdrawn' && a.status !== 'rejected'
+        );
+        if (matchingApp) {
+          matchingApp.isReferred = true;
+          matchingApp.referralId = result.outcome.id;
+          applicationsById.set(matchingApp.id, matchingApp);
+        }
+
+        sendNotification({
+          recipientId: notifCandidateId,
+          type: 'referral_approved',
+          title: 'Referral Submitted',
+          body: 'Your referral request was approved and submitted to the hiring team!',
+          referenceType: 'referral',
+          referenceId: result.request.id,
+        });
+      } else if (input.action === 'forward' && input.forwardedToUserId) {
+        const forwardedList = referralRequestsByReferrerId.get(input.forwardedToUserId) || [];
+        forwardedList.unshift(result.request);
+        referralRequestsByReferrerId.set(input.forwardedToUserId, forwardedList);
+
+        const fwdProfile = profilesByUserId.get(input.forwardedToUserId);
+        const notifFwdId = fwdProfile?.id || input.forwardedToUserId;
+        sendNotification({
+          recipientId: notifFwdId,
+          type: 'referral_forwarded',
+          title: 'Referral Request Forwarded',
+          body: 'A colleague forwarded a referral request to you.',
+          referenceType: 'referral',
+          referenceId: result.request.id,
+        });
+      } else {
+        sendNotification({
+          recipientId: notifCandidateId,
+          type: 'referral_declined',
+          title: 'Referral Request Declined',
+          body: 'Your referral request was declined by the referrer.',
+          referenceType: 'referral',
+          referenceId: result.request.id,
+        });
+      }
+
+      auditLogs.push({
+        event: 'referral.responded',
+        actorId: session.userId,
+        targetId: result.request.id,
+        metadata: { action: input.action, outcomeId: result.outcome?.id },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        request: result.request,
+        outcome: result.outcome,
+      });
+    }
+  );
+
+  app.get(
+    '/api/v1/referrals/outcomes',
+    async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { orgId } = req.query;
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMemberOfQueryOrg = orgId ? userMemberships.some((m) => m.orgId === orgId) : false;
+      const isAdmin = session.roles.includes('platform_admin');
+
+      let list = Array.from(referralOutcomesById.values());
+      if (orgId) {
+        if (!isMemberOfQueryOrg && !isAdmin) {
+          throw new DomainError('FORBIDDEN', 'Access denied to organization referral outcomes.');
+        }
+        list = list.filter((o) => o.orgId === orgId);
+      } else if (!isAdmin) {
+        // Non-admins see outcomes where they are candidate or referrer
+        list = list.filter(
+          (o) => o.candidateId === session.userId || o.referrerId === session.userId
+        );
+      }
+
+      return reply.status(200).send({ outcomes: list });
+    }
+  );
 
   // Peer Credibility Networks & Skill Endorsements (F-150, F-110, F-144)
   const skillEndorsementsById = new Map<string, SkillEndorsement>();
@@ -5654,7 +6240,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     // Check rate limit: max 5 endorsements given per week
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const endorserHistory = skillEndorsementsByEndorserId.get(session.userId) || [];
-    const recentWeeklyCount = endorserHistory.filter((e) => new Date(e.createdAt).getTime() > oneWeekAgo).length;
+    const recentWeeklyCount = endorserHistory.filter(
+      (e) => new Date(e.createdAt).getTime() > oneWeekAgo
+    ).length;
 
     // Check duplicate endorsement
     const recipientList = skillEndorsementsByRecipientId.get(input.recipientId) || [];
@@ -5684,7 +6272,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const recipientGivenEndorsements = skillEndorsementsByEndorserId.get(input.recipientId) || [];
     const isReciprocal = recipientGivenEndorsements.some(
-      (e) => e.recipientId === session.userId && e.status === 'active' && new Date(e.createdAt).getTime() > thirtyDaysAgo
+      (e) =>
+        e.recipientId === session.userId &&
+        e.status === 'active' &&
+        new Date(e.createdAt).getTime() > thirtyDaysAgo
     );
 
     const endorsement = createSkillEndorsement({
@@ -5725,66 +6316,80 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 2. Query Skill Endorsements for a Candidate (with aggregated strength)
-  app.get('/api/v1/skills/endorsements/recipients/:recipientId', async (req: FastifyRequest<{ Params: { recipientId: string }; Querystring: { skillId?: string } }>, reply: FastifyReply) => {
-    const { recipientId } = req.params;
-    const { skillId } = req.query;
+  app.get(
+    '/api/v1/skills/endorsements/recipients/:recipientId',
+    async (
+      req: FastifyRequest<{ Params: { recipientId: string }; Querystring: { skillId?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const { recipientId } = req.params;
+      const { skillId } = req.query;
 
-    let list = skillEndorsementsByRecipientId.get(recipientId) || [];
-    if (skillId) {
-      list = list.filter((e) => e.skillId === skillId);
+      let list = skillEndorsementsByRecipientId.get(recipientId) || [];
+      if (skillId) {
+        list = list.filter((e) => e.skillId === skillId);
+      }
+
+      const activeList = list.filter((e) => e.status === 'active');
+      const aggregate = aggregateSkillEndorsements(activeList);
+
+      return reply.status(200).send({
+        recipientId,
+        skillId,
+        aggregate,
+        endorsements: activeList,
+      });
     }
-
-    const activeList = list.filter((e) => e.status === 'active');
-    const aggregate = aggregateSkillEndorsements(activeList);
-
-    return reply.status(200).send({
-      recipientId,
-      skillId,
-      aggregate,
-      endorsements: activeList,
-    });
-  });
+  );
 
   // 3. Revoke Endorsement within 30-day window
-  app.delete('/api/v1/skills/endorsements/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+  app.delete(
+    '/api/v1/skills/endorsements/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const endorsement = skillEndorsementsById.get(id);
-    if (!endorsement) {
-      throw new DomainError('NOT_FOUND', `Endorsement with ID ${id} not found.`);
+      const endorsement = skillEndorsementsById.get(id);
+      if (!endorsement) {
+        throw new DomainError('NOT_FOUND', `Endorsement with ID ${id} not found.`);
+      }
+
+      const revoked = revokeSkillEndorsement(endorsement, session.userId);
+      skillEndorsementsById.set(revoked.id, revoked);
+
+      const rList = skillEndorsementsByRecipientId.get(revoked.recipientId) || [];
+      const rIdx = rList.findIndex((e) => e.id === revoked.id);
+      if (rIdx >= 0) rList[rIdx] = revoked;
+
+      const eList = skillEndorsementsByEndorserId.get(revoked.endorserId) || [];
+      const eIdx = eList.findIndex((e) => e.id === revoked.id);
+      if (eIdx >= 0) eList[eIdx] = revoked;
+
+      return reply.status(200).send({
+        message: 'Endorsement revoked successfully.',
+        endorsement: revoked,
+      });
     }
-
-    const revoked = revokeSkillEndorsement(endorsement, session.userId);
-    skillEndorsementsById.set(revoked.id, revoked);
-
-    const rList = skillEndorsementsByRecipientId.get(revoked.recipientId) || [];
-    const rIdx = rList.findIndex((e) => e.id === revoked.id);
-    if (rIdx >= 0) rList[rIdx] = revoked;
-
-    const eList = skillEndorsementsByEndorserId.get(revoked.endorserId) || [];
-    const eIdx = eList.findIndex((e) => e.id === revoked.id);
-    if (eIdx >= 0) eList[eIdx] = revoked;
-
-    return reply.status(200).send({
-      message: 'Endorsement revoked successfully.',
-      endorsement: revoked,
-    });
-  });
+  );
 
   // 4. Query Endorsements Given by Authenticated User
-  app.get('/api/v1/skills/endorsements/my/given', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const history = skillEndorsementsByEndorserId.get(session.userId) || [];
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const weeklyGiven = history.filter((e) => new Date(e.createdAt).getTime() > oneWeekAgo).length;
+  app.get(
+    '/api/v1/skills/endorsements/my/given',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const history = skillEndorsementsByEndorserId.get(session.userId) || [];
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const weeklyGiven = history.filter(
+        (e) => new Date(e.createdAt).getTime() > oneWeekAgo
+      ).length;
 
-    return reply.status(200).send({
-      endorsements: history,
-      weeklyQuotaRemaining: Math.max(0, 5 - weeklyGiven),
-      totalGiven: history.length,
-    });
-  });
+      return reply.status(200).send({
+        endorsements: history,
+        weeklyQuotaRemaining: Math.max(0, 5 - weeklyGiven),
+        totalGiven: history.length,
+      });
+    }
+  );
 
   // =========================================================================
   // Skill Supply/Demand Forecasting Repositories & Endpoints (F-151, F-84, F-86, F-97)
@@ -5795,7 +6400,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   // Seed baseline market signals for canonical skills
   const nowTs = Date.now();
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  const initialSkillSignals: Array<{ skillId: string; signals: Array<{ demandPostingsCount: number; activeCandidatesCount: number; avgSalaryOffered: number; geographicRegion: string; industry: string; recordedAt: string }> }> = [
+  const initialSkillSignals: Array<{
+    skillId: string;
+    signals: Array<{
+      demandPostingsCount: number;
+      activeCandidatesCount: number;
+      avgSalaryOffered: number;
+      geographicRegion: string;
+      industry: string;
+      recordedAt: string;
+    }>;
+  }> = [
     {
       skillId: '10000000-0000-4000-a000-000000000001', // TypeScript
       signals: [
@@ -5891,206 +6506,218 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   }
 
   // 1. Get Top Emerging Skills (trajectory & scarcity ranking)
-  app.get('/api/v1/skills/forecast/top-growth', async (req: FastifyRequest, reply: FastifyReply) => {
-    const query = TopEmergingSkillsQuerySchema.parse(req.query);
-    const limit = query.limit ?? 10;
+  app.get(
+    '/api/v1/skills/forecast/top-growth',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const query = TopEmergingSkillsQuerySchema.parse(req.query);
+      const limit = query.limit ?? 10;
 
-    const skillsWithForecasts: Array<{
-      skillId: string;
-      skillName: string;
-      forecast: SkillForecast;
-    }> = [];
+      const skillsWithForecasts: Array<{
+        skillId: string;
+        skillName: string;
+        forecast: SkillForecast;
+      }> = [];
 
-    for (const skill of skillsById.values()) {
-      let signals = skillMarketSignalsBySkillId.get(skill.id) || [];
-      if (signals.length === 0) {
-        signals = [
-          recordSkillMarketSignal({
+      for (const skill of skillsById.values()) {
+        let signals = skillMarketSignalsBySkillId.get(skill.id) || [];
+        if (signals.length === 0) {
+          signals = [
+            recordSkillMarketSignal({
+              skillId: skill.id,
+              demandPostingsCount: 50,
+              activeCandidatesCount: 50,
+              avgSalaryOffered: 100000,
+              geographicRegion: 'Global',
+              industry: 'Technology',
+            }),
+          ];
+          skillMarketSignalsBySkillId.set(skill.id, signals);
+        }
+
+        let forecast = skillForecastsBySkillId.get(skill.id);
+        if (!forecast) {
+          forecast = computeSkillForecast({
             skillId: skill.id,
-            demandPostingsCount: 50,
-            activeCandidatesCount: 50,
-            avgSalaryOffered: 100000,
-            geographicRegion: 'Global',
-            industry: 'Technology',
-          }),
-        ];
-        skillMarketSignalsBySkillId.set(skill.id, signals);
-      }
+            signals,
+            forecastHorizonMonths: 12,
+            skillCategory: skill.category,
+          });
+          skillForecastsBySkillId.set(skill.id, forecast);
+        }
 
-      let forecast = skillForecastsBySkillId.get(skill.id);
-      if (!forecast) {
-        forecast = computeSkillForecast({
+        skillsWithForecasts.push({
           skillId: skill.id,
-          signals,
-          forecastHorizonMonths: 12,
-          skillCategory: skill.category,
+          skillName: skill.name,
+          forecast,
         });
-        skillForecastsBySkillId.set(skill.id, forecast);
       }
 
-      skillsWithForecasts.push({
-        skillId: skill.id,
+      const ranked = rankTopEmergingSkills(skillsWithForecasts, limit);
+
+      return reply.status(200).send({
+        topEmergingSkills: ranked,
+        total: ranked.length,
+      });
+    }
+  );
+
+  // 2. Record Real-time Labor Market Signal for a Skill
+  app.post(
+    '/api/v1/skills/:skillId/market-signals',
+    async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { skillId } = req.params;
+
+      const skill = skillsById.get(skillId);
+      if (!skill) {
+        throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+      }
+
+      const input = RecordSkillMarketSignalInputSchema.parse(req.body);
+
+      const signal = recordSkillMarketSignal({
+        skillId,
+        demandPostingsCount: input.demandPostingsCount,
+        activeCandidatesCount: input.activeCandidatesCount,
+        avgSalaryOffered: input.avgSalaryOffered,
+        geographicRegion: input.geographicRegion,
+        industry: input.industry,
+      });
+
+      const list = skillMarketSignalsBySkillId.get(skillId) || [];
+      list.push(signal);
+      skillMarketSignalsBySkillId.set(skillId, list);
+
+      // Invalidate cached forecast so subsequent reads compute fresh metrics
+      skillForecastsBySkillId.delete(skillId);
+
+      enqueuedWorkerJobs.push({
+        type: 'skill.market_signal_recorded',
+        payload: {
+          signalId: signal.id,
+          skillId,
+          demandPostingsCount: signal.demandPostingsCount,
+          activeCandidatesCount: signal.activeCandidatesCount,
+          recordedByUserId: session.userId,
+        },
+        enqueuedAt: signal.recordedAt,
+      });
+
+      return reply.status(201).send({
+        message: 'Skill market signal recorded successfully.',
+        signal,
+      });
+    }
+  );
+
+  // 3. Query 12-Month (or custom) Skill Supply/Demand Forecast
+  app.get(
+    '/api/v1/skills/:skillId/forecast',
+    async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+      const { skillId } = req.params;
+
+      const skill = skillsById.get(skillId);
+      if (!skill) {
+        throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+      }
+
+      const query = QuerySkillForecastInputSchema.parse(req.query);
+      const horizon = query.forecastHorizonMonths ?? 12;
+
+      let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+      if (signals.length === 0) {
+        const baseline = recordSkillMarketSignal({
+          skillId,
+          demandPostingsCount: 100,
+          activeCandidatesCount: 80,
+          avgSalaryOffered: 110000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+        });
+        signals = [baseline];
+        skillMarketSignalsBySkillId.set(skillId, signals);
+      }
+
+      const prevForecast = skillForecastsBySkillId.get(skillId);
+      const forecast = computeSkillForecast({
+        skillId,
+        signals,
+        forecastHorizonMonths: horizon,
+        skillCategory: skill.category,
+        previousForecast: prevForecast,
+      });
+
+      skillForecastsBySkillId.set(skillId, forecast);
+
+      return reply.status(200).send({
+        skillId,
+        skillName: skill.name,
+        category: skill.category,
+        forecast,
+      });
+    }
+  );
+
+  // 4. Generate/Recompute Skill Forecast (Admin / Recruiter / On-demand)
+  app.post(
+    '/api/v1/skills/:skillId/forecast/generate',
+    async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { skillId } = req.params;
+
+      const skill = skillsById.get(skillId);
+      if (!skill) {
+        throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+      }
+
+      const input = GenerateSkillForecastInputSchema.parse(req.body);
+
+      let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+      if (signals.length === 0) {
+        const baseline = recordSkillMarketSignal({
+          skillId,
+          demandPostingsCount: 100,
+          activeCandidatesCount: 80,
+          avgSalaryOffered: 110000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+        });
+        signals = [baseline];
+        skillMarketSignalsBySkillId.set(skillId, signals);
+      }
+
+      const prevForecast = skillForecastsBySkillId.get(skillId);
+      const forecast = computeSkillForecast({
+        skillId,
+        signals,
+        forecastHorizonMonths: input.forecastHorizonMonths,
+        skillCategory: input.skillCategory || skill.category,
+        prerequisiteDepth: input.prerequisiteDepth,
+        previousForecast: prevForecast,
+      });
+
+      skillForecastsBySkillId.set(skillId, forecast);
+
+      enqueuedWorkerJobs.push({
+        type: 'skill.forecast_generated',
+        payload: {
+          skillId,
+          horizonMonths: forecast.forecastHorizonMonths,
+          demandGrowthPct: forecast.demandGrowthPct,
+          scarcityIndex: forecast.scarcityIndex,
+          generatedByUserId: session.userId,
+        },
+        enqueuedAt: forecast.generatedAt,
+      });
+
+      return reply.status(201).send({
+        message: 'Skill forecast generated successfully.',
+        skillId,
         skillName: skill.name,
         forecast,
       });
     }
-
-    const ranked = rankTopEmergingSkills(skillsWithForecasts, limit);
-
-    return reply.status(200).send({
-      topEmergingSkills: ranked,
-      total: ranked.length,
-    });
-  });
-
-  // 2. Record Real-time Labor Market Signal for a Skill
-  app.post('/api/v1/skills/:skillId/market-signals', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { skillId } = req.params;
-
-    const skill = skillsById.get(skillId);
-    if (!skill) {
-      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
-    }
-
-    const input = RecordSkillMarketSignalInputSchema.parse(req.body);
-
-    const signal = recordSkillMarketSignal({
-      skillId,
-      demandPostingsCount: input.demandPostingsCount,
-      activeCandidatesCount: input.activeCandidatesCount,
-      avgSalaryOffered: input.avgSalaryOffered,
-      geographicRegion: input.geographicRegion,
-      industry: input.industry,
-    });
-
-    const list = skillMarketSignalsBySkillId.get(skillId) || [];
-    list.push(signal);
-    skillMarketSignalsBySkillId.set(skillId, list);
-
-    // Invalidate cached forecast so subsequent reads compute fresh metrics
-    skillForecastsBySkillId.delete(skillId);
-
-    enqueuedWorkerJobs.push({
-      type: 'skill.market_signal_recorded',
-      payload: {
-        signalId: signal.id,
-        skillId,
-        demandPostingsCount: signal.demandPostingsCount,
-        activeCandidatesCount: signal.activeCandidatesCount,
-        recordedByUserId: session.userId,
-      },
-      enqueuedAt: signal.recordedAt,
-    });
-
-    return reply.status(201).send({
-      message: 'Skill market signal recorded successfully.',
-      signal,
-    });
-  });
-
-  // 3. Query 12-Month (or custom) Skill Supply/Demand Forecast
-  app.get('/api/v1/skills/:skillId/forecast', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
-    const { skillId } = req.params;
-
-    const skill = skillsById.get(skillId);
-    if (!skill) {
-      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
-    }
-
-    const query = QuerySkillForecastInputSchema.parse(req.query);
-    const horizon = query.forecastHorizonMonths ?? 12;
-
-    let signals = skillMarketSignalsBySkillId.get(skillId) || [];
-    if (signals.length === 0) {
-      const baseline = recordSkillMarketSignal({
-        skillId,
-        demandPostingsCount: 100,
-        activeCandidatesCount: 80,
-        avgSalaryOffered: 110000,
-        geographicRegion: 'Global',
-        industry: 'Technology',
-      });
-      signals = [baseline];
-      skillMarketSignalsBySkillId.set(skillId, signals);
-    }
-
-    const prevForecast = skillForecastsBySkillId.get(skillId);
-    const forecast = computeSkillForecast({
-      skillId,
-      signals,
-      forecastHorizonMonths: horizon,
-      skillCategory: skill.category,
-      previousForecast: prevForecast,
-    });
-
-    skillForecastsBySkillId.set(skillId, forecast);
-
-    return reply.status(200).send({
-      skillId,
-      skillName: skill.name,
-      category: skill.category,
-      forecast,
-    });
-  });
-
-  // 4. Generate/Recompute Skill Forecast (Admin / Recruiter / On-demand)
-  app.post('/api/v1/skills/:skillId/forecast/generate', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { skillId } = req.params;
-
-    const skill = skillsById.get(skillId);
-    if (!skill) {
-      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
-    }
-
-    const input = GenerateSkillForecastInputSchema.parse(req.body);
-
-    let signals = skillMarketSignalsBySkillId.get(skillId) || [];
-    if (signals.length === 0) {
-      const baseline = recordSkillMarketSignal({
-        skillId,
-        demandPostingsCount: 100,
-        activeCandidatesCount: 80,
-        avgSalaryOffered: 110000,
-        geographicRegion: 'Global',
-        industry: 'Technology',
-      });
-      signals = [baseline];
-      skillMarketSignalsBySkillId.set(skillId, signals);
-    }
-
-    const prevForecast = skillForecastsBySkillId.get(skillId);
-    const forecast = computeSkillForecast({
-      skillId,
-      signals,
-      forecastHorizonMonths: input.forecastHorizonMonths,
-      skillCategory: input.skillCategory || skill.category,
-      prerequisiteDepth: input.prerequisiteDepth,
-      previousForecast: prevForecast,
-    });
-
-    skillForecastsBySkillId.set(skillId, forecast);
-
-    enqueuedWorkerJobs.push({
-      type: 'skill.forecast_generated',
-      payload: {
-        skillId,
-        horizonMonths: forecast.forecastHorizonMonths,
-        demandGrowthPct: forecast.demandGrowthPct,
-        scarcityIndex: forecast.scarcityIndex,
-        generatedByUserId: session.userId,
-      },
-      enqueuedAt: forecast.generatedAt,
-    });
-
-    return reply.status(201).send({
-      message: 'Skill forecast generated successfully.',
-      skillId,
-      skillName: skill.name,
-      forecast,
-    });
-  });
+  );
 
   // =========================================================================
   // Alumni Networks Repositories & Endpoints (F-125, F-12, F-09, F-40)
@@ -6138,7 +6765,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const user = usersById.get(session.userId);
     const userEmail = user?.email || session.email;
     const institutionDomain = org.website
-      ? org.website.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase()
+      ? org.website
+          .replace(/^https?:\/\//i, '')
+          .replace(/\/.*$/, '')
+          .toLowerCase()
       : undefined;
 
     const affiliation = createAlumniAffiliation({
@@ -6179,71 +6809,84 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 2. Verify Alumni Affiliation (by email domain match or seat code)
-  app.post('/api/v1/alumni/affiliations/:id/verify', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = VerifyAlumniAffiliationInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/alumni/affiliations/:id/verify',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = VerifyAlumniAffiliationInputSchema.parse(req.body);
 
-    const affiliation = alumniAffiliationsById.get(id);
-    if (!affiliation) {
-      throw new DomainError('NOT_FOUND', 'Alumni affiliation not found.');
-    }
-
-    const isOwner = affiliation.userId === session.userId;
-    const isAdmin = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
-    if (!isOwner && !isAdmin) {
-      throw new DomainError('FORBIDDEN', 'Access denied to verify this affiliation.');
-    }
-
-    if (input.verificationMethod === 'email_domain') {
-      const org = organizationsById.get(affiliation.institutionId);
-      const instDomain = org?.website
-        ? org.website.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase()
-        : '';
-      const user = usersById.get(affiliation.userId);
-      const userEmail = user?.email || session.email;
-      const emailParts = userEmail.split('@');
-      const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
-
-      if (!instDomain || (!userDomain.includes(instDomain) && !instDomain.includes(userDomain))) {
-        throw new DomainError(
-          'VALIDATION_FAILED',
-          'User email domain does not match institution domain.'
-        );
+      const affiliation = alumniAffiliationsById.get(id);
+      if (!affiliation) {
+        throw new DomainError('NOT_FOUND', 'Alumni affiliation not found.');
       }
-      affiliation.verificationStatus = 'verified';
-      affiliation.verificationMethod = 'email_domain';
-      affiliation.verifiedAt = new Date().toISOString();
-    } else if (input.verificationMethod === 'institutional_seat') {
-      if (!input.seatCode || input.seatCode.trim().length === 0) {
-        throw new DomainError('VALIDATION_FAILED', 'Institutional verification seat code is required.');
+
+      const isOwner = affiliation.userId === session.userId;
+      const isAdmin =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      if (!isOwner && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to verify this affiliation.');
       }
-      if (input.seatCode.trim().length < 4) {
-        throw new DomainError('VALIDATION_FAILED', 'Institutional verification seat code is invalid.');
+
+      if (input.verificationMethod === 'email_domain') {
+        const org = organizationsById.get(affiliation.institutionId);
+        const instDomain = org?.website
+          ? org.website
+              .replace(/^https?:\/\//i, '')
+              .replace(/\/.*$/, '')
+              .toLowerCase()
+          : '';
+        const user = usersById.get(affiliation.userId);
+        const userEmail = user?.email || session.email;
+        const emailParts = userEmail.split('@');
+        const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
+
+        if (!instDomain || (!userDomain.includes(instDomain) && !instDomain.includes(userDomain))) {
+          throw new DomainError(
+            'VALIDATION_FAILED',
+            'User email domain does not match institution domain.'
+          );
+        }
+        affiliation.verificationStatus = 'verified';
+        affiliation.verificationMethod = 'email_domain';
+        affiliation.verifiedAt = new Date().toISOString();
+      } else if (input.verificationMethod === 'institutional_seat') {
+        if (!input.seatCode || input.seatCode.trim().length === 0) {
+          throw new DomainError(
+            'VALIDATION_FAILED',
+            'Institutional verification seat code is required.'
+          );
+        }
+        if (input.seatCode.trim().length < 4) {
+          throw new DomainError(
+            'VALIDATION_FAILED',
+            'Institutional verification seat code is invalid.'
+          );
+        }
+        affiliation.verificationStatus = 'verified';
+        affiliation.verificationMethod = 'institutional_seat';
+        affiliation.verifiedAt = new Date().toISOString();
       }
-      affiliation.verificationStatus = 'verified';
-      affiliation.verificationMethod = 'institutional_seat';
-      affiliation.verifiedAt = new Date().toISOString();
+
+      alumniAffiliationsById.set(affiliation.id, affiliation);
+
+      enqueuedWorkerJobs.push({
+        type: 'alumni.affiliation.verified',
+        payload: {
+          affiliationId: affiliation.id,
+          userId: affiliation.userId,
+          institutionId: affiliation.institutionId,
+          method: affiliation.verificationMethod,
+        },
+        enqueuedAt: affiliation.verifiedAt,
+      });
+
+      return reply.status(200).send({
+        message: 'Alumni affiliation verified successfully.',
+        affiliation,
+      });
     }
-
-    alumniAffiliationsById.set(affiliation.id, affiliation);
-
-    enqueuedWorkerJobs.push({
-      type: 'alumni.affiliation.verified',
-      payload: {
-        affiliationId: affiliation.id,
-        userId: affiliation.userId,
-        institutionId: affiliation.institutionId,
-        method: affiliation.verificationMethod,
-      },
-      enqueuedAt: affiliation.verifiedAt,
-    });
-
-    return reply.status(200).send({
-      message: 'Alumni affiliation verified successfully.',
-      affiliation,
-    });
-  });
+  );
 
   // 3. Get Authenticated User's Alumni Affiliations
   app.get('/api/v1/alumni/affiliations/my', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -6256,265 +6899,295 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 4. Institutional Alumni Directory Discovery (Strict Cross-Institution Isolation BR-F125-03)
-  app.get('/api/v1/alumni/institutions/:institutionId/directory', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { institutionId } = req.params;
+  app.get(
+    '/api/v1/alumni/institutions/:institutionId/directory',
+    async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { institutionId } = req.params;
 
-    const org = organizationsById.get(institutionId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', 'Institution not found.');
-    }
+      const org = organizationsById.get(institutionId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', 'Institution not found.');
+      }
 
-    const query = QueryAlumniDirectoryInputSchema.parse(req.query || {});
-    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const query = QueryAlumniDirectoryInputSchema.parse(req.query || {});
+      const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+      const isPrivileged =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
 
-    if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
-      throw new DomainError(
-        'TENANT_ISOLATION_VIOLATION',
-        'Access denied: You must be a verified alumni or member of this institution to browse its directory.'
-      );
-    }
+      if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
+        throw new DomainError(
+          'TENANT_ISOLATION_VIOLATION',
+          'Access denied: You must be a verified alumni or member of this institution to browse its directory.'
+        );
+      }
 
-    const instAffs = alumniAffiliationsByInstitutionId.get(institutionId) || [];
-    const enriched = instAffs.map((aff) => {
-      const userProfile = profilesByUserId.get(aff.userId);
-      const u = usersById.get(aff.userId);
-      return {
-        ...aff,
-        user: {
-          fullName: userProfile?.fullName || 'Alumni Member',
-          email: u?.email,
-        },
-      };
-    });
+      const instAffs = alumniAffiliationsByInstitutionId.get(institutionId) || [];
+      const enriched = instAffs.map((aff) => {
+        const userProfile = profilesByUserId.get(aff.userId);
+        const u = usersById.get(aff.userId);
+        return {
+          ...aff,
+          user: {
+            fullName: userProfile?.fullName || 'Alumni Member',
+            email: u?.email,
+          },
+        };
+      });
 
-    const callerInsts = isPrivileged && !userVerifiedInsts.includes(institutionId)
-      ? [institutionId, ...userVerifiedInsts]
-      : userVerifiedInsts;
+      const callerInsts =
+        isPrivileged && !userVerifiedInsts.includes(institutionId)
+          ? [institutionId, ...userVerifiedInsts]
+          : userVerifiedInsts;
 
-    const directory = filterAlumniDirectory({
-      callerUserId: session.userId,
-      callerVerifiedInstitutions: callerInsts,
-      targetInstitutionId: institutionId,
-      affiliations: enriched,
-      filters: query,
-    });
+      const directory = filterAlumniDirectory({
+        callerUserId: session.userId,
+        callerVerifiedInstitutions: callerInsts,
+        targetInstitutionId: institutionId,
+        affiliations: enriched,
+        filters: query,
+      });
 
-    return reply.status(200).send({
-      institutionId,
-      directory,
-      total: directory.length,
-    });
-  });
-
-  // 5. Create Alumni Group
-  app.post('/api/v1/alumni/institutions/:institutionId/groups', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { institutionId } = req.params;
-
-    const org = organizationsById.get(institutionId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', 'Institution not found.');
-    }
-
-    const input = CreateAlumniGroupInputSchema.parse(req.body);
-    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
-    const creatorInsts = isPrivileged && !userVerifiedInsts.includes(institutionId)
-      ? [institutionId, ...userVerifiedInsts]
-      : userVerifiedInsts;
-
-    const { group, creatorMembership } = createAlumniGroup({
-      institutionId,
-      name: input.name,
-      description: input.description,
-      chapterLocation: input.chapterLocation,
-      createdBy: session.userId,
-      creatorVerifiedInstitutions: creatorInsts,
-    });
-
-    alumniGroupsById.set(group.id, group);
-    const instGroups = alumniGroupsByInstitutionId.get(institutionId) || [];
-    instGroups.unshift(group);
-    alumniGroupsByInstitutionId.set(institutionId, instGroups);
-
-    const members = [creatorMembership];
-    alumniGroupMembersByGroupId.set(group.id, members);
-
-    return reply.status(201).send({
-      message: 'Alumni group created successfully.',
-      group,
-      membership: creatorMembership,
-    });
-  });
-
-  // 6. List Alumni Groups for Institution
-  app.get('/api/v1/alumni/institutions/:institutionId/groups', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { institutionId } = req.params;
-
-    const org = organizationsById.get(institutionId);
-    if (!org) {
-      throw new DomainError('NOT_FOUND', 'Institution not found.');
-    }
-
-    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
-
-    if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
-      throw new DomainError(
-        'TENANT_ISOLATION_VIOLATION',
-        'Access denied: You must be a verified alumni or member of this institution to view groups.'
-      );
-    }
-
-    const groups = alumniGroupsByInstitutionId.get(institutionId) || [];
-    return reply.status(200).send({
-      institutionId,
-      groups,
-      total: groups.length,
-    });
-  });
-
-  // 7. Join Alumni Group
-  app.post('/api/v1/alumni/groups/:id/join', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const group = alumniGroupsById.get(id);
-    if (!group) {
-      throw new DomainError('NOT_FOUND', 'Alumni group not found.');
-    }
-
-    const input = JoinAlumniGroupInputSchema.parse(req.body || {});
-    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
-    const userInsts = isPrivileged && !userVerifiedInsts.includes(group.institutionId)
-      ? [group.institutionId, ...userVerifiedInsts]
-      : userVerifiedInsts;
-
-    const members = alumniGroupMembersByGroupId.get(id) || [];
-    const existing = members.find((m) => m.userId === session.userId);
-    if (existing) {
       return reply.status(200).send({
-        message: 'Already a member of this alumni group.',
-        membership: existing,
+        institutionId,
+        directory,
+        total: directory.length,
       });
     }
+  );
 
-    const membership = joinAlumniGroup({
-      groupId: id,
-      userId: session.userId,
-      groupInstitutionId: group.institutionId,
-      userVerifiedInstitutions: userInsts,
-      role: input.role,
-    });
+  // 5. Create Alumni Group
+  app.post(
+    '/api/v1/alumni/institutions/:institutionId/groups',
+    async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { institutionId } = req.params;
 
-    members.push(membership);
-    alumniGroupMembersByGroupId.set(id, members);
+      const org = organizationsById.get(institutionId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', 'Institution not found.');
+      }
 
-    return reply.status(200).send({
-      message: 'Joined alumni group successfully.',
-      membership,
-    });
-  });
+      const input = CreateAlumniGroupInputSchema.parse(req.body);
+      const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+      const isPrivileged =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const creatorInsts =
+        isPrivileged && !userVerifiedInsts.includes(institutionId)
+          ? [institutionId, ...userVerifiedInsts]
+          : userVerifiedInsts;
+
+      const { group, creatorMembership } = createAlumniGroup({
+        institutionId,
+        name: input.name,
+        description: input.description,
+        chapterLocation: input.chapterLocation,
+        createdBy: session.userId,
+        creatorVerifiedInstitutions: creatorInsts,
+      });
+
+      alumniGroupsById.set(group.id, group);
+      const instGroups = alumniGroupsByInstitutionId.get(institutionId) || [];
+      instGroups.unshift(group);
+      alumniGroupsByInstitutionId.set(institutionId, instGroups);
+
+      const members = [creatorMembership];
+      alumniGroupMembersByGroupId.set(group.id, members);
+
+      return reply.status(201).send({
+        message: 'Alumni group created successfully.',
+        group,
+        membership: creatorMembership,
+      });
+    }
+  );
+
+  // 6. List Alumni Groups for Institution
+  app.get(
+    '/api/v1/alumni/institutions/:institutionId/groups',
+    async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { institutionId } = req.params;
+
+      const org = organizationsById.get(institutionId);
+      if (!org) {
+        throw new DomainError('NOT_FOUND', 'Institution not found.');
+      }
+
+      const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+      const isPrivileged =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+
+      if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
+        throw new DomainError(
+          'TENANT_ISOLATION_VIOLATION',
+          'Access denied: You must be a verified alumni or member of this institution to view groups.'
+        );
+      }
+
+      const groups = alumniGroupsByInstitutionId.get(institutionId) || [];
+      return reply.status(200).send({
+        institutionId,
+        groups,
+        total: groups.length,
+      });
+    }
+  );
+
+  // 7. Join Alumni Group
+  app.post(
+    '/api/v1/alumni/groups/:id/join',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const group = alumniGroupsById.get(id);
+      if (!group) {
+        throw new DomainError('NOT_FOUND', 'Alumni group not found.');
+      }
+
+      const input = JoinAlumniGroupInputSchema.parse(req.body || {});
+      const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+      const isPrivileged =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const userInsts =
+        isPrivileged && !userVerifiedInsts.includes(group.institutionId)
+          ? [group.institutionId, ...userVerifiedInsts]
+          : userVerifiedInsts;
+
+      const members = alumniGroupMembersByGroupId.get(id) || [];
+      const existing = members.find((m) => m.userId === session.userId);
+      if (existing) {
+        return reply.status(200).send({
+          message: 'Already a member of this alumni group.',
+          membership: existing,
+        });
+      }
+
+      const membership = joinAlumniGroup({
+        groupId: id,
+        userId: session.userId,
+        groupInstitutionId: group.institutionId,
+        userVerifiedInstitutions: userInsts,
+        role: input.role,
+      });
+
+      members.push(membership);
+      alumniGroupMembersByGroupId.set(id, members);
+
+      return reply.status(200).send({
+        message: 'Joined alumni group successfully.',
+        membership,
+      });
+    }
+  );
 
   // 8. List Members of Alumni Group
-  app.get('/api/v1/alumni/groups/:id/members', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
+  app.get(
+    '/api/v1/alumni/groups/:id/members',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const group = alumniGroupsById.get(id);
-    if (!group) {
-      throw new DomainError('NOT_FOUND', 'Alumni group not found.');
+      const group = alumniGroupsById.get(id);
+      if (!group) {
+        throw new DomainError('NOT_FOUND', 'Alumni group not found.');
+      }
+
+      const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+      const isPrivileged =
+        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      if (!userVerifiedInsts.includes(group.institutionId) && !isPrivileged) {
+        throw new DomainError('TENANT_ISOLATION_VIOLATION', 'Access denied to group members.');
+      }
+
+      const members = alumniGroupMembersByGroupId.get(id) || [];
+      return reply.status(200).send({
+        groupId: id,
+        members,
+        total: members.length,
+      });
     }
-
-    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
-    if (!userVerifiedInsts.includes(group.institutionId) && !isPrivileged) {
-      throw new DomainError('TENANT_ISOLATION_VIOLATION', 'Access denied to group members.');
-    }
-
-    const members = alumniGroupMembersByGroupId.get(id) || [];
-    return reply.status(200).send({
-      groupId: id,
-      members,
-      total: members.length,
-    });
-  });
+  );
 
   // 9. Request Alumni Mentorship
-  app.post('/api/v1/alumni/mentorship/request', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = RequestAlumniMentorshipInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/alumni/mentorship/request',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = RequestAlumniMentorshipInputSchema.parse(req.body);
 
-    if (input.mentorId === session.userId) {
-      throw new DomainError('FORBIDDEN', 'Cannot request mentorship from oneself');
+      if (input.mentorId === session.userId) {
+        throw new DomainError('FORBIDDEN', 'Cannot request mentorship from oneself');
+      }
+
+      const menteeInsts = getUserVerifiedInstitutions(session.userId);
+      const mentorInsts = getUserVerifiedInstitutions(input.mentorId);
+      const isPrivileged = session.roles.includes('platform_admin');
+      const effectiveMenteeInsts =
+        isPrivileged && !menteeInsts.includes(input.institutionId)
+          ? [input.institutionId, ...menteeInsts]
+          : menteeInsts;
+
+      const mentorshipRequest = createAlumniMentorshipRequest({
+        mentorId: input.mentorId,
+        menteeId: session.userId,
+        institutionId: input.institutionId,
+        menteeVerifiedInstitutions: effectiveMenteeInsts,
+        mentorVerifiedInstitutions: mentorInsts,
+        focusAreas: input.focusAreas,
+      });
+
+      alumniMentorshipRequestsById.set(mentorshipRequest.id, mentorshipRequest);
+      const instMentorships = alumniMentorshipByInstitutionId.get(input.institutionId) || [];
+      instMentorships.unshift(mentorshipRequest);
+      alumniMentorshipByInstitutionId.set(input.institutionId, instMentorships);
+
+      enqueuedWorkerJobs.push({
+        type: 'alumni.mentorship.requested',
+        payload: {
+          mentorshipId: mentorshipRequest.id,
+          mentorId: mentorshipRequest.mentorId,
+          menteeId: mentorshipRequest.menteeId,
+          institutionId: mentorshipRequest.institutionId,
+        },
+        enqueuedAt: mentorshipRequest.requestedAt,
+      });
+
+      return reply.status(201).send({
+        message: 'Alumni mentorship request submitted successfully.',
+        mentorshipRequest,
+      });
     }
-
-    const menteeInsts = getUserVerifiedInstitutions(session.userId);
-    const mentorInsts = getUserVerifiedInstitutions(input.mentorId);
-    const isPrivileged = session.roles.includes('platform_admin');
-    const effectiveMenteeInsts = isPrivileged && !menteeInsts.includes(input.institutionId)
-      ? [input.institutionId, ...menteeInsts]
-      : menteeInsts;
-
-    const mentorshipRequest = createAlumniMentorshipRequest({
-      mentorId: input.mentorId,
-      menteeId: session.userId,
-      institutionId: input.institutionId,
-      menteeVerifiedInstitutions: effectiveMenteeInsts,
-      mentorVerifiedInstitutions: mentorInsts,
-      focusAreas: input.focusAreas,
-    });
-
-    alumniMentorshipRequestsById.set(mentorshipRequest.id, mentorshipRequest);
-    const instMentorships = alumniMentorshipByInstitutionId.get(input.institutionId) || [];
-    instMentorships.unshift(mentorshipRequest);
-    alumniMentorshipByInstitutionId.set(input.institutionId, instMentorships);
-
-    enqueuedWorkerJobs.push({
-      type: 'alumni.mentorship.requested',
-      payload: {
-        mentorshipId: mentorshipRequest.id,
-        mentorId: mentorshipRequest.mentorId,
-        menteeId: mentorshipRequest.menteeId,
-        institutionId: mentorshipRequest.institutionId,
-      },
-      enqueuedAt: mentorshipRequest.requestedAt,
-    });
-
-    return reply.status(201).send({
-      message: 'Alumni mentorship request submitted successfully.',
-      mentorshipRequest,
-    });
-  });
+  );
 
   // 10. Respond to Alumni Mentorship (Accept, Decline, Complete)
-  app.post('/api/v1/alumni/mentorship/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = RespondAlumniMentorshipInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/alumni/mentorship/:id/respond',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = RespondAlumniMentorshipInputSchema.parse(req.body);
 
-    const request = alumniMentorshipRequestsById.get(id);
-    if (!request) {
-      throw new DomainError('NOT_FOUND', 'Mentorship request not found.');
+      const request = alumniMentorshipRequestsById.get(id);
+      if (!request) {
+        throw new DomainError('NOT_FOUND', 'Mentorship request not found.');
+      }
+
+      const updated = respondToAlumniMentorship({
+        request,
+        responderId: session.userId,
+        action: input.action,
+      });
+
+      alumniMentorshipRequestsById.set(updated.id, updated);
+
+      return reply.status(200).send({
+        message: 'Mentorship request status updated successfully.',
+        mentorshipRequest: updated,
+      });
     }
-
-    const updated = respondToAlumniMentorship({
-      request,
-      responderId: session.userId,
-      action: input.action,
-    });
-
-    alumniMentorshipRequestsById.set(updated.id, updated);
-
-    return reply.status(200).send({
-      message: 'Mentorship request status updated successfully.',
-      mentorshipRequest: updated,
-    });
-  });
+  );
 
   // 11. List Authenticated User's Mentorship Requests
   app.get('/api/v1/alumni/mentorship/my', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -6571,57 +7244,69 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(201).send({ event, score });
   });
 
-  app.get('/api/v1/activity/events', async (req: FastifyRequest<{ Querystring: { category?: string; limit?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { category, limit } = req.query;
+  app.get(
+    '/api/v1/activity/events',
+    async (
+      req: FastifyRequest<{ Querystring: { category?: string; limit?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { category, limit } = req.query;
 
-    let userEvents = activityEventsByUserId.get(session.userId) || [];
-    if (category) {
-      userEvents = userEvents.filter((e) => e.category === category);
-    }
-
-    if (limit) {
-      const parsedLimit = parseInt(limit, 10);
-      if (!isNaN(parsedLimit) && parsedLimit > 0) {
-        userEvents = userEvents.slice(0, parsedLimit);
+      let userEvents = activityEventsByUserId.get(session.userId) || [];
+      if (category) {
+        userEvents = userEvents.filter((e) => e.category === category);
       }
-    }
 
-    return reply.status(200).send({ events: userEvents });
-  });
+      if (limit) {
+        const parsedLimit = parseInt(limit, 10);
+        if (!isNaN(parsedLimit) && parsedLimit > 0) {
+          userEvents = userEvents.slice(0, parsedLimit);
+        }
+      }
+
+      return reply.status(200).send({ events: userEvents });
+    }
+  );
 
   app.get('/api/v1/activity/scores/me', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const userEvents = activityEventsByUserId.get(session.userId) || [];
-    const score = contributionScoresByUserId.get(session.userId) || calculateContributionScores(session.userId, userEvents);
+    const score =
+      contributionScoresByUserId.get(session.userId) ||
+      calculateContributionScores(session.userId, userEvents);
     return reply.status(200).send({ score });
   });
 
-  app.get('/api/v1/activity/users/:userId/score', async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
-    extractUser(req);
-    const { userId } = req.params;
+  app.get(
+    '/api/v1/activity/users/:userId/score',
+    async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
+      extractUser(req);
+      const { userId } = req.params;
 
-    const user = usersById.get(userId);
-    if (!user) {
-      throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      const user = usersById.get(userId);
+      if (!user) {
+        throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      }
+
+      const userEvents = activityEventsByUserId.get(userId) || [];
+      const score =
+        contributionScoresByUserId.get(userId) || calculateContributionScores(userId, userEvents);
+
+      return reply.status(200).send({
+        userId,
+        compositeScore: score.compositeScore,
+        engagementBand: score.engagementBand,
+        activeStreakDays: score.activeStreakDays,
+        totalEventsCount: score.totalEventsCount,
+        learningScore: score.learningScore,
+        creationScore: score.creationScore,
+        collaborationScore: score.collaborationScore,
+        socialScore: score.socialScore,
+        lastActiveAt: score.lastActiveAt,
+      });
     }
-
-    const userEvents = activityEventsByUserId.get(userId) || [];
-    const score = contributionScoresByUserId.get(userId) || calculateContributionScores(userId, userEvents);
-
-    return reply.status(200).send({
-      userId,
-      compositeScore: score.compositeScore,
-      engagementBand: score.engagementBand,
-      activeStreakDays: score.activeStreakDays,
-      totalEventsCount: score.totalEventsCount,
-      learningScore: score.learningScore,
-      creationScore: score.creationScore,
-      collaborationScore: score.collaborationScore,
-      socialScore: score.socialScore,
-      lastActiveAt: score.lastActiveAt,
-    });
-  });
+  );
 
   app.post('/api/v1/activity/recalculate', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -6667,146 +7352,167 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ projects: userProjects });
   });
 
-  app.get('/api/v1/portfolio/projects/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const { id } = req.params;
-    const project = portfolioProjectsById.get(id);
-    if (!project) {
-      throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-    }
-
-    let viewerUserId: string | undefined;
-    let viewerRoles: Role[] | undefined;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7).trim();
-      const session = verifySessionToken(token);
-      if (session) {
-        viewerUserId = session.userId;
-        viewerRoles = session.roles;
+  app.get(
+    '/api/v1/portfolio/projects/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { id } = req.params;
+      const project = portfolioProjectsById.get(id);
+      if (!project) {
+        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
       }
-    }
 
-    const userConnections = viewerUserId ? (connectionsByUserId.get(viewerUserId) || []) : [];
-    const isConnected = viewerUserId ? areConnected(userConnections, viewerUserId, project.userId) : false;
-
-    if (!canViewPortfolioProject(project, { userId: viewerUserId, roles: viewerRoles, isConnected })) {
-      throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-    }
-
-    return reply.status(200).send({ project });
-  });
-
-  app.patch('/api/v1/portfolio/projects/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const project = portfolioProjectsById.get(id);
-    if (!project) {
-      throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-    }
-
-    if (project.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-    }
-
-    const input = UpdatePortfolioProjectInputSchema.parse(req.body || {});
-    const updated = updatePortfolioProject(project, input);
-    portfolioProjectsById.set(updated.id, updated);
-
-    const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-    const idx = userProjects.findIndex((p) => p.id === updated.id);
-    if (idx !== -1) {
-      userProjects[idx] = updated;
-      portfolioProjectsByUserId.set(session.userId, userProjects);
-    }
-
-    enqueuedWorkerJobs.push({
-      type: 'portfolio.project.updated',
-      payload: {
-        userId: session.userId,
-        projectId: updated.id,
-      },
-      enqueuedAt: updated.updatedAt,
-    });
-
-    return reply.status(200).send({ project: updated });
-  });
-
-  app.delete('/api/v1/portfolio/projects/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-
-    const project = portfolioProjectsById.get(id);
-    if (!project) {
-      throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
-    }
-
-    if (project.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
-    }
-
-    portfolioProjectsById.delete(id);
-
-    const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
-    portfolioProjectsByUserId.set(session.userId, userProjects.filter((p) => p.id !== id));
-
-    enqueuedWorkerJobs.push({
-      type: 'portfolio.project.removed',
-      payload: {
-        userId: session.userId,
-        projectId: id,
-      },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({
-      message: 'Portfolio project deleted successfully',
-      deletedId: id,
-    });
-  });
-
-  app.get('/api/v1/portfolio/showcase/:targetUserId', async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
-    let { targetUserId } = req.params;
-    const targetProfile = profilesById.get(targetUserId);
-    if (targetProfile) {
-      targetUserId = targetProfile.userId;
-    }
-
-    let viewerUserId: string | undefined;
-    let viewerRoles: Role[] | undefined;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7).trim();
-      const session = verifySessionToken(token);
-      if (session) {
-        viewerUserId = session.userId;
-        viewerRoles = session.roles;
+      let viewerUserId: string | undefined;
+      let viewerRoles: Role[] | undefined;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7).trim();
+        const session = verifySessionToken(token);
+        if (session) {
+          viewerUserId = session.userId;
+          viewerRoles = session.roles;
+        }
       }
+
+      const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
+      const isConnected = viewerUserId
+        ? areConnected(userConnections, viewerUserId, project.userId)
+        : false;
+
+      if (
+        !canViewPortfolioProject(project, { userId: viewerUserId, roles: viewerRoles, isConnected })
+      ) {
+        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
+      }
+
+      return reply.status(200).send({ project });
     }
+  );
 
-    const userConnections = viewerUserId ? (connectionsByUserId.get(viewerUserId) || []) : [];
-    const isConnected = viewerUserId ? areConnected(userConnections, viewerUserId, targetUserId) : false;
+  app.patch(
+    '/api/v1/portfolio/projects/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
 
-    const allProjects = portfolioProjectsByUserId.get(targetUserId) || [];
-    const visibleProjects = allProjects.filter((p) =>
-      canViewPortfolioProject(p, { userId: viewerUserId, roles: viewerRoles, isConnected })
-    );
-
-    visibleProjects.sort((a, b) => {
-      if (a.featured !== b.featured) {
-        return a.featured ? -1 : 1;
+      const project = portfolioProjectsById.get(id);
+      if (!project) {
+        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
       }
-      if (a.orderIndex !== b.orderIndex) {
-        return a.orderIndex - b.orderIndex;
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
 
-    return reply.status(200).send({
-      projects: visibleProjects,
-      totalCount: visibleProjects.length,
-    });
-  });
+      if (project.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
+      }
+
+      const input = UpdatePortfolioProjectInputSchema.parse(req.body || {});
+      const updated = updatePortfolioProject(project, input);
+      portfolioProjectsById.set(updated.id, updated);
+
+      const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
+      const idx = userProjects.findIndex((p) => p.id === updated.id);
+      if (idx !== -1) {
+        userProjects[idx] = updated;
+        portfolioProjectsByUserId.set(session.userId, userProjects);
+      }
+
+      enqueuedWorkerJobs.push({
+        type: 'portfolio.project.updated',
+        payload: {
+          userId: session.userId,
+          projectId: updated.id,
+        },
+        enqueuedAt: updated.updatedAt,
+      });
+
+      return reply.status(200).send({ project: updated });
+    }
+  );
+
+  app.delete(
+    '/api/v1/portfolio/projects/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+
+      const project = portfolioProjectsById.get(id);
+      if (!project) {
+        throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
+      }
+
+      if (project.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to portfolio project.');
+      }
+
+      portfolioProjectsById.delete(id);
+
+      const userProjects = portfolioProjectsByUserId.get(session.userId) || [];
+      portfolioProjectsByUserId.set(
+        session.userId,
+        userProjects.filter((p) => p.id !== id)
+      );
+
+      enqueuedWorkerJobs.push({
+        type: 'portfolio.project.removed',
+        payload: {
+          userId: session.userId,
+          projectId: id,
+        },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({
+        message: 'Portfolio project deleted successfully',
+        deletedId: id,
+      });
+    }
+  );
+
+  app.get(
+    '/api/v1/portfolio/showcase/:targetUserId',
+    async (req: FastifyRequest<{ Params: { targetUserId: string } }>, reply: FastifyReply) => {
+      let { targetUserId } = req.params;
+      const targetProfile = profilesById.get(targetUserId);
+      if (targetProfile) {
+        targetUserId = targetProfile.userId;
+      }
+
+      let viewerUserId: string | undefined;
+      let viewerRoles: Role[] | undefined;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7).trim();
+        const session = verifySessionToken(token);
+        if (session) {
+          viewerUserId = session.userId;
+          viewerRoles = session.roles;
+        }
+      }
+
+      const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
+      const isConnected = viewerUserId
+        ? areConnected(userConnections, viewerUserId, targetUserId)
+        : false;
+
+      const allProjects = portfolioProjectsByUserId.get(targetUserId) || [];
+      const visibleProjects = allProjects.filter((p) =>
+        canViewPortfolioProject(p, { userId: viewerUserId, roles: viewerRoles, isConnected })
+      );
+
+      visibleProjects.sort((a, b) => {
+        if (a.featured !== b.featured) {
+          return a.featured ? -1 : 1;
+        }
+        if (a.orderIndex !== b.orderIndex) {
+          return a.orderIndex - b.orderIndex;
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      return reply.status(200).send({
+        projects: visibleProjects,
+        totalCount: visibleProjects.length,
+      });
+    }
+  );
 
   // Gamification & XP Ledger Repositories & Endpoints (F-22, F-23, BR-25, WF-11)
   const gamificationProfilesByUserId = new Map<string, GamificationProfile>();
@@ -6928,111 +7634,120 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
-  app.post('/api/v1/gamification/claim-activity', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = ClaimGamificationActivityInputSchema.parse(req.body || {});
+  app.post(
+    '/api/v1/gamification/claim-activity',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = ClaimGamificationActivityInputSchema.parse(req.body || {});
 
-    const profile = getOrCreateGamificationProfile(session.userId);
-    const existingTxs = xpTransactionsByUserId.get(session.userId) || [];
+      const profile = getOrCreateGamificationProfile(session.userId);
+      const existingTxs = xpTransactionsByUserId.get(session.userId) || [];
 
-    const result = processXpAward({
-      userId: session.userId,
-      amount: input.amount,
-      referenceType: input.referenceType,
-      referenceId: input.referenceId,
-      description: input.description,
-      profile,
-      existingTransactions: existingTxs,
-    });
-
-    if (result.isDuplicate) {
-      return reply.status(200).send({
-        message: 'XP already credited for this activity.',
-        awarded: 0,
-        isDuplicate: true,
-        transaction: result.transaction,
-        profile,
-      });
-    }
-
-    if (result.isCapReached) {
-      return reply.status(200).send({
-        message: `Daily XP cap reached (${DAILY_XP_CAP} XP/day). No additional XP awarded.`,
-        awarded: 0,
-        isCapReached: true,
-        profile,
-      });
-    }
-
-    // Persist transaction
-    if (result.transaction) {
-      existingTxs.unshift(result.transaction);
-      xpTransactionsByUserId.set(session.userId, existingTxs);
-    }
-    gamificationProfilesByUserId.set(session.userId, result.updatedProfile);
-
-    // Check eligible badges
-    const userBadges = userBadgesByUserId.get(session.userId) || [];
-    const alreadyAwardedIds = userBadges.map((b) => b.badgeId);
-
-    const completedChallengesCount = existingTxs.filter((t) => t.referenceType === 'challenge' || t.referenceType === 'challenge_completion').length;
-    const completedCoursesCount = existingTxs.filter((t) => t.referenceType === 'course' || t.referenceType === 'course_completion').length;
-    const connectionsCount = (connectionsByUserId.get(session.userId) || []).filter((c) => c.status === 'accepted').length;
-
-    const newlyEligible = evaluateEligibleBadges(
-      {
-        totalXp: result.updatedProfile.totalXp,
-        completedChallengesCount,
-        completedCoursesCount,
-        currentStreak: result.updatedProfile.currentStreak,
-        connectionsCount,
-      },
-      Array.from(badgesById.values()),
-      alreadyAwardedIds
-    );
-
-    const now = new Date().toISOString();
-    for (const badge of newlyEligible) {
-      const ub: UserBadge = {
-        id: crypto.randomUUID(),
+      const result = processXpAward({
         userId: session.userId,
-        badgeId: badge.id,
-        awardedAt: now,
-      };
-      userBadges.push(ub);
+        amount: input.amount,
+        referenceType: input.referenceType,
+        referenceId: input.referenceId,
+        description: input.description,
+        profile,
+        existingTransactions: existingTxs,
+      });
 
-      enqueuedWorkerJobs.push({
-        type: 'gamification.badge.unlocked',
-        payload: {
+      if (result.isDuplicate) {
+        return reply.status(200).send({
+          message: 'XP already credited for this activity.',
+          awarded: 0,
+          isDuplicate: true,
+          transaction: result.transaction,
+          profile,
+        });
+      }
+
+      if (result.isCapReached) {
+        return reply.status(200).send({
+          message: `Daily XP cap reached (${DAILY_XP_CAP} XP/day). No additional XP awarded.`,
+          awarded: 0,
+          isCapReached: true,
+          profile,
+        });
+      }
+
+      // Persist transaction
+      if (result.transaction) {
+        existingTxs.unshift(result.transaction);
+        xpTransactionsByUserId.set(session.userId, existingTxs);
+      }
+      gamificationProfilesByUserId.set(session.userId, result.updatedProfile);
+
+      // Check eligible badges
+      const userBadges = userBadgesByUserId.get(session.userId) || [];
+      const alreadyAwardedIds = userBadges.map((b) => b.badgeId);
+
+      const completedChallengesCount = existingTxs.filter(
+        (t) => t.referenceType === 'challenge' || t.referenceType === 'challenge_completion'
+      ).length;
+      const completedCoursesCount = existingTxs.filter(
+        (t) => t.referenceType === 'course' || t.referenceType === 'course_completion'
+      ).length;
+      const connectionsCount = (connectionsByUserId.get(session.userId) || []).filter(
+        (c) => c.status === 'accepted'
+      ).length;
+
+      const newlyEligible = evaluateEligibleBadges(
+        {
+          totalXp: result.updatedProfile.totalXp,
+          completedChallengesCount,
+          completedCoursesCount,
+          currentStreak: result.updatedProfile.currentStreak,
+          connectionsCount,
+        },
+        Array.from(badgesById.values()),
+        alreadyAwardedIds
+      );
+
+      const now = new Date().toISOString();
+      for (const badge of newlyEligible) {
+        const ub: UserBadge = {
+          id: crypto.randomUUID(),
           userId: session.userId,
           badgeId: badge.id,
-          badgeSlug: badge.slug,
-          badgeName: badge.name,
+          awardedAt: now,
+        };
+        userBadges.push(ub);
+
+        enqueuedWorkerJobs.push({
+          type: 'gamification.badge.unlocked',
+          payload: {
+            userId: session.userId,
+            badgeId: badge.id,
+            badgeSlug: badge.slug,
+            badgeName: badge.name,
+          },
+          enqueuedAt: now,
+        });
+      }
+      userBadgesByUserId.set(session.userId, userBadges);
+
+      enqueuedWorkerJobs.push({
+        type: 'gamification.xp.awarded',
+        payload: {
+          userId: session.userId,
+          amount: result.awardedAmount,
+          referenceType: input.referenceType,
+          referenceId: input.referenceId,
         },
         enqueuedAt: now,
       });
+
+      return reply.status(200).send({
+        message: `Successfully awarded ${result.awardedAmount} XP`,
+        awarded: result.awardedAmount,
+        transaction: result.transaction,
+        profile: result.updatedProfile,
+        newlyUnlockedBadges: newlyEligible,
+      });
     }
-    userBadgesByUserId.set(session.userId, userBadges);
-
-    enqueuedWorkerJobs.push({
-      type: 'gamification.xp.awarded',
-      payload: {
-        userId: session.userId,
-        amount: result.awardedAmount,
-        referenceType: input.referenceType,
-        referenceId: input.referenceId,
-      },
-      enqueuedAt: now,
-    });
-
-    return reply.status(200).send({
-      message: `Successfully awarded ${result.awardedAmount} XP`,
-      awarded: result.awardedAmount,
-      transaction: result.transaction,
-      profile: result.updatedProfile,
-      newlyUnlockedBadges: newlyEligible,
-    });
-  });
+  );
 
   // ============================================================================
   // Account Settings, Privacy & GDPR/DPDP Erasure Routes (F-15, §31, BR-06)
@@ -7205,9 +7920,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const input = RequestErasureInputSchema.parse(req.body);
 
     const userRequests = erasureRequestsByUserId.get(session.userId) || [];
-    const active = userRequests.find(
-      (r) => r.status === 'grace_period' || r.status === 'pending'
-    );
+    const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
     if (active) {
       throw new DomainError(
         'CONFLICT',
@@ -7240,9 +7953,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.get('/api/v1/settings/erasure/status', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const userRequests = erasureRequestsByUserId.get(session.userId) || [];
-    const active = userRequests.find(
-      (r) => r.status === 'grace_period' || r.status === 'pending'
-    );
+    const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
 
     return reply.status(200).send({
       hasPendingErasure: !!active,
@@ -7346,7 +8057,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
 
     return reply.status(200).send({
-      message: 'Account logically anonymized and deactivated in compliance with GDPR Art 17 and §31.4.',
+      message:
+        'Account logically anonymized and deactivated in compliance with GDPR Art 17 and §31.4.',
       anonymizedHash: result.anonymizedHash,
       completedAt: result.completedAt,
     });
@@ -7552,128 +8264,140 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   // ============================================================================
 
   // 1. List users (Admin)
-  app.get('/api/v1/admin/users', async (req: FastifyRequest<{ Querystring: { search?: string; status?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.get(
+    '/api/v1/admin/users',
+    async (
+      req: FastifyRequest<{ Querystring: { search?: string; status?: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const { search, status } = req.query;
-    let users = Array.from(usersById.values());
+      const { search, status } = req.query;
+      let users = Array.from(usersById.values());
 
-    if (status) {
-      users = users.filter((u) => (u.status || 'active') === status);
+      if (status) {
+        users = users.filter((u) => (u.status || 'active') === status);
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        users = users.filter((u) => u.email.toLowerCase().includes(q));
+      }
+
+      const sanitizedUsers = users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        roles: u.roles,
+        status: u.status || 'active',
+        createdAt: u.createdAt,
+      }));
+
+      return reply.status(200).send({
+        users: sanitizedUsers,
+        total: sanitizedUsers.length,
+      });
     }
-    if (search) {
-      const q = search.toLowerCase();
-      users = users.filter((u) => u.email.toLowerCase().includes(q));
-    }
-
-    const sanitizedUsers = users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      roles: u.roles,
-      status: u.status || 'active',
-      createdAt: u.createdAt,
-    }));
-
-    return reply.status(200).send({
-      users: sanitizedUsers,
-      total: sanitizedUsers.length,
-    });
-  });
+  );
 
   // 2. Update user status (Admin - with anti-lockout BR-29, BR-068)
-  app.patch('/api/v1/admin/users/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.patch(
+    '/api/v1/admin/users/:id/status',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const { id } = req.params;
-    const targetUser = usersById.get(id);
-    if (!targetUser) {
-      throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+      const { id } = req.params;
+      const targetUser = usersById.get(id);
+      if (!targetUser) {
+        throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+      }
+
+      const input = AdminUpdateUserStatusInputSchema.parse(req.body);
+      const oldStatus = (targetUser.status || 'active') as any;
+
+      validateUserStatusTransition(oldStatus, input.status, session.userId, targetUser.id);
+
+      targetUser.status = input.status;
+      usersById.set(targetUser.id, targetUser);
+
+      const auditLog = createAdminAuditLog({
+        eventName: 'USER_STATUS_UPDATED',
+        actorId: session.userId,
+        targetId: targetUser.id,
+        targetType: 'user',
+        metadata: {
+          oldStatus,
+          newStatus: input.status,
+          reason: input.reason,
+        },
+      });
+      adminAuditLogs.unshift(auditLog);
+
+      enqueuedWorkerJobs.push({
+        type: 'admin.user.status_updated',
+        payload: {
+          userId: targetUser.id,
+          newStatus: input.status,
+          updatedBy: session.userId,
+        },
+        enqueuedAt: auditLog.createdAt,
+      });
+
+      return reply.status(200).send({
+        message: 'User status updated successfully.',
+        user: {
+          id: targetUser.id,
+          email: targetUser.email,
+          roles: targetUser.roles,
+          status: targetUser.status,
+        },
+        auditLog,
+      });
     }
-
-    const input = AdminUpdateUserStatusInputSchema.parse(req.body);
-    const oldStatus = (targetUser.status || 'active') as any;
-
-    validateUserStatusTransition(oldStatus, input.status, session.userId, targetUser.id);
-
-    targetUser.status = input.status;
-    usersById.set(targetUser.id, targetUser);
-
-    const auditLog = createAdminAuditLog({
-      eventName: 'USER_STATUS_UPDATED',
-      actorId: session.userId,
-      targetId: targetUser.id,
-      targetType: 'user',
-      metadata: {
-        oldStatus,
-        newStatus: input.status,
-        reason: input.reason,
-      },
-    });
-    adminAuditLogs.unshift(auditLog);
-
-    enqueuedWorkerJobs.push({
-      type: 'admin.user.status_updated',
-      payload: {
-        userId: targetUser.id,
-        newStatus: input.status,
-        updatedBy: session.userId,
-      },
-      enqueuedAt: auditLog.createdAt,
-    });
-
-    return reply.status(200).send({
-      message: 'User status updated successfully.',
-      user: {
-        id: targetUser.id,
-        email: targetUser.email,
-        roles: targetUser.roles,
-        status: targetUser.status,
-      },
-      auditLog,
-    });
-  });
+  );
 
   // 3. Update user roles (Admin)
-  app.patch('/api/v1/admin/users/:id/roles', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.patch(
+    '/api/v1/admin/users/:id/roles',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const { id } = req.params;
-    const targetUser = usersById.get(id);
-    if (!targetUser) {
-      throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+      const { id } = req.params;
+      const targetUser = usersById.get(id);
+      if (!targetUser) {
+        throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+      }
+
+      const input = AdminUpdateUserRolesInputSchema.parse(req.body);
+      const oldRoles = [...targetUser.roles];
+      targetUser.roles = input.roles as Role[];
+      usersById.set(targetUser.id, targetUser);
+
+      const auditLog = createAdminAuditLog({
+        eventName: 'USER_ROLES_UPDATED',
+        actorId: session.userId,
+        targetId: targetUser.id,
+        targetType: 'user',
+        metadata: {
+          oldRoles,
+          newRoles: input.roles,
+        },
+      });
+      adminAuditLogs.unshift(auditLog);
+
+      return reply.status(200).send({
+        message: 'User roles updated successfully.',
+        user: {
+          id: targetUser.id,
+          email: targetUser.email,
+          roles: targetUser.roles,
+          status: targetUser.status || 'active',
+        },
+        auditLog,
+      });
     }
-
-    const input = AdminUpdateUserRolesInputSchema.parse(req.body);
-    const oldRoles = [...targetUser.roles];
-    targetUser.roles = input.roles as Role[];
-    usersById.set(targetUser.id, targetUser);
-
-    const auditLog = createAdminAuditLog({
-      eventName: 'USER_ROLES_UPDATED',
-      actorId: session.userId,
-      targetId: targetUser.id,
-      targetType: 'user',
-      metadata: {
-        oldRoles,
-        newRoles: input.roles,
-      },
-    });
-    adminAuditLogs.unshift(auditLog);
-
-    return reply.status(200).send({
-      message: 'User roles updated successfully.',
-      user: {
-        id: targetUser.id,
-        email: targetUser.email,
-        roles: targetUser.roles,
-        status: targetUser.status || 'active',
-      },
-      auditLog,
-    });
-  });
+  );
 
   // 4. List feature flags (Admin)
   app.get('/api/v1/admin/feature-flags', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -7688,66 +8412,77 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 5. Update/toggle feature flag (Admin)
-  app.put('/api/v1/admin/feature-flags/:key', async (req: FastifyRequest<{ Params: { key: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.put(
+    '/api/v1/admin/feature-flags/:key',
+    async (req: FastifyRequest<{ Params: { key: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const { key } = req.params;
-    const input = AdminToggleFeatureFlagInputSchema.parse(req.body);
+      const { key } = req.params;
+      const input = AdminToggleFeatureFlagInputSchema.parse(req.body);
 
-    const existingFlag = featureFlags.get(key) || {
-      key,
-      enabled: false,
-      description: input.description,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updated = updateFeatureFlagState(existingFlag, input.enabled, input.description);
-    featureFlags.set(key, updated);
-
-    const auditLog = createAdminAuditLog({
-      eventName: 'FEATURE_FLAG_UPDATED',
-      actorId: session.userId,
-      targetId: key,
-      targetType: 'feature_flag',
-      metadata: {
+      const existingFlag = featureFlags.get(key) || {
         key,
-        enabled: updated.enabled,
-        description: updated.description,
-      },
-    });
-    adminAuditLogs.unshift(auditLog);
+        enabled: false,
+        description: input.description,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-    return reply.status(200).send({
-      message: 'Feature flag updated successfully.',
-      flag: updated,
-      auditLog,
-    });
-  });
+      const updated = updateFeatureFlagState(existingFlag, input.enabled, input.description);
+      featureFlags.set(key, updated);
+
+      const auditLog = createAdminAuditLog({
+        eventName: 'FEATURE_FLAG_UPDATED',
+        actorId: session.userId,
+        targetId: key,
+        targetType: 'feature_flag',
+        metadata: {
+          key,
+          enabled: updated.enabled,
+          description: updated.description,
+        },
+      });
+      adminAuditLogs.unshift(auditLog);
+
+      return reply.status(200).send({
+        message: 'Feature flag updated successfully.',
+        flag: updated,
+        auditLog,
+      });
+    }
+  );
 
   // 6. Query admin audit logs (BR-067)
-  app.get('/api/v1/admin/audit-logs', async (req: FastifyRequest<{ Querystring: { actorId?: string; eventName?: string; limit?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.get(
+    '/api/v1/admin/audit-logs',
+    async (
+      req: FastifyRequest<{
+        Querystring: { actorId?: string; eventName?: string; limit?: string };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const query = AdminQueryAuditLogsSchema.parse(req.query);
-    let logs = [...adminAuditLogs];
+      const query = AdminQueryAuditLogsSchema.parse(req.query);
+      let logs = [...adminAuditLogs];
 
-    if (query.actorId) {
-      logs = logs.filter((l) => l.actorId === query.actorId);
+      if (query.actorId) {
+        logs = logs.filter((l) => l.actorId === query.actorId);
+      }
+      if (query.eventName) {
+        logs = logs.filter((l) => l.eventName === query.eventName);
+      }
+
+      const limited = logs.slice(0, query.limit);
+
+      return reply.status(200).send({
+        logs: limited,
+        total: limited.length,
+      });
     }
-    if (query.eventName) {
-      logs = logs.filter((l) => l.eventName === query.eventName);
-    }
-
-    const limited = logs.slice(0, query.limit);
-
-    return reply.status(200).send({
-      logs: limited,
-      total: limited.length,
-    });
-  });
+  );
 
   // 7. System health & diagnostics (BR-28)
   app.get('/api/v1/admin/health-diagnostics', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -8009,9 +8744,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
     if (input.level) {
       const lvlQ = input.level.toLowerCase();
-      filteredResults = filteredResults.filter((r) =>
-        r.subtitle?.toLowerCase().includes(lvlQ)
-      );
+      filteredResults = filteredResults.filter((r) => r.subtitle?.toLowerCase().includes(lvlQ));
     }
     if (input.minScore !== undefined) {
       filteredResults = filteredResults.filter((r) => r.score >= input.minScore!);
@@ -8202,7 +8935,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     enqueuedWorkerJobs.push({
       type: 'moderation.report_created',
-      payload: { reportId: report.id, targetType: report.targetType, targetId: report.targetId, severity: report.severity },
+      payload: {
+        reportId: report.id,
+        targetType: report.targetType,
+        targetId: report.targetId,
+        severity: report.severity,
+      },
       enqueuedAt: new Date().toISOString(),
     });
 
@@ -8223,7 +8961,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const session = extractUser(req);
     assertModeratorAuthority(session.roles);
 
-    const query = req.query as { status?: string; targetType?: string; severity?: string } | undefined;
+    const query = req.query as
+      { status?: string; targetType?: string; severity?: string } | undefined;
     let list = Array.from(moderationReportsById.values());
 
     if (query?.status) {
@@ -8240,114 +8979,131 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 5. Get report details
-  app.get('/api/v1/moderation/reports/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const report = moderationReportsById.get(id);
-    if (!report) {
-      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
-    }
+  app.get(
+    '/api/v1/moderation/reports/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const report = moderationReportsById.get(id);
+      if (!report) {
+        throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      }
 
-    const isModerator = session.roles.includes('moderator') || session.roles.includes('platform_admin');
-    if (!isModerator && report.reporterId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this moderation report.');
-    }
+      const isModerator =
+        session.roles.includes('moderator') || session.roles.includes('platform_admin');
+      if (!isModerator && report.reporterId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this moderation report.');
+      }
 
-    return reply.status(200).send({ report });
-  });
+      return reply.status(200).send({ report });
+    }
+  );
 
   // 6. Transition report status (BR-34)
-  app.patch('/api/v1/moderation/reports/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = UpdateModerationReportStatusInputSchema.parse(req.body);
+  app.patch(
+    '/api/v1/moderation/reports/:id/status',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = UpdateModerationReportStatusInputSchema.parse(req.body);
 
-    const report = moderationReportsById.get(id);
-    if (!report) {
-      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      const report = moderationReportsById.get(id);
+      if (!report) {
+        throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      }
+
+      const updated = transitionReportStatus(report, input.status, {
+        userId: session.userId,
+        roles: session.roles,
+      });
+      moderationReportsById.set(id, updated);
+
+      return reply.status(200).send({ report: updated });
     }
-
-    const updated = transitionReportStatus(report, input.status, {
-      userId: session.userId,
-      roles: session.roles,
-    });
-    moderationReportsById.set(id, updated);
-
-    return reply.status(200).send({ report: updated });
-  });
+  );
 
   // 7. Resolve moderation report with enforcement action (BR-068, WIT-008, WIT-013)
-  app.post('/api/v1/moderation/reports/:id/resolve', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = ResolveModerationReportInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/moderation/reports/:id/resolve',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = ResolveModerationReportInputSchema.parse(req.body);
 
-    const report = moderationReportsById.get(id);
-    if (!report) {
-      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      const report = moderationReportsById.get(id);
+      if (!report) {
+        throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      }
+
+      let secondApproverRoles: string[] | undefined;
+      if (input.secondApproverId) {
+        const secondUser = usersById.get(input.secondApproverId);
+        secondApproverRoles = secondUser?.roles;
+      }
+
+      const resolved = resolveModerationReport({
+        report,
+        action: input.action,
+        resolutionNotes: input.resolutionNotes,
+        resolver: { userId: session.userId, roles: session.roles },
+        secondApproverId: input.secondApproverId,
+        secondApproverRoles,
+      });
+
+      moderationReportsById.set(id, resolved);
+
+      // Apply side effects of enforcement
+      if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
+        const user = usersById.get(resolved.targetId);
+        if (user) user.status = 'suspended';
+      } else if (resolved.actionTaken === 'user_banned' && resolved.targetType === 'user') {
+        const user = usersById.get(resolved.targetId);
+        if (user) user.status = 'deactivated';
+      } else if (resolved.actionTaken === 'content_removed' && resolved.targetType === 'job') {
+        const job = jobsById.get(resolved.targetId);
+        if (job) job.status = 'closed';
+      }
+
+      enqueuedWorkerJobs.push({
+        type: 'moderation.report_resolved',
+        payload: {
+          reportId: resolved.id,
+          action: resolved.actionTaken,
+          targetId: resolved.targetId,
+        },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ report: resolved });
     }
-
-    let secondApproverRoles: string[] | undefined;
-    if (input.secondApproverId) {
-      const secondUser = usersById.get(input.secondApproverId);
-      secondApproverRoles = secondUser?.roles;
-    }
-
-    const resolved = resolveModerationReport({
-      report,
-      action: input.action,
-      resolutionNotes: input.resolutionNotes,
-      resolver: { userId: session.userId, roles: session.roles },
-      secondApproverId: input.secondApproverId,
-      secondApproverRoles,
-    });
-
-    moderationReportsById.set(id, resolved);
-
-    // Apply side effects of enforcement
-    if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
-      const user = usersById.get(resolved.targetId);
-      if (user) user.status = 'suspended';
-    } else if (resolved.actionTaken === 'user_banned' && resolved.targetType === 'user') {
-      const user = usersById.get(resolved.targetId);
-      if (user) user.status = 'deactivated';
-    } else if (resolved.actionTaken === 'content_removed' && resolved.targetType === 'job') {
-      const job = jobsById.get(resolved.targetId);
-      if (job) job.status = 'closed';
-    }
-
-    enqueuedWorkerJobs.push({
-      type: 'moderation.report_resolved',
-      payload: { reportId: resolved.id, action: resolved.actionTaken, targetId: resolved.targetId },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({ report: resolved });
-  });
+  );
 
   // 8. Submit an appeal against an adverse moderation action (WIT-013, BR-154)
-  app.post('/api/v1/moderation/reports/:id/appeal', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = CreateModerationAppealInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/moderation/reports/:id/appeal',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = CreateModerationAppealInputSchema.parse(req.body);
 
-    const report = moderationReportsById.get(id);
-    if (!report) {
-      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      const report = moderationReportsById.get(id);
+      if (!report) {
+        throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      }
+
+      const existingAppeals = Array.from(moderationAppealsById.values());
+      const appeal = createModerationAppeal(report, session.userId, input.reason, existingAppeals);
+      moderationAppealsById.set(appeal.id, appeal);
+
+      enqueuedWorkerJobs.push({
+        type: 'moderation.appeal_submitted',
+        payload: { appealId: appeal.id, reportId: report.id, appellantId: appeal.appellantId },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({ appeal });
     }
-
-    const existingAppeals = Array.from(moderationAppealsById.values());
-    const appeal = createModerationAppeal(report, session.userId, input.reason, existingAppeals);
-    moderationAppealsById.set(appeal.id, appeal);
-
-    enqueuedWorkerJobs.push({
-      type: 'moderation.appeal_submitted',
-      payload: { appealId: appeal.id, reportId: report.id, appellantId: appeal.appellantId },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(201).send({ appeal });
-  });
+  );
 
   // 9. List appeals (Moderator Queue)
   app.get('/api/v1/moderation/appeals', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -8359,44 +9115,47 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 10. Review and decide on an appeal
-  app.post('/api/v1/moderation/appeals/:id/review', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const input = ReviewModerationAppealInputSchema.parse(req.body);
+  app.post(
+    '/api/v1/moderation/appeals/:id/review',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const input = ReviewModerationAppealInputSchema.parse(req.body);
 
-    const appeal = moderationAppealsById.get(id);
-    if (!appeal) {
-      throw new DomainError('NOT_FOUND', `Appeal with ID "${id}" not found.`);
-    }
+      const appeal = moderationAppealsById.get(id);
+      if (!appeal) {
+        throw new DomainError('NOT_FOUND', `Appeal with ID "${id}" not found.`);
+      }
 
-    const reviewed = reviewModerationAppeal(appeal, input.decision, input.decisionNotes, {
-      userId: session.userId,
-      roles: session.roles,
-    });
+      const reviewed = reviewModerationAppeal(appeal, input.decision, input.decisionNotes, {
+        userId: session.userId,
+        roles: session.roles,
+      });
 
-    moderationAppealsById.set(id, reviewed);
+      moderationAppealsById.set(id, reviewed);
 
-    // If appeal is upheld, reverse penalty on target entity
-    if (reviewed.status === 'upheld') {
-      const origReport = moderationReportsById.get(reviewed.reportId);
-      if (origReport) {
-        origReport.actionTaken = 'dismissed';
-        origReport.status = 'dismissed';
-        if (origReport.targetType === 'user') {
-          const user = usersById.get(origReport.targetId);
-          if (user) user.status = 'active';
+      // If appeal is upheld, reverse penalty on target entity
+      if (reviewed.status === 'upheld') {
+        const origReport = moderationReportsById.get(reviewed.reportId);
+        if (origReport) {
+          origReport.actionTaken = 'dismissed';
+          origReport.status = 'dismissed';
+          if (origReport.targetType === 'user') {
+            const user = usersById.get(origReport.targetId);
+            if (user) user.status = 'active';
+          }
         }
       }
+
+      enqueuedWorkerJobs.push({
+        type: 'moderation.appeal_reviewed',
+        payload: { appealId: reviewed.id, status: reviewed.status },
+        enqueuedAt: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ appeal: reviewed });
     }
-
-    enqueuedWorkerJobs.push({
-      type: 'moderation.appeal_reviewed',
-      payload: { appealId: reviewed.id, status: reviewed.status },
-      enqueuedAt: new Date().toISOString(),
-    });
-
-    return reply.status(200).send({ appeal: reviewed });
-  });
+  );
 
   // =========================================================================
   // Saved Searches, Job Alerts & Saved Jobs Endpoints (F-32, F-04, F-25)
@@ -8430,66 +9189,78 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 3. Get single saved search by ID
-  app.get('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const search = savedSearchesById.get(id);
-    if (!search) {
-      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+  app.get(
+    '/api/v1/jobs/saved-searches/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const search = savedSearchesById.get(id);
+      if (!search) {
+        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+      }
+      if (search.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+      }
+      return reply.status(200).send({ savedSearch: search });
     }
-    if (search.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-    }
-    return reply.status(200).send({ savedSearch: search });
-  });
+  );
 
   // 4. Update saved search
-  app.patch('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const search = savedSearchesById.get(id);
-    if (!search) {
-      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+  app.patch(
+    '/api/v1/jobs/saved-searches/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const search = savedSearchesById.get(id);
+      if (!search) {
+        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+      }
+      if (search.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+      }
+      const input = UpdateSavedSearchInputSchema.parse(req.body);
+      const updated = updateSavedSearch(search, input);
+      savedSearchesById.set(id, updated);
+      return reply.status(200).send({ savedSearch: updated });
     }
-    if (search.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-    }
-    const input = UpdateSavedSearchInputSchema.parse(req.body);
-    const updated = updateSavedSearch(search, input);
-    savedSearchesById.set(id, updated);
-    return reply.status(200).send({ savedSearch: updated });
-  });
+  );
 
   // 5. Delete saved search
-  app.delete('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const search = savedSearchesById.get(id);
-    if (!search) {
-      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+  app.delete(
+    '/api/v1/jobs/saved-searches/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const search = savedSearchesById.get(id);
+      if (!search) {
+        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+      }
+      if (search.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+      }
+      savedSearchesById.delete(id);
+      return reply.status(200).send({ message: 'Saved search deleted successfully.' });
     }
-    if (search.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-    }
-    savedSearchesById.delete(id);
-    return reply.status(200).send({ message: 'Saved search deleted successfully.' });
-  });
+  );
 
   // 6. Run saved search on live published inventory
-  app.post('/api/v1/jobs/saved-searches/:id/run', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const search = savedSearchesById.get(id);
-    if (!search) {
-      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+  app.post(
+    '/api/v1/jobs/saved-searches/:id/run',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const search = savedSearchesById.get(id);
+      if (!search) {
+        throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+      }
+      if (search.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+      }
+      const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
+      const matched = published.filter((j) => matchJobAgainstCriteria(j, search.criteria));
+      return reply.status(200).send({ matchingJobs: matched, total: matched.length });
     }
-    if (search.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
-    }
-    const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
-    const matched = published.filter((j) => matchJobAgainstCriteria(j, search.criteria));
-    return reply.status(200).send({ matchingJobs: matched, total: matched.length });
-  });
+  );
 
   // 7. List job alerts for candidate
   app.get('/api/v1/jobs/alerts', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -8501,45 +9272,54 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // 8. Mark job alert as read
-  app.patch('/api/v1/jobs/alerts/:id/read', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id } = req.params;
-    const alert = jobAlertsById.get(id);
-    if (!alert) {
-      throw new DomainError('NOT_FOUND', `Job alert with ID "${id}" not found.`);
+  app.patch(
+    '/api/v1/jobs/alerts/:id/read',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const alert = jobAlertsById.get(id);
+      if (!alert) {
+        throw new DomainError('NOT_FOUND', `Job alert with ID "${id}" not found.`);
+      }
+      if (alert.userId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this alert.');
+      }
+      alert.isRead = true;
+      jobAlertsById.set(id, alert);
+      return reply.status(200).send({ alert });
     }
-    if (alert.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'Access denied to this alert.');
-    }
-    alert.isRead = true;
-    jobAlertsById.set(id, alert);
-    return reply.status(200).send({ alert });
-  });
+  );
 
   // 9. Bookmark / save job
-  app.post('/api/v1/jobs/:id/save', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: jobId } = req.params;
-    const job = jobsById.get(jobId);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+  app.post(
+    '/api/v1/jobs/:id/save',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: jobId } = req.params;
+      const job = jobsById.get(jobId);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+      }
+      const currentSaved = savedJobsByUserId.get(session.userId) || [];
+      const savedJob = createSavedJob(session.userId, jobId, currentSaved);
+      currentSaved.push(savedJob);
+      savedJobsByUserId.set(session.userId, currentSaved);
+      return reply.status(201).send({ savedJob });
     }
-    const currentSaved = savedJobsByUserId.get(session.userId) || [];
-    const savedJob = createSavedJob(session.userId, jobId, currentSaved);
-    currentSaved.push(savedJob);
-    savedJobsByUserId.set(session.userId, currentSaved);
-    return reply.status(201).send({ savedJob });
-  });
+  );
 
   // 10. Remove saved job bookmark
-  app.delete('/api/v1/jobs/:id/save', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const { id: jobId } = req.params;
-    const currentSaved = savedJobsByUserId.get(session.userId) || [];
-    const updated = removeSavedJob(session.userId, jobId, currentSaved);
-    savedJobsByUserId.set(session.userId, updated);
-    return reply.status(200).send({ message: 'Job removed from saved bookmarks.' });
-  });
+  app.delete(
+    '/api/v1/jobs/:id/save',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id: jobId } = req.params;
+      const currentSaved = savedJobsByUserId.get(session.userId) || [];
+      const updated = removeSavedJob(session.userId, jobId, currentSaved);
+      savedJobsByUserId.set(session.userId, updated);
+      return reply.status(200).send({ message: 'Job removed from saved bookmarks.' });
+    }
+  );
 
   // 11. List candidate's saved jobs
   app.get('/api/v1/jobs/saved', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -8550,146 +9330,155 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // Application Draft Autosave & Version Recovery (F-36, BR-18, SSOT 1015)
-  app.put('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+  app.put(
+    '/api/v1/jobs/:jobId/draft',
+    async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+      }
+
+      const { jobId } = req.params;
+      const job = jobsById.get(jobId);
+      if (!job) {
+        throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+      }
+
+      const input = SaveApplicationDraftInputSchema.parse(req.body);
+
+      const draftKey = `${profile.id}:${jobId}`;
+      const existingDraftId = applicationDraftsByCandidateAndJob.get(draftKey);
+      const existingDraft = existingDraftId
+        ? applicationDraftsById.get(existingDraftId)
+        : undefined;
+
+      const { draft, versionSnapshot } = saveApplicationDraft({
+        candidateId: profile.id,
+        jobId,
+        actor: {
+          userId: session.userId,
+          roles: session.roles,
+        },
+        resumeId: input.resumeId,
+        coverLetter: input.coverLetter,
+        answers: input.answers,
+        attachedEvidenceIds: input.attachedEvidenceIds,
+        stepIndex: input.stepIndex,
+        existingDraft,
+      });
+
+      applicationDraftsById.set(draft.id, draft);
+      applicationDraftsByCandidateAndJob.set(draftKey, draft.id);
+
+      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+      versions.push(versionSnapshot);
+      applicationDraftVersionsByDraftId.set(draft.id, versions);
+
+      return reply.status(200).send({
+        message: 'Application draft saved successfully.',
+        draft,
+        version: draft.version,
+      });
     }
+  );
 
-    const { jobId } = req.params;
-    const job = jobsById.get(jobId);
-    if (!job) {
-      throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+  app.get(
+    '/api/v1/jobs/:jobId/draft',
+    async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+      }
+
+      const { jobId } = req.params;
+      const draftKey = `${profile.id}:${jobId}`;
+      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+      if (!draftId) {
+        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+      }
+
+      const draft = applicationDraftsById.get(draftId);
+      if (!draft || draft.isSubmitted) {
+        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+      }
+
+      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+
+      return reply.status(200).send({
+        draft,
+        versions,
+      });
     }
+  );
 
-    const input = SaveApplicationDraftInputSchema.parse(req.body);
+  app.delete(
+    '/api/v1/jobs/:jobId/draft',
+    async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+      }
 
-    const draftKey = `${profile.id}:${jobId}`;
-    const existingDraftId = applicationDraftsByCandidateAndJob.get(draftKey);
-    const existingDraft = existingDraftId ? applicationDraftsById.get(existingDraftId) : undefined;
+      const { jobId } = req.params;
+      const draftKey = `${profile.id}:${jobId}`;
+      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+      if (!draftId) {
+        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+      }
 
-    const { draft, versionSnapshot } = saveApplicationDraft({
-      candidateId: profile.id,
-      jobId,
-      actor: {
-        userId: session.userId,
-        roles: session.roles,
-      },
-      resumeId: input.resumeId,
-      coverLetter: input.coverLetter,
-      answers: input.answers,
-      attachedEvidenceIds: input.attachedEvidenceIds,
-      stepIndex: input.stepIndex,
-      existingDraft,
-    });
+      applicationDraftsById.delete(draftId);
+      applicationDraftsByCandidateAndJob.delete(draftKey);
+      applicationDraftVersionsByDraftId.delete(draftId);
 
-    applicationDraftsById.set(draft.id, draft);
-    applicationDraftsByCandidateAndJob.set(draftKey, draft.id);
-
-    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
-    versions.push(versionSnapshot);
-    applicationDraftVersionsByDraftId.set(draft.id, versions);
-
-    return reply.status(200).send({
-      message: 'Application draft saved successfully.',
-      draft,
-      version: draft.version,
-    });
-  });
-
-  app.get('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+      return reply.status(200).send({
+        message: 'Application draft discarded successfully.',
+      });
     }
+  );
 
-    const { jobId } = req.params;
-    const draftKey = `${profile.id}:${jobId}`;
-    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-    if (!draftId) {
-      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-    }
+  app.post(
+    '/api/v1/jobs/:jobId/draft/restore',
+    async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+      }
 
-    const draft = applicationDraftsById.get(draftId);
-    if (!draft || draft.isSubmitted) {
-      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-    }
+      const { jobId } = req.params;
+      const draftKey = `${profile.id}:${jobId}`;
+      const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+      if (!draftId) {
+        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+      }
 
-    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+      const draft = applicationDraftsById.get(draftId);
+      if (!draft || draft.isSubmitted) {
+        throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+      }
 
-    return reply.status(200).send({
-      draft,
-      versions,
-    });
-  });
+      const input = RestoreApplicationDraftVersionInputSchema.parse(req.body);
+      const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
 
-  app.delete('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
-    }
-
-    const { jobId } = req.params;
-    const draftKey = `${profile.id}:${jobId}`;
-    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-    if (!draftId) {
-      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-    }
-
-    applicationDraftsById.delete(draftId);
-    applicationDraftsByCandidateAndJob.delete(draftKey);
-    applicationDraftVersionsByDraftId.delete(draftId);
-
-    return reply.status(200).send({
-      message: 'Application draft discarded successfully.',
-    });
-  });
-
-  app.post('/api/v1/jobs/:jobId/draft/restore', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const profile = profilesByUserId.get(session.userId);
-    if (!profile) {
-      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
-    }
-
-    const { jobId } = req.params;
-    const draftKey = `${profile.id}:${jobId}`;
-    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
-    if (!draftId) {
-      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-    }
-
-    const draft = applicationDraftsById.get(draftId);
-    if (!draft || draft.isSubmitted) {
-      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
-    }
-
-    const input = RestoreApplicationDraftVersionInputSchema.parse(req.body);
-    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
-
-    const restored = restoreApplicationDraftVersion(
-      draft,
-      input.targetVersion,
-      versions,
-      {
+      const restored = restoreApplicationDraftVersion(draft, input.targetVersion, versions, {
         userId: session.userId,
         candidateProfileId: profile.id,
-      }
-    );
+      });
 
-    applicationDraftsById.set(restored.draft.id, restored.draft);
-    versions.push(restored.versionSnapshot);
-    applicationDraftVersionsByDraftId.set(restored.draft.id, versions);
+      applicationDraftsById.set(restored.draft.id, restored.draft);
+      versions.push(restored.versionSnapshot);
+      applicationDraftVersionsByDraftId.set(restored.draft.id, versions);
 
-    return reply.status(200).send({
-      message: `Application draft restored to version ${input.targetVersion}.`,
-      draft: restored.draft,
-      version: restored.draft.version,
-    });
-  });
+      return reply.status(200).send({
+        message: `Application draft restored to version ${input.targetVersion}.`,
+        draft: restored.draft,
+        version: restored.draft.version,
+      });
+    }
+  );
 
   app.get('/api/v1/applications/drafts', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -8704,7 +9493,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         const job = jobsById.get(draft.jobId);
         return {
           ...draft,
-          job: job ? { id: job.id, title: job.title, orgId: job.orgId, location: job.location } : undefined,
+          job: job
+            ? { id: job.id, title: job.title, orgId: job.orgId, location: job.location }
+            : undefined,
         };
       });
 
@@ -8721,14 +9512,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     if (session) {
       const settings = userSettingsByUserId.get(session.userId);
-      if (settings && (settings.showActivity === false || (settings as any).telemetryEnabled === false)) {
+      if (
+        settings &&
+        (settings.showActivity === false || (settings as any).telemetryEnabled === false)
+      ) {
         telemetryConsent = false;
       }
     }
 
     const body = req.body as Record<string, unknown>;
-    const ipHash = crypto.createHash('sha256').update(req.ip || '127.0.0.1').digest('hex');
-    const userAgent = typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+    const ipHash = crypto
+      .createHash('sha256')
+      .update(req.ip || '127.0.0.1')
+      .digest('hex');
+    const userAgent =
+      typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
 
     const recorded: AnalyticsEvent[] = [];
 
@@ -8769,35 +9567,41 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
-  app.get('/api/v1/analytics/events', async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+  app.get(
+    '/api/v1/analytics/events',
+    async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-    const { eventType } = req.query;
-    let list = analyticsEvents;
-    if (eventType) {
-      list = list.filter((e) => e.eventType === eventType.toLowerCase());
+      const { eventType } = req.query;
+      let list = analyticsEvents;
+      if (eventType) {
+        list = list.filter((e) => e.eventType === eventType.toLowerCase());
+      }
+
+      return reply.status(200).send({
+        events: list,
+        total: list.length,
+      });
     }
+  );
 
-    return reply.status(200).send({
-      events: list,
-      total: list.length,
-    });
-  });
+  app.get(
+    '/api/v1/analytics/kpis',
+    async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      assertPlatformAdmin(session.roles);
 
-  app.get('/api/v1/analytics/kpis', async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
-    const session = extractUser(req);
-    assertPlatformAdmin(session.roles);
+      const { eventType } = req.query;
+      let targetEvents = analyticsEvents;
+      if (eventType) {
+        targetEvents = targetEvents.filter((e) => e.eventType === eventType.toLowerCase());
+      }
 
-    const { eventType } = req.query;
-    let targetEvents = analyticsEvents;
-    if (eventType) {
-      targetEvents = targetEvents.filter((e) => e.eventType === eventType.toLowerCase());
+      const kpis = computeKPIs(targetEvents);
+      return reply.status(200).send({ kpis });
     }
-
-    const kpis = computeKPIs(targetEvents);
-    return reply.status(200).send({ kpis });
-  });
+  );
 
   // Internal test helper for inspecting async job dispatch
   app.get('/api/v1/internal/worker-jobs', async () => {
@@ -8806,4 +9610,3 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   return app;
 }
-

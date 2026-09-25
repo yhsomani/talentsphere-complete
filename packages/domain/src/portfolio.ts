@@ -63,17 +63,26 @@ export function createPortfolioProject(
   input: CreatePortfolioProjectInput
 ): PortfolioProject {
   if (!userId) {
-    throw new DomainError('VALIDATION_FAILED', 'User ID is required to create a portfolio project.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'User ID is required to create a portfolio project.'
+    );
   }
 
   const title = input.title?.trim();
   if (!title || title.length < 2 || title.length > 200) {
-    throw new DomainError('VALIDATION_FAILED', 'Project title must be between 2 and 200 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Project title must be between 2 and 200 characters.'
+    );
   }
 
   const description = input.description?.trim();
   if (!description || description.length < 10 || description.length > 10000) {
-    throw new DomainError('VALIDATION_FAILED', 'Project description must be between 10 and 10000 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Project description must be between 10 and 10000 characters.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -110,7 +119,10 @@ export function updatePortfolioProject(
   if (input.title !== undefined) {
     const title = input.title.trim();
     if (title.length < 2 || title.length > 200) {
-      throw new DomainError('VALIDATION_FAILED', 'Project title must be between 2 and 200 characters.');
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Project title must be between 2 and 200 characters.'
+      );
     }
     project.title = title;
   }
@@ -118,7 +130,10 @@ export function updatePortfolioProject(
   if (input.description !== undefined) {
     const description = input.description.trim();
     if (description.length < 10 || description.length > 10000) {
-      throw new DomainError('VALIDATION_FAILED', 'Project description must be between 10 and 10000 characters.');
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Project description must be between 10 and 10000 characters.'
+      );
     }
     project.description = description;
   }
@@ -165,10 +180,7 @@ export function updatePortfolioProject(
   return project;
 }
 
-export function canViewPortfolioProject(
-  project: PortfolioProject,
-  viewer: ViewerContext
-): boolean {
+export function canViewPortfolioProject(project: PortfolioProject, viewer: ViewerContext): boolean {
   if (viewer.userId && project.userId === viewer.userId) {
     return true;
   }
@@ -187,7 +199,11 @@ export function canViewPortfolioProject(
 
   if (project.visibility === 'recruiters_only') {
     const roles = viewer.roles || [];
-    return roles.includes('recruiter') || roles.includes('hiring_manager') || roles.includes('platform_admin');
+    return (
+      roles.includes('recruiter') ||
+      roles.includes('hiring_manager') ||
+      roles.includes('platform_admin')
+    );
   }
 
   return false;

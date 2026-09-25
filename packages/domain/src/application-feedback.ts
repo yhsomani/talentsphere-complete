@@ -10,12 +10,7 @@ export type FeedbackReasonCategory =
   | 'other';
 
 export type FeedbackStatus =
-  | 'pending'
-  | 'provided'
-  | 'viewed'
-  | 'requested'
-  | 'responded'
-  | 'skipped';
+  'pending' | 'provided' | 'viewed' | 'requested' | 'responded' | 'skipped';
 
 export interface ApplicationFeedback {
   id: string;
@@ -90,18 +85,30 @@ export interface CreateFeedbackTemplateParams {
 /**
  * Creates structured candidate feedback upon application progression or rejection (F-122, BR-217..BR-224, P-02).
  */
-export function createApplicationFeedback(params: CreateApplicationFeedbackParams): ApplicationFeedback {
+export function createApplicationFeedback(
+  params: CreateApplicationFeedbackParams
+): ApplicationFeedback {
   const isAuthorized =
     params.actor.roles.includes('recruiter') ||
     params.actor.roles.includes('hiring_manager') ||
     params.actor.roles.includes('platform_admin');
 
   if (!isAuthorized) {
-    throw new DomainError('FORBIDDEN', 'Only recruiters, hiring managers, or platform administrators may provide application feedback.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only recruiters, hiring managers, or platform administrators may provide application feedback.'
+    );
   }
 
-  if (params.actor.orgId && params.actor.orgId !== params.orgId && !params.actor.roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Recruiters may only provide feedback for their assigned organization (BR-12).');
+  if (
+    params.actor.orgId &&
+    params.actor.orgId !== params.orgId &&
+    !params.actor.roles.includes('platform_admin')
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Recruiters may only provide feedback for their assigned organization (BR-12).'
+    );
   }
 
   // BR-217: Minimum reason category required on rejection
@@ -119,23 +126,35 @@ export function createApplicationFeedback(params: CreateApplicationFeedbackParam
   }
 
   if (!params.strengths || params.strengths.trim().length < 5) {
-    throw new DomainError('VALIDATION_FAILED', 'Candidate strengths description must be at least 5 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Candidate strengths description must be at least 5 characters.'
+    );
   }
 
   if (!params.areasForImprovement || params.areasForImprovement.trim().length < 5) {
-    throw new DomainError('VALIDATION_FAILED', 'Areas for improvement must be at least 5 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Areas for improvement must be at least 5 characters.'
+    );
   }
 
   // BR-223: Negative feedback must include actionable element
   if (!params.actionableAdvice || params.actionableAdvice.trim().length < 5) {
-    throw new DomainError('VALIDATION_FAILED', 'Actionable advice is required to support candidate dignity and growth (BR-223, P-02).');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Actionable advice is required to support candidate dignity and growth (BR-223, P-02).'
+    );
   }
 
   // BR-221: AI drafts require human review before sending
   const isAiAssisted = params.isAiAssisted === true;
   const humanReviewed = params.humanReviewed !== false; // defaults to true
   if (isAiAssisted && !humanReviewed) {
-    throw new DomainError('POLICY_VIOLATION', 'AI-assisted feedback must be human-reviewed before delivery to candidate (BR-221).');
+    throw new DomainError(
+      'POLICY_VIOLATION',
+      'AI-assisted feedback must be human-reviewed before delivery to candidate (BR-221).'
+    );
   }
 
   const now = new Date().toISOString();
@@ -169,7 +188,10 @@ export function requestApplicationFeedback(
   requestingUserId: string
 ): { requestedAt: string } {
   if (candidateProfileUserId !== requestingUserId) {
-    throw new DomainError('FORBIDDEN', 'Candidates may only request feedback for their own applications.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Candidates may only request feedback for their own applications.'
+    );
   }
 
   const decisionTime = new Date(applicationUpdatedAt).getTime();
@@ -197,7 +219,10 @@ export function markFeedbackViewed(
   requestingUserId: string
 ): ApplicationFeedback {
   if (candidateProfileUserId !== requestingUserId) {
-    throw new DomainError('FORBIDDEN', 'Application feedback is private and visible only to the candidate (BR-219).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Application feedback is private and visible only to the candidate (BR-219).'
+    );
   }
 
   if (feedback.status === 'viewed') {
@@ -262,11 +287,21 @@ export function createFeedbackTemplate(params: CreateFeedbackTemplateParams): Fe
     params.actor.roles.includes('platform_admin');
 
   if (!isAuthorized) {
-    throw new DomainError('FORBIDDEN', 'Only recruiters or administrators may configure feedback templates.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only recruiters or administrators may configure feedback templates.'
+    );
   }
 
-  if (params.actor.orgId && params.actor.orgId !== params.orgId && !params.actor.roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Cannot configure feedback templates for a foreign organization.');
+  if (
+    params.actor.orgId &&
+    params.actor.orgId !== params.orgId &&
+    !params.actor.roles.includes('platform_admin')
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Cannot configure feedback templates for a foreign organization.'
+    );
   }
 
   if (!params.templateName || params.templateName.trim().length < 2) {

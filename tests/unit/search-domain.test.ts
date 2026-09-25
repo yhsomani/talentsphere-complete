@@ -110,7 +110,13 @@ describe('Multi-Entity Search & Command Palette Domain (F-20, F-34, F-32)', () =
   describe('createSearchHistoryRecord', () => {
     it('creates an immutable search history entry', () => {
       const userId = '00000000-0000-0000-0000-000000000001';
-      const record = createSearchHistoryRecord(userId, ' TypeScript ', 'skills', 4, '2026-09-24T18:00:00.000Z');
+      const record = createSearchHistoryRecord(
+        userId,
+        ' TypeScript ',
+        'skills',
+        4,
+        '2026-09-24T18:00:00.000Z'
+      );
 
       expect(record.id).toBeDefined();
       expect(record.userId).toBe(userId);
@@ -165,7 +171,13 @@ describe('Multi-Entity Search & Command Palette Domain (F-20, F-34, F-32)', () =
     const catalog: SearchResultItem[] = [
       { id: '1', type: 'skill', title: 'TypeScript', url: '/skills/typescript', score: 0 },
       { id: '2', type: 'job', title: 'TypeScript Lead Engineer', url: '/jobs/1', score: 0 },
-      { id: '3', type: 'course', title: 'Fullstack TypeScript Mastery', url: '/courses/1', score: 0 },
+      {
+        id: '3',
+        type: 'course',
+        title: 'Fullstack TypeScript Mastery',
+        url: '/courses/1',
+        score: 0,
+      },
       { id: '4', type: 'skill', title: 'Python', url: '/skills/python', score: 0 },
       { id: '5', type: 'company', title: 'TypeCraft AI', url: '/orgs/1', score: 0 },
       { id: '6', type: 'skill', title: 'TypeScript', url: '/skills/ts-duplicate', score: 0 },
@@ -201,4 +213,3 @@ describe('Multi-Entity Search & Command Palette Domain (F-20, F-34, F-32)', () =
     });
   });
 });
-

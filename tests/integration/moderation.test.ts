@@ -472,7 +472,8 @@ describe('Trust, Safety & Moderation Integration Tests (F-24, BR-34, BR-68, BR-1
           authorization: `Bearer ${targetCandidateToken}`,
         },
         payload: {
-          reason: 'My account was accessed unauthorized from an external location. Security logs attached.',
+          reason:
+            'My account was accessed unauthorized from an external location. Security logs attached.',
         },
       });
 
@@ -547,7 +548,8 @@ describe('Trust, Safety & Moderation Integration Tests (F-24, BR-34, BR-68, BR-1
         },
         payload: {
           decision: 'upheld',
-          decisionNotes: 'Compromised session confirmed. Reversing suspension and restoring profile.',
+          decisionNotes:
+            'Compromised session confirmed. Reversing suspension and restoring profile.',
         },
       });
 

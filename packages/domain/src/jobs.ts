@@ -1,13 +1,7 @@
 import { DomainError, type Role } from './index.js';
 
 export type JobStatus =
-  | 'draft'
-  | 'pending_approval'
-  | 'approved'
-  | 'published'
-  | 'paused'
-  | 'closed'
-  | 'archived';
+  'draft' | 'pending_approval' | 'approved' | 'published' | 'paused' | 'closed' | 'archived';
 
 export interface Job {
   id: string;
@@ -75,8 +69,15 @@ export function createJobPosting(params: CreateJobParams): Job {
     throw new DomainError('FORBIDDEN', 'Only recruiters or administrators may post jobs (BR-01).');
   }
 
-  if (params.actor.orgId && params.actor.orgId !== params.orgId && !params.actor.roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Recruiters may only post jobs for their assigned organization (BR-12).');
+  if (
+    params.actor.orgId &&
+    params.actor.orgId !== params.orgId &&
+    !params.actor.roles.includes('platform_admin')
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Recruiters may only post jobs for their assigned organization (BR-12).'
+    );
   }
 
   if (!params.title || params.title.trim().length < 3) {
@@ -92,8 +93,14 @@ export function createJobPosting(params: CreateJobParams): Job {
   }
 
   if (params.salaryRange) {
-    if (params.salaryRange.minMinor < 0 || params.salaryRange.maxMinor < params.salaryRange.minMinor) {
-      throw new DomainError('VALIDATION_FAILED', 'Invalid salary range: min must be non-negative and max >= min.');
+    if (
+      params.salaryRange.minMinor < 0 ||
+      params.salaryRange.maxMinor < params.salaryRange.minMinor
+    ) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Invalid salary range: min must be non-negative and max >= min.'
+      );
     }
   }
 
@@ -127,7 +134,10 @@ export function transitionJobStatus(
     (actor.roles.includes('recruiter') && actor.orgId === job.orgId);
 
   if (!isAuthorized) {
-    throw new DomainError('FORBIDDEN', 'You do not have permission to manage this job posting (BR-12).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'You do not have permission to manage this job posting (BR-12).'
+    );
   }
 
   if (!canTransitionJob(job.status, targetStatus)) {

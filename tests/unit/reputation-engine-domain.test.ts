@@ -141,7 +141,13 @@ describe('Domain: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254)'
       });
       agedSignal.createdAt = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
 
-      const freshScore = calculateReputationScore(userId, 'candidate', 'general', [freshSignal], now);
+      const freshScore = calculateReputationScore(
+        userId,
+        'candidate',
+        'general',
+        [freshSignal],
+        now
+      );
       const agedScore = calculateReputationScore(userId, 'candidate', 'general', [agedSignal], now);
 
       expect(freshScore.score).toBeGreaterThan(agedScore.score);
@@ -167,7 +173,10 @@ describe('Domain: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254)'
       });
 
       const beforePenalty = calculateReputationScore(userId, 'community', 'general', [goodSignal]);
-      const afterPenalty = calculateReputationScore(userId, 'community', 'general', [goodSignal, penaltySignal]);
+      const afterPenalty = calculateReputationScore(userId, 'community', 'general', [
+        goodSignal,
+        penaltySignal,
+      ]);
 
       expect(afterPenalty.score).toBeLessThan(beforePenalty.score);
     });

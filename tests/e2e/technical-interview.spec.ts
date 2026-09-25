@@ -95,21 +95,28 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     applicationId = (await appRes.json()).application.id;
   });
 
-  test('recruiter creates company-scoped question and candidate is forbidden from browsing bank (BR-173)', async ({ request }) => {
+  test('recruiter creates company-scoped question and candidate is forbidden from browsing bank (BR-173)', async ({
+    request,
+  }) => {
     // 1. Recruiter creates company question
     const qRes = await request.post(`${API_BASE}/interviews/questions`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
       data: {
         orgId,
         title: 'Design Consistent Hashing Ring with Virtual Nodes',
-        statement: 'Implement a consistent hash ring with replica factor K and dynamic node rebalancing.',
+        statement:
+          'Implement a consistent hash ring with replica factor K and dynamic node rebalancing.',
         category: 'code',
         difficulty: 'hard',
         durationMinutes: 45,
         expectedCompetencies: ['Hashing', 'Distributed Systems', 'Load Balancing'],
         testCases: [
           { input: 'addNode("nodeA"); getNode("key1")', expectedOutput: 'nodeA', isHidden: false },
-          { input: 'addNode("nodeB"); removeNode("nodeA"); getNode("key1")', expectedOutput: 'nodeB', isHidden: true },
+          {
+            input: 'addNode("nodeB"); removeNode("nodeA"); getNode("key1")',
+            expectedOutput: 'nodeB',
+            isHidden: true,
+          },
         ],
       },
     });
@@ -137,7 +144,9 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(recQBody.questions.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('schedules interview assessment, candidate joins, and hidden test cases are stripped for candidate (BR-173)', async ({ request }) => {
+  test('schedules interview assessment, candidate joins, and hidden test cases are stripped for candidate (BR-173)', async ({
+    request,
+  }) => {
     const schedRes = await request.post(`${API_BASE}/interviews/assessments`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
       data: {
@@ -178,12 +187,17 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(joinBody.assessment.candidateJoinedAt).toBeDefined();
   });
 
-  test('enforces dual consent for recording before recording becomes active (BR-169, BR-170)', async ({ request }) => {
+  test('enforces dual consent for recording before recording becomes active (BR-169, BR-170)', async ({
+    request,
+  }) => {
     // 1. Candidate consents to recording
-    const candConsentRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/consent`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-      data: { consent: true },
-    });
+    const candConsentRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/consent`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+        data: { consent: true },
+      }
+    );
     expect(candConsentRes.status()).toBe(200);
     let body = await candConsentRes.json();
     expect(body.assessment.recordingConsentCandidate).toBe(true);
@@ -194,10 +208,13 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
       headers: { authorization: `Bearer ${recruiterToken}` },
     });
 
-    const recConsentRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/consent`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: { consent: true },
-    });
+    const recConsentRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/consent`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: { consent: true },
+      }
+    );
     expect(recConsentRes.status()).toBe(200);
     body = await recConsentRes.json();
     expect(body.assessment.recordingConsentInterviewer).toBe(true);
@@ -205,7 +222,9 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(body.assessment.retentionExpiresAt).toBeDefined(); // BR-170 <= 90 days
   });
 
-  test('candidate executes live code in sandbox and session concludes (BR-175)', async ({ request }) => {
+  test('candidate executes live code in sandbox and session concludes (BR-175)', async ({
+    request,
+  }) => {
     const codeRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/code`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
@@ -231,36 +250,45 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(endBody.assessment.recordingStatus).toBe('completed');
   });
 
-  test('submits structured scorecard, performs compensating entry, and verifies candidate view privacy (BR-174, BR-176)', async ({ request }) => {
+  test('submits structured scorecard, performs compensating entry, and verifies candidate view privacy (BR-174, BR-176)', async ({
+    request,
+  }) => {
     // 1. Candidate cannot submit scorecard (403 Forbidden)
-    const candScoreRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/scorecard`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-      data: {
-        technicalCorrectness: 5,
-        communication: 5,
-        problemSolving: 5,
-        codeQuality: 5,
-        recommendation: 'strong_yes',
-        strengths: 'Candidate self score',
-        areasForImprovement: 'None',
-      },
-    });
+    const candScoreRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/scorecard`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+        data: {
+          technicalCorrectness: 5,
+          communication: 5,
+          problemSolving: 5,
+          codeQuality: 5,
+          recommendation: 'strong_yes',
+          strengths: 'Candidate self score',
+          areasForImprovement: 'None',
+        },
+      }
+    );
     expect(candScoreRes.status()).toBe(403);
 
     // 2. Interviewer submits structured scorecard
-    const scoreRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/scorecard`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        technicalCorrectness: 5,
-        communication: 4,
-        problemSolving: 5,
-        codeQuality: 4,
-        recommendation: 'strong_yes',
-        strengths: 'Exceptional deep dive on consistent hashing and virtual nodes balance.',
-        areasForImprovement: 'Could proactively highlight partition tolerance under network splits.',
-        privateNotes: 'Top 1% candidate for distributed infrastructure team.',
-      },
-    });
+    const scoreRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/scorecard`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          technicalCorrectness: 5,
+          communication: 4,
+          problemSolving: 5,
+          codeQuality: 4,
+          recommendation: 'strong_yes',
+          strengths: 'Exceptional deep dive on consistent hashing and virtual nodes balance.',
+          areasForImprovement:
+            'Could proactively highlight partition tolerance under network splits.',
+          privateNotes: 'Top 1% candidate for distributed infrastructure team.',
+        },
+      }
+    );
     expect(scoreRes.status()).toBe(201);
     const scoreBody = await scoreRes.json();
     expect(scoreBody.scorecard.overallScore).toBe(4.5);
@@ -268,19 +296,22 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(scoreBody.assessment.status).toBe('scored');
 
     // 3. Compensating scorecard entry (BR-174: append-only ledger)
-    const compRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/scorecard/compensate`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        technicalCorrectness: 5,
-        communication: 5,
-        problemSolving: 5,
-        codeQuality: 5,
-        recommendation: 'strong_yes',
-        strengths: 'Exceptional deep dive on consistent hashing and virtual nodes balance.',
-        areasForImprovement: 'Network partition tolerance addressed in post-coding discussion.',
-        compensationReason: 'Reviewed partition tolerance audio segment with hiring panel.',
-      },
-    });
+    const compRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/scorecard/compensate`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          technicalCorrectness: 5,
+          communication: 5,
+          problemSolving: 5,
+          codeQuality: 5,
+          recommendation: 'strong_yes',
+          strengths: 'Exceptional deep dive on consistent hashing and virtual nodes balance.',
+          areasForImprovement: 'Network partition tolerance addressed in post-coding discussion.',
+          compensationReason: 'Reviewed partition tolerance audio segment with hiring panel.',
+        },
+      }
+    );
     expect(compRes.status()).toBe(201);
     const compBody = await compRes.json();
     expect(compBody.scorecard.revisionNumber).toBe(2);
@@ -288,9 +319,12 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(compBody.scorecard.compensationReason).toContain('hiring panel');
 
     // 4. Candidate views scorecards: private notes are stripped (BR-176)
-    const candViewRes = await request.get(`${API_BASE}/interviews/assessments/${assessmentId}/scorecards`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-    });
+    const candViewRes = await request.get(
+      `${API_BASE}/interviews/assessments/${assessmentId}/scorecards`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+      }
+    );
     expect(candViewRes.status()).toBe(200);
     const candViewBody = await candViewRes.json();
     expect(candViewBody.scorecards.length).toBeGreaterThanOrEqual(1);
@@ -298,19 +332,27 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(candViewBody.scorecards[0].overallScore).toBeDefined();
 
     // 5. Recruiter views full scorecard details
-    const recViewRes = await request.get(`${API_BASE}/interviews/assessments/${assessmentId}/scorecards`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+    const recViewRes = await request.get(
+      `${API_BASE}/interviews/assessments/${assessmentId}/scorecards`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
     expect(recViewRes.status()).toBe(200);
     const recViewBody = await recViewRes.json();
     expect(recViewBody.scorecards[0].privateNotes).toContain('Top 1% candidate');
   });
 
-  test('generates advisory AI feedback without protected attributes and completes HM review (BR-171, BR-172, F-102)', async ({ request }) => {
+  test('generates advisory AI feedback without protected attributes and completes HM review (BR-171, BR-172, F-102)', async ({
+    request,
+  }) => {
     // 1. Generate Advisory AI Feedback
-    const aiRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/ai-feedback`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+    const aiRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/ai-feedback`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
     expect(aiRes.status()).toBe(200);
     const aiBody = await aiRes.json();
     expect(aiBody.feedback.isAdvisory).toBe(true); // BR-171
@@ -319,9 +361,12 @@ test.describe('E2E: Technical Interview Assessment Platform (F-88, S-06, BR-169.
     expect(aiBody.feedback.communicationClarityScore).toBeGreaterThanOrEqual(75);
 
     // 2. Complete Hiring Manager Review Approval
-    const reviewRes = await request.post(`${API_BASE}/interviews/assessments/${assessmentId}/review`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+    const reviewRes = await request.post(
+      `${API_BASE}/interviews/assessments/${assessmentId}/review`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
     expect(reviewRes.status()).toBe(200);
     const reviewBody = await reviewRes.json();
     expect(reviewBody.assessment.status).toBe('reviewed');

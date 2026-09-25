@@ -20,7 +20,7 @@ Goal → Gap → Learn → Practice → Prove → Verify
 React + TypeScript + Vite · Node.js + Fastify · PostgreSQL/Supabase · Supabase Auth/Storage/Queues · REST/OpenAPI · PWA · central AI Gateway.
 
 ## Start here
- 
+
 1. [`SSOT.md`](SSOT.md)
 2. [`BRAIN/MEMORY.md`](BRAIN/MEMORY.md)
 3. [`docs/product/PRD.md`](docs/product/PRD.md)
@@ -54,6 +54,7 @@ Security is part of the product architecture, not post-release hardening.
 ## Contribution
 
 Every behavior-changing PR updates:
+
 - tests;
 - required documentation;
 - migrations if applicable;

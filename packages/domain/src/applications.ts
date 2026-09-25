@@ -1,4 +1,9 @@
-import { DomainError, type Role, type ApplicationState, canTransitionApplication } from './index.js';
+import {
+  DomainError,
+  type Role,
+  type ApplicationState,
+  canTransitionApplication,
+} from './index.js';
 
 export interface JobApplication {
   id: string;
@@ -44,7 +49,10 @@ export function submitJobApplication(params: SubmitApplicationParams): JobApplic
 
   // BR-16 & BR-38: Candidates may apply only to published jobs
   if (params.jobStatus !== 'published') {
-    throw new DomainError('VALIDATION_FAILED', 'Applications are only accepted for published jobs (BR-16).');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Applications are only accepted for published jobs (BR-16).'
+    );
   }
 
   // BR-15 & BR-39: Duplicate active application check
@@ -102,7 +110,10 @@ export function transitionApplicationState(
   } else {
     // ATS Pipeline transitions (in_review, shortlisted, interviewing, offered, hired, rejected)
     if (!actor.isRecruiterForJob && !actor.roles.includes('platform_admin')) {
-      throw new DomainError('FORBIDDEN', 'Only authorized recruiters for this job may advance candidates (BR-40).');
+      throw new DomainError(
+        'FORBIDDEN',
+        'Only authorized recruiters for this job may advance candidates (BR-40).'
+      );
     }
   }
 

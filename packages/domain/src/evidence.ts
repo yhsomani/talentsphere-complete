@@ -1,5 +1,12 @@
 import { createHash } from 'node:crypto';
-import { DomainError, type Role, type Evidence, type EvidenceType, type VerificationLevel, type EvidenceStatus } from './index.js';
+import {
+  DomainError,
+  type Role,
+  type Evidence,
+  type EvidenceType,
+  type VerificationLevel,
+  type EvidenceStatus,
+} from './index.js';
 
 export interface CreateEvidenceParams {
   id?: string;
@@ -79,8 +86,14 @@ export function verifyEvidence(
   }
 
   // Self-verification check (subject cannot verify their own evidence)
-  if (verifier.userId === evidence.subjectId || (subjectUserId && verifier.userId === subjectUserId)) {
-    throw new DomainError('FORBIDDEN', 'Subject cannot self-verify evidence (Anti-gaming invariant).');
+  if (
+    verifier.userId === evidence.subjectId ||
+    (subjectUserId && verifier.userId === subjectUserId)
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Subject cannot self-verify evidence (Anti-gaming invariant).'
+    );
   }
 
   // Role authority checks per target level
@@ -141,7 +154,10 @@ export function disputeEvidence(
     throw new DomainError('VALIDATION_FAILED', 'Dispute reason is required.');
   }
   if (evidence.status === 'revoked') {
-    throw new DomainError('INVALID_STATE_TRANSITION', 'Cannot dispute an already revoked evidence record.');
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      'Cannot dispute an already revoked evidence record.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -175,7 +191,10 @@ export function revokeEvidence(
   const isOriginalVerifier = evidence.verifiedBy === actor.userId;
 
   if (!isOwner && !isAuthority && !isOriginalVerifier) {
-    throw new DomainError('FORBIDDEN', 'Only the owner, issuer/verifier, or platform admin may revoke evidence.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only the owner, issuer/verifier, or platform admin may revoke evidence.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -208,7 +227,9 @@ export function generatePublicProof(evidence: Evidence): PublicEvidenceProof {
     status: evidence.status,
     verifiedAt: evidence.verifiedAt,
     recencyDate: evidence.recencyDate,
-    issuerRole: (evidence.metadata?.verifiedByRole as string) || (evidence.verificationLevel === 'unverified' ? 'self_reported' : 'platform_authority'),
+    issuerRole:
+      (evidence.metadata?.verifiedByRole as string) ||
+      (evidence.verificationLevel === 'unverified' ? 'self_reported' : 'platform_authority'),
     proofHash,
     verificationUrl: `/verify/evidence/${evidence.id}`,
   };

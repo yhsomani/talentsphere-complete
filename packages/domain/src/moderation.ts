@@ -1,6 +1,7 @@
 import { DomainError } from './index.js';
 
-export type ModerationTargetType = 'user' | 'job' | 'message' | 'evidence' | 'review' | 'portfolio_project';
+export type ModerationTargetType =
+  'user' | 'job' | 'message' | 'evidence' | 'review' | 'portfolio_project';
 
 export type ModerationReason =
   | 'spam'
@@ -16,12 +17,7 @@ export type ModerationReportStatus = 'pending' | 'under_review' | 'resolved' | '
 export type ModerationSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 export type ModerationAction =
-  | 'none'
-  | 'warning'
-  | 'content_removed'
-  | 'user_suspended'
-  | 'user_banned'
-  | 'dismissed';
+  'none' | 'warning' | 'content_removed' | 'user_suspended' | 'user_banned' | 'dismissed';
 
 export type ModerationAppealStatus = 'pending' | 'under_review' | 'upheld' | 'denied';
 
@@ -66,10 +62,26 @@ export interface ContentScanResult {
 
 // Banned patterns for automated abuse screening (BR-125)
 const ABUSIVE_PATTERNS = [
-  { regex: /\b(crypto\s+investment|guaranteed\s+returns|send\s+eth|wire\s+funds)\b/i, category: 'financial_scam', severity: 'critical' },
-  { regex: /\b(hacked|exploit|phishing|stolen\s+credentials|dumped\s+database)\b/i, category: 'security_violation', severity: 'critical' },
-  { regex: /\b(viagra|cialis|free\s+money|click\s+here\s+now|earn\s+\$?\d{4,}\s+daily)\b/i, category: 'spam', severity: 'high' },
-  { regex: /\b(idiot|moron|loser|kill\s+yourself|die\s+in\s+a\s+fire)\b/i, category: 'harassment', severity: 'high' },
+  {
+    regex: /\b(crypto\s+investment|guaranteed\s+returns|send\s+eth|wire\s+funds)\b/i,
+    category: 'financial_scam',
+    severity: 'critical',
+  },
+  {
+    regex: /\b(hacked|exploit|phishing|stolen\s+credentials|dumped\s+database)\b/i,
+    category: 'security_violation',
+    severity: 'critical',
+  },
+  {
+    regex: /\b(viagra|cialis|free\s+money|click\s+here\s+now|earn\s+\$?\d{4,}\s+daily)\b/i,
+    category: 'spam',
+    severity: 'high',
+  },
+  {
+    regex: /\b(idiot|moron|loser|kill\s+yourself|die\s+in\s+a\s+fire)\b/i,
+    category: 'harassment',
+    severity: 'high',
+  },
 ];
 
 /**
@@ -196,7 +208,10 @@ export function createModerationReport(params: CreateModerationReportParams): Mo
  */
 export function assertModeratorAuthority(roles: string[]): void {
   if (!roles.includes('moderator') && !roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Access denied. Moderator or Platform Admin privileges required.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Access denied. Moderator or Platform Admin privileges required.'
+    );
   }
 }
 
@@ -250,7 +265,8 @@ export interface ResolveModerationReportParams {
 export function resolveModerationReport(params: ResolveModerationReportParams): ModerationReport {
   assertModeratorAuthority(params.resolver.roles);
 
-  const { report, action, resolutionNotes, resolver, secondApproverId, secondApproverRoles } = params;
+  const { report, action, resolutionNotes, resolver, secondApproverId, secondApproverRoles } =
+    params;
 
   if (report.status === 'resolved' || report.status === 'dismissed') {
     throw new DomainError(
@@ -262,7 +278,10 @@ export function resolveModerationReport(params: ResolveModerationReportParams): 
   // Dual-human approval requirement for account termination / permanent bans (BR-068, WIT-008)
   if (action === 'user_banned') {
     if (!resolver.roles.includes('platform_admin')) {
-      throw new DomainError('FORBIDDEN', 'Permanent account termination requires Platform Admin authority (BR-068).');
+      throw new DomainError(
+        'FORBIDDEN',
+        'Permanent account termination requires Platform Admin authority (BR-068).'
+      );
     }
     if (!secondApproverId || !secondApproverRoles?.includes('platform_admin')) {
       throw new DomainError(
@@ -279,11 +298,17 @@ export function resolveModerationReport(params: ResolveModerationReportParams): 
   }
 
   const now = new Date().toISOString();
-  const terminalStatus: ModerationReportStatus = action === 'dismissed' || action === 'none' ? 'dismissed' : 'resolved';
+  const terminalStatus: ModerationReportStatus =
+    action === 'dismissed' || action === 'none' ? 'dismissed' : 'resolved';
 
   // Open 14-day appeal window if an enforcement action was taken
   let appealEligibleUntil: string | undefined;
-  if (action === 'warning' || action === 'content_removed' || action === 'user_suspended' || action === 'user_banned') {
+  if (
+    action === 'warning' ||
+    action === 'content_removed' ||
+    action === 'user_suspended' ||
+    action === 'user_banned'
+  ) {
     const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
     appealEligibleUntil = new Date(Date.now() + fourteenDaysMs).toISOString();
   }
@@ -309,8 +334,15 @@ export function createModerationAppeal(
   reason: string,
   existingAppeals: ModerationAppeal[] = []
 ): ModerationAppeal {
-  if (report.status !== 'resolved' || report.actionTaken === 'none' || report.actionTaken === 'dismissed') {
-    throw new DomainError('VALIDATION_FAILED', 'Appeals can only be submitted against active enforcement actions.');
+  if (
+    report.status !== 'resolved' ||
+    report.actionTaken === 'none' ||
+    report.actionTaken === 'dismissed'
+  ) {
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Appeals can only be submitted against active enforcement actions.'
+    );
   }
 
   if (!report.appealEligibleUntil || new Date().toISOString() > report.appealEligibleUntil) {
@@ -320,13 +352,21 @@ export function createModerationAppeal(
     );
   }
 
-  const existing = existingAppeals.find((a) => a.reportId === report.id && (a.status === 'pending' || a.status === 'under_review'));
+  const existing = existingAppeals.find(
+    (a) => a.reportId === report.id && (a.status === 'pending' || a.status === 'under_review')
+  );
   if (existing) {
-    throw new DomainError('CONFLICT', 'An active appeal for this moderation report is already pending review.');
+    throw new DomainError(
+      'CONFLICT',
+      'An active appeal for this moderation report is already pending review.'
+    );
   }
 
   if (!reason || reason.trim().length < 10) {
-    throw new DomainError('VALIDATION_FAILED', 'Appeal reason must be at least 10 characters detailing justification.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Appeal reason must be at least 10 characters detailing justification.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -353,7 +393,10 @@ export function reviewModerationAppeal(
   assertModeratorAuthority(reviewer.roles);
 
   if (appeal.status === 'upheld' || appeal.status === 'denied') {
-    throw new DomainError('INVALID_STATE_TRANSITION', `Appeal has already reached terminal status "${appeal.status}".`);
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      `Appeal has already reached terminal status "${appeal.status}".`
+    );
   }
 
   const now = new Date().toISOString();

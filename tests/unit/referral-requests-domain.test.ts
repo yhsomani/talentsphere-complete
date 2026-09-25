@@ -20,7 +20,8 @@ describe('Domain: Referral Request System (F-142, S-11, BR-233..BR-240)', () => 
           referrerId,
           jobId,
           orgId,
-          pitch: 'I have 5 years experience with Node.js and distributed systems, would love a referral!',
+          pitch:
+            'I have 5 years experience with Node.js and distributed systems, would love a referral!',
         },
         1, // 1 prior request in 30 days
         true, // referrer is employed at org
@@ -33,7 +34,9 @@ describe('Domain: Referral Request System (F-142, S-11, BR-233..BR-240)', () => 
       expect(req.jobId).toBe(jobId);
       expect(req.orgId).toBe(orgId);
       expect(req.status).toBe('pending');
-      expect(req.pitch).toBe('I have 5 years experience with Node.js and distributed systems, would love a referral!');
+      expect(req.pitch).toBe(
+        'I have 5 years experience with Node.js and distributed systems, would love a referral!'
+      );
     });
 
     it('rejects self-referral requests', () => {
@@ -137,9 +140,9 @@ describe('Domain: Referral Request System (F-142, S-11, BR-233..BR-240)', () => 
     };
 
     it('requires designated referrer consent to respond (BR-234)', () => {
-      expect(() =>
-        respondToReferralRequest(pendingRequest, candidateId, 'refer', 0)
-      ).toThrowError(/Only the designated referrer can respond/);
+      expect(() => respondToReferralRequest(pendingRequest, candidateId, 'refer', 0)).toThrowError(
+        /Only the designated referrer can respond/
+      );
     });
 
     it('approves referral, establishes 12-month attribution, and grants default XP (BR-234, BR-236, BR-240)', () => {
@@ -214,9 +217,9 @@ describe('Domain: Referral Request System (F-142, S-11, BR-233..BR-240)', () => 
         0
       );
 
-      expect(() =>
-        respondToReferralRequest(approved, referrerId, 'decline', 0)
-      ).toThrowError(/Cannot respond to referral request in 'approved' status/);
+      expect(() => respondToReferralRequest(approved, referrerId, 'decline', 0)).toThrowError(
+        /Cannot respond to referral request in 'approved' status/
+      );
     });
   });
 });

@@ -49,7 +49,9 @@ const JWT_BEARER_PATTERN = /^(Bearer\s+|eyJ[a-zA-Z0-9_-]{10,}\.)/;
 /**
  * Validates and sanitizes analytics metadata per BR-27 (whitelist-only; zero secrets/tokens/raw passwords).
  */
-export function sanitizeAnalyticsMetadata(metadata?: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeAnalyticsMetadata(
+  metadata?: Record<string, unknown>
+): Record<string, unknown> {
   if (!metadata || typeof metadata !== 'object') {
     return {};
   }
@@ -151,13 +153,11 @@ export function computeKPIs(events: AnalyticsEvent[]): KPISummary {
     }
   }
 
-  const registrationToProfileRate = registeredCount > 0
-    ? Number((profileCompletedCount / registeredCount).toFixed(4))
-    : 0;
+  const registrationToProfileRate =
+    registeredCount > 0 ? Number((profileCompletedCount / registeredCount).toFixed(4)) : 0;
 
-  const jobViewToApplyRate = jobViewCount > 0
-    ? Number((appSubmittedCount / jobViewCount).toFixed(4))
-    : 0;
+  const jobViewToApplyRate =
+    jobViewCount > 0 ? Number((appSubmittedCount / jobViewCount).toFixed(4)) : 0;
 
   return {
     totalEvents: events.length,

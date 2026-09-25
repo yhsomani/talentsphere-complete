@@ -14,7 +14,9 @@ import {
 describe('Trust, Safety & Moderation Domain Unit Tests (F-24, BR-34, BR-68, BR-125, BR-154, WIT-008, WIT-013)', () => {
   describe('scanContentForAbuse (BR-125 Pre-Publish Screening)', () => {
     it('allows clean and legitimate professional content', () => {
-      const result = scanContentForAbuse('Senior Full-Stack Engineer with 8 years of React and Node experience.');
+      const result = scanContentForAbuse(
+        'Senior Full-Stack Engineer with 8 years of React and Node experience.'
+      );
       expect(result.isFlagged).toBe(false);
       expect(result.suggestedAction).toBe('allow');
       expect(result.score).toBe(0.0);
@@ -22,7 +24,9 @@ describe('Trust, Safety & Moderation Domain Unit Tests (F-24, BR-34, BR-68, BR-1
     });
 
     it('blocks high-risk financial scam content', () => {
-      const result = scanContentForAbuse('Join our telegram for guaranteed returns and send eth to our wallet!');
+      const result = scanContentForAbuse(
+        'Join our telegram for guaranteed returns and send eth to our wallet!'
+      );
       expect(result.isFlagged).toBe(true);
       expect(result.suggestedAction).toBe('block');
       expect(result.matchedCategories).toContain('financial_scam');
@@ -30,7 +34,9 @@ describe('Trust, Safety & Moderation Domain Unit Tests (F-24, BR-34, BR-68, BR-1
     });
 
     it('blocks security exploit and credential theft content', () => {
-      const result = scanContentForAbuse('Looking to buy stolen credentials and dumped database records.');
+      const result = scanContentForAbuse(
+        'Looking to buy stolen credentials and dumped database records.'
+      );
       expect(result.isFlagged).toBe(true);
       expect(result.suggestedAction).toBe('block');
       expect(result.matchedCategories).toContain('security_violation');

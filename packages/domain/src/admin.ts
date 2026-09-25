@@ -51,7 +51,10 @@ export interface SystemDiagnostics {
  */
 export function assertPlatformAdmin(roles: string[]): void {
   if (!roles.includes('platform_admin') && !roles.includes('admin')) {
-    throw new DomainError('FORBIDDEN', 'Access denied. Platform Admin privileges required (BR-06).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Access denied. Platform Admin privileges required (BR-06).'
+    );
   }
 }
 

@@ -396,7 +396,9 @@ describe('Integration: Technical Interview Assessment Platform (F-88, S-06, BR-1
     });
     expect(recViewRes.statusCode).toBe(200);
     const recViewBody = JSON.parse(recViewRes.payload);
-    expect(recViewBody.scorecards[0].privateNotes).toBe('Top 5% distributed systems engineer. Strong hire.');
+    expect(recViewBody.scorecards[0].privateNotes).toBe(
+      'Top 5% distributed systems engineer. Strong hire.'
+    );
   });
 
   it('generates advisory AI feedback without protected attributes and completes HM review (BR-171, BR-172, F-102)', async () => {

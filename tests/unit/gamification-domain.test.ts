@@ -74,21 +74,36 @@ describe('Gamification & XP Ledger Domain (F-22, F-23, BR-25, WF-11)', () => {
     });
 
     it('does not increment streak for duplicate activity on the same date', () => {
-      const active = { ...baseProfile, currentStreak: 3, longestStreak: 5, lastActivityDate: '2026-09-02' };
+      const active = {
+        ...baseProfile,
+        currentStreak: 3,
+        longestStreak: 5,
+        lastActivityDate: '2026-09-02',
+      };
       const updated = updateStreak(active, '2026-09-02');
       expect(updated.currentStreak).toBe(3);
       expect(updated.longestStreak).toBe(5);
     });
 
     it('increments streak on consecutive calendar day', () => {
-      const active = { ...baseProfile, currentStreak: 3, longestStreak: 3, lastActivityDate: '2026-09-02' };
+      const active = {
+        ...baseProfile,
+        currentStreak: 3,
+        longestStreak: 3,
+        lastActivityDate: '2026-09-02',
+      };
       const updated = updateStreak(active, '2026-09-03');
       expect(updated.currentStreak).toBe(4);
       expect(updated.longestStreak).toBe(4);
     });
 
     it('resets streak to 1 after an inactivity gap while preserving longest streak', () => {
-      const active = { ...baseProfile, currentStreak: 5, longestStreak: 10, lastActivityDate: '2026-09-01' };
+      const active = {
+        ...baseProfile,
+        currentStreak: 5,
+        longestStreak: 10,
+        lastActivityDate: '2026-09-01',
+      };
       const updated = updateStreak(active, '2026-09-05'); // 4 days later
       expect(updated.currentStreak).toBe(1);
       expect(updated.longestStreak).toBe(10);

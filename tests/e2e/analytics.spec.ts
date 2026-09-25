@@ -27,14 +27,14 @@ test.describe('E2E: Product Analytics, Telemetry & KPI Rollups (F-19, F-31, BR-2
 
     // 2. Mint platform admin token
     adminUserId = 'user_admin_e2e_' + Date.now();
-    adminToken = createSessionToken(
-      adminUserId,
-      `admin.e2e.${Date.now()}@talentsphere.internal`,
-      ['platform_admin']
-    );
+    adminToken = createSessionToken(adminUserId, `admin.e2e.${Date.now()}@talentsphere.internal`, [
+      'platform_admin',
+    ]);
   });
 
-  test('ingests client telemetry events and enforces metadata allowlist (F-19, BR-27)', async ({ request }) => {
+  test('ingests client telemetry events and enforces metadata allowlist (F-19, BR-27)', async ({
+    request,
+  }) => {
     // 1. Ingest single telemetry event
     const singleRes = await request.post(`${API_BASE}/analytics/events`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -98,7 +98,9 @@ test.describe('E2E: Product Analytics, Telemetry & KPI Rollups (F-19, F-31, BR-2
     expect(tokenRes.status()).toBe(422);
   });
 
-  test('enforces RBAC on analytics queries and aggregates KPIs for platform admin (F-31, BR-06)', async ({ request }) => {
+  test('enforces RBAC on analytics queries and aggregates KPIs for platform admin (F-31, BR-06)', async ({
+    request,
+  }) => {
     // 1. Candidate forbidden from accessing telemetry queries
     const candForbiddenEvents = await request.get(`${API_BASE}/analytics/events`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -130,7 +132,9 @@ test.describe('E2E: Product Analytics, Telemetry & KPI Rollups (F-19, F-31, BR-2
     expect(adminKpiData.kpis.uniqueUsers).toBeGreaterThanOrEqual(1);
   });
 
-  test('respects candidate privacy opt-out by anonymizing telemetry (F-15, §31)', async ({ request }) => {
+  test('respects candidate privacy opt-out by anonymizing telemetry (F-15, §31)', async ({
+    request,
+  }) => {
     // 1. Candidate opts out of activity telemetry
     const optOutRes = await request.patch(`${API_BASE}/settings`, {
       headers: { authorization: `Bearer ${candidateToken}` },

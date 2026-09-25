@@ -258,7 +258,9 @@ describe('Domain: Technical Interview Assessment Platform (F-88, S-06, BR-169..B
 
       expect(compensated.revisionNumber).toBe(2);
       expect(compensated.parentScorecardId).toBe(original.id);
-      expect(compensated.compensationReason).toBe('Re-reviewed recorded session code execution tests.');
+      expect(compensated.compensationReason).toBe(
+        'Re-reviewed recorded session code execution tests.'
+      );
       expect(compensated.overallScore).toBe(4.0);
     });
   });
@@ -289,7 +291,10 @@ describe('Domain: Technical Interview Assessment Platform (F-88, S-06, BR-169..B
         { input: '[4, 5]', expectedOutput: '9', isHidden: true },
       ];
 
-      const successRun = executeInterviewCode('function sum(arr) { return arr.reduce((a, b) => a + b, 0); }', testCases);
+      const successRun = executeInterviewCode(
+        'function sum(arr) { return arr.reduce((a, b) => a + b, 0); }',
+        testCases
+      );
       expect(successRun.passed).toBe(2);
       expect(successRun.total).toBe(2);
 

@@ -83,7 +83,10 @@ export function evaluateChallengeSubmission(params: {
   code: string;
 }): SubmissionResult {
   if (!ALLOWED_LANGUAGES.includes(params.language as AllowedLanguage)) {
-    throw new DomainError('VALIDATION_FAILED', `Language "${params.language}" is not permitted (BR-24).`);
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      `Language "${params.language}" is not permitted (BR-24).`
+    );
   }
 
   if (!params.code || params.code.trim().length === 0) {

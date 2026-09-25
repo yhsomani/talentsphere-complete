@@ -84,7 +84,9 @@ test.describe('E2E: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232, P-0
     });
   });
 
-  test('candidate can register a skill for freshness tracking with initial 100 score and fresh band', async ({ request }) => {
+  test('candidate can register a skill for freshness tracking with initial 100 score and fresh band', async ({
+    request,
+  }) => {
     const res = await request.post(`${API_BASE}/skills/freshness`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
@@ -115,7 +117,9 @@ test.describe('E2E: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232, P-0
     expect(tracked.freshnessScore).toBe(100);
   });
 
-  test('recruiter without application context cannot view candidate freshness (403 Forbidden, BR-230)', async ({ request }) => {
+  test('recruiter without application context cannot view candidate freshness (403 Forbidden, BR-230)', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/candidates/${candidateProfileId}/skills/freshness`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
     });
@@ -126,7 +130,9 @@ test.describe('E2E: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232, P-0
     expect(body.error.message).toContain('BR-230');
   });
 
-  test('recruiter within application context can inspect candidate skill freshness portfolio (BR-230)', async ({ request }) => {
+  test('recruiter within application context can inspect candidate skill freshness portfolio (BR-230)', async ({
+    request,
+  }) => {
     // Candidate applies to recruiter's job
     const applyRes = await request.post(`${API_BASE}/jobs/${jobId}/apply`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -150,7 +156,9 @@ test.describe('E2E: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232, P-0
     expect(skillRecord.freshnessBand).toBe('fresh');
   });
 
-  test('candidate can re-verify a skill via self-attestation with 0.5x credit and assessment challenge with 100 restoration', async ({ request }) => {
+  test('candidate can re-verify a skill via self-attestation with 0.5x credit and assessment challenge with 100 restoration', async ({
+    request,
+  }) => {
     // 1. Re-verify via self_attestation (BR-229: 0.5x credit)
     const selfRes = await request.post(`${API_BASE}/skills/${validSkillId}/reverify`, {
       headers: { authorization: `Bearer ${candidateToken}` },

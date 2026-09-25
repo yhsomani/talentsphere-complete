@@ -115,7 +115,8 @@ describe('Portfolio Showcase Integration (F-26)', () => {
       headers: { authorization: `Bearer ${ownerToken}` },
       payload: {
         title: 'Cloud-Native Distributed Database',
-        description: 'Engineered a consensus-based distributed KV store with multi-Raft clustering and MVCC.',
+        description:
+          'Engineered a consensus-based distributed KV store with multi-Raft clustering and MVCC.',
         projectUrl: 'https://kv-db.example.com',
         repoUrl: 'https://github.com/elena/kv-db',
         visibility: 'public',
@@ -141,7 +142,8 @@ describe('Portfolio Showcase Integration (F-26)', () => {
       headers: { authorization: `Bearer ${ownerToken}` },
       payload: {
         title: 'Open Source Compiler Optimization Plugin',
-        description: 'LLVM pass optimizing tail-call recursions into jump instructions for high-performance ASTs.',
+        description:
+          'LLVM pass optimizing tail-call recursions into jump instructions for high-performance ASTs.',
         visibility: 'connections_only',
         orderIndex: 1,
       },
@@ -156,7 +158,8 @@ describe('Portfolio Showcase Integration (F-26)', () => {
       headers: { authorization: `Bearer ${ownerToken}` },
       payload: {
         title: 'Fintech High-Frequency Risk Engine',
-        description: 'Sub-millisecond risk analysis engine evaluated by institutional hiring managers.',
+        description:
+          'Sub-millisecond risk analysis engine evaluated by institutional hiring managers.',
         visibility: 'recruiters_only',
         orderIndex: 2,
       },
@@ -171,7 +174,8 @@ describe('Portfolio Showcase Integration (F-26)', () => {
       headers: { authorization: `Bearer ${ownerToken}` },
       payload: {
         title: 'Stealth AI Autonomous Agent Framework',
-        description: 'Confidential research exploration for autonomous multi-agent code orchestration.',
+        description:
+          'Confidential research exploration for autonomous multi-agent code orchestration.',
         visibility: 'private',
         orderIndex: 3,
       },
@@ -184,7 +188,9 @@ describe('Portfolio Showcase Integration (F-26)', () => {
       method: 'GET',
       url: '/api/v1/internal/worker-jobs',
     });
-    const createdJobs = jobsRes.json().jobs.filter((j: any) => j.type === 'portfolio.project.created');
+    const createdJobs = jobsRes
+      .json()
+      .jobs.filter((j: any) => j.type === 'portfolio.project.created');
     expect(createdJobs.length).toBeGreaterThanOrEqual(4);
   });
 

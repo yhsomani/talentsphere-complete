@@ -112,7 +112,9 @@ describe('Challenges Arena & Assessment Domain Model (F-08, BR-24, BR-25, BR-49.
     // SSOT Section D: Verification that AI access is blocked server-side
     expect(() => {
       assertAIAssistanceAllowed([session]);
-    }).toThrowError(/AI assistance is strictly prohibited during an active proctored assessment session/);
+    }).toThrowError(
+      /AI assistance is strictly prohibited during an active proctored assessment session/
+    );
   });
 
   it('evaluates solution, verifies all test cases, and auto-mints verified evidence', () => {

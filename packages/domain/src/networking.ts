@@ -52,7 +52,10 @@ export function requestConnection(
       throw new DomainError('CONFLICT', 'Users are already connected.');
     }
     if (existing.status === 'pending') {
-      throw new DomainError('CONFLICT', 'A connection request is already pending between these users.');
+      throw new DomainError(
+        'CONFLICT',
+        'A connection request is already pending between these users.'
+      );
     }
   }
 

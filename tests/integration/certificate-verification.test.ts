@@ -47,11 +47,9 @@ describe('Integration: Certificate Verification & Public Proofs (F-52, S-02, BR-
 
     // 2. Mint platform admin token
     adminUserId = 'user_admin_cert_' + Date.now();
-    adminToken = createSessionToken(
-      adminUserId,
-      `admin.cert.${Date.now()}@talentsphere.internal`,
-      ['platform_admin']
-    );
+    adminToken = createSessionToken(adminUserId, `admin.cert.${Date.now()}@talentsphere.internal`, [
+      'platform_admin',
+    ]);
 
     // 3. Find seeded baseline course
     const catalogRes = await app.inject({
@@ -178,6 +176,8 @@ describe('Integration: Certificate Verification & Public Proofs (F-52, S-02, BR-
     const verifyData = JSON.parse(verifyRes.payload);
     expect(verifyData.valid).toBe(false);
     expect(verifyData.verification.status).toBe('revoked');
-    expect(verifyData.verification.revocationReason).toBe('Irregularity identified in module progress evaluation.');
+    expect(verifyData.verification.revocationReason).toBe(
+      'Irregularity identified in module progress evaluation.'
+    );
   });
 });

@@ -103,7 +103,9 @@ test.describe('E2E: Saved Searches, Job Alerts & Bookmarks (F-32, F-04, F-25)', 
     expect(updateData.savedSearch.title).toBe('Staff Distributed Consensus Architect');
   });
 
-  test('dispatches job alert when matching job is published and allows running saved search (F-32, SSOT 1018)', async ({ request }) => {
+  test('dispatches job alert when matching job is published and allows running saved search (F-32, SSOT 1018)', async ({
+    request,
+  }) => {
     // 1. Recruiter publishes a matching job
     const postJobRes = await request.post(`${API_BASE}/jobs`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
@@ -158,7 +160,9 @@ test.describe('E2E: Saved Searches, Job Alerts & Bookmarks (F-32, F-04, F-25)', 
     expect(runData.matchingJobs.some((j: any) => j.id === publishedJobId)).toBe(true);
   });
 
-  test('manages saved job bookmarks and deletes saved search (F-04, F-25, F-32)', async ({ request }) => {
+  test('manages saved job bookmarks and deletes saved search (F-04, F-25, F-32)', async ({
+    request,
+  }) => {
     // 1. Save job bookmark
     const saveRes = await request.post(`${API_BASE}/jobs/${publishedJobId}/save`, {
       headers: { authorization: `Bearer ${candidateToken}` },

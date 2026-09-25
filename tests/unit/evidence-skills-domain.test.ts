@@ -15,9 +15,18 @@ import {
 
 describe('Evidence Graph & Verification Domain Model (F-96, BR-149..155)', () => {
   const subjectId = 'c0000000-0000-4000-a000-000000000001';
-  const peerVerifier = { userId: 'p0000000-0000-4000-a000-000000000002', role: 'candidate' as const };
-  const instructorVerifier = { userId: 'i0000000-0000-4000-a000-000000000003', role: 'instructor' as const };
-  const adminVerifier = { userId: 'a0000000-0000-4000-a000-000000000004', role: 'platform_admin' as const };
+  const peerVerifier = {
+    userId: 'p0000000-0000-4000-a000-000000000002',
+    role: 'candidate' as const,
+  };
+  const instructorVerifier = {
+    userId: 'i0000000-0000-4000-a000-000000000003',
+    role: 'instructor' as const,
+  };
+  const adminVerifier = {
+    userId: 'a0000000-0000-4000-a000-000000000004',
+    role: 'platform_admin' as const,
+  };
 
   it('creates evidence in pending and unverified initial state', () => {
     const evidence = createEvidence({
@@ -64,7 +73,12 @@ describe('Evidence Graph & Verification Domain Model (F-96, BR-149..155)', () =>
       recencyDate: '2026-05-10',
     });
 
-    const verified = verifyEvidence(evidence, peerVerifier, 'peer_reviewed', 'Code review approved.');
+    const verified = verifyEvidence(
+      evidence,
+      peerVerifier,
+      'peer_reviewed',
+      'Code review approved.'
+    );
     expect(verified.verificationLevel).toBe('peer_reviewed');
     expect(verified.status).toBe('verified');
     expect(verified.verifiedBy).toBe(peerVerifier.userId);
@@ -113,7 +127,11 @@ describe('Evidence Graph & Verification Domain Model (F-96, BR-149..155)', () =>
       recencyDate: '2026-02-01',
     });
 
-    const disputed = disputeEvidence(evidence, adminVerifier, 'Company denies employment during this period.');
+    const disputed = disputeEvidence(
+      evidence,
+      adminVerifier,
+      'Company denies employment during this period.'
+    );
     expect(disputed.status).toBe('disputed');
     expect(disputed.metadata?.disputeReason).toBe('Company denies employment during this period.');
     expect(disputed.metadata?.disputedBy).toBe(adminVerifier.userId);
@@ -130,7 +148,11 @@ describe('Evidence Graph & Verification Domain Model (F-96, BR-149..155)', () =>
       recencyDate: '2026-01-01',
     });
 
-    const revoked = revokeEvidence(evidence, adminVerifier, 'Plagiarism verified by integrity committee.');
+    const revoked = revokeEvidence(
+      evidence,
+      adminVerifier,
+      'Plagiarism verified by integrity committee.'
+    );
     expect(revoked.status).toBe('revoked');
     expect(revoked.metadata?.revocationReason).toBe('Plagiarism verified by integrity committee.');
     expect(revoked.metadata?.revokedAt).toBeDefined();

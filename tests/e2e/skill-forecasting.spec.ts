@@ -25,7 +25,9 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     recruiterToken = d.token;
   });
 
-  test('queries top emerging skills with forward growth and scarcity scores', async ({ request }) => {
+  test('queries top emerging skills with forward growth and scarcity scores', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/skills/forecast/top-growth?limit=5`);
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -64,8 +66,12 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     expect(data.signal.industry).toBe('Cloud Infrastructure');
   });
 
-  test('retrieves 12-month forward forecast with salary bounds and regional distributions', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/skills/${canonicalSkillId}/forecast?forecastHorizonMonths=12`);
+  test('retrieves 12-month forward forecast with salary bounds and regional distributions', async ({
+    request,
+  }) => {
+    const res = await request.get(
+      `${API_BASE}/skills/${canonicalSkillId}/forecast?forecastHorizonMonths=12`
+    );
     expect(res.status()).toBe(200);
     const data = await res.json();
 
@@ -74,14 +80,18 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     expect(data.forecast.confidenceLevel).toBe(0.95);
     expect(data.forecast.projectedMedianSalary).toBeGreaterThan(100000);
     expect(data.forecast.salaryLowerBound).toBeLessThanOrEqual(data.forecast.projectedMedianSalary);
-    expect(data.forecast.salaryUpperBound).toBeGreaterThanOrEqual(data.forecast.projectedMedianSalary);
+    expect(data.forecast.salaryUpperBound).toBeGreaterThanOrEqual(
+      data.forecast.projectedMedianSalary
+    );
     expect(data.forecast.scarcityIndex).toBeGreaterThan(0);
     expect(data.forecast.estimatedWeeksToMarketability).toBeGreaterThan(0);
     expect(data.forecast.regionalDistribution).toBeDefined();
     expect(data.forecast.industryDistribution).toBeDefined();
   });
 
-  test('generates on-demand custom horizon forecast with prerequisite depth', async ({ request }) => {
+  test('generates on-demand custom horizon forecast with prerequisite depth', async ({
+    request,
+  }) => {
     const res = await request.post(`${API_BASE}/skills/${canonicalSkillId}/forecast/generate`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
       data: {
@@ -108,17 +118,22 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     expect(unauth.status()).toBe(401);
 
     // 400 validation error (negative demand postings)
-    const invalidData = await request.post(`${API_BASE}/skills/${canonicalSkillId}/market-signals`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        demandPostingsCount: -50,
-        activeCandidatesCount: 100,
-      },
-    });
+    const invalidData = await request.post(
+      `${API_BASE}/skills/${canonicalSkillId}/market-signals`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          demandPostingsCount: -50,
+          activeCandidatesCount: 100,
+        },
+      }
+    );
     expect(invalidData.status()).toBe(400);
 
     // 404 non-existent skill
-    const notFound = await request.get(`${API_BASE}/skills/00000000-0000-0000-0000-000000000099/forecast`);
+    const notFound = await request.get(
+      `${API_BASE}/skills/00000000-0000-0000-0000-000000000099/forecast`
+    );
     expect(notFound.status()).toBe(404);
   });
 });

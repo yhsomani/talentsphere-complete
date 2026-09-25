@@ -139,11 +139,17 @@ describe('Gamification & XP Ledger Integration (F-22, F-23, BR-25)', () => {
     });
     const jobs = jobsRes.json().jobs;
 
-    const xpJob = jobs.find((j: any) => j.type === 'gamification.xp.awarded' && j.payload.referenceId === 'ch-algorithm-001');
+    const xpJob = jobs.find(
+      (j: any) =>
+        j.type === 'gamification.xp.awarded' && j.payload.referenceId === 'ch-algorithm-001'
+    );
     expect(xpJob).toBeDefined();
     expect(xpJob.payload.amount).toBe(50);
 
-    const badgeJob = jobs.find((j: any) => j.type === 'gamification.badge.unlocked' && j.payload.badgeSlug === 'first_challenge');
+    const badgeJob = jobs.find(
+      (j: any) =>
+        j.type === 'gamification.badge.unlocked' && j.payload.badgeSlug === 'first_challenge'
+    );
     expect(badgeJob).toBeDefined();
   });
 

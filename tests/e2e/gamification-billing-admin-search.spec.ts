@@ -29,14 +29,14 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
 
     // 2. Generate platform_admin token for registered user
     adminId = userId;
-    adminToken = createSessionToken(
-      adminId,
-      'admin.root@talentsphere.internal',
-      ['platform_admin']
-    );
+    adminToken = createSessionToken(adminId, 'admin.root@talentsphere.internal', [
+      'platform_admin',
+    ]);
   });
 
-  test('tracks gamification XP, enforces daily cap (200 XP/day BR-25), and views leaderboard (F-22, F-23)', async ({ request }) => {
+  test('tracks gamification XP, enforces daily cap (200 XP/day BR-25), and views leaderboard (F-22, F-23)', async ({
+    request,
+  }) => {
     // 1. Check initial gamification summary
     const summaryRes = await request.get(`${API_BASE}/gamification/summary`, {
       headers: { authorization: `Bearer ${userToken}` },
@@ -84,7 +84,9 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
     expect(lbData.totalParticipants).toBeGreaterThanOrEqual(1);
   });
 
-  test('subscribes to platform plan and verifies webhook replay idempotency (F-16, WIT-016)', async ({ request }) => {
+  test('subscribes to platform plan and verifies webhook replay idempotency (F-16, WIT-016)', async ({
+    request,
+  }) => {
     // 1. Inspect public plans
     const plansRes = await request.get(`${API_BASE}/billing/plans`);
     expect(plansRes.status()).toBe(200);
@@ -139,7 +141,9 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
     expect(whData2.replayed).toBe(true);
   });
 
-  test('enforces admin governance, feature flags, anti-lockout (BR-29, BR-068), and executes multi-entity search (F-17, F-35, F-20, F-34)', async ({ request }) => {
+  test('enforces admin governance, feature flags, anti-lockout (BR-29, BR-068), and executes multi-entity search (F-17, F-35, F-20, F-34)', async ({
+    request,
+  }) => {
     // 1. Non-admin accessing admin endpoint must be rejected with 403
     const forbiddenRes = await request.get(`${API_BASE}/admin/users`, {
       headers: { authorization: `Bearer ${userToken}` },

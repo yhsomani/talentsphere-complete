@@ -17,7 +17,8 @@ describe('Portfolio Showcase Domain (F-26)', () => {
       expect(() => {
         createPortfolioProject('', {
           title: 'My Cool App',
-          description: 'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
+          description:
+            'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
         });
       }).toThrowError(/User ID is required/);
     });
@@ -26,14 +27,16 @@ describe('Portfolio Showcase Domain (F-26)', () => {
       expect(() => {
         createPortfolioProject(ownerId, {
           title: 'A',
-          description: 'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
+          description:
+            'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
         });
       }).toThrowError(/Project title must be between 2 and 200 characters/);
 
       expect(() => {
         createPortfolioProject(ownerId, {
           title: 'a'.repeat(201),
-          description: 'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
+          description:
+            'A comprehensive full-stack distributed system built with TypeScript and PostgreSQL.',
         });
       }).toThrowError(/Project title must be between 2 and 200 characters/);
     });
@@ -53,7 +56,8 @@ describe('Portfolio Showcase Domain (F-26)', () => {
 
       const project = createPortfolioProject(ownerId, {
         title: 'Distributed Event Bus',
-        description: 'High-throughput event streaming platform with zero-loss durability and strict idempotency.',
+        description:
+          'High-throughput event streaming platform with zero-loss durability and strict idempotency.',
         projectUrl: 'https://demo.example.com/event-bus',
         repoUrl: 'https://github.com/example/event-bus',
         visibility: 'public',
@@ -99,7 +103,9 @@ describe('Portfolio Showcase Domain (F-26)', () => {
       expect(updated.title).toBe('Updated Title');
       expect(updated.visibility).toBe('connections_only');
       expect(updated.featured).toBe(true);
-      expect(updated.description).toBe('Initial description that is sufficiently long for validation.');
+      expect(updated.description).toBe(
+        'Initial description that is sufficiently long for validation.'
+      );
     });
   });
 
@@ -146,32 +152,51 @@ describe('Portfolio Showcase Domain (F-26)', () => {
     it('evaluates public project as viewable by all personas', () => {
       expect(canViewPortfolioProject(publicProject, {})).toBe(true);
       expect(canViewPortfolioProject(publicProject, { userId: strangerId })).toBe(true);
-      expect(canViewPortfolioProject(publicProject, { userId: recruiterId, roles: ['recruiter'] })).toBe(true);
+      expect(
+        canViewPortfolioProject(publicProject, { userId: recruiterId, roles: ['recruiter'] })
+      ).toBe(true);
     });
 
     it('enforces connections_only visibility based on network relationship', () => {
       // Unconnected stranger cannot view
-      expect(canViewPortfolioProject(connectionsProject, { userId: strangerId, isConnected: false })).toBe(false);
+      expect(
+        canViewPortfolioProject(connectionsProject, { userId: strangerId, isConnected: false })
+      ).toBe(false);
 
       // Connected peer can view
-      expect(canViewPortfolioProject(connectionsProject, { userId: connectedPeerId, isConnected: true })).toBe(true);
+      expect(
+        canViewPortfolioProject(connectionsProject, { userId: connectedPeerId, isConnected: true })
+      ).toBe(true);
     });
 
     it('enforces recruiters_only visibility based on role authorization', () => {
       // General candidate peer cannot view
-      expect(canViewPortfolioProject(recruitersProject, { userId: strangerId, roles: ['candidate'] })).toBe(false);
+      expect(
+        canViewPortfolioProject(recruitersProject, { userId: strangerId, roles: ['candidate'] })
+      ).toBe(false);
 
       // Recruiter can view
-      expect(canViewPortfolioProject(recruitersProject, { userId: recruiterId, roles: ['recruiter'] })).toBe(true);
+      expect(
+        canViewPortfolioProject(recruitersProject, { userId: recruiterId, roles: ['recruiter'] })
+      ).toBe(true);
 
       // Hiring manager can view
-      expect(canViewPortfolioProject(recruitersProject, { userId: recruiterId, roles: ['hiring_manager'] })).toBe(true);
+      expect(
+        canViewPortfolioProject(recruitersProject, {
+          userId: recruiterId,
+          roles: ['hiring_manager'],
+        })
+      ).toBe(true);
     });
 
     it('enforces private visibility strictly to owner only', () => {
       expect(canViewPortfolioProject(privateProject, { userId: strangerId })).toBe(false);
-      expect(canViewPortfolioProject(privateProject, { userId: connectedPeerId, isConnected: true })).toBe(false);
-      expect(canViewPortfolioProject(privateProject, { userId: recruiterId, roles: ['recruiter'] })).toBe(false);
+      expect(
+        canViewPortfolioProject(privateProject, { userId: connectedPeerId, isConnected: true })
+      ).toBe(false);
+      expect(
+        canViewPortfolioProject(privateProject, { userId: recruiterId, roles: ['recruiter'] })
+      ).toBe(false);
     });
   });
 });

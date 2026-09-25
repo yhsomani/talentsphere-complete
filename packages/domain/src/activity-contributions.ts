@@ -48,7 +48,10 @@ export function determineEngagementBand(score: number): EngagementBand {
 
 export function recordActivityEvent(params: RecordActivityEventParams): ActivityEvent {
   if (!params.userId || params.userId.trim().length === 0) {
-    throw new DomainError('VALIDATION_FAILED', 'User ID is required for recording an activity event.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'User ID is required for recording an activity event.'
+    );
   }
 
   const validCategories: ActivityCategory[] = ['learning', 'creation', 'collaboration', 'social'];
@@ -62,7 +65,10 @@ export function recordActivityEvent(params: RecordActivityEventParams): Activity
 
   const weight = params.weight !== undefined ? params.weight : 1.0;
   if (weight <= 0 || weight > 10.0) {
-    throw new DomainError('VALIDATION_FAILED', 'Activity event weight must be between 0.1 and 10.0.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Activity event weight must be between 0.1 and 10.0.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -157,7 +163,9 @@ export function calculateContributionScores(
   // Composite: weighted mix of the 4 dimensions
   const compositeScore = Math.min(
     100,
-    Math.round(learningScore * 0.35 + creationScore * 0.3 + collaborationScore * 0.25 + socialScore * 0.1)
+    Math.round(
+      learningScore * 0.35 + creationScore * 0.3 + collaborationScore * 0.25 + socialScore * 0.1
+    )
   );
 
   // Calculate active streak (consecutive calendar days ending at ref or ref - 1 day)

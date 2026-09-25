@@ -24,7 +24,9 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01)', () =>
     await expect(page.locator('h2:has-text("3. Governed Intelligence")')).toBeVisible();
   });
 
-  test('navigates to dashboard and displays career cockpit with readiness metrics', async ({ page }) => {
+  test('navigates to dashboard and displays career cockpit with readiness metrics', async ({
+    page,
+  }) => {
     await page.goto('/');
 
     // Click launch dashboard button

@@ -153,7 +153,7 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.resume_exports');
     expect(sql).toContain('ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.resume_exports ENABLE ROW LEVEL SECURITY;');
-    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'active\'');
+    expect(sql).toContain("status VARCHAR(32) NOT NULL DEFAULT 'active'");
     expect(sql).toContain('deleted_at TIMESTAMPTZ');
   });
 
@@ -165,7 +165,7 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.connections ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('CONSTRAINT chk_connections_no_self CHECK (sender_id != recipient_id)');
     expect(sql).toContain('CONSTRAINT uq_connections_pair UNIQUE (sender_id, recipient_id)');
-    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'pending\'');
+    expect(sql).toContain("status VARCHAR(32) NOT NULL DEFAULT 'pending'");
   });
 
   it('contains and validates migration 00011 portfolio showcase schema (F-26)', () => {
@@ -179,9 +179,13 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.portfolio_projects ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.portfolio_project_skills ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.portfolio_project_media ENABLE ROW LEVEL SECURITY;');
-    expect(sql).toContain('ALTER TABLE public.portfolio_project_evidence ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain(
+      'ALTER TABLE public.portfolio_project_evidence ENABLE ROW LEVEL SECURITY;'
+    );
     expect(sql).toContain('CONSTRAINT uq_portfolio_project_skill UNIQUE (project_id, skill_id)');
-    expect(sql).toContain('CONSTRAINT uq_portfolio_project_evidence UNIQUE (project_id, evidence_id)');
+    expect(sql).toContain(
+      'CONSTRAINT uq_portfolio_project_evidence UNIQUE (project_id, evidence_id)'
+    );
   });
 
   it('contains and validates migration 00012 gamification xp ledger schema (F-22, F-23)', () => {
@@ -191,7 +195,9 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.user_gamification_profiles');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.gamification_badges');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.user_badges');
-    expect(sql).toContain('ALTER TABLE public.user_gamification_profiles ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain(
+      'ALTER TABLE public.user_gamification_profiles ENABLE ROW LEVEL SECURITY;'
+    );
     expect(sql).toContain('ALTER TABLE public.gamification_badges ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('CONSTRAINT uq_user_badge UNIQUE (user_id, badge_id)');
@@ -207,8 +213,8 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.data_erasure_requests ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('ALTER TABLE public.data_export_requests ENABLE ROW LEVEL SECURITY;');
-    expect(sql).toContain('profile_visibility VARCHAR(32) NOT NULL DEFAULT \'public\'');
-    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'grace_period\'');
+    expect(sql).toContain("profile_visibility VARCHAR(32) NOT NULL DEFAULT 'public'");
+    expect(sql).toContain("status VARCHAR(32) NOT NULL DEFAULT 'grace_period'");
   });
 
   it('contains and validates migration 00014 billing and subscriptions schema (F-16)', () => {
@@ -252,7 +258,9 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     const sql = fs.readFileSync(migrationFile31, 'utf8');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.instructor_reputation_breakdown');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.instructor_endorsements');
-    expect(sql).toContain('ALTER TABLE public.instructor_reputation_breakdown ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain(
+      'ALTER TABLE public.instructor_reputation_breakdown ENABLE ROW LEVEL SECURITY;'
+    );
     expect(sql).toContain('ALTER TABLE public.instructor_endorsements ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('course_quality_score NUMERIC(5, 2)');
     expect(sql).toContain('teaching_effectiveness_score NUMERIC(5, 2)');
@@ -293,7 +301,9 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     const sql = fs.readFileSync(migrationFile34, 'utf8');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.employer_reputation_breakdown');
     expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.employer_reviews');
-    expect(sql).toContain('ALTER TABLE public.employer_reputation_breakdown ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain(
+      'ALTER TABLE public.employer_reputation_breakdown ENABLE ROW LEVEL SECURITY;'
+    );
     expect(sql).toContain('ALTER TABLE public.employer_reviews ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('hiring_score NUMERIC(5, 2)');
     expect(sql).toContain('culture_score NUMERIC(5, 2)');
@@ -320,7 +330,3 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('UNIQUE(skill_id, forecast_horizon_months)');
   });
 });
-
-
-
-

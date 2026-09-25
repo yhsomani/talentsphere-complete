@@ -14,8 +14,6 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "references": [
-    { "path": "../domain" }
-  ],
+  "references": [{ "path": "../domain" }],
   "include": ["src/**/*"]
 }

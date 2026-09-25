@@ -64,11 +64,9 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
     expect(updateRes.statusCode).toBe(200);
 
     // 3. Platform Admin token
-    adminToken = createSessionToken(
-      adminUserId,
-      'admin.search@talentsphere.internal',
-      ['platform_admin']
-    );
+    adminToken = createSessionToken(adminUserId, 'admin.search@talentsphere.internal', [
+      'platform_admin',
+    ]);
   });
 
   afterAll(async () => {
@@ -86,7 +84,9 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
     expect(body.query).toBe('typescript');
     expect(body.totalResults).toBeGreaterThanOrEqual(1);
 
-    const hasSkill = body.results.some((r: any) => r.type === 'skill' && r.title.toLowerCase().includes('typescript'));
+    const hasSkill = body.results.some(
+      (r: any) => r.type === 'skill' && r.title.toLowerCase().includes('typescript')
+    );
     expect(hasSkill).toBe(true);
   });
 
@@ -235,7 +235,9 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
     expect(searchRes.statusCode).toBe(200);
     const body = JSON.parse(searchRes.body);
     expect(body.results.length).toBeGreaterThanOrEqual(1);
-    expect(body.results.some((r: any) => r.type === 'company' && r.title.includes('Acme Robotics'))).toBe(true);
+    expect(
+      body.results.some((r: any) => r.type === 'company' && r.title.includes('Acme Robotics'))
+    ).toBe(true);
     expect(body.categories.companies).toBeGreaterThanOrEqual(1);
   });
 
@@ -263,7 +265,9 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
     });
     expect(pubSearchRes.statusCode).toBe(200);
     const pubBody = JSON.parse(pubSearchRes.body);
-    expect(pubBody.results.some((r: any) => r.type === 'project' && r.title.includes('Autonomous Drone'))).toBe(true);
+    expect(
+      pubBody.results.some((r: any) => r.type === 'project' && r.title.includes('Autonomous Drone'))
+    ).toBe(true);
 
     // 3. Admin creates private project
     const privProjRes = await app.inject({
@@ -320,7 +324,11 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
 
   it('supports multi-faceted filtering by location and minScore (F-147, BR-267)', async () => {
     // Post published jobs in different locations
-    const recruiterToken = createSessionToken('00000000-0000-4000-a000-000000000088', 'rec@corp.com', ['recruiter']);
+    const recruiterToken = createSessionToken(
+      '00000000-0000-4000-a000-000000000088',
+      'rec@corp.com',
+      ['recruiter']
+    );
     const orgRes = await app.inject({
       method: 'POST',
       url: '/api/v1/organizations',
@@ -413,4 +421,3 @@ describe('Multi-Entity Backend Search & Command Palette Integration (F-20, F-34,
     expect(body.suggestions.some((s: any) => s.text.toLowerCase().includes('type'))).toBe(true);
   });
 });
-

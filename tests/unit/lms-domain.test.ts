@@ -93,7 +93,11 @@ describe('LMS Domain & Business Rules (F-07)', () => {
     expect(invalidRes.errors.length).toBeGreaterThan(0);
 
     // Passes when threshold met (3 lessons, 60 mins, contains video/text)
-    const validRes = validateCoursePublishReadiness(mockCourse, [module1, module2], [lesson1, lesson2, lesson3]);
+    const validRes = validateCoursePublishReadiness(
+      mockCourse,
+      [module1, module2],
+      [lesson1, lesson2, lesson3]
+    );
     expect(validRes.valid).toBe(true);
     expect(validRes.errors).toHaveLength(0);
   });
@@ -108,7 +112,9 @@ describe('LMS Domain & Business Rules (F-07)', () => {
     expect(enrollment.progressPercent).toBe(0);
 
     // Duplicate check
-    expect(() => enrollUserInCourse([enrollment], 'user-1', mockCourse)).toThrowError(/already enrolled/);
+    expect(() => enrollUserInCourse([enrollment], 'user-1', mockCourse)).toThrowError(
+      /already enrolled/
+    );
   });
 
   it('enforces sequential module progression (BR-47)', () => {

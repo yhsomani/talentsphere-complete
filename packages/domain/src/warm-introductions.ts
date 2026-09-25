@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import { DomainError } from './index.js';
 
-export type WarmIntroStatus = 'pending_introducer' | 'approved' | 'declined' | 'completed' | 'cancelled';
+export type WarmIntroStatus =
+  'pending_introducer' | 'approved' | 'declined' | 'completed' | 'cancelled';
 
 export interface WarmIntroPreferences {
   userId: string;
@@ -114,21 +115,33 @@ export function createWarmIntroRequest(
 
   // BR-211: Max 10 intro requests/week/user
   if (recentWeeklyRequestsCount >= 10) {
-    throw new DomainError('RATE_LIMIT_EXCEEDED', 'Weekly warm introduction request limit reached (10 requests/week, BR-211).');
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'Weekly warm introduction request limit reached (10 requests/week, BR-211).'
+    );
   }
 
   // BR-212: Introducer can opt out of intro services
   if (introducerPrefs?.optOutIntroducer) {
-    throw new DomainError('FORBIDDEN', 'Introducer has opted out of warm introduction requests (BR-212).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Introducer has opted out of warm introduction requests (BR-212).'
+    );
   }
 
   // BR-213: Target can block all intro requests
   if (targetPrefs?.blockAllIncomingIntros) {
-    throw new DomainError('FORBIDDEN', 'Target user does not accept incoming introductions (BR-213).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Target user does not accept incoming introductions (BR-213).'
+    );
   }
 
   // BR-216: No introduction for blocked users
-  if (introducerPrefs?.blockedUserIds.includes(params.requesterUserId) || targetPrefs?.blockedUserIds.includes(params.requesterUserId)) {
+  if (
+    introducerPrefs?.blockedUserIds.includes(params.requesterUserId) ||
+    targetPrefs?.blockedUserIds.includes(params.requesterUserId)
+  ) {
     throw new DomainError('FORBIDDEN', 'Cannot send introduction request to this user (BR-216).');
   }
 
@@ -138,7 +151,10 @@ export function createWarmIntroRequest(
 
   // Note <= 500 characters
   if (!params.note || params.note.trim().length === 0 || params.note.length > 500) {
-    throw new DomainError('VALIDATION_FAILED', 'Introduction note is required and must not exceed 500 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Introduction note is required and must not exceed 500 characters.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -166,11 +182,17 @@ export function respondToIntroRequest(
   currentTime?: Date
 ): WarmIntroRequest {
   if (request.introducerUserId !== actorUserId) {
-    throw new DomainError('FORBIDDEN', 'Only the designated introducer can approve or decline this introduction (BR-209).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only the designated introducer can approve or decline this introduction (BR-209).'
+    );
   }
 
   if (request.status !== 'pending_introducer') {
-    throw new DomainError('CONFLICT', `Cannot respond to introduction request in '${request.status}' status.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Cannot respond to introduction request in '${request.status}' status.`
+    );
   }
 
   const now = (currentTime || new Date()).toISOString();

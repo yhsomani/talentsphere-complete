@@ -10,7 +10,7 @@ export interface TestCase {
 export type ChallengeDifficulty = 'easy' | 'medium' | 'hard';
 
 export const ALLOWED_LANGUAGES = ['typescript', 'javascript', 'python', 'rust', 'go'] as const;
-export type AllowedLanguage = typeof ALLOWED_LANGUAGES[number];
+export type AllowedLanguage = (typeof ALLOWED_LANGUAGES)[number];
 
 export interface Challenge {
   id: string;
@@ -65,7 +65,10 @@ export function createChallenge(params: CreateChallengeParams): Challenge {
   }
 
   if (!params.slug || !/^[a-z0-9-]+$/.test(params.slug)) {
-    throw new DomainError('VALIDATION_FAILED', 'Challenge slug must be lowercase alphanumeric with hyphens.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Challenge slug must be lowercase alphanumeric with hyphens.'
+    );
   }
 
   if (!params.testCases || params.testCases.length === 0) {
@@ -77,7 +80,10 @@ export function createChallenge(params: CreateChallengeParams): Challenge {
   const hasHidden = params.testCases.some((tc) => tc.isHidden);
 
   if (!hasPublic || !hasHidden) {
-    throw new DomainError('VALIDATION_FAILED', 'Challenge test cases must be split between public and hidden (BR-51).');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Challenge test cases must be split between public and hidden (BR-51).'
+    );
   }
 
   const now = new Date().toISOString();
@@ -102,7 +108,9 @@ export function createChallenge(params: CreateChallengeParams): Challenge {
  * Filters challenge representation for candidate view.
  * BR-51: Hidden test cases are never returned to candidate client.
  */
-export function filterChallengeForCandidate(challenge: Challenge): Omit<Challenge, 'testCases'> & { publicTestCases: TestCase[] } {
+export function filterChallengeForCandidate(
+  challenge: Challenge
+): Omit<Challenge, 'testCases'> & { publicTestCases: TestCase[] } {
   const publicTestCases = challenge.testCases.filter((tc) => !tc.isHidden);
   return {
     id: challenge.id,

@@ -5,14 +5,39 @@ import { colors, spacing } from '@talentsphere/ui';
 export const LandingPage: React.FC = () => {
   return (
     <section style={{ padding: `${spacing['2xl']} 0`, textAlign: 'center' }}>
-      <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: colors.neutral[900], marginBottom: spacing.md, lineHeight: 1.2 }}>
-        The Career Operating System Built on <span style={{ color: colors.primary[600] }}>Verified Evidence</span>
+      <h1
+        style={{
+          fontSize: '2.5rem',
+          fontWeight: 800,
+          color: colors.neutral[900],
+          marginBottom: spacing.md,
+          lineHeight: 1.2,
+        }}
+      >
+        The Career Operating System Built on{' '}
+        <span style={{ color: colors.primary[600] }}>Verified Evidence</span>
       </h1>
-      <p style={{ fontSize: '1.125rem', color: colors.neutral[600], maxWidth: '700px', margin: '0 auto', marginBottom: spacing.xl }}>
-        Move beyond unverified resumes and keyword games. Prove your capabilities through verifiable projects, proctored assessments, and an evidence graph employers trust.
+      <p
+        style={{
+          fontSize: '1.125rem',
+          color: colors.neutral[600],
+          maxWidth: '700px',
+          margin: '0 auto',
+          marginBottom: spacing.xl,
+        }}
+      >
+        Move beyond unverified resumes and keyword games. Prove your capabilities through verifiable
+        projects, proctored assessments, and an evidence graph employers trust.
       </p>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: spacing.md, marginBottom: spacing['3xl'] }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: spacing.md,
+          marginBottom: spacing['3xl'],
+        }}
+      >
         <Link
           to="/dashboard"
           style={{
@@ -37,8 +62,22 @@ export const LandingPage: React.FC = () => {
           textAlign: 'left',
         }}
       >
-        <div style={{ backgroundColor: '#ffffff', padding: spacing.lg, borderRadius: '8px', border: `1px solid ${colors.neutral[200]}` }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: colors.neutral[900], marginBottom: spacing.xs }}>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            padding: spacing.lg,
+            borderRadius: '8px',
+            border: `1px solid ${colors.neutral[200]}`,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: colors.neutral[900],
+              marginBottom: spacing.xs,
+            }}
+          >
             1. Talent Graph
           </h2>
           <p style={{ fontSize: '0.875rem', color: colors.neutral[600] }}>
@@ -46,8 +85,22 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ backgroundColor: '#ffffff', padding: spacing.lg, borderRadius: '8px', border: `1px solid ${colors.neutral[200]}` }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: colors.neutral[900], marginBottom: spacing.xs }}>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            padding: spacing.lg,
+            borderRadius: '8px',
+            border: `1px solid ${colors.neutral[200]}`,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: colors.neutral[900],
+              marginBottom: spacing.xs,
+            }}
+          >
             2. Evidence Graph
           </h2>
           <p style={{ fontSize: '0.875rem', color: colors.neutral[600] }}>
@@ -55,8 +108,22 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ backgroundColor: '#ffffff', padding: spacing.lg, borderRadius: '8px', border: `1px solid ${colors.neutral[200]}` }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: colors.neutral[900], marginBottom: spacing.xs }}>
+        <div
+          style={{
+            backgroundColor: '#ffffff',
+            padding: spacing.lg,
+            borderRadius: '8px',
+            border: `1px solid ${colors.neutral[200]}`,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: colors.neutral[900],
+              marginBottom: spacing.xs,
+            }}
+          >
             3. Governed Intelligence
           </h2>
           <p style={{ fontSize: '0.875rem', color: colors.neutral[600] }}>

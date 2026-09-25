@@ -48,7 +48,9 @@ test.describe('E2E: Resume Builder, Networking & Portfolio Showcase (F-09, F-10,
     user2ProfileId = u2Data.profile.id;
   });
 
-  test('creates resume, performs append-only exports, and verifies soft-delete (F-13, BR-26)', async ({ request }) => {
+  test('creates resume, performs append-only exports, and verifies soft-delete (F-13, BR-26)', async ({
+    request,
+  }) => {
     // 1. Create Resume
     const createRes = await request.post(`${API_BASE}/resumes`, {
       headers: { authorization: `Bearer ${user1Token}` },
@@ -93,15 +95,20 @@ test.describe('E2E: Resume Builder, Networking & Portfolio Showcase (F-09, F-10,
     const activeExportsData = await activeExportsRes.json();
     expect(activeExportsData.exports.some((e: any) => e.id === exportId)).toBe(false);
 
-    const allExportsRes = await request.get(`${API_BASE}/resumes/${resumeId}/exports?includeDeleted=true`, {
-      headers: { authorization: `Bearer ${user1Token}` },
-    });
+    const allExportsRes = await request.get(
+      `${API_BASE}/resumes/${resumeId}/exports?includeDeleted=true`,
+      {
+        headers: { authorization: `Bearer ${user1Token}` },
+      }
+    );
     expect(allExportsRes.status()).toBe(200);
     const allExportsData = await allExportsRes.json();
     expect(allExportsData.exports.some((e: any) => e.id === exportId)).toBe(true);
   });
 
-  test('performs professional connection handshake and creates portfolio project (F-09, F-30)', async ({ request }) => {
+  test('performs professional connection handshake and creates portfolio project (F-09, F-30)', async ({
+    request,
+  }) => {
     // 1. Anti-self connection check
     const selfConnRes = await request.post(`${API_BASE}/connections/request`, {
       headers: { authorization: `Bearer ${user1Token}` },

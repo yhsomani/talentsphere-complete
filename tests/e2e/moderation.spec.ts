@@ -52,11 +52,9 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     targetCandidateId = targetData.user.id;
 
     // 3. Register second admin and promote via admin1Token
-    admin1Token = createSessionToken(
-      admin1Id,
-      'admin1.moderation@talentsphere.internal',
-      ['platform_admin']
-    );
+    admin1Token = createSessionToken(admin1Id, 'admin1.moderation@talentsphere.internal', [
+      'platform_admin',
+    ]);
 
     const admin2RegRes = await request.post(`${API_BASE}/auth/register`, {
       data: {
@@ -76,18 +74,14 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     });
     expect(promoteRes.status()).toBe(200);
 
-    admin2Token = createSessionToken(
-      admin2Id,
-      'admin2.moderation@talentsphere.internal',
-      ['platform_admin']
-    );
+    admin2Token = createSessionToken(admin2Id, 'admin2.moderation@talentsphere.internal', [
+      'platform_admin',
+    ]);
 
     // 4. Generate Moderator token
-    moderatorToken = createSessionToken(
-      moderatorId,
-      'moderator.e2e@talentsphere.internal',
-      ['moderator']
-    );
+    moderatorToken = createSessionToken(moderatorId, 'moderator.e2e@talentsphere.internal', [
+      'moderator',
+    ]);
   });
 
   test('scans user content for abuse prior to publication (BR-125)', async ({ request }) => {
@@ -115,7 +109,9 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(scamData.scanResult.matchedCategories).toContain('financial_scam');
   });
 
-  test('submits moderation reports, enforces anti-self reporting and anti-duplicate rules', async ({ request }) => {
+  test('submits moderation reports, enforces anti-self reporting and anti-duplicate rules', async ({
+    request,
+  }) => {
     // 1. Anti-self report rejection
     const selfRes = await request.post(`${API_BASE}/moderation/reports`, {
       headers: { authorization: `Bearer ${reporterToken}` },
@@ -166,7 +162,9 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(myData.reports[0].id).toBe(activeReportId);
   });
 
-  test('moderator reviews queue, transitions lifecycle status (BR-34), and enforces sanctions', async ({ request }) => {
+  test('moderator reviews queue, transitions lifecycle status (BR-34), and enforces sanctions', async ({
+    request,
+  }) => {
     // 1. Moderator lists queue
     const queueRes = await request.get(`${API_BASE}/moderation/reports`, {
       headers: { authorization: `Bearer ${moderatorToken}` },
@@ -182,22 +180,29 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(detailRes.status()).toBe(200);
 
     // 3. Transition to under_review
-    const statusRes = await request.patch(`${API_BASE}/moderation/reports/${activeReportId}/status`, {
-      headers: { authorization: `Bearer ${moderatorToken}` },
-      data: { status: 'under_review' },
-    });
+    const statusRes = await request.patch(
+      `${API_BASE}/moderation/reports/${activeReportId}/status`,
+      {
+        headers: { authorization: `Bearer ${moderatorToken}` },
+        data: { status: 'under_review' },
+      }
+    );
     expect(statusRes.status()).toBe(200);
     const statusData = await statusRes.json();
     expect(statusData.report.status).toBe('under_review');
 
     // 4. Resolve with user suspension and verify 14-day appeal window is opened (WIT-013)
-    const resolveRes = await request.post(`${API_BASE}/moderation/reports/${activeReportId}/resolve`, {
-      headers: { authorization: `Bearer ${moderatorToken}` },
-      data: {
-        action: 'user_suspended',
-        resolutionNotes: 'Violated Terms of Service Section 4 (Harassment). Temporary 14-day account suspension.',
-      },
-    });
+    const resolveRes = await request.post(
+      `${API_BASE}/moderation/reports/${activeReportId}/resolve`,
+      {
+        headers: { authorization: `Bearer ${moderatorToken}` },
+        data: {
+          action: 'user_suspended',
+          resolutionNotes:
+            'Violated Terms of Service Section 4 (Harassment). Temporary 14-day account suspension.',
+        },
+      }
+    );
     expect(resolveRes.status()).toBe(200);
     const resolveData = await resolveRes.json();
     expect(resolveData.report.status).toBe('resolved');
@@ -205,7 +210,9 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(resolveData.report.appealEligibleUntil).toBeDefined();
   });
 
-  test('enforces dual-human platform admin approval for permanent account bans (BR-068, WIT-008)', async ({ request }) => {
+  test('enforces dual-human platform admin approval for permanent account bans (BR-068, WIT-008)', async ({
+    request,
+  }) => {
     // 1. Create a separate critical security report
     const secRepRes = await request.post(`${API_BASE}/moderation/reports`, {
       headers: { authorization: `Bearer ${reporterToken}` },
@@ -236,13 +243,16 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(modBanRes.status()).toBe(403);
 
     // 3. Platform Admin 1 attempts unilateral ban without second approver -> 422 Policy Violation
-    const unilatBanRes = await request.post(`${API_BASE}/moderation/reports/${secReportId}/resolve`, {
-      headers: { authorization: `Bearer ${admin1Token}` },
-      data: {
-        action: 'user_banned',
-        resolutionNotes: 'Unilateral permanent ban request.',
-      },
-    });
+    const unilatBanRes = await request.post(
+      `${API_BASE}/moderation/reports/${secReportId}/resolve`,
+      {
+        headers: { authorization: `Bearer ${admin1Token}` },
+        data: {
+          action: 'user_banned',
+          resolutionNotes: 'Unilateral permanent ban request.',
+        },
+      }
+    );
     expect(unilatBanRes.status()).toBe(422);
 
     // 4. Platform Admin 1 executes ban with Platform Admin 2 co-approval -> 200 OK
@@ -260,14 +270,20 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(dualBanData.report.actionTaken).toBe('user_banned');
   });
 
-  test('executes appeals lifecycle: submission, queue inspection, and moderator review (WIT-013, BR-154)', async ({ request }) => {
+  test('executes appeals lifecycle: submission, queue inspection, and moderator review (WIT-013, BR-154)', async ({
+    request,
+  }) => {
     // 1. Penalized user submits appeal within the 14-day appeal window
-    const appealRes = await request.post(`${API_BASE}/moderation/reports/${activeReportId}/appeal`, {
-      headers: { authorization: `Bearer ${targetCandidateToken}` },
-      data: {
-        reason: 'My account was accessed unauthorized from a public computer; I have reset my password and enabled MFA.',
-      },
-    });
+    const appealRes = await request.post(
+      `${API_BASE}/moderation/reports/${activeReportId}/appeal`,
+      {
+        headers: { authorization: `Bearer ${targetCandidateToken}` },
+        data: {
+          reason:
+            'My account was accessed unauthorized from a public computer; I have reset my password and enabled MFA.',
+        },
+      }
+    );
     expect(appealRes.status()).toBe(201);
     const appealData = await appealRes.json();
     expect(appealData.appeal.id).toBeDefined();
@@ -283,13 +299,17 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     expect(queueData.total).toBeGreaterThanOrEqual(1);
 
     // 3. Moderator upholds appeal and restores candidate profile
-    const reviewRes = await request.post(`${API_BASE}/moderation/appeals/${activeAppealId}/review`, {
-      headers: { authorization: `Bearer ${moderatorToken}` },
-      data: {
-        decision: 'upheld',
-        decisionNotes: 'Confirmed foreign IP intrusion during incident window. Reversing suspension and restoring account.',
-      },
-    });
+    const reviewRes = await request.post(
+      `${API_BASE}/moderation/appeals/${activeAppealId}/review`,
+      {
+        headers: { authorization: `Bearer ${moderatorToken}` },
+        data: {
+          decision: 'upheld',
+          decisionNotes:
+            'Confirmed foreign IP intrusion during incident window. Reversing suspension and restoring account.',
+        },
+      }
+    );
     expect(reviewRes.status()).toBe(200);
     const reviewData = await reviewRes.json();
     expect(reviewData.appeal.status).toBe('upheld');

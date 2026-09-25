@@ -137,12 +137,10 @@ describe('Domain: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 1015)
 
     const history: ApplicationDraftVersion[] = [v1.versionSnapshot, v2.versionSnapshot];
 
-    const restored = restoreApplicationDraftVersion(
-      v2.draft,
-      1,
-      history,
-      { userId: candidateActor.userId, candidateProfileId: candidateId }
-    );
+    const restored = restoreApplicationDraftVersion(v2.draft, 1, history, {
+      userId: candidateActor.userId,
+      candidateProfileId: candidateId,
+    });
 
     expect(restored.draft.version).toBe(3); // strictly forward-moving versioning
     expect(restored.draft.coverLetter).toBe('Version 1 text');
@@ -160,12 +158,10 @@ describe('Domain: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 1015)
     });
 
     expect(() =>
-      restoreApplicationDraftVersion(
-        v1.draft,
-        999,
-        [v1.versionSnapshot],
-        { userId: candidateActor.userId, candidateProfileId: candidateId }
-      )
+      restoreApplicationDraftVersion(v1.draft, 999, [v1.versionSnapshot], {
+        userId: candidateActor.userId,
+        candidateProfileId: candidateId,
+      })
     ).toThrowError(/Draft version 999 not found/);
   });
 
@@ -178,12 +174,10 @@ describe('Domain: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 1015)
     });
 
     expect(() =>
-      restoreApplicationDraftVersion(
-        v1.draft,
-        1,
-        [v1.versionSnapshot],
-        { userId: 'other_user', candidateProfileId: 'other_profile' }
-      )
+      restoreApplicationDraftVersion(v1.draft, 1, [v1.versionSnapshot], {
+        userId: 'other_user',
+        candidateProfileId: 'other_profile',
+      })
     ).toThrowError(/Cannot restore an application draft belonging to another candidate/);
   });
 });

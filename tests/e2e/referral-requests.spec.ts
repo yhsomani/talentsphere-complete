@@ -112,7 +112,9 @@ test.describe('E2E: Referral Request System (F-142, S-11, BR-233..BR-240, P-02)'
     applicationId = (await appRes.json()).application.id;
   });
 
-  test('enforces employment verification: rejects referral request for non-employee (BR-237)', async ({ request }) => {
+  test('enforces employment verification: rejects referral request for non-employee (BR-237)', async ({
+    request,
+  }) => {
     // Register outside user
     const outsideRes = await request.post(`${API_BASE}/auth/register`, {
       data: {
@@ -144,7 +146,8 @@ test.describe('E2E: Referral Request System (F-142, S-11, BR-233..BR-240, P-02)'
       data: {
         referrerId: referrerUserId,
         jobId,
-        pitch: 'Hi Elena, I have architected global Kubernetes clusters and would appreciate your referral!',
+        pitch:
+          'Hi Elena, I have architected global Kubernetes clusters and would appreciate your referral!',
       },
     });
 
@@ -158,7 +161,9 @@ test.describe('E2E: Referral Request System (F-142, S-11, BR-233..BR-240, P-02)'
     referralRequestId = body.request.id;
   });
 
-  test('referrer inspects incoming request and candidate inspects outgoing request', async ({ request }) => {
+  test('referrer inspects incoming request and candidate inspects outgoing request', async ({
+    request,
+  }) => {
     // Referrer incoming
     const inRes = await request.get(`${API_BASE}/referrals/requests/incoming`, {
       headers: { authorization: `Bearer ${referrerToken}` },
@@ -176,11 +181,16 @@ test.describe('E2E: Referral Request System (F-142, S-11, BR-233..BR-240, P-02)'
     expect(outBody.requests.some((r: any) => r.id === referralRequestId)).toBe(true);
   });
 
-  test('referrer approves referral, generates 12-month attribution outcome and tags application (BR-234..BR-240)', async ({ request }) => {
-    const approveRes = await request.post(`${API_BASE}/referrals/requests/${referralRequestId}/respond`, {
-      headers: { authorization: `Bearer ${referrerToken}` },
-      data: { action: 'refer' },
-    });
+  test('referrer approves referral, generates 12-month attribution outcome and tags application (BR-234..BR-240)', async ({
+    request,
+  }) => {
+    const approveRes = await request.post(
+      `${API_BASE}/referrals/requests/${referralRequestId}/respond`,
+      {
+        headers: { authorization: `Bearer ${referrerToken}` },
+        data: { action: 'refer' },
+      }
+    );
 
     expect(approveRes.status()).toBe(200);
     const body = await approveRes.json();
@@ -208,6 +218,8 @@ test.describe('E2E: Referral Request System (F-142, S-11, BR-233..BR-240, P-02)'
     expect(outcomesRes.status()).toBe(200);
     const body = await outcomesRes.json();
     expect(body.outcomes.length).toBeGreaterThanOrEqual(1);
-    expect(body.outcomes.some((o: any) => o.candidateId === candidateUserId && o.jobId === jobId)).toBe(true);
+    expect(
+      body.outcomes.some((o: any) => o.candidateId === candidateUserId && o.jobId === jobId)
+    ).toBe(true);
   });
 });

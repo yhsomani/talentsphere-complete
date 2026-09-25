@@ -28,7 +28,16 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
         [targetId, new Set([introducerId])],
       ]);
       const prefs = new Map<string, WarmIntroPreferences>([
-        [targetId, { userId: targetId, optOutIntroducer: false, blockAllIncomingIntros: true, blockedUserIds: [], updatedAt: '' }],
+        [
+          targetId,
+          {
+            userId: targetId,
+            optOutIntroducer: false,
+            blockAllIncomingIntros: true,
+            blockedUserIds: [],
+            updatedAt: '',
+          },
+        ],
       ]);
 
       const paths = discoverWarmIntroPaths(requesterId, targetId, graph, prefs);
@@ -41,7 +50,16 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
         [targetId, new Set([introducerId])],
       ]);
       const prefs = new Map<string, WarmIntroPreferences>([
-        [targetId, { userId: targetId, optOutIntroducer: false, blockAllIncomingIntros: false, blockedUserIds: [requesterId], updatedAt: '' }],
+        [
+          targetId,
+          {
+            userId: targetId,
+            optOutIntroducer: false,
+            blockAllIncomingIntros: false,
+            blockedUserIds: [requesterId],
+            updatedAt: '',
+          },
+        ],
       ]);
 
       const paths = discoverWarmIntroPaths(requesterId, targetId, graph, prefs);
@@ -70,7 +88,16 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
         [targetId, new Set([introducerId])],
       ]);
       const prefs = new Map<string, WarmIntroPreferences>([
-        [introducerId, { userId: introducerId, optOutIntroducer: true, blockAllIncomingIntros: false, blockedUserIds: [], updatedAt: '' }],
+        [
+          introducerId,
+          {
+            userId: introducerId,
+            optOutIntroducer: true,
+            blockAllIncomingIntros: false,
+            blockedUserIds: [],
+            updatedAt: '',
+          },
+        ],
       ]);
 
       const paths = discoverWarmIntroPaths(requesterId, targetId, graph, prefs);
@@ -246,9 +273,9 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
     };
 
     it('requires introducer consent to respond (BR-209)', () => {
-      expect(() =>
-        respondToIntroRequest(pendingRequest, requesterId, 'approve')
-      ).toThrowError(/Only the designated introducer can approve/);
+      expect(() => respondToIntroRequest(pendingRequest, requesterId, 'approve')).toThrowError(
+        /Only the designated introducer can approve/
+      );
     });
 
     it('delivers three-way thread upon approval (BR-214)', () => {
@@ -260,7 +287,12 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
     });
 
     it('updates status and captures reason upon decline', () => {
-      const declined = respondToIntroRequest(pendingRequest, introducerId, 'decline', 'Not in touch recently');
+      const declined = respondToIntroRequest(
+        pendingRequest,
+        introducerId,
+        'decline',
+        'Not in touch recently'
+      );
 
       expect(declined.status).toBe('declined');
       expect(declined.declineReason).toBe('Not in touch recently');
@@ -269,9 +301,9 @@ describe('Domain: Warm Introduction Paths (F-121, S-11, BR-209..BR-216)', () => 
 
     it('rejects responding to already resolved requests', () => {
       const approved = respondToIntroRequest(pendingRequest, introducerId, 'approve');
-      expect(() =>
-        respondToIntroRequest(approved, introducerId, 'decline')
-      ).toThrowError(/Cannot respond to introduction request in 'approved' status/);
+      expect(() => respondToIntroRequest(approved, introducerId, 'decline')).toThrowError(
+        /Cannot respond to introduction request in 'approved' status/
+      );
     });
   });
 });

@@ -119,7 +119,8 @@ test.describe('E2E: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', ()
         reasonCategory: 'skills_gap',
         defaultStrengths: 'Strong fundamental knowledge of network protocols and kernel limits.',
         defaultAreasForImprovement: 'Limited experience with eBPF tracing and kernel telemetry.',
-        defaultActionableAdvice: 'Read through Cilium/eBPF architectural guides and experiment in a sandbox.',
+        defaultActionableAdvice:
+          'Read through Cilium/eBPF architectural guides and experiment in a sandbox.',
       },
     });
 
@@ -137,7 +138,9 @@ test.describe('E2E: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', ()
     expect(listData.templates.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('recruiter provides structured feedback and candidate views it privately (BR-217, BR-219, BR-223)', async ({ request }) => {
+  test('recruiter provides structured feedback and candidate views it privately (BR-217, BR-219, BR-223)', async ({
+    request,
+  }) => {
     // 1. Recruiter submits feedback
     const provRes = await request.post(`${API_BASE}/applications/${applicationId}/feedback`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
@@ -146,7 +149,8 @@ test.describe('E2E: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', ()
         reasonCategory: 'skills_gap',
         strengths: 'Deep domain expertise in Linux sysadmin and distributed tracing.',
         areasForImprovement: 'Could improve on concurrent consensus algorithms (Raft/Paxos).',
-        actionableAdvice: 'We suggest building a toy Raft cluster in Go to deepen consensus mechanics.',
+        actionableAdvice:
+          'We suggest building a toy Raft cluster in Go to deepen consensus mechanics.',
         suggestedSkillIds: [validSkillId],
         isAiAssisted: false,
         humanReviewed: true,
@@ -170,9 +174,12 @@ test.describe('E2E: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', ()
     expect(viewData.feedback.actionableAdvice).toContain('toy Raft cluster');
 
     // 3. Candidate requests follow-up
-    const reqRes = await request.post(`${API_BASE}/applications/${applicationId}/feedback/request`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-    });
+    const reqRes = await request.post(
+      `${API_BASE}/applications/${applicationId}/feedback/request`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+      }
+    );
     expect(reqRes.status()).toBe(200);
   });
 });

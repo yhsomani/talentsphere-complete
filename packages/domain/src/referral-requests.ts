@@ -63,12 +63,18 @@ export function createReferralRequest(
 
   // BR-233: Max 3 referral requests per 30 days per candidate
   if (recentRequests30DaysCount >= 3) {
-    throw new DomainError('RATE_LIMIT_EXCEEDED', 'Max 3 referral requests per 30 days per candidate (BR-233).');
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'Max 3 referral requests per 30 days per candidate (BR-233).'
+    );
   }
 
   // BR-237: System verifies referrer's employment
   if (!isReferrerEmployedAtOrg) {
-    throw new DomainError('FORBIDDEN', 'System verifies referrer employment: referrer must be employed at target organization (BR-237).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'System verifies referrer employment: referrer must be employed at target organization (BR-237).'
+    );
   }
 
   // BR-238: No referral request from blocked user
@@ -114,11 +120,17 @@ export function respondToReferralRequest(
 ): RespondReferralRequestResult {
   // BR-234: Referrer consent required per request
   if (request.referrerId !== actorUserId) {
-    throw new DomainError('FORBIDDEN', 'Only the designated referrer can respond to this referral request (BR-234).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only the designated referrer can respond to this referral request (BR-234).'
+    );
   }
 
   if (request.status !== 'pending') {
-    throw new DomainError('CONFLICT', `Cannot respond to referral request in '${request.status}' status.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Cannot respond to referral request in '${request.status}' status.`
+    );
   }
 
   const now = (currentTime || new Date()).toISOString();
@@ -126,7 +138,10 @@ export function respondToReferralRequest(
   if (action === 'refer') {
     // BR-239: Referrer max 20 referrals/quarter
     if (quarterlyReferralsCount >= 20) {
-      throw new DomainError('RATE_LIMIT_EXCEEDED', 'Referrer has reached the maximum of 20 referrals per quarter (BR-239).');
+      throw new DomainError(
+        'RATE_LIMIT_EXCEEDED',
+        'Referrer has reached the maximum of 20 referrals per quarter (BR-239).'
+      );
     }
 
     const updatedRequest: ReferralRequest = {
@@ -158,7 +173,10 @@ export function respondToReferralRequest(
     return { request: updatedRequest, outcome };
   } else if (action === 'forward') {
     if (!forwardedToUserId || forwardedToUserId.trim().length === 0) {
-      throw new DomainError('VALIDATION_FAILED', 'forwardedToUserId is required when forwarding a referral request.');
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'forwardedToUserId is required when forwarding a referral request.'
+      );
     }
 
     const updatedRequest: ReferralRequest = {

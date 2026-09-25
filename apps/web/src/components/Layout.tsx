@@ -22,7 +22,15 @@ export const Layout: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: colors.neutral[50], color: colors.neutral[900] }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: colors.neutral[50],
+        color: colors.neutral[900],
+      }}
+    >
       {/* WCAG 2.2 AA Skip Link */}
       <a
         href="#main-content"
@@ -103,7 +111,8 @@ export const Layout: React.FC = () => {
               to="/dashboard"
               style={{
                 textDecoration: 'none',
-                color: location.pathname === '/dashboard' ? colors.primary[600] : colors.neutral[600],
+                color:
+                  location.pathname === '/dashboard' ? colors.primary[600] : colors.neutral[600],
                 fontWeight: location.pathname === '/dashboard' ? 600 : 400,
                 fontSize: '0.875rem',
               }}

@@ -3,11 +3,7 @@ import { DomainError } from './index.js';
 export type SkillDecayCategory = 'fast_changing' | 'moderate' | 'stable' | 'foundational';
 export type SkillFreshnessBand = 'fresh' | 'current' | 'aging' | 'stale' | 'expired';
 export type ReverificationSource =
-  | 'challenge'
-  | 'course'
-  | 'certification'
-  | 'evidence'
-  | 'self_attestation';
+  'challenge' | 'course' | 'certification' | 'evidence' | 'self_attestation';
 
 export interface SkillFreshnessRecord {
   id: string;
@@ -104,7 +100,9 @@ export function calculateFreshnessScore(
 /**
  * Initializes a new skill freshness record.
  */
-export function createSkillFreshnessRecord(params: CreateSkillFreshnessParams): SkillFreshnessRecord {
+export function createSkillFreshnessRecord(
+  params: CreateSkillFreshnessParams
+): SkillFreshnessRecord {
   if (!params.candidateId || params.candidateId.trim().length === 0) {
     throw new DomainError('VALIDATION_FAILED', 'Candidate ID is required.');
   }

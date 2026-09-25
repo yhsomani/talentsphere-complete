@@ -29,8 +29,10 @@ describe('Domain: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', () =
       stage: 'technical_interview',
       reasonCategory: 'skills_gap',
       strengths: 'Exceptional communication and deep knowledge of relational SQL databases.',
-      areasForImprovement: 'Needs stronger exposure to distributed caching and event-driven patterns with Kafka.',
-      actionableAdvice: 'We recommend completing advanced distributed systems labs and practicing event stream partitioning.',
+      areasForImprovement:
+        'Needs stronger exposure to distributed caching and event-driven patterns with Kafka.',
+      actionableAdvice:
+        'We recommend completing advanced distributed systems labs and practicing event stream partitioning.',
       suggestedSkillIds: ['skill_kafka', 'skill_redis'],
       actor: recruiterActor,
     });
@@ -129,9 +131,9 @@ describe('Domain: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', () =
     });
 
     // Foreign user cannot view feedback
-    expect(() =>
-      markFeedbackViewed(feedback, 'cand_user_1', 'intruder_user_99')
-    ).toThrowError(/Application feedback is private and visible only to the candidate/);
+    expect(() => markFeedbackViewed(feedback, 'cand_user_1', 'intruder_user_99')).toThrowError(
+      /Application feedback is private and visible only to the candidate/
+    );
 
     // Candidate views feedback -> status transitions to viewed
     const viewed = markFeedbackViewed(feedback, 'cand_user_1', 'cand_user_1');

@@ -80,8 +80,14 @@ export function createSavedSearch(params: CreateSavedSearchParams): SavedSearch 
       location: criteria.location?.trim() || undefined,
       workMode: criteria.workMode,
       jobType: criteria.jobType,
-      requiredSkillIds: criteria.requiredSkillIds && criteria.requiredSkillIds.length > 0 ? criteria.requiredSkillIds : undefined,
-      salaryMinMinor: criteria.salaryMinMinor !== undefined && criteria.salaryMinMinor > 0 ? criteria.salaryMinMinor : undefined,
+      requiredSkillIds:
+        criteria.requiredSkillIds && criteria.requiredSkillIds.length > 0
+          ? criteria.requiredSkillIds
+          : undefined,
+      salaryMinMinor:
+        criteria.salaryMinMinor !== undefined && criteria.salaryMinMinor > 0
+          ? criteria.salaryMinMinor
+          : undefined,
     },
     alertFrequency,
     isActive: true,
@@ -100,7 +106,10 @@ export interface UpdateSavedSearchParams {
 /**
  * Updates an existing saved search.
  */
-export function updateSavedSearch(search: SavedSearch, updates: UpdateSavedSearchParams): SavedSearch {
+export function updateSavedSearch(
+  search: SavedSearch,
+  updates: UpdateSavedSearchParams
+): SavedSearch {
   const now = new Date().toISOString();
 
   let nextCriteria = { ...search.criteria };
@@ -115,7 +124,8 @@ export function updateSavedSearch(search: SavedSearch, updates: UpdateSavedSearc
     ...search,
     title: updates.title !== undefined ? updates.title.trim() : search.title,
     criteria: nextCriteria,
-    alertFrequency: updates.alertFrequency !== undefined ? updates.alertFrequency : search.alertFrequency,
+    alertFrequency:
+      updates.alertFrequency !== undefined ? updates.alertFrequency : search.alertFrequency,
     isActive: updates.isActive !== undefined ? updates.isActive : search.isActive,
     updatedAt: now,
   };
@@ -219,7 +229,11 @@ export function evaluateJobAlertsForPublishedJob(
 /**
  * Saves/bookmarks a job for a candidate.
  */
-export function createSavedJob(userId: string, jobId: string, existingSavedJobs: SavedJob[]): SavedJob {
+export function createSavedJob(
+  userId: string,
+  jobId: string,
+  existingSavedJobs: SavedJob[]
+): SavedJob {
   const existing = existingSavedJobs.find((s) => s.userId === userId && s.jobId === jobId);
   if (existing) {
     throw new DomainError('CONFLICT', 'Job is already saved in your bookmarks.');
@@ -236,7 +250,11 @@ export function createSavedJob(userId: string, jobId: string, existingSavedJobs:
 /**
  * Removes a job from candidate's saved list.
  */
-export function removeSavedJob(userId: string, jobId: string, existingSavedJobs: SavedJob[]): SavedJob[] {
+export function removeSavedJob(
+  userId: string,
+  jobId: string,
+  existingSavedJobs: SavedJob[]
+): SavedJob[] {
   const existing = existingSavedJobs.find((s) => s.userId === userId && s.jobId === jobId);
   if (!existing) {
     throw new DomainError('NOT_FOUND', 'Saved job bookmark not found.');

@@ -246,7 +246,9 @@ export function processXpAward(params: ProcessXpAwardParams): ProcessXpAwardResu
 
   const now = new Date().toISOString();
   const txCreatedAt = params.currentDate
-    ? (params.currentDate.includes('T') ? params.currentDate : `${params.currentDate}T${now.slice(11)}`)
+    ? params.currentDate.includes('T')
+      ? params.currentDate
+      : `${params.currentDate}T${now.slice(11)}`
     : now;
   const transaction: XpTransaction = {
     id: crypto.randomUUID(),

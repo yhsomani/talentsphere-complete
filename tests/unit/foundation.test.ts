@@ -12,7 +12,11 @@ import {
 } from '../../packages/contracts/src/index.js';
 import { validateServerEnv, CONSTANTS } from '../../packages/config/src/index.js';
 import { createLogger, InMemoryAuditSink } from '../../packages/observability/src/index.js';
-import { createMockUser, createMockProfile, createMockEvidence } from '../../packages/testing/src/index.js';
+import {
+  createMockUser,
+  createMockProfile,
+  createMockEvidence,
+} from '../../packages/testing/src/index.js';
 
 describe('Phase 0 Foundation Test Suite', () => {
   describe('Domain Invariants & State Transitions', () => {
@@ -40,7 +44,9 @@ describe('Phase 0 Foundation Test Suite', () => {
     });
 
     it('creates DomainError with code, message and details', () => {
-      const err = new DomainError('ASSESSMENT_AI_PROHIBITED', 'AI is disallowed during exam', { sessionId: '123' });
+      const err = new DomainError('ASSESSMENT_AI_PROHIBITED', 'AI is disallowed during exam', {
+        sessionId: '123',
+      });
       expect(err.code).toBe('ASSESSMENT_AI_PROHIBITED');
       expect(err.message).toBe('AI is disallowed during exam');
       expect(err.details).toEqual({ sessionId: '123' });

@@ -62,10 +62,13 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(conn1.status()).toBe(201);
     const conn1Data = await conn1.json();
 
-    const accept1 = await request.post(`${API_BASE}/connections/${conn1Data.connection.id}/respond`, {
-      headers: { authorization: `Bearer ${bobToken}` },
-      data: { action: 'accept' },
-    });
+    const accept1 = await request.post(
+      `${API_BASE}/connections/${conn1Data.connection.id}/respond`,
+      {
+        headers: { authorization: `Bearer ${bobToken}` },
+        data: { action: 'accept' },
+      }
+    );
     expect(accept1.status()).toBe(200);
 
     // 5. Connect Bob <-> Charlie
@@ -76,17 +79,25 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(conn2.status()).toBe(201);
     const conn2Data = await conn2.json();
 
-    const accept2 = await request.post(`${API_BASE}/connections/${conn2Data.connection.id}/respond`, {
-      headers: { authorization: `Bearer ${charlieToken}` },
-      data: { action: 'accept' },
-    });
+    const accept2 = await request.post(
+      `${API_BASE}/connections/${conn2Data.connection.id}/respond`,
+      {
+        headers: { authorization: `Bearer ${charlieToken}` },
+        data: { action: 'accept' },
+      }
+    );
     expect(accept2.status()).toBe(200);
   });
 
-  test('discovers warm introduction path Alice -> Bob -> Charlie (BR-210, BR-215)', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/networking/warm-intros/paths?targetUserId=${charlieUserId}`, {
-      headers: { authorization: `Bearer ${aliceToken}` },
-    });
+  test('discovers warm introduction path Alice -> Bob -> Charlie (BR-210, BR-215)', async ({
+    request,
+  }) => {
+    const res = await request.get(
+      `${API_BASE}/networking/warm-intros/paths?targetUserId=${charlieUserId}`,
+      {
+        headers: { authorization: `Bearer ${aliceToken}` },
+      }
+    );
 
     expect(res.status()).toBe(200);
     const body = await res.json();
@@ -96,7 +107,9 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(body.paths[0].hops).toBe(2);
   });
 
-  test('creates warm introduction request in pending status and isolates from target (BR-209, BR-211)', async ({ request }) => {
+  test('creates warm introduction request in pending status and isolates from target (BR-209, BR-211)', async ({
+    request,
+  }) => {
     const createRes = await request.post(`${API_BASE}/networking/warm-intros/requests`, {
       headers: { authorization: `Bearer ${aliceToken}` },
       data: {
@@ -115,18 +128,26 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     introRequestId = createBody.request.id;
 
     // Verify target Charlie cannot see request while pending (BR-209)
-    const getRes = await request.get(`${API_BASE}/networking/warm-intros/requests/${introRequestId}`, {
-      headers: { authorization: `Bearer ${charlieToken}` },
-    });
+    const getRes = await request.get(
+      `${API_BASE}/networking/warm-intros/requests/${introRequestId}`,
+      {
+        headers: { authorization: `Bearer ${charlieToken}` },
+      }
+    );
     expect(getRes.status()).toBe(403);
   });
 
-  test('introducer approves request, establishing three-way thread and granting target access (BR-209, BR-214)', async ({ request }) => {
+  test('introducer approves request, establishing three-way thread and granting target access (BR-209, BR-214)', async ({
+    request,
+  }) => {
     // Bob approves the intro
-    const respondRes = await request.post(`${API_BASE}/networking/warm-intros/requests/${introRequestId}/respond`, {
-      headers: { authorization: `Bearer ${bobToken}` },
-      data: { decision: 'approve' },
-    });
+    const respondRes = await request.post(
+      `${API_BASE}/networking/warm-intros/requests/${introRequestId}/respond`,
+      {
+        headers: { authorization: `Bearer ${bobToken}` },
+        data: { decision: 'approve' },
+      }
+    );
 
     expect(respondRes.status()).toBe(200);
     const body = await respondRes.json();
@@ -135,9 +156,12 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(body.request.deliveredAt).toBeDefined();
 
     // Now Charlie CAN access the approved introduction
-    const targetGetRes = await request.get(`${API_BASE}/networking/warm-intros/requests/${introRequestId}`, {
-      headers: { authorization: `Bearer ${charlieToken}` },
-    });
+    const targetGetRes = await request.get(
+      `${API_BASE}/networking/warm-intros/requests/${introRequestId}`,
+      {
+        headers: { authorization: `Bearer ${charlieToken}` },
+      }
+    );
     expect(targetGetRes.status()).toBe(200);
     const targetData = await targetGetRes.json();
     expect(targetData.request.id).toBe(introRequestId);
@@ -159,10 +183,13 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     const secondReqId = (await createRes.json()).request.id;
 
     // Bob declines
-    const declineRes = await request.post(`${API_BASE}/networking/warm-intros/requests/${secondReqId}/respond`, {
-      headers: { authorization: `Bearer ${bobToken}` },
-      data: { decision: 'decline', reason: 'Too busy with current sprint commitments' },
-    });
+    const declineRes = await request.post(
+      `${API_BASE}/networking/warm-intros/requests/${secondReqId}/respond`,
+      {
+        headers: { authorization: `Bearer ${bobToken}` },
+        data: { decision: 'decline', reason: 'Too busy with current sprint commitments' },
+      }
+    );
 
     expect(declineRes.status()).toBe(200);
     const declineBody = await declineRes.json();
@@ -170,7 +197,9 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(declineBody.request.declineReason).toBe('Too busy with current sprint commitments');
   });
 
-  test('user can update warm intro preferences to opt out of introducing (BR-212)', async ({ request }) => {
+  test('user can update warm intro preferences to opt out of introducing (BR-212)', async ({
+    request,
+  }) => {
     // Bob opts out
     const prefRes = await request.post(`${API_BASE}/networking/warm-intros/preferences`, {
       headers: { authorization: `Bearer ${bobToken}` },
@@ -182,9 +211,12 @@ test.describe('E2E: Warm Introduction Paths (F-121, S-11, BR-209..BR-216, P-02)'
     expect(prefBody.preferences.optOutIntroducer).toBe(true);
 
     // Alice queries paths -> Bob is excluded
-    const pathRes = await request.get(`${API_BASE}/networking/warm-intros/paths?targetUserId=${charlieUserId}`, {
-      headers: { authorization: `Bearer ${aliceToken}` },
-    });
+    const pathRes = await request.get(
+      `${API_BASE}/networking/warm-intros/paths?targetUserId=${charlieUserId}`,
+      {
+        headers: { authorization: `Bearer ${aliceToken}` },
+      }
+    );
     expect(pathRes.status()).toBe(200);
     expect((await pathRes.json()).paths).toHaveLength(0);
   });

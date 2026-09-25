@@ -95,7 +95,9 @@ test.describe('E2E: Organizations, Jobs & Applications Lifecycle (F-04, F-05, F-
     expect(found.title).toBe('Staff Distributed Systems Engineer');
   });
 
-  test('applies to job, enforces anti-duplicate constraint (BR-039), and progresses through hiring pipeline (F-06)', async ({ request }) => {
+  test('applies to job, enforces anti-duplicate constraint (BR-039), and progresses through hiring pipeline (F-06)', async ({
+    request,
+  }) => {
     // 1. Candidate submits application
     const applyRes = await request.post(`${API_BASE}/jobs/${jobId}/apply`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -149,26 +151,32 @@ test.describe('E2E: Organizations, Jobs & Applications Lifecycle (F-04, F-05, F-
     const inReviewData = await inReviewRes.json();
     expect(inReviewData.application.status).toBe('in_review');
 
-    const shortlistRes = await request.post(`${API_BASE}/applications/${applicationId}/transition`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        applicationId,
-        targetState: 'shortlisted',
-        reason: 'Strong match on distributed systems skills.',
-      },
-    });
+    const shortlistRes = await request.post(
+      `${API_BASE}/applications/${applicationId}/transition`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          applicationId,
+          targetState: 'shortlisted',
+          reason: 'Strong match on distributed systems skills.',
+        },
+      }
+    );
     expect(shortlistRes.status()).toBe(200);
     const shortlistData = await shortlistRes.json();
     expect(shortlistData.application.status).toBe('shortlisted');
 
-    const interviewRes = await request.post(`${API_BASE}/applications/${applicationId}/transition`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-      data: {
-        applicationId,
-        targetState: 'interviewing',
-        reason: 'Scheduled technical architecture loop.',
-      },
-    });
+    const interviewRes = await request.post(
+      `${API_BASE}/applications/${applicationId}/transition`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          applicationId,
+          targetState: 'interviewing',
+          reason: 'Scheduled technical architecture loop.',
+        },
+      }
+    );
     expect(interviewRes.status()).toBe(200);
     const interviewData = await interviewRes.json();
     expect(interviewData.application.status).toBe('interviewing');

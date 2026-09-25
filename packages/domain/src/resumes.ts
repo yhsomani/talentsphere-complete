@@ -105,8 +105,10 @@ export function updateResumeEntity(existing: Resume, patch: Partial<Resume>): Re
     template: patch.template || existing.template,
     headline: patch.headline !== undefined ? patch.headline.trim() : existing.headline,
     summary: patch.summary !== undefined ? patch.summary.trim() : existing.summary,
-    contactEmail: patch.contactEmail !== undefined ? patch.contactEmail.trim() : existing.contactEmail,
-    contactPhone: patch.contactPhone !== undefined ? patch.contactPhone.trim() : existing.contactPhone,
+    contactEmail:
+      patch.contactEmail !== undefined ? patch.contactEmail.trim() : existing.contactEmail,
+    contactPhone:
+      patch.contactPhone !== undefined ? patch.contactPhone.trim() : existing.contactPhone,
     location: patch.location !== undefined ? patch.location.trim() : existing.location,
     websiteUrl: patch.websiteUrl !== undefined ? patch.websiteUrl.trim() : existing.websiteUrl,
     experience: patch.experience || existing.experience,
@@ -128,7 +130,12 @@ export function renderResumeToMarkdown(resume: Resume, candidateName?: string): 
   lines.push(`# ${name}`);
   if (resume.headline) lines.push(`**${resume.headline}**`);
 
-  const contactDetails = [resume.contactEmail, resume.contactPhone, resume.location, resume.websiteUrl]
+  const contactDetails = [
+    resume.contactEmail,
+    resume.contactPhone,
+    resume.location,
+    resume.websiteUrl,
+  ]
     .filter(Boolean)
     .join(' | ');
   if (contactDetails) lines.push(`_${contactDetails}_`);
@@ -177,7 +184,9 @@ export function renderResumeToMarkdown(resume: Resume, candidateName?: string): 
 
   if (resume.evidenceIds.length > 0) {
     lines.push('## Verified Evidence & Credentials');
-    lines.push(`This resume links ${resume.evidenceIds.length} verified TalentSphere graph credentials.`);
+    lines.push(
+      `This resume links ${resume.evidenceIds.length} verified TalentSphere graph credentials.`
+    );
     for (const evId of resume.evidenceIds) {
       lines.push(`- Verified Credential ID: ${evId}`);
     }

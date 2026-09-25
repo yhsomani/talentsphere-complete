@@ -40,10 +40,15 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     recruiterUserId = recData.user.id;
   });
 
-  test('user starts with neutral baseline reputation of 50 in developing band', async ({ request }) => {
-    const res = await request.get(`${API_BASE}/reputation/users/${candidateUserId}?context=candidate&domain=general`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+  test('user starts with neutral baseline reputation of 50 in developing band', async ({
+    request,
+  }) => {
+    const res = await request.get(
+      `${API_BASE}/reputation/users/${candidateUserId}?context=candidate&domain=general`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
 
     expect(res.status()).toBe(200);
     const body = await res.json();
@@ -53,7 +58,9 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     expect(body.scores[0].signalCount).toBe(0);
   });
 
-  test('aggregates signals across contexts and verifies context segregation (F-144)', async ({ request }) => {
+  test('aggregates signals across contexts and verifies context segregation (F-144)', async ({
+    request,
+  }) => {
     // 1. Add verified credential in cloud_architecture
     const credRes = await request.post(`${API_BASE}/reputation/signals`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -85,25 +92,33 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     expect(mentorRes.status()).toBe(201);
 
     // 3. Query candidate context: isolated
-    const candRes = await request.get(`${API_BASE}/reputation/users/${candidateUserId}?context=candidate`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+    const candRes = await request.get(
+      `${API_BASE}/reputation/users/${candidateUserId}?context=candidate`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
     expect(candRes.status()).toBe(200);
     const candBody = await candRes.json();
     expect(candBody.scores).toHaveLength(1);
     expect(candBody.scores[0].context).toBe('candidate');
 
     // 4. Query mentor context: isolated
-    const mentorQueryRes = await request.get(`${API_BASE}/reputation/users/${candidateUserId}?context=mentor`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
-    });
+    const mentorQueryRes = await request.get(
+      `${API_BASE}/reputation/users/${candidateUserId}?context=mentor`,
+      {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      }
+    );
     expect(mentorQueryRes.status()).toBe(200);
     const mentorQueryBody = await mentorQueryRes.json();
     expect(mentorQueryBody.scores).toHaveLength(1);
     expect(mentorQueryBody.scores[0].context).toBe('mentor');
   });
 
-  test('guarantees zero individual signal leakage on public profile query (BR-253)', async ({ request }) => {
+  test('guarantees zero individual signal leakage on public profile query (BR-253)', async ({
+    request,
+  }) => {
     // Recruiter view: only aggregate scores
     const pubRes = await request.get(`${API_BASE}/reputation/users/${candidateUserId}`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
@@ -122,7 +137,9 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     expect(privBody.signals.length).toBeGreaterThanOrEqual(2);
   });
 
-  test('penalizes score and executes reputation recovery plan to restore score', async ({ request }) => {
+  test('penalizes score and executes reputation recovery plan to restore score', async ({
+    request,
+  }) => {
     // 1. Add penalty signal
     const penRes = await request.post(`${API_BASE}/reputation/signals`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -159,18 +176,24 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
 
     // 3. Complete Task 1
     const task1Id = recovBody.plan.reboundTasks[0].id;
-    const step1Res = await request.post(`${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task1Id}/complete`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-    });
+    const step1Res = await request.post(
+      `${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task1Id}/complete`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+      }
+    );
     expect(step1Res.status()).toBe(200);
     const step1Body = await step1Res.json();
     expect(step1Body.isFullyRecovered).toBe(false);
 
     // 4. Complete Task 2 -> full recovery!
     const task2Id = recovBody.plan.reboundTasks[1].id;
-    const step2Res = await request.post(`${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task2Id}/complete`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
-    });
+    const step2Res = await request.post(
+      `${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task2Id}/complete`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+      }
+    );
     expect(step2Res.status()).toBe(200);
     const step2Body = await step2Res.json();
     expect(step2Body.isFullyRecovered).toBe(true);

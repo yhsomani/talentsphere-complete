@@ -18,7 +18,9 @@ describe('Direct Messaging Domain Model (F-10, WF-10)', () => {
     expect(() => createThreadEntities('', [bobId])).toThrowError(/creator profile ID is required/);
 
     // Empty recipients
-    expect(() => createThreadEntities(aliceId, [])).toThrowError(/At least one recipient is required/);
+    expect(() => createThreadEntities(aliceId, [])).toThrowError(
+      /At least one recipient is required/
+    );
 
     // Self-messaging prohibited
     expect(() => createThreadEntities(aliceId, [aliceId])).toThrowError(/solely with yourself/);
@@ -50,11 +52,15 @@ describe('Direct Messaging Domain Model (F-10, WF-10)', () => {
     const threadId = 'thread-1';
 
     // Empty message
-    expect(() => createMessageEntity(threadId, aliceId, '   ')).toThrowError(/Message content cannot be empty/);
+    expect(() => createMessageEntity(threadId, aliceId, '   ')).toThrowError(
+      /Message content cannot be empty/
+    );
 
     // Too long message
     const tooLong = 'x'.repeat(5001);
-    expect(() => createMessageEntity(threadId, aliceId, tooLong)).toThrowError(/exceeds maximum allowed length/);
+    expect(() => createMessageEntity(threadId, aliceId, tooLong)).toThrowError(
+      /exceeds maximum allowed length/
+    );
 
     // Valid message
     const msg = createMessageEntity(threadId, aliceId, 'Hello Bob!', 'client-msg-123');

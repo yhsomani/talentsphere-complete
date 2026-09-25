@@ -14,7 +14,9 @@ export function createProfileEntity(userId: string, fullName: string): Profile {
 
 export function updateProfileEntity(
   current: Profile,
-  updates: Partial<Pick<Profile, 'fullName' | 'headline' | 'bio' | 'location' | 'avatarUrl' | 'privacy'>>
+  updates: Partial<
+    Pick<Profile, 'fullName' | 'headline' | 'bio' | 'location' | 'avatarUrl' | 'privacy'>
+  >
 ): Profile {
   return {
     ...current,

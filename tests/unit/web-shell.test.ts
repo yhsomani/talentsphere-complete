@@ -26,7 +26,9 @@ describe('PWA Frontend Shell & Design System (E-13, E-14, F-02, F-03)', () => {
       expect(fs.existsSync(htmlPath)).toBe(true);
 
       const html = fs.readFileSync(htmlPath, 'utf8');
-      expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1.0"');
+      expect(html).toContain(
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0"'
+      );
       expect(html).toContain('<link rel="manifest" href="/manifest.webmanifest"');
       expect(html).toContain('<title>TalentSphere — Career Operating System</title>');
     });

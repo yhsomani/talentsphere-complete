@@ -33,7 +33,8 @@ export interface UserSettings {
   updatedAt: string;
 }
 
-export type ErasureRequestStatus = 'pending' | 'grace_period' | 'processing' | 'completed' | 'cancelled';
+export type ErasureRequestStatus =
+  'pending' | 'grace_period' | 'processing' | 'completed' | 'cancelled';
 
 export interface DataErasureRequest {
   id: string;
@@ -129,7 +130,9 @@ export function updateUserSettings(
 
   if (
     updates.profileVisibility &&
-    !['public', 'connections_only', 'recruiters_only', 'private'].includes(updates.profileVisibility)
+    !['public', 'connections_only', 'recruiters_only', 'private'].includes(
+      updates.profileVisibility
+    )
   ) {
     throw new DomainError(
       'VALIDATION_FAILED',

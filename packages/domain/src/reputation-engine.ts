@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import { DomainError } from './index.js';
 
-export type ReputationContext = 'candidate' | 'instructor' | 'employer' | 'peer' | 'community' | 'mentor';
+export type ReputationContext =
+  'candidate' | 'instructor' | 'employer' | 'peer' | 'community' | 'mentor';
 export type ReputationBand = 'exceptional' | 'high' | 'established' | 'developing' | 'emerging';
 export type ReputationSignalType =
   | 'credential'
@@ -159,7 +160,10 @@ export function calculateReputationScore(
 
   for (const sig of activeSignals) {
     const createdTime = new Date(sig.createdAt).getTime();
-    const elapsedDays = Math.max(0, Math.floor((now.getTime() - createdTime) / (1000 * 60 * 60 * 24)));
+    const elapsedDays = Math.max(
+      0,
+      Math.floor((now.getTime() - createdTime) / (1000 * 60 * 60 * 24))
+    );
     const decayFactor = Math.pow(0.5, elapsedDays / sig.decayHalfLifeDays);
     const effective = sig.rawValue * sig.weight * decayFactor;
 
@@ -196,7 +200,9 @@ export function calculateReputationScore(
 /**
  * Initializes a structured reputation recovery plan after penalties.
  */
-export function startReputationRecoveryPlan(params: StartRecoveryPlanParams): ReputationRecoveryPlan {
+export function startReputationRecoveryPlan(
+  params: StartRecoveryPlanParams
+): ReputationRecoveryPlan {
   if (!params.userId || params.userId.trim().length === 0) {
     throw new DomainError('VALIDATION_FAILED', 'User ID is required.');
   }

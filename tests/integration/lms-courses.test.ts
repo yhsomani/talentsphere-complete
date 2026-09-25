@@ -224,7 +224,9 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
       headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(invalidModuleStepRes.statusCode).toBe(422);
-    expect(invalidModuleStepRes.json().error.message).toContain('Module progress is strictly sequential');
+    expect(invalidModuleStepRes.json().error.message).toContain(
+      'Module progress is strictly sequential'
+    );
 
     // 2. Attempting Lesson 2 without prerequisite Lesson 1 -> 422 BR-22
     const invalidPrereqRes = await app.inject({
@@ -233,7 +235,9 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
       headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(invalidPrereqRes.statusCode).toBe(422);
-    expect(invalidPrereqRes.json().error.message).toContain('Lesson prerequisite has not been completed');
+    expect(invalidPrereqRes.json().error.message).toContain(
+      'Lesson prerequisite has not been completed'
+    );
 
     // 3. Complete Lesson 1 successfully
     const step1Res = await app.inject({
@@ -314,7 +318,9 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
     expect(lmsJob).toBeDefined();
     expect(lmsJob.payload.certificateNumber).toBe(certificateNumber);
 
-    const evidenceJob = jobs.find((j: any) => j.type === 'evidence.propagate' && j.payload.level === 'authority_verified');
+    const evidenceJob = jobs.find(
+      (j: any) => j.type === 'evidence.propagate' && j.payload.level === 'authority_verified'
+    );
     expect(evidenceJob).toBeDefined();
   });
 });

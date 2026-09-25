@@ -135,7 +135,12 @@ describe('Platform Administration & Governance Domain (F-17, F-35, BR-06, BR-28,
         updatedAt: '2026-09-01T00:00:00.000Z',
       };
 
-      const updated = updateFeatureFlagState(initial, true, 'Updated Copilot Beta', '2026-09-24T12:00:00.000Z');
+      const updated = updateFeatureFlagState(
+        initial,
+        true,
+        'Updated Copilot Beta',
+        '2026-09-24T12:00:00.000Z'
+      );
       expect(updated.enabled).toBe(true);
       expect(updated.description).toBe('Updated Copilot Beta');
       expect(updated.updatedAt).toBe('2026-09-24T12:00:00.000Z');

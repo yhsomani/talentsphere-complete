@@ -63,18 +63,18 @@ export interface CreateSkillEndorsementParams {
 export function calculateNetworkDistanceFactor(distance: number): number {
   if (distance <= 1) return 1.0;
   if (distance === 2) return 0.75;
-  if (distance === 3) return 0.50;
+  if (distance === 3) return 0.5;
   if (distance === 4) return 0.25;
-  return 0.10;
+  return 0.1;
 }
 
 /**
  * Normalizes endorser's reputation score to credibility factor (0.10 - 1.00).
  */
 export function normalizeEndorserCredibility(reputationScore?: number): number {
-  if (reputationScore === undefined || reputationScore === null) return 0.50;
+  if (reputationScore === undefined || reputationScore === null) return 0.5;
   const clamped = Math.max(0, Math.min(100, reputationScore));
-  return Math.max(0.10, Math.round((clamped / 100) * 100) / 100);
+  return Math.max(0.1, Math.round((clamped / 100) * 100) / 100);
 }
 
 /**
@@ -96,7 +96,7 @@ export function computeEndorsementWeight(
   const endorserCredibility = normalizeEndorserCredibility(params.endorserReputationScore);
   const networkDistance = Math.max(1, Math.min(5, Math.floor(params.networkDistance)));
   const distanceFactor = calculateNetworkDistanceFactor(networkDistance);
-  const specializationMultiplier = params.hasSpecializationInSkill ? 1.30 : 1.0;
+  const specializationMultiplier = params.hasSpecializationInSkill ? 1.3 : 1.0;
   const trackRecordMultiplier = calculateTrackRecordMultiplier(params.endorserAccuracyScore);
   const isReciprocalDampened = Boolean(params.isReciprocalEndorsement);
 
@@ -121,9 +121,7 @@ export function computeEndorsementWeight(
 /**
  * Validates invariants and creates a skill endorsement entity.
  */
-export function createSkillEndorsement(
-  params: CreateSkillEndorsementParams
-): SkillEndorsement {
+export function createSkillEndorsement(params: CreateSkillEndorsementParams): SkillEndorsement {
   if (!params.recipientId || !params.endorserId) {
     throw new DomainError('VALIDATION_FAILED', 'Recipient ID and Endorser ID are required.');
   }
@@ -204,9 +202,7 @@ export function revokeSkillEndorsement(
 /**
  * Computes aggregated skill endorsement strength from active endorsements.
  */
-export function aggregateSkillEndorsements(
-  endorsements: SkillEndorsement[]
-): {
+export function aggregateSkillEndorsements(endorsements: SkillEndorsement[]): {
   totalCount: number;
   totalWeight: number;
   averageWeight: number;
@@ -224,7 +220,8 @@ export function aggregateSkillEndorsements(
     };
   }
 
-  const totalWeight = Math.round(active.reduce((acc, e) => acc + e.weight.finalWeight, 0) * 1000) / 1000;
+  const totalWeight =
+    Math.round(active.reduce((acc, e) => acc + e.weight.finalWeight, 0) * 1000) / 1000;
   const firstDegreeCount = active.filter((e) => e.weight.networkDistance === 1).length;
   const specialistCount = active.filter((e) => e.weight.specializationMultiplier > 1.0).length;
 

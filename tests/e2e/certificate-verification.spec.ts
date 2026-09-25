@@ -72,7 +72,9 @@ test.describe('E2E: Certificate Verification & Credential Proofs (F-52, S-02, BR
     expect(verificationProofHash).toBeDefined();
   });
 
-  test('candidate can view their earned certificates with verification links', async ({ request }) => {
+  test('candidate can view their earned certificates with verification links', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/certificates/my`, {
       headers: { authorization: `Bearer ${candidateToken}` },
     });
@@ -84,7 +86,9 @@ test.describe('E2E: Certificate Verification & Credential Proofs (F-52, S-02, BR
     expect(cert.verificationUrl).toBe(`/verify/${verificationProofHash}`);
   });
 
-  test('public Zero-PII verification verifies legitimate proof hash without auth', async ({ request }) => {
+  test('public Zero-PII verification verifies legitimate proof hash without auth', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/verify/${verificationProofHash}`);
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -107,7 +111,9 @@ test.describe('E2E: Certificate Verification & Credential Proofs (F-52, S-02, BR
     expect(res.status()).toBe(404);
   });
 
-  test('enforces role authorization on certificate revocation and reflects revocation publicly', async ({ request }) => {
+  test('enforces role authorization on certificate revocation and reflects revocation publicly', async ({
+    request,
+  }) => {
     // 1. Candidate cannot revoke
     const forbidRes = await request.post(`${API_BASE}/certificates/${certificateNumber}/revoke`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -131,6 +137,8 @@ test.describe('E2E: Certificate Verification & Credential Proofs (F-52, S-02, BR
     const verifyData = await verifyRes.json();
     expect(verifyData.valid).toBe(false);
     expect(verifyData.verification.status).toBe('revoked');
-    expect(verifyData.verification.revocationReason).toBe('Integrity review failed: module completion anomaly detected.');
+    expect(verifyData.verification.revocationReason).toBe(
+      'Integrity review failed: module completion anomaly detected.'
+    );
   });
 });

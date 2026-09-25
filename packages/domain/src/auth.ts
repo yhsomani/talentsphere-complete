@@ -58,12 +58,20 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET || 'talentsphere_local_secret_must
 /**
  * Creates a signed session token using HMAC-SHA256.
  */
-export function createSessionToken(userId: string, email: string, roles: Role[], ttlSeconds: number = 86400): string {
+export function createSessionToken(
+  userId: string,
+  email: string,
+  roles: Role[],
+  ttlSeconds: number = 86400
+): string {
   const issuedAt = Math.floor(Date.now() / 1000);
   const expiresAt = issuedAt + ttlSeconds;
   const payload: AuthPayload = { userId, email, roles, issuedAt, expiresAt };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const signature = crypto.createHmac('sha256', TOKEN_SECRET).update(payloadB64).digest('base64url');
+  const signature = crypto
+    .createHmac('sha256', TOKEN_SECRET)
+    .update(payloadB64)
+    .digest('base64url');
   return `${payloadB64}.${signature}`;
 }
 
@@ -76,7 +84,10 @@ export function verifySessionToken(token: string): AuthPayload | null {
   const [payloadB64, signature] = parts;
   if (!payloadB64 || !signature) return null;
 
-  const expectedSig = crypto.createHmac('sha256', TOKEN_SECRET).update(payloadB64).digest('base64url');
+  const expectedSig = crypto
+    .createHmac('sha256', TOKEN_SECRET)
+    .update(payloadB64)
+    .digest('base64url');
   if (signature.length !== expectedSig.length) return null;
 
   try {

@@ -100,11 +100,21 @@ export function createJobTemplate(params: CreateJobTemplateParams): JobTemplate 
     params.actor.roles.includes('platform_admin');
 
   if (!isAuthorizedRecruiter) {
-    throw new DomainError('FORBIDDEN', 'Only recruiters, hiring managers, or platform administrators may create job templates (BR-01).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only recruiters, hiring managers, or platform administrators may create job templates (BR-01).'
+    );
   }
 
-  if (params.actor.orgId && params.actor.orgId !== params.orgId && !params.actor.roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Recruiters may only create templates for their assigned organization (BR-12).');
+  if (
+    params.actor.orgId &&
+    params.actor.orgId !== params.orgId &&
+    !params.actor.roles.includes('platform_admin')
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Recruiters may only create templates for their assigned organization (BR-12).'
+    );
   }
 
   if (!params.templateName || params.templateName.trim().length < 2) {
@@ -124,8 +134,14 @@ export function createJobTemplate(params: CreateJobTemplateParams): JobTemplate 
   }
 
   if (params.salaryRange) {
-    if (params.salaryRange.minMinor < 0 || params.salaryRange.maxMinor < params.salaryRange.minMinor) {
-      throw new DomainError('VALIDATION_FAILED', 'Invalid salary range: min must be non-negative and max >= min.');
+    if (
+      params.salaryRange.minMinor < 0 ||
+      params.salaryRange.maxMinor < params.salaryRange.minMinor
+    ) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Invalid salary range: min must be non-negative and max >= min.'
+      );
     }
   }
 
@@ -153,22 +169,38 @@ export function createJobTemplate(params: CreateJobTemplateParams): JobTemplate 
 /**
  * Updates an existing job template.
  */
-export function updateJobTemplate(template: JobTemplate, params: UpdateJobTemplateParams): JobTemplate {
+export function updateJobTemplate(
+  template: JobTemplate,
+  params: UpdateJobTemplateParams
+): JobTemplate {
   const isAuthorized =
     params.actor.roles.includes('recruiter') ||
     params.actor.roles.includes('hiring_manager') ||
     params.actor.roles.includes('platform_admin');
 
   if (!isAuthorized) {
-    throw new DomainError('FORBIDDEN', 'Only recruiters or administrators may update job templates.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only recruiters or administrators may update job templates.'
+    );
   }
 
-  if (params.actor.orgId && params.actor.orgId !== template.orgId && !params.actor.roles.includes('platform_admin')) {
-    throw new DomainError('FORBIDDEN', 'Cannot update a job template belonging to another organization.');
+  if (
+    params.actor.orgId &&
+    params.actor.orgId !== template.orgId &&
+    !params.actor.roles.includes('platform_admin')
+  ) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Cannot update a job template belonging to another organization.'
+    );
   }
 
   if (template.isArchived && params.isArchived !== false) {
-    throw new DomainError('CONFLICT', 'Cannot modify an archived job template unless restoring it.');
+    throw new DomainError(
+      'CONFLICT',
+      'Cannot modify an archived job template unless restoring it.'
+    );
   }
 
   if (params.templateName !== undefined && params.templateName.trim().length < 2) {
@@ -188,8 +220,14 @@ export function updateJobTemplate(template: JobTemplate, params: UpdateJobTempla
   }
 
   if (params.salaryRange) {
-    if (params.salaryRange.minMinor < 0 || params.salaryRange.maxMinor < params.salaryRange.minMinor) {
-      throw new DomainError('VALIDATION_FAILED', 'Invalid salary range: min must be non-negative and max >= min.');
+    if (
+      params.salaryRange.minMinor < 0 ||
+      params.salaryRange.maxMinor < params.salaryRange.minMinor
+    ) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Invalid salary range: min must be non-negative and max >= min.'
+      );
     }
   }
 
@@ -201,10 +239,17 @@ export function updateJobTemplate(template: JobTemplate, params: UpdateJobTempla
     location: params.location ? params.location.trim() : template.location,
     workMode: params.workMode !== undefined ? params.workMode : template.workMode,
     jobType: params.jobType !== undefined ? params.jobType : template.jobType,
-    requiredSkillIds: params.requiredSkillIds !== undefined ? [...params.requiredSkillIds] : template.requiredSkillIds,
-    salaryRange: params.salaryRange === null ? undefined : (params.salaryRange ?? template.salaryRange),
+    requiredSkillIds:
+      params.requiredSkillIds !== undefined
+        ? [...params.requiredSkillIds]
+        : template.requiredSkillIds,
+    salaryRange:
+      params.salaryRange === null ? undefined : (params.salaryRange ?? template.salaryRange),
     department: params.department !== undefined ? params.department.trim() : template.department,
-    screeningQuestions: params.screeningQuestions !== undefined ? [...params.screeningQuestions] : template.screeningQuestions,
+    screeningQuestions:
+      params.screeningQuestions !== undefined
+        ? [...params.screeningQuestions]
+        : template.screeningQuestions,
     isArchived: params.isArchived !== undefined ? params.isArchived : template.isArchived,
     updatedAt: new Date().toISOString(),
   };

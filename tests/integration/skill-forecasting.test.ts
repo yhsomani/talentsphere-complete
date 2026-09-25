@@ -123,8 +123,12 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
       expect(data.forecast.forecastHorizonMonths).toBe(12);
       expect(data.forecast.confidenceLevel).toBe(0.95);
       expect(data.forecast.projectedMedianSalary).toBeGreaterThan(0);
-      expect(data.forecast.salaryLowerBound).toBeLessThanOrEqual(data.forecast.projectedMedianSalary);
-      expect(data.forecast.salaryUpperBound).toBeGreaterThanOrEqual(data.forecast.projectedMedianSalary);
+      expect(data.forecast.salaryLowerBound).toBeLessThanOrEqual(
+        data.forecast.projectedMedianSalary
+      );
+      expect(data.forecast.salaryUpperBound).toBeGreaterThanOrEqual(
+        data.forecast.projectedMedianSalary
+      );
       expect(data.forecast.scarcityIndex).toBeGreaterThan(0);
       expect(data.forecast.regionalDistribution).toBeDefined();
       expect(data.forecast.industryDistribution).toBeDefined();

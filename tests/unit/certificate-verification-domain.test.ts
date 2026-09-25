@@ -62,9 +62,9 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
   it('rejects verification if proof hash does not match certificate or is malformed', () => {
     const cert = mintCourseCertificate('enroll_1', 'user_123', dummyCourse);
 
-    expect(() =>
-      verifyPublicCertificateProof('short_bad', cert, dummyCourse.title)
-    ).toThrowError(/Invalid verification proof hash/);
+    expect(() => verifyPublicCertificateProof('short_bad', cert, dummyCourse.title)).toThrowError(
+      /Invalid verification proof hash/
+    );
 
     expect(() =>
       verifyPublicCertificateProof('00000000000000000000000000000000', cert, dummyCourse.title)
@@ -73,10 +73,16 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
 
   it('allows platform_admin to revoke a certificate with an auditable reason (BR-154)', () => {
     const cert = mintCourseCertificate('enroll_2', 'user_456', dummyCourse);
-    const revoked = revokeCourseCertificate(cert, 'Violation of academic integrity during final evaluation.', adminActor);
+    const revoked = revokeCourseCertificate(
+      cert,
+      'Violation of academic integrity during final evaluation.',
+      adminActor
+    );
 
     expect(revoked.status).toBe('revoked');
-    expect(revoked.revocationReason).toBe('Violation of academic integrity during final evaluation.');
+    expect(revoked.revocationReason).toBe(
+      'Violation of academic integrity during final evaluation.'
+    );
     expect(revoked.revokedAt).toBeDefined();
 
     const proof = verifyPublicCertificateProof(
@@ -91,7 +97,11 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
 
   it('allows instructor to revoke a certificate', () => {
     const cert = mintCourseCertificate('enroll_3', 'user_789', dummyCourse);
-    const revoked = revokeCourseCertificate(cert, 'Issued in error due to grading recalculation.', instructorActor);
+    const revoked = revokeCourseCertificate(
+      cert,
+      'Issued in error due to grading recalculation.',
+      instructorActor
+    );
 
     expect(revoked.status).toBe('revoked');
     expect(revoked.revocationReason).toBe('Issued in error due to grading recalculation.');
@@ -106,9 +116,9 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
 
   it('rejects revocation with reason shorter than 5 characters', () => {
     const cert = mintCourseCertificate('enroll_5', 'user_111', dummyCourse);
-    expect(() =>
-      revokeCourseCertificate(cert, 'Bad', adminActor)
-    ).toThrowError(/Revocation reason must be at least 5 characters/);
+    expect(() => revokeCourseCertificate(cert, 'Bad', adminActor)).toThrowError(
+      /Revocation reason must be at least 5 characters/
+    );
   });
 
   it('prohibits re-revoking an already revoked certificate', () => {

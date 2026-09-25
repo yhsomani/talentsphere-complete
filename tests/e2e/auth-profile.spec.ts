@@ -7,7 +7,9 @@ test.describe('E2E: Authentication, Profile & Settings (F-01, F-12, F-15)', () =
   let candidateId: string;
   const candidateEmail = `e2e.candidate.${Date.now()}@example.com`;
 
-  test('registers candidate, prevents duplicates, and logs in with secure tokens (F-01)', async ({ request }) => {
+  test('registers candidate, prevents duplicates, and logs in with secure tokens (F-01)', async ({
+    request,
+  }) => {
     // 1. Register candidate
     const regRes = await request.post(`${API_BASE}/auth/register`, {
       data: {
@@ -87,7 +89,9 @@ test.describe('E2E: Authentication, Profile & Settings (F-01, F-12, F-15)', () =
     expect(updated.profile.location).toBe('San Francisco, CA');
   });
 
-  test('configures privacy preferences, requests export, and initiates GDPR erasure (F-15)', async ({ request }) => {
+  test('configures privacy preferences, requests export, and initiates GDPR erasure (F-15)', async ({
+    request,
+  }) => {
     // 1. Get default settings
     const settingsRes = await request.get(`${API_BASE}/settings`, {
       headers: { authorization: `Bearer ${candidateToken}` },

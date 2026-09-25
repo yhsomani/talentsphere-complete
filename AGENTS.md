@@ -21,6 +21,7 @@ UNDERSTAND
 ## Before coding
 
 Read:
+
 1. `SSOT.md`
 2. relevant `PRD.md` / `TRD.md`
 3. `ARCHITECTURE.md`
@@ -56,6 +57,7 @@ foundation
 ## Agent authority
 
 Agents may:
+
 - fix defects;
 - implement approved requirements;
 - refactor within established boundaries;
@@ -63,6 +65,7 @@ Agents may:
 - make low-risk implementation decisions.
 
 Agents must escalate:
+
 - schema-breaking design;
 - security architecture changes;
 - AI provider/entitlement changes;
@@ -73,6 +76,7 @@ Agents must escalate:
 ## Completion report
 
 Every task reports:
+
 - files changed;
 - behavior changed;
 - tests executed;

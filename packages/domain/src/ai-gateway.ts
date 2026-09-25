@@ -50,7 +50,10 @@ export interface AIEngineResponse {
 }
 
 // Daily Quota Limits (SSOT Section 16.4: Free-User Cost Invariant)
-export const AI_QUOTA_LIMITS: Record<AITier, { maxTokensPerDay: number; maxRequestsPerDay: number }> = {
+export const AI_QUOTA_LIMITS: Record<
+  AITier,
+  { maxTokensPerDay: number; maxRequestsPerDay: number }
+> = {
   free: {
     maxTokensPerDay: 5000,
     maxRequestsPerDay: 20,
@@ -80,7 +83,10 @@ export function estimateTokens(text: string): number {
  * Context Firewall & Prompt Injection Defense (WIT-007, APP_FLOW.md).
  * Sanitizes delimiters, escapes XML tags, and frames with <user_content>.
  */
-export function sanitizePromptInput(rawInput: string, maxChars = 2000): { sanitized: string; framed: string } {
+export function sanitizePromptInput(
+  rawInput: string,
+  maxChars = 2000
+): { sanitized: string; framed: string } {
   if (!rawInput || typeof rawInput !== 'string') {
     throw new DomainError('VALIDATION_FAILED', 'Prompt must be a non-empty string.');
   }
@@ -91,7 +97,10 @@ export function sanitizePromptInput(rawInput: string, maxChars = 2000): { saniti
   }
 
   if (trimmed.length > maxChars) {
-    throw new DomainError('VALIDATION_FAILED', `Prompt exceeds maximum length of ${maxChars} characters.`);
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      `Prompt exceeds maximum length of ${maxChars} characters.`
+    );
   }
 
   // Detect explicit prompt injection delimiters
@@ -105,7 +114,10 @@ export function sanitizePromptInput(rawInput: string, maxChars = 2000): { saniti
 
   for (const pattern of injectionPatterns) {
     if (pattern.test(trimmed)) {
-      throw new DomainError('POLICY_VIOLATION', 'Prompt contains prohibited injection patterns or script tags.');
+      throw new DomainError(
+        'POLICY_VIOLATION',
+        'Prompt contains prohibited injection patterns or script tags.'
+      );
     }
   }
 

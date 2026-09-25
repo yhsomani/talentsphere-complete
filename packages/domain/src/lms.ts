@@ -105,19 +105,25 @@ export function validateCoursePublishReadiness(
   }
 
   if (lessons.length < 3) {
-    errors.push(`Course must contain at least 3 lessons before publishing (BR-91). Found ${lessons.length}.`);
+    errors.push(
+      `Course must contain at least 3 lessons before publishing (BR-91). Found ${lessons.length}.`
+    );
   }
 
   const totalDuration = lessons.reduce((acc, l) => acc + (l.durationMinutes || 0), 0);
   if (totalDuration < 30) {
-    errors.push(`Course must contain at least 30 minutes of content before publishing (BR-91). Found ${totalDuration} min.`);
+    errors.push(
+      `Course must contain at least 30 minutes of content before publishing (BR-91). Found ${totalDuration} min.`
+    );
   }
 
   const hasSubstantiveContent = lessons.some(
     (l) => l.contentType === 'text' || l.contentType === 'video'
   );
   if (!hasSubstantiveContent) {
-    errors.push('Course must include at least 1 text or video lesson; quiz-only courses are prohibited (BR-92).');
+    errors.push(
+      'Course must include at least 1 text or video lesson; quiz-only courses are prohibited (BR-92).'
+    );
   }
 
   return {
@@ -142,7 +148,10 @@ export function enrollUserInCourse(
   }
 
   const activeEnrollment = existingEnrollments.find(
-    (e) => e.userId === userId && e.courseId === course.id && (e.status === 'enrolled' || e.status === 'completed')
+    (e) =>
+      e.userId === userId &&
+      e.courseId === course.id &&
+      (e.status === 'enrolled' || e.status === 'completed')
   );
 
   if (activeEnrollment) {
@@ -158,7 +167,7 @@ export function enrollUserInCourse(
     userId,
     courseId: course.id,
     status: 'enrolled',
-    progressPercent: 0.00,
+    progressPercent: 0.0,
     completedAt: null,
     createdAt: now,
     updatedAt: now,
@@ -246,7 +255,10 @@ export function mintCourseCertificate(
   evidenceId?: string | null
 ): CourseCertificate {
   const now = new Date().toISOString();
-  const slugClean = course.slug.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase();
+  const slugClean = course.slug
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 8)
+    .toUpperCase();
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
   const certificateNumber = `CERT-${slugClean}-${Date.now().toString(36).toUpperCase()}-${randomPart}`;
   const proofHash = generateCertificateProofHash(certificateNumber, userId, course.id, now);
@@ -279,11 +291,17 @@ export function revokeCourseCertificate(
 
   const isAuthorized = actor.roles.includes('platform_admin') || actor.roles.includes('instructor');
   if (!isAuthorized) {
-    throw new DomainError('FORBIDDEN', 'Only platform administrators or instructors may revoke a certificate.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only platform administrators or instructors may revoke a certificate.'
+    );
   }
 
   if (!reason || reason.trim().length < 5) {
-    throw new DomainError('VALIDATION_FAILED', 'Revocation reason must be at least 5 characters long.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Revocation reason must be at least 5 characters long.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -308,7 +326,10 @@ export function verifyPublicCertificateProof(
   }
 
   if (!cert || cert.verificationProofHash !== hash) {
-    throw new DomainError('NOT_FOUND', `No certificate found matching verification proof hash "${hash}".`);
+    throw new DomainError(
+      'NOT_FOUND',
+      `No certificate found matching verification proof hash "${hash}".`
+    );
   }
 
   return {
@@ -323,4 +344,3 @@ export function verifyPublicCertificateProof(
     authority: 'TalentSphere Verified Credential Authority (Zero-PII BR-150)',
   };
 }
-

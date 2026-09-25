@@ -85,7 +85,9 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     mitOrgId = (await org2.json()).organization.id;
   });
 
-  test('submits alumni affiliations with domain auto-verification and institutional seat codes', async ({ request }) => {
+  test('submits alumni affiliations with domain auto-verification and institutional seat codes', async ({
+    request,
+  }) => {
     // 1. Alice submits Stanford affiliation (auto-verified via email domain)
     const affRes = await request.post(`${API_BASE}/alumni/affiliations`, {
       headers: { authorization: `Bearer ${user1Token}` },
@@ -131,18 +133,23 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     charlieAffiliationId = charlieData.affiliation.id;
 
     // 4. Charlie verifies his Stanford affiliation using valid seat code
-    const verifyRes = await request.post(`${API_BASE}/alumni/affiliations/${charlieAffiliationId}/verify`, {
-      headers: { authorization: `Bearer ${user3Token}` },
-      data: {
-        verificationMethod: 'institutional_seat',
-        seatCode: 'STANFORD-SEAT-2023',
-      },
-    });
+    const verifyRes = await request.post(
+      `${API_BASE}/alumni/affiliations/${charlieAffiliationId}/verify`,
+      {
+        headers: { authorization: `Bearer ${user3Token}` },
+        data: {
+          verificationMethod: 'institutional_seat',
+          seatCode: 'STANFORD-SEAT-2023',
+        },
+      }
+    );
     expect(verifyRes.status()).toBe(200);
     expect((await verifyRes.json()).affiliation.verificationStatus).toBe('verified');
   });
 
-  test('enforces strict cross-institution isolation on directory discovery (BR-F125-03)', async ({ request }) => {
+  test('enforces strict cross-institution isolation on directory discovery (BR-F125-03)', async ({
+    request,
+  }) => {
     // 1. Alice has no verified affiliation at MIT -> querying MIT directory must return 403
     const mitDirRes = await request.get(`${API_BASE}/alumni/institutions/${mitOrgId}/directory`, {
       headers: { authorization: `Bearer ${user1Token}` },
@@ -152,24 +159,32 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     expect(err.error.code).toBe('TENANT_ISOLATION_VIOLATION');
 
     // 2. Alice queries Stanford directory -> succeeds and returns verified alumni
-    const stanfordDirRes = await request.get(`${API_BASE}/alumni/institutions/${stanfordOrgId}/directory`, {
-      headers: { authorization: `Bearer ${user1Token}` },
-    });
+    const stanfordDirRes = await request.get(
+      `${API_BASE}/alumni/institutions/${stanfordOrgId}/directory`,
+      {
+        headers: { authorization: `Bearer ${user1Token}` },
+      }
+    );
     expect(stanfordDirRes.status()).toBe(200);
     const stanfordDir = await stanfordDirRes.json();
     expect(stanfordDir.directory.length).toBeGreaterThanOrEqual(2);
 
     // 3. Filter Stanford directory by field of study
-    const searchRes = await request.get(`${API_BASE}/alumni/institutions/${stanfordOrgId}/directory?fieldOfStudy=Computer`, {
-      headers: { authorization: `Bearer ${user1Token}` },
-    });
+    const searchRes = await request.get(
+      `${API_BASE}/alumni/institutions/${stanfordOrgId}/directory?fieldOfStudy=Computer`,
+      {
+        headers: { authorization: `Bearer ${user1Token}` },
+      }
+    );
     expect(searchRes.status()).toBe(200);
     const searchDir = await searchRes.json();
     expect(searchDir.directory.length).toBeGreaterThanOrEqual(1);
     expect(searchDir.directory[0].fieldOfStudy).toContain('Computer Science');
   });
 
-  test('creates, joins, and lists alumni chapter groups with institutional boundaries', async ({ request }) => {
+  test('creates, joins, and lists alumni chapter groups with institutional boundaries', async ({
+    request,
+  }) => {
     // 1. Alice creates Stanford chapter
     const groupRes = await request.post(`${API_BASE}/alumni/institutions/${stanfordOrgId}/groups`, {
       headers: { authorization: `Bearer ${user1Token}` },
@@ -234,10 +249,13 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     expect((await acceptRes.json()).mentorshipRequest.status).toBe('active');
 
     // 4. Bob completes mentorship
-    const completeRes = await request.post(`${API_BASE}/alumni/mentorship/${mentorshipId}/respond`, {
-      headers: { authorization: `Bearer ${user2Token}` },
-      data: { action: 'complete' },
-    });
+    const completeRes = await request.post(
+      `${API_BASE}/alumni/mentorship/${mentorshipId}/respond`,
+      {
+        headers: { authorization: `Bearer ${user2Token}` },
+        data: { action: 'complete' },
+      }
+    );
     expect(completeRes.status()).toBe(200);
     expect((await completeRes.json()).mentorshipRequest.status).toBe('completed');
   });

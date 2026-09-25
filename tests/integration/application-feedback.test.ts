@@ -216,8 +216,10 @@ describe('Integration: Application Feedback Loop (F-122, BR-217..BR-224, P-02)',
         reasonCategory: 'skills_gap',
         stage: 'technical_interview',
         strengths: 'Excellent system design intuition and clean modular code architecture.',
-        areasForImprovement: 'Deep dive into concurrent transactions and isolation levels was missing.',
-        actionableAdvice: 'We recommend hands-on practice with PostgreSQL serialized snapshots and locking mechanisms.',
+        areasForImprovement:
+          'Deep dive into concurrent transactions and isolation levels was missing.',
+        actionableAdvice:
+          'We recommend hands-on practice with PostgreSQL serialized snapshots and locking mechanisms.',
         suggestedSkillIds: [validSkillId],
         isAiAssisted: false,
         humanReviewed: true,

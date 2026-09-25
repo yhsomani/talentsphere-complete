@@ -107,7 +107,9 @@ test.describe('E2E: Peer Credibility Networks & Endorsement Weighting (F-150, F-
     expect(recipBody.endorsement.weight.isReciprocalDampened).toBe(true);
   });
 
-  test('prevents self-endorsement and duplicate active endorsements (BR-153)', async ({ request }) => {
+  test('prevents self-endorsement and duplicate active endorsements (BR-153)', async ({
+    request,
+  }) => {
     // 1. Self endorsement rejected
     const selfRes = await request.post(`${API_BASE}/skills/endorsements`, {
       headers: { authorization: `Bearer ${user1Token}` },
@@ -145,13 +147,18 @@ test.describe('E2E: Peer Credibility Networks & Endorsement Weighting (F-150, F-
     expect(activeEndorsement).toBeDefined();
 
     // 2. Alice revokes her endorsement
-    const revokeRes = await request.delete(`${API_BASE}/skills/endorsements/${activeEndorsement.id}`, {
-      headers: { authorization: `Bearer ${user1Token}` },
-    });
+    const revokeRes = await request.delete(
+      `${API_BASE}/skills/endorsements/${activeEndorsement.id}`,
+      {
+        headers: { authorization: `Bearer ${user1Token}` },
+      }
+    );
     expect(revokeRes.status()).toBe(200);
 
     // 3. Verify aggregate count drops
-    const postRevokeRes = await request.get(`${API_BASE}/skills/endorsements/recipients/${user2Id}`);
+    const postRevokeRes = await request.get(
+      `${API_BASE}/skills/endorsements/recipients/${user2Id}`
+    );
     expect(postRevokeRes.status()).toBe(200);
     const postBody = await postRevokeRes.json();
     expect(postBody.endorsements.some((e: any) => e.id === activeEndorsement.id)).toBe(false);

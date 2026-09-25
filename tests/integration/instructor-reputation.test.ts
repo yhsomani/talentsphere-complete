@@ -25,27 +25,17 @@ describe('Instructor Reputation System Integration (F-148, F-72, F-144)', () => 
 
     // 1. Instructor 1
     instructor1Id = '00000000-0000-4000-a000-000000000101';
-    instructor1Token = createSessionToken(
-      instructor1Id,
-      'prof.smith@university.edu',
-      ['instructor']
-    );
+    instructor1Token = createSessionToken(instructor1Id, 'prof.smith@university.edu', [
+      'instructor',
+    ]);
 
     // 2. Instructor 2
     instructor2Id = '00000000-0000-4000-a000-000000000102';
-    instructor2Token = createSessionToken(
-      instructor2Id,
-      'dr.curie@institute.org',
-      ['instructor']
-    );
+    instructor2Token = createSessionToken(instructor2Id, 'dr.curie@institute.org', ['instructor']);
 
     // 3. Student Candidate
     candidateId = '00000000-0000-4000-a000-000000000103';
-    candidateToken = createSessionToken(
-      candidateId,
-      'student.bob@learner.io',
-      ['candidate']
-    );
+    candidateToken = createSessionToken(candidateId, 'student.bob@learner.io', ['candidate']);
 
     // 4. Admin session token
     adminToken = createSessionToken(adminId, 'admin@talentsphere.internal', ['platform_admin']);

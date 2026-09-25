@@ -127,7 +127,11 @@ export type RevokeEvidenceInput = z.infer<typeof RevokeEvidenceInputSchema>;
  * Skills & Taxonomy Contracts (BR-141..147)
  */
 export const CreateSkillInputSchema = z.object({
-  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   name: z.string().min(2).max(100),
   category: z.string().min(2).max(100),
   description: z.string().max(1000).optional(),
@@ -149,7 +153,11 @@ export type CreateSkillRelationshipInput = z.infer<typeof CreateSkillRelationshi
  */
 export const CreateOrganizationInputSchema = z.object({
   name: z.string().min(2).max(100),
-  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   website: z.string().url().optional(),
   description: z.string().max(1000).optional(),
 });
@@ -175,7 +183,15 @@ export const CreateJobInputSchema = z.object({
 export type CreateJobInput = z.infer<typeof CreateJobInputSchema>;
 
 export const UpdateJobStatusInputSchema = z.object({
-  status: z.enum(['draft', 'pending_approval', 'approved', 'published', 'paused', 'closed', 'archived']),
+  status: z.enum([
+    'draft',
+    'pending_approval',
+    'approved',
+    'published',
+    'paused',
+    'closed',
+    'archived',
+  ]),
 });
 
 export type UpdateJobStatusInput = z.infer<typeof UpdateJobStatusInputSchema>;
@@ -212,23 +228,31 @@ export type TransitionApplicationInput = z.infer<typeof TransitionApplicationInp
  * Challenges Arena & Assessment Contracts (F-08, BR-24..BR-51)
  */
 export const CreateChallengeInputSchema = z.object({
-  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   title: z.string().min(3).max(150),
   description: z.string().min(10).max(10000),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   category: z.string().min(2).max(100),
   skillIds: z.array(z.string().uuid()).optional(),
-  testCases: z.array(
-    z.object({
-      id: z.string().optional(),
-      input: z.string(),
-      expectedOutput: z.string(),
-      isHidden: z.boolean().default(false),
-    })
-  ).min(2),
+  testCases: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        input: z.string(),
+        expectedOutput: z.string(),
+        isHidden: z.boolean().default(false),
+      })
+    )
+    .min(2),
   timeLimitMs: z.number().int().min(100).max(30000).default(5000),
   memoryLimitMb: z.number().int().min(64).max(512).default(512),
-  policyMode: z.enum(['AI_PROHIBITED', 'AI_RESTRICTED', 'AI_ALLOWED', 'POST_ASSESSMENT_ONLY']).default('AI_PROHIBITED'),
+  policyMode: z
+    .enum(['AI_PROHIBITED', 'AI_RESTRICTED', 'AI_ALLOWED', 'POST_ASSESSMENT_ONLY'])
+    .default('AI_PROHIBITED'),
 });
 
 export type CreateChallengeInput = z.infer<typeof CreateChallengeInputSchema>;
@@ -255,7 +279,11 @@ export type AIAssistantQueryInput = z.infer<typeof AIAssistantQueryInputSchema>;
  */
 export const CreateCourseInputSchema = z.object({
   title: z.string().min(3).max(200),
-  slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z
+    .string()
+    .min(2)
+    .max(100)
+    .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().min(10).max(5000),
   level: z.enum(['beginner', 'intermediate', 'advanced']).default('beginner'),
   estimatedDurationMinutes: z.number().int().min(10).max(10000).default(60),
@@ -335,7 +363,9 @@ export const UpdateNotificationPreferencesInputSchema = z.object({
   emailDigestFrequency: z.enum(['realtime', 'daily', 'weekly', 'never']).optional(),
 });
 
-export type UpdateNotificationPreferencesInput = z.infer<typeof UpdateNotificationPreferencesInputSchema>;
+export type UpdateNotificationPreferencesInput = z.infer<
+  typeof UpdateNotificationPreferencesInputSchema
+>;
 
 /**
  * AI Gateway & Career Assistant Contracts (F-11, SSOT Section 16)
@@ -447,7 +477,9 @@ export const CreatePortfolioProjectInputSchema = z.object({
   description: z.string().min(10).max(10000),
   projectUrl: z.string().url().max(500).optional(),
   repoUrl: z.string().url().max(500).optional(),
-  visibility: z.enum(['public', 'connections_only', 'recruiters_only', 'private']).default('public'),
+  visibility: z
+    .enum(['public', 'connections_only', 'recruiters_only', 'private'])
+    .default('public'),
   featured: z.boolean().default(false),
   orderIndex: z.number().int().min(0).default(0),
   skillIds: z.array(z.string().uuid()).default([]),
@@ -486,7 +518,9 @@ export const UpdateUserSettingsInputSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).optional(),
   language: z.string().min(2).max(10).optional(),
   timezone: z.string().min(1).max(64).optional(),
-  profileVisibility: z.enum(['public', 'connections_only', 'recruiters_only', 'private']).optional(),
+  profileVisibility: z
+    .enum(['public', 'connections_only', 'recruiters_only', 'private'])
+    .optional(),
   showEmail: z.boolean().optional(),
   showActivity: z.boolean().optional(),
   allowConnectionRequests: z.boolean().optional(),
@@ -506,7 +540,9 @@ export type UpdateUserSettingsInput = z.infer<typeof UpdateUserSettingsInputSche
 export const RequestErasureInputSchema = z.object({
   reason: z.string().max(1000).optional(),
   confirm: z.literal(true, {
-    errorMap: () => ({ message: 'You must explicitly confirm account deletion to initiate the 30-day grace period.' }),
+    errorMap: () => ({
+      message: 'You must explicitly confirm account deletion to initiate the 30-day grace period.',
+    }),
   }),
 });
 
@@ -597,7 +633,19 @@ export type AdminQueryAuditLogs = z.infer<typeof AdminQueryAuditLogsSchema>;
  */
 export const SearchQueryInputSchema = z.object({
   query: z.string().min(1).max(200),
-  type: z.enum(['all', 'jobs', 'skills', 'courses', 'challenges', 'profiles', 'commands', 'companies', 'projects']).default('all'),
+  type: z
+    .enum([
+      'all',
+      'jobs',
+      'skills',
+      'courses',
+      'challenges',
+      'profiles',
+      'commands',
+      'companies',
+      'projects',
+    ])
+    .default('all'),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   location: z.string().max(100).optional(),
   level: z.string().max(50).optional(),
@@ -631,7 +679,15 @@ export type ScanContentInput = z.infer<typeof ScanContentInputSchema>;
 export const CreateModerationReportInputSchema = z.object({
   targetType: z.enum(['user', 'job', 'message', 'evidence', 'review', 'portfolio_project']),
   targetId: z.string().min(1).max(128),
-  reason: z.enum(['spam', 'harassment', 'fraud', 'inappropriate', 'intellectual_property', 'security_violation', 'other']),
+  reason: z.enum([
+    'spam',
+    'harassment',
+    'fraud',
+    'inappropriate',
+    'intellectual_property',
+    'security_violation',
+    'other',
+  ]),
   details: z.string().max(2000).optional(),
 });
 
@@ -641,10 +697,19 @@ export const UpdateModerationReportStatusInputSchema = z.object({
   status: z.enum(['pending', 'under_review', 'resolved', 'dismissed']),
 });
 
-export type UpdateModerationReportStatusInput = z.infer<typeof UpdateModerationReportStatusInputSchema>;
+export type UpdateModerationReportStatusInput = z.infer<
+  typeof UpdateModerationReportStatusInputSchema
+>;
 
 export const ResolveModerationReportInputSchema = z.object({
-  action: z.enum(['none', 'warning', 'content_removed', 'user_suspended', 'user_banned', 'dismissed']),
+  action: z.enum([
+    'none',
+    'warning',
+    'content_removed',
+    'user_suspended',
+    'user_banned',
+    'dismissed',
+  ]),
   resolutionNotes: z.string().min(3).max(2000),
   secondApproverId: z.string().uuid().optional(),
 });
@@ -712,7 +777,9 @@ export const RestoreApplicationDraftVersionInputSchema = z.object({
   targetVersion: z.number().int().positive(),
 });
 
-export type RestoreApplicationDraftVersionInput = z.infer<typeof RestoreApplicationDraftVersionInputSchema>;
+export type RestoreApplicationDraftVersionInput = z.infer<
+  typeof RestoreApplicationDraftVersionInputSchema
+>;
 
 /**
  * Product Analytics & Telemetry Contracts (F-19, F-31, BR-27)
@@ -841,7 +908,9 @@ export type SubmitSalaryReportInput = z.infer<typeof SubmitSalaryReportInputSche
 
 export const SalaryBenchmarkQuerySchema = z.object({
   role: z.string().optional(),
-  level: z.enum(['entry', 'mid', 'senior', 'lead', 'principal', 'director', 'executive']).optional(),
+  level: z
+    .enum(['entry', 'mid', 'senior', 'lead', 'principal', 'director', 'executive'])
+    .optional(),
   location: z.string().optional(),
   currency: z.string().length(3).default('USD'),
   minCohortSize: z.coerce.number().int().min(1).max(20).default(3),
@@ -899,13 +968,17 @@ export const RegisterSkillFreshnessInputSchema = z.object({
   skillId: z.string().min(1).max(100),
   category: z.enum(['fast_changing', 'moderate', 'stable', 'foundational']).default('moderate'),
   lastVerifiedAt: z.string().datetime().optional(),
-  verificationSource: z.enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation']).default('evidence'),
+  verificationSource: z
+    .enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation'])
+    .default('evidence'),
 });
 
 export type RegisterSkillFreshnessInput = z.infer<typeof RegisterSkillFreshnessInputSchema>;
 
 export const ReverifySkillInputSchema = z.object({
-  source: z.enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation']).default('self_attestation'),
+  source: z
+    .enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation'])
+    .default('self_attestation'),
 });
 
 export type ReverifySkillInput = z.infer<typeof ReverifySkillInputSchema>;
@@ -921,11 +994,15 @@ export const CreateInterviewQuestionInputSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']),
   durationMinutes: z.number().int().min(5).max(180).default(30),
   expectedCompetencies: z.array(z.string().min(1).max(100)).default([]),
-  testCases: z.array(z.object({
-    input: z.string(),
-    expectedOutput: z.string(),
-    isHidden: z.boolean().default(false),
-  })).default([]),
+  testCases: z
+    .array(
+      z.object({
+        input: z.string(),
+        expectedOutput: z.string(),
+        isHidden: z.boolean().default(false),
+      })
+    )
+    .default([]),
 });
 
 export type CreateInterviewQuestionInput = z.infer<typeof CreateInterviewQuestionInputSchema>;
@@ -942,7 +1019,9 @@ export const ScheduleInterviewAssessmentInputSchema = z.object({
   questionIds: z.array(z.string().uuid()).default([]),
 });
 
-export type ScheduleInterviewAssessmentInput = z.infer<typeof ScheduleInterviewAssessmentInputSchema>;
+export type ScheduleInterviewAssessmentInput = z.infer<
+  typeof ScheduleInterviewAssessmentInputSchema
+>;
 
 export const SetRecordingConsentInputSchema = z.object({
   consent: z.boolean(),
@@ -975,17 +1054,23 @@ export const CompensateInterviewScorecardInputSchema = z.object({
   privateNotes: z.string().max(5000).optional(),
 });
 
-export type CompensateInterviewScorecardInput = z.infer<typeof CompensateInterviewScorecardInputSchema>;
+export type CompensateInterviewScorecardInput = z.infer<
+  typeof CompensateInterviewScorecardInputSchema
+>;
 
 export const ExecuteInterviewCodeInputSchema = z.object({
   code: z.string().min(1).max(50000),
   language: z.enum(['javascript', 'typescript', 'python']).default('javascript'),
   questionId: z.string().uuid().optional(),
-  customTestCases: z.array(z.object({
-    input: z.string(),
-    expectedOutput: z.string(),
-    isHidden: z.boolean().default(false),
-  })).optional(),
+  customTestCases: z
+    .array(
+      z.object({
+        input: z.string(),
+        expectedOutput: z.string(),
+        isHidden: z.boolean().default(false),
+      })
+    )
+    .optional(),
 });
 
 export type ExecuteInterviewCodeInput = z.infer<typeof ExecuteInterviewCodeInputSchema>;
@@ -997,7 +1082,15 @@ export const AddReputationSignalInputSchema = z.object({
   targetUserId: z.string().uuid().optional(),
   context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']),
   domain: z.string().min(1).max(100).default('general'),
-  signalType: z.enum(['credential', 'endorsement', 'review', 'contribution', 'peer_feedback', 'assessment', 'penalty']),
+  signalType: z.enum([
+    'credential',
+    'endorsement',
+    'review',
+    'contribution',
+    'peer_feedback',
+    'assessment',
+    'penalty',
+  ]),
   rawValue: z.number().min(-100).max(100),
   weight: z.number().min(0).max(5).default(1.0),
   decayHalfLifeDays: z.number().int().min(30).max(3650).default(365),
@@ -1008,7 +1101,9 @@ export const AddReputationSignalInputSchema = z.object({
 export type AddReputationSignalInput = z.infer<typeof AddReputationSignalInputSchema>;
 
 export const QueryReputationInputSchema = z.object({
-  context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']).optional(),
+  context: z
+    .enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor'])
+    .optional(),
   domain: z.string().max(100).optional(),
 });
 
@@ -1018,10 +1113,14 @@ export const StartRecoveryPlanInputSchema = z.object({
   context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']),
   penaltySignalId: z.string().uuid(),
   targetReboundPoints: z.number().positive(),
-  tasks: z.array(z.object({
-    description: z.string().min(1).max(500),
-    points: z.number().positive(),
-  })).min(1),
+  tasks: z
+    .array(
+      z.object({
+        description: z.string().min(1).max(500),
+        points: z.number().positive(),
+      })
+    )
+    .min(1),
 });
 
 export type StartRecoveryPlanInput = z.infer<typeof StartRecoveryPlanInputSchema>;
@@ -1127,7 +1226,9 @@ export const CreateInstructorEndorsementInputSchema = z.object({
   notes: z.string().max(1000).optional(),
 });
 
-export type CreateInstructorEndorsementInput = z.infer<typeof CreateInstructorEndorsementInputSchema>;
+export type CreateInstructorEndorsementInput = z.infer<
+  typeof CreateInstructorEndorsementInputSchema
+>;
 
 export const SubmitInstructorReviewInputSchema = z.object({
   rating: z.number().min(1).max(5),
@@ -1282,4 +1383,3 @@ export const TopEmergingSkillsQuerySchema = z.object({
 });
 
 export type TopEmergingSkillsQuery = z.infer<typeof TopEmergingSkillsQuerySchema>;
-

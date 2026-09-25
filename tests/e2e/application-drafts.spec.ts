@@ -78,7 +78,9 @@ test.describe('E2E: Application Draft Autosave & Version Recovery (F-36, BR-18, 
     expect(pubRes.status()).toBe(200);
   });
 
-  test('autosaves application draft, tracks versions, and enables historical recovery (F-36, BR-18, SSOT 1015)', async ({ request }) => {
+  test('autosaves application draft, tracks versions, and enables historical recovery (F-36, BR-18, SSOT 1015)', async ({
+    request,
+  }) => {
     // 1. Initial autosave (Step 1)
     const draft1Res = await request.put(`${API_BASE}/jobs/${jobId}/draft`, {
       headers: { authorization: `Bearer ${candidateToken}` },
@@ -91,14 +93,20 @@ test.describe('E2E: Application Draft Autosave & Version Recovery (F-36, BR-18, 
     expect(draft1Res.status()).toBe(200);
     const draft1Data = await draft1Res.json();
     expect(draft1Data.version).toBe(1);
-    expect(draft1Data.draft.coverLetter).toBe('I have deep expertise in Paxos and Raft implementations.');
+    expect(draft1Data.draft.coverLetter).toBe(
+      'I have deep expertise in Paxos and Raft implementations.'
+    );
 
     // 2. Continuous autosave (Step 2)
     const draft2Res = await request.put(`${API_BASE}/jobs/${jobId}/draft`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
         coverLetter: 'Updated with additional open-source benchmarks.',
-        answers: { yearsExperience: 8, remotePreference: 'full_remote', portfolioUrl: 'https://alex.dev' },
+        answers: {
+          yearsExperience: 8,
+          remotePreference: 'full_remote',
+          portfolioUrl: 'https://alex.dev',
+        },
         stepIndex: 2,
       },
     });
@@ -125,7 +133,9 @@ test.describe('E2E: Application Draft Autosave & Version Recovery (F-36, BR-18, 
     expect(restoreRes.status()).toBe(200);
     const restoreData = await restoreRes.json();
     expect(restoreData.draft.version).toBe(3); // audit-safe forward version
-    expect(restoreData.draft.coverLetter).toBe('I have deep expertise in Paxos and Raft implementations.');
+    expect(restoreData.draft.coverLetter).toBe(
+      'I have deep expertise in Paxos and Raft implementations.'
+    );
     expect(restoreData.draft.stepIndex).toBe(1);
 
     // 5. Candidate lists all active drafts across opportunities
@@ -140,7 +150,9 @@ test.describe('E2E: Application Draft Autosave & Version Recovery (F-36, BR-18, 
     expect(activeDraft.job.title).toBe('Staff Distributed Systems Engineer');
   });
 
-  test('submitting application marks draft as submitted and prevents further mutation (F-36, BR-15, SSOT 1015)', async ({ request }) => {
+  test('submitting application marks draft as submitted and prevents further mutation (F-36, BR-15, SSOT 1015)', async ({
+    request,
+  }) => {
     // 1. Submit application
     const applyRes = await request.post(`${API_BASE}/jobs/${jobId}/apply`, {
       headers: { authorization: `Bearer ${candidateToken}` },

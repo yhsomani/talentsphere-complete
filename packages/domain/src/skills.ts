@@ -11,10 +11,7 @@ export interface Skill {
 }
 
 export type SkillRelationshipType =
-  | 'prerequisite_of'
-  | 'subskill_of'
-  | 'supersedes'
-  | 'correlates_with';
+  'prerequisite_of' | 'subskill_of' | 'supersedes' | 'correlates_with';
 
 export interface SkillRelationship {
   id: string;
@@ -99,7 +96,13 @@ export function createSkillRelationship(
   }
 
   if (params.relationshipType === 'prerequisite_of') {
-    if (wouldCreatePrerequisiteCycle(existingRelationships, params.sourceSkillId, params.targetSkillId)) {
+    if (
+      wouldCreatePrerequisiteCycle(
+        existingRelationships,
+        params.sourceSkillId,
+        params.targetSkillId
+      )
+    ) {
       throw new DomainError(
         'INVALID_STATE_TRANSITION',
         'Prerequisite relationship would create a circular dependency (BR-147).'

@@ -23,7 +23,9 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
     candidateProfileId = regData.profile.id;
   });
 
-  test('enforces strict server-side AI prohibition during active assessment session (BR-10)', async ({ request }) => {
+  test('enforces strict server-side AI prohibition during active assessment session (BR-10)', async ({
+    request,
+  }) => {
     // 1. Fetch available challenges
     const challengesRes = await request.get(`${API_BASE}/challenges`);
     expect(challengesRes.status()).toBe(200);
@@ -78,7 +80,9 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
     expect(aiAllowedData.disclaimer).toBeDefined();
   });
 
-  test('enrolls in LMS course, enforces prerequisite sequential ordering, and issues verified evidence on completion (BR-21..BR-23)', async ({ request }) => {
+  test('enrolls in LMS course, enforces prerequisite sequential ordering, and issues verified evidence on completion (BR-21..BR-23)', async ({
+    request,
+  }) => {
     // 1. Get published courses
     const coursesRes = await request.get(`${API_BASE}/courses`);
     expect(coursesRes.status()).toBe(200);
@@ -136,7 +140,9 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
     expect(l3Data.certificate.certificateNumber).toBeDefined();
 
     // 8. Verify public zero-PII certificate (BR-150)
-    const certRes = await request.get(`${API_BASE}/certificates/${l3Data.certificate.certificateNumber}`);
+    const certRes = await request.get(
+      `${API_BASE}/certificates/${l3Data.certificate.certificateNumber}`
+    );
     expect(certRes.status()).toBe(200);
     const certData = await certRes.json();
     expect(certData.isValid).toBe(true);

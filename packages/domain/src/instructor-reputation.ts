@@ -85,7 +85,9 @@ export function trimOutlierReviews(reviews: InstructorReviewInput[]): {
   verifiedAverage: number;
 } {
   // 1. Only verified enrollments are considered for formal instructor reputation
-  const verifiedReviews = reviews.filter((r) => r.isVerifiedEnrollment && r.rating >= 1 && r.rating <= 5);
+  const verifiedReviews = reviews.filter(
+    (r) => r.isVerifiedEnrollment && r.rating >= 1 && r.rating <= 5
+  );
 
   if (verifiedReviews.length === 0) {
     return { cleanRatings: [], trimmedCount: 0, verifiedAverage: 3.5 };
@@ -112,7 +114,8 @@ export function trimOutlierReviews(reviews: InstructorReviewInput[]): {
 
   const trimmedCount = ratings.length - cleanRatings.length;
   const cleanSum = cleanRatings.reduce((acc, v) => acc + v, 0);
-  const cleanAvg = cleanRatings.length > 0 ? Math.round((cleanSum / cleanRatings.length) * 100) / 100 : mean;
+  const cleanAvg =
+    cleanRatings.length > 0 ? Math.round((cleanSum / cleanRatings.length) * 100) / 100 : mean;
 
   return {
     cleanRatings,
@@ -125,7 +128,10 @@ export function trimOutlierReviews(reviews: InstructorReviewInput[]): {
  * Calculates deterministic course quality score (0 - 100).
  * Blends course completion rate and verified student review average.
  */
-export function calculateCourseQualityScore(completionRate: number, verifiedReviewAvg: number): number {
+export function calculateCourseQualityScore(
+  completionRate: number,
+  verifiedReviewAvg: number
+): number {
   const normCompletion = Math.max(0, Math.min(100, completionRate));
   const normReview = ((Math.max(1, Math.min(5, verifiedReviewAvg)) - 1) / 4) * 100;
   // 50% completion rate + 50% normalized review satisfaction
@@ -146,7 +152,7 @@ export function calculateTeachingEffectivenessScore(cleanRatings: number[]): {
   const sampleSum = cleanRatings.reduce((sum, r) => sum + r, 0);
 
   const bayesianMean = (sampleSum + priorMean * priorWeight) / (count + priorWeight);
-  const score = Math.round((((bayesianMean - 1) / 4) * 100) * 100) / 100;
+  const score = Math.round(((bayesianMean - 1) / 4) * 100 * 100) / 100;
 
   return {
     score: Math.max(0, Math.min(100, score)),
@@ -157,7 +163,10 @@ export function calculateTeachingEffectivenessScore(cleanRatings: number[]): {
 /**
  * Calculates course currency score based on freshness of course material updates.
  */
-export function calculateCurrencyScore(daysSinceLastUpdate: number, activeCoursesCount: number): number {
+export function calculateCurrencyScore(
+  daysSinceLastUpdate: number,
+  activeCoursesCount: number
+): number {
   if (activeCoursesCount === 0) return 40.0;
 
   if (daysSinceLastUpdate <= 60) return 100.0;
@@ -170,7 +179,10 @@ export function calculateCurrencyScore(daysSinceLastUpdate: number, activeCourse
 /**
  * Calculates Q&A and support responsiveness score (0 - 100).
  */
-export function calculateResponsivenessScore(avgResponseHours: number, answeredRate: number): number {
+export function calculateResponsivenessScore(
+  avgResponseHours: number,
+  answeredRate: number
+): number {
   let speedScore = 25.0;
   if (avgResponseHours <= 4) speedScore = 100.0;
   else if (avgResponseHours <= 12) speedScore = 85.0;
@@ -204,17 +216,26 @@ export function calculateInstructorReputation(
   const reviewResult = trimOutlierReviews(metrics.reviews);
 
   // 2. Compute individual factors
-  const courseQualityScore = calculateCourseQualityScore(metrics.completionRate, reviewResult.verifiedAverage);
+  const courseQualityScore = calculateCourseQualityScore(
+    metrics.completionRate,
+    reviewResult.verifiedAverage
+  );
   const teaching = calculateTeachingEffectivenessScore(reviewResult.cleanRatings);
-  const currencyScore = calculateCurrencyScore(metrics.daysSinceLastCourseUpdate, metrics.activeCoursesCount);
-  const responsivenessScore = calculateResponsivenessScore(metrics.avgQaResponseHours, metrics.qaAnsweredRate);
+  const currencyScore = calculateCurrencyScore(
+    metrics.daysSinceLastCourseUpdate,
+    metrics.activeCoursesCount
+  );
+  const responsivenessScore = calculateResponsivenessScore(
+    metrics.avgQaResponseHours,
+    metrics.qaAnsweredRate
+  );
   const communityScore = calculateCommunityStandingScore(metrics.peerEndorsementCount);
 
   // Factor weights:
   // Course Quality: 25%, Teaching Effectiveness: 25%, Currency: 20%, Responsiveness: 15%, Community Standing: 15%
   const WEIGHT_QUALITY = 0.25;
   const WEIGHT_TEACHING = 0.25;
-  const WEIGHT_CURRENCY = 0.20;
+  const WEIGHT_CURRENCY = 0.2;
   const WEIGHT_RESPONSIVENESS = 0.15;
   const WEIGHT_COMMUNITY = 0.15;
 

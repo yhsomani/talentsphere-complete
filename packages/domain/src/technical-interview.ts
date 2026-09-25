@@ -4,13 +4,7 @@ import { DomainError } from './index.js';
 export type QuestionCategory = 'code' | 'design' | 'behavioral' | 'text';
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 export type InterviewAssessmentStatus =
-  | 'scheduled'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled'
-  | 'no_show'
-  | 'scored'
-  | 'reviewed';
+  'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show' | 'scored' | 'reviewed';
 export type RecordingStatus = 'disabled' | 'consented' | 'active' | 'completed';
 export type InterviewRecommendation = 'strong_yes' | 'yes' | 'neutral' | 'no' | 'strong_no';
 
@@ -161,7 +155,10 @@ export function createInterviewQuestion(params: CreateInterviewQuestionParams): 
 
   const duration = params.durationMinutes ?? 30;
   if (duration < 5 || duration > 180) {
-    throw new DomainError('VALIDATION_FAILED', 'Question duration must be between 5 and 180 minutes.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Question duration must be between 5 and 180 minutes.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -185,7 +182,9 @@ export function createInterviewQuestion(params: CreateInterviewQuestionParams): 
 /**
  * Schedules an interview assessment (F-88).
  */
-export function scheduleInterviewAssessment(params: ScheduleInterviewAssessmentParams): InterviewAssessment {
+export function scheduleInterviewAssessment(
+  params: ScheduleInterviewAssessmentParams
+): InterviewAssessment {
   if (!params.orgId || params.orgId.trim().length === 0) {
     throw new DomainError('VALIDATION_FAILED', 'Organization ID is required.');
   }
@@ -206,7 +205,10 @@ export function scheduleInterviewAssessment(params: ScheduleInterviewAssessmentP
 
   const duration = params.durationMinutes ?? 60;
   if (duration < 15 || duration > 240) {
-    throw new DomainError('VALIDATION_FAILED', 'Assessment duration must be between 15 and 240 minutes.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Assessment duration must be between 15 and 240 minutes.'
+    );
   }
 
   const id = params.id || crypto.randomUUID();
@@ -242,7 +244,10 @@ export function joinInterviewAssessment(
   currentTime?: Date
 ): InterviewAssessment {
   if (['completed', 'cancelled', 'no_show', 'scored', 'reviewed'].includes(assessment.status)) {
-    throw new DomainError('CONFLICT', `Cannot join interview in terminal status '${assessment.status}'.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Cannot join interview in terminal status '${assessment.status}'.`
+    );
   }
 
   const now = (currentTime || new Date()).toISOString();
@@ -310,7 +315,10 @@ export function endInterviewAssessment(
   currentTime?: Date
 ): InterviewAssessment {
   if (['completed', 'cancelled', 'no_show', 'scored', 'reviewed'].includes(assessment.status)) {
-    throw new DomainError('CONFLICT', `Interview already concluded in status '${assessment.status}'.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Interview already concluded in status '${assessment.status}'.`
+    );
   }
 
   const now = (currentTime || new Date()).toISOString();
@@ -334,7 +342,10 @@ export function submitInterviewScorecard(
   params: SubmitScorecardParams
 ): { assessment: InterviewAssessment; scorecard: InterviewScorecard } {
   if (!['completed', 'scored'].includes(assessment.status)) {
-    throw new DomainError('CONFLICT', `Cannot score interview while in '${assessment.status}' status. Complete session first.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Cannot score interview while in '${assessment.status}' status. Complete session first.`
+    );
   }
 
   const scores = [
@@ -346,7 +357,10 @@ export function submitInterviewScorecard(
 
   for (const s of scores) {
     if (typeof s !== 'number' || s < 1 || s > 5 || !Number.isInteger(s)) {
-      throw new DomainError('VALIDATION_FAILED', 'Rubric scores must be integers between 1 and 5 (BR-176).');
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Rubric scores must be integers between 1 and 5 (BR-176).'
+      );
     }
   }
 
@@ -398,7 +412,10 @@ export function compensateInterviewScorecard(
   params: CompensateScorecardParams
 ): { assessment: InterviewAssessment; scorecard: InterviewScorecard } {
   if (!params.compensationReason || params.compensationReason.trim().length === 0) {
-    throw new DomainError('VALIDATION_FAILED', 'Reason for compensating scorecard entry is required (BR-174).');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Reason for compensating scorecard entry is required (BR-174).'
+    );
   }
 
   const scores = [
@@ -410,7 +427,10 @@ export function compensateInterviewScorecard(
 
   for (const s of scores) {
     if (typeof s !== 'number' || s < 1 || s > 5 || !Number.isInteger(s)) {
-      throw new DomainError('VALIDATION_FAILED', 'Rubric scores must be integers between 1 and 5 (BR-176).');
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Rubric scores must be integers between 1 and 5 (BR-176).'
+      );
     }
   }
 
@@ -449,11 +469,12 @@ export function compensateInterviewScorecard(
 /**
  * Reviews and approves interview assessment by Hiring Manager (F-102, state: reviewed).
  */
-export function reviewInterviewAssessment(
-  assessment: InterviewAssessment
-): InterviewAssessment {
+export function reviewInterviewAssessment(assessment: InterviewAssessment): InterviewAssessment {
   if (assessment.status !== 'scored') {
-    throw new DomainError('CONFLICT', `Assessment must be in 'scored' status before review. Current status: '${assessment.status}'.`);
+    throw new DomainError(
+      'CONFLICT',
+      `Assessment must be in 'scored' status before review. Current status: '${assessment.status}'.`
+    );
   }
 
   return {
@@ -470,7 +491,8 @@ export function generateAdvisoryAiFeedback(
   assessment: InterviewAssessment,
   codeResult?: { passed: number; total: number }
 ): InterviewAiFeedback {
-  const passedRatio = codeResult && codeResult.total > 0 ? codeResult.passed / codeResult.total : 0.8;
+  const passedRatio =
+    codeResult && codeResult.total > 0 ? codeResult.passed / codeResult.total : 0.8;
   const clarityScore = Math.round(75 + passedRatio * 20);
 
   return {

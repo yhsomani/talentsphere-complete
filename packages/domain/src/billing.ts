@@ -16,7 +16,7 @@ export interface PlanDefinition {
   name: string;
   description: string;
   priceMonthlyCents: number; // Integer minor units (USD cents)
-  priceYearlyCents: number;  // Integer minor units (USD cents)
+  priceYearlyCents: number; // Integer minor units (USD cents)
   currency: 'USD';
   targetRole: 'candidate' | 'recruiter' | 'all';
   features: string[];
@@ -91,7 +91,8 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
   candidate_pro: {
     tier: 'candidate_pro',
     name: 'Candidate Pro',
-    description: 'For ambitious professionals seeking accelerated career growth and high-capacity AI assistance.',
+    description:
+      'For ambitious professionals seeking accelerated career growth and high-capacity AI assistance.',
     priceMonthlyCents: 1999, // $19.99
     priceYearlyCents: 19990, // $199.90 (2 months free)
     currency: 'USD',
@@ -122,7 +123,8 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
   recruiter_enterprise: {
     tier: 'recruiter_enterprise',
     name: 'Recruiter Enterprise',
-    description: 'High-volume talent acquisition with unlimited postings, team seats, and deep graph analytics.',
+    description:
+      'High-volume talent acquisition with unlimited postings, team seats, and deep graph analytics.',
     priceMonthlyCents: 29900, // $299.00
     priceYearlyCents: 299000, // $2,990.00
     currency: 'USD',

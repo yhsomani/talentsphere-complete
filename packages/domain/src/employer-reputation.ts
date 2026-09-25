@@ -8,10 +8,7 @@ import crypto from 'node:crypto';
 import { DomainError } from './index.js';
 
 export type EmployerReputationBand =
-  | 'top_employer'
-  | 'strong_reputation'
-  | 'developing'
-  | 'needs_improvement';
+  'top_employer' | 'strong_reputation' | 'developing' | 'needs_improvement';
 
 export interface EmployerFactorBreakdown {
   hiringScore: number; // 0 to 100 (25% weight)
@@ -106,8 +103,7 @@ export function trimOutlierEmployerReviews(reviews: EmployerReview[]): {
   });
 
   const mean = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-  const variance =
-    scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
+  const variance = scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
   const stdDev = Math.sqrt(variance);
 
   if (stdDev < 0.2) {

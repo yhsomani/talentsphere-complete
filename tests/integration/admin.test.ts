@@ -37,11 +37,9 @@ describe('Platform Administration & Governance Integration (F-17, F-35, BR-06, B
     candidateUserId = body.user.id;
 
     // 2. Generate platform_admin token
-    adminToken = createSessionToken(
-      adminUserId,
-      'admin.governance@talentsphere.internal',
-      ['platform_admin']
-    );
+    adminToken = createSessionToken(adminUserId, 'admin.governance@talentsphere.internal', [
+      'platform_admin',
+    ]);
   });
 
   afterAll(async () => {

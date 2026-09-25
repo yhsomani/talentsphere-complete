@@ -89,7 +89,7 @@ test.describe('E2E: Instructor Reputation System (F-148, F-72, F-144, P-02)', ()
     expect(body.factors.teachingEffectiveness).toBeDefined();
     expect(body.factors.teachingEffectiveness.weight).toBe(0.25);
     expect(body.factors.currency).toBeDefined();
-    expect(body.factors.currency.weight).toBe(0.20);
+    expect(body.factors.currency.weight).toBe(0.2);
     expect(body.factors.responsiveness).toBeDefined();
     expect(body.factors.responsiveness.weight).toBe(0.15);
     expect(body.factors.communityStanding).toBeDefined();
@@ -101,7 +101,9 @@ test.describe('E2E: Instructor Reputation System (F-148, F-72, F-144, P-02)', ()
     expect(body.studentIds).toBeUndefined();
   });
 
-  test('instructor updates operational metrics and recomputes composite score', async ({ request }) => {
+  test('instructor updates operational metrics and recomputes composite score', async ({
+    request,
+  }) => {
     const res = await request.post(`${API_BASE}/reputation/instructors/${instructor1Id}/metrics`, {
       headers: { authorization: `Bearer ${instructor1Token}` },
       data: {

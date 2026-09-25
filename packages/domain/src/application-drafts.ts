@@ -52,16 +52,25 @@ export interface SaveDraftResult {
 export function saveApplicationDraft(params: SaveDraftParams): SaveDraftResult {
   // BR-02: Only candidates may apply / draft applications
   if (params.actor.roles.includes('recruiter') && !params.actor.roles.includes('candidate')) {
-    throw new DomainError('FORBIDDEN', 'Recruiters may not create or save job application drafts (BR-02).');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Recruiters may not create or save job application drafts (BR-02).'
+    );
   }
 
   // Cover letter validation (SSOT 1015: <= 5000 characters)
   if (params.coverLetter && params.coverLetter.length > 5000) {
-    throw new DomainError('VALIDATION_FAILED', 'Cover letter exceeds maximum allowed length of 5000 characters (SSOT 1015).');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Cover letter exceeds maximum allowed length of 5000 characters (SSOT 1015).'
+    );
   }
 
   if (params.existingDraft && params.existingDraft.isSubmitted) {
-    throw new DomainError('INVALID_STATE_TRANSITION', 'Cannot edit an application draft that has already been submitted.');
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      'Cannot edit an application draft that has already been submitted.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -78,7 +87,8 @@ export function saveApplicationDraft(params: SaveDraftParams): SaveDraftResult {
     coverLetter: params.coverLetter !== undefined ? params.coverLetter : existing?.coverLetter,
     answers: params.answers ?? existing?.answers ?? {},
     attachedEvidenceIds: params.attachedEvidenceIds ?? existing?.attachedEvidenceIds ?? [],
-    stepIndex: params.stepIndex !== undefined ? Math.max(0, params.stepIndex) : (existing?.stepIndex ?? 0),
+    stepIndex:
+      params.stepIndex !== undefined ? Math.max(0, params.stepIndex) : (existing?.stepIndex ?? 0),
     version,
     isSubmitted: false,
     createdAt: existing ? existing.createdAt : now,
@@ -112,11 +122,17 @@ export function restoreApplicationDraftVersion(
   }
 ): SaveDraftResult {
   if (draft.candidateId !== actor.candidateProfileId) {
-    throw new DomainError('FORBIDDEN', 'Cannot restore an application draft belonging to another candidate.');
+    throw new DomainError(
+      'FORBIDDEN',
+      'Cannot restore an application draft belonging to another candidate.'
+    );
   }
 
   if (draft.isSubmitted) {
-    throw new DomainError('INVALID_STATE_TRANSITION', 'Cannot restore a version of an already submitted application.');
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      'Cannot restore a version of an already submitted application.'
+    );
   }
 
   const snapshot = versionsHistory.find(
@@ -124,7 +140,10 @@ export function restoreApplicationDraftVersion(
   );
 
   if (!snapshot) {
-    throw new DomainError('NOT_FOUND', `Draft version ${targetVersion} not found for this application draft.`);
+    throw new DomainError(
+      'NOT_FOUND',
+      `Draft version ${targetVersion} not found for this application draft.`
+    );
   }
 
   const now = new Date().toISOString();

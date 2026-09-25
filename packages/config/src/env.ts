@@ -42,7 +42,9 @@ export const ServerEnvSchema = z.object({
 
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
-export function validateServerEnv(env: Record<string, string | undefined> = process.env): ServerEnv {
+export function validateServerEnv(
+  env: Record<string, string | undefined> = process.env
+): ServerEnv {
   const result = ServerEnvSchema.safeParse(env);
   if (!result.success) {
     const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');

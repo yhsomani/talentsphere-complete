@@ -136,7 +136,9 @@ describe('Professional Networking Domain (F-09)', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      expect(() => acceptConnection(acceptedConn, userB)).toThrowError(/Only pending requests can be accepted/);
+      expect(() => acceptConnection(acceptedConn, userB)).toThrowError(
+        /Only pending requests can be accepted/
+      );
     });
   });
 
@@ -168,7 +170,9 @@ describe('Professional Networking Domain (F-09)', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      expect(() => rejectConnection(rejectedConn, userB)).toThrowError(/Only pending requests can be rejected/);
+      expect(() => rejectConnection(rejectedConn, userB)).toThrowError(
+        /Only pending requests can be rejected/
+      );
     });
   });
 
@@ -200,7 +204,9 @@ describe('Professional Networking Domain (F-09)', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      expect(() => withdrawConnection(withdrawnConn, userA)).toThrowError(/Only pending requests can be withdrawn/);
+      expect(() => withdrawConnection(withdrawnConn, userA)).toThrowError(
+        /Only pending requests can be withdrawn/
+      );
     });
   });
 

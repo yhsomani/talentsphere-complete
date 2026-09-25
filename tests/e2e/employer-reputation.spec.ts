@@ -53,7 +53,9 @@ test.describe('E2E: Employer Reputation & Brand System (F-149, F-75, F-56, F-144
     orgId = (await orgRes.json()).organization.id;
   });
 
-  test('queries baseline employer reputation profile with transparent factor breakdown', async ({ request }) => {
+  test('queries baseline employer reputation profile with transparent factor breakdown', async ({
+    request,
+  }) => {
     const res = await request.get(`${API_BASE}/reputation/organizations/${orgId}`);
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -69,7 +71,9 @@ test.describe('E2E: Employer Reputation & Brand System (F-149, F-75, F-56, F-144
     expect(data.profile.factors.leadershipScore).toBeDefined();
   });
 
-  test('submits employer review and updates reputation score dynamically (BR-F149-01)', async ({ request }) => {
+  test('submits employer review and updates reputation score dynamically (BR-F149-01)', async ({
+    request,
+  }) => {
     const res = await request.post(`${API_BASE}/reputation/organizations/${orgId}/reviews`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
@@ -80,7 +84,8 @@ test.describe('E2E: Employer Reputation & Brand System (F-149, F-75, F-56, F-144
         compensationRating: 4.7,
         leadershipRating: 4.5,
         title: 'Exemplary interviewing and transparent team culture',
-        feedback: 'Transparent compensation bracket, rapid feedback loops, and highly respectful interviewers.',
+        feedback:
+          'Transparent compensation bracket, rapid feedback loops, and highly respectful interviewers.',
         isVerifiedEmployee: false,
       },
     });
@@ -136,6 +141,8 @@ test.describe('E2E: Employer Reputation & Brand System (F-149, F-75, F-56, F-144
     expect(reviewsRes.status()).toBe(200);
     const reviewsData = await reviewsRes.json();
     expect(reviewsData.reviews).toHaveLength(1);
-    expect(reviewsData.reviews[0].title).toBe('Exemplary interviewing and transparent team culture');
+    expect(reviewsData.reviews[0].title).toBe(
+      'Exemplary interviewing and transparent team culture'
+    );
   });
 });

@@ -135,7 +135,7 @@ describe('Instructor Reputation System Domain (F-148, F-72, F-144)', () => {
       expect(profile.factors.courseQuality).toBeDefined();
       expect(profile.factors.courseQuality.weight).toBe(0.25);
       expect(profile.factors.teachingEffectiveness.weight).toBe(0.25);
-      expect(profile.factors.currency.weight).toBe(0.20);
+      expect(profile.factors.currency.weight).toBe(0.2);
       expect(profile.factors.responsiveness.weight).toBe(0.15);
       expect(profile.factors.communityStanding.weight).toBe(0.15);
 

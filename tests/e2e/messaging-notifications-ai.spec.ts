@@ -45,14 +45,17 @@ test.describe('E2E: Direct Messaging, Notification Center & AI Career Copilot (F
     recipientProfileId = recipientData.profile.id;
   });
 
-  test('creates thread, sends messages with deduplication, and triggers recipient notification (F-12, F-14)', async ({ request }) => {
+  test('creates thread, sends messages with deduplication, and triggers recipient notification (F-12, F-14)', async ({
+    request,
+  }) => {
     // 1. Create thread with initial message
     const threadRes = await request.post(`${API_BASE}/threads`, {
       headers: { authorization: `Bearer ${senderToken}` },
       data: {
         recipientId: recipientProfileId,
         subject: 'Inquiry regarding distributed systems role',
-        initialMessage: 'Hello Bob, I saw the open staff engineering position and would love to connect!',
+        initialMessage:
+          'Hello Bob, I saw the open staff engineering position and would love to connect!',
         clientMessageId: `client-msg-${Date.now()}`,
       },
     });
@@ -117,7 +120,9 @@ test.describe('E2E: Direct Messaging, Notification Center & AI Career Copilot (F
     expect(prefData.preferences.emailDigestFrequency).toBe('daily');
   });
 
-  test('interacts with AI Career Copilot with quota metering and advisory disclaimer (F-13, BR-12, BR-13)', async ({ request }) => {
+  test('interacts with AI Career Copilot with quota metering and advisory disclaimer (F-13, BR-12, BR-13)', async ({
+    request,
+  }) => {
     // 1. Send query to Career Assistant
     const aiRes = await request.post(`${API_BASE}/ai/career-assistant/chat`, {
       headers: { authorization: `Bearer ${senderToken}` },

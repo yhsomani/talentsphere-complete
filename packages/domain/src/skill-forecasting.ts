@@ -63,7 +63,10 @@ export function recordSkillMarketSignal(params: RecordSkillMarketSignalParams): 
     params.demandPostingsCount < 0 ||
     !Number.isInteger(params.demandPostingsCount)
   ) {
-    throw new DomainError('VALIDATION_FAILED', 'Demand postings count must be a non-negative integer.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Demand postings count must be a non-negative integer.'
+    );
   }
 
   if (
@@ -71,12 +74,22 @@ export function recordSkillMarketSignal(params: RecordSkillMarketSignalParams): 
     params.activeCandidatesCount < 0 ||
     !Number.isInteger(params.activeCandidatesCount)
   ) {
-    throw new DomainError('VALIDATION_FAILED', 'Active candidates count must be a non-negative integer.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Active candidates count must be a non-negative integer.'
+    );
   }
 
   if (params.avgSalaryOffered !== undefined) {
-    if (typeof params.avgSalaryOffered !== 'number' || params.avgSalaryOffered <= 0 || isNaN(params.avgSalaryOffered)) {
-      throw new DomainError('VALIDATION_FAILED', 'Average salary offered must be a positive number.');
+    if (
+      typeof params.avgSalaryOffered !== 'number' ||
+      params.avgSalaryOffered <= 0 ||
+      isNaN(params.avgSalaryOffered)
+    ) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Average salary offered must be a positive number.'
+      );
     }
   }
 
@@ -86,7 +99,9 @@ export function recordSkillMarketSignal(params: RecordSkillMarketSignalParams): 
     recordedAt: params.recordedAt || new Date().toISOString(),
     demandPostingsCount: params.demandPostingsCount,
     activeCandidatesCount: params.activeCandidatesCount,
-    avgSalaryOffered: params.avgSalaryOffered ? Math.round(params.avgSalaryOffered * 100) / 100 : undefined,
+    avgSalaryOffered: params.avgSalaryOffered
+      ? Math.round(params.avgSalaryOffered * 100) / 100
+      : undefined,
     geographicRegion: params.geographicRegion?.trim() || 'Global',
     industry: params.industry?.trim() || 'Technology',
   };
@@ -107,11 +122,17 @@ export function computeSkillForecast(params: ComputeSkillForecastParams): SkillF
     horizonMonths < 1 ||
     horizonMonths > 36
   ) {
-    throw new DomainError('VALIDATION_FAILED', 'Forecast horizon months must be an integer between 1 and 36.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Forecast horizon months must be an integer between 1 and 36.'
+    );
   }
 
   if (!params.signals || params.signals.length === 0) {
-    throw new DomainError('VALIDATION_FAILED', 'At least one market signal is required to compute a forecast.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'At least one market signal is required to compute a forecast.'
+    );
   }
 
   // Sort signals chronologically
@@ -133,11 +154,15 @@ export function computeSkillForecast(params: ComputeSkillForecastParams): SkillF
     const newestTime = new Date(newest.recordedAt).getTime();
     const monthsElapsed = Math.max(1, (newestTime - oldestTime) / (1000 * 60 * 60 * 24 * 30.4375));
 
-    const demandChange = (newest.demandPostingsCount - oldest.demandPostingsCount) / Math.max(1, oldest.demandPostingsCount);
-    demandGrowthPct = Math.round((demandChange * (12 / monthsElapsed) * 100) * 100) / 100;
+    const demandChange =
+      (newest.demandPostingsCount - oldest.demandPostingsCount) /
+      Math.max(1, oldest.demandPostingsCount);
+    demandGrowthPct = Math.round(demandChange * (12 / monthsElapsed) * 100 * 100) / 100;
 
-    const supplyChange = (newest.activeCandidatesCount - oldest.activeCandidatesCount) / Math.max(1, oldest.activeCandidatesCount);
-    supplyGrowthPct = Math.round((supplyChange * (12 / monthsElapsed) * 100) * 100) / 100;
+    const supplyChange =
+      (newest.activeCandidatesCount - oldest.activeCandidatesCount) /
+      Math.max(1, oldest.activeCandidatesCount);
+    supplyGrowthPct = Math.round(supplyChange * (12 / monthsElapsed) * 100 * 100) / 100;
   }
 
   // 2. Scarcity Index (0.000 to 1.000)
@@ -160,25 +185,34 @@ export function computeSkillForecast(params: ComputeSkillForecastParams): SkillF
 
   const baselineSalary =
     signalsWithSalary.length > 0
-      ? signalsWithSalary.reduce((sum, s) => sum + (s.avgSalaryOffered || 0), 0) / signalsWithSalary.length
+      ? signalsWithSalary.reduce((sum, s) => sum + (s.avgSalaryOffered || 0), 0) /
+        signalsWithSalary.length
       : 110000; // baseline market tech median
 
   // Annual salary growth driven by baseline inflation (3%) + scarcity premium (up to 12%)
   const annualSalaryGrowth = 0.03 + (scarcityIndex - 0.5) * 0.12;
-  const projectedMedianSalary = Math.round(baselineSalary * (1 + annualSalaryGrowth * horizonYears));
+  const projectedMedianSalary = Math.round(
+    baselineSalary * (1 + annualSalaryGrowth * horizonYears)
+  );
 
   // 95% Confidence Interval (z = 1.96, std dev estimated proportional to horizon and signal variance)
-  const salaryStdDev = signalsWithSalary.length > 1
-    ? Math.sqrt(
-        signalsWithSalary.reduce((sum, s) => sum + Math.pow((s.avgSalaryOffered || 0) - baselineSalary, 2), 0) /
-          (signalsWithSalary.length - 1)
-      )
-    : baselineSalary * 0.10;
+  const salaryStdDev =
+    signalsWithSalary.length > 1
+      ? Math.sqrt(
+          signalsWithSalary.reduce(
+            (sum, s) => sum + Math.pow((s.avgSalaryOffered || 0) - baselineSalary, 2),
+            0
+          ) /
+            (signalsWithSalary.length - 1)
+        )
+      : baselineSalary * 0.1;
 
   const marginOfError = Math.round(
     Math.max(
       projectedMedianSalary * 0.05,
-      1.96 * (salaryStdDev / Math.sqrt(Math.max(1, signalsWithSalary.length))) * Math.sqrt(horizonYears)
+      1.96 *
+        (salaryStdDev / Math.sqrt(Math.max(1, signalsWithSalary.length))) *
+        Math.sqrt(horizonYears)
     )
   );
 
@@ -188,11 +222,25 @@ export function computeSkillForecast(params: ComputeSkillForecastParams): SkillF
   // 4. Time to Marketability (weeks)
   const category = (params.skillCategory || '').toLowerCase();
   let baseWeeks = 8;
-  if (category.includes('ai') || category.includes('ml') || category.includes('data science') || category.includes('machine learning')) {
+  if (
+    category.includes('ai') ||
+    category.includes('ml') ||
+    category.includes('data science') ||
+    category.includes('machine learning')
+  ) {
     baseWeeks = 16;
-  } else if (category.includes('security') || category.includes('systems') || category.includes('cloud') || category.includes('devops')) {
+  } else if (
+    category.includes('security') ||
+    category.includes('systems') ||
+    category.includes('cloud') ||
+    category.includes('devops')
+  ) {
     baseWeeks = 12;
-  } else if (category.includes('design') || category.includes('frontend') || category.includes('qa')) {
+  } else if (
+    category.includes('design') ||
+    category.includes('frontend') ||
+    category.includes('qa')
+  ) {
     baseWeeks = 6;
   }
 
@@ -227,7 +275,8 @@ export function computeSkillForecast(params: ComputeSkillForecastParams): SkillF
     const prevForecast = params.previousForecast;
     const latestActualDemand = latestSignal.demandPostingsCount;
     // Expected demand from previous forecast
-    const expectedDemand = latestSignal.demandPostingsCount / (1 + (prevForecast.demandGrowthPct / 100));
+    const expectedDemand =
+      latestSignal.demandPostingsCount / (1 + prevForecast.demandGrowthPct / 100);
     if (latestActualDemand > 0) {
       const absError = Math.abs(latestActualDemand - expectedDemand);
       historicalAccuracyMape = Math.round((absError / latestActualDemand) * 10000) / 100;
@@ -274,7 +323,8 @@ export function rankTopEmergingSkills(
       // Score balances demand trajectory (50%) and talent scarcity index (50%)
       const demandComponent = Math.max(0, item.forecast.demandGrowthPct);
       const scarcityComponent = item.forecast.scarcityIndex * 100;
-      const emergingScore = Math.round((demandComponent * 0.5 + scarcityComponent * 0.5) * 100) / 100;
+      const emergingScore =
+        Math.round((demandComponent * 0.5 + scarcityComponent * 0.5) * 100) / 100;
       return {
         skillId: item.skillId,
         skillName: item.skillName,

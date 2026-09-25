@@ -49,7 +49,9 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     morganToken = (await res3.json()).token;
   });
 
-  test('submits salary reports and protects candidate privacy under k-anonymity (BR-178)', async ({ request }) => {
+  test('submits salary reports and protects candidate privacy under k-anonymity (BR-178)', async ({
+    request,
+  }) => {
     // 1. Jordan submits report 1
     const sub1 = await request.post(`${API_BASE}/salaries/reports`, {
       headers: { authorization: `Bearer ${jordanToken}` },
@@ -104,7 +106,9 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     expect(sparseData.minRequired).toBe(3);
   });
 
-  test('aggregates compensation benchmarks once cohort threshold is met (BR-178, BR-180, BR-183)', async ({ request }) => {
+  test('aggregates compensation benchmarks once cohort threshold is met (BR-178, BR-180, BR-183)', async ({
+    request,
+  }) => {
     // 1. Morgan submits report 3
     const sub3 = await request.post(`${API_BASE}/salaries/reports`, {
       headers: { authorization: `Bearer ${morganToken}` },
@@ -138,9 +142,7 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     expect(benchData.benchmark.equityP50Minor).toBe(7000000); // Median equity
 
     // 3. Query company compensation summary (Apex Cloud Systems >= 3 reports BR-180)
-    const companyRes = await request.get(
-      `${API_BASE}/salaries/company/Apex%20Cloud%20Systems`
-    );
+    const companyRes = await request.get(`${API_BASE}/salaries/company/Apex%20Cloud%20Systems`);
     expect(companyRes.status()).toBe(200);
     const companyData = await companyRes.json();
     expect(companyData.status).toBe('available');

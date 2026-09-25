@@ -27,7 +27,11 @@ export class JobQueueEngine {
     this.handlers.set(type, handler);
   }
 
-  async enqueue<T>(type: string, payload: T, options: { maxRetries?: number; idempotencyKey?: string } = {}): Promise<Job<T>> {
+  async enqueue<T>(
+    type: string,
+    payload: T,
+    options: { maxRetries?: number; idempotencyKey?: string } = {}
+  ): Promise<Job<T>> {
     const job: Job<T> = {
       id: `job_${crypto.randomUUID()}`,
       type,
@@ -53,14 +57,20 @@ export class JobQueueEngine {
 
     // Idempotency Check
     if (job.idempotencyKey && this.processedKeys.has(job.idempotencyKey)) {
-      this.logger.info({ jobId: job.id, idempotencyKey: job.idempotencyKey }, 'Skipping already processed job (idempotent)');
+      this.logger.info(
+        { jobId: job.id, idempotencyKey: job.idempotencyKey },
+        'Skipping already processed job (idempotent)'
+      );
       job.status = 'completed';
       return true;
     }
 
     const handler = this.handlers.get(job.type);
     if (!handler) {
-      this.logger.warn({ jobId: job.id, type: job.type }, 'No handler registered for job type. Sending to DLQ.');
+      this.logger.warn(
+        { jobId: job.id, type: job.type },
+        'No handler registered for job type. Sending to DLQ.'
+      );
       job.status = 'dead_letter';
       job.error = `No handler for job type: ${job.type}`;
       this.deadLetterQueue.push(job);
@@ -89,11 +99,17 @@ export class JobQueueEngine {
 
       if (job.attempts < job.maxRetries) {
         job.status = 'pending';
-        this.logger.warn({ jobId: job.id, attempt: job.attempts, maxRetries: job.maxRetries, error: errorMessage }, 'Job failed. Re-queuing for retry.');
+        this.logger.warn(
+          { jobId: job.id, attempt: job.attempts, maxRetries: job.maxRetries, error: errorMessage },
+          'Job failed. Re-queuing for retry.'
+        );
         this.queue.push(job); // Bounded retry
       } else {
         job.status = 'dead_letter';
-        this.logger.error({ jobId: job.id, attempts: job.attempts, error: errorMessage }, 'Job exceeded max retries. Moved to DLQ.');
+        this.logger.error(
+          { jobId: job.id, attempts: job.attempts, error: errorMessage },
+          'Job exceeded max retries. Moved to DLQ.'
+        );
         this.deadLetterQueue.push(job);
       }
 

@@ -66,7 +66,9 @@ describe('Resume Builder Domain (F-13, BR-26)', () => {
       expect(updated.template).toBe('technical');
       expect(updated.summary).toContain('zero-trust');
       expect(updated.experience).toHaveLength(1);
-      expect(new Date(updated.updatedAt).getTime()).toBeGreaterThanOrEqual(new Date(resume.updatedAt).getTime());
+      expect(new Date(updated.updatedAt).getTime()).toBeGreaterThanOrEqual(
+        new Date(resume.updatedAt).getTime()
+      );
     });
   });
 

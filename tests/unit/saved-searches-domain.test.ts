@@ -88,7 +88,9 @@ describe('Saved Searches & Job Alerts Domain Unit Tests (F-32, F-04, F-25, SSOT 
           criteria: {},
           existingSearches: existing,
         });
-      }).toThrowError(`Cannot exceed maximum limit of ${MAX_ACTIVE_SAVED_SEARCHES} active saved searches`);
+      }).toThrowError(
+        `Cannot exceed maximum limit of ${MAX_ACTIVE_SAVED_SEARCHES} active saved searches`
+      );
     });
   });
 
@@ -129,14 +131,18 @@ describe('Saved Searches & Job Alerts Domain Unit Tests (F-32, F-04, F-25, SSOT 
     });
 
     it('matches work mode and job type', () => {
-      expect(matchJobAgainstCriteria(sampleJob, { workMode: 'remote', jobType: 'full_time' })).toBe(true);
+      expect(matchJobAgainstCriteria(sampleJob, { workMode: 'remote', jobType: 'full_time' })).toBe(
+        true
+      );
       expect(matchJobAgainstCriteria(sampleJob, { workMode: 'onsite' })).toBe(false);
       expect(matchJobAgainstCriteria(sampleJob, { jobType: 'contract' })).toBe(false);
     });
 
     it('matches required skills', () => {
       expect(matchJobAgainstCriteria(sampleJob, { requiredSkillIds: ['skill-rust'] })).toBe(true);
-      expect(matchJobAgainstCriteria(sampleJob, { requiredSkillIds: ['skill-python', 'skill-django'] })).toBe(false);
+      expect(
+        matchJobAgainstCriteria(sampleJob, { requiredSkillIds: ['skill-python', 'skill-django'] })
+      ).toBe(false);
     });
 
     it('matches minimum salary threshold', () => {

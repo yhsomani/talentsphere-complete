@@ -47,15 +47,23 @@ export function createThreadEntities(
     throw new DomainError('VALIDATION_FAILED', 'Thread creator profile ID is required.');
   }
 
-  const validRecipients = Array.from(new Set(recipientIds.filter((id) => id && id.trim().length > 0)));
+  const validRecipients = Array.from(
+    new Set(recipientIds.filter((id) => id && id.trim().length > 0))
+  );
 
   if (validRecipients.length === 0) {
-    throw new DomainError('VALIDATION_FAILED', 'At least one recipient is required to start a conversation.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'At least one recipient is required to start a conversation.'
+    );
   }
 
   // Anti-gaming / self-messaging rule
   if (validRecipients.length === 1 && validRecipients[0] === creatorId) {
-    throw new DomainError('VALIDATION_FAILED', 'Cannot start a direct message thread solely with yourself.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Cannot start a direct message thread solely with yourself.'
+    );
   }
 
   const threadId = crypto.randomUUID();
@@ -109,7 +117,10 @@ export function createMessageEntity(
     throw new DomainError('VALIDATION_FAILED', 'Message content cannot be empty.');
   }
   if (trimmed.length > 5000) {
-    throw new DomainError('VALIDATION_FAILED', 'Message content exceeds maximum allowed length of 5000 characters.');
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Message content exceeds maximum allowed length of 5000 characters.'
+    );
   }
 
   const now = new Date().toISOString();
@@ -128,14 +139,9 @@ export function createMessageEntity(
 /**
  * Computes unread message count for a participant.
  */
-export function calculateUnreadCount(
-  messages: Message[],
-  participant: ThreadParticipant
-): number {
+export function calculateUnreadCount(messages: Message[], participant: ThreadParticipant): number {
   const lastReadTime = new Date(participant.lastReadAt).getTime();
   return messages.filter(
-    (m) =>
-      m.senderId !== participant.userId &&
-      new Date(m.createdAt).getTime() > lastReadTime
+    (m) => m.senderId !== participant.userId && new Date(m.createdAt).getTime() > lastReadTime
   ).length;
 }
