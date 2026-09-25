@@ -12,11 +12,13 @@ export type SearchEntityType =
   | 'courses'
   | 'challenges'
   | 'profiles'
-  | 'commands';
+  | 'commands'
+  | 'companies'
+  | 'projects';
 
 export interface SearchResultItem {
   id: string;
-  type: 'job' | 'skill' | 'course' | 'challenge' | 'profile' | 'command';
+  type: 'job' | 'skill' | 'course' | 'challenge' | 'profile' | 'command' | 'company' | 'project';
   title: string;
   subtitle?: string;
   url: string;
@@ -155,12 +157,37 @@ export const BASE_COMMANDS: CommandItem[] = [
   },
 ];
 
+export function levenshteinDistance(a: string, b: string): number {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
 /**
- * Calculates a relevance score for a search term match against a query.
+ * Calculates a relevance score for a search term match against a query with typo tolerance (BR-266).
  * Exact match: 100
  * Prefix match: 85
- * Word match: 70
+ * Word match: 75
+ * Word prefix match: 70
  * Substring match: 50
+ * Fuzzy typo match: 35..45
  * No match: 0
  */
 export function scoreSearchMatch(target: string, query: string): number {
@@ -178,7 +205,53 @@ export function scoreSearchMatch(target: string, query: string): number {
 
   if (t.includes(q)) return 50;
 
+  // Typo tolerance (BR-266)
+  if (q.length >= 4) {
+    for (const w of words) {
+      const dist = levenshteinDistance(w, q);
+      if (dist === 1) return 45;
+      if (dist === 2 && q.length >= 5) return 35;
+    }
+  }
+
   return 0;
+}
+
+export interface AutocompleteSuggestion {
+  text: string;
+  type: SearchResultItem['type'];
+  score: number;
+}
+
+/**
+ * Generates autocomplete suggestions with sub-100ms response expectation (BR-265).
+ */
+export function generateAutocompleteSuggestions(
+  query: string,
+  items: SearchResultItem[],
+  limit: number = 5
+): AutocompleteSuggestion[] {
+  const q = query.trim().toLowerCase();
+  if (q.length === 0) return [];
+
+  const suggestions: AutocompleteSuggestion[] = [];
+  const seenTexts = new Set<string>();
+
+  for (const item of items) {
+    if (seenTexts.has(item.title.toLowerCase())) continue;
+    const score = scoreSearchMatch(item.title, q);
+    if (score > 0) {
+      seenTexts.add(item.title.toLowerCase());
+      suggestions.push({
+        text: item.title,
+        type: item.type,
+        score,
+      });
+    }
+  }
+
+  suggestions.sort((a, b) => b.score - a.score);
+  return suggestions.slice(0, limit);
 }
 
 /**

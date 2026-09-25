@@ -597,11 +597,21 @@ export type AdminQueryAuditLogs = z.infer<typeof AdminQueryAuditLogsSchema>;
  */
 export const SearchQueryInputSchema = z.object({
   query: z.string().min(1).max(200),
-  type: z.enum(['all', 'jobs', 'skills', 'courses', 'challenges', 'profiles', 'commands']).default('all'),
+  type: z.enum(['all', 'jobs', 'skills', 'courses', 'challenges', 'profiles', 'commands', 'companies', 'projects']).default('all'),
   limit: z.coerce.number().int().min(1).max(100).default(20),
+  location: z.string().max(100).optional(),
+  level: z.string().max(50).optional(),
+  minScore: z.coerce.number().min(0).max(100).optional(),
 });
 
 export type SearchQueryInput = z.infer<typeof SearchQueryInputSchema>;
+
+export const AutocompleteQueryInputSchema = z.object({
+  query: z.string().min(1).max(100),
+  limit: z.coerce.number().int().min(1).max(20).default(5),
+});
+
+export type AutocompleteQueryInput = z.infer<typeof AutocompleteQueryInputSchema>;
 
 export const ClearSearchHistoryInputSchema = z.object({
   olderThanDays: z.number().int().min(0).optional(),

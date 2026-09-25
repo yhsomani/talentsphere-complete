@@ -5,6 +5,8 @@ import {
   getAvailableCommands,
   filterCommandsByQuery,
   createSearchHistoryRecord,
+  levenshteinDistance,
+  generateAutocompleteSuggestions,
   SearchResultItem,
   BASE_COMMANDS,
 } from '../../packages/domain/src/index.js';
@@ -118,4 +120,85 @@ describe('Multi-Entity Search & Command Palette Domain (F-20, F-34, F-32)', () =
       expect(record.createdAt).toBe('2026-09-24T18:00:00.000Z');
     });
   });
+
+  describe('levenshteinDistance', () => {
+    it('returns 0 for identical strings', () => {
+      expect(levenshteinDistance('typescript', 'typescript')).toBe(0);
+      expect(levenshteinDistance('', '')).toBe(0);
+    });
+
+    it('returns string length when comparing with empty string', () => {
+      expect(levenshteinDistance('react', '')).toBe(5);
+      expect(levenshteinDistance('', 'python')).toBe(6);
+    });
+
+    it('calculates single-character insertion, deletion, and substitution', () => {
+      expect(levenshteinDistance('typescrip', 'typescript')).toBe(1); // insertion
+      expect(levenshteinDistance('pythons', 'python')).toBe(1); // deletion
+      expect(levenshteinDistance('dockkr', 'docker')).toBe(1); // substitution
+    });
+
+    it('calculates multi-character edit distance accurately', () => {
+      expect(levenshteinDistance('kitten', 'sitting')).toBe(3);
+    });
+  });
+
+  describe('Typo Tolerance in scoreSearchMatch (BR-266)', () => {
+    it('matches target with 1 edit distance when query is >= 4 chars', () => {
+      expect(scoreSearchMatch('TypeScript', 'typescrit')).toBe(45);
+      expect(scoreSearchMatch('Python Web', 'pythn')).toBe(45);
+      expect(scoreSearchMatch('Docker Containers', 'dockr')).toBe(45);
+    });
+
+    it('matches target with 2 edit distance when query is >= 5 chars', () => {
+      expect(scoreSearchMatch('Kubernetes', 'kubernits')).toBe(35);
+    });
+
+    it('does not trigger typo tolerance for short queries < 4 chars', () => {
+      expect(scoreSearchMatch('Go', 'g')).toBe(85); // prefix
+      expect(scoreSearchMatch('Rust', 'rus')).toBe(85); // prefix
+      expect(scoreSearchMatch('Rust', 'rst')).toBe(0); // edit distance 1, but query length 3 (< 4)
+    });
+  });
+
+  describe('generateAutocompleteSuggestions (BR-265)', () => {
+    const catalog: SearchResultItem[] = [
+      { id: '1', type: 'skill', title: 'TypeScript', url: '/skills/typescript', score: 0 },
+      { id: '2', type: 'job', title: 'TypeScript Lead Engineer', url: '/jobs/1', score: 0 },
+      { id: '3', type: 'course', title: 'Fullstack TypeScript Mastery', url: '/courses/1', score: 0 },
+      { id: '4', type: 'skill', title: 'Python', url: '/skills/python', score: 0 },
+      { id: '5', type: 'company', title: 'TypeCraft AI', url: '/orgs/1', score: 0 },
+      { id: '6', type: 'skill', title: 'TypeScript', url: '/skills/ts-duplicate', score: 0 },
+    ];
+
+    it('returns ranked suggestions matching query prefix or term', () => {
+      const suggestions = generateAutocompleteSuggestions('type', catalog, 5);
+      expect(suggestions.length).toBeGreaterThanOrEqual(1);
+      expect(suggestions[0].text).toBe('TypeScript');
+      expect(suggestions[0].score).toBe(85); // prefix match
+    });
+
+    it('deduplicates identical suggestion titles', () => {
+      const suggestions = generateAutocompleteSuggestions('type', catalog, 10);
+      const tsTitles = suggestions.filter((s) => s.text.toLowerCase() === 'typescript');
+      expect(tsTitles.length).toBe(1);
+    });
+
+    it('respects limit argument', () => {
+      const suggestions = generateAutocompleteSuggestions('type', catalog, 2);
+      expect(suggestions.length).toBeLessThanOrEqual(2);
+    });
+
+    it('returns empty array when query is empty or whitespace', () => {
+      expect(generateAutocompleteSuggestions('', catalog)).toEqual([]);
+      expect(generateAutocompleteSuggestions('   ', catalog)).toEqual([]);
+    });
+
+    it('handles typo-tolerant autocomplete queries', () => {
+      const suggestions = generateAutocompleteSuggestions('typescrip', catalog, 5);
+      expect(suggestions.length).toBeGreaterThanOrEqual(1);
+      expect(suggestions.some((s) => s.text === 'TypeScript')).toBe(true);
+    });
+  });
 });
+

@@ -143,6 +143,8 @@ import {
   PlatformConfig,
   scoreSearchMatch,
   rankSearchResults,
+  generateAutocompleteSuggestions,
+  AutocompleteSuggestion,
   getAvailableCommands,
   filterCommandsByQuery,
   createSearchHistoryRecord,
@@ -296,6 +298,7 @@ import {
   AdminSetMaintenanceModeInputSchema,
   AdminQueryAuditLogsSchema,
   SearchQueryInputSchema,
+  AutocompleteQueryInputSchema,
   ClearSearchHistoryInputSchema,
   ScanContentInputSchema,
   CreateModerationReportInputSchema,
@@ -6544,6 +6547,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       challenges: 0,
       profiles: 0,
       commands: 0,
+      companies: 0,
+      projects: 0,
     };
 
     // 1a. Jobs Search
@@ -6666,7 +6671,48 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
     }
 
-    // 1f. Command Palette Search
+    // 1f. Companies Search (F-147)
+    if (type === 'all' || type === 'companies') {
+      for (const org of organizationsById.values()) {
+        const nameScore = scoreSearchMatch(org.name, query);
+        if (nameScore > 0) {
+          categories.companies++;
+          matchedResults.push({
+            id: org.id,
+            type: 'company',
+            title: org.name,
+            subtitle: org.website || 'Organization',
+            url: `/organizations/${org.id}`,
+            badge: 'Company',
+            score: nameScore,
+          });
+        }
+      }
+    }
+
+    // 1g. Portfolio Projects Search (F-147)
+    if (type === 'all' || type === 'projects') {
+      for (const proj of portfolioProjectsById.values()) {
+        if (proj.visibility === 'private' && proj.userId !== viewerId) continue;
+        const titleScore = scoreSearchMatch(proj.title, query);
+        const descScore = scoreSearchMatch(proj.description, query);
+        const maxScore = Math.max(titleScore, descScore);
+        if (maxScore > 0) {
+          categories.projects++;
+          matchedResults.push({
+            id: proj.id,
+            type: 'project',
+            title: proj.title,
+            subtitle: proj.projectUrl || 'Portfolio Project',
+            url: `/portfolio/projects/${proj.id}`,
+            badge: proj.visibility,
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1h. Command Palette Search
     const availableCommands = getAvailableCommands(viewerRoles);
     let matchedCommands: CommandItem[] = [];
     if (type === 'all' || type === 'commands') {
@@ -6674,8 +6720,28 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       categories.commands = matchedCommands.length;
     }
 
+    // Multi-faceted filtering (BR-267)
+    let filteredResults = matchedResults;
+    if (input.location) {
+      const locQ = input.location.toLowerCase();
+      filteredResults = filteredResults.filter(
+        (r) =>
+          r.subtitle?.toLowerCase().includes(locQ) ||
+          r.metadata?.location?.toString().toLowerCase().includes(locQ)
+      );
+    }
+    if (input.level) {
+      const lvlQ = input.level.toLowerCase();
+      filteredResults = filteredResults.filter((r) =>
+        r.subtitle?.toLowerCase().includes(lvlQ)
+      );
+    }
+    if (input.minScore !== undefined) {
+      filteredResults = filteredResults.filter((r) => r.score >= input.minScore!);
+    }
+
     // Rank and slice results
-    const rankedResults = rankSearchResults(matchedResults);
+    const rankedResults = rankSearchResults(filteredResults);
     const slicedResults = rankedResults.slice(0, limit);
 
     // Save search history for authenticated users
@@ -6709,6 +6775,84 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       results: slicedResults,
       commands: matchedCommands.slice(0, limit),
       categories,
+    });
+  });
+
+  // 1b. Search Autocomplete (F-147, BR-265)
+  app.get('/api/v1/search/autocomplete', async (req: FastifyRequest, reply: FastifyReply) => {
+    const input = AutocompleteQueryInputSchema.parse(req.query);
+    const session = maybeExtractUser(req);
+    const viewerId = session?.userId;
+    const viewerRoles = session?.roles || [];
+
+    const query = input.query.trim();
+    const candidateItems: SearchResultItem[] = [];
+
+    // Collect published jobs
+    for (const job of jobsById.values()) {
+      if (job.status === 'published') {
+        candidateItems.push({
+          id: job.id,
+          type: 'job',
+          title: job.title,
+          url: `/jobs/${job.id}`,
+          score: 0,
+        });
+      }
+    }
+
+    // Collect skills
+    for (const skill of skillsById.values()) {
+      candidateItems.push({
+        id: skill.id,
+        type: 'skill',
+        title: skill.name,
+        url: `/skills/${skill.slug}`,
+        score: 0,
+      });
+    }
+
+    // Collect published courses
+    for (const course of coursesById.values()) {
+      if (course.status === 'published') {
+        candidateItems.push({
+          id: course.id,
+          type: 'course',
+          title: course.title,
+          url: `/courses/${course.id}`,
+          score: 0,
+        });
+      }
+    }
+
+    // Collect companies
+    for (const org of organizationsById.values()) {
+      candidateItems.push({
+        id: org.id,
+        type: 'company',
+        title: org.name,
+        url: `/organizations/${org.id}`,
+        score: 0,
+      });
+    }
+
+    // Collect public profiles
+    for (const profile of profilesById.values()) {
+      if (canViewProfile(profile, viewerId, viewerRoles)) {
+        candidateItems.push({
+          id: profile.id,
+          type: 'profile',
+          title: profile.fullName,
+          url: `/profile/${profile.userId}`,
+          score: 0,
+        });
+      }
+    }
+
+    const suggestions = generateAutocompleteSuggestions(query, candidateItems, input.limit);
+    return reply.status(200).send({
+      query,
+      suggestions,
     });
   });
 
