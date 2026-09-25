@@ -806,6 +806,39 @@ export const SaveJobAsTemplateInputSchema = z.object({
 
 export type SaveJobAsTemplateInput = z.infer<typeof SaveJobAsTemplateInputSchema>;
 
+/**
+ * Salary Intelligence & Compensation Benchmarks Contracts (F-86, BR-177..BR-183)
+ */
+export const SubmitSalaryReportInputSchema = z.object({
+  jobTitle: z.string().min(2).max(255),
+  standardizedRole: z.string().min(2).max(100),
+  seniorityLevel: z.enum(['entry', 'mid', 'senior', 'lead', 'principal', 'director', 'executive']),
+  location: z.string().min(2).max(255),
+  countryCode: z.string().length(2).default('US'),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  currency: z.string().length(3).default('USD'),
+  baseSalaryMinor: z.number().int().positive(),
+  bonusMinor: z.number().int().nonnegative().optional(),
+  equityAnnualMinor: z.number().int().nonnegative().optional(),
+  yearsOfExperience: z.number().nonnegative(),
+  companyName: z.string().max(255).optional(),
+  companySize: z.enum(['seed', 'early', 'midsize', 'enterprise']).optional(),
+  industry: z.string().max(100).optional(),
+  verificationType: z.enum(['self_reported', 'employment_verified']).default('self_reported'),
+});
+
+export type SubmitSalaryReportInput = z.infer<typeof SubmitSalaryReportInputSchema>;
+
+export const SalaryBenchmarkQuerySchema = z.object({
+  role: z.string().optional(),
+  level: z.enum(['entry', 'mid', 'senior', 'lead', 'principal', 'director', 'executive']).optional(),
+  location: z.string().optional(),
+  currency: z.string().length(3).default('USD'),
+  minCohortSize: z.coerce.number().int().min(1).max(20).default(3),
+});
+
+export type SalaryBenchmarkQuery = z.infer<typeof SalaryBenchmarkQuerySchema>;
+
 
 
 
