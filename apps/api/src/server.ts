@@ -202,6 +202,20 @@ import {
   calculateFreshnessScore,
   createSkillFreshnessRecord,
   reverifySkill,
+  InterviewQuestion,
+  InterviewAssessment,
+  InterviewScorecard,
+  InterviewAiFeedback,
+  createInterviewQuestion,
+  scheduleInterviewAssessment,
+  joinInterviewAssessment,
+  updateRecordingConsent,
+  endInterviewAssessment,
+  submitInterviewScorecard,
+  compensateInterviewScorecard,
+  reviewInterviewAssessment,
+  generateAdvisoryAiFeedback,
+  executeInterviewCode,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -279,6 +293,12 @@ import {
   CreateFeedbackTemplateInputSchema,
   RegisterSkillFreshnessInputSchema,
   ReverifySkillInputSchema,
+  CreateInterviewQuestionInputSchema,
+  ScheduleInterviewAssessmentInputSchema,
+  SetRecordingConsentInputSchema,
+  SubmitInterviewScorecardInputSchema,
+  CompensateInterviewScorecardInputSchema,
+  ExecuteInterviewCodeInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1093,6 +1113,13 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const applicationFeedbackByAppId = new Map<string, ApplicationFeedback>();
   const feedbackTemplatesByOrgId = new Map<string, FeedbackTemplate[]>();
   const skillFreshnessByCandidateId = new Map<string, Map<string, SkillFreshnessRecord>>();
+  const interviewQuestionsById = new Map<string, InterviewQuestion>();
+  const interviewQuestionsByOrgId = new Map<string, InterviewQuestion[]>();
+  const interviewAssessmentsById = new Map<string, InterviewAssessment>();
+  const interviewAssessmentsByOrgId = new Map<string, InterviewAssessment[]>();
+  const interviewAssessmentsByCandidateId = new Map<string, InterviewAssessment[]>();
+  const interviewScorecardsByAssessmentId = new Map<string, InterviewScorecard[]>();
+  const interviewAiFeedbacksByAssessmentId = new Map<string, InterviewAiFeedback[]>();
 
   // Organization Endpoints
   app.post('/api/v1/organizations', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -1143,6 +1170,46 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
     }
     return reply.status(200).send({ organization: org });
+  });
+
+  app.post('/api/v1/organizations/:id/members', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const org = organizationsById.get(id);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isOwnerOrAdmin = userMemberships.some((m) => m.orgId === id && ['owner', 'admin'].includes(m.role));
+    const isPlatformAdmin = session.roles.includes('platform_admin');
+    if (!isOwnerOrAdmin && !isPlatformAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only organization owner or admin can add members.');
+    }
+
+    const body = (req.body as any) || {};
+    const targetUserId = body.userId;
+    if (!targetUserId) {
+      throw new DomainError('VALIDATION_FAILED', 'userId is required.');
+    }
+
+    const membership: StoredOrgMembership = {
+      id: crypto.randomUUID(),
+      orgId: id,
+      userId: targetUserId,
+      role: body.role || 'recruiter',
+      createdAt: new Date().toISOString(),
+    };
+
+    const orgMembers = orgMembershipsByOrgId.get(id) || [];
+    orgMembers.push(membership);
+    orgMembershipsByOrgId.set(id, orgMembers);
+
+    const targetUserMembers = orgMembershipsByUserId.get(targetUserId) || [];
+    targetUserMembers.push(membership);
+    orgMembershipsByUserId.set(targetUserId, targetUserMembers);
+
+    return reply.status(201).send({ membership });
   });
 
   // Jobs Endpoints (F-04, F-05, BR-01..BR-12)
@@ -1838,6 +1905,28 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({ applications: withJobDetails });
   });
 
+  app.get('/api/v1/applications/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const application = applicationsById.get(id);
+    if (!application) {
+      throw new DomainError('NOT_FOUND', `Application ${id} not found.`);
+    }
+
+    const userProfile = profilesByUserId.get(session.userId);
+    const isCandidate = userProfile && userProfile.id === application.candidateId;
+    const job = jobsById.get(application.jobId);
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isOrgMember = job && userMemberships.some((m) => m.orgId === job.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isCandidate && !isOrgMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
+    }
+
+    return reply.status(200).send({ application });
+  });
+
   app.get('/api/v1/jobs/:id/applications', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     const session = extractUser(req);
     const { id: jobId } = req.params;
@@ -2285,6 +2374,423 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
 
     return reply.status(200).send({ message: 'Skill freshness scores updated successfully (BR-225).' });
+  });
+
+  // Technical Interview Assessment Platform Endpoints (F-88, S-06, BR-169..BR-176)
+  app.post('/api/v1/interviews/questions', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateInterviewQuestionInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'User is not authorized to create questions for this organization.');
+    }
+
+    const question = createInterviewQuestion({
+      orgId: input.orgId,
+      createdByUserId: session.userId,
+      title: input.title,
+      statement: input.statement,
+      category: input.category,
+      difficulty: input.difficulty,
+      durationMinutes: input.durationMinutes,
+      expectedCompetencies: input.expectedCompetencies,
+      testCases: input.testCases,
+    });
+
+    interviewQuestionsById.set(question.id, question);
+    const orgQuestions = interviewQuestionsByOrgId.get(question.orgId) || [];
+    orgQuestions.push(question);
+    interviewQuestionsByOrgId.set(question.orgId, orgQuestions);
+
+    auditLogs.push({
+      event: 'interview_question.created',
+      actorId: session.userId,
+      targetId: question.id,
+      metadata: { orgId: question.orgId, title: question.title, category: question.category },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ question });
+  });
+
+  app.get('/api/v1/interviews/questions', async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { orgId } = req.query;
+    if (!orgId) {
+      throw new DomainError('VALIDATION_FAILED', 'orgId query parameter is required.');
+    }
+
+    // BR-173: Candidate cannot view company question bank
+    if (session.roles.includes('candidate') && !session.roles.includes('recruiter') && !session.roles.includes('platform_admin')) {
+      throw new DomainError('FORBIDDEN', 'Interview question bank is company-scoped and not accessible to candidates (BR-173).');
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'User is not a member of the requested organization.');
+    }
+
+    const questions = interviewQuestionsByOrgId.get(orgId) || [];
+    return reply.status(200).send({ questions });
+  });
+
+  app.post('/api/v1/interviews/assessments', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = ScheduleInterviewAssessmentInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'User is not authorized to schedule interviews for this organization.');
+    }
+
+    const candidateProfile = profilesById.get(input.candidateProfileId);
+    if (!candidateProfile) {
+      throw new DomainError('NOT_FOUND', `Candidate profile ${input.candidateProfileId} not found.`);
+    }
+
+    const assessment = scheduleInterviewAssessment({
+      orgId: input.orgId,
+      applicationId: input.applicationId,
+      candidateProfileId: input.candidateProfileId,
+      interviewerUserId: input.interviewerUserId,
+      title: input.title,
+      scheduledAt: input.scheduledAt,
+      durationMinutes: input.durationMinutes,
+      meetingUrl: input.meetingUrl,
+      questionIds: input.questionIds,
+    });
+
+    interviewAssessmentsById.set(assessment.id, assessment);
+    const orgList = interviewAssessmentsByOrgId.get(assessment.orgId) || [];
+    orgList.push(assessment);
+    interviewAssessmentsByOrgId.set(assessment.orgId, orgList);
+
+    const candList = interviewAssessmentsByCandidateId.get(assessment.candidateProfileId) || [];
+    candList.push(assessment);
+    interviewAssessmentsByCandidateId.set(assessment.candidateProfileId, candList);
+
+    auditLogs.push({
+      event: 'interview_assessment.scheduled',
+      actorId: session.userId,
+      targetId: assessment.id,
+      metadata: { orgId: assessment.orgId, candidateProfileId: assessment.candidateProfileId },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ assessment });
+  });
+
+  app.get('/api/v1/interviews/assessments/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const userProfile = profilesByUserId.get(session.userId);
+    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
+    const isInterviewer = session.userId === assessment.interviewerUserId;
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to this interview assessment is restricted.');
+    }
+
+    // BR-173: Candidates receive questions with hidden test cases stripped
+    const questions = assessment.questionIds
+      .map((qid) => interviewQuestionsById.get(qid))
+      .filter((q): q is InterviewQuestion => q !== undefined)
+      .map((q) => {
+        if (isCandidate) {
+          return {
+            ...q,
+            testCases: q.testCases.filter((tc) => !tc.isHidden),
+          };
+        }
+        return q;
+      });
+
+    return reply.status(200).send({ assessment, questions });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/join', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const userProfile = profilesByUserId.get(session.userId);
+    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+    const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
+
+    const updated = joinInterviewAssessment(assessment, role);
+    interviewAssessmentsById.set(updated.id, updated);
+
+    auditLogs.push({
+      event: 'interview.joined',
+      actorId: session.userId,
+      targetId: updated.id,
+      metadata: { role, status: updated.status },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({ assessment: updated, meetingUrl: updated.meetingUrl });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/consent', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const input = SetRecordingConsentInputSchema.parse(req.body);
+    const userProfile = profilesByUserId.get(session.userId);
+    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+    const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
+
+    const updated = updateRecordingConsent(assessment, role, input.consent);
+    interviewAssessmentsById.set(updated.id, updated);
+
+    return reply.status(200).send({ assessment: updated });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/end', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const body = (req.body as any) || {};
+    const resolution = body.resolution || 'completed';
+    if (!['completed', 'cancelled', 'no_show'].includes(resolution)) {
+      throw new DomainError('VALIDATION_FAILED', `Invalid resolution '${resolution}'. Must be completed, cancelled, or no_show.`);
+    }
+
+    const updated = endInterviewAssessment(assessment, resolution);
+    interviewAssessmentsById.set(updated.id, updated);
+
+    auditLogs.push({
+      event: 'interview.ended',
+      actorId: session.userId,
+      targetId: updated.id,
+      metadata: { resolution: updated.status },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({ assessment: updated });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/code', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const input = ExecuteInterviewCodeInputSchema.parse(req.body);
+    let testCases = input.customTestCases || [];
+    if (input.questionId) {
+      const q = interviewQuestionsById.get(input.questionId);
+      if (q) {
+        testCases = q.testCases;
+      }
+    }
+
+    const result = executeInterviewCode(input.code, testCases);
+    return reply.status(200).send({ result });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/scorecard', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    // Candidate is forbidden from submitting scorecard (BR-176)
+    const userProfile = profilesByUserId.get(session.userId);
+    if (userProfile && userProfile.id === assessment.candidateProfileId) {
+      throw new DomainError('FORBIDDEN', 'Candidates are not authorized to submit interview scorecards.');
+    }
+
+    const input = SubmitInterviewScorecardInputSchema.parse(req.body);
+    const { assessment: scoredAssessment, scorecard } = submitInterviewScorecard(assessment, {
+      interviewerUserId: session.userId,
+      technicalCorrectness: input.technicalCorrectness,
+      communication: input.communication,
+      problemSolving: input.problemSolving,
+      codeQuality: input.codeQuality,
+      recommendation: input.recommendation,
+      strengths: input.strengths,
+      areasForImprovement: input.areasForImprovement,
+      privateNotes: input.privateNotes,
+    });
+
+    interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
+    const cards = interviewScorecardsByAssessmentId.get(id) || [];
+    cards.push(scorecard);
+    interviewScorecardsByAssessmentId.set(id, cards);
+
+    // If linked to job application, update application notes/evaluation
+    if (assessment.applicationId) {
+      const app = applicationsById.get(assessment.applicationId);
+      if (app) {
+        app.status = 'interviewing';
+        app.updatedAt = new Date().toISOString();
+      }
+    }
+
+    auditLogs.push({
+      event: 'interview.scorecard_submitted',
+      actorId: session.userId,
+      targetId: scorecard.id,
+      metadata: { assessmentId: id, overallScore: scorecard.overallScore, recommendation: scorecard.recommendation },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ scorecard, assessment: scoredAssessment });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/scorecard/compensate', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const userProfile = profilesByUserId.get(session.userId);
+    if (userProfile && userProfile.id === assessment.candidateProfileId) {
+      throw new DomainError('FORBIDDEN', 'Candidates are not authorized to submit scorecard compensations.');
+    }
+
+    const cards = interviewScorecardsByAssessmentId.get(id) || [];
+    if (cards.length === 0) {
+      throw new DomainError('NOT_FOUND', 'No existing scorecard found to compensate.');
+    }
+
+    const latest = cards[cards.length - 1];
+    const input = CompensateInterviewScorecardInputSchema.parse(req.body);
+
+    const { assessment: scoredAssessment, scorecard: compensated } = compensateInterviewScorecard(latest, assessment, {
+      interviewerUserId: session.userId,
+      technicalCorrectness: input.technicalCorrectness,
+      communication: input.communication,
+      problemSolving: input.problemSolving,
+      codeQuality: input.codeQuality,
+      recommendation: input.recommendation,
+      strengths: input.strengths,
+      areasForImprovement: input.areasForImprovement,
+      compensationReason: input.compensationReason,
+      privateNotes: input.privateNotes,
+    });
+
+    interviewAssessmentsById.set(scoredAssessment.id, scoredAssessment);
+    cards.push(compensated);
+    interviewScorecardsByAssessmentId.set(id, cards);
+
+    auditLogs.push({
+      event: 'interview.scorecard_compensated',
+      actorId: session.userId,
+      targetId: compensated.id,
+      metadata: { parentScorecardId: latest.id, revisionNumber: compensated.revisionNumber },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ scorecard: compensated, assessment: scoredAssessment });
+  });
+
+  app.get('/api/v1/interviews/assessments/:id/scorecards', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const userProfile = profilesByUserId.get(session.userId);
+    const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
+    const isInterviewer = session.userId === assessment.interviewerUserId;
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to scorecards is restricted.');
+    }
+
+    const cards = interviewScorecardsByAssessmentId.get(id) || [];
+
+    // BR-176: Candidate view strips private notes and revision details
+    if (isCandidate) {
+      const publicCards = cards.map((c) => ({
+        id: c.id,
+        assessmentId: c.assessmentId,
+        overallScore: c.overallScore,
+        strengths: c.strengths,
+        areasForImprovement: c.areasForImprovement,
+        recommendation: c.recommendation,
+        createdAt: c.createdAt,
+      }));
+      return reply.status(200).send({ scorecards: publicCards });
+    }
+
+    return reply.status(200).send({ scorecards: cards });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/ai-feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const feedback = generateAdvisoryAiFeedback(assessment);
+    const list = interviewAiFeedbacksByAssessmentId.get(id) || [];
+    list.push(feedback);
+    interviewAiFeedbacksByAssessmentId.set(id, list);
+
+    return reply.status(200).send({ feedback });
+  });
+
+  app.post('/api/v1/interviews/assessments/:id/review', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const assessment = interviewAssessmentsById.get(id);
+    if (!assessment) {
+      throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
+    }
+
+    const reviewed = reviewInterviewAssessment(assessment);
+    interviewAssessmentsById.set(reviewed.id, reviewed);
+
+    auditLogs.push({
+      event: 'interview.reviewed',
+      actorId: session.userId,
+      targetId: reviewed.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({ assessment: reviewed });
   });
 
   // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)

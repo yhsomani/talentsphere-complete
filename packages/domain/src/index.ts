@@ -31,6 +31,7 @@ export * from './job-templates.js';
 export * from './salary-intelligence.js';
 export * from './application-feedback.js';
 export * from './skill-decay.js';
+export * from './technical-interview.js';
 
 export type Role =
   | 'candidate'

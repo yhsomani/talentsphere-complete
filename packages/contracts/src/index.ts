@@ -900,6 +900,86 @@ export const ReverifySkillInputSchema = z.object({
 
 export type ReverifySkillInput = z.infer<typeof ReverifySkillInputSchema>;
 
+/**
+ * Technical Interview Assessment Platform Contracts (F-88, S-06, BR-169..BR-176)
+ */
+export const CreateInterviewQuestionInputSchema = z.object({
+  orgId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  statement: z.string().min(1).max(10000),
+  category: z.enum(['code', 'design', 'behavioral', 'text']),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
+  durationMinutes: z.number().int().min(5).max(180).default(30),
+  expectedCompetencies: z.array(z.string().min(1).max(100)).default([]),
+  testCases: z.array(z.object({
+    input: z.string(),
+    expectedOutput: z.string(),
+    isHidden: z.boolean().default(false),
+  })).default([]),
+});
+
+export type CreateInterviewQuestionInput = z.infer<typeof CreateInterviewQuestionInputSchema>;
+
+export const ScheduleInterviewAssessmentInputSchema = z.object({
+  orgId: z.string().uuid(),
+  applicationId: z.string().uuid().optional(),
+  candidateProfileId: z.string().uuid(),
+  interviewerUserId: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  scheduledAt: z.string().datetime(),
+  durationMinutes: z.number().int().min(15).max(240).default(60),
+  meetingUrl: z.string().url().optional(),
+  questionIds: z.array(z.string().uuid()).default([]),
+});
+
+export type ScheduleInterviewAssessmentInput = z.infer<typeof ScheduleInterviewAssessmentInputSchema>;
+
+export const SetRecordingConsentInputSchema = z.object({
+  consent: z.boolean(),
+});
+
+export type SetRecordingConsentInput = z.infer<typeof SetRecordingConsentInputSchema>;
+
+export const SubmitInterviewScorecardInputSchema = z.object({
+  technicalCorrectness: z.number().int().min(1).max(5),
+  communication: z.number().int().min(1).max(5),
+  problemSolving: z.number().int().min(1).max(5),
+  codeQuality: z.number().int().min(1).max(5),
+  recommendation: z.enum(['strong_yes', 'yes', 'neutral', 'no', 'strong_no']),
+  strengths: z.string().min(1).max(5000),
+  areasForImprovement: z.string().min(1).max(5000),
+  privateNotes: z.string().max(5000).optional(),
+});
+
+export type SubmitInterviewScorecardInput = z.infer<typeof SubmitInterviewScorecardInputSchema>;
+
+export const CompensateInterviewScorecardInputSchema = z.object({
+  technicalCorrectness: z.number().int().min(1).max(5),
+  communication: z.number().int().min(1).max(5),
+  problemSolving: z.number().int().min(1).max(5),
+  codeQuality: z.number().int().min(1).max(5),
+  recommendation: z.enum(['strong_yes', 'yes', 'neutral', 'no', 'strong_no']),
+  strengths: z.string().min(1).max(5000),
+  areasForImprovement: z.string().min(1).max(5000),
+  compensationReason: z.string().min(1).max(1000),
+  privateNotes: z.string().max(5000).optional(),
+});
+
+export type CompensateInterviewScorecardInput = z.infer<typeof CompensateInterviewScorecardInputSchema>;
+
+export const ExecuteInterviewCodeInputSchema = z.object({
+  code: z.string().min(1).max(50000),
+  language: z.enum(['javascript', 'typescript', 'python']).default('javascript'),
+  questionId: z.string().uuid().optional(),
+  customTestCases: z.array(z.object({
+    input: z.string(),
+    expectedOutput: z.string(),
+    isHidden: z.boolean().default(false),
+  })).optional(),
+});
+
+export type ExecuteInterviewCodeInput = z.infer<typeof ExecuteInterviewCodeInputSchema>;
+
 
 
 
