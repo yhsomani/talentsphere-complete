@@ -15,6 +15,8 @@ export interface Job {
   title: string;
   description: string;
   location: string;
+  workMode?: 'remote' | 'hybrid' | 'onsite';
+  jobType?: 'full_time' | 'part_time' | 'contract' | 'internship';
   status: JobStatus;
   requiredSkillIds: string[];
   salaryRange?: {
@@ -46,6 +48,8 @@ export interface CreateJobParams {
   title: string;
   description: string;
   location: string;
+  workMode?: 'remote' | 'hybrid' | 'onsite';
+  jobType?: 'full_time' | 'part_time' | 'contract' | 'internship';
   requiredSkillIds?: string[];
   salaryRange?: {
     minMinor: number;
@@ -100,6 +104,8 @@ export function createJobPosting(params: CreateJobParams): Job {
     title: params.title.trim(),
     description: params.description.trim(),
     location: params.location.trim(),
+    workMode: params.workMode,
+    jobType: params.jobType,
     status: 'draft',
     requiredSkillIds: params.requiredSkillIds || [],
     salaryRange: params.salaryRange,

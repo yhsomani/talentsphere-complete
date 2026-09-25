@@ -24,6 +24,7 @@ export * from './billing.js';
 export * from './admin.js';
 export * from './search.js';
 export * from './moderation.js';
+export * from './saved-searches.js';
 
 export type Role =
   | 'candidate'

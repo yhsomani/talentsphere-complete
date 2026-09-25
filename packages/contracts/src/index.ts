@@ -164,6 +164,8 @@ export const CreateJobInputSchema = z.object({
   title: z.string().min(3).max(150),
   description: z.string().min(10).max(10000),
   location: z.string().min(2).max(100),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
   requiredSkillIds: z.array(z.string().uuid()).optional(),
   salaryMinMinor: z.number().int().nonnegative().optional(),
   salaryMaxMinor: z.number().int().nonnegative().optional(),
@@ -651,6 +653,38 @@ export const ReviewModerationAppealInputSchema = z.object({
 });
 
 export type ReviewModerationAppealInput = z.infer<typeof ReviewModerationAppealInputSchema>;
+
+/**
+ * Saved Searches & Job Alerts Contracts (F-32, F-04, F-25, Section 7)
+ */
+export const SearchCriteriaSchema = z.object({
+  query: z.string().max(200).optional(),
+  location: z.string().max(120).optional(),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+  requiredSkillIds: z.array(z.string()).optional(),
+  salaryMinMinor: z.number().int().min(0).optional(),
+});
+
+export type SearchCriteriaInput = z.infer<typeof SearchCriteriaSchema>;
+
+export const CreateSavedSearchInputSchema = z.object({
+  title: z.string().min(2).max(100),
+  criteria: SearchCriteriaSchema.default({}),
+  alertFrequency: z.enum(['instant', 'daily', 'weekly', 'never']).default('daily'),
+});
+
+export type CreateSavedSearchInput = z.infer<typeof CreateSavedSearchInputSchema>;
+
+export const UpdateSavedSearchInputSchema = z.object({
+  title: z.string().min(2).max(100).optional(),
+  criteria: SearchCriteriaSchema.optional(),
+  alertFrequency: z.enum(['instant', 'daily', 'weekly', 'never']).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateSavedSearchInput = z.infer<typeof UpdateSavedSearchInputSchema>;
+
 
 
 

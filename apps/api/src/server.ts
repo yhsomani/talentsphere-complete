@@ -158,6 +158,16 @@ import {
   resolveModerationReport,
   createModerationAppeal,
   reviewModerationAppeal,
+  SavedSearch,
+  JobAlert,
+  SavedJob,
+  SearchCriteria,
+  createSavedSearch,
+  updateSavedSearch,
+  matchJobAgainstCriteria,
+  evaluateJobAlertsForPublishedJob,
+  createSavedJob,
+  removeSavedJob,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -217,6 +227,8 @@ import {
   ResolveModerationReportInputSchema,
   CreateModerationAppealInputSchema,
   ReviewModerationAppealInputSchema,
+  CreateSavedSearchInputSchema,
+  UpdateSavedSearchInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -377,6 +389,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
+  const savedSearchesById = new Map<string, SavedSearch>();
+  const jobAlertsById = new Map<string, JobAlert>();
+  const savedJobsByUserId = new Map<string, SavedJob[]>();
 
   // Feature Flags & Admin Repositories (F-17, F-35)
   const adminAuditLogs: AdminAuditLog[] = [];
@@ -1095,6 +1110,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       title: input.title,
       description: input.description,
       location: input.location,
+      workMode: input.workMode,
+      jobType: input.jobType,
       requiredSkillIds: input.requiredSkillIds,
       salaryRange:
         input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined
@@ -1115,6 +1132,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const list = jobsByOrgId.get(input.orgId) || [];
     list.push(job);
     jobsByOrgId.set(input.orgId, list);
+
+    if (job.status === 'published') {
+      const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
+      const alerts = evaluateJobAlertsForPublishedJob(job, activeSearches);
+      for (const alert of alerts) {
+        jobAlertsById.set(alert.id, alert);
+      }
+    }
 
     auditLogs.push({
       event: 'job.created',
@@ -1164,6 +1189,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const list = jobsByOrgId.get(job.orgId) || [];
     const idx = list.findIndex((j) => j.id === updated.id);
     if (idx >= 0) list[idx] = updated;
+
+    if (updated.status === 'published' && job.status !== 'published') {
+      const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
+      const alerts = evaluateJobAlertsForPublishedJob(updated, activeSearches);
+      for (const alert of alerts) {
+        jobAlertsById.set(alert.id, alert);
+      }
+    }
 
     return reply.status(200).send({
       message: 'Job status updated successfully.',
@@ -4588,6 +4621,157 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
 
     return reply.status(200).send({ appeal: reviewed });
+  });
+
+  // =========================================================================
+  // Saved Searches, Job Alerts & Saved Jobs Endpoints (F-32, F-04, F-25)
+  // =========================================================================
+
+  // 1. Create a new saved search
+  app.post('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateSavedSearchInputSchema.parse(req.body);
+    const existing = Array.from(savedSearchesById.values());
+
+    const savedSearch = createSavedSearch({
+      userId: session.userId,
+      title: input.title,
+      criteria: input.criteria,
+      alertFrequency: input.alertFrequency,
+      existingSearches: existing,
+    });
+
+    savedSearchesById.set(savedSearch.id, savedSearch);
+    return reply.status(201).send({ savedSearch });
+  });
+
+  // 2. List candidate's saved searches
+  app.get('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userSearches = Array.from(savedSearchesById.values()).filter(
+      (s) => s.userId === session.userId
+    );
+    return reply.status(200).send({ savedSearches: userSearches, total: userSearches.length });
+  });
+
+  // 3. Get single saved search by ID
+  app.get('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const search = savedSearchesById.get(id);
+    if (!search) {
+      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+    }
+    if (search.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+    }
+    return reply.status(200).send({ savedSearch: search });
+  });
+
+  // 4. Update saved search
+  app.patch('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const search = savedSearchesById.get(id);
+    if (!search) {
+      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+    }
+    if (search.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+    }
+    const input = UpdateSavedSearchInputSchema.parse(req.body);
+    const updated = updateSavedSearch(search, input);
+    savedSearchesById.set(id, updated);
+    return reply.status(200).send({ savedSearch: updated });
+  });
+
+  // 5. Delete saved search
+  app.delete('/api/v1/jobs/saved-searches/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const search = savedSearchesById.get(id);
+    if (!search) {
+      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+    }
+    if (search.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+    }
+    savedSearchesById.delete(id);
+    return reply.status(200).send({ message: 'Saved search deleted successfully.' });
+  });
+
+  // 6. Run saved search on live published inventory
+  app.post('/api/v1/jobs/saved-searches/:id/run', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const search = savedSearchesById.get(id);
+    if (!search) {
+      throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
+    }
+    if (search.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
+    }
+    const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
+    const matched = published.filter((j) => matchJobAgainstCriteria(j, search.criteria));
+    return reply.status(200).send({ matchingJobs: matched, total: matched.length });
+  });
+
+  // 7. List job alerts for candidate
+  app.get('/api/v1/jobs/alerts', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const alerts = Array.from(jobAlertsById.values())
+      .filter((a) => a.userId === session.userId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return reply.status(200).send({ alerts, total: alerts.length });
+  });
+
+  // 8. Mark job alert as read
+  app.patch('/api/v1/jobs/alerts/:id/read', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const alert = jobAlertsById.get(id);
+    if (!alert) {
+      throw new DomainError('NOT_FOUND', `Job alert with ID "${id}" not found.`);
+    }
+    if (alert.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this alert.');
+    }
+    alert.isRead = true;
+    jobAlertsById.set(id, alert);
+    return reply.status(200).send({ alert });
+  });
+
+  // 9. Bookmark / save job
+  app.post('/api/v1/jobs/:id/save', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: jobId } = req.params;
+    const job = jobsById.get(jobId);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+    }
+    const currentSaved = savedJobsByUserId.get(session.userId) || [];
+    const savedJob = createSavedJob(session.userId, jobId, currentSaved);
+    currentSaved.push(savedJob);
+    savedJobsByUserId.set(session.userId, currentSaved);
+    return reply.status(201).send({ savedJob });
+  });
+
+  // 10. Remove saved job bookmark
+  app.delete('/api/v1/jobs/:id/save', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id: jobId } = req.params;
+    const currentSaved = savedJobsByUserId.get(session.userId) || [];
+    const updated = removeSavedJob(session.userId, jobId, currentSaved);
+    savedJobsByUserId.set(session.userId, updated);
+    return reply.status(200).send({ message: 'Job removed from saved bookmarks.' });
+  });
+
+  // 11. List candidate's saved jobs
+  app.get('/api/v1/jobs/saved', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const currentSaved = savedJobsByUserId.get(session.userId) || [];
+    const jobs = currentSaved.map((s) => jobsById.get(s.jobId)).filter(Boolean);
+    return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
   });
 
   // Internal test helper for inspecting async job dispatch
