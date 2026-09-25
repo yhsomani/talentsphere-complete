@@ -4,29 +4,29 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 3.0
-- **Last Updated:** 2026-09-25 11:45
+- **Memory Version:** 3.1
+- **Last Updated:** 2026-09-25 12:15
 - **Current Milestone:** M4/M5 — Career Trajectory, Learning Impact & Market Intelligence
 - **Current Phase:** Phase 0 through Phase 4/5 Core Loops
-- **Overall Implementation:** 47 / 173 (27.17%)
-- **Overall Verification:** 40 Vitest unit suites (440 tests PASS), 38 Fastify integration suites (280 tests PASS), 30 Playwright E2E suites (110 tests PASS) — 830/830 tests PASS (100% GREEN). 37 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`).
+- **Overall Implementation:** 49 / 173 (28.32%)
+- **Overall Verification:** 42 Vitest unit suites (479 tests PASS), 40 Fastify integration suites (303 tests PASS), 32 Playwright E2E suites (122 tests PASS) — 904/904 tests PASS (100% GREEN). 39 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`).
 - **Current Release:** v0.4.0-intelligence
 - **Current Branch:** `main`
-- **Current Primary Task:** Documentation Organization & System Validation (Completed)
-- **Next Action:** Feature F-158 (Talent Pool Intelligence & Analytics) / F-159 (Behavioral Talent Discovery)
+- **Current Primary Task:** Behavioral Talent Discovery & Talent Pool Intelligence (Completed)
+- **Next Action:** Feature F-160 (Talent Segmentation & Classification) / F-162 (Verified Work History Network & Graph)
 
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (100% verified test passes across 830 automated tests)
-- **Backend:** Fastify 5 + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase, gamification XP & streaks, user privacy/GDPR erasure & export, billing & subscriptions, platform administration & governance, multi-entity search, trust/safety & moderation, application drafts, job templates, certificate verification, application feedback, technical interview assessment, alumni networks, activity contribution graph, candidate referral requests, warm introductions, skill decay freshness tracking, multi-dimensional reputation engine, instructor reputation, employer workplace reputation, salary intelligence, peer credibility networks, skill supply/demand forecasting, career trajectory benchmarks, and learning impact tracking)
+- **Implementation Status:** IN PROGRESS (100% verified test passes across 904 automated tests)
+- **Backend:** Fastify 5 + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase, gamification XP & streaks, user privacy/GDPR erasure & export, billing & subscriptions, platform administration & governance, multi-entity search, trust/safety & moderation, application drafts, job templates, certificate verification, application feedback, technical interview assessment, alumni networks, activity contribution graph, candidate referral requests, warm introductions, skill decay freshness tracking, multi-dimensional reputation engine, instructor reputation, employer workplace reputation, salary intelligence, peer credibility networks, skill supply/demand forecasting, career trajectory benchmarks, learning impact tracking, talent pool intelligence, and behavioral talent discovery)
 - **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, cockpit dashboard, WCAG 2.2 AA compliant)
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS policies (00001 through 00037)
+- **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS policies (00001 through 00039)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 40 Vitest unit suites (440/440 passing), 38 Fastify integration suites (280/280 passing), 30 Playwright E2E suites (110/110 passing) — 830 total tests PASS
+- **Testing:** 42 Vitest unit suites (479/479 passing), 40 Fastify integration suites (303/303 passing), 32 Playwright E2E suites (122/122 passing) — 904 total tests PASS
 - **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts)
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Sequential execution of Phase 4/5 intelligence systems under the Golden Workflow
@@ -52,11 +52,11 @@
 | **Evidence & Learning (Phase 2)** | 24 | 10 | 10 | 0 | IN PROGRESS |
 | **Opportunity Loop (Phase 3)** | 22 | 8 | 8 | 0 | IN PROGRESS |
 | **Hiring Depth & Assessment (Phase 4)** | 18 | 6 | 6 | 0 | IN PROGRESS |
-| **Intelligence & Analytics (Phase 5)** | 20 | 5 | 5 | 0 | IN PROGRESS |
+| **Intelligence & Analytics (Phase 5)** | 20 | 7 | 7 | 0 | IN PROGRESS |
 | **Trust, Safety & Ecosystem (Phase 6)** | 19 | 4 | 4 | 0 | IN PROGRESS |
 | **Institution & Enterprise (Phase 7)** | 16 | 1 | 1 | 0 | IN PROGRESS |
 | **Advanced AI & Insights (Phase 8-10)** | 20 | 0 | 0 | 0 | PLANNED |
-| **Total Portfolio** | **173** | **47** | **47** | **0** | **IN PROGRESS (27.17%)** |
+| **Total Portfolio** | **173** | **49** | **49** | **0** | **IN PROGRESS (28.32%)** |
 
 ---
 
@@ -65,9 +65,9 @@
 A complete register of all 173 features is tracked in [`docs/registries/FEATURE_REGISTRY.md`](../docs/registries/FEATURE_REGISTRY.md).
 
 Summary by status:
-- **PLANNED:** 126
+- **PLANNED:** 124
 - **IN DEVELOPMENT:** 0
-- **IMPLEMENTED & VERIFIED:** 47 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09, F-10, F-11, F-12, F-13, F-14, F-15, F-16, F-17, F-19, F-20, F-22, F-23, F-24, F-26, F-32, F-34, F-35, F-36, F-37, F-52, F-84, F-96, F-122, F-125, F-128, F-130, F-132, F-133, F-145, F-146, F-147, F-148, F-149, F-150, F-151, F-152, F-153)
+- **IMPLEMENTED & VERIFIED:** 49 (F-01, F-02, F-03, F-04, F-05, F-06, F-07, F-08, F-09, F-10, F-11, F-12, F-13, F-14, F-15, F-16, F-17, F-19, F-20, F-22, F-23, F-24, F-26, F-32, F-34, F-35, F-36, F-37, F-52, F-84, F-96, F-122, F-125, F-128, F-130, F-132, F-133, F-145, F-146, F-147, F-148, F-149, F-150, F-151, F-152, F-153, F-158, F-159)
 - **RELEASED:** 0
 - **BLOCKED:** 0
 - **DEPRECATED:** 2 (F-38, F-39)
@@ -77,7 +77,7 @@ Summary by status:
 ## 6. Implementation Progress
 
 The implementation is a clean, modular monolith with 10 workspace packages and applications:
-- `apps/api`: Fastify modular API server with structured routing, auth hooks, Zod validation, error handling, rate limiting, and 47 feature route modules.
+- `apps/api`: Fastify modular API server with structured routing, auth hooks, Zod validation, error handling, rate limiting, and 49 feature route modules.
 - `apps/web`: React 19 + TypeScript + Vite + TanStack Query PWA with WCAG 2.2 AA accessible layout and role-adaptive dashboard cockpit.
 - `apps/worker`: Node.js async background job processor with DLQ, exponential retries, and idempotency cache.
 - `packages/config`: Environment validation and schema parsing.
@@ -91,14 +91,14 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 
 ## 7. Verification Progress
 
-- **Total Automated Tests Executed:** 830
-- **Tests Passing:** 830 (100% green)
+- **Total Automated Tests Executed:** 904
+- **Tests Passing:** 904 (100% green)
 - **Tests Failing:** 0
 - **Test Breakdown:**
-  - Unit Tests: 440 passing across 40 test files (`pnpm test:unit`)
-  - Integration Tests: 280 passing across 38 test files (`pnpm test:integration`)
-  - Playwright E2E Tests: 110 passing across 30 spec files (`pnpm exec playwright test`)
-- **Database Migrations:** 37 SQL migrations applied and verified
+  - Unit Tests: 479 passing across 42 test files (`pnpm test:unit`)
+  - Integration Tests: 303 passing across 40 test files (`pnpm test:integration`)
+  - Playwright E2E Tests: 122 passing across 32 spec files (`pnpm exec playwright test`)
+- **Database Migrations:** 39 SQL migrations applied and verified
 - **TypeScript Composite Build:** 10/10 packages clean (`tsc -b`), 0 errors
 - **Lint Check:** Prettier code style 100% clean, 0 warnings
 
@@ -142,6 +142,30 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
   - `BRAIN/MEMORY.md` (Updated to v3.0 with exact test counts, feature mappings, and milestone status)
 - **Result:** 100% green test passes across all 830 tests; clean `tsc -b` and Prettier format.
 
+#### Change 41: Talent Pool Intelligence & Analytics (F-158, F-92)
+- **Why:** Implement organization talent pools, candidate sourcing source and cost tracking, recruitment pipeline health, skill composition against target roles, and aggregate demographic diversity analytics with strict $k \ge 10$ cell suppression per BR-200.
+- **Files:**
+  - `supabase/migrations/00038_talent_pool_intelligence_schema.sql` (talent_pools, talent_pool_members with RLS)
+  - `packages/domain/src/talent-pool-intelligence.ts` (pool skill composition, pipeline health, source effectiveness, and $k \ge 10$ anonymized diversity)
+  - `packages/contracts/src/index.ts` (Talent pool schemas)
+  - `apps/api/src/server.ts` (Talent pool intelligence API endpoints)
+  - `tests/unit/talent-pool-intelligence-domain.test.ts` (18 unit tests)
+  - `tests/integration/talent-pool-intelligence.test.ts` (11 integration tests)
+  - `tests/e2e/talent-pool-intelligence.spec.ts` (6 Playwright E2E tests)
+- **Result:** All 35 tests PASS. Committed as `ecf45a0`.
+
+#### Change 42: Behavioral Talent Discovery & Anti-Gaming Engine (F-159, F-146, F-130, F-150)
+- **Why:** Enable recruiters to discover high-velocity organic talent based on real contributions, reputation, and verified credentials while enforcing anti-gaming invariants: logarithmic dampening on contribution spam bots and zero weight for reciprocal collusion ring endorsements.
+- **Files:**
+  - `supabase/migrations/00039_behavioral_talent_discovery_schema.sql` (behavioral_talent_profiles with RLS)
+  - `packages/domain/src/behavioral-talent-discovery.ts` (activity log-dampening, peer credibility collusion ring discounting, learning velocity, emerging expertise, composite score, discovery ranking & filtering)
+  - `packages/contracts/src/index.ts` (Behavioral talent discovery schemas)
+  - `apps/api/src/server.ts` (Behavioral talent discovery API endpoints and signal synthesis)
+  - `tests/unit/behavioral-talent-discovery-domain.test.ts` (19 unit tests)
+  - `tests/integration/behavioral-talent-discovery.test.ts` (12 integration tests)
+  - `tests/e2e/behavioral-talent-discovery.spec.ts` (6 Playwright E2E tests)
+- **Result:** All 37 tests PASS.
+
 ---
 
 ## 9. Completed Work
@@ -170,6 +194,8 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **TASK-045:** Feature F-152 (Career Trajectory Analysis & Progression Benchmarks) — Migration 00036.
 - **TASK-046:** Feature F-153 (Learning Impact Dashboard & Tracking) — Migration 00037.
 - **TASK-047:** Documentation taxonomy audit, `docs/INDEX.md` creation, and memory register synchronization.
+- **TASK-048:** Feature F-158 (Talent Pool Intelligence & Analytics) — Migration 00038.
+- **TASK-049:** Feature F-159 (Behavioral Talent Discovery & Anti-Gaming Engine) — Migration 00039.
 
 ---
 

@@ -373,4 +373,20 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('uq_talent_pool_candidate UNIQUE(pool_id, candidate_id)');
     expect(sql).toContain('idx_talent_pool_members_source');
   });
+
+  it('contains and validates migration 00039 behavioral talent discovery schema (F-159, F-146)', () => {
+    const migrationFile39 = path.join(
+      migrationsDir,
+      '00039_behavioral_talent_discovery_schema.sql'
+    );
+    expect(fs.existsSync(migrationFile39)).toBe(true);
+    const sql = fs.readFileSync(migrationFile39, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.behavioral_talent_profiles');
+    expect(sql).toContain(
+      'ALTER TABLE public.behavioral_talent_profiles ENABLE ROW LEVEL SECURITY;'
+    );
+    expect(sql).toContain('composite_behavioral_score NUMERIC(5, 2)');
+    expect(sql).toContain('uq_behavioral_profile_candidate UNIQUE(candidate_id)');
+    expect(sql).toContain('idx_behavioral_composite_score');
+  });
 });

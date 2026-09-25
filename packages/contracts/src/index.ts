@@ -1531,3 +1531,53 @@ export const QueryPoolIntelligenceInputSchema = z.object({
 });
 
 export type QueryPoolIntelligenceInput = z.infer<typeof QueryPoolIntelligenceInputSchema>;
+
+/**
+ * Behavioral Talent Discovery Contracts (F-159, F-146, F-130, F-150)
+ */
+export const DiscoverBehavioralTalentQuerySchema = z.object({
+  skills: z.string().optional(),
+  minCompositeScore: z.coerce.number().min(0).max(100).optional(),
+  minActivityScore: z.coerce.number().min(0).max(100).optional(),
+  minReputationScore: z.coerce.number().min(0).max(100).optional(),
+  maxDaysSinceActive: z.coerce.number().int().min(1).max(365).optional(),
+  minEndorsements: z.coerce.number().int().min(0).max(100).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+export type DiscoverBehavioralTalentQuery = z.infer<typeof DiscoverBehavioralTalentQuerySchema>;
+
+export const ComputeBehavioralProfileInputSchema = z.object({
+  candidateId: z.string().uuid().optional(),
+  weights: z
+    .object({
+      activity: z.number().min(0).max(1),
+      reputation: z.number().min(0).max(1),
+      peerCredibility: z.number().min(0).max(1),
+      learningVelocity: z.number().min(0).max(1),
+      emergingExpertise: z.number().min(0).max(1),
+    })
+    .optional(),
+  rawSignals: z
+    .object({
+      contributionsCount30d: z.number().int().min(0).default(0),
+      challengesCompleted: z.number().int().min(0).default(0),
+      reputationOverallScore: z.number().min(0).max(100).default(70),
+      verifiedEndorsements: z
+        .array(
+          z.object({
+            endorserWeight: z.number().min(0).max(10).default(1.0),
+            isReciprocalRing: z.boolean().optional(),
+          })
+        )
+        .default([]),
+      coursesCompletedLast90d: z.number().int().min(0).default(0),
+      emergingSkillsCount: z.number().int().min(0).default(0),
+      highlightedSkills: z.array(z.string()).default([]),
+      lastActiveDate: z.string().optional(),
+    })
+    .optional(),
+});
+
+export type ComputeBehavioralProfileInput = z.infer<typeof ComputeBehavioralProfileInputSchema>;

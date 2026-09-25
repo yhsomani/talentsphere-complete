@@ -274,6 +274,12 @@ import {
   addCandidateToPool,
   updatePoolMemberStatus,
   generateTalentPoolIntelligence,
+  BehavioralTalentProfile,
+  BehavioralWeights,
+  CandidateRawSignals,
+  DEFAULT_BEHAVIORAL_WEIGHTS,
+  evaluateBehavioralTalentProfile,
+  filterAndRankBehavioralTalent,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -393,6 +399,8 @@ import {
   AddPoolMemberInputSchema,
   UpdatePoolMemberStatusInputSchema,
   QueryPoolIntelligenceInputSchema,
+  DiscoverBehavioralTalentQuerySchema,
+  ComputeBehavioralProfileInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -7528,6 +7536,233 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       );
 
       return reply.status(200).send({ intelligence });
+    }
+  );
+
+  // =========================================================================
+  // Behavioral Talent Discovery Repositories & Endpoints (F-159, F-146, F-130, F-150)
+  // =========================================================================
+  const behavioralProfilesByCandidateId = new Map<string, BehavioralTalentProfile>();
+
+  function synthesizeCandidateRawSignals(candidateId: string): CandidateRawSignals {
+    const candidateUser = usersById.get(candidateId);
+    const candidateProfile =
+      profilesByUserId.get(candidateId) ||
+      Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
+    const userId = candidateUser?.id || candidateProfile?.userId || candidateId;
+
+    // 1. Contributions in last 30d
+    const userEvents = activityEventsByUserId.get(userId) || [];
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const contributionsCount30d = userEvents.filter(
+      (e) => new Date(e.createdAt).getTime() >= thirtyDaysAgo
+    ).length;
+
+    // 2. Challenges completed/passed
+    const candidateSessions =
+      assessmentSessionsByCandidateId.get(candidateProfile?.id || '') ||
+      assessmentSessionsByCandidateId.get(userId) ||
+      [];
+    const userChallenges = candidateSessions.filter((s) => s.status === 'submitted').length;
+
+    // 3. Overall reputation score
+    const repKey = `${userId}:candidate:general`;
+    const repScore = reputationScoresByUserContextDomain.get(repKey);
+    const reputationOverallScore = repScore ? repScore.score : 70;
+
+    // 4. Endorsements with anti-gaming reciprocal ring detection
+    const endorsements = skillEndorsementsByRecipientId.get(userId) || [];
+    const verifiedEndorsements = endorsements.map((e) => {
+      const endorserReceived = skillEndorsementsByRecipientId.get(e.endorserId) || [];
+      const isReciprocal =
+        e.weight?.isReciprocalDampened ||
+        endorserReceived.some((back) => back.endorserId === userId);
+      const endorserWeight =
+        typeof e.weight === 'object' && e.weight !== null ? e.weight.finalWeight : 1.0;
+      return {
+        endorserWeight,
+        isReciprocalRing: isReciprocal,
+      };
+    });
+
+    // 5. Courses completed in last 90d
+    const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    const coursesCompletedLast90d = Array.from(enrollmentsById.values()).filter(
+      (e) =>
+        (e.userId === userId || e.userId === candidateProfile?.id) &&
+        e.status === 'completed' &&
+        new Date(e.completedAt || e.updatedAt).getTime() >= ninetyDaysAgo
+    ).length;
+
+    // 6. Highlighted skills
+    const userEvidences = candidateProfile
+      ? evidenceBySubjectId.get(candidateProfile.id) || evidenceBySubjectId.get(userId) || []
+      : [];
+    const skillNames: string[] = [];
+    for (const ev of userEvidences) {
+      const sids = evidenceSkills.get(ev.id) || [];
+      for (const sid of sids) {
+        const sk = skillsById.get(sid);
+        if (sk) skillNames.push(sk.name);
+      }
+    }
+    for (const e of endorsements) {
+      const sk = skillsById.get(e.skillId);
+      if (sk) skillNames.push(sk.name);
+    }
+    const uniqueSkills = Array.from(new Set(skillNames));
+    const emergingSkillsCount = Math.min(5, Math.floor(uniqueSkills.length / 2));
+
+    const lastEvent = userEvents[0];
+    const lastActiveDate = lastEvent ? lastEvent.createdAt : new Date().toISOString();
+
+    const userSettings = userSettingsByUserId.get(userId);
+    const isStealthMode = userSettings ? (userSettings as any).stealthMode === true : false;
+    const privacyLevel = candidateProfile?.isPublic === false ? 'private' : 'recruiters_only';
+
+    return {
+      candidateId,
+      contributionsCount30d,
+      challengesCompleted: userChallenges,
+      reputationOverallScore,
+      verifiedEndorsements,
+      coursesCompletedLast90d,
+      emergingSkillsCount,
+      highlightedSkills: uniqueSkills,
+      lastActiveDate,
+      isStealthMode,
+      privacyLevel,
+    };
+  }
+
+  // 1. Compute or Update Behavioral Talent Profile (F-159)
+  app.post(
+    '/api/v1/recruiter/discovery/behavioral/compute',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = ComputeBehavioralProfileInputSchema.parse(req.body || {});
+      const targetCandidateId = input.candidateId || session.userId;
+
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (targetCandidateId !== session.userId && !isPrivileged) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Insufficient permissions to compute behavioral profile for other candidates.'
+        );
+      }
+
+      let signals: CandidateRawSignals;
+      if (input.rawSignals) {
+        signals = {
+          candidateId: targetCandidateId,
+          contributionsCount30d: input.rawSignals.contributionsCount30d,
+          challengesCompleted: input.rawSignals.challengesCompleted,
+          reputationOverallScore: input.rawSignals.reputationOverallScore,
+          verifiedEndorsements: input.rawSignals.verifiedEndorsements,
+          coursesCompletedLast90d: input.rawSignals.coursesCompletedLast90d,
+          emergingSkillsCount: input.rawSignals.emergingSkillsCount,
+          highlightedSkills: input.rawSignals.highlightedSkills,
+          lastActiveDate: input.rawSignals.lastActiveDate,
+        };
+      } else {
+        signals = synthesizeCandidateRawSignals(targetCandidateId);
+      }
+
+      const profile = evaluateBehavioralTalentProfile(signals, input.weights);
+      behavioralProfilesByCandidateId.set(targetCandidateId, profile);
+
+      return reply.status(200).send({ profile });
+    }
+  );
+
+  // 2. Discover & Rank Candidates by Behavioral Signals (F-159, F-146, F-130)
+  app.get(
+    '/api/v1/recruiter/discovery/behavioral',
+    async (
+      req: FastifyRequest<{
+        Querystring: {
+          skills?: string;
+          minCompositeScore?: string;
+          minActivityScore?: string;
+          minReputationScore?: string;
+          maxDaysSinceActive?: string;
+          minEndorsements?: string;
+          limit?: string;
+          offset?: string;
+        };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (!isPrivileged) {
+        throw new DomainError('FORBIDDEN', 'Access denied to recruiter talent discovery.');
+      }
+
+      const query = DiscoverBehavioralTalentQuerySchema.parse(req.query || {});
+      const requiredSkills = query.skills
+        ? query.skills
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        : undefined;
+
+      const allProfiles = Array.from(behavioralProfilesByCandidateId.values());
+      const result = filterAndRankBehavioralTalent(allProfiles, {
+        requiredSkills,
+        minCompositeScore: query.minCompositeScore,
+        minActivityScore: query.minActivityScore,
+        minReputationScore: query.minReputationScore,
+        maxDaysSinceActive: query.maxDaysSinceActive,
+        minEndorsements: query.minEndorsements,
+        limit: query.limit,
+        offset: query.offset,
+      });
+
+      return reply.status(200).send({
+        profiles: result.profiles,
+        total: result.total,
+      });
+    }
+  );
+
+  // 3. Get Behavioral Profile Breakdown for Candidate (F-159)
+  app.get(
+    '/api/v1/recruiter/discovery/behavioral/:candidateId',
+    async (req: FastifyRequest<{ Params: { candidateId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { candidateId } = req.params;
+
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (candidateId !== session.userId && !isPrivileged) {
+        throw new DomainError('FORBIDDEN', 'Access denied to candidate behavioral profile.');
+      }
+
+      let profile = behavioralProfilesByCandidateId.get(candidateId);
+      if (!profile) {
+        // Try to compute automatically if candidate exists
+        const candidateUser = usersById.get(candidateId);
+        const candidateProfile =
+          profilesByUserId.get(candidateId) ||
+          Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
+        if (!candidateUser && !candidateProfile) {
+          throw new DomainError(
+            'NOT_FOUND',
+            `Behavioral profile for candidate "${candidateId}" not found.`
+          );
+        }
+        const signals = synthesizeCandidateRawSignals(candidateId);
+        profile = evaluateBehavioralTalentProfile(signals);
+        behavioralProfilesByCandidateId.set(candidateId, profile);
+      }
+
+      return reply.status(200).send({ profile });
     }
   );
 
