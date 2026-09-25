@@ -1,0 +1,13 @@
+{
+  "projectId": "default",
+  "projectName": "Default",
+  "orgId": "org_e7e4320355644fc3b7660d64a7eef770",
+  "url": "https://app.reticle.sh",
+  "dashboardUrl": "https://app.reticle.sh/issues?project=default",
+  "sync": {
+    "runs": true,
+    "memory": true,
+    "flows": true
+  },
+  "verify": "local"
+}
