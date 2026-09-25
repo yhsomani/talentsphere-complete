@@ -173,6 +173,10 @@ import {
   saveApplicationDraft,
   restoreApplicationDraftVersion,
   markDraftSubmitted,
+  AnalyticsEvent,
+  recordAnalyticsEvent,
+  computeKPIs,
+  KPISummary,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -236,6 +240,9 @@ import {
   UpdateSavedSearchInputSchema,
   SaveApplicationDraftInputSchema,
   RestoreApplicationDraftVersionInputSchema,
+  RecordAnalyticsEventInputSchema,
+  RecordAnalyticsEventBatchInputSchema,
+  QueryAnalyticsKPIsInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -402,6 +409,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const applicationDraftsById = new Map<string, ApplicationDraft>();
   const applicationDraftsByCandidateAndJob = new Map<string, string>(); // `${candidateId}:${jobId}` -> draftId
   const applicationDraftVersionsByDraftId = new Map<string, ApplicationDraftVersion[]>();
+  const analyticsEvents: AnalyticsEvent[] = [];
 
   // Feature Flags & Admin Repositories (F-17, F-35)
   const adminAuditLogs: AdminAuditLog[] = [];
@@ -4958,6 +4966,91 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       drafts: candidateDrafts,
       total: candidateDrafts.length,
     });
+  });
+
+  // Product Analytics & Telemetry Routes (F-19, F-31, BR-27)
+  app.post('/api/v1/analytics/events', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = maybeExtractUser(req);
+    let telemetryConsent = true;
+
+    if (session) {
+      const settings = userSettingsByUserId.get(session.userId);
+      if (settings && (settings.showActivity === false || (settings as any).telemetryEnabled === false)) {
+        telemetryConsent = false;
+      }
+    }
+
+    const body = req.body as Record<string, unknown>;
+    const ipHash = crypto.createHash('sha256').update(req.ip || '127.0.0.1').digest('hex');
+    const userAgent = typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+
+    const recorded: AnalyticsEvent[] = [];
+
+    if (body && Array.isArray(body.events)) {
+      const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
+      for (const item of batchInput.events) {
+        const ev = recordAnalyticsEvent({
+          userId: session?.userId,
+          anonymousId: item.anonymousId,
+          eventType: item.eventType,
+          metadata: item.metadata,
+          ipHash,
+          userAgent,
+          telemetryConsent,
+        });
+        analyticsEvents.push(ev);
+        recorded.push(ev);
+      }
+    } else {
+      const singleInput = RecordAnalyticsEventInputSchema.parse(body);
+      const ev = recordAnalyticsEvent({
+        userId: session?.userId,
+        anonymousId: singleInput.anonymousId,
+        eventType: singleInput.eventType,
+        metadata: singleInput.metadata,
+        ipHash,
+        userAgent,
+        telemetryConsent,
+      });
+      analyticsEvents.push(ev);
+      recorded.push(ev);
+    }
+
+    return reply.status(201).send({
+      message: 'Analytics event(s) recorded successfully.',
+      count: recorded.length,
+      events: recorded,
+    });
+  });
+
+  app.get('/api/v1/analytics/events', async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { eventType } = req.query;
+    let list = analyticsEvents;
+    if (eventType) {
+      list = list.filter((e) => e.eventType === eventType.toLowerCase());
+    }
+
+    return reply.status(200).send({
+      events: list,
+      total: list.length,
+    });
+  });
+
+  app.get('/api/v1/analytics/kpis', async (req: FastifyRequest<{ Querystring: { eventType?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { eventType } = req.query;
+    let targetEvents = analyticsEvents;
+    if (eventType) {
+      targetEvents = targetEvents.filter((e) => e.eventType === eventType.toLowerCase());
+    }
+
+    const kpis = computeKPIs(targetEvents);
+    return reply.status(200).send({ kpis });
   });
 
   // Internal test helper for inspecting async job dispatch

@@ -704,6 +704,30 @@ export const RestoreApplicationDraftVersionInputSchema = z.object({
 
 export type RestoreApplicationDraftVersionInput = z.infer<typeof RestoreApplicationDraftVersionInputSchema>;
 
+/**
+ * Product Analytics & Telemetry Contracts (F-19, F-31, BR-27)
+ */
+export const RecordAnalyticsEventInputSchema = z.object({
+  eventType: z.string().min(2).max(100),
+  anonymousId: z.string().max(100).optional(),
+  metadata: z.record(z.unknown()).default({}),
+});
+
+export type RecordAnalyticsEventInput = z.infer<typeof RecordAnalyticsEventInputSchema>;
+
+export const RecordAnalyticsEventBatchInputSchema = z.object({
+  events: z.array(RecordAnalyticsEventInputSchema).min(1).max(100),
+});
+
+export type RecordAnalyticsEventBatchInput = z.infer<typeof RecordAnalyticsEventBatchInputSchema>;
+
+export const QueryAnalyticsKPIsInputSchema = z.object({
+  eventType: z.string().optional(),
+});
+
+export type QueryAnalyticsKPIsInput = z.infer<typeof QueryAnalyticsKPIsInputSchema>;
+
+
 
 
 
