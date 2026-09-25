@@ -727,6 +727,16 @@ export const QueryAnalyticsKPIsInputSchema = z.object({
 
 export type QueryAnalyticsKPIsInput = z.infer<typeof QueryAnalyticsKPIsInputSchema>;
 
+/**
+ * Certificate Verification & Revocation Contracts (F-52, S-02)
+ */
+export const RevokeCertificateInputSchema = z.object({
+  reason: z.string().min(5).max(1000),
+});
+
+export type RevokeCertificateInput = z.infer<typeof RevokeCertificateInputSchema>;
+
+
 
 
 

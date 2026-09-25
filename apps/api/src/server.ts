@@ -54,6 +54,8 @@ import {
   verifyLessonPrerequisites,
   calculateCourseProgress,
   mintCourseCertificate,
+  revokeCourseCertificate,
+  verifyPublicCertificateProof,
   MessageThread,
   ThreadParticipant,
   Message,
@@ -243,6 +245,7 @@ import {
   RecordAnalyticsEventInputSchema,
   RecordAnalyticsEventBatchInputSchema,
   QueryAnalyticsKPIsInputSchema,
+  RevokeCertificateInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1630,6 +1633,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const lessonProgressByEnrollmentAndLesson = new Map<string, LessonProgress>(); // key: `${enrollmentId}:${lessonId}`
   const certificatesByNumber = new Map<string, CourseCertificate>();
   const certificatesByEnrollmentId = new Map<string, CourseCertificate>();
+  const certificatesByProofHash = new Map<string, CourseCertificate>();
   const courseSkillsByCourseId = new Map<string, string[]>();
 
   // Seed baseline course for instant onboarding & exploration
@@ -2097,6 +2101,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       certificate = mintCourseCertificate(enrollment.id, profile.id, course, evidence.id);
       certificatesByNumber.set(certificate.certificateNumber, certificate);
       certificatesByEnrollmentId.set(enrollment.id, certificate);
+      certificatesByProofHash.set(certificate.verificationProofHash, certificate);
 
       // Award XP bonus capped by 200 XP/day (BR-25)
       const userTxs = xpTransactionsByUserId.get(session.userId) || [];
@@ -2152,6 +2157,122 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       issuedAt: cert.issuedAt,
       verificationProofHash: cert.verificationProofHash,
       isValid: cert.status === 'verified',
+    });
+  });
+
+  // Unified Public Zero-PII Verification Endpoint (SSOT 1132, S-02, BR-150, F-52, F-96)
+  app.get('/api/v1/verify/:hash', async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
+    const { hash } = req.params;
+
+    // A. Check if hash matches an issued Course Certificate
+    const cert = certificatesByProofHash.get(hash);
+    if (cert) {
+      const course = coursesById.get(cert.courseId);
+      const proof = verifyPublicCertificateProof(hash, cert, course?.title);
+      return reply.status(200).send({
+        valid: proof.isValid,
+        type: 'course_certificate',
+        verification: proof,
+      });
+    }
+
+    // B. Check if hash matches an issued Evidence Proof
+    const allEvidence = Array.from(evidenceById.values());
+    for (const ev of allEvidence) {
+      const proof = generatePublicProof(ev);
+      if (proof.proofHash === hash) {
+        return reply.status(200).send({
+          valid: ev.status === 'verified',
+          type: 'evidence_proof',
+          verification: {
+            isValid: ev.status === 'verified',
+            status: ev.status,
+            verificationLevel: ev.verificationLevel,
+            title: proof.title,
+            type: proof.type,
+            issuedAt: ev.createdAt,
+            verifiedAt: proof.verifiedAt,
+            proofHash: proof.proofHash,
+            authority: 'TalentSphere Verifiable Evidence Registry (Zero-PII BR-150)',
+          },
+        });
+      }
+    }
+
+    throw new DomainError('NOT_FOUND', `No credential or verification proof found matching hash "${hash}".`);
+  });
+
+  // Direct Certificate Verification Alias (F-52)
+  app.get('/api/v1/certificates/verify/:hash', async (req: FastifyRequest<{ Params: { hash: string } }>, reply: FastifyReply) => {
+    const { hash } = req.params;
+    const cert = certificatesByProofHash.get(hash);
+    if (!cert) {
+      throw new DomainError('NOT_FOUND', `Certificate with verification proof hash "${hash}" not found.`);
+    }
+
+    const course = coursesById.get(cert.courseId);
+    const proof = verifyPublicCertificateProof(hash, cert, course?.title);
+    return reply.status(200).send({
+      valid: proof.isValid,
+      verification: proof,
+    });
+  });
+
+  // Learner's Earned Certificates (F-52)
+  app.get('/api/v1/certificates/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const userCerts = Array.from(certificatesByNumber.values())
+      .filter((c) => c.userId === profile.id)
+      .map((c) => {
+        const course = coursesById.get(c.courseId);
+        return {
+          ...c,
+          courseTitle: course?.title || 'Unknown Course',
+          verificationUrl: `/verify/${c.verificationProofHash}`,
+        };
+      });
+
+    return reply.status(200).send({
+      certificates: userCerts,
+      total: userCerts.length,
+    });
+  });
+
+  // Revoke Certificate (Admin or Instructor authority, F-52, BR-154)
+  app.post('/api/v1/certificates/:certificateNumber/revoke', async (req: FastifyRequest<{ Params: { certificateNumber: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { certificateNumber } = req.params;
+    const cert = certificatesByNumber.get(certificateNumber);
+    if (!cert) {
+      throw new DomainError('NOT_FOUND', `Certificate "${certificateNumber}" not found.`);
+    }
+
+    const input = RevokeCertificateInputSchema.parse(req.body);
+
+    const revoked = revokeCourseCertificate(cert, input.reason, {
+      userId: session.userId,
+      roles: session.roles,
+    });
+
+    certificatesByNumber.set(revoked.certificateNumber, revoked);
+    certificatesByProofHash.set(revoked.verificationProofHash, revoked);
+    certificatesByEnrollmentId.set(revoked.enrollmentId, revoked);
+
+    auditLogs.push({
+      event: 'certificate.revoked',
+      actorId: session.userId,
+      targetId: revoked.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Certificate revoked successfully.',
+      certificate: revoked,
     });
   });
 

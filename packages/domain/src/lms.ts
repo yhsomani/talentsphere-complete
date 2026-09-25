@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError, type Role } from './index.js';
 
 export type CourseStatus = 'draft' | 'published' | 'archived';
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -74,6 +74,8 @@ export interface CourseCertificate {
   verificationProofHash: string;
   evidenceId?: string | null;
   status: CertificateStatus;
+  revocationReason?: string | null;
+  revokedAt?: string | null;
   issuedAt: string;
 }
 
@@ -261,3 +263,64 @@ export function mintCourseCertificate(
     issuedAt: now,
   };
 }
+
+/**
+ * Revokes an issued course certificate (BR-154, F-52).
+ * Allowed only for platform administrators or course instructors.
+ */
+export function revokeCourseCertificate(
+  certificate: CourseCertificate,
+  reason: string,
+  actor: { userId: string; roles: Role[] }
+): CourseCertificate {
+  if (certificate.status === 'revoked') {
+    throw new DomainError('INVALID_STATE_TRANSITION', 'Certificate has already been revoked.');
+  }
+
+  const isAuthorized = actor.roles.includes('platform_admin') || actor.roles.includes('instructor');
+  if (!isAuthorized) {
+    throw new DomainError('FORBIDDEN', 'Only platform administrators or instructors may revoke a certificate.');
+  }
+
+  if (!reason || reason.trim().length < 5) {
+    throw new DomainError('VALIDATION_FAILED', 'Revocation reason must be at least 5 characters long.');
+  }
+
+  const now = new Date().toISOString();
+  return {
+    ...certificate,
+    status: 'revoked',
+    revocationReason: reason.trim(),
+    revokedAt: now,
+  };
+}
+
+/**
+ * Verifies public certificate proof hash with Zero-PII guarantee (F-52, S-02, BR-150, SSOT 1132).
+ */
+export function verifyPublicCertificateProof(
+  hash: string,
+  cert?: CourseCertificate,
+  courseTitle?: string
+) {
+  if (!hash || hash.trim().length < 10) {
+    throw new DomainError('VALIDATION_FAILED', 'Invalid verification proof hash.');
+  }
+
+  if (!cert || cert.verificationProofHash !== hash) {
+    throw new DomainError('NOT_FOUND', `No certificate found matching verification proof hash "${hash}".`);
+  }
+
+  return {
+    isValid: cert.status === 'verified',
+    status: cert.status,
+    certificateNumber: cert.certificateNumber,
+    courseTitle: courseTitle || 'Verified Course',
+    issuedAt: cert.issuedAt,
+    verificationProofHash: cert.verificationProofHash,
+    revokedAt: cert.revokedAt,
+    revocationReason: cert.revocationReason,
+    authority: 'TalentSphere Verified Credential Authority (Zero-PII BR-150)',
+  };
+}
+
