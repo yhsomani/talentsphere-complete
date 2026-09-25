@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "test:e2e": "vitest run --dir tests/e2e",
+    "test:e2e": "playwright test",
+    "test:playwright": "playwright test",
     "test:security": "vitest run --dir tests/security",
     "test:a11y": "vitest run --dir tests/accessibility",
     "test:performance": "vitest run --dir tests/performance",
@@ -24,6 +25,7 @@
     "db:seed": "node scripts/seed.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.20.4",
     "prettier": "^3.9.9",
     "typescript": "^5.9.3",

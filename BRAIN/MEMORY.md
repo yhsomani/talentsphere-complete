@@ -710,7 +710,9 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **Current Phase:** Phase 2 — Verified Growth & Engagement Loops
 - **Current Milestone:** M2 — Gamification, Engagement & Networking
 - **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15, F-16, F-17, F-35, F-20, F-34
-- **Test Suite Status:** 36 test suites / 302 tests passing (100% PASS)
+- **Test Suite Status:**
+  - **Vitest Suite:** 36 test suites / 302 unit & integration tests passing (100% PASS)
+  - **Playwright E2E Suite:** 7 test files / 18 end-to-end browser & API tests passing (100% PASS)
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA production bundle)
 - **Highest-Priority Remaining Work:** Feature F-24 (Trust, Safety & Moderation), F-25 (Job Detail View), F-31 (KPI Aggregation & Rollups)
 - **Critical Blockers:** None
@@ -718,7 +720,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - Zero-PII public SHA-256 verification proofs (BR-150, BR-155)
   - Anti-self networking (`sender_id != recipient_id`) and anti-self messaging
   - Free-User Cost Invariant (SSOT 16.4, Security Invariant 1): zero third-party paid AI cost without explicit entitlement
-  - Server-authoritative assessment AI prohibition (`ASSESSMENT_AI_PROHIBITED`)
+  - Server-authoritative assessment AI prohibition (`ASSESSMENT_AI_PROHIBITED`, BR-10)
   - Strict daily 200 XP ledger cap (BR-25, WIT-011)
   - Idempotency per (userId, referenceType, referenceId)
   - Append-only resume exports with soft delete (BR-26)
@@ -732,9 +734,10 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - System health diagnostics distinguishing live, degraded, and maintenance states (BR-28)
   - Strict profile privacy boundary (`canViewProfile`) in multi-entity search: private profiles never leaked
   - Role-aware command palette scoping (admin commands restricted from non-admin callers)
-- **Last Significant Change:** Completed Feature F-20 (Command Search ⌘K) and Feature F-34 (Multi-Entity Backend Search): `search_history` schema with user RLS, search match relevance scoring and ranking, role-aware command palette, multi-entity search across jobs, skills, courses, challenges, public profiles, and search history management.
-- **Last Verified Milestone:** All 36 test suites green (302/302 tests), monorepo composite build clean.
-- **Next Action:** Git commit for F-20/F-34, then proceed to Feature F-24 (Trust, Safety & Moderation).
-- **Last Updated:** 2026-09-24 20:25
+  - Automated dual WebServer Playwright testing for Fastify API and Vite PWA frontend shell
+- **Last Significant Change:** Integrated Playwright E2E testing framework (`@playwright/test` v1.63.0) with automated dual webServer execution (`scripts/start-e2e-api.mjs` on port 4000 and Vite preview on port 4173). Implemented comprehensive browser & API test suites covering all 30 implemented features across 7 test files (18/18 PASS): web shell & WCAG 2.2 AA accessibility, candidate authentication & profile privacy, zero-PII cryptographic evidence proofs & skills graph, organizations & ATS pipeline, sandboxed challenges with anti-cheating AI prohibition & LMS course completion, direct messaging with deduplication & AI career copilot, resume builder & professional networking, and gamification with daily XP cap & admin governance & multi-entity search.
+- **Last Verified Milestone:** All 36 Vitest suites (302/302 tests), 7 Playwright E2E suites (18/18 tests), and monorepo composite build green.
+- **Next Action:** Commit Playwright E2E integration milestone, then proceed to Feature F-24 (Trust, Safety & Moderation).
+- **Last Updated:** 2026-09-24 20:42
 
 
