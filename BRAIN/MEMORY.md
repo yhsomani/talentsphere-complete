@@ -4,29 +4,29 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 3.3
-- **Last Updated:** 2026-09-25 12:45
+- **Memory Version:** 3.4
+- **Last Updated:** 2026-09-25 13:25
 - **Current Milestone:** M4/M5 — Career Trajectory, Learning Impact & Market Intelligence
 - **Current Phase:** Phase 0 through Phase 4/5 Core Loops
 - **Overall Implementation:** 51 / 173 (29.48%)
-- **Overall Verification:** 44 Vitest unit suites (537 tests PASS), 42 Fastify integration suites (333 tests PASS), 34 Playwright E2E suites (134 tests PASS) — 1004/1004 tests PASS (100% GREEN). 41 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`).
+- **Overall Verification:** 44 Vitest unit suites (537 tests PASS), 42 Fastify integration suites (333 tests PASS), 34 Playwright E2E suites (136 tests PASS) — 1006/1006 tests PASS (100% GREEN). 41 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`). In-app Reticle verification complete for Candidate Navigation, Login, and Checkout flows.
 - **Current Release:** v0.4.0-intelligence
 - **Current Branch:** `main`
-- **Current Primary Task:** Verified Work History Network & Graph (Completed)
+- **Current Primary Task:** Web Shell User Flows & Reticle Verification (Completed)
 - **Next Action:** Feature F-163 (Credential Wallet & Portability) / Feature F-164 (Skills Evidence Narrative & Storytelling)
 
 ---
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (100% verified test passes across 1004 automated tests)
+- **Implementation Status:** IN PROGRESS (100% verified test passes across 1006 automated tests)
 - **Backend:** Fastify 5 + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase, gamification XP & streaks, user privacy/GDPR erasure & export, billing & subscriptions, platform administration & governance, multi-entity search, trust/safety & moderation, application drafts, job templates, certificate verification, application feedback, technical interview assessment, alumni networks, activity contribution graph, candidate referral requests, warm introductions, skill decay freshness tracking, multi-dimensional reputation engine, instructor reputation, employer workplace reputation, salary intelligence, peer credibility networks, skill supply/demand forecasting, career trajectory benchmarks, learning impact tracking, talent pool intelligence, behavioral talent discovery, talent segmentation & classification, and verified work history network & structured references)
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, cockpit dashboard, WCAG 2.2 AA compliant)
+- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, cockpit dashboard, login flow, checkout & plan subscriptions flow, WCAG 2.2 AA compliant, Reticle & Playwright verified)
 - **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS policies (00001 through 00041)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 44 Vitest unit suites (537/537 passing), 42 Fastify integration suites (333/333 passing), 34 Playwright E2E suites (134/134 passing) — 1004 total tests PASS
+- **Testing:** 44 Vitest unit suites (537/537 passing), 42 Fastify integration suites (333/333 passing), 34 Playwright E2E suites (136/136 passing) — 1006 total tests PASS
 - **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts)
 - **Deployment:** Staging / Production CI/CD pipelines defined in specification
 - **Current Focus:** Sequential execution of Phase 4/5 intelligence systems under the Golden Workflow

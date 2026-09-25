@@ -15,8 +15,33 @@ if (import.meta.env.DEV) {
   // No state library detected. If you add one, register it here — see node_modules/@reticlehq/server/docs/usage.md.
 
   registerCapabilities({
-    testids: [], // none found; add data-testid to your key elements
-    signals: [], // names you pass to reticle.signal()
-    stores: [], // the keys you registered above
+    testids: [
+      'nav-dashboard',
+      'nav-checkout',
+      'nav-login',
+      'login-form',
+      'login-email',
+      'login-password',
+      'login-submit',
+      'login-error',
+      'login-success',
+      'prefill-credentials',
+      'checkout-form',
+      'billing-cycle-monthly',
+      'billing-cycle-yearly',
+      'card-name',
+      'card-number',
+      'card-expiry',
+      'card-cvc',
+      'checkout-submit',
+      'checkout-error',
+      'checkout-success',
+      'order-reference',
+      'order-amount',
+      'return-to-dashboard',
+      'prefill-payment',
+    ],
+    signals: ['auth:login', 'auth:logout', 'checkout:complete'],
+    stores: [],
   });
 }

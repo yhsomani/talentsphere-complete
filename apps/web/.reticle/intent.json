@@ -1,0 +1,344 @@
+{
+  "version": 1,
+  "intents": {
+    "inline:navigate-from-landing-page-to-career-cockpit-das-7a90b4fd": {
+      "id": "inline:navigate-from-landing-page-to-career-cockpit-das-7a90b4fd",
+      "statement": "Navigate from landing page to Career Cockpit Dashboard",
+      "state": "bound",
+      "declaredAt": 1790365656854,
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      }
+    },
+    "inline:career-cockpit-dashboard-header-and-metrics-are-19091b3d": {
+      "id": "inline:career-cockpit-dashboard-header-and-metrics-are-19091b3d",
+      "statement": "Career Cockpit dashboard header and metrics are rendered",
+      "state": "proved",
+      "declaredAt": 1790365672188,
+      "binding": {
+        "kind": "text",
+        "contains": "Candidate Career Cockpit"
+      },
+      "surface": {
+        "route": "/dashboard",
+        "files": [
+          "src/pages/LandingPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1790365672218",
+        "grade": "presence",
+        "at": 1790365672218
+      }
+    },
+    "inline:navigate-back-to-landing-page-from-dashboard-via-87e05137": {
+      "id": "inline:navigate-back-to-landing-page-from-dashboard-via-87e05137",
+      "statement": "Navigate back to Landing Page from Dashboard via header logo",
+      "state": "bound",
+      "declaredAt": 1790365682315,
+      "binding": {
+        "kind": "route",
+        "pathname": "/"
+      }
+    },
+    "inline:landing-page-headline-is-visible-after-navigatio-b0905421": {
+      "id": "inline:landing-page-headline-is-visible-after-navigatio-b0905421",
+      "statement": "Landing page headline is visible after navigation",
+      "state": "bound",
+      "declaredAt": 1790365686297,
+      "binding": {
+        "kind": "text",
+        "contains": "The Career Operating System Built on Verified Evidence"
+      }
+    },
+    "inline:landing-page-headline-contains-the-expected-titl-d191dc84": {
+      "id": "inline:landing-page-headline-contains-the-expected-titl-d191dc84",
+      "statement": "Landing page headline contains the expected title",
+      "state": "bound",
+      "declaredAt": 1790365689826,
+      "binding": {
+        "kind": "text",
+        "contains": "The Career Operating System Built on Verified Evidence"
+      }
+    },
+    "inline:landing-page-heading-element-exists-df4611ba": {
+      "id": "inline:landing-page-heading-element-exists-df4611ba",
+      "statement": "Landing page heading element exists",
+      "state": "proved",
+      "declaredAt": 1790365694213,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "heading",
+          "name": "The Career Operating System Built on Verified Evidence"
+        }
+      },
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1790365694232",
+        "grade": "presence",
+        "at": 1790365694232
+      }
+    },
+    "inline:click-launch-dashboard-link-to-navigate-to-dashb-26deb73f": {
+      "id": "inline:click-launch-dashboard-link-to-navigate-to-dashb-26deb73f",
+      "statement": "Click Launch Dashboard link to navigate to dashboard",
+      "state": "bound",
+      "declaredAt": 1790365737272,
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      }
+    },
+    "inline:candidate-career-cockpit-heading-is-visible-326bafcb": {
+      "id": "inline:candidate-career-cockpit-heading-is-visible-326bafcb",
+      "statement": "Candidate Career Cockpit heading is visible",
+      "state": "proved",
+      "declaredAt": 1790365740484,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "heading",
+          "name": "Candidate Career Cockpit"
+        }
+      },
+      "surface": {
+        "route": "/dashboard",
+        "files": [
+          "src/pages/LandingPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1790365740512",
+        "grade": "presence",
+        "at": 1790365740512
+      }
+    },
+    "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2": {
+      "id": "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2",
+      "statement": "Click header logo to return to landing page",
+      "state": "bound",
+      "declaredAt": 1790365750566,
+      "binding": {
+        "kind": "route",
+        "pathname": "/"
+      }
+    },
+    "inline:landing-page-heading-is-visible-after-returning-2dd1bb56": {
+      "id": "inline:landing-page-heading-is-visible-after-returning-2dd1bb56",
+      "statement": "Landing page heading is visible after returning home",
+      "state": "proved",
+      "declaredAt": 1790365754566,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "heading",
+          "name": "The Career Operating System Built on Verified Evidence"
+        }
+      },
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1790365754582",
+        "grade": "presence",
+        "at": 1790365754582
+      }
+    },
+    "flow:candidate-navigation": {
+      "id": "flow:candidate-navigation",
+      "statement": "Candidate can launch the Career Cockpit Dashboard from the landing page and return home using the logo",
+      "state": "declared",
+      "declaredAt": 1790365762986,
+      "surface": {
+        "flow": "candidate-navigation"
+      }
+    },
+    "inline:verify-user-login-form-is-displayed-on-login-67244a71": {
+      "id": "inline:verify-user-login-form-is-displayed-on-login-67244a71",
+      "statement": "Verify user login form is displayed on /login",
+      "state": "bound",
+      "declaredAt": 1790366296749,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "text": "Sign In"
+        }
+      }
+    },
+    "inline:prefill-login-credentials-for-test-authenticatio-6272c6a0": {
+      "id": "inline:prefill-login-credentials-for-test-authenticatio-6272c6a0",
+      "statement": "Prefill login credentials for test authentication",
+      "state": "bound",
+      "declaredAt": 1790367444566,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "name": "Sign In"
+        }
+      }
+    },
+    "inline:sign-in-with-credentials-and-transition-to-caree-71bc5dc7": {
+      "id": "inline:sign-in-with-credentials-and-transition-to-caree-71bc5dc7",
+      "statement": "Sign in with credentials and transition to Career Cockpit Dashboard",
+      "state": "proved",
+      "declaredAt": 1790367452344,
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      },
+      "surface": {
+        "route": "/dashboard",
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1790367453981",
+        "grade": "presence",
+        "at": 1790367453981
+      }
+    },
+    "inline:dashboard-heading-is-visible-after-login-2dd66386": {
+      "id": "inline:dashboard-heading-is-visible-after-login-2dd66386",
+      "statement": "Dashboard heading is visible after login",
+      "state": "proved",
+      "declaredAt": 1790367460308,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "heading",
+          "name": "Candidate Career Cockpit"
+        }
+      },
+      "surface": {
+        "route": "/dashboard",
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_assert:1790367460330",
+        "grade": "presence",
+        "at": 1790367460330
+      }
+    },
+    "inline:monkey-test-empty-checkout-submission-4630fef2": {
+      "id": "inline:monkey-test-empty-checkout-submission-4630fef2",
+      "statement": "Monkey-test empty checkout submission",
+      "state": "bound",
+      "declaredAt": 1790367496979,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "name": "Complete Purchase — $29"
+        }
+      }
+    },
+    "inline:monkey-test-empty-checkout-submission-with-dange-a24a3e2a": {
+      "id": "inline:monkey-test-empty-checkout-submission-with-dange-a24a3e2a",
+      "statement": "Monkey-test empty checkout submission with dangerous action confirmation",
+      "state": "bound",
+      "declaredAt": 1790367504983,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "name": "Complete Purchase — $29"
+        }
+      }
+    },
+    "inline:monkey-test-invalid-payment-details-trigger-vali-59c9eaa8": {
+      "id": "inline:monkey-test-invalid-payment-details-trigger-vali-59c9eaa8",
+      "statement": "Monkey test: invalid payment details trigger validation error alert",
+      "state": "proved",
+      "declaredAt": 1790367531765,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "checkout-error"
+        }
+      },
+      "surface": {
+        "route": "/checkout",
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1790367533946",
+        "grade": "presence",
+        "at": 1790367533946
+      }
+    },
+    "inline:switch-billing-cycle-to-annual-3fbbf626": {
+      "id": "inline:switch-billing-cycle-to-annual-3fbbf626",
+      "statement": "Switch billing cycle to Annual",
+      "state": "proved",
+      "declaredAt": 1790367540731,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "name": "Complete Purchase — $279"
+        }
+      },
+      "surface": {
+        "route": "/checkout",
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1790367542965",
+        "grade": "presence",
+        "at": 1790367542965
+      }
+    },
+    "inline:prefill-valid-test-card-data-4b7daca1": {
+      "id": "inline:prefill-valid-test-card-data-4b7daca1",
+      "statement": "Prefill valid test card data",
+      "state": "bound",
+      "declaredAt": 1790367546370,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "card-name"
+        }
+      }
+    },
+    "inline:complete-annual-subscription-checkout-and-verify-e3c08c5d": {
+      "id": "inline:complete-annual-subscription-checkout-and-verify-e3c08c5d",
+      "statement": "Complete annual subscription checkout and verify confirmation receipt",
+      "state": "proved",
+      "declaredAt": 1790367555544,
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "checkout-success"
+        }
+      },
+      "surface": {
+        "route": "/checkout",
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1790367557958",
+        "grade": "presence",
+        "at": 1790367557958
+      }
+    }
+  }
+}

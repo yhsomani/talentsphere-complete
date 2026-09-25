@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from './components/Layout.js';
 import { LandingPage } from './pages/LandingPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
+import { LoginPage } from './pages/LoginPage.js';
+import { CheckoutPage } from './pages/CheckoutPage.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +24,8 @@ export const App: React.FC = () => {
           <Route path="/" element={<Layout />}>
             <Route index element={<LandingPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="checkout" element={<CheckoutPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -106,9 +106,10 @@ export const Layout: React.FC = () => {
             <span>TalentSphere</span>
           </Link>
 
-          <nav aria-label="Main Navigation" style={{ display: 'flex', gap: spacing.md }}>
+          <nav aria-label="Main Navigation" style={{ display: 'flex', gap: spacing.md, alignItems: 'center' }}>
             <Link
               to="/dashboard"
+              data-testid="nav-dashboard"
               style={{
                 textDecoration: 'none',
                 color:
@@ -119,10 +120,39 @@ export const Layout: React.FC = () => {
             >
               Dashboard
             </Link>
+            <Link
+              to="/checkout"
+              data-testid="nav-checkout"
+              style={{
+                textDecoration: 'none',
+                color:
+                  location.pathname === '/checkout' ? colors.primary[600] : colors.neutral[600],
+                fontWeight: location.pathname === '/checkout' ? 600 : 400,
+                fontSize: '0.875rem',
+              }}
+            >
+              Plans & Pricing
+            </Link>
           </nav>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
+          <Link
+            to="/login"
+            data-testid="nav-login"
+            style={{
+              textDecoration: 'none',
+              color: location.pathname === '/login' ? colors.primary[700] : colors.primary[600],
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              padding: `${spacing.xs} ${spacing.sm}`,
+              borderRadius: '6px',
+              border: `1px solid ${colors.primary[200]}`,
+              backgroundColor: location.pathname === '/login' ? colors.primary[50] : '#ffffff',
+            }}
+          >
+            Sign In
+          </Link>
           <span
             style={{
               fontSize: '0.75rem',
