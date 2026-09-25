@@ -252,6 +252,14 @@ import {
   recordSkillMarketSignal,
   computeSkillForecast,
   rankTopEmergingSkills,
+  CareerTransition,
+  ProgressionBenchmark,
+  CareerMilestoneReadiness,
+  recordCareerTransition,
+  calculateCareerTransitionProbability,
+  generateProgressionPathways,
+  projectSalaryTrajectory,
+  evaluateMilestoneReadiness,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -358,6 +366,11 @@ import {
   GenerateSkillForecastInputSchema,
   QuerySkillForecastInputSchema,
   TopEmergingSkillsQuerySchema,
+  RecordCareerTransitionInputSchema,
+  QueryCareerBenchmarksQuerySchema,
+  CalculateTransitionProbabilityInputSchema,
+  CareerProgressionPathwaysQuerySchema,
+  EvaluateMilestoneReadinessInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -6716,6 +6729,264 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         skillName: skill.name,
         forecast,
       });
+    }
+  );
+
+  // =========================================================================
+  // Career Trajectory & Progression Benchmarks Repositories & Endpoints (F-152, F-85, BR-157..BR-163)
+  // =========================================================================
+  const careerTransitionsById = new Map<string, CareerTransition>();
+  const careerTransitionsByUserId = new Map<string, CareerTransition[]>();
+  const allCareerTransitions: CareerTransition[] = [];
+  const careerMilestoneEvaluationsByUserId = new Map<string, CareerMilestoneReadiness[]>();
+
+  // Seed baseline historical career transitions (F-85, F-152)
+  // 28 transitions: Software Engineer -> Senior Software Engineer (sampleCount >= 20, publishable)
+  for (let i = 0; i < 28; i++) {
+    const t = recordCareerTransition({
+      id: `seed-trans-se-sse-${i + 1}`,
+      userId: `seed-user-se-${i + 1}`,
+      fromRole: 'Software Engineer',
+      toRole: 'Senior Software Engineer',
+      salaryDelta: 25000 + (i % 5) * 1000,
+      timeInRoleMonths: 24 + (i % 6),
+      consentFlag: true,
+      transitionDate: '2025-01-15',
+    });
+    careerTransitionsById.set(t.id, t);
+    allCareerTransitions.push(t);
+  }
+
+  // 22 transitions: Senior Software Engineer -> Staff Engineer (sampleCount >= 20, publishable)
+  for (let i = 0; i < 22; i++) {
+    const t = recordCareerTransition({
+      id: `seed-trans-sse-staff-${i + 1}`,
+      userId: `seed-user-sse-${i + 1}`,
+      fromRole: 'Senior Software Engineer',
+      toRole: 'Staff Engineer',
+      salaryDelta: 40000 + (i % 4) * 2000,
+      timeInRoleMonths: 36 + (i % 8),
+      consentFlag: true,
+      transitionDate: '2025-02-10',
+    });
+    careerTransitionsById.set(t.id, t);
+    allCareerTransitions.push(t);
+  }
+
+  // 10 transitions: Software Engineer -> Product Manager (sampleCount < 20, demonstrating BR-160 k-anonymity suppression)
+  for (let i = 0; i < 10; i++) {
+    const t = recordCareerTransition({
+      id: `seed-trans-se-pm-${i + 1}`,
+      userId: `seed-user-pm-${i + 1}`,
+      fromRole: 'Software Engineer',
+      toRole: 'Product Manager',
+      salaryDelta: 18000 + (i % 3) * 1500,
+      timeInRoleMonths: 28 + (i % 5),
+      consentFlag: true,
+      transitionDate: '2025-03-05',
+    });
+    careerTransitionsById.set(t.id, t);
+    allCareerTransitions.push(t);
+  }
+
+  // 1. Record Opt-in Career Transition (BR-157, BR-159, BR-161)
+  app.post('/api/v1/career/transitions', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required to record career transition.');
+    }
+
+    const input = RecordCareerTransitionInputSchema.parse(req.body);
+
+    const transition = recordCareerTransition({
+      userId: profile.id,
+      fromRole: input.fromRole,
+      toRole: input.toRole,
+      fromCompanyId: input.fromCompanyId,
+      toCompanyId: input.toCompanyId,
+      transitionDate: input.transitionDate,
+      salaryDelta: input.salaryDelta,
+      timeInRoleMonths: input.timeInRoleMonths,
+      consentFlag: input.consentFlag,
+    });
+
+    careerTransitionsById.set(transition.id, transition);
+    allCareerTransitions.push(transition);
+
+    const userList = careerTransitionsByUserId.get(profile.id) || [];
+    userList.push(transition);
+    careerTransitionsByUserId.set(profile.id, userList);
+
+    auditLogs.push({
+      event: 'career.transition_recorded',
+      actorId: session.userId,
+      targetId: transition.id,
+      metadata: {
+        fromRole: transition.fromRole,
+        toRole: transition.toRole,
+        salaryDelta: transition.salaryDelta,
+        timeInRoleMonths: transition.timeInRoleMonths,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    enqueuedWorkerJobs.push({
+      type: 'career.transition_recorded',
+      payload: {
+        transitionId: transition.id,
+        userId: profile.id,
+        fromRole: transition.fromRole,
+        toRole: transition.toRole,
+      },
+      enqueuedAt: transition.createdAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Career transition recorded successfully.',
+      transition,
+    });
+  });
+
+  // 2. Get My Career Transitions (BR-159: Individual career transitions visible only to the user)
+  app.get('/api/v1/career/transitions/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const transitions = careerTransitionsByUserId.get(profile.id) || [];
+    return reply.status(200).send({
+      transitions,
+      total: transitions.length,
+    });
+  });
+
+  // 3. Query Progression Benchmarks (BR-160: requires sample count >= 20 to publish)
+  app.get('/api/v1/career/benchmarks', async (req: FastifyRequest, reply: FastifyReply) => {
+    const query = QueryCareerBenchmarksQuerySchema.parse(req.query);
+    const minSamples = query.minSamples ?? 20;
+
+    // Discover distinct pairs
+    const pairs = new Set<string>();
+    for (const t of allCareerTransitions) {
+      if (t.consentFlag) {
+        pairs.add(`${t.fromRole}:::${t.toRole}`);
+      }
+    }
+
+    const benchmarks: ProgressionBenchmark[] = [];
+    for (const pair of pairs) {
+      const [fromRole, toRole] = pair.split(':::');
+
+      if (query.fromRole && fromRole.toLowerCase() !== query.fromRole.toLowerCase()) {
+        continue;
+      }
+      if (query.toRole && toRole.toLowerCase() !== query.toRole.toLowerCase()) {
+        continue;
+      }
+
+      const bm = calculateCareerTransitionProbability(allCareerTransitions, fromRole, toRole, {
+        industry: query.industry,
+      });
+
+      // BR-160: Progression benchmarks by role require >= 20 data points to publish
+      if (bm.sampleCount >= minSamples) {
+        benchmarks.push(bm);
+      }
+    }
+
+    return reply.status(200).send({
+      benchmarks,
+      total: benchmarks.length,
+      kAnonymityThreshold: minSamples,
+    });
+  });
+
+  // 4. Calculate Transition Probability (BR-163: disclose data sources and confidence intervals)
+  app.post(
+    '/api/v1/career/transition-probability',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const input = CalculateTransitionProbabilityInputSchema.parse(req.body);
+
+      const benchmark = calculateCareerTransitionProbability(
+        allCareerTransitions,
+        input.fromRole,
+        input.toRole,
+        {
+          industry: input.industry,
+          baselineSalary: input.baselineSalary,
+        }
+      );
+
+      return reply.status(200).send({ benchmark });
+    }
+  );
+
+  // 5. Discover Career Progression Pathways & Salary Trajectory (F-152, BR-160, BR-161)
+  app.get('/api/v1/career/pathways', async (req: FastifyRequest, reply: FastifyReply) => {
+    const query = CareerProgressionPathwaysQuerySchema.parse(req.query);
+
+    const pathway = generateProgressionPathways(allCareerTransitions, query.originRole, {
+      industry: query.industry,
+      enforceKAnonymity: query.enforceKAnonymity,
+      baselineSalary: query.baselineSalary,
+    });
+
+    const salaryProjections = projectSalaryTrajectory(
+      query.baselineSalary || 120000,
+      pathway.pathways,
+      5
+    );
+
+    return reply.status(200).send({
+      pathway,
+      salaryProjections,
+    });
+  });
+
+  // 6. Evaluate Candidate Milestone Readiness (F-85, F-152)
+  app.post(
+    '/api/v1/career/milestones/readiness',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const profile = profilesByUserId.get(session.userId);
+      if (!profile) {
+        throw new DomainError('NOT_FOUND', 'Candidate profile required to evaluate milestones.');
+      }
+
+      const input = EvaluateMilestoneReadinessInputSchema.parse(req.body);
+
+      const readiness = evaluateMilestoneReadiness({
+        userId: profile.id,
+        currentRole: profile.headline || 'Software Engineer',
+        targetRole: input.targetRole,
+        candidateSkills: input.candidateSkills,
+        requiredSkills: input.requiredSkills,
+        yearsOfExperience: input.yearsOfExperience,
+        requiredYearsOfExperience: input.requiredYearsOfExperience,
+        educationLevel: input.educationLevel,
+        requiredEducationLevel: input.requiredEducationLevel,
+      });
+
+      const list = careerMilestoneEvaluationsByUserId.get(profile.id) || [];
+      list.push(readiness);
+      careerMilestoneEvaluationsByUserId.set(profile.id, list);
+
+      auditLogs.push({
+        event: 'career.milestone_readiness_evaluated',
+        actorId: session.userId,
+        targetId: readiness.id,
+        metadata: {
+          targetRole: readiness.targetRole,
+          overallReadinessScore: readiness.overallReadinessScore,
+          skillsOverlapPct: readiness.skillsOverlapPct,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(200).send({ readiness });
     }
   );
 

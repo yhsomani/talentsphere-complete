@@ -329,4 +329,21 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('historical_accuracy_mape NUMERIC(5, 2)');
     expect(sql).toContain('UNIQUE(skill_id, forecast_horizon_months)');
   });
+
+  it('contains and validates migration 00036 career trajectory schema (F-152, F-85)', () => {
+    const migrationFile36 = path.join(migrationsDir, '00036_career_trajectory_schema.sql');
+    expect(fs.existsSync(migrationFile36)).toBe(true);
+    const sql = fs.readFileSync(migrationFile36, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.career_transitions');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.progression_benchmarks');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.career_milestone_evaluations');
+    expect(sql).toContain('ALTER TABLE public.career_transitions ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.progression_benchmarks ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain(
+      'ALTER TABLE public.career_milestone_evaluations ENABLE ROW LEVEL SECURITY;'
+    );
+    expect(sql).toContain('sample_count >= 20');
+    expect(sql).toContain('time_in_role_months INT NOT NULL CHECK (time_in_role_months >= 1)');
+    expect(sql).toContain('UNIQUE(from_role, to_role, industry)');
+  });
 });

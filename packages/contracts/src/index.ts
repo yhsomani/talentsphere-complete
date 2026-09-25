@@ -1383,3 +1383,73 @@ export const TopEmergingSkillsQuerySchema = z.object({
 });
 
 export type TopEmergingSkillsQuery = z.infer<typeof TopEmergingSkillsQuerySchema>;
+
+/**
+ * Career Trajectory Analysis & Progression Benchmarks Contracts (F-152, F-85, BR-157..BR-163)
+ */
+export const RecordCareerTransitionInputSchema = z.object({
+  fromRole: z.string().min(1).max(100),
+  toRole: z.string().min(1).max(100),
+  fromCompanyId: z.string().uuid().optional(),
+  toCompanyId: z.string().uuid().optional(),
+  transitionDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  salaryDelta: z.number(),
+  timeInRoleMonths: z.number().int().min(1).max(600),
+  consentFlag: z.boolean(),
+});
+
+export type RecordCareerTransitionInput = z.infer<typeof RecordCareerTransitionInputSchema>;
+
+export const QueryCareerBenchmarksQuerySchema = z.object({
+  fromRole: z.string().min(1).max(100).optional(),
+  toRole: z.string().min(1).max(100).optional(),
+  industry: z.string().max(100).optional(),
+  minSamples: z.coerce.number().int().min(0).max(1000).default(20),
+});
+
+export type QueryCareerBenchmarksQuery = z.infer<typeof QueryCareerBenchmarksQuerySchema>;
+
+export const CalculateTransitionProbabilityInputSchema = z.object({
+  fromRole: z.string().min(1).max(100),
+  toRole: z.string().min(1).max(100),
+  industry: z.string().max(100).default('Technology'),
+  baselineSalary: z.number().positive().optional(),
+});
+
+export type CalculateTransitionProbabilityInput = z.infer<
+  typeof CalculateTransitionProbabilityInputSchema
+>;
+
+export const CareerProgressionPathwaysQuerySchema = z.object({
+  originRole: z.string().min(1).max(100),
+  industry: z.string().max(100).default('Technology'),
+  enforceKAnonymity: z
+    .preprocess((val) => {
+      if (typeof val === 'string') return val.toLowerCase() === 'true';
+      if (typeof val === 'boolean') return val;
+      return true;
+    }, z.boolean())
+    .default(true),
+  baselineSalary: z.coerce.number().positive().optional(),
+});
+
+export type CareerProgressionPathwaysQuery = z.infer<typeof CareerProgressionPathwaysQuerySchema>;
+
+export const EvaluateMilestoneReadinessInputSchema = z.object({
+  targetRole: z.string().min(1).max(100),
+  candidateSkills: z.array(z.string().min(1).max(100)).min(1),
+  requiredSkills: z.array(z.string().min(1).max(100)).optional(),
+  yearsOfExperience: z.number().min(0).max(50),
+  requiredYearsOfExperience: z.number().min(0).max(50).optional(),
+  educationLevel: z
+    .enum(['none', 'bootcamp', 'associate', 'bachelor', 'master', 'doctorate'])
+    .default('bachelor'),
+  requiredEducationLevel: z
+    .enum(['none', 'bootcamp', 'associate', 'bachelor', 'master', 'doctorate'])
+    .default('bachelor'),
+});
+
+export type EvaluateMilestoneReadinessInput = z.infer<typeof EvaluateMilestoneReadinessInputSchema>;
