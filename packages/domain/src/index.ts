@@ -40,6 +40,7 @@ export * from './instructor-reputation.js';
 export * from './peer-credibility.js';
 export * from './alumni-networks.js';
 export * from './employer-reputation.js';
+export * from './skill-forecasting.js';
 
 export type Role =
   | 'candidate'

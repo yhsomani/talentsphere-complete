@@ -1250,3 +1250,36 @@ export const SubmitEmployerMetricsInputSchema = z.object({
 
 export type SubmitEmployerMetricsInput = z.infer<typeof SubmitEmployerMetricsInputSchema>;
 
+/**
+ * Skill Supply/Demand Forecasting Contracts (F-151, F-84, F-86, F-97)
+ */
+export const RecordSkillMarketSignalInputSchema = z.object({
+  demandPostingsCount: z.number().int().min(0),
+  activeCandidatesCount: z.number().int().min(0),
+  avgSalaryOffered: z.number().positive().optional(),
+  geographicRegion: z.string().min(1).max(100).default('Global'),
+  industry: z.string().min(1).max(100).default('Technology'),
+});
+
+export type RecordSkillMarketSignalInput = z.infer<typeof RecordSkillMarketSignalInputSchema>;
+
+export const GenerateSkillForecastInputSchema = z.object({
+  forecastHorizonMonths: z.number().int().min(1).max(36).default(12),
+  skillCategory: z.string().max(100).optional(),
+  prerequisiteDepth: z.number().int().min(0).max(10).default(0),
+});
+
+export type GenerateSkillForecastInput = z.infer<typeof GenerateSkillForecastInputSchema>;
+
+export const QuerySkillForecastInputSchema = z.object({
+  forecastHorizonMonths: z.coerce.number().int().min(1).max(36).default(12),
+});
+
+export type QuerySkillForecastInput = z.infer<typeof QuerySkillForecastInputSchema>;
+
+export const TopEmergingSkillsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export type TopEmergingSkillsQuery = z.infer<typeof TopEmergingSkillsQuerySchema>;
+

@@ -283,6 +283,11 @@ import {
   calculateEmployerReputation,
   createEmployerReview,
   trimOutlierEmployerReviews,
+  SkillMarketSignal,
+  SkillForecast,
+  recordSkillMarketSignal,
+  computeSkillForecast,
+  rankTopEmergingSkills,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -393,6 +398,10 @@ import {
   RespondAlumniMentorshipInputSchema,
   SubmitEmployerReviewInputSchema,
   SubmitEmployerMetricsInputSchema,
+  RecordSkillMarketSignalInputSchema,
+  GenerateSkillForecastInputSchema,
+  QuerySkillForecastInputSchema,
+  TopEmergingSkillsQuerySchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -5819,6 +5828,312 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       endorsements: history,
       weeklyQuotaRemaining: Math.max(0, 5 - weeklyGiven),
       totalGiven: history.length,
+    });
+  });
+
+  // =========================================================================
+  // Skill Supply/Demand Forecasting Repositories & Endpoints (F-151, F-84, F-86, F-97)
+  // =========================================================================
+  const skillMarketSignalsBySkillId = new Map<string, SkillMarketSignal[]>();
+  const skillForecastsBySkillId = new Map<string, SkillForecast>();
+
+  // Seed baseline market signals for canonical skills
+  const nowTs = Date.now();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  const initialSkillSignals: Array<{ skillId: string; signals: Array<{ demandPostingsCount: number; activeCandidatesCount: number; avgSalaryOffered: number; geographicRegion: string; industry: string; recordedAt: string }> }> = [
+    {
+      skillId: '10000000-0000-4000-a000-000000000001', // TypeScript
+      signals: [
+        {
+          demandPostingsCount: 1200,
+          activeCandidatesCount: 950,
+          avgSalaryOffered: 135000,
+          geographicRegion: 'North America',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
+        },
+        {
+          demandPostingsCount: 1650,
+          activeCandidatesCount: 1050,
+          avgSalaryOffered: 142000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs).toISOString(),
+        },
+      ],
+    },
+    {
+      skillId: '10000000-0000-4000-a000-000000000002', // React
+      signals: [
+        {
+          demandPostingsCount: 1500,
+          activeCandidatesCount: 1400,
+          avgSalaryOffered: 125000,
+          geographicRegion: 'North America',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
+        },
+        {
+          demandPostingsCount: 1750,
+          activeCandidatesCount: 1550,
+          avgSalaryOffered: 130000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs).toISOString(),
+        },
+      ],
+    },
+    {
+      skillId: '10000000-0000-4000-a000-000000000003', // PostgreSQL
+      signals: [
+        {
+          demandPostingsCount: 800,
+          activeCandidatesCount: 700,
+          avgSalaryOffered: 130000,
+          geographicRegion: 'North America',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
+        },
+        {
+          demandPostingsCount: 1100,
+          activeCandidatesCount: 780,
+          avgSalaryOffered: 138000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs).toISOString(),
+        },
+      ],
+    },
+    {
+      skillId: '10000000-0000-4000-a000-000000000004', // System Design
+      signals: [
+        {
+          demandPostingsCount: 950,
+          activeCandidatesCount: 600,
+          avgSalaryOffered: 155000,
+          geographicRegion: 'North America',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
+        },
+        {
+          demandPostingsCount: 1400,
+          activeCandidatesCount: 680,
+          avgSalaryOffered: 168000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+          recordedAt: new Date(nowTs).toISOString(),
+        },
+      ],
+    },
+  ];
+
+  for (const item of initialSkillSignals) {
+    const recordedList: SkillMarketSignal[] = [];
+    for (const s of item.signals) {
+      recordedList.push(recordSkillMarketSignal({ skillId: item.skillId, ...s }));
+    }
+    skillMarketSignalsBySkillId.set(item.skillId, recordedList);
+  }
+
+  // 1. Get Top Emerging Skills (trajectory & scarcity ranking)
+  app.get('/api/v1/skills/forecast/top-growth', async (req: FastifyRequest, reply: FastifyReply) => {
+    const query = TopEmergingSkillsQuerySchema.parse(req.query);
+    const limit = query.limit ?? 10;
+
+    const skillsWithForecasts: Array<{
+      skillId: string;
+      skillName: string;
+      forecast: SkillForecast;
+    }> = [];
+
+    for (const skill of skillsById.values()) {
+      let signals = skillMarketSignalsBySkillId.get(skill.id) || [];
+      if (signals.length === 0) {
+        signals = [
+          recordSkillMarketSignal({
+            skillId: skill.id,
+            demandPostingsCount: 50,
+            activeCandidatesCount: 50,
+            avgSalaryOffered: 100000,
+            geographicRegion: 'Global',
+            industry: 'Technology',
+          }),
+        ];
+        skillMarketSignalsBySkillId.set(skill.id, signals);
+      }
+
+      let forecast = skillForecastsBySkillId.get(skill.id);
+      if (!forecast) {
+        forecast = computeSkillForecast({
+          skillId: skill.id,
+          signals,
+          forecastHorizonMonths: 12,
+          skillCategory: skill.category,
+        });
+        skillForecastsBySkillId.set(skill.id, forecast);
+      }
+
+      skillsWithForecasts.push({
+        skillId: skill.id,
+        skillName: skill.name,
+        forecast,
+      });
+    }
+
+    const ranked = rankTopEmergingSkills(skillsWithForecasts, limit);
+
+    return reply.status(200).send({
+      topEmergingSkills: ranked,
+      total: ranked.length,
+    });
+  });
+
+  // 2. Record Real-time Labor Market Signal for a Skill
+  app.post('/api/v1/skills/:skillId/market-signals', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { skillId } = req.params;
+
+    const skill = skillsById.get(skillId);
+    if (!skill) {
+      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+    }
+
+    const input = RecordSkillMarketSignalInputSchema.parse(req.body);
+
+    const signal = recordSkillMarketSignal({
+      skillId,
+      demandPostingsCount: input.demandPostingsCount,
+      activeCandidatesCount: input.activeCandidatesCount,
+      avgSalaryOffered: input.avgSalaryOffered,
+      geographicRegion: input.geographicRegion,
+      industry: input.industry,
+    });
+
+    const list = skillMarketSignalsBySkillId.get(skillId) || [];
+    list.push(signal);
+    skillMarketSignalsBySkillId.set(skillId, list);
+
+    // Invalidate cached forecast so subsequent reads compute fresh metrics
+    skillForecastsBySkillId.delete(skillId);
+
+    enqueuedWorkerJobs.push({
+      type: 'skill.market_signal_recorded',
+      payload: {
+        signalId: signal.id,
+        skillId,
+        demandPostingsCount: signal.demandPostingsCount,
+        activeCandidatesCount: signal.activeCandidatesCount,
+        recordedByUserId: session.userId,
+      },
+      enqueuedAt: signal.recordedAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Skill market signal recorded successfully.',
+      signal,
+    });
+  });
+
+  // 3. Query 12-Month (or custom) Skill Supply/Demand Forecast
+  app.get('/api/v1/skills/:skillId/forecast', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+    const { skillId } = req.params;
+
+    const skill = skillsById.get(skillId);
+    if (!skill) {
+      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+    }
+
+    const query = QuerySkillForecastInputSchema.parse(req.query);
+    const horizon = query.forecastHorizonMonths ?? 12;
+
+    let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+    if (signals.length === 0) {
+      const baseline = recordSkillMarketSignal({
+        skillId,
+        demandPostingsCount: 100,
+        activeCandidatesCount: 80,
+        avgSalaryOffered: 110000,
+        geographicRegion: 'Global',
+        industry: 'Technology',
+      });
+      signals = [baseline];
+      skillMarketSignalsBySkillId.set(skillId, signals);
+    }
+
+    const prevForecast = skillForecastsBySkillId.get(skillId);
+    const forecast = computeSkillForecast({
+      skillId,
+      signals,
+      forecastHorizonMonths: horizon,
+      skillCategory: skill.category,
+      previousForecast: prevForecast,
+    });
+
+    skillForecastsBySkillId.set(skillId, forecast);
+
+    return reply.status(200).send({
+      skillId,
+      skillName: skill.name,
+      category: skill.category,
+      forecast,
+    });
+  });
+
+  // 4. Generate/Recompute Skill Forecast (Admin / Recruiter / On-demand)
+  app.post('/api/v1/skills/:skillId/forecast/generate', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { skillId } = req.params;
+
+    const skill = skillsById.get(skillId);
+    if (!skill) {
+      throw new DomainError('NOT_FOUND', `Skill with ID "${skillId}" not found.`);
+    }
+
+    const input = GenerateSkillForecastInputSchema.parse(req.body);
+
+    let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+    if (signals.length === 0) {
+      const baseline = recordSkillMarketSignal({
+        skillId,
+        demandPostingsCount: 100,
+        activeCandidatesCount: 80,
+        avgSalaryOffered: 110000,
+        geographicRegion: 'Global',
+        industry: 'Technology',
+      });
+      signals = [baseline];
+      skillMarketSignalsBySkillId.set(skillId, signals);
+    }
+
+    const prevForecast = skillForecastsBySkillId.get(skillId);
+    const forecast = computeSkillForecast({
+      skillId,
+      signals,
+      forecastHorizonMonths: input.forecastHorizonMonths,
+      skillCategory: input.skillCategory || skill.category,
+      prerequisiteDepth: input.prerequisiteDepth,
+      previousForecast: prevForecast,
+    });
+
+    skillForecastsBySkillId.set(skillId, forecast);
+
+    enqueuedWorkerJobs.push({
+      type: 'skill.forecast_generated',
+      payload: {
+        skillId,
+        horizonMonths: forecast.forecastHorizonMonths,
+        demandGrowthPct: forecast.demandGrowthPct,
+        scarcityIndex: forecast.scarcityIndex,
+        generatedByUserId: session.userId,
+      },
+      enqueuedAt: forecast.generatedAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Skill forecast generated successfully.',
+      skillId,
+      skillName: skill.name,
+      forecast,
     });
   });
 

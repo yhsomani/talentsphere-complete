@@ -302,6 +302,23 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('leadership_score NUMERIC(5, 2)');
     expect(sql).toContain('UNIQUE(organization_id, reviewer_id)');
   });
+
+  it('contains and validates migration 00035 skill forecasting schema (F-151)', () => {
+    const migrationFile35 = path.join(migrationsDir, '00035_skill_forecasting_schema.sql');
+    expect(fs.existsSync(migrationFile35)).toBe(true);
+    const sql = fs.readFileSync(migrationFile35, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skill_market_signals');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.skill_forecasts');
+    expect(sql).toContain('ALTER TABLE public.skill_market_signals ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.skill_forecasts ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('demand_growth_pct NUMERIC(6, 2)');
+    expect(sql).toContain('supply_growth_pct NUMERIC(6, 2)');
+    expect(sql).toContain('scarcity_index NUMERIC(4, 3)');
+    expect(sql).toContain('projected_median_salary NUMERIC(12, 2)');
+    expect(sql).toContain('confidence_level NUMERIC(4, 3)');
+    expect(sql).toContain('historical_accuracy_mape NUMERIC(5, 2)');
+    expect(sql).toContain('UNIQUE(skill_id, forecast_horizon_months)');
+  });
 });
 
 
