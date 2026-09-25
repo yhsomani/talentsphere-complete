@@ -36,6 +36,7 @@ export * from './reputation-engine.js';
 export * from './warm-introductions.js';
 export * from './referral-requests.js';
 export * from './activity-contributions.js';
+export * from './instructor-reputation.js';
 
 export type Role =
   | 'candidate'

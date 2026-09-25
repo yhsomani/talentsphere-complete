@@ -245,6 +245,19 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.search_history ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('idx_search_history_user_created');
   });
+
+  it('contains and validates migration 00031 instructor reputation schema (F-148)', () => {
+    const migrationFile31 = path.join(migrationsDir, '00031_instructor_reputation_schema.sql');
+    expect(fs.existsSync(migrationFile31)).toBe(true);
+    const sql = fs.readFileSync(migrationFile31, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.instructor_reputation_breakdown');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.instructor_endorsements');
+    expect(sql).toContain('ALTER TABLE public.instructor_reputation_breakdown ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.instructor_endorsements ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('course_quality_score NUMERIC(5, 2)');
+    expect(sql).toContain('teaching_effectiveness_score NUMERIC(5, 2)');
+    expect(sql).toContain('community_standing_score NUMERIC(5, 2)');
+  });
 });
 
 

@@ -246,6 +246,14 @@ import {
   recordActivityEvent,
   calculateContributionScores,
   determineEngagementBand,
+  InstructorReputationProfile,
+  InstructorReputationFactors,
+  InstructorOperationalMetrics,
+  InstructorEndorsement,
+  InstructorReviewInput,
+  calculateInstructorReputation,
+  createInstructorEndorsement,
+  trimOutlierReviews,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -341,6 +349,9 @@ import {
   RespondReferralRequestInputSchema,
   RecordActivityEventInputSchema,
   QueryActivityEventsInputSchema,
+  SubmitInstructorMetricsInputSchema,
+  CreateInstructorEndorsementInputSchema,
+  SubmitInstructorReviewInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -3013,6 +3024,194 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Reputation scores recomputed successfully.',
       updatedCount,
+    });
+  });
+
+  // Instructor Reputation System (F-148, F-72, F-144)
+  const instructorBreakdownsById = new Map<string, InstructorReputationProfile>();
+  const instructorEndorsementsByInstructorId = new Map<string, InstructorEndorsement[]>();
+  const instructorOperationalMetricsById = new Map<string, InstructorOperationalMetrics>();
+
+  function getOrCreateInstructorMetrics(instructorId: string): InstructorOperationalMetrics {
+    let metrics = instructorOperationalMetricsById.get(instructorId);
+    if (!metrics) {
+      metrics = {
+        instructorId,
+        reviews: [],
+        completionRate: 75.0,
+        daysSinceLastCourseUpdate: 30,
+        avgQaResponseHours: 12.0,
+        qaAnsweredRate: 90.0,
+        activeCoursesCount: 1,
+        peerEndorsementCount: (instructorEndorsementsByInstructorId.get(instructorId) || []).length,
+      };
+      instructorOperationalMetricsById.set(instructorId, metrics);
+    }
+    return metrics;
+  }
+
+  // 1. Get Transparent Instructor Reputation Breakdown (F-148)
+  app.get('/api/v1/reputation/instructors/:instructorId', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+    const { instructorId } = req.params;
+    let profile = instructorBreakdownsById.get(instructorId);
+    if (!profile) {
+      const metrics = getOrCreateInstructorMetrics(instructorId);
+      profile = calculateInstructorReputation(metrics);
+      instructorBreakdownsById.set(instructorId, profile);
+    }
+
+    return reply.status(200).send({
+      instructorId: profile.instructorId,
+      compositeScore: profile.compositeScore,
+      band: profile.band,
+      factors: profile.factors,
+      reviewCount: profile.reviewCount,
+      completionRate: profile.completionRate,
+      avgQaResponseHours: profile.avgQaResponseHours,
+      endorsementCount: profile.endorsementCount,
+      coursesCount: profile.coursesCount,
+      lastCalculatedAt: profile.lastCalculatedAt,
+    });
+  });
+
+  // 2. Submit Operational Telemetry / Metrics (Instructor or Admin)
+  app.post('/api/v1/reputation/instructors/:instructorId/metrics', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { instructorId } = req.params;
+    const input = SubmitInstructorMetricsInputSchema.parse(req.body);
+
+    const isSelf = session.userId === instructorId;
+    const isAdmin = session.roles.includes('platform_admin');
+    if (!isSelf && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only the instructor or platform administrator can update operational metrics.');
+    }
+
+    const endorsements = instructorEndorsementsByInstructorId.get(instructorId) || [];
+    const existing = getOrCreateInstructorMetrics(instructorId);
+    const updatedMetrics: InstructorOperationalMetrics = {
+      instructorId,
+      reviews: input.reviews
+        ? input.reviews.map((r) => ({
+            id: r.id,
+            rating: r.rating,
+            isVerifiedEnrollment: r.isVerifiedEnrollment,
+            createdAt: r.createdAt || new Date().toISOString(),
+          }))
+        : existing.reviews,
+      completionRate: input.completionRate,
+      daysSinceLastCourseUpdate: input.daysSinceLastCourseUpdate,
+      avgQaResponseHours: input.avgQaResponseHours,
+      qaAnsweredRate: input.qaAnsweredRate,
+      activeCoursesCount: input.activeCoursesCount,
+      peerEndorsementCount: endorsements.length,
+    };
+
+    instructorOperationalMetricsById.set(instructorId, updatedMetrics);
+    const profile = calculateInstructorReputation(updatedMetrics);
+    instructorBreakdownsById.set(instructorId, profile);
+
+    enqueuedWorkerJobs.push({
+      type: 'instructor.reputation.updated',
+      payload: { instructorId, compositeScore: profile.compositeScore, band: profile.band },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Instructor metrics submitted and reputation profile recomputed successfully.',
+      profile,
+    });
+  });
+
+  // 3. Endorse an Instructor (Peer Instructor or Admin)
+  app.post('/api/v1/reputation/instructors/:instructorId/endorse', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { instructorId } = req.params;
+    const input = CreateInstructorEndorsementInputSchema.parse(req.body || {});
+
+    const endorsement = createInstructorEndorsement({
+      instructorId,
+      endorserId: session.userId,
+      endorserRoles: session.roles,
+      skillDomain: input.skillDomain,
+      notes: input.notes,
+    });
+
+    const list = instructorEndorsementsByInstructorId.get(instructorId) || [];
+    const alreadyEndorsed = list.some(
+      (e) => e.endorserId === session.userId && e.skillDomain === endorsement.skillDomain
+    );
+    if (alreadyEndorsed) {
+      throw new DomainError('CONFLICT', 'You have already endorsed this instructor for this skill domain.');
+    }
+
+    list.push(endorsement);
+    instructorEndorsementsByInstructorId.set(instructorId, list);
+
+    const metrics = getOrCreateInstructorMetrics(instructorId);
+    metrics.peerEndorsementCount = list.length;
+    const profile = calculateInstructorReputation(metrics);
+    instructorBreakdownsById.set(instructorId, profile);
+
+    auditLogs.push({
+      event: 'instructor.endorsed',
+      actorId: session.userId,
+      targetId: instructorId,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Instructor endorsed successfully.',
+      endorsement,
+      profile,
+    });
+  });
+
+  // 4. Submit Student Review with Anti-Manipulation Outlier Trimming
+  app.post('/api/v1/reputation/instructors/:instructorId/reviews', async (req: FastifyRequest<{ Params: { instructorId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { instructorId } = req.params;
+    const input = SubmitInstructorReviewInputSchema.parse(req.body);
+
+    if (session.userId === instructorId) {
+      throw new DomainError('FORBIDDEN', 'Instructors cannot review themselves.');
+    }
+
+    const metrics = getOrCreateInstructorMetrics(instructorId);
+    metrics.reviews.push({
+      id: crypto.randomUUID(),
+      rating: input.rating,
+      isVerifiedEnrollment: input.isVerifiedEnrollment,
+      createdAt: new Date().toISOString(),
+    });
+
+    const profile = calculateInstructorReputation(metrics);
+    instructorBreakdownsById.set(instructorId, profile);
+
+    return reply.status(201).send({
+      message: 'Review recorded and reputation recalculated.',
+      factorBreakdown: profile.factors,
+      compositeScore: profile.compositeScore,
+      band: profile.band,
+    });
+  });
+
+  // 5. Nightly Batch Recalculation (SSOT F-148 Acceptance)
+  app.post('/api/v1/reputation/instructors/recompute', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    let recomputedCount = 0;
+    for (const [instId, metrics] of instructorOperationalMetricsById.entries()) {
+      const endorsements = instructorEndorsementsByInstructorId.get(instId) || [];
+      metrics.peerEndorsementCount = endorsements.length;
+      const profile = calculateInstructorReputation(metrics);
+      instructorBreakdownsById.set(instId, profile);
+      recomputedCount++;
+    }
+
+    return reply.status(200).send({
+      message: 'Nightly instructor reputation batch recomputed successfully.',
+      recomputedCount,
     });
   });
 

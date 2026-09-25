@@ -1099,15 +1099,41 @@ export const QueryActivityEventsInputSchema = z.object({
 
 export type QueryActivityEventsInput = z.infer<typeof QueryActivityEventsInputSchema>;
 
+/**
+ * Instructor Reputation System Contracts (F-148, F-72, F-144)
+ */
+export const SubmitInstructorMetricsInputSchema = z.object({
+  completionRate: z.number().min(0).max(100),
+  daysSinceLastCourseUpdate: z.number().int().min(0),
+  avgQaResponseHours: z.number().min(0).max(720),
+  qaAnsweredRate: z.number().min(0).max(100),
+  activeCoursesCount: z.number().int().min(0),
+  reviews: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        rating: z.number().min(1).max(5),
+        isVerifiedEnrollment: z.boolean(),
+        createdAt: z.string().datetime().optional(),
+      })
+    )
+    .optional(),
+});
 
+export type SubmitInstructorMetricsInput = z.infer<typeof SubmitInstructorMetricsInputSchema>;
 
+export const CreateInstructorEndorsementInputSchema = z.object({
+  skillDomain: z.string().min(1).max(50).default('general'),
+  notes: z.string().max(1000).optional(),
+});
 
+export type CreateInstructorEndorsementInput = z.infer<typeof CreateInstructorEndorsementInputSchema>;
 
+export const SubmitInstructorReviewInputSchema = z.object({
+  rating: z.number().min(1).max(5),
+  isVerifiedEnrollment: z.boolean().default(true),
+  feedback: z.string().max(2000).optional(),
+});
 
-
-
-
-
-
-
+export type SubmitInstructorReviewInput = z.infer<typeof SubmitInstructorReviewInputSchema>;
 
