@@ -1223,3 +1223,30 @@ export const RespondAlumniMentorshipInputSchema = z.object({
 
 export type RespondAlumniMentorshipInput = z.infer<typeof RespondAlumniMentorshipInputSchema>;
 
+/**
+ * Employer Reputation & Brand System Contracts (F-149, F-75, F-56, F-144)
+ */
+export const SubmitEmployerReviewInputSchema = z.object({
+  employmentStatus: z.enum(['current', 'former', 'candidate']),
+  hiringRating: z.number().min(1).max(5),
+  cultureRating: z.number().min(1).max(5),
+  growthRating: z.number().min(1).max(5),
+  compensationRating: z.number().min(1).max(5),
+  leadershipRating: z.number().min(1).max(5),
+  title: z.string().min(1).max(200),
+  feedback: z.string().max(3000).optional(),
+  isVerifiedEmployee: z.boolean().default(false),
+});
+
+export type SubmitEmployerReviewInput = z.infer<typeof SubmitEmployerReviewInputSchema>;
+
+export const SubmitEmployerMetricsInputSchema = z.object({
+  avgTimeToHireDays: z.number().min(1).max(365).optional(),
+  offerAcceptanceRate: z.number().min(0).max(100).optional(),
+  offerRescindedRate: z.number().min(0).max(100).optional(),
+  salaryTransparencyIndex: z.number().min(0).max(100).optional(),
+  internalPromotionRate: z.number().min(0).max(100).optional(),
+});
+
+export type SubmitEmployerMetricsInput = z.infer<typeof SubmitEmployerMetricsInputSchema>;
+

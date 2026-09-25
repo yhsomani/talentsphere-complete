@@ -286,6 +286,22 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('idx_alumni_affiliations_lookup');
     expect(sql).toContain('CHECK (mentor_id != mentee_id)');
   });
+
+  it('contains and validates migration 00034 employer reputation schema (F-149)', () => {
+    const migrationFile34 = path.join(migrationsDir, '00034_employer_reputation_schema.sql');
+    expect(fs.existsSync(migrationFile34)).toBe(true);
+    const sql = fs.readFileSync(migrationFile34, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.employer_reputation_breakdown');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.employer_reviews');
+    expect(sql).toContain('ALTER TABLE public.employer_reputation_breakdown ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.employer_reviews ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('hiring_score NUMERIC(5, 2)');
+    expect(sql).toContain('culture_score NUMERIC(5, 2)');
+    expect(sql).toContain('growth_score NUMERIC(5, 2)');
+    expect(sql).toContain('compensation_reliability_score NUMERIC(5, 2)');
+    expect(sql).toContain('leadership_score NUMERIC(5, 2)');
+    expect(sql).toContain('UNIQUE(organization_id, reviewer_id)');
+  });
 });
 
 

@@ -39,6 +39,7 @@ export * from './activity-contributions.js';
 export * from './instructor-reputation.js';
 export * from './peer-credibility.js';
 export * from './alumni-networks.js';
+export * from './employer-reputation.js';
 
 export type Role =
   | 'candidate'

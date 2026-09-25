@@ -275,6 +275,14 @@ import {
   joinAlumniGroup,
   createAlumniMentorshipRequest,
   respondToAlumniMentorship,
+  EmployerReputationBand,
+  EmployerFactorBreakdown,
+  EmployerReputationProfile,
+  EmployerReview,
+  EmployerOperationalMetrics,
+  calculateEmployerReputation,
+  createEmployerReview,
+  trimOutlierEmployerReviews,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -383,6 +391,8 @@ import {
   JoinAlumniGroupInputSchema,
   RequestAlumniMentorshipInputSchema,
   RespondAlumniMentorshipInputSchema,
+  SubmitEmployerReviewInputSchema,
+  SubmitEmployerMetricsInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -3243,6 +3253,165 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Nightly instructor reputation batch recomputed successfully.',
       recomputedCount,
+    });
+  });
+
+  // =========================================================================
+  // Employer Reputation & Brand System Repositories & Endpoints (F-149, F-75, F-56, F-144)
+  // =========================================================================
+  const employerReputationProfilesById = new Map<string, EmployerReputationProfile>();
+  const employerReviewsByOrgId = new Map<string, EmployerReview[]>();
+  const employerReviewsById = new Map<string, EmployerReview>();
+  const employerMetricsByOrgId = new Map<string, EmployerOperationalMetrics>();
+
+  // 1. Get Employer Reputation Profile & Factor Breakdown
+  app.get('/api/v1/reputation/organizations/:organizationId', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+    const { organizationId } = req.params;
+
+    const org = organizationsById.get(organizationId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+    }
+
+    let profile = employerReputationProfilesById.get(organizationId);
+    if (!profile) {
+      const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const metrics = employerMetricsByOrgId.get(organizationId) || {};
+      profile = calculateEmployerReputation({ organizationId, reviews, metrics });
+      employerReputationProfilesById.set(organizationId, profile);
+    }
+
+    return reply.status(200).send({ profile });
+  });
+
+  // 2. Submit Employer Review
+  app.post('/api/v1/reputation/organizations/:organizationId/reviews', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { organizationId } = req.params;
+
+    const org = organizationsById.get(organizationId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+    }
+
+    const input = SubmitEmployerReviewInputSchema.parse(req.body);
+
+    const reviews = employerReviewsByOrgId.get(organizationId) || [];
+    const existing = reviews.find((r) => r.reviewerId === session.userId);
+    if (existing) {
+      throw new DomainError('CONFLICT', 'You have already submitted a review for this employer.');
+    }
+
+    const memberships = orgMembershipsByOrgId.get(organizationId) || [];
+    const userMembership = memberships.find((m) => m.userId === session.userId);
+    const isOwnerOrRecruiter = userMembership?.role === 'owner' || userMembership?.role === 'admin';
+    const isVerifiedEmployee = input.isVerifiedEmployee || !!userMembership;
+
+    const review = createEmployerReview({
+      organizationId,
+      reviewerId: session.userId,
+      employmentStatus: input.employmentStatus,
+      hiringRating: input.hiringRating,
+      cultureRating: input.cultureRating,
+      growthRating: input.growthRating,
+      compensationRating: input.compensationRating,
+      leadershipRating: input.leadershipRating,
+      title: input.title,
+      feedback: input.feedback,
+      isVerifiedEmployee,
+      isOrgRecruiterOrOwner: isOwnerOrRecruiter && input.employmentStatus === 'candidate',
+    });
+
+    employerReviewsById.set(review.id, review);
+    reviews.unshift(review);
+    employerReviewsByOrgId.set(organizationId, reviews);
+
+    const metrics = employerMetricsByOrgId.get(organizationId) || {};
+    const profile = calculateEmployerReputation({ organizationId, reviews, metrics });
+    employerReputationProfilesById.set(organizationId, profile);
+
+    // Sync to multi-context reputation engine (F-144)
+    reputationScoresByUserContextDomain.set(`${organizationId}:employer:general`, {
+      id: crypto.randomUUID(),
+      userId: organizationId,
+      context: 'employer',
+      domain: 'general',
+      score: profile.overallScore,
+      band: determineReputationBand(profile.overallScore),
+      confidenceScore: Math.min(1.0, 0.5 + reviews.length * 0.05),
+      signalCount: reviews.length,
+      lastCalculatedAt: profile.updatedAt,
+      createdAt: profile.updatedAt,
+      updatedAt: profile.updatedAt,
+    });
+
+    enqueuedWorkerJobs.push({
+      type: 'employer.reputation.updated',
+      payload: {
+        organizationId,
+        reviewId: review.id,
+        overallScore: profile.overallScore,
+        band: profile.reputationBand,
+      },
+      enqueuedAt: review.createdAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Employer review submitted and reputation recalculated.',
+      review,
+      profile,
+    });
+  });
+
+  // 3. Submit Operational Metrics for Employer
+  app.post('/api/v1/reputation/organizations/:organizationId/metrics', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { organizationId } = req.params;
+
+    const org = organizationsById.get(organizationId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+    }
+
+    const memberships = orgMembershipsByOrgId.get(organizationId) || [];
+    const isMember = memberships.some((m) => m.userId === session.userId);
+    const isPlatformAdmin = session.roles.includes('platform_admin');
+    if (!isMember && !isPlatformAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access denied to submit operational metrics for this employer.');
+    }
+
+    const input = SubmitEmployerMetricsInputSchema.parse(req.body);
+    const currentMetrics = employerMetricsByOrgId.get(organizationId) || {};
+    const updatedMetrics: EmployerOperationalMetrics = {
+      ...currentMetrics,
+      ...input,
+    };
+    employerMetricsByOrgId.set(organizationId, updatedMetrics);
+
+    const reviews = employerReviewsByOrgId.get(organizationId) || [];
+    const profile = calculateEmployerReputation({ organizationId, reviews, metrics: updatedMetrics });
+    employerReputationProfilesById.set(organizationId, profile);
+
+    return reply.status(200).send({
+      message: 'Employer operational metrics updated and reputation recalculated.',
+      profile,
+    });
+  });
+
+  // 4. List Reviews for Employer
+  app.get('/api/v1/reputation/organizations/:organizationId/reviews', async (req: FastifyRequest<{ Params: { organizationId: string } }>, reply: FastifyReply) => {
+    const { organizationId } = req.params;
+
+    const org = organizationsById.get(organizationId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', `Organization with ID "${organizationId}" not found.`);
+    }
+
+    const reviews = employerReviewsByOrgId.get(organizationId) || [];
+    return reply.status(200).send({
+      organizationId,
+      reviews,
+      total: reviews.length,
     });
   });
 
