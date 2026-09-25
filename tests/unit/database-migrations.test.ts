@@ -270,6 +270,22 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('endorser_credibility NUMERIC(4, 3)');
     expect(sql).toContain('final_weight NUMERIC(5, 3)');
   });
+
+  it('contains and validates migration 00033 alumni networks schema (F-125)', () => {
+    const migrationFile33 = path.join(migrationsDir, '00033_alumni_networks_schema.sql');
+    expect(fs.existsSync(migrationFile33)).toBe(true);
+    const sql = fs.readFileSync(migrationFile33, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.alumni_affiliations');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.alumni_groups');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.alumni_group_members');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.alumni_mentorship');
+    expect(sql).toContain('ALTER TABLE public.alumni_affiliations ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.alumni_groups ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.alumni_group_members ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.alumni_mentorship ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('idx_alumni_affiliations_lookup');
+    expect(sql).toContain('CHECK (mentor_id != mentee_id)');
+  });
 });
 
 

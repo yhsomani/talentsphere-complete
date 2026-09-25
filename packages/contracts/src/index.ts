@@ -1160,3 +1160,66 @@ export const QuerySkillEndorsementsInputSchema = z.object({
 
 export type QuerySkillEndorsementsInput = z.infer<typeof QuerySkillEndorsementsInputSchema>;
 
+/**
+ * Alumni Networks Contracts (F-125, F-12, F-09, F-40)
+ */
+export const CreateAlumniAffiliationInputSchema = z.object({
+  institutionId: z.string().uuid(),
+  degreeType: z.enum(['bachelors', 'masters', 'phd', 'bootcamp', 'certification', 'other']),
+  fieldOfStudy: z.string().min(1).max(200),
+  graduationYear: z.number().int().min(1950).max(2050),
+  verificationMethod: z
+    .enum(['email_domain', 'institutional_seat', 'manual_review', 'unverified'])
+    .default('unverified'),
+});
+
+export type CreateAlumniAffiliationInput = z.infer<typeof CreateAlumniAffiliationInputSchema>;
+
+export const VerifyAlumniAffiliationInputSchema = z.object({
+  verificationMethod: z.enum(['email_domain', 'institutional_seat']),
+  seatCode: z.string().optional(),
+});
+
+export type VerifyAlumniAffiliationInput = z.infer<typeof VerifyAlumniAffiliationInputSchema>;
+
+export const QueryAlumniDirectoryInputSchema = z.object({
+  graduationYear: z.coerce.number().int().min(1950).max(2050).optional(),
+  minGraduationYear: z.coerce.number().int().min(1950).max(2050).optional(),
+  maxGraduationYear: z.coerce.number().int().min(1950).max(2050).optional(),
+  fieldOfStudy: z.string().optional(),
+  degreeType: z
+    .enum(['bachelors', 'masters', 'phd', 'bootcamp', 'certification', 'other'])
+    .optional(),
+  search: z.string().optional(),
+});
+
+export type QueryAlumniDirectoryInput = z.infer<typeof QueryAlumniDirectoryInputSchema>;
+
+export const CreateAlumniGroupInputSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional(),
+  chapterLocation: z.string().max(200).default('Global'),
+});
+
+export type CreateAlumniGroupInput = z.infer<typeof CreateAlumniGroupInputSchema>;
+
+export const JoinAlumniGroupInputSchema = z.object({
+  role: z.enum(['member', 'moderator']).default('member'),
+});
+
+export type JoinAlumniGroupInput = z.infer<typeof JoinAlumniGroupInputSchema>;
+
+export const RequestAlumniMentorshipInputSchema = z.object({
+  mentorId: z.string().uuid(),
+  institutionId: z.string().uuid(),
+  focusAreas: z.array(z.string().min(1).max(100)).max(10).optional(),
+});
+
+export type RequestAlumniMentorshipInput = z.infer<typeof RequestAlumniMentorshipInputSchema>;
+
+export const RespondAlumniMentorshipInputSchema = z.object({
+  action: z.enum(['accept', 'decline', 'complete']),
+});
+
+export type RespondAlumniMentorshipInput = z.infer<typeof RespondAlumniMentorshipInputSchema>;
+

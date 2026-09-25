@@ -260,6 +260,21 @@ import {
   computeEndorsementWeight,
   revokeSkillEndorsement,
   aggregateSkillEndorsements,
+  AlumniDegreeType,
+  AlumniVerificationMethod,
+  AlumniVerificationStatus,
+  AlumniAffiliation,
+  AlumniGroup,
+  AlumniGroupMember,
+  AlumniMentorshipStatus,
+  AlumniMentorshipRequest,
+  createAlumniAffiliation,
+  verifyAffiliationBySeatCode,
+  filterAlumniDirectory,
+  createAlumniGroup,
+  joinAlumniGroup,
+  createAlumniMentorshipRequest,
+  respondToAlumniMentorship,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -361,6 +376,13 @@ import {
   CreateSkillEndorsementInputSchema,
   RevokeSkillEndorsementInputSchema,
   QuerySkillEndorsementsInputSchema,
+  CreateAlumniAffiliationInputSchema,
+  VerifyAlumniAffiliationInputSchema,
+  QueryAlumniDirectoryInputSchema,
+  CreateAlumniGroupInputSchema,
+  JoinAlumniGroupInputSchema,
+  RequestAlumniMentorshipInputSchema,
+  RespondAlumniMentorshipInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -5628,6 +5650,443 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       endorsements: history,
       weeklyQuotaRemaining: Math.max(0, 5 - weeklyGiven),
       totalGiven: history.length,
+    });
+  });
+
+  // =========================================================================
+  // Alumni Networks Repositories & Endpoints (F-125, F-12, F-09, F-40)
+  // =========================================================================
+  const alumniAffiliationsById = new Map<string, AlumniAffiliation>();
+  const alumniAffiliationsByUserId = new Map<string, AlumniAffiliation[]>();
+  const alumniAffiliationsByInstitutionId = new Map<string, AlumniAffiliation[]>();
+  const alumniGroupsById = new Map<string, AlumniGroup>();
+  const alumniGroupsByInstitutionId = new Map<string, AlumniGroup[]>();
+  const alumniGroupMembersByGroupId = new Map<string, AlumniGroupMember[]>();
+  const alumniMentorshipRequestsById = new Map<string, AlumniMentorshipRequest>();
+  const alumniMentorshipByInstitutionId = new Map<string, AlumniMentorshipRequest[]>();
+
+  function getUserVerifiedInstitutions(userId: string): string[] {
+    const userAffiliations = alumniAffiliationsByUserId.get(userId) || [];
+    return userAffiliations
+      .filter((aff) => aff.verificationStatus === 'verified')
+      .map((aff) => aff.institutionId);
+  }
+
+  // 1. Submit Alumni Affiliation
+  app.post('/api/v1/alumni/affiliations', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateAlumniAffiliationInputSchema.parse(req.body);
+
+    const org = organizationsById.get(input.institutionId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', 'Institution not found.');
+    }
+
+    const userAffs = alumniAffiliationsByUserId.get(session.userId) || [];
+    const duplicate = userAffs.find(
+      (a) =>
+        a.institutionId === input.institutionId &&
+        a.degreeType === input.degreeType &&
+        a.graduationYear === input.graduationYear
+    );
+    if (duplicate) {
+      throw new DomainError(
+        'CONFLICT',
+        'An affiliation with this degree and graduation year already exists for this institution.'
+      );
+    }
+
+    const user = usersById.get(session.userId);
+    const userEmail = user?.email || session.email;
+    const institutionDomain = org.website
+      ? org.website.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase()
+      : undefined;
+
+    const affiliation = createAlumniAffiliation({
+      userId: session.userId,
+      institutionId: input.institutionId,
+      degreeType: input.degreeType,
+      fieldOfStudy: input.fieldOfStudy,
+      graduationYear: input.graduationYear,
+      verificationMethod: input.verificationMethod,
+      userEmail,
+      institutionDomain,
+    });
+
+    alumniAffiliationsById.set(affiliation.id, affiliation);
+
+    userAffs.unshift(affiliation);
+    alumniAffiliationsByUserId.set(session.userId, userAffs);
+
+    const instAffs = alumniAffiliationsByInstitutionId.get(affiliation.institutionId) || [];
+    instAffs.unshift(affiliation);
+    alumniAffiliationsByInstitutionId.set(affiliation.institutionId, instAffs);
+
+    enqueuedWorkerJobs.push({
+      type: 'alumni.affiliation.created',
+      payload: {
+        affiliationId: affiliation.id,
+        userId: affiliation.userId,
+        institutionId: affiliation.institutionId,
+        status: affiliation.verificationStatus,
+      },
+      enqueuedAt: affiliation.createdAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Alumni affiliation submitted successfully.',
+      affiliation,
+    });
+  });
+
+  // 2. Verify Alumni Affiliation (by email domain match or seat code)
+  app.post('/api/v1/alumni/affiliations/:id/verify', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = VerifyAlumniAffiliationInputSchema.parse(req.body);
+
+    const affiliation = alumniAffiliationsById.get(id);
+    if (!affiliation) {
+      throw new DomainError('NOT_FOUND', 'Alumni affiliation not found.');
+    }
+
+    const isOwner = affiliation.userId === session.userId;
+    const isAdmin = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+    if (!isOwner && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access denied to verify this affiliation.');
+    }
+
+    if (input.verificationMethod === 'email_domain') {
+      const org = organizationsById.get(affiliation.institutionId);
+      const instDomain = org?.website
+        ? org.website.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase()
+        : '';
+      const user = usersById.get(affiliation.userId);
+      const userEmail = user?.email || session.email;
+      const emailParts = userEmail.split('@');
+      const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
+
+      if (!instDomain || (!userDomain.includes(instDomain) && !instDomain.includes(userDomain))) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          'User email domain does not match institution domain.'
+        );
+      }
+      affiliation.verificationStatus = 'verified';
+      affiliation.verificationMethod = 'email_domain';
+      affiliation.verifiedAt = new Date().toISOString();
+    } else if (input.verificationMethod === 'institutional_seat') {
+      if (!input.seatCode || input.seatCode.trim().length === 0) {
+        throw new DomainError('VALIDATION_FAILED', 'Institutional verification seat code is required.');
+      }
+      if (input.seatCode.trim().length < 4) {
+        throw new DomainError('VALIDATION_FAILED', 'Institutional verification seat code is invalid.');
+      }
+      affiliation.verificationStatus = 'verified';
+      affiliation.verificationMethod = 'institutional_seat';
+      affiliation.verifiedAt = new Date().toISOString();
+    }
+
+    alumniAffiliationsById.set(affiliation.id, affiliation);
+
+    enqueuedWorkerJobs.push({
+      type: 'alumni.affiliation.verified',
+      payload: {
+        affiliationId: affiliation.id,
+        userId: affiliation.userId,
+        institutionId: affiliation.institutionId,
+        method: affiliation.verificationMethod,
+      },
+      enqueuedAt: affiliation.verifiedAt,
+    });
+
+    return reply.status(200).send({
+      message: 'Alumni affiliation verified successfully.',
+      affiliation,
+    });
+  });
+
+  // 3. Get Authenticated User's Alumni Affiliations
+  app.get('/api/v1/alumni/affiliations/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userAffs = alumniAffiliationsByUserId.get(session.userId) || [];
+    return reply.status(200).send({
+      affiliations: userAffs,
+      total: userAffs.length,
+    });
+  });
+
+  // 4. Institutional Alumni Directory Discovery (Strict Cross-Institution Isolation BR-F125-03)
+  app.get('/api/v1/alumni/institutions/:institutionId/directory', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { institutionId } = req.params;
+
+    const org = organizationsById.get(institutionId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', 'Institution not found.');
+    }
+
+    const query = QueryAlumniDirectoryInputSchema.parse(req.query || {});
+    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+
+    if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
+      throw new DomainError(
+        'TENANT_ISOLATION_VIOLATION',
+        'Access denied: You must be a verified alumni or member of this institution to browse its directory.'
+      );
+    }
+
+    const instAffs = alumniAffiliationsByInstitutionId.get(institutionId) || [];
+    const enriched = instAffs.map((aff) => {
+      const userProfile = profilesByUserId.get(aff.userId);
+      const u = usersById.get(aff.userId);
+      return {
+        ...aff,
+        user: {
+          fullName: userProfile?.fullName || 'Alumni Member',
+          email: u?.email,
+        },
+      };
+    });
+
+    const callerInsts = isPrivileged && !userVerifiedInsts.includes(institutionId)
+      ? [institutionId, ...userVerifiedInsts]
+      : userVerifiedInsts;
+
+    const directory = filterAlumniDirectory({
+      callerUserId: session.userId,
+      callerVerifiedInstitutions: callerInsts,
+      targetInstitutionId: institutionId,
+      affiliations: enriched,
+      filters: query,
+    });
+
+    return reply.status(200).send({
+      institutionId,
+      directory,
+      total: directory.length,
+    });
+  });
+
+  // 5. Create Alumni Group
+  app.post('/api/v1/alumni/institutions/:institutionId/groups', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { institutionId } = req.params;
+
+    const org = organizationsById.get(institutionId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', 'Institution not found.');
+    }
+
+    const input = CreateAlumniGroupInputSchema.parse(req.body);
+    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+    const creatorInsts = isPrivileged && !userVerifiedInsts.includes(institutionId)
+      ? [institutionId, ...userVerifiedInsts]
+      : userVerifiedInsts;
+
+    const { group, creatorMembership } = createAlumniGroup({
+      institutionId,
+      name: input.name,
+      description: input.description,
+      chapterLocation: input.chapterLocation,
+      createdBy: session.userId,
+      creatorVerifiedInstitutions: creatorInsts,
+    });
+
+    alumniGroupsById.set(group.id, group);
+    const instGroups = alumniGroupsByInstitutionId.get(institutionId) || [];
+    instGroups.unshift(group);
+    alumniGroupsByInstitutionId.set(institutionId, instGroups);
+
+    const members = [creatorMembership];
+    alumniGroupMembersByGroupId.set(group.id, members);
+
+    return reply.status(201).send({
+      message: 'Alumni group created successfully.',
+      group,
+      membership: creatorMembership,
+    });
+  });
+
+  // 6. List Alumni Groups for Institution
+  app.get('/api/v1/alumni/institutions/:institutionId/groups', async (req: FastifyRequest<{ Params: { institutionId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { institutionId } = req.params;
+
+    const org = organizationsById.get(institutionId);
+    if (!org) {
+      throw new DomainError('NOT_FOUND', 'Institution not found.');
+    }
+
+    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+
+    if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
+      throw new DomainError(
+        'TENANT_ISOLATION_VIOLATION',
+        'Access denied: You must be a verified alumni or member of this institution to view groups.'
+      );
+    }
+
+    const groups = alumniGroupsByInstitutionId.get(institutionId) || [];
+    return reply.status(200).send({
+      institutionId,
+      groups,
+      total: groups.length,
+    });
+  });
+
+  // 7. Join Alumni Group
+  app.post('/api/v1/alumni/groups/:id/join', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const group = alumniGroupsById.get(id);
+    if (!group) {
+      throw new DomainError('NOT_FOUND', 'Alumni group not found.');
+    }
+
+    const input = JoinAlumniGroupInputSchema.parse(req.body || {});
+    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+    const userInsts = isPrivileged && !userVerifiedInsts.includes(group.institutionId)
+      ? [group.institutionId, ...userVerifiedInsts]
+      : userVerifiedInsts;
+
+    const members = alumniGroupMembersByGroupId.get(id) || [];
+    const existing = members.find((m) => m.userId === session.userId);
+    if (existing) {
+      return reply.status(200).send({
+        message: 'Already a member of this alumni group.',
+        membership: existing,
+      });
+    }
+
+    const membership = joinAlumniGroup({
+      groupId: id,
+      userId: session.userId,
+      groupInstitutionId: group.institutionId,
+      userVerifiedInstitutions: userInsts,
+      role: input.role,
+    });
+
+    members.push(membership);
+    alumniGroupMembersByGroupId.set(id, members);
+
+    return reply.status(200).send({
+      message: 'Joined alumni group successfully.',
+      membership,
+    });
+  });
+
+  // 8. List Members of Alumni Group
+  app.get('/api/v1/alumni/groups/:id/members', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const group = alumniGroupsById.get(id);
+    if (!group) {
+      throw new DomainError('NOT_FOUND', 'Alumni group not found.');
+    }
+
+    const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
+    const isPrivileged = session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+    if (!userVerifiedInsts.includes(group.institutionId) && !isPrivileged) {
+      throw new DomainError('TENANT_ISOLATION_VIOLATION', 'Access denied to group members.');
+    }
+
+    const members = alumniGroupMembersByGroupId.get(id) || [];
+    return reply.status(200).send({
+      groupId: id,
+      members,
+      total: members.length,
+    });
+  });
+
+  // 9. Request Alumni Mentorship
+  app.post('/api/v1/alumni/mentorship/request', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = RequestAlumniMentorshipInputSchema.parse(req.body);
+
+    if (input.mentorId === session.userId) {
+      throw new DomainError('FORBIDDEN', 'Cannot request mentorship from oneself');
+    }
+
+    const menteeInsts = getUserVerifiedInstitutions(session.userId);
+    const mentorInsts = getUserVerifiedInstitutions(input.mentorId);
+    const isPrivileged = session.roles.includes('platform_admin');
+    const effectiveMenteeInsts = isPrivileged && !menteeInsts.includes(input.institutionId)
+      ? [input.institutionId, ...menteeInsts]
+      : menteeInsts;
+
+    const mentorshipRequest = createAlumniMentorshipRequest({
+      mentorId: input.mentorId,
+      menteeId: session.userId,
+      institutionId: input.institutionId,
+      menteeVerifiedInstitutions: effectiveMenteeInsts,
+      mentorVerifiedInstitutions: mentorInsts,
+      focusAreas: input.focusAreas,
+    });
+
+    alumniMentorshipRequestsById.set(mentorshipRequest.id, mentorshipRequest);
+    const instMentorships = alumniMentorshipByInstitutionId.get(input.institutionId) || [];
+    instMentorships.unshift(mentorshipRequest);
+    alumniMentorshipByInstitutionId.set(input.institutionId, instMentorships);
+
+    enqueuedWorkerJobs.push({
+      type: 'alumni.mentorship.requested',
+      payload: {
+        mentorshipId: mentorshipRequest.id,
+        mentorId: mentorshipRequest.mentorId,
+        menteeId: mentorshipRequest.menteeId,
+        institutionId: mentorshipRequest.institutionId,
+      },
+      enqueuedAt: mentorshipRequest.requestedAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Alumni mentorship request submitted successfully.',
+      mentorshipRequest,
+    });
+  });
+
+  // 10. Respond to Alumni Mentorship (Accept, Decline, Complete)
+  app.post('/api/v1/alumni/mentorship/:id/respond', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = RespondAlumniMentorshipInputSchema.parse(req.body);
+
+    const request = alumniMentorshipRequestsById.get(id);
+    if (!request) {
+      throw new DomainError('NOT_FOUND', 'Mentorship request not found.');
+    }
+
+    const updated = respondToAlumniMentorship({
+      request,
+      responderId: session.userId,
+      action: input.action,
+    });
+
+    alumniMentorshipRequestsById.set(updated.id, updated);
+
+    return reply.status(200).send({
+      message: 'Mentorship request status updated successfully.',
+      mentorshipRequest: updated,
+    });
+  });
+
+  // 11. List Authenticated User's Mentorship Requests
+  app.get('/api/v1/alumni/mentorship/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userMentorships = Array.from(alumniMentorshipRequestsById.values()).filter(
+      (m) => m.mentorId === session.userId || m.menteeId === session.userId
+    );
+
+    return reply.status(200).send({
+      mentorships: userMentorships,
+      total: userMentorships.length,
     });
   });
 
