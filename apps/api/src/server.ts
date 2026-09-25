@@ -216,6 +216,17 @@ import {
   reviewInterviewAssessment,
   generateAdvisoryAiFeedback,
   executeInterviewCode,
+  ReputationContext,
+  ReputationBand,
+  ReputationSignalType,
+  ReputationSignal,
+  ReputationScore,
+  ReputationRecoveryPlan,
+  createReputationSignal,
+  calculateReputationScore,
+  determineReputationBand,
+  startReputationRecoveryPlan,
+  completeRecoveryTask,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -299,6 +310,10 @@ import {
   SubmitInterviewScorecardInputSchema,
   CompensateInterviewScorecardInputSchema,
   ExecuteInterviewCodeInputSchema,
+  AddReputationSignalInputSchema,
+  QueryReputationInputSchema,
+  StartRecoveryPlanInputSchema,
+  CompleteRecoveryTaskInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1120,6 +1135,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const interviewAssessmentsByCandidateId = new Map<string, InterviewAssessment[]>();
   const interviewScorecardsByAssessmentId = new Map<string, InterviewScorecard[]>();
   const interviewAiFeedbacksByAssessmentId = new Map<string, InterviewAiFeedback[]>();
+  const reputationSignalsByUserId = new Map<string, ReputationSignal[]>();
+  const reputationScoresByUserContextDomain = new Map<string, ReputationScore>();
+  const reputationRecoveryPlansById = new Map<string, ReputationRecoveryPlan>();
 
   // Organization Endpoints
   app.post('/api/v1/organizations', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -2791,6 +2809,184 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
 
     return reply.status(200).send({ assessment: reviewed });
+  });
+
+  // Multi-Context Reputation Engine Endpoints (F-144, S-03, BR-247..BR-254)
+  app.post('/api/v1/reputation/signals', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = AddReputationSignalInputSchema.parse(req.body);
+
+    const targetUserId = input.targetUserId || session.userId;
+    const targetUser = usersById.get(targetUserId);
+    if (!targetUser) {
+      throw new DomainError('NOT_FOUND', `User ${targetUserId} not found.`);
+    }
+
+    const signal = createReputationSignal({
+      userId: targetUserId,
+      sourceUserId: session.userId,
+      context: input.context,
+      domain: input.domain,
+      signalType: input.signalType,
+      rawValue: input.rawValue,
+      weight: input.weight,
+      decayHalfLifeDays: input.decayHalfLifeDays,
+      evidenceReferenceId: input.evidenceReferenceId,
+      notes: input.notes,
+    });
+
+    const userSignals = reputationSignalsByUserId.get(targetUserId) || [];
+    userSignals.push(signal);
+    reputationSignalsByUserId.set(targetUserId, userSignals);
+
+    // Compute updated score
+    const updatedScore = calculateReputationScore(targetUserId, signal.context, signal.domain, userSignals);
+    const scoreKey = `${targetUserId}:${signal.context}:${signal.domain}`;
+    reputationScoresByUserContextDomain.set(scoreKey, updatedScore);
+
+    auditLogs.push({
+      event: 'reputation.signal_added',
+      actorId: session.userId,
+      targetId: signal.id,
+      metadata: { targetUserId, context: signal.context, domain: signal.domain, newScore: updatedScore.score },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ signal, updatedScore });
+  });
+
+  app.get('/api/v1/reputation/users/:userId', async (req: FastifyRequest<{ Params: { userId: string }; Querystring: { context?: string; domain?: string } }>, reply: FastifyReply) => {
+    extractUser(req); // must be authenticated
+    const { userId } = req.params;
+    const { context, domain } = req.query;
+
+    const user = usersById.get(userId);
+    if (!user) {
+      throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+    }
+
+    const userSignals = reputationSignalsByUserId.get(userId) || [];
+    const prefix = `${userId}:`;
+    const matchingScores: ReputationScore[] = [];
+
+    // Ensure baseline score exists if no precomputed scores
+    if (userSignals.length === 0) {
+      const baseContext = (context as ReputationContext) || 'candidate';
+      const baseDomain = (domain || 'general').toLowerCase();
+      const baseScore = calculateReputationScore(userId, baseContext, baseDomain, []);
+      return reply.status(200).send({ scores: [baseScore] });
+    }
+
+    for (const [key, score] of reputationScoresByUserContextDomain.entries()) {
+      if (key.startsWith(prefix)) {
+        if (context && score.context !== context) continue;
+        if (domain && score.domain !== domain.toLowerCase()) continue;
+        matchingScores.push(score);
+      }
+    }
+
+    return reply.status(200).send({ scores: matchingScores });
+  });
+
+  app.get('/api/v1/reputation/my/signals', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const signals = reputationSignalsByUserId.get(session.userId) || [];
+    return reply.status(200).send({ signals });
+  });
+
+  app.post('/api/v1/reputation/recovery', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = StartRecoveryPlanInputSchema.parse(req.body);
+
+    const userSignals = reputationSignalsByUserId.get(session.userId) || [];
+    const penaltySignal = userSignals.find((s) => s.id === input.penaltySignalId);
+    if (!penaltySignal) {
+      throw new DomainError('NOT_FOUND', `Penalty signal ${input.penaltySignalId} not found.`);
+    }
+
+    const plan = startReputationRecoveryPlan({
+      userId: session.userId,
+      context: input.context,
+      penaltySignalId: input.penaltySignalId,
+      targetReboundPoints: input.targetReboundPoints,
+      tasks: input.tasks,
+    });
+
+    reputationRecoveryPlansById.set(plan.id, plan);
+
+    auditLogs.push({
+      event: 'reputation.recovery_started',
+      actorId: session.userId,
+      targetId: plan.id,
+      metadata: { targetReboundPoints: plan.targetReboundPoints },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ plan });
+  });
+
+  app.post('/api/v1/reputation/recovery/:planId/tasks/:taskId/complete', async (req: FastifyRequest<{ Params: { planId: string; taskId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { planId, taskId } = req.params;
+
+    const plan = reputationRecoveryPlansById.get(planId);
+    if (!plan) {
+      throw new DomainError('NOT_FOUND', `Recovery plan ${planId} not found.`);
+    }
+
+    if (plan.userId !== session.userId && !session.roles.includes('platform_admin')) {
+      throw new DomainError('FORBIDDEN', 'Cannot complete tasks on another user recovery plan.');
+    }
+
+    const { plan: updatedPlan, completedTask, isFullyRecovered } = completeRecoveryTask(plan, taskId);
+    reputationRecoveryPlansById.set(planId, updatedPlan);
+
+    let updatedScore: ReputationScore | undefined;
+    if (isFullyRecovered) {
+      // Offset or deactivate penalty signal to restore reputation
+      const userSignals = reputationSignalsByUserId.get(plan.userId) || [];
+      const penalty = userSignals.find((s) => s.id === plan.penaltySignalId);
+      if (penalty) {
+        penalty.isActive = false;
+        updatedScore = calculateReputationScore(plan.userId, plan.context, penalty.domain, userSignals);
+        const scoreKey = `${plan.userId}:${plan.context}:${penalty.domain}`;
+        reputationScoresByUserContextDomain.set(scoreKey, updatedScore);
+      }
+    }
+
+    auditLogs.push({
+      event: 'reputation.recovery_task_completed',
+      actorId: session.userId,
+      targetId: planId,
+      metadata: { taskId, isFullyRecovered },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      plan: updatedPlan,
+      completedTask,
+      isFullyRecovered,
+      updatedScore,
+    });
+  });
+
+  app.post('/api/v1/reputation/recalculate-all', async (req: FastifyRequest, reply: FastifyReply) => {
+    let updatedCount = 0;
+    for (const [userId, signals] of reputationSignalsByUserId.entries()) {
+      const distinctContextDomains = new Set(signals.map((s) => `${s.context}:${s.domain}`));
+      for (const cd of distinctContextDomains) {
+        const [context, domain] = cd.split(':') as [ReputationContext, string];
+        const score = calculateReputationScore(userId, context, domain, signals);
+        const key = `${userId}:${context}:${domain}`;
+        reputationScoresByUserContextDomain.set(key, score);
+        updatedCount++;
+      }
+    }
+
+    return reply.status(200).send({
+      message: 'Reputation scores recomputed successfully.',
+      updatedCount,
+    });
   });
 
   // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)

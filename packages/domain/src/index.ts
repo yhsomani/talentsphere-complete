@@ -32,6 +32,7 @@ export * from './salary-intelligence.js';
 export * from './application-feedback.js';
 export * from './skill-decay.js';
 export * from './technical-interview.js';
+export * from './reputation-engine.js';
 
 export type Role =
   | 'candidate'

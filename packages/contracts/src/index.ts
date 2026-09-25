@@ -980,6 +980,48 @@ export const ExecuteInterviewCodeInputSchema = z.object({
 
 export type ExecuteInterviewCodeInput = z.infer<typeof ExecuteInterviewCodeInputSchema>;
 
+/**
+ * Multi-Context Reputation Engine Contracts (F-144, S-03, BR-247..BR-254)
+ */
+export const AddReputationSignalInputSchema = z.object({
+  targetUserId: z.string().uuid().optional(),
+  context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']),
+  domain: z.string().min(1).max(100).default('general'),
+  signalType: z.enum(['credential', 'endorsement', 'review', 'contribution', 'peer_feedback', 'assessment', 'penalty']),
+  rawValue: z.number().min(-100).max(100),
+  weight: z.number().min(0).max(5).default(1.0),
+  decayHalfLifeDays: z.number().int().min(30).max(3650).default(365),
+  evidenceReferenceId: z.string().uuid().optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+export type AddReputationSignalInput = z.infer<typeof AddReputationSignalInputSchema>;
+
+export const QueryReputationInputSchema = z.object({
+  context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']).optional(),
+  domain: z.string().max(100).optional(),
+});
+
+export type QueryReputationInput = z.infer<typeof QueryReputationInputSchema>;
+
+export const StartRecoveryPlanInputSchema = z.object({
+  context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']),
+  penaltySignalId: z.string().uuid(),
+  targetReboundPoints: z.number().positive(),
+  tasks: z.array(z.object({
+    description: z.string().min(1).max(500),
+    points: z.number().positive(),
+  })).min(1),
+});
+
+export type StartRecoveryPlanInput = z.infer<typeof StartRecoveryPlanInputSchema>;
+
+export const CompleteRecoveryTaskInputSchema = z.object({
+  taskId: z.string().uuid(),
+});
+
+export type CompleteRecoveryTaskInput = z.infer<typeof CompleteRecoveryTaskInputSchema>;
+
 
 
 
