@@ -42,6 +42,7 @@ export * from './alumni-networks.js';
 export * from './employer-reputation.js';
 export * from './skill-forecasting.js';
 export * from './career-trajectory.js';
+export * from './learning-impact.js';
 
 export type Role =
   | 'candidate'

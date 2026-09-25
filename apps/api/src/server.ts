@@ -260,6 +260,13 @@ import {
   generateProgressionPathways,
   projectSalaryTrajectory,
   evaluateMilestoneReadiness,
+  LearningOutcome,
+  LearningImpactMetrics,
+  LearningImpactDashboard,
+  recordLearningOutcome,
+  computeLearningImpactMetrics,
+  aggregateLearningImpactDashboard,
+  CORRELATION_DISCLAIMER_LABEL,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -371,6 +378,10 @@ import {
   CalculateTransitionProbabilityInputSchema,
   CareerProgressionPathwaysQuerySchema,
   EvaluateMilestoneReadinessInputSchema,
+  RecordLearningOutcomeInputSchema,
+  QueryLearningImpactInputSchema,
+  ComputeLearningImpactInputSchema,
+  LearningImpactDashboardQuerySchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -6989,6 +7000,192 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       return reply.status(200).send({ readiness });
     }
   );
+
+  // =========================================================================
+  // Learning Impact Dashboard & Outcome Correlation Repositories & Endpoints (F-153, F-114, BR-189..BR-193, OD-51)
+  // =========================================================================
+  const learningOutcomesById = new Map<string, LearningOutcome>();
+  const learningOutcomesByCourseId = new Map<string, LearningOutcome[]>();
+  const learningOutcomesByUserId = new Map<string, LearningOutcome[]>();
+  const learningImpactMetricsByCourseId = new Map<string, LearningImpactMetrics>();
+
+  // Seed realistic outcome dataset for baseline seed course (35 outcomes, meeting k >= 30 threshold per BR-189)
+  const seedCourseOutcomes: LearningOutcome[] = [];
+  for (let i = 0; i < 35; i++) {
+    const outcome = recordLearningOutcome({
+      id: `seed-outcome-${seedCourseId}-${i + 1}`,
+      userId: `seed-learner-${i + 1}`,
+      courseId: seedCourseId,
+      completedAt: new Date(Date.now() - (35 - i) * 86400000).toISOString(),
+      hiredWithin12m: i < 28, // 80% hire rate
+      salaryGrowthPct: 18 + (i % 8) * 1.5,
+      jobSatisfactionScore: 4.2 + (i % 3) * 0.2,
+      retentionMonths: i < 25 ? 10 : 3,
+      promotedWithin18m: i < 15,
+      skillsUsedOnJob: ['TypeScript', 'Fastify', 'Domain-Driven Design'],
+      consentFlag: true,
+    });
+    learningOutcomesById.set(outcome.id, outcome);
+    seedCourseOutcomes.push(outcome);
+  }
+  learningOutcomesByCourseId.set(seedCourseId, seedCourseOutcomes);
+
+  // Compute and cache initial impact metrics for seed course
+  const seedMetrics = computeLearningImpactMetrics(seedCourseId, seedCourseOutcomes, 42);
+  learningImpactMetricsByCourseId.set(seedCourseId, seedMetrics);
+
+  // 1. Record Learner Career Outcome (F-114, BR-190)
+  app.post('/api/v1/learning/impact/outcomes', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required to record learning outcome.');
+    }
+
+    const input = RecordLearningOutcomeInputSchema.parse(req.body);
+
+    const outcome = recordLearningOutcome({
+      userId: profile.id,
+      courseId: input.courseId,
+      hiredWithin12m: input.hiredWithin12m,
+      salaryGrowthPct: input.salaryGrowthPct,
+      jobSatisfactionScore: input.jobSatisfactionScore,
+      retentionMonths: input.retentionMonths,
+      promotedWithin18m: input.promotedWithin18m,
+      skillsUsedOnJob: input.skillsUsedOnJob,
+      consentFlag: input.consentFlag,
+    });
+
+    learningOutcomesById.set(outcome.id, outcome);
+
+    const courseList = learningOutcomesByCourseId.get(input.courseId) || [];
+    courseList.push(outcome);
+    learningOutcomesByCourseId.set(input.courseId, courseList);
+
+    const userList = learningOutcomesByUserId.get(profile.id) || [];
+    userList.push(outcome);
+    learningOutcomesByUserId.set(profile.id, userList);
+
+    // Invalidate cached metrics so subsequent calls compute freshly
+    learningImpactMetricsByCourseId.delete(input.courseId);
+
+    auditLogs.push({
+      event: 'learning.outcome_recorded',
+      actorId: session.userId,
+      targetId: outcome.id,
+      metadata: {
+        courseId: outcome.courseId,
+        hiredWithin12m: outcome.hiredWithin12m,
+        salaryGrowthPct: outcome.salaryGrowthPct,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    enqueuedWorkerJobs.push({
+      type: 'learning.outcome_recorded',
+      payload: {
+        outcomeId: outcome.id,
+        courseId: outcome.courseId,
+        userId: profile.id,
+      },
+      enqueuedAt: outcome.createdAt,
+    });
+
+    return reply.status(201).send({
+      message: 'Learning outcome recorded successfully.',
+      outcome,
+    });
+  });
+
+  // 2. Get Course Learning Impact Metrics (F-153, F-114, BR-189, BR-193, OD-51)
+  app.get(
+    '/api/v1/learning/impact/courses/:courseId',
+    async (req: FastifyRequest<{ Params: { courseId: string } }>, reply: FastifyReply) => {
+      const { courseId } = req.params;
+      const query = QueryLearningImpactInputSchema.parse(req.query);
+      const minCohortSize = query.minCohortSize ?? 30;
+
+      let metrics = learningImpactMetricsByCourseId.get(courseId);
+      if (!metrics) {
+        const outcomes = learningOutcomesByCourseId.get(courseId) || [];
+        metrics = computeLearningImpactMetrics(courseId, outcomes);
+        learningImpactMetricsByCourseId.set(courseId, metrics);
+      }
+
+      // BR-189: Course outcome correlation requires >= 30 enrolled learners with measurable outcomes
+      if (metrics.sampleCount < minCohortSize) {
+        return reply.status(200).send({
+          courseId,
+          isPublishable: false,
+          sampleCount: metrics.sampleCount,
+          cohortSize: metrics.cohortSize,
+          message:
+            'Insufficient measurable outcome data yet (k >= 30 required per BR-189 to publish outcome correlations).',
+          correlationalClaimLabel: metrics.correlationalClaimLabel,
+        });
+      }
+
+      return reply.status(200).send({ metrics });
+    }
+  );
+
+  // 3. Compute/Recompute Course Impact Metrics (Instructor / Admin authority, BR-191)
+  app.post(
+    '/api/v1/learning/impact/courses/:courseId/compute',
+    async (req: FastifyRequest<{ Params: { courseId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { courseId } = req.params;
+      const input = ComputeLearningImpactInputSchema.parse(req.body);
+
+      const course = coursesById.get(courseId);
+      if (!course) {
+        throw new DomainError('NOT_FOUND', `Course with ID "${courseId}" not found.`);
+      }
+
+      const outcomes = learningOutcomesByCourseId.get(courseId) || [];
+      const metrics = computeLearningImpactMetrics(courseId, outcomes, input.enrolledCount);
+      learningImpactMetricsByCourseId.set(courseId, metrics);
+
+      auditLogs.push({
+        event: 'learning.impact_computed',
+        actorId: session.userId,
+        targetId: courseId,
+        metadata: {
+          cohortSize: metrics.cohortSize,
+          sampleCount: metrics.sampleCount,
+          hireRatePct: metrics.hireRatePct,
+          pathEffectivenessScore: metrics.pathEffectivenessScore,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Course learning impact metrics computed successfully.',
+        metrics,
+      });
+    }
+  );
+
+  // 4. Learning Impact Platform Dashboard (F-153)
+  app.get('/api/v1/learning/impact/dashboard', async (req: FastifyRequest, reply: FastifyReply) => {
+    const query = LearningImpactDashboardQuerySchema.parse(req.query);
+
+    // Ensure all registered courses with outcomes are reflected in cached metrics
+    for (const [cId, outcomes] of learningOutcomesByCourseId.entries()) {
+      if (!learningImpactMetricsByCourseId.has(cId)) {
+        learningImpactMetricsByCourseId.set(cId, computeLearningImpactMetrics(cId, outcomes));
+      }
+    }
+
+    const allMetrics = Array.from(learningImpactMetricsByCourseId.values());
+    const dashboard = aggregateLearningImpactDashboard(allMetrics);
+
+    if (query.limit && dashboard.topPerformingCourses.length > query.limit) {
+      dashboard.topPerformingCourses = dashboard.topPerformingCourses.slice(0, query.limit);
+    }
+
+    return reply.status(200).send({ dashboard });
+  });
 
   // =========================================================================
   // Alumni Networks Repositories & Endpoints (F-125, F-12, F-09, F-40)

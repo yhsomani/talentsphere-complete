@@ -346,4 +346,18 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('time_in_role_months INT NOT NULL CHECK (time_in_role_months >= 1)');
     expect(sql).toContain('UNIQUE(from_role, to_role, industry)');
   });
+
+  it('contains and validates migration 00037 learning impact schema (F-153, F-114)', () => {
+    const migrationFile37 = path.join(migrationsDir, '00037_learning_impact_schema.sql');
+    expect(fs.existsSync(migrationFile37)).toBe(true);
+    const sql = fs.readFileSync(migrationFile37, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.learning_outcomes');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.learning_impact_metrics');
+    expect(sql).toContain('ALTER TABLE public.learning_outcomes ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.learning_impact_metrics ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('sample_count >= 30');
+    expect(sql).toContain('path_effectiveness_score NUMERIC(5, 2)');
+    expect(sql).toContain('UNIQUE(course_id)');
+    expect(sql).toContain('Correlational finding based on observational learner data. Not causal.');
+  });
 });

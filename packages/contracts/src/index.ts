@@ -1453,3 +1453,37 @@ export const EvaluateMilestoneReadinessInputSchema = z.object({
 });
 
 export type EvaluateMilestoneReadinessInput = z.infer<typeof EvaluateMilestoneReadinessInputSchema>;
+
+/**
+ * Learning Impact Dashboard & Outcome Correlation Contracts (F-153, F-114, BR-189..BR-193, OD-51)
+ */
+export const RecordLearningOutcomeInputSchema = z.object({
+  courseId: z.string().uuid(),
+  hiredWithin12m: z.boolean().default(false),
+  salaryGrowthPct: z.number().optional(),
+  jobSatisfactionScore: z.number().min(1.0).max(5.0).optional(),
+  retentionMonths: z.number().int().min(0).max(120).optional(),
+  promotedWithin18m: z.boolean().default(false),
+  skillsUsedOnJob: z.array(z.string().min(1).max(100)).default([]),
+  consentFlag: z.boolean(),
+});
+
+export type RecordLearningOutcomeInput = z.infer<typeof RecordLearningOutcomeInputSchema>;
+
+export const QueryLearningImpactInputSchema = z.object({
+  minCohortSize: z.coerce.number().int().min(0).max(1000).default(30),
+});
+
+export type QueryLearningImpactInput = z.infer<typeof QueryLearningImpactInputSchema>;
+
+export const ComputeLearningImpactInputSchema = z.object({
+  enrolledCount: z.number().int().min(0).optional(),
+});
+
+export type ComputeLearningImpactInput = z.infer<typeof ComputeLearningImpactInputSchema>;
+
+export const LearningImpactDashboardQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export type LearningImpactDashboardQuery = z.infer<typeof LearningImpactDashboardQuerySchema>;
