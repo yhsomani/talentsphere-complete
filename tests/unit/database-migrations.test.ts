@@ -196,6 +196,20 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;');
     expect(sql).toContain('CONSTRAINT uq_user_badge UNIQUE (user_id, badge_id)');
   });
+
+  it('contains and validates migration 00013 account settings and privacy schema (F-15)', () => {
+    const migrationFile13 = path.join(migrationsDir, '00013_account_settings_privacy_schema.sql');
+    expect(fs.existsSync(migrationFile13)).toBe(true);
+    const sql = fs.readFileSync(migrationFile13, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.user_settings');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.data_erasure_requests');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.data_export_requests');
+    expect(sql).toContain('ALTER TABLE public.user_settings ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.data_erasure_requests ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.data_export_requests ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('profile_visibility VARCHAR(32) NOT NULL DEFAULT \'public\'');
+    expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'grace_period\'');
+  });
 });
 
 

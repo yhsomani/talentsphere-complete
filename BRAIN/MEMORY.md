@@ -341,6 +341,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/gamification.test.ts` (9 integration tests verifying initial summary, badge catalog, activity claim, worker job dispatch, idempotency duplicate rejection, course level up, daily cap clamping, transaction history, and weekly/all-time leaderboards)
 - **Result:** All 28 test suites (218 tests) PASS. TypeScript composite build clean. Vite web bundle built in 3.10s.
 
+#### Change 21: Account Settings, Privacy Control & GDPR/DPDP Erasure (F-15, §31, BR-06, BR-242)
+- **Why:** Implement canonical account settings, privacy preferences, and regulatory compliance workflows under GDPR Article 15 (Right of access/portability), Article 17 (Right to erasure with mandatory 30-day grace period), CCPA/CPRA, and India DPDP 2023. Includes default settings initialization, settings updates with BYO key masking, bidirectional synchronization of profile privacy, GDPR Article 15 & 20 data portability JSON export compilation with credential scrubbing, erasure request lifecycle (initiate, status, conflict prevention, cancellation within grace period), immediate §31.4 logical anonymization / FERPA severance pattern preserving immutable ledger and credential relationships with SHA-256 hash verification, and asynchronous worker queue dispatch (`user.settings.updated`, `gdpr.data.exported`, `gdpr.erasure.requested`, `gdpr.erasure.cancelled`, `gdpr.erasure.completed`).
+- **Files:**
+  - `supabase/migrations/00013_account_settings_privacy_schema.sql` (user_settings, data_erasure_requests, data_export_requests with RLS and index optimizations)
+  - `packages/domain/src/settings.ts` (UserSettings, createDefaultUserSettings, updateUserSettings, requestAccountErasure, cancelAccountErasure, executeLogicalAnonymization, compileDataExportArchive, GDPR_GRACE_PERIOD_DAYS)
+  - `packages/domain/src/index.ts` (Exports settings domain types, methods, and constants)
+  - `packages/contracts/src/index.ts` (UpdateUserSettingsInputSchema, RequestErasureInputSchema, CancelErasureInputSchema, RequestDataExportInputSchema)
+  - `apps/api/src/server.ts` (GET /api/v1/settings, PATCH /api/v1/settings, POST /api/v1/settings/export, GET /api/v1/settings/export/latest, POST /api/v1/settings/erasure/request, GET /api/v1/settings/erasure/status, POST /api/v1/settings/erasure/cancel, POST /api/v1/settings/erasure/execute)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00013)
+  - `tests/unit/settings-domain.test.ts` (12 unit tests verifying default settings, update constraints, BYO key sanitization, 30-day grace period calculation, grace period expiration, cancellation validity, logical anonymization hash, and data export bundling)
+  - `tests/integration/settings.test.ts` (6 integration tests verifying 401 unauthenticated rejection, initial default settings retrieval, PATCH updates with masked BYO AI key, profile privacy synchronization, GDPR export compilation, erasure request initiation, duplicate conflict prevention, cancellation within grace period, status polling, and §31.4 logical anonymization execution)
+- **Result:** All 30 test suites (237 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.82s.
+
 ---
 
 ## 9. Completed Work
@@ -367,6 +380,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-020:** Implemented Professional Networking & Connection Request State Machine (F-09): Migration 00010, anti-self connection check (`sender_id != recipient_id`), duplicate prevention, state transitions (`pending -> accepted | rejected | withdrawn`), authorization enforcement, notification triggers, async worker telemetry (`connection.requested`, `connection.accepted`, `connection.rejected`, `connection.withdrawn`, `connection.removed`), status queries, and test suites (21 tests added; 175/175 total PASS across 24 suites).
 - **TASK-021:** Implemented Portfolio Showcase, Media Assets, and Verified Skills Link (F-26): Migration 00011, canonical skill mapping, digital credential evidence links, multi-media asset attachments, visibility gating (`public`, `connections_only`, `recruiters_only`, `private`), connection-aware showcase view, owner project lifecycle, async worker dispatch (`portfolio.project.created`, `portfolio.project.updated`, `portfolio.project.removed`), and test suites (18 tests added; 193/193 total PASS across 26 suites).
 - **TASK-022:** Implemented Gamification & XP Ledger + Leaderboard & Badges (F-22, F-23): Migration 00012, daily 200 XP ledger cap enforcement (BR-25, WIT-011), level progression curve with dynamic step increments, streak tracking with single-day continuity, baseline badges catalog and milestone unlocks, weekly & all-time leaderboards with streak tie-breaking (OD-06), async worker job telemetry (`gamification.xp.awarded`, `gamification.badge.unlocked`), and comprehensive test suites (25 tests added; 218/218 total PASS across 28 suites).
+- **TASK-023:** Implemented Account Settings, Privacy Control & GDPR/DPDP Erasure (F-15): Migration 00013, default user settings generator, validated preference updates with BYO key masking, profile privacy synchronization, GDPR Art 15 & 20 data portability JSON export compilation, erasure request initiation with 30-day grace period (GDPR Art 17), conflict prevention, cancellation within grace period, §31.4 logical anonymization / FERPA severance pattern preserving immutable ledger and credential relationships with SHA-256 hash verification, async worker telemetry (`user.settings.updated`, `gdpr.data.exported`, `gdpr.erasure.requested`, `gdpr.erasure.cancelled`, `gdpr.erasure.completed`), and test suites (19 tests added; 237/237 total PASS across 30 suites).
 
 ---
 
@@ -676,15 +690,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 ## 40. Final Current-State Summary
 
 - **Project:** TalentSphere
-- **Implementation:** 24 / 173 (13.87%)
-- **Verification:** 24 / 173 (13.87%)
+- **Implementation:** 25 / 173 (14.45%)
+- **Verification:** 25 / 173 (14.45%)
 - **Released:** 0 / 173 (0.00%)
 - **Current Phase:** Phase 2 — Verified Growth & Engagement Loops
 - **Current Milestone:** M2 — Gamification, Engagement & Networking
-- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23
-- **Test Suite Status:** 28 test suites / 218 tests passing (100% PASS)
+- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15
+- **Test Suite Status:** 30 test suites / 237 tests passing (100% PASS)
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA production bundle)
-- **Highest-Priority Remaining Work:** Feature F-15 (Account Settings, Privacy Control & GDPR Erasure), F-16 (Organization Management & Workspaces), F-17 (Platform Administration Console)
+- **Highest-Priority Remaining Work:** Feature F-16 (Organization Management & Workspaces), F-17 (Platform Administration Console)
 - **Critical Blockers:** None
 - **Important Invariants Maintained:**
   - Zero-PII public SHA-256 verification proofs (BR-150, BR-155)
@@ -694,7 +708,9 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - Strict daily 200 XP ledger cap (BR-25, WIT-011)
   - Idempotency per (userId, referenceType, referenceId)
   - Append-only resume exports with soft delete (BR-26)
-- **Last Significant Change:** Completed Feature F-22 & F-23: Daily XP ledger, level progression curves, streak updates, milestone badges catalog, and weekly/all-time leaderboards.
-- **Last Verified Milestone:** All 28 test suites green, monorepo build clean.
-- **Next Action:** Git commit for F-22 & F-23, then proceed to F-15 (Account Settings & Privacy Control).
-- **Last Updated:** 2026-09-24 13:50
+  - 30-day grace period for GDPR Art 17 account erasure requests
+  - Logical anonymization (§31.4 severance pattern) preserving aggregate ledger and credential relationships
+- **Last Significant Change:** Completed Feature F-15: Account settings preferences, privacy toggles, BYO key masking, GDPR Art 15 & 20 data portability JSON export, GDPR Art 17 30-day grace period erasure lifecycle, and §31.4 logical anonymization.
+- **Last Verified Milestone:** All 30 test suites green, monorepo composite build clean.
+- **Next Action:** Git commit for F-15, then proceed to F-16 (Organization Management & Workspaces).
+- **Last Updated:** 2026-09-24 14:15

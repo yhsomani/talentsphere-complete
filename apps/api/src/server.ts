@@ -111,6 +111,15 @@ import {
   LeaderboardUserRecord,
   LeaderboardEntry,
   computeLeaderboard,
+  UserSettings,
+  DataErasureRequest,
+  DataExportRequest,
+  createDefaultUserSettings,
+  updateUserSettings,
+  requestAccountErasure,
+  cancelAccountErasure,
+  executeLogicalAnonymization,
+  compileDataExportArchive,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -150,6 +159,10 @@ import {
   UpdatePortfolioProjectInputSchema,
   ClaimGamificationActivityInputSchema,
   GetLeaderboardQuerySchema,
+  UpdateUserSettingsInputSchema,
+  RequestErasureInputSchema,
+  CancelErasureInputSchema,
+  RequestDataExportInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -305,11 +318,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     roles: ('candidate' | 'recruiter')[];
     passwordHash: string;
     createdAt: string;
+    status?: string;
   }
   const usersByEmail = new Map<string, StoredUser>();
   const usersById = new Map<string, StoredUser>();
   const profilesByUserId = new Map<string, any>();
   const profilesById = new Map<string, any>();
+  const userSettingsByUserId = new Map<string, UserSettings>();
+  const erasureRequestsByUserId = new Map<string, DataErasureRequest[]>();
+  const erasureRequestsById = new Map<string, DataErasureRequest>();
+  const exportRequestsByUserId = new Map<string, DataExportRequest[]>();
 
   // Authentication Helper
   const extractUser = (req: FastifyRequest) => {
@@ -3217,6 +3235,324 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       transaction: result.transaction,
       profile: result.updatedProfile,
       newlyUnlockedBadges: newlyEligible,
+    });
+  });
+
+  // ============================================================================
+  // Account Settings, Privacy & GDPR/DPDP Erasure Routes (F-15, §31, BR-06)
+  // ============================================================================
+
+  // Helper to safely format settings for HTTP responses (mask sensitive keys)
+  const sanitizeSettings = (settings: UserSettings) => {
+    return {
+      ...settings,
+      byoAiKey: settings.byoAiKey ? '••••••••' : null,
+    };
+  };
+
+  // 1. Get current user settings (creates defaults if not yet initialized)
+  app.get('/api/v1/settings', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    let settings = userSettingsByUserId.get(session.userId);
+    if (!settings) {
+      settings = createDefaultUserSettings(session.userId);
+      userSettingsByUserId.set(session.userId, settings);
+    }
+
+    return reply.status(200).send({
+      settings: sanitizeSettings(settings),
+    });
+  });
+
+  // 2. Update user settings
+  app.patch('/api/v1/settings', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = UpdateUserSettingsInputSchema.parse(req.body);
+
+    let current = userSettingsByUserId.get(session.userId);
+    if (!current) {
+      current = createDefaultUserSettings(session.userId);
+    }
+
+    const updated = updateUserSettings(current, input);
+    userSettingsByUserId.set(session.userId, updated);
+
+    // If profile visibility was changed, synchronize with profile entity
+    if (input.profileVisibility) {
+      const profile = profilesByUserId.get(session.userId);
+      if (profile) {
+        profile.privacy = input.profileVisibility;
+        profilesByUserId.set(session.userId, profile);
+        if (profile.id) profilesById.set(profile.id, profile);
+      }
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'user.settings.updated',
+      payload: {
+        userId: session.userId,
+        updatedFields: Object.keys(input),
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Account settings updated successfully.',
+      settings: sanitizeSettings(updated),
+    });
+  });
+
+  // 3. Initiate Data Portability / Export (GDPR Art 15 & 20)
+  app.post('/api/v1/settings/export', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = RequestDataExportInputSchema.parse(req.body || {});
+
+    const user = usersById.get(session.userId) || {
+      id: session.userId,
+      email: session.email,
+      roles: session.roles as any,
+      status: 'active' as any,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const profile = profilesByUserId.get(session.userId) || {
+      id: crypto.randomUUID(),
+      userId: session.userId,
+      fullName: 'TalentSphere User',
+      privacy: 'public' as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    let settings = userSettingsByUserId.get(session.userId);
+    if (!settings) {
+      settings = createDefaultUserSettings(session.userId);
+      userSettingsByUserId.set(session.userId, settings);
+    }
+
+    const evidence = evidenceBySubjectId.get(session.userId) || [];
+    const applications = Array.from(applicationsById.values()).filter(
+      (a) => a.candidateId === session.userId
+    );
+    const resumes = resumesByUserId.get(session.userId) || [];
+    const portfolio = portfolioProjectsByUserId.get(session.userId) || [];
+    const gamification = gamificationProfilesByUserId.get(session.userId);
+
+    const now = new Date().toISOString();
+    const exportBundle = compileDataExportArchive({
+      user: {
+        id: user.id,
+        email: user.email,
+        roles: user.roles as any,
+        status: (user.status as any) || 'active',
+        createdAt: user.createdAt,
+        updatedAt: user.createdAt,
+      },
+      profile,
+      settings,
+      evidence: evidence as any,
+      applications: applications as any,
+      resumes: resumes as any,
+      portfolio: portfolio as any,
+      gamification: gamification as any,
+      nowIso: now,
+    });
+
+    const exportRequestId = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const exportRequest: DataExportRequest = {
+      id: exportRequestId,
+      userId: session.userId,
+      status: 'completed',
+      format: input.format,
+      downloadUrl: `/api/v1/settings/export/download/${exportRequestId}`,
+      expiresAt,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const userExports = exportRequestsByUserId.get(session.userId) || [];
+    userExports.unshift(exportRequest);
+    exportRequestsByUserId.set(session.userId, userExports);
+
+    enqueuedWorkerJobs.push({
+      type: 'gdpr.data.exported',
+      payload: {
+        userId: session.userId,
+        requestId: exportRequestId,
+        format: input.format,
+      },
+      enqueuedAt: now,
+    });
+
+    return reply.status(200).send({
+      message: 'Data export compiled successfully in accordance with GDPR Articles 15 & 20.',
+      exportRequest,
+      data: exportBundle,
+    });
+  });
+
+  // 4. Get Latest Data Export Request Status
+  app.get('/api/v1/settings/export/latest', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userExports = exportRequestsByUserId.get(session.userId) || [];
+    const latest = userExports[0] || null;
+
+    return reply.status(200).send({
+      latestExport: latest,
+    });
+  });
+
+  // 5. Request Account Erasure (GDPR Art 17 with mandatory 30-day grace period)
+  app.post('/api/v1/settings/erasure/request', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = RequestErasureInputSchema.parse(req.body);
+
+    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
+    const active = userRequests.find(
+      (r) => r.status === 'grace_period' || r.status === 'pending'
+    );
+    if (active) {
+      throw new DomainError(
+        'CONFLICT',
+        'An active account erasure request is already pending. You can cancel it before the grace period ends.'
+      );
+    }
+
+    const erasureRequest = requestAccountErasure(session.userId, input.reason);
+    userRequests.unshift(erasureRequest);
+    erasureRequestsByUserId.set(session.userId, userRequests);
+    erasureRequestsById.set(erasureRequest.id, erasureRequest);
+
+    enqueuedWorkerJobs.push({
+      type: 'gdpr.erasure.requested',
+      payload: {
+        userId: session.userId,
+        requestId: erasureRequest.id,
+        gracePeriodEndsAt: erasureRequest.gracePeriodEndsAt,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Account erasure request initiated with 30-day grace period (GDPR Art 17).',
+      erasureRequest,
+    });
+  });
+
+  // 6. Get Account Erasure Request Status
+  app.get('/api/v1/settings/erasure/status', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
+    const active = userRequests.find(
+      (r) => r.status === 'grace_period' || r.status === 'pending'
+    );
+
+    return reply.status(200).send({
+      hasPendingErasure: !!active,
+      activeRequest: active || null,
+      history: userRequests,
+    });
+  });
+
+  // 7. Cancel Account Erasure within 30-Day Grace Period
+  app.post('/api/v1/settings/erasure/cancel', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CancelErasureInputSchema.parse(req.body);
+
+    const erasureRequest = erasureRequestsById.get(input.requestId);
+    if (!erasureRequest) {
+      throw new DomainError('NOT_FOUND', `Erasure request ${input.requestId} not found.`);
+    }
+
+    if (erasureRequest.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'You are not authorized to cancel this erasure request.');
+    }
+
+    const cancelled = cancelAccountErasure(erasureRequest);
+    erasureRequestsById.set(cancelled.id, cancelled);
+
+    const list = erasureRequestsByUserId.get(session.userId) || [];
+    const idx = list.findIndex((r) => r.id === cancelled.id);
+    if (idx !== -1) {
+      list[idx] = cancelled;
+      erasureRequestsByUserId.set(session.userId, list);
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'gdpr.erasure.cancelled',
+      payload: {
+        userId: session.userId,
+        requestId: cancelled.id,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Account erasure request successfully cancelled.',
+      erasureRequest: cancelled,
+    });
+  });
+
+  // 8. Execute Immediate Account Erasure / Logical Anonymization (§31.4)
+  app.post('/api/v1/settings/erasure/execute', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+
+    const user = usersById.get(session.userId);
+    const profile = profilesByUserId.get(session.userId);
+
+    if (!user || !profile) {
+      throw new DomainError('NOT_FOUND', 'User or profile not found for erasure execution.');
+    }
+
+    const result = executeLogicalAnonymization(
+      {
+        id: user.id,
+        email: user.email,
+        roles: user.roles as any,
+        status: (user.status as any) || 'active',
+        createdAt: user.createdAt,
+        updatedAt: user.createdAt,
+      },
+      profile
+    );
+
+    // Persist anonymized state
+    user.email = result.anonymizedUser.email;
+    user.status = 'deactivated';
+    usersById.set(user.id, user);
+    usersByEmail.delete(session.email.toLowerCase());
+    usersByEmail.set(user.email.toLowerCase(), user);
+
+    profilesByUserId.set(session.userId, result.anonymizedProfile);
+    if (profile.id) {
+      profilesById.set(profile.id, result.anonymizedProfile);
+    }
+
+    // Mark any active erasure request as completed
+    const list = erasureRequestsByUserId.get(session.userId) || [];
+    const active = list.find((r) => r.status === 'grace_period' || r.status === 'pending');
+    if (active) {
+      active.status = 'completed';
+      active.completedAt = result.completedAt;
+      active.anonymizedHash = result.anonymizedHash;
+      active.updatedAt = result.completedAt;
+      erasureRequestsById.set(active.id, active);
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'gdpr.erasure.completed',
+      payload: {
+        userId: session.userId,
+        anonymizedHash: result.anonymizedHash,
+      },
+      enqueuedAt: result.completedAt,
+    });
+
+    return reply.status(200).send({
+      message: 'Account logically anonymized and deactivated in compliance with GDPR Art 17 and §31.4.',
+      anonymizedHash: result.anonymizedHash,
+      completedAt: result.completedAt,
     });
   });
 

@@ -477,6 +477,51 @@ export const GetLeaderboardQuerySchema = z.object({
 
 export type GetLeaderboardQuery = z.infer<typeof GetLeaderboardQuerySchema>;
 
+/**
+ * Account Settings, Privacy & GDPR Erasure Contracts (F-15, §31, BR-06)
+ */
+export const UpdateUserSettingsInputSchema = z.object({
+  theme: z.enum(['light', 'dark', 'system']).optional(),
+  language: z.string().min(2).max(10).optional(),
+  timezone: z.string().min(1).max(64).optional(),
+  profileVisibility: z.enum(['public', 'connections_only', 'recruiters_only', 'private']).optional(),
+  showEmail: z.boolean().optional(),
+  showActivity: z.boolean().optional(),
+  allowConnectionRequests: z.boolean().optional(),
+  allowDirectMessages: z.enum(['everyone', 'connections_only', 'none']).optional(),
+  searchEngineIndexing: z.boolean().optional(),
+  emailNotifications: z.boolean().optional(),
+  pushNotifications: z.boolean().optional(),
+  marketingEmails: z.boolean().optional(),
+  digestFrequency: z.enum(['realtime', 'daily', 'weekly', 'none']).optional(),
+  twoFactorEnabled: z.boolean().optional(),
+  byoAiKey: z.string().max(256).nullable().optional(),
+  aiDataUsageConsent: z.boolean().optional(),
+});
+
+export type UpdateUserSettingsInput = z.infer<typeof UpdateUserSettingsInputSchema>;
+
+export const RequestErasureInputSchema = z.object({
+  reason: z.string().max(1000).optional(),
+  confirm: z.literal(true, {
+    errorMap: () => ({ message: 'You must explicitly confirm account deletion to initiate the 30-day grace period.' }),
+  }),
+});
+
+export type RequestErasureInput = z.infer<typeof RequestErasureInputSchema>;
+
+export const CancelErasureInputSchema = z.object({
+  requestId: z.string().uuid(),
+});
+
+export type CancelErasureInput = z.infer<typeof CancelErasureInputSchema>;
+
+export const RequestDataExportInputSchema = z.object({
+  format: z.enum(['json', 'csv']).default('json'),
+});
+
+export type RequestDataExportInput = z.infer<typeof RequestDataExportInputSchema>;
+
 
 
 
