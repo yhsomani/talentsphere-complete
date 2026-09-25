@@ -736,6 +736,76 @@ export const RevokeCertificateInputSchema = z.object({
 
 export type RevokeCertificateInput = z.infer<typeof RevokeCertificateInputSchema>;
 
+/**
+ * Job Templates Contracts (F-37, F-05, BR-01, BR-12, BR-144)
+ */
+export const ScreeningQuestionSchema = z.object({
+  id: z.string().optional(),
+  question: z.string().min(3).max(500),
+  required: z.boolean().default(false),
+  idealAnswer: z.string().max(1000).optional(),
+});
+
+export type ScreeningQuestion = z.infer<typeof ScreeningQuestionSchema>;
+
+export const CreateJobTemplateInputSchema = z.object({
+  orgId: z.string().uuid(),
+  templateName: z.string().min(2).max(150),
+  title: z.string().min(3).max(255),
+  description: z.string().min(10).max(20000),
+  location: z.string().min(1).max(255),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+  requiredSkillIds: z.array(z.string()).default([]),
+  salaryMinMinor: z.number().int().nonnegative().optional(),
+  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  currency: z.string().length(3).default('USD'),
+  department: z.string().max(100).optional(),
+  screeningQuestions: z.array(ScreeningQuestionSchema).default([]),
+});
+
+export type CreateJobTemplateInput = z.infer<typeof CreateJobTemplateInputSchema>;
+
+export const UpdateJobTemplateInputSchema = z.object({
+  templateName: z.string().min(2).max(150).optional(),
+  title: z.string().min(3).max(255).optional(),
+  description: z.string().min(10).max(20000).optional(),
+  location: z.string().min(1).max(255).optional(),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+  requiredSkillIds: z.array(z.string()).optional(),
+  salaryMinMinor: z.number().int().nonnegative().nullable().optional(),
+  salaryMaxMinor: z.number().int().nonnegative().nullable().optional(),
+  currency: z.string().length(3).optional(),
+  department: z.string().max(100).optional(),
+  screeningQuestions: z.array(ScreeningQuestionSchema).optional(),
+  isArchived: z.boolean().optional(),
+});
+
+export type UpdateJobTemplateInput = z.infer<typeof UpdateJobTemplateInputSchema>;
+
+export const InstantiateJobFromTemplateInputSchema = z.object({
+  title: z.string().min(3).max(255).optional(),
+  description: z.string().min(10).max(20000).optional(),
+  location: z.string().min(1).max(255).optional(),
+  workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
+  jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
+  requiredSkillIds: z.array(z.string()).optional(),
+  salaryMinMinor: z.number().int().nonnegative().optional(),
+  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  currency: z.string().length(3).optional(),
+});
+
+export type InstantiateJobFromTemplateInput = z.infer<typeof InstantiateJobFromTemplateInputSchema>;
+
+export const SaveJobAsTemplateInputSchema = z.object({
+  templateName: z.string().min(2).max(150),
+  department: z.string().max(100).optional(),
+  screeningQuestions: z.array(ScreeningQuestionSchema).default([]),
+});
+
+export type SaveJobAsTemplateInput = z.infer<typeof SaveJobAsTemplateInputSchema>;
+
 
 
 

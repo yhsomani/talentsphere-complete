@@ -27,6 +27,7 @@ export * from './moderation.js';
 export * from './saved-searches.js';
 export * from './application-drafts.js';
 export * from './analytics.js';
+export * from './job-templates.js';
 
 export type Role =
   | 'candidate'

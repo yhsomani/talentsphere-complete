@@ -179,6 +179,11 @@ import {
   recordAnalyticsEvent,
   computeKPIs,
   KPISummary,
+  JobTemplate,
+  createJobTemplate,
+  updateJobTemplate,
+  archiveJobTemplate,
+  instantiateJobFromTemplate,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -246,6 +251,10 @@ import {
   RecordAnalyticsEventBatchInputSchema,
   QueryAnalyticsKPIsInputSchema,
   RevokeCertificateInputSchema,
+  CreateJobTemplateInputSchema,
+  UpdateJobTemplateInputSchema,
+  InstantiateJobFromTemplateInputSchema,
+  SaveJobAsTemplateInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1050,6 +1059,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const orgMembershipsByUserId = new Map<string, StoredOrgMembership[]>();
   const jobsById = new Map<string, Job>();
   const jobsByOrgId = new Map<string, Job[]>();
+  const jobTemplatesById = new Map<string, JobTemplate>();
+  const jobTemplatesByOrgId = new Map<string, JobTemplate[]>();
   const applicationsById = new Map<string, JobApplication>();
   const applicationsByJobId = new Map<string, JobApplication[]>();
   const applicationsByCandidateId = new Map<string, JobApplication[]>();
@@ -1222,6 +1233,361 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Job status updated successfully.',
       job: updated,
+    });
+  });
+
+  // Job Templates Endpoints (F-37, F-05, BR-01, BR-12, BR-144)
+  app.post('/api/v1/job-templates', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateJobTemplateInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === input.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Recruiters may only create templates for their assigned organization (BR-12).');
+    }
+
+    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+      for (const skillId of input.requiredSkillIds) {
+        if (!skillsById.has(skillId)) {
+          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+        }
+      }
+    }
+
+    const template = createJobTemplate({
+      orgId: input.orgId,
+      templateName: input.templateName,
+      title: input.title,
+      description: input.description,
+      location: input.location,
+      workMode: input.workMode,
+      jobType: input.jobType,
+      requiredSkillIds: input.requiredSkillIds,
+      salaryRange:
+        input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined
+          ? {
+              minMinor: input.salaryMinMinor,
+              maxMinor: input.salaryMaxMinor,
+              currency: input.currency,
+            }
+          : undefined,
+      department: input.department,
+      screeningQuestions: input.screeningQuestions,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: input.orgId,
+      },
+    });
+
+    jobTemplatesById.set(template.id, template);
+    const list = jobTemplatesByOrgId.get(template.orgId) || [];
+    list.push(template);
+    jobTemplatesByOrgId.set(template.orgId, list);
+
+    auditLogs.push({
+      event: 'job_template.created',
+      actorId: session.userId,
+      targetId: template.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ template });
+  });
+
+  app.get('/api/v1/job-templates', async (req: FastifyRequest<{ Querystring: { orgId?: string; includeArchived?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { orgId, includeArchived } = req.query;
+    const isAdmin = session.roles.includes('platform_admin');
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+
+    let templates: JobTemplate[] = [];
+
+    if (orgId) {
+      const isMember = userMemberships.some((m) => m.orgId === orgId);
+      if (!isMember && !isAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access to templates is restricted to organization members (BR-12).');
+      }
+      templates = jobTemplatesByOrgId.get(orgId) || [];
+    } else {
+      if (isAdmin) {
+        templates = Array.from(jobTemplatesById.values());
+      } else {
+        const allowedOrgIds = new Set(userMemberships.map((m) => m.orgId));
+        templates = Array.from(jobTemplatesById.values()).filter((t) => allowedOrgIds.has(t.orgId));
+      }
+    }
+
+    if (includeArchived !== 'true') {
+      templates = templates.filter((t) => !t.isArchived);
+    }
+
+    return reply.status(200).send({ templates });
+  });
+
+  app.get('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const template = jobTemplatesById.get(id);
+    if (!template) {
+      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
+    }
+
+    return reply.status(200).send({ template });
+  });
+
+  app.patch('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = UpdateJobTemplateInputSchema.parse(req.body);
+
+    const template = jobTemplatesById.get(id);
+    if (!template) {
+      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
+    }
+
+    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+      for (const skillId of input.requiredSkillIds) {
+        if (!skillsById.has(skillId)) {
+          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+        }
+      }
+    }
+
+    let salaryRange: { minMinor: number; maxMinor: number; currency: string } | null | undefined = undefined;
+    if (input.salaryMinMinor === null || input.salaryMaxMinor === null) {
+      salaryRange = null;
+    } else if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
+      salaryRange = {
+        minMinor: input.salaryMinMinor,
+        maxMinor: input.salaryMaxMinor,
+        currency: input.currency || template.salaryRange?.currency || 'USD',
+      };
+    }
+
+    const updated = updateJobTemplate(template, {
+      templateName: input.templateName,
+      title: input.title,
+      description: input.description,
+      location: input.location,
+      workMode: input.workMode,
+      jobType: input.jobType,
+      requiredSkillIds: input.requiredSkillIds,
+      salaryRange,
+      department: input.department,
+      screeningQuestions: input.screeningQuestions,
+      isArchived: input.isArchived,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: template.orgId,
+      },
+    });
+
+    jobTemplatesById.set(updated.id, updated);
+    const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
+    const idx = orgList.findIndex((t) => t.id === updated.id);
+    if (idx >= 0) orgList[idx] = updated;
+
+    auditLogs.push({
+      event: 'job_template.updated',
+      actorId: session.userId,
+      targetId: updated.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Job template updated successfully.',
+      template: updated,
+    });
+  });
+
+  app.delete('/api/v1/job-templates/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const template = jobTemplatesById.get(id);
+    if (!template) {
+      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to template is restricted to organization members (BR-12).');
+    }
+
+    const archived = archiveJobTemplate(template, {
+      userId: session.userId,
+      roles: session.roles,
+      orgId: template.orgId,
+    });
+
+    jobTemplatesById.set(archived.id, archived);
+    const orgList = jobTemplatesByOrgId.get(template.orgId) || [];
+    const idx = orgList.findIndex((t) => t.id === archived.id);
+    if (idx >= 0) orgList[idx] = archived;
+
+    auditLogs.push({
+      event: 'job_template.archived',
+      actorId: session.userId,
+      targetId: archived.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Job template archived successfully.',
+      template: archived,
+    });
+  });
+
+  app.post('/api/v1/job-templates/:id/instantiate', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = InstantiateJobFromTemplateInputSchema.parse(req.body || {});
+
+    const template = jobTemplatesById.get(id);
+    if (!template) {
+      throw new DomainError('NOT_FOUND', `Job template with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === template.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only recruiters of this organization can instantiate jobs from its templates (BR-12).');
+    }
+
+    if (input.requiredSkillIds && input.requiredSkillIds.length > 0) {
+      for (const skillId of input.requiredSkillIds) {
+        if (!skillsById.has(skillId)) {
+          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+        }
+      }
+    }
+
+    let salaryRange = undefined;
+    if (input.salaryMinMinor !== undefined && input.salaryMaxMinor !== undefined) {
+      salaryRange = {
+        minMinor: input.salaryMinMinor,
+        maxMinor: input.salaryMaxMinor,
+        currency: input.currency || template.salaryRange?.currency || 'USD',
+      };
+    }
+
+    const job = instantiateJobFromTemplate(
+      template,
+      {
+        title: input.title,
+        description: input.description,
+        location: input.location,
+        workMode: input.workMode,
+        jobType: input.jobType,
+        requiredSkillIds: input.requiredSkillIds,
+        salaryRange,
+      },
+      {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: template.orgId,
+      }
+    );
+
+    jobsById.set(job.id, job);
+    const list = jobsByOrgId.get(job.orgId) || [];
+    list.push(job);
+    jobsByOrgId.set(job.orgId, list);
+
+    auditLogs.push({
+      event: 'job.instantiated_from_template',
+      actorId: session.userId,
+      targetId: job.id,
+      metadata: { templateId: template.id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Job instantiated successfully from template.',
+      job,
+    });
+  });
+
+  app.post('/api/v1/jobs/:id/save-as-template', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = SaveJobAsTemplateInputSchema.parse(req.body);
+
+    const job = jobsById.get(id);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === job.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only recruiters of this organization can save its jobs as templates (BR-12).');
+    }
+
+    const template = createJobTemplate({
+      orgId: job.orgId,
+      templateName: input.templateName,
+      title: job.title,
+      description: job.description,
+      location: job.location,
+      workMode: job.workMode,
+      jobType: job.jobType,
+      requiredSkillIds: job.requiredSkillIds,
+      salaryRange: job.salaryRange,
+      department: input.department,
+      screeningQuestions: input.screeningQuestions,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: job.orgId,
+      },
+    });
+
+    jobTemplatesById.set(template.id, template);
+    const list = jobTemplatesByOrgId.get(template.orgId) || [];
+    list.push(template);
+    jobTemplatesByOrgId.set(template.orgId, list);
+
+    auditLogs.push({
+      event: 'job_template.saved_from_job',
+      actorId: session.userId,
+      targetId: template.id,
+      metadata: { sourceJobId: job.id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Template created from job requisition successfully.',
+      template,
     });
   });
 
