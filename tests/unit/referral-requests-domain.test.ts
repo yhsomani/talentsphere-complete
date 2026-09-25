@@ -3,7 +3,6 @@ import {
   createReferralRequest,
   respondToReferralRequest,
   ReferralRequest,
-  DomainError,
 } from '../../packages/domain/src/index.js';
 
 describe('Domain: Referral Request System (F-142, S-11, BR-233..BR-240)', () => {

@@ -3,7 +3,6 @@ import {
   createPortfolioProject,
   updatePortfolioProject,
   canViewPortfolioProject,
-  DomainError,
   type PortfolioProject,
 } from '../../packages/domain/src/index.js';
 

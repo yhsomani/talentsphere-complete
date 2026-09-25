@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
-import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Peer Credibility Networks Integration (F-150, F-110, F-144)', () => {
   let app: FastifyInstance;

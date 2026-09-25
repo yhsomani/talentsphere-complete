@@ -1,7 +1,6 @@
 import {
   DomainError,
   type AssessmentSession,
-  type AssessmentPolicyMode,
   type Evidence,
   createEvidence,
   verifyEvidence,

@@ -4,9 +4,7 @@ import {
   updateJobTemplate,
   archiveJobTemplate,
   instantiateJobFromTemplate,
-  type JobTemplate,
 } from '../../packages/domain/src/job-templates.js';
-import { DomainError } from '../../packages/domain/src/index.js';
 
 describe('Domain: Job Templates & Requisition Instantiation (F-37, F-05, BR-01, BR-12, BR-144)', () => {
   const recruiterActor = {

@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Profile, ProfilePrivacy, Role } from './index.js';
+import { Profile, Role } from './index.js';
 
 export function createProfileEntity(userId: string, fullName: string): Profile {
   return {

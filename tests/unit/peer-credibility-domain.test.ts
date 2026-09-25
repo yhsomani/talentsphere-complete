@@ -7,7 +7,6 @@ import {
   createSkillEndorsement,
   revokeSkillEndorsement,
   aggregateSkillEndorsements,
-  SkillEndorsement,
   DomainError,
 } from '../../packages/domain/src/index.js';
 

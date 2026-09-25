@@ -3,7 +3,6 @@ import {
   canTransitionApplication,
   isAIAssistanceAllowed,
   DomainError,
-  ApplicationState,
 } from '../../packages/domain/src/index.js';
 import {
   ErrorEnvelopeSchema,

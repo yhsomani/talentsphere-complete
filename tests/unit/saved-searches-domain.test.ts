@@ -8,7 +8,6 @@ import {
   removeSavedJob,
   SavedSearch,
   Job,
-  DomainError,
   MAX_ACTIVE_SAVED_SEARCHES,
 } from '../../packages/domain/src/index.js';
 

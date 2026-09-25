@@ -8,7 +8,6 @@ import {
   createSkillRelationship,
   wouldCreatePrerequisiteCycle,
   traverseSkillGraph,
-  DomainError,
   type Evidence,
   type Skill,
   type SkillRelationship,

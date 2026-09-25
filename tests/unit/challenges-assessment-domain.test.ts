@@ -6,7 +6,6 @@ import {
   assertAIAssistanceAllowed,
   evaluateChallengeSubmission,
   calculateCappedXp,
-  type Challenge,
   type XpTransaction,
 } from '../../packages/domain/src/index.js';
 

@@ -3,10 +3,8 @@ import {
   saveApplicationDraft,
   restoreApplicationDraftVersion,
   markDraftSubmitted,
-  type ApplicationDraft,
   type ApplicationDraftVersion,
 } from '../../packages/domain/src/application-drafts.js';
-import { DomainError } from '../../packages/domain/src/index.js';
 
 describe('Domain: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 1015)', () => {
   const candidateId = 'prof_cand_123';

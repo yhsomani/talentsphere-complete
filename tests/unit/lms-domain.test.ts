@@ -10,7 +10,6 @@ import {
   Course,
   CourseModule,
   Lesson,
-  CourseEnrollment,
 } from '../../packages/domain/src/index.js';
 
 describe('LMS Domain & Business Rules (F-07)', () => {
