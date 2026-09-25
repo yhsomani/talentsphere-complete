@@ -704,15 +704,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 ## 40. Final Current-State Summary
 
 - **Project:** TalentSphere
-- **Implementation:** 28 / 173 (16.18%)
-- **Verification:** 28 / 173 (16.18%)
+- **Implementation:** 30 / 173 (17.34%)
+- **Verification:** 30 / 173 (17.34%)
 - **Released:** 0 / 173 (0.00%)
 - **Current Phase:** Phase 2 — Verified Growth & Engagement Loops
 - **Current Milestone:** M2 — Gamification, Engagement & Networking
-- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15, F-16, F-17, F-35
-- **Test Suite Status:** 34 test suites / 281 tests passing (100% PASS)
+- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15, F-16, F-17, F-35, F-20, F-34
+- **Test Suite Status:** 36 test suites / 302 tests passing (100% PASS)
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA production bundle)
-- **Highest-Priority Remaining Work:** Feature F-20 (Command Search ⌘K), F-24 (Trust, Safety & Moderation)
+- **Highest-Priority Remaining Work:** Feature F-24 (Trust, Safety & Moderation), F-25 (Job Detail View), F-31 (KPI Aggregation & Rollups)
 - **Critical Blockers:** None
 - **Important Invariants Maintained:**
   - Zero-PII public SHA-256 verification proofs (BR-150, BR-155)
@@ -730,8 +730,11 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - Platform Admin privilege checks (BR-06) and anti-lockout protection preventing admin self-suspension/deactivation (BR-29, BR-068)
   - Immutable audit logs for all administrative interventions (BR-067)
   - System health diagnostics distinguishing live, degraded, and maintenance states (BR-28)
-- **Last Significant Change:** Completed Feature F-17 (Platform Administration Console & Governance) and Feature F-35 (Feature Flag Management): platform configuration schema, admin role assertions, user lifecycle management with anti-lockout safeguards, dynamic feature flag toggles, system maintenance modes, and immutable audit logs.
-- **Last Verified Milestone:** All 34 test suites green (281/281 tests), monorepo composite build clean.
-- **Next Action:** Git commit for F-17/F-35, then proceed to Feature F-20 (Command Search ⌘K) and Feature F-24 (Trust, Safety & Moderation).
-- **Last Updated:** 2026-09-24 20:15
+  - Strict profile privacy boundary (`canViewProfile`) in multi-entity search: private profiles never leaked
+  - Role-aware command palette scoping (admin commands restricted from non-admin callers)
+- **Last Significant Change:** Completed Feature F-20 (Command Search ⌘K) and Feature F-34 (Multi-Entity Backend Search): `search_history` schema with user RLS, search match relevance scoring and ranking, role-aware command palette, multi-entity search across jobs, skills, courses, challenges, public profiles, and search history management.
+- **Last Verified Milestone:** All 36 test suites green (302/302 tests), monorepo composite build clean.
+- **Next Action:** Git commit for F-20/F-34, then proceed to Feature F-24 (Trust, Safety & Moderation).
+- **Last Updated:** 2026-09-24 20:25
+
 

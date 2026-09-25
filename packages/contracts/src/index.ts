@@ -590,6 +590,24 @@ export const AdminQueryAuditLogsSchema = z.object({
 
 export type AdminQueryAuditLogs = z.infer<typeof AdminQueryAuditLogsSchema>;
 
+/**
+ * Multi-Entity Search & Command Palette Contracts (F-20, F-34, F-32)
+ */
+export const SearchQueryInputSchema = z.object({
+  query: z.string().min(1).max(200),
+  type: z.enum(['all', 'jobs', 'skills', 'courses', 'challenges', 'profiles', 'commands']).default('all'),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export type SearchQueryInput = z.infer<typeof SearchQueryInputSchema>;
+
+export const ClearSearchHistoryInputSchema = z.object({
+  olderThanDays: z.number().int().min(0).optional(),
+});
+
+export type ClearSearchHistoryInput = z.infer<typeof ClearSearchHistoryInputSchema>;
+
+
 
 
 

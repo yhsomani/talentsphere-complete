@@ -139,6 +139,15 @@ import {
   FeatureFlag,
   SystemDiagnostics,
   PlatformConfig,
+  scoreSearchMatch,
+  rankSearchResults,
+  getAvailableCommands,
+  filterCommandsByQuery,
+  createSearchHistoryRecord,
+  SearchResultItem,
+  CommandItem,
+  SearchHistoryItem,
+  SearchEntityType,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -190,6 +199,8 @@ import {
   AdminToggleFeatureFlagInputSchema,
   AdminSetMaintenanceModeInputSchema,
   AdminQueryAuditLogsSchema,
+  SearchQueryInputSchema,
+  ClearSearchHistoryInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -347,6 +358,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const invoicesByUserId = new Map<string, Invoice[]>();
   const invoicesById = new Map<string, Invoice>();
   const billingEventsByIdempotency = new Map<string, BillingEvent>();
+  const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
 
   // Feature Flags & Admin Repositories (F-17, F-35)
   const adminAuditLogs: AdminAuditLog[] = [];
@@ -427,6 +439,19 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('UNAUTHENTICATED', 'Invalid or expired session token.');
     }
     return session;
+  };
+
+  const maybeExtractUser = (req: FastifyRequest) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    const token = authHeader.substring(7).trim();
+    try {
+      return verifySessionToken(token);
+    } catch {
+      return null;
+    }
   };
 
   // Auth Routes
@@ -4088,6 +4113,236 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       message: `System maintenance mode ${input.inMaintenance ? 'enabled' : 'disabled'}.`,
       inMaintenance: systemInMaintenance,
       auditLog,
+    });
+  });
+
+  // ============================================================================
+  // Multi-Entity Backend Search & Command Palette Routes (F-20, F-34, F-32)
+  // ============================================================================
+
+  // 1. Unified Multi-Entity Search
+  app.get('/api/v1/search', async (req: FastifyRequest, reply: FastifyReply) => {
+    const input = SearchQueryInputSchema.parse(req.query);
+    const session = maybeExtractUser(req);
+    const viewerId = session?.userId;
+    const viewerRoles = session?.roles || [];
+
+    const query = input.query.trim();
+    const type = input.type;
+    const limit = input.limit;
+
+    const matchedResults: SearchResultItem[] = [];
+    const categories: Record<string, number> = {
+      jobs: 0,
+      skills: 0,
+      courses: 0,
+      challenges: 0,
+      profiles: 0,
+      commands: 0,
+    };
+
+    // 1a. Jobs Search
+    if (type === 'all' || type === 'jobs') {
+      for (const job of jobsById.values()) {
+        if (job.status !== 'published') continue;
+        const titleScore = scoreSearchMatch(job.title, query);
+        const locScore = scoreSearchMatch(job.location, query);
+        const descScore = scoreSearchMatch(job.description, query);
+        const maxScore = Math.max(titleScore, locScore, descScore);
+
+        if (maxScore > 0) {
+          categories.jobs++;
+          matchedResults.push({
+            id: job.id,
+            type: 'job',
+            title: job.title,
+            subtitle: job.location || 'Remote',
+            url: `/jobs/${job.id}`,
+            badge: job.status,
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1b. Skills Search
+    if (type === 'all' || type === 'skills') {
+      for (const skill of skillsById.values()) {
+        const nameScore = scoreSearchMatch(skill.name, query);
+        const catScore = scoreSearchMatch(skill.category, query);
+        const maxScore = Math.max(nameScore, catScore);
+
+        if (maxScore > 0) {
+          categories.skills++;
+          matchedResults.push({
+            id: skill.id,
+            type: 'skill',
+            title: skill.name,
+            subtitle: skill.category,
+            url: `/skills/${skill.slug}`,
+            badge: 'Skill',
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1c. Courses Search
+    if (type === 'all' || type === 'courses') {
+      for (const course of coursesById.values()) {
+        if (course.status !== 'published') continue;
+        const titleScore = scoreSearchMatch(course.title, query);
+        const descScore = scoreSearchMatch(course.description, query);
+        const levelScore = scoreSearchMatch(course.level, query);
+        const maxScore = Math.max(titleScore, descScore, levelScore);
+
+        if (maxScore > 0) {
+          categories.courses++;
+          matchedResults.push({
+            id: course.id,
+            type: 'course',
+            title: course.title,
+            subtitle: `${course.level} • ${course.estimatedDurationMinutes} mins`,
+            url: `/courses/${course.id}`,
+            badge: `${course.xpReward} XP`,
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1d. Coding Challenges Search
+    if (type === 'all' || type === 'challenges') {
+      for (const challenge of challengesById.values()) {
+        const titleScore = scoreSearchMatch(challenge.title, query);
+        const catScore = scoreSearchMatch(challenge.category, query);
+        const diffScore = scoreSearchMatch(challenge.difficulty, query);
+        const maxScore = Math.max(titleScore, catScore, diffScore);
+
+        if (maxScore > 0) {
+          categories.challenges++;
+          matchedResults.push({
+            id: challenge.id,
+            type: 'challenge',
+            title: challenge.title,
+            subtitle: `${challenge.difficulty} • ${challenge.category}`,
+            url: `/arena/challenges/${challenge.id}`,
+            badge: challenge.difficulty,
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1e. Profiles Search (Strict Privacy Enforced via canViewProfile)
+    if (type === 'all' || type === 'profiles') {
+      for (const profile of profilesById.values()) {
+        // Enforce privacy rule: skip if viewer cannot view profile
+        if (!canViewProfile(profile, viewerId, viewerRoles)) {
+          continue;
+        }
+
+        const nameScore = scoreSearchMatch(profile.fullName, query);
+        const headScore = scoreSearchMatch(profile.headline || '', query);
+        const maxScore = Math.max(nameScore, headScore);
+
+        if (maxScore > 0) {
+          categories.profiles++;
+          matchedResults.push({
+            id: profile.id,
+            type: 'profile',
+            title: profile.fullName,
+            subtitle: profile.headline || 'TalentSphere Member',
+            url: `/profile/${profile.userId}`,
+            badge: profile.privacy,
+            score: maxScore,
+          });
+        }
+      }
+    }
+
+    // 1f. Command Palette Search
+    const availableCommands = getAvailableCommands(viewerRoles);
+    let matchedCommands: CommandItem[] = [];
+    if (type === 'all' || type === 'commands') {
+      matchedCommands = filterCommandsByQuery(availableCommands, query);
+      categories.commands = matchedCommands.length;
+    }
+
+    // Rank and slice results
+    const rankedResults = rankSearchResults(matchedResults);
+    const slicedResults = rankedResults.slice(0, limit);
+
+    // Save search history for authenticated users
+    if (session) {
+      const historyRecord = createSearchHistoryRecord(
+        session.userId,
+        query,
+        type,
+        slicedResults.length
+      );
+      const userHistory = searchHistoryByUserId.get(session.userId) || [];
+      userHistory.unshift(historyRecord);
+      searchHistoryByUserId.set(session.userId, userHistory);
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'search.queried',
+      payload: {
+        userId: viewerId || 'anonymous',
+        query,
+        entityType: type,
+        resultCount: slicedResults.length,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      query,
+      type,
+      totalResults: rankedResults.length,
+      results: slicedResults,
+      commands: matchedCommands.slice(0, limit),
+      categories,
+    });
+  });
+
+  // 2. Get Available Commands (Command Palette ⌘K)
+  app.get('/api/v1/search/commands', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = maybeExtractUser(req);
+    const commands = getAvailableCommands(session?.roles || []);
+    return reply.status(200).send({
+      commands,
+      total: commands.length,
+    });
+  });
+
+  // 3. Get User Search History
+  app.get('/api/v1/search/history', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const history = searchHistoryByUserId.get(session.userId) || [];
+    return reply.status(200).send({
+      history,
+      total: history.length,
+    });
+  });
+
+  // 4. Clear User Search History
+  app.delete('/api/v1/search/history', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = ClearSearchHistoryInputSchema.parse(req.body || {});
+
+    if (input.olderThanDays !== undefined && input.olderThanDays > 0) {
+      const cutoff = new Date(Date.now() - input.olderThanDays * 86400000).toISOString();
+      const current = searchHistoryByUserId.get(session.userId) || [];
+      const retained = current.filter((h) => h.createdAt >= cutoff);
+      searchHistoryByUserId.set(session.userId, retained);
+    } else {
+      searchHistoryByUserId.set(session.userId, []);
+    }
+
+    return reply.status(200).send({
+      message: 'Search history cleared successfully.',
     });
   });
 
