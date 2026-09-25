@@ -839,6 +839,49 @@ export const SalaryBenchmarkQuerySchema = z.object({
 
 export type SalaryBenchmarkQuery = z.infer<typeof SalaryBenchmarkQuerySchema>;
 
+/**
+ * Application Feedback Loop Contracts (F-122, BR-217..BR-224, P-02)
+ */
+export const CreateApplicationFeedbackInputSchema = z.object({
+  reasonCategory: z.enum([
+    'skills_gap',
+    'experience_gap',
+    'culture_fit',
+    'overqualified',
+    'position_filled',
+    'compensation_mismatch',
+    'other',
+  ]),
+  stage: z.string().min(2).max(50).default('screening'),
+  strengths: z.string().min(5).max(3000),
+  areasForImprovement: z.string().min(5).max(3000),
+  actionableAdvice: z.string().min(5).max(3000),
+  suggestedSkillIds: z.array(z.string()).default([]),
+  isAiAssisted: z.boolean().default(false),
+  humanReviewed: z.boolean().default(true),
+});
+
+export type CreateApplicationFeedbackInput = z.infer<typeof CreateApplicationFeedbackInputSchema>;
+
+export const CreateFeedbackTemplateInputSchema = z.object({
+  templateName: z.string().min(2).max(150),
+  stage: z.string().min(2).max(50),
+  reasonCategory: z.enum([
+    'skills_gap',
+    'experience_gap',
+    'culture_fit',
+    'overqualified',
+    'position_filled',
+    'compensation_mismatch',
+    'other',
+  ]),
+  defaultStrengths: z.string().max(3000).optional(),
+  defaultAreasForImprovement: z.string().max(3000).optional(),
+  defaultActionableAdvice: z.string().max(3000).optional(),
+});
+
+export type CreateFeedbackTemplateInput = z.infer<typeof CreateFeedbackTemplateInputSchema>;
+
 
 
 

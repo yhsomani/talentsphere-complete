@@ -191,6 +191,13 @@ import {
   computeSalaryAggregates,
   querySalaryBenchmark,
   queryCompanySalarySummary,
+  ApplicationFeedback,
+  FeedbackTemplate,
+  createApplicationFeedback,
+  requestApplicationFeedback,
+  markFeedbackViewed,
+  computeFeedbackAggregateInsights,
+  createFeedbackTemplate,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -264,6 +271,8 @@ import {
   SaveJobAsTemplateInputSchema,
   SubmitSalaryReportInputSchema,
   SalaryBenchmarkQuerySchema,
+  CreateApplicationFeedbackInputSchema,
+  CreateFeedbackTemplateInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1075,6 +1084,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const applicationsById = new Map<string, JobApplication>();
   const applicationsByJobId = new Map<string, JobApplication[]>();
   const applicationsByCandidateId = new Map<string, JobApplication[]>();
+  const applicationFeedbackByAppId = new Map<string, ApplicationFeedback>();
+  const feedbackTemplatesByOrgId = new Map<string, FeedbackTemplate[]>();
 
   // Organization Endpoints
   app.post('/api/v1/organizations', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -1906,6 +1917,224 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       message: 'Application status transitioned successfully.',
       application: updated,
     });
+  });
+
+  // Application Feedback Loop Endpoints (F-122, BR-217..BR-224, P-02)
+  app.post('/api/v1/applications/:id/feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = CreateApplicationFeedbackInputSchema.parse(req.body);
+
+    const application = applicationsById.get(id);
+    if (!application) {
+      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+    }
+
+    const job = jobsById.get(application.jobId);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Associated job for application ${id} not found.`);
+    }
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isRecruiterForJob = userMemberships.some((m) => m.orgId === job.orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isRecruiterForJob && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only recruiters of the hiring organization can provide feedback (BR-12).');
+    }
+
+    if (input.suggestedSkillIds && input.suggestedSkillIds.length > 0) {
+      for (const skillId of input.suggestedSkillIds) {
+        if (!skillsById.has(skillId)) {
+          throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+        }
+      }
+    }
+
+    const feedback = createApplicationFeedback({
+      applicationId: application.id,
+      candidateId: application.candidateId,
+      jobId: application.jobId,
+      orgId: job.orgId,
+      stage: input.stage,
+      reasonCategory: input.reasonCategory,
+      strengths: input.strengths,
+      areasForImprovement: input.areasForImprovement,
+      actionableAdvice: input.actionableAdvice,
+      suggestedSkillIds: input.suggestedSkillIds,
+      isAiAssisted: input.isAiAssisted,
+      humanReviewed: input.humanReviewed,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId: job.orgId,
+      },
+    });
+
+    applicationFeedbackByAppId.set(application.id, feedback);
+
+    enqueuedWorkerJobs.push({
+      type: 'application.feedback_delivered',
+      payload: { applicationId: application.id, candidateId: application.candidateId },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    auditLogs.push({
+      event: 'application.feedback_provided',
+      actorId: session.userId,
+      targetId: feedback.id,
+      metadata: {
+        applicationId: application.id,
+        reasonCategory: feedback.reasonCategory,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Application feedback provided successfully.',
+      feedback,
+    });
+  });
+
+  app.get('/api/v1/applications/:id/feedback', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const application = applicationsById.get(id);
+    if (!application) {
+      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+    }
+
+    const feedback = applicationFeedbackByAppId.get(id);
+    if (!feedback) {
+      throw new DomainError('NOT_FOUND', `No feedback recorded for application ${id}.`);
+    }
+
+    const candidateProfile = profilesById.get(application.candidateId);
+    const isCandidateOwner = candidateProfile?.userId === session.userId;
+
+    const job = jobsById.get(application.jobId);
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isRecruiterForJob = job ? userMemberships.some((m) => m.orgId === job.orgId) : false;
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isCandidateOwner && !isRecruiterForJob && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Application feedback is private and visible only to the candidate (BR-219).');
+    }
+
+    let result = feedback;
+    if (isCandidateOwner && candidateProfile) {
+      result = markFeedbackViewed(feedback, candidateProfile.userId, session.userId);
+      applicationFeedbackByAppId.set(id, result);
+    }
+
+    return reply.status(200).send({ feedback: result });
+  });
+
+  app.post('/api/v1/applications/:id/feedback/request', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+
+    const application = applicationsById.get(id);
+    if (!application) {
+      throw new DomainError('NOT_FOUND', `Application with ID ${id} not found.`);
+    }
+
+    const candidateProfile = profilesById.get(application.candidateId);
+    if (!candidateProfile || candidateProfile.userId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Candidates may only request feedback for their own applications.');
+    }
+
+    const reqResult = requestApplicationFeedback(
+      application.updatedAt,
+      candidateProfile.userId,
+      session.userId
+    );
+
+    const existingFeedback = applicationFeedbackByAppId.get(id);
+    if (existingFeedback) {
+      if (existingFeedback.status === 'provided' || existingFeedback.status === 'viewed') {
+        return reply.status(200).send({
+          message: 'Feedback has already been provided for this application.',
+          feedback: existingFeedback,
+        });
+      }
+      existingFeedback.status = 'requested';
+      existingFeedback.requestedAt = reqResult.requestedAt;
+      applicationFeedbackByAppId.set(id, existingFeedback);
+    }
+
+    auditLogs.push({
+      event: 'application.feedback_requested',
+      actorId: session.userId,
+      targetId: application.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Feedback requested successfully from hiring team.',
+      requestedAt: reqResult.requestedAt,
+    });
+  });
+
+  app.post('/api/v1/organizations/:orgId/feedback-templates', async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { orgId } = req.params;
+    const input = CreateFeedbackTemplateInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Only organization members can configure feedback templates (BR-224).');
+    }
+
+    const template = createFeedbackTemplate({
+      orgId,
+      templateName: input.templateName,
+      stage: input.stage,
+      reasonCategory: input.reasonCategory,
+      defaultStrengths: input.defaultStrengths,
+      defaultAreasForImprovement: input.defaultAreasForImprovement,
+      defaultActionableAdvice: input.defaultActionableAdvice,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+        orgId,
+      },
+    });
+
+    const list = feedbackTemplatesByOrgId.get(orgId) || [];
+    list.push(template);
+    feedbackTemplatesByOrgId.set(orgId, list);
+
+    return reply.status(201).send({
+      message: 'Feedback template created successfully.',
+      template,
+    });
+  });
+
+  app.get('/api/v1/organizations/:orgId/feedback-templates', async (req: FastifyRequest<{ Params: { orgId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { orgId } = req.params;
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const isMember = userMemberships.some((m) => m.orgId === orgId);
+    const isAdmin = session.roles.includes('platform_admin');
+
+    if (!isMember && !isAdmin) {
+      throw new DomainError('FORBIDDEN', 'Access to feedback templates is restricted to organization members.');
+    }
+
+    const templates = feedbackTemplatesByOrgId.get(orgId) || [];
+    return reply.status(200).send({ templates });
+  });
+
+  app.get('/api/v1/feedback/aggregate-insights', async (req: FastifyRequest, reply: FastifyReply) => {
+    const allFeedbacks = Array.from(applicationFeedbackByAppId.values());
+    const insights = computeFeedbackAggregateInsights(allFeedbacks, 10);
+    return reply.status(200).send({ insights });
   });
 
   // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)
