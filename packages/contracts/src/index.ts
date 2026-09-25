@@ -607,6 +607,52 @@ export const ClearSearchHistoryInputSchema = z.object({
 
 export type ClearSearchHistoryInput = z.infer<typeof ClearSearchHistoryInputSchema>;
 
+/**
+ * Trust, Safety & Moderation Contracts (F-24, BR-34, BR-68, BR-125, BR-154, WIT-008, WIT-013)
+ */
+export const ScanContentInputSchema = z.object({
+  text: z.string().min(1).max(10000),
+});
+
+export type ScanContentInput = z.infer<typeof ScanContentInputSchema>;
+
+export const CreateModerationReportInputSchema = z.object({
+  targetType: z.enum(['user', 'job', 'message', 'evidence', 'review', 'portfolio_project']),
+  targetId: z.string().min(1).max(128),
+  reason: z.enum(['spam', 'harassment', 'fraud', 'inappropriate', 'intellectual_property', 'security_violation', 'other']),
+  details: z.string().max(2000).optional(),
+});
+
+export type CreateModerationReportInput = z.infer<typeof CreateModerationReportInputSchema>;
+
+export const UpdateModerationReportStatusInputSchema = z.object({
+  status: z.enum(['pending', 'under_review', 'resolved', 'dismissed']),
+});
+
+export type UpdateModerationReportStatusInput = z.infer<typeof UpdateModerationReportStatusInputSchema>;
+
+export const ResolveModerationReportInputSchema = z.object({
+  action: z.enum(['none', 'warning', 'content_removed', 'user_suspended', 'user_banned', 'dismissed']),
+  resolutionNotes: z.string().min(3).max(2000),
+  secondApproverId: z.string().uuid().optional(),
+});
+
+export type ResolveModerationReportInput = z.infer<typeof ResolveModerationReportInputSchema>;
+
+export const CreateModerationAppealInputSchema = z.object({
+  reason: z.string().min(10).max(2000),
+});
+
+export type CreateModerationAppealInput = z.infer<typeof CreateModerationAppealInputSchema>;
+
+export const ReviewModerationAppealInputSchema = z.object({
+  decision: z.enum(['upheld', 'denied']),
+  decisionNotes: z.string().min(3).max(2000),
+});
+
+export type ReviewModerationAppealInput = z.infer<typeof ReviewModerationAppealInputSchema>;
+
+
 
 
 

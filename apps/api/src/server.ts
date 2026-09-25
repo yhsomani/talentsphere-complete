@@ -148,6 +148,16 @@ import {
   CommandItem,
   SearchHistoryItem,
   SearchEntityType,
+  ModerationReport,
+  ModerationAppeal,
+  ContentScanResult,
+  scanContentForAbuse,
+  createModerationReport,
+  assertModeratorAuthority,
+  transitionReportStatus,
+  resolveModerationReport,
+  createModerationAppeal,
+  reviewModerationAppeal,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -201,6 +211,12 @@ import {
   AdminQueryAuditLogsSchema,
   SearchQueryInputSchema,
   ClearSearchHistoryInputSchema,
+  ScanContentInputSchema,
+  CreateModerationReportInputSchema,
+  UpdateModerationReportStatusInputSchema,
+  ResolveModerationReportInputSchema,
+  CreateModerationAppealInputSchema,
+  ReviewModerationAppealInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -359,6 +375,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const invoicesById = new Map<string, Invoice>();
   const billingEventsByIdempotency = new Map<string, BillingEvent>();
   const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
+  const moderationReportsById = new Map<string, ModerationReport>();
+  const moderationAppealsById = new Map<string, ModerationAppeal>();
 
   // Feature Flags & Admin Repositories (F-17, F-35)
   const adminAuditLogs: AdminAuditLog[] = [];
@@ -4344,6 +4362,232 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return reply.status(200).send({
       message: 'Search history cleared successfully.',
     });
+  });
+
+  // =========================================================================
+  // Trust, Safety & Content Moderation Endpoints (F-24, BR-34, BR-68, BR-125, BR-154, WIT-008, WIT-013)
+  // =========================================================================
+
+  // 1. Scan content for abuse prior to publication (BR-125)
+  app.post('/api/v1/moderation/scan', async (req: FastifyRequest, reply: FastifyReply) => {
+    const input = ScanContentInputSchema.parse(req.body);
+    const scanResult = scanContentForAbuse(input.text);
+    return reply.status(200).send({ scanResult });
+  });
+
+  // 2. Submit a moderation report
+  app.post('/api/v1/moderation/reports', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateModerationReportInputSchema.parse(req.body);
+    const existingReports = Array.from(moderationReportsById.values());
+
+    const report = createModerationReport({
+      reporterId: session.userId,
+      targetType: input.targetType,
+      targetId: input.targetId,
+      reason: input.reason,
+      details: input.details,
+      existingReports,
+    });
+
+    moderationReportsById.set(report.id, report);
+
+    enqueuedWorkerJobs.push({
+      type: 'moderation.report_created',
+      payload: { reportId: report.id, targetType: report.targetType, targetId: report.targetId, severity: report.severity },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ report });
+  });
+
+  // 3. Get reporter's own submitted reports
+  app.get('/api/v1/moderation/reports/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const myReports = Array.from(moderationReportsById.values()).filter(
+      (r) => r.reporterId === session.userId
+    );
+    return reply.status(200).send({ reports: myReports, total: myReports.length });
+  });
+
+  // 4. Moderator Queue: List reports with optional filters
+  app.get('/api/v1/moderation/reports', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertModeratorAuthority(session.roles);
+
+    const query = req.query as { status?: string; targetType?: string; severity?: string } | undefined;
+    let list = Array.from(moderationReportsById.values());
+
+    if (query?.status) {
+      list = list.filter((r) => r.status === query.status);
+    }
+    if (query?.targetType) {
+      list = list.filter((r) => r.targetType === query.targetType);
+    }
+    if (query?.severity) {
+      list = list.filter((r) => r.severity === query.severity);
+    }
+
+    return reply.status(200).send({ reports: list, total: list.length });
+  });
+
+  // 5. Get report details
+  app.get('/api/v1/moderation/reports/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const report = moderationReportsById.get(id);
+    if (!report) {
+      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+    }
+
+    const isModerator = session.roles.includes('moderator') || session.roles.includes('platform_admin');
+    if (!isModerator && report.reporterId !== session.userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to this moderation report.');
+    }
+
+    return reply.status(200).send({ report });
+  });
+
+  // 6. Transition report status (BR-34)
+  app.patch('/api/v1/moderation/reports/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = UpdateModerationReportStatusInputSchema.parse(req.body);
+
+    const report = moderationReportsById.get(id);
+    if (!report) {
+      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+    }
+
+    const updated = transitionReportStatus(report, input.status, {
+      userId: session.userId,
+      roles: session.roles,
+    });
+    moderationReportsById.set(id, updated);
+
+    return reply.status(200).send({ report: updated });
+  });
+
+  // 7. Resolve moderation report with enforcement action (BR-068, WIT-008, WIT-013)
+  app.post('/api/v1/moderation/reports/:id/resolve', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = ResolveModerationReportInputSchema.parse(req.body);
+
+    const report = moderationReportsById.get(id);
+    if (!report) {
+      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+    }
+
+    let secondApproverRoles: string[] | undefined;
+    if (input.secondApproverId) {
+      const secondUser = usersById.get(input.secondApproverId);
+      secondApproverRoles = secondUser?.roles;
+    }
+
+    const resolved = resolveModerationReport({
+      report,
+      action: input.action,
+      resolutionNotes: input.resolutionNotes,
+      resolver: { userId: session.userId, roles: session.roles },
+      secondApproverId: input.secondApproverId,
+      secondApproverRoles,
+    });
+
+    moderationReportsById.set(id, resolved);
+
+    // Apply side effects of enforcement
+    if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
+      const user = usersById.get(resolved.targetId);
+      if (user) user.status = 'suspended';
+    } else if (resolved.actionTaken === 'user_banned' && resolved.targetType === 'user') {
+      const user = usersById.get(resolved.targetId);
+      if (user) user.status = 'deactivated';
+    } else if (resolved.actionTaken === 'content_removed' && resolved.targetType === 'job') {
+      const job = jobsById.get(resolved.targetId);
+      if (job) job.status = 'closed';
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'moderation.report_resolved',
+      payload: { reportId: resolved.id, action: resolved.actionTaken, targetId: resolved.targetId },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({ report: resolved });
+  });
+
+  // 8. Submit an appeal against an adverse moderation action (WIT-013, BR-154)
+  app.post('/api/v1/moderation/reports/:id/appeal', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = CreateModerationAppealInputSchema.parse(req.body);
+
+    const report = moderationReportsById.get(id);
+    if (!report) {
+      throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+    }
+
+    const existingAppeals = Array.from(moderationAppealsById.values());
+    const appeal = createModerationAppeal(report, session.userId, input.reason, existingAppeals);
+    moderationAppealsById.set(appeal.id, appeal);
+
+    enqueuedWorkerJobs.push({
+      type: 'moderation.appeal_submitted',
+      payload: { appealId: appeal.id, reportId: report.id, appellantId: appeal.appellantId },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ appeal });
+  });
+
+  // 9. List appeals (Moderator Queue)
+  app.get('/api/v1/moderation/appeals', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertModeratorAuthority(session.roles);
+
+    const appeals = Array.from(moderationAppealsById.values());
+    return reply.status(200).send({ appeals, total: appeals.length });
+  });
+
+  // 10. Review and decide on an appeal
+  app.post('/api/v1/moderation/appeals/:id/review', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { id } = req.params;
+    const input = ReviewModerationAppealInputSchema.parse(req.body);
+
+    const appeal = moderationAppealsById.get(id);
+    if (!appeal) {
+      throw new DomainError('NOT_FOUND', `Appeal with ID "${id}" not found.`);
+    }
+
+    const reviewed = reviewModerationAppeal(appeal, input.decision, input.decisionNotes, {
+      userId: session.userId,
+      roles: session.roles,
+    });
+
+    moderationAppealsById.set(id, reviewed);
+
+    // If appeal is upheld, reverse penalty on target entity
+    if (reviewed.status === 'upheld') {
+      const origReport = moderationReportsById.get(reviewed.reportId);
+      if (origReport) {
+        origReport.actionTaken = 'dismissed';
+        origReport.status = 'dismissed';
+        if (origReport.targetType === 'user') {
+          const user = usersById.get(origReport.targetId);
+          if (user) user.status = 'active';
+        }
+      }
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'moderation.appeal_reviewed',
+      payload: { appealId: reviewed.id, status: reviewed.status },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({ appeal: reviewed });
   });
 
   // Internal test helper for inspecting async job dispatch
