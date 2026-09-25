@@ -1487,3 +1487,47 @@ export const LearningImpactDashboardQuerySchema = z.object({
 });
 
 export type LearningImpactDashboardQuery = z.infer<typeof LearningImpactDashboardQuerySchema>;
+
+/**
+ * Talent Pool Intelligence & Analytics Contracts (F-158, F-92, BR-200, BR-201)
+ */
+export const CreateTalentPoolInputSchema = z.object({
+  orgId: z.string().uuid().optional(),
+  name: z.string().min(1).max(120),
+  description: z.string().max(500).optional(),
+  targetRole: z.string().max(120).optional(),
+  targetSkills: z.array(z.string().min(1).max(100)).default([]),
+});
+
+export type CreateTalentPoolInput = z.infer<typeof CreateTalentPoolInputSchema>;
+
+export const AddPoolMemberInputSchema = z.object({
+  candidateId: z.string().uuid(),
+  source: z
+    .enum(['search', 'referral', 'inbound_application', 'alumni', 'outreach'])
+    .default('search'),
+  costMinorUnits: z.number().int().min(0).default(0),
+  notes: z.string().max(500).optional(),
+});
+
+export type AddPoolMemberInput = z.infer<typeof AddPoolMemberInputSchema>;
+
+export const UpdatePoolMemberStatusInputSchema = z.object({
+  status: z.enum([
+    'sourced',
+    'contacted',
+    'screening',
+    'interviewing',
+    'offered',
+    'hired',
+    'archived',
+  ]),
+});
+
+export type UpdatePoolMemberStatusInput = z.infer<typeof UpdatePoolMemberStatusInputSchema>;
+
+export const QueryPoolIntelligenceInputSchema = z.object({
+  kThreshold: z.coerce.number().int().min(5).max(50).default(10),
+});
+
+export type QueryPoolIntelligenceInput = z.infer<typeof QueryPoolIntelligenceInputSchema>;

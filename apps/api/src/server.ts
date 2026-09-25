@@ -267,6 +267,13 @@ import {
   computeLearningImpactMetrics,
   aggregateLearningImpactDashboard,
   CORRELATION_DISCLAIMER_LABEL,
+  TalentPool,
+  TalentPoolMember,
+  CandidateSkillProfile,
+  createTalentPool,
+  addCandidateToPool,
+  updatePoolMemberStatus,
+  generateTalentPoolIntelligence,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -382,6 +389,10 @@ import {
   QueryLearningImpactInputSchema,
   ComputeLearningImpactInputSchema,
   LearningImpactDashboardQuerySchema,
+  CreateTalentPoolInputSchema,
+  AddPoolMemberInputSchema,
+  UpdatePoolMemberStatusInputSchema,
+  QueryPoolIntelligenceInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -7186,6 +7197,339 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     return reply.status(200).send({ dashboard });
   });
+
+  // =========================================================================
+  // Talent Pool Intelligence & Analytics Endpoints (F-158, F-92, BR-200, BR-201)
+  // =========================================================================
+  const talentPoolsById = new Map<string, TalentPool>();
+  const talentPoolsByOrgId = new Map<string, TalentPool[]>();
+  const talentPoolMembersById = new Map<string, TalentPoolMember>();
+  const talentPoolMembersByPoolId = new Map<string, TalentPoolMember[]>();
+
+  // 1. Create Talent Pool (F-158, F-92)
+  app.post('/api/v1/recruiter/talent-pools', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CreateTalentPoolInputSchema.parse(req.body);
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    let targetOrgId = input.orgId;
+    if (!targetOrgId) {
+      if (userMemberships.length > 0) {
+        targetOrgId = userMemberships[0].orgId;
+      } else if (session.roles.includes('platform_admin')) {
+        targetOrgId = '00000000-0000-0000-0000-000000000001';
+      } else {
+        throw new DomainError('FORBIDDEN', 'User does not belong to any organization.');
+      }
+    } else {
+      const isMember = userMemberships.some((m) => m.orgId === targetOrgId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to organization talent pools.');
+      }
+    }
+
+    const pool = createTalentPool({
+      orgId: targetOrgId,
+      name: input.name,
+      description: input.description,
+      targetRole: input.targetRole,
+      targetSkills: input.targetSkills,
+      createdBy: session.userId,
+    });
+
+    talentPoolsById.set(pool.id, pool);
+    const orgPools = talentPoolsByOrgId.get(targetOrgId) || [];
+    orgPools.push(pool);
+    talentPoolsByOrgId.set(targetOrgId, orgPools);
+
+    auditLogs.push({
+      event: 'talent_pool.created',
+      actorId: session.userId,
+      targetId: pool.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Talent pool created successfully.',
+      pool,
+    });
+  });
+
+  // 2. List Organization Talent Pools
+  app.get(
+    '/api/v1/recruiter/talent-pools',
+    async (req: FastifyRequest<{ Querystring: { orgId?: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      let targetOrgId = req.query.orgId;
+
+      if (!targetOrgId) {
+        if (userMemberships.length > 0) {
+          targetOrgId = userMemberships[0].orgId;
+        } else if (session.roles.includes('platform_admin')) {
+          targetOrgId = '00000000-0000-0000-0000-000000000001';
+        } else {
+          throw new DomainError('FORBIDDEN', 'User does not belong to any organization.');
+        }
+      } else {
+        const isMember = userMemberships.some((m) => m.orgId === targetOrgId);
+        const isPlatformAdmin = session.roles.includes('platform_admin');
+        if (!isMember && !isPlatformAdmin) {
+          throw new DomainError('FORBIDDEN', 'Access denied to organization talent pools.');
+        }
+      }
+
+      const pools = talentPoolsByOrgId.get(targetOrgId) || [];
+      const poolsWithCounts = pools.map((p) => {
+        const members = talentPoolMembersByPoolId.get(p.id) || [];
+        return {
+          ...p,
+          memberCount: members.length,
+        };
+      });
+
+      return reply.status(200).send({
+        pools: poolsWithCounts,
+        total: poolsWithCounts.length,
+      });
+    }
+  );
+
+  // 3. Get Talent Pool Details
+  app.get(
+    '/api/v1/recruiter/talent-pools/:poolId',
+    async (req: FastifyRequest<{ Params: { poolId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { poolId } = req.params;
+      const pool = talentPoolsById.get(poolId);
+      if (!pool) {
+        throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
+      }
+
+      const members = talentPoolMembersByPoolId.get(pool.id) || [];
+      return reply.status(200).send({
+        pool,
+        members,
+        totalMembers: members.length,
+      });
+    }
+  );
+
+  // 4. Add Candidate to Talent Pool (F-158, F-92, BR-064)
+  app.post(
+    '/api/v1/recruiter/talent-pools/:poolId/members',
+    async (req: FastifyRequest<{ Params: { poolId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { poolId } = req.params;
+      const pool = talentPoolsById.get(poolId);
+      if (!pool) {
+        throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
+      }
+
+      const input = AddPoolMemberInputSchema.parse(req.body);
+      const existingMembers = talentPoolMembersByPoolId.get(pool.id) || [];
+      if (existingMembers.some((m) => m.candidateId === input.candidateId)) {
+        throw new DomainError('CONFLICT', 'Candidate is already a member of this talent pool.');
+      }
+
+      // Verify candidate profile and privacy/stealth invariants
+      const candidateProfile =
+        profilesByUserId.get(input.candidateId) ||
+        Array.from(profilesByUserId.values()).find((p) => p.id === input.candidateId);
+
+      // Check if candidate has applied to any jobs of this organization
+      const orgJobs = jobsByOrgId.get(pool.orgId) || [];
+      const orgJobIds = new Set(orgJobs.map((j) => j.id));
+      const candApplications = candidateProfile
+        ? applicationsByCandidateId.get(candidateProfile.id) || []
+        : [];
+      const hasAppliedToOrg = candApplications.some((a) => orgJobIds.has(a.jobId));
+
+      // Construct candidate skill profile
+      const userEvidence = candidateProfile
+        ? evidenceBySubjectId.get(candidateProfile.id) ||
+          evidenceBySubjectId.get(candidateProfile.userId) ||
+          []
+        : [];
+      const skills: Array<{ skillName: string; verified: boolean }> = [];
+      for (const ev of userEvidence) {
+        const sids = evidenceSkills.get(ev.id);
+        if (sids) {
+          for (const sid of sids) {
+            const sk = skillsById.get(sid);
+            skills.push({
+              skillName: sk?.name || sid,
+              verified: ev.status === 'verified',
+            });
+          }
+        }
+      }
+
+      const candidateSkills: CandidateSkillProfile = {
+        candidateId: input.candidateId,
+        skills,
+        isStealthMode: (candidateProfile as any)?.isStealthMode || false,
+        privacyLevel:
+          (candidateProfile?.privacy as 'public' | 'recruiters_only' | 'private') || 'public',
+        hasAppliedOrConsented: hasAppliedToOrg,
+      };
+
+      const member = addCandidateToPool(
+        pool,
+        candidateSkills,
+        input.source,
+        input.costMinorUnits,
+        input.notes
+      );
+
+      talentPoolMembersById.set(member.id, member);
+      existingMembers.push(member);
+      talentPoolMembersByPoolId.set(pool.id, existingMembers);
+
+      auditLogs.push({
+        event: 'talent_pool.member_added',
+        actorId: session.userId,
+        targetId: member.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      return reply.status(201).send({
+        message: 'Candidate added to talent pool successfully.',
+        member,
+      });
+    }
+  );
+
+  // 5. Update Talent Pool Member Status
+  app.patch(
+    '/api/v1/recruiter/talent-pools/:poolId/members/:memberId',
+    async (
+      req: FastifyRequest<{ Params: { poolId: string; memberId: string } }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { poolId, memberId } = req.params;
+      const pool = talentPoolsById.get(poolId);
+      if (!pool) {
+        throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
+      }
+
+      const member = talentPoolMembersById.get(memberId);
+      if (!member || member.poolId !== pool.id) {
+        throw new DomainError(
+          'NOT_FOUND',
+          `Talent pool member with ID "${memberId}" not found in this pool.`
+        );
+      }
+
+      const input = UpdatePoolMemberStatusInputSchema.parse(req.body);
+      const updatedMember = updatePoolMemberStatus(member, input.status);
+      talentPoolMembersById.set(member.id, updatedMember);
+
+      const poolMembers = talentPoolMembersByPoolId.get(pool.id) || [];
+      const idx = poolMembers.findIndex((m) => m.id === member.id);
+      if (idx !== -1) {
+        poolMembers[idx] = updatedMember;
+        talentPoolMembersByPoolId.set(pool.id, poolMembers);
+      }
+
+      return reply.status(200).send({
+        message: 'Talent pool member status updated successfully.',
+        member: updatedMember,
+      });
+    }
+  );
+
+  // 6. Compute Talent Pool Intelligence (F-158)
+  app.get(
+    '/api/v1/recruiter/talent-pools/:poolId/intelligence',
+    async (
+      req: FastifyRequest<{
+        Params: { poolId: string };
+        Querystring: { kThreshold?: string };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const { poolId } = req.params;
+      const pool = talentPoolsById.get(poolId);
+      if (!pool) {
+        throw new DomainError('NOT_FOUND', `Talent pool with ID "${poolId}" not found.`);
+      }
+
+      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+      const isMember = userMemberships.some((m) => m.orgId === pool.orgId);
+      const isPlatformAdmin = session.roles.includes('platform_admin');
+      if (!isMember && !isPlatformAdmin) {
+        throw new DomainError('FORBIDDEN', 'Access denied to this talent pool.');
+      }
+
+      const query = QueryPoolIntelligenceInputSchema.parse(req.query);
+      const members = talentPoolMembersByPoolId.get(pool.id) || [];
+
+      // Construct candidate skill profiles
+      const candidateProfiles: CandidateSkillProfile[] = members.map((m) => {
+        const candidateProfile =
+          profilesByUserId.get(m.candidateId) ||
+          Array.from(profilesByUserId.values()).find((p) => p.id === m.candidateId);
+        const userEvidence = candidateProfile
+          ? evidenceBySubjectId.get(candidateProfile.id) ||
+            evidenceBySubjectId.get(candidateProfile.userId) ||
+            []
+          : [];
+        const skills: Array<{ skillName: string; verified: boolean }> = [];
+        for (const ev of userEvidence) {
+          const sids = evidenceSkills.get(ev.id);
+          if (sids) {
+            for (const sid of sids) {
+              const sk = skillsById.get(sid);
+              skills.push({
+                skillName: sk?.name || sid,
+                verified: ev.status === 'verified',
+              });
+            }
+          }
+        }
+
+        return {
+          candidateId: m.candidateId,
+          skills,
+        };
+      });
+
+      const intelligence = generateTalentPoolIntelligence(
+        pool,
+        members,
+        candidateProfiles,
+        [],
+        query.kThreshold
+      );
+
+      return reply.status(200).send({ intelligence });
+    }
+  );
 
   // =========================================================================
   // Alumni Networks Repositories & Endpoints (F-125, F-12, F-09, F-40)

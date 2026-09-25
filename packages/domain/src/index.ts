@@ -43,6 +43,7 @@ export * from './employer-reputation.js';
 export * from './skill-forecasting.js';
 export * from './career-trajectory.js';
 export * from './learning-impact.js';
+export * from './talent-pool-intelligence.js';
 
 export type Role =
   | 'candidate'

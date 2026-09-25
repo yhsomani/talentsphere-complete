@@ -360,4 +360,17 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('UNIQUE(course_id)');
     expect(sql).toContain('Correlational finding based on observational learner data. Not causal.');
   });
+
+  it('contains and validates migration 00038 talent pool intelligence schema (F-158, F-92)', () => {
+    const migrationFile38 = path.join(migrationsDir, '00038_talent_pool_intelligence_schema.sql');
+    expect(fs.existsSync(migrationFile38)).toBe(true);
+    const sql = fs.readFileSync(migrationFile38, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.talent_pools');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.talent_pool_members');
+    expect(sql).toContain('ALTER TABLE public.talent_pools ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.talent_pool_members ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('cost_minor_units INT NOT NULL DEFAULT 0');
+    expect(sql).toContain('uq_talent_pool_candidate UNIQUE(pool_id, candidate_id)');
+    expect(sql).toContain('idx_talent_pool_members_source');
+  });
 });
