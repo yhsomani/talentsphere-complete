@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01)', () => {
+test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)', () => {
   test('renders landing page with accessibility skip-link and PWA indicator', async ({ page }) => {
     await page.goto('/');
 
@@ -19,9 +19,9 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01)', () =>
     await expect(pwaBadge).toBeVisible();
 
     // 4. Feature pillars
-    await expect(page.locator('h2:has-text("1. Talent Graph")')).toBeVisible();
-    await expect(page.locator('h2:has-text("2. Evidence Graph")')).toBeVisible();
-    await expect(page.locator('h2:has-text("3. Governed Intelligence")')).toBeVisible();
+    await expect(page.locator(':is(h2, h3):has-text("1. Talent Graph")')).toBeVisible();
+    await expect(page.locator(':is(h2, h3):has-text("2. Evidence Graph")')).toBeVisible();
+    await expect(page.locator(':is(h2, h3):has-text("3. Governed Intelligence")')).toBeVisible();
   });
 
   test('navigates to dashboard and displays career cockpit with readiness metrics', async ({
@@ -29,8 +29,8 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01)', () =>
   }) => {
     await page.goto('/');
 
-    // Click launch dashboard button
-    await page.click('text=Launch Dashboard');
+    // Click launch career cockpit button
+    await page.click('text=Launch Career Cockpit');
     await expect(page).toHaveURL(/.*dashboard/);
 
     // Verify dashboard heading
@@ -102,5 +102,109 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01)', () =>
     await expect(page.getByTestId('order-reference')).toBeVisible();
     await expect(page.getByTestId('order-amount')).toHaveText('$279');
   });
-});
 
+  test('navigates to evidence page and validates work history attestations with anti-fraud checks', async ({
+    page,
+  }) => {
+    await page.goto('/evidence');
+
+    // Heading verification
+    await expect(page.locator('h1')).toContainText('Verified Work History');
+    await expect(page.getByTestId('add-work-history-btn')).toBeVisible();
+
+    // Open add modal
+    await page.getByTestId('add-work-history-btn').click();
+    await expect(page.getByTestId('add-employment-form')).toBeVisible();
+
+    // Test anti-fraud check: end date before start date
+    await page.getByTestId('input-company').fill('Fraudulent Corp');
+    await page.getByTestId('input-title').fill('Security Engineer');
+    await page.getByTestId('input-start-date').fill('2024-05-01');
+    await page.getByTestId('input-end-date').fill('2023-01-01'); // earlier than start date
+    await page.getByTestId('submit-employment-btn').click();
+
+    // Verify anti-fraud error is surfaced
+    const alert = page.locator('div[role="alert"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText('Anti-fraud BR-084');
+
+    // Test anti-fraud check: disposable email domain rejection
+    await page.getByTestId('input-end-date').fill('2024-12-01');
+    await page.getByTestId('input-corporate-email').fill('tester@mailinator.com');
+    await page.getByTestId('submit-employment-btn').click();
+
+    await expect(alert).toBeVisible();
+    await expect(alert).toContainText('Disposable');
+
+    // Submit valid attestation
+    await page.getByTestId('input-corporate-email').fill('jordan@verified-domain.com');
+    await page.getByTestId('submit-employment-btn').click();
+
+    // Verify new record appears in list
+    await expect(page.getByText('Fraudulent Corp')).toBeVisible();
+  });
+
+  test('runs proctored assessment sandbox execution with verifiable invariants', async ({
+    page,
+  }) => {
+    await page.goto('/assessments');
+
+    // Heading verification
+    await expect(page.locator('h1')).toContainText('Proctored Capability Assessments');
+
+    // Launch first sandbox challenge
+    await page.getByTestId('start-challenge-ch-dist-01').click();
+
+    // Verify modal and code pre-block
+    await expect(page.getByTestId('run-sandbox-btn')).toBeVisible();
+    await expect(page.locator('pre')).toContainText('TransactionalQueue');
+
+    // Execute sandbox runner
+    await page.getByTestId('run-sandbox-btn').click();
+
+    // Verify execution log and verification badge
+    await expect(page.getByTestId('sandbox-log')).toBeVisible();
+    await expect(page.getByTestId('sandbox-log')).toContainText('Test 1/3: Basic enqueue & dequeue invariant... PASS');
+    await expect(page.getByText('Sandbox Invariants Verified')).toBeVisible();
+  });
+
+  test('browses verifiable job opportunities and applies with verified evidence graph', async ({
+    page,
+  }) => {
+    await page.goto('/jobs');
+
+    // Heading verification
+    await expect(page.locator('h1')).toContainText('Verifiable Career Opportunities');
+
+    // First job card checks
+    const jobCard = page.getByTestId('job-card-job-001');
+    await expect(jobCard).toBeVisible();
+    await expect(jobCard).toContainText('Staff Distributed Systems Engineer');
+    await expect(jobCard).toContainText('94% MATCH');
+    await expect(jobCard).toContainText('CoreDB Infrastructure');
+
+    // Apply with evidence graph
+    const applyBtn = page.getByTestId('apply-btn-job-001');
+    await expect(applyBtn).toBeVisible();
+    await applyBtn.click();
+
+    // Verify state transition to transmitted
+    await expect(jobCard).toContainText('Application Transmitted');
+    await expect(applyBtn).toBeDisabled();
+  });
+
+  test('renders privacy policy and terms of service pre-launch gates', async ({ page }) => {
+    // Privacy Page
+    await page.goto('/privacy');
+    await expect(page.locator('h1')).toHaveText('TalentSphere Privacy Policy');
+    await expect(page.getByText('GDPR & CCPA Compliant')).toBeVisible();
+    await expect(page.getByText('Anti-LLM Scraping Clause')).toBeVisible();
+    await expect(page.getByText('privacy@talentsphere.dev')).toBeVisible();
+
+    // Terms Page
+    await page.goto('/terms');
+    await expect(page.locator('h1')).toHaveText('Terms of Service & Verification Standards');
+    await expect(page.getByText('Credential Integrity Notice')).toBeVisible();
+    await expect(page.getByText('Prohibition of AI Proxy Agents')).toBeVisible();
+  });
+});
