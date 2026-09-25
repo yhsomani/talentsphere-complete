@@ -403,4 +403,20 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('uq_candidate_segmentation UNIQUE(candidate_id)');
     expect(sql).toContain('idx_segmentation_specialization');
   });
+
+  it('contains and validates migration 00041 verified work history schema (F-162, F-94, F-84)', () => {
+    const migrationFile41 = path.join(migrationsDir, '00041_verified_work_history_schema.sql');
+    expect(fs.existsSync(migrationFile41)).toBe(true);
+    const sql = fs.readFileSync(migrationFile41, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.verified_work_histories');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.employment_references');
+    expect(sql).toContain('ALTER TABLE public.verified_work_histories ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.employment_references ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('corporate_email VARCHAR(255)');
+    expect(sql).toContain('badge_tier VARCHAR(20)');
+    expect(sql).toContain('chk_work_history_dates');
+    expect(sql).toContain('chk_ref_relationship');
+    expect(sql).toContain('idx_work_history_candidate');
+    expect(sql).toContain('idx_references_work_history');
+  });
 });

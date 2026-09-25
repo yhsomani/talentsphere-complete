@@ -1619,3 +1619,61 @@ export const FilterSegmentedTalentQuerySchema = z.object({
 });
 
 export type FilterSegmentedTalentQuery = z.infer<typeof FilterSegmentedTalentQuerySchema>;
+
+/**
+ * Verified Work History Network & References Contracts (F-162, F-94, F-84)
+ */
+export const CreateWorkHistoryInputSchema = z.object({
+  companyName: z.string().min(1, 'Company name is required').max(150),
+  companyId: z.string().uuid().optional(),
+  title: z.string().min(1, 'Job title is required').max(150),
+  employmentType: z
+    .enum(['full_time', 'part_time', 'contract', 'internship', 'freelance'])
+    .default('full_time'),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'startDate must be in YYYY-MM-DD format'),
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'endDate must be in YYYY-MM-DD format')
+    .optional(),
+  isCurrent: z.boolean().default(false),
+  description: z.string().max(3000).optional(),
+  corporateEmail: z.string().email('Valid corporate email is required').optional(),
+  skills: z.array(z.string().min(1).max(100)).default([]),
+});
+
+export type CreateWorkHistoryInput = z.infer<typeof CreateWorkHistoryInputSchema>;
+
+export const VerifyWorkHistoryEmailInputSchema = z.object({
+  corporateEmail: z.string().email('Valid corporate email is required'),
+  verificationCode: z.string().min(4).max(32).optional(),
+});
+
+export type VerifyWorkHistoryEmailInput = z.infer<typeof VerifyWorkHistoryEmailInputSchema>;
+
+export const RequestEmploymentReferenceInputSchema = z.object({
+  refereeName: z.string().min(2, 'Referee name must be at least 2 characters').max(150),
+  refereeEmail: z.string().email('Valid referee email is required'),
+  relationship: z.enum(['manager', 'peer', 'direct_report', 'mentor', 'client']),
+});
+
+export type RequestEmploymentReferenceInput = z.infer<typeof RequestEmploymentReferenceInputSchema>;
+
+export const SubmitEmploymentReferenceInputSchema = z.object({
+  token: z.string().min(6).optional(),
+  confirmDates: z.boolean(),
+  confirmTitle: z.boolean(),
+  technicalProficiency: z.number().int().min(1).max(5),
+  collaborationRating: z.number().int().min(1).max(5),
+  deliveryReliability: z.number().int().min(1).max(5),
+  leadershipRating: z.number().int().min(1).max(5).optional(),
+  endorsedSkills: z.array(z.string().min(1).max(100)).default([]),
+  summaryNotes: z.string().max(2000).optional(),
+});
+
+export type SubmitEmploymentReferenceInput = z.infer<typeof SubmitEmploymentReferenceInputSchema>;
+
+export const QueryWorkHistoryGraphSchema = z.object({
+  includeUnverified: z.coerce.boolean().default(false),
+});
+
+export type QueryWorkHistoryGraph = z.infer<typeof QueryWorkHistoryGraphSchema>;

@@ -193,3 +193,5 @@ export class DomainError extends Error {
     this.name = 'DomainError';
   }
 }
+
+export * from './work-history-graph.js';

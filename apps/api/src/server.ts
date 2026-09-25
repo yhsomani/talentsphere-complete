@@ -290,6 +290,15 @@ import {
   classifyCandidate,
   aggregateSegmentDistribution,
   filterSegmentedTalent,
+  VerifiedWorkHistory,
+  EmploymentReference,
+  WorkHistoryGraph,
+  createWorkHistory,
+  verifyCorporateEmail,
+  requestEmploymentReference,
+  submitEmploymentReference,
+  calculateVerificationScoreAndBadge,
+  buildWorkHistoryGraph,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -414,6 +423,11 @@ import {
   ClassifyCandidateInputSchema,
   QuerySegmentDistributionInputSchema,
   FilterSegmentedTalentQuerySchema,
+  CreateWorkHistoryInputSchema,
+  VerifyWorkHistoryEmailInputSchema,
+  RequestEmploymentReferenceInputSchema,
+  SubmitEmploymentReferenceInputSchema,
+  QueryWorkHistoryGraphSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -10902,6 +10916,302 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       const kpis = computeKPIs(targetEvents);
       return reply.status(200).send({ kpis });
+    }
+  );
+
+  // =========================================================================
+  // Verified Work History Network & References Repositories & Endpoints (F-162, F-94, F-84)
+  // =========================================================================
+  const verifiedWorkHistoriesById = new Map<string, VerifiedWorkHistory>();
+  const verifiedWorkHistoriesByCandidateId = new Map<string, VerifiedWorkHistory[]>();
+  const employmentReferencesById = new Map<string, EmploymentReference>();
+  const employmentReferencesByHistoryId = new Map<string, EmploymentReference[]>();
+
+  // 1. Add Work History Entry (F-94)
+  app.post('/api/v1/candidates/work-history', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const body = CreateWorkHistoryInputSchema.parse(req.body);
+
+    const candidateId = session.userId;
+
+    const history = createWorkHistory({
+      candidateId,
+      companyName: body.companyName,
+      companyId: body.companyId,
+      title: body.title,
+      employmentType: body.employmentType,
+      startDate: body.startDate,
+      endDate: body.endDate,
+      isCurrent: body.isCurrent,
+      description: body.description,
+      corporateEmail: body.corporateEmail,
+      skills: body.skills,
+    });
+
+    verifiedWorkHistoriesById.set(history.id, history);
+    const list = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
+    list.push(history);
+    verifiedWorkHistoriesByCandidateId.set(candidateId, list);
+
+    return reply.status(201).send({
+      workHistory: history,
+      message: 'Work history record created successfully.',
+    });
+  });
+
+  // 2. Verify Corporate Email for Work History (F-94)
+  app.post(
+    '/api/v1/candidates/work-history/:id/verify-email',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const body = VerifyWorkHistoryEmailInputSchema.parse(req.body);
+
+      const workHistory = verifiedWorkHistoriesById.get(id);
+      if (!workHistory) {
+        throw new DomainError('NOT_FOUND', `Work history record "${id}" not found.`);
+      }
+
+      if (workHistory.candidateId !== session.userId && !session.roles.includes('platform_admin')) {
+        throw new DomainError('FORBIDDEN', 'Access denied to verify this work history record.');
+      }
+
+      let companyDomain: string | undefined;
+      if (workHistory.companyId) {
+        const org = organizationsById.get(workHistory.companyId);
+        if (org?.website) {
+          companyDomain = org.website;
+        }
+      }
+
+      const existingRefs = employmentReferencesByHistoryId.get(id) || [];
+
+      const updatedHistory = verifyCorporateEmail({
+        workHistory,
+        corporateEmail: body.corporateEmail,
+        companyDomain,
+        references: existingRefs,
+      });
+
+      verifiedWorkHistoriesById.set(id, updatedHistory);
+      const list = verifiedWorkHistoriesByCandidateId.get(workHistory.candidateId) || [];
+      const idx = list.findIndex((h) => h.id === id);
+      if (idx !== -1) {
+        list[idx] = updatedHistory;
+      }
+      verifiedWorkHistoriesByCandidateId.set(workHistory.candidateId, list);
+
+      return reply.status(200).send({
+        workHistory: updatedHistory,
+        message: 'Corporate email verified successfully.',
+      });
+    }
+  );
+
+  // 3. Request Employment Reference (F-94)
+  app.post(
+    '/api/v1/candidates/work-history/:id/references/request',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const body = RequestEmploymentReferenceInputSchema.parse(req.body);
+
+      const workHistory = verifiedWorkHistoriesById.get(id);
+      if (!workHistory) {
+        throw new DomainError('NOT_FOUND', `Work history record "${id}" not found.`);
+      }
+
+      if (workHistory.candidateId !== session.userId && !session.roles.includes('platform_admin')) {
+        throw new DomainError('FORBIDDEN', 'Access denied to request reference for this record.');
+      }
+
+      let refereeUserId: string | undefined;
+      for (const [uid, user] of usersById.entries()) {
+        if (user.email.toLowerCase() === body.refereeEmail.toLowerCase()) {
+          refereeUserId = uid;
+          break;
+        }
+      }
+
+      const reference = requestEmploymentReference({
+        workHistoryId: id,
+        candidateId: workHistory.candidateId,
+        candidateUserId: session.userId,
+        candidateEmail: session.email,
+        refereeUserId,
+        refereeName: body.refereeName,
+        refereeEmail: body.refereeEmail,
+        relationship: body.relationship,
+      });
+
+      employmentReferencesById.set(reference.id, reference);
+      const refs = employmentReferencesByHistoryId.get(id) || [];
+      refs.push(reference);
+      employmentReferencesByHistoryId.set(id, refs);
+
+      return reply.status(201).send({
+        reference,
+        message: 'Employment reference request created successfully.',
+      });
+    }
+  );
+
+  // 4. Submit Employment Reference (F-94)
+  app.post(
+    '/api/v1/candidates/work-history/references/:refId/submit',
+    async (req: FastifyRequest<{ Params: { refId: string } }>, reply: FastifyReply) => {
+      let session: { userId: string; email: string; roles: string[] } | null = null;
+      try {
+        session = extractUser(req);
+      } catch {
+        // Referee can submit via email link token without session
+      }
+
+      const { refId } = req.params;
+      const body = SubmitEmploymentReferenceInputSchema.parse(req.body);
+
+      const reference = employmentReferencesById.get(refId);
+      if (!reference) {
+        throw new DomainError('NOT_FOUND', `Employment reference "${refId}" not found.`);
+      }
+
+      if (session && session.userId === reference.candidateId) {
+        throw new DomainError('FORBIDDEN', 'Candidate cannot submit their own reference.');
+      }
+
+      const updatedRef = submitEmploymentReference({
+        reference,
+        token: body.token,
+        confirmDates: body.confirmDates,
+        confirmTitle: body.confirmTitle,
+        ratings: {
+          technicalProficiency: body.technicalProficiency,
+          collaborationRating: body.collaborationRating,
+          deliveryReliability: body.deliveryReliability,
+          leadershipRating: body.leadershipRating,
+        },
+        endorsedSkills: body.endorsedSkills,
+        summaryNotes: body.summaryNotes,
+      });
+
+      employmentReferencesById.set(refId, updatedRef);
+      const refs = employmentReferencesByHistoryId.get(reference.workHistoryId) || [];
+      const refIdx = refs.findIndex((r) => r.id === refId);
+      if (refIdx !== -1) {
+        refs[refIdx] = updatedRef;
+      }
+      employmentReferencesByHistoryId.set(reference.workHistoryId, refs);
+
+      const workHistory = verifiedWorkHistoriesById.get(reference.workHistoryId);
+      let updatedHistory = workHistory;
+      if (workHistory) {
+        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs);
+        updatedHistory = {
+          ...workHistory,
+          verificationScore: score,
+          badgeTier,
+          verificationStatus: status,
+          updatedAt: new Date().toISOString(),
+        };
+        verifiedWorkHistoriesById.set(workHistory.id, updatedHistory);
+        const list = verifiedWorkHistoriesByCandidateId.get(workHistory.candidateId) || [];
+        const hIdx = list.findIndex((h) => h.id === workHistory.id);
+        if (hIdx !== -1) {
+          list[hIdx] = updatedHistory;
+        }
+        verifiedWorkHistoriesByCandidateId.set(workHistory.candidateId, list);
+      }
+
+      return reply.status(200).send({
+        reference: updatedRef,
+        workHistory: updatedHistory,
+        message: 'Employment reference submitted successfully.',
+      });
+    }
+  );
+
+  // 5. Get Candidate Work History Records (F-94)
+  app.get(
+    '/api/v1/candidates/:candidateId/work-history',
+    async (req: FastifyRequest<{ Params: { candidateId: string } }>, reply: FastifyReply) => {
+      let session: { userId: string; roles: string[] } | null = null;
+      try {
+        session = extractUser(req);
+      } catch {
+        // Public request
+      }
+
+      const { candidateId } = req.params;
+      const allHistories = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
+
+      const isSelfOrPrivileged =
+        session &&
+        (session.userId === candidateId ||
+          session.roles.some((r) =>
+            ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+          ));
+
+      const filtered = isSelfOrPrivileged
+        ? allHistories
+        : allHistories.filter((h) => h.verificationStatus === 'verified' || h.badgeTier !== 'none');
+
+      return reply.status(200).send({
+        workHistories: filtered,
+        total: filtered.length,
+      });
+    }
+  );
+
+  // 6. Get Candidate Work History Network & Graph (F-162)
+  app.get(
+    '/api/v1/candidates/:candidateId/work-history-graph',
+    async (
+      req: FastifyRequest<{
+        Params: { candidateId: string };
+        Querystring: { includeUnverified?: boolean };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const { candidateId } = req.params;
+      const query = QueryWorkHistoryGraphSchema.parse(req.query);
+
+      let session: { userId: string; roles: string[] } | null = null;
+      try {
+        session = extractUser(req);
+      } catch {
+        // Public request
+      }
+
+      const isSelfOrPrivileged =
+        session &&
+        (session.userId === candidateId ||
+          session.roles.some((r) =>
+            ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+          ));
+
+      const user = usersById.get(candidateId);
+      const profile =
+        profilesByUserId.get(candidateId) ||
+        Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
+      const candidateName = profile?.fullName || user?.email.split('@')[0] || 'Candidate';
+
+      const histories = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
+      const historyIds = new Set(histories.map((h) => h.id));
+      const references = Array.from(employmentReferencesById.values()).filter((ref) =>
+        historyIds.has(ref.workHistoryId)
+      );
+
+      const includeUnverified = Boolean(isSelfOrPrivileged && query.includeUnverified);
+
+      const graph = buildWorkHistoryGraph({
+        candidateId,
+        candidateName,
+        workHistories: histories,
+        references,
+        includeUnverified,
+      });
+
+      return reply.status(200).send({ graph });
     }
   );
 
