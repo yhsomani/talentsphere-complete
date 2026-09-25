@@ -18,6 +18,7 @@ export * from './ai-gateway.js';
 export * from './resumes.js';
 export * from './networking.js';
 export * from './portfolio.js';
+export * from './gamification.js';
 
 export type Role =
   | 'candidate'

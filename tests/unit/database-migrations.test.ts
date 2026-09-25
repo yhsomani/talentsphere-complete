@@ -183,7 +183,21 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('CONSTRAINT uq_portfolio_project_skill UNIQUE (project_id, skill_id)');
     expect(sql).toContain('CONSTRAINT uq_portfolio_project_evidence UNIQUE (project_id, evidence_id)');
   });
+
+  it('contains and validates migration 00012 gamification xp ledger schema (F-22, F-23)', () => {
+    const migrationFile12 = path.join(migrationsDir, '00012_gamification_xp_ledger_schema.sql');
+    expect(fs.existsSync(migrationFile12)).toBe(true);
+    const sql = fs.readFileSync(migrationFile12, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.user_gamification_profiles');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.gamification_badges');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.user_badges');
+    expect(sql).toContain('ALTER TABLE public.user_gamification_profiles ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.gamification_badges ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('CONSTRAINT uq_user_badge UNIQUE (user_id, badge_id)');
+  });
 });
+
 
 
 

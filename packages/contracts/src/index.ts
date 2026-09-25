@@ -458,5 +458,25 @@ export type CreatePortfolioProjectInput = z.infer<typeof CreatePortfolioProjectI
 export const UpdatePortfolioProjectInputSchema = CreatePortfolioProjectInputSchema.partial();
 export type UpdatePortfolioProjectInput = z.infer<typeof UpdatePortfolioProjectInputSchema>;
 
+/**
+ * Gamification & XP Ledger Contracts (F-22, F-23, BR-25)
+ */
+export const ClaimGamificationActivityInputSchema = z.object({
+  referenceType: z.string().min(1).max(64),
+  referenceId: z.string().min(1).max(128),
+  amount: z.number().int().min(1).max(200),
+  description: z.string().max(255).optional(),
+});
+
+export type ClaimGamificationActivityInput = z.infer<typeof ClaimGamificationActivityInputSchema>;
+
+export const GetLeaderboardQuerySchema = z.object({
+  period: z.enum(['weekly', 'all_time']).default('all_time'),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export type GetLeaderboardQuery = z.infer<typeof GetLeaderboardQuerySchema>;
+
+
 
 

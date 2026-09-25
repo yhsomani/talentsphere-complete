@@ -328,6 +328,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/portfolio.test.ts` (7 integration tests verifying project creation, owner listing, stranger public filtering, connected peer visibility, recruiter visibility, privacy enforcement, and owner mutations)
 - **Result:** All 26 test suites (193 tests) PASS. TypeScript composite build clean. Vite web bundle built in 2.83s.
 
+#### Change 20: Gamification, Daily 200 XP Ledger, Level Progression, Badges & Leaderboards (F-22, F-23, BR-25, WF-11, OD-06)
+- **Why:** Implement canonical gamification engine: daily 200 XP ledger cap (BR-25, WIT-011), idempotency per (userId, referenceType, referenceId), level progression curves with progressive thresholds, streak tracking with day gap rules, baseline badges catalog and milestone triggers (`challenges_completed`, `courses_completed`, `streak_days`, `total_xp`, `connections_count`), weekly & all-time leaderboards with streak tie-breaking (OD-06), and async worker telemetry (`gamification.xp.awarded`, `gamification.badge.unlocked`).
+- **Files:**
+  - `supabase/migrations/00012_gamification_xp_ledger_schema.sql` (user_gamification_profiles, gamification_badges, user_badges with RLS and unique constraints)
+  - `packages/domain/src/gamification.ts` (calculateLevel, updateStreak, processXpAward, evaluateEligibleBadges, computeLeaderboard, DEFAULT_PLATFORM_BADGES, DAILY_XP_CAP)
+  - `packages/domain/src/index.ts` (Exports gamification domain types, methods, and constants)
+  - `packages/contracts/src/index.ts` (ClaimGamificationActivityInputSchema, GetLeaderboardQuerySchema)
+  - `apps/api/src/server.ts` (GET /api/v1/gamification/summary, GET /api/v1/gamification/transactions, GET /api/v1/gamification/badges, GET /api/v1/gamification/leaderboard, POST /api/v1/gamification/claim-activity)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00012)
+  - `tests/unit/gamification-domain.test.ts` (15 unit tests verifying level progression curves, streak updates, idempotency, daily 200 XP cap, badge criteria evaluation, and weekly/all-time leaderboard ranking)
+  - `tests/integration/gamification.test.ts` (9 integration tests verifying initial summary, badge catalog, activity claim, worker job dispatch, idempotency duplicate rejection, course level up, daily cap clamping, transaction history, and weekly/all-time leaderboards)
+- **Result:** All 28 test suites (218 tests) PASS. TypeScript composite build clean. Vite web bundle built in 3.10s.
+
 ---
 
 ## 9. Completed Work
@@ -353,6 +366,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-019:** Implemented Resume Builder & Append-Only Export Engine with Soft Delete (F-13): Migration 00009, multi-template sections, verified evidence credential embedding, JSON/Markdown/HTML rendering, SHA-256 export integrity, soft-delete audit preservation (BR-26), and test suites (13 tests added; 153/153 total PASS across 22 suites).
 - **TASK-020:** Implemented Professional Networking & Connection Request State Machine (F-09): Migration 00010, anti-self connection check (`sender_id != recipient_id`), duplicate prevention, state transitions (`pending -> accepted | rejected | withdrawn`), authorization enforcement, notification triggers, async worker telemetry (`connection.requested`, `connection.accepted`, `connection.rejected`, `connection.withdrawn`, `connection.removed`), status queries, and test suites (21 tests added; 175/175 total PASS across 24 suites).
 - **TASK-021:** Implemented Portfolio Showcase, Media Assets, and Verified Skills Link (F-26): Migration 00011, canonical skill mapping, digital credential evidence links, multi-media asset attachments, visibility gating (`public`, `connections_only`, `recruiters_only`, `private`), connection-aware showcase view, owner project lifecycle, async worker dispatch (`portfolio.project.created`, `portfolio.project.updated`, `portfolio.project.removed`), and test suites (18 tests added; 193/193 total PASS across 26 suites).
+- **TASK-022:** Implemented Gamification & XP Ledger + Leaderboard & Badges (F-22, F-23): Migration 00012, daily 200 XP ledger cap enforcement (BR-25, WIT-011), level progression curve with dynamic step increments, streak tracking with single-day continuity, baseline badges catalog and milestone unlocks, weekly & all-time leaderboards with streak tie-breaking (OD-06), async worker job telemetry (`gamification.xp.awarded`, `gamification.badge.unlocked`), and comprehensive test suites (25 tests added; 218/218 total PASS across 28 suites).
 
 ---
 
@@ -662,15 +676,25 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 ## 40. Final Current-State Summary
 
 - **Project:** TalentSphere
-- **Implementation:** 0 / 173 (0.00%)
-- **Verification:** 0 / 173 (0.00%)
+- **Implementation:** 24 / 173 (13.87%)
+- **Verification:** 24 / 173 (13.87%)
 - **Released:** 0 / 173 (0.00%)
-- **Current Phase:** Phase 0 — Platform Trust Foundation
-- **Current Milestone:** M0 — Monorepo Toolchain & Bootstrap
-- **Highest-Priority Remaining Work:** Root package setup, workspace scripts, Fastify backend scaffold, React/Vite PWA shell, shared packages (`contracts`, `domain`, `ui`), Supabase migrations.
+- **Current Phase:** Phase 2 — Verified Growth & Engagement Loops
+- **Current Milestone:** M2 — Gamification, Engagement & Networking
+- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23
+- **Test Suite Status:** 28 test suites / 218 tests passing (100% PASS)
+- **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA production bundle)
+- **Highest-Priority Remaining Work:** Feature F-15 (Account Settings, Privacy Control & GDPR Erasure), F-16 (Organization Management & Workspaces), F-17 (Platform Administration Console)
 - **Critical Blockers:** None
-- **Important Risks:** Windows PowerShell script execution policy (use `pnpm.cmd` wrapper).
-- **Last Significant Change:** Document reorganization and creation of `SOURCE_RECONCILIATION.md` and `BRAIN/MEMORY.md`.
-- **Last Verified Milestone:** Baseline audit verified.
-- **Next Action:** Create root `package.json`, `pnpm-workspace.yaml`, and `.gitignore`.
-- **Last Updated:** 2026-09-24 12:10
+- **Important Invariants Maintained:**
+  - Zero-PII public SHA-256 verification proofs (BR-150, BR-155)
+  - Anti-self networking (`sender_id != recipient_id`) and anti-self messaging
+  - Free-User Cost Invariant (SSOT 16.4, Security Invariant 1): zero third-party paid AI cost without explicit entitlement
+  - Server-authoritative assessment AI prohibition (`ASSESSMENT_AI_PROHIBITED`)
+  - Strict daily 200 XP ledger cap (BR-25, WIT-011)
+  - Idempotency per (userId, referenceType, referenceId)
+  - Append-only resume exports with soft delete (BR-26)
+- **Last Significant Change:** Completed Feature F-22 & F-23: Daily XP ledger, level progression curves, streak updates, milestone badges catalog, and weekly/all-time leaderboards.
+- **Last Verified Milestone:** All 28 test suites green, monorepo build clean.
+- **Next Action:** Git commit for F-22 & F-23, then proceed to F-15 (Account Settings & Privacy Control).
+- **Last Updated:** 2026-09-24 13:50
