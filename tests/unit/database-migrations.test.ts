@@ -226,6 +226,16 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('amount_cents INTEGER NOT NULL CHECK (amount_cents >= 0)');
     expect(sql).toContain('idempotency_key VARCHAR(128) UNIQUE');
   });
+
+  it('contains and validates migration 00015 platform admin governance schema (F-17, F-35)', () => {
+    const migrationFile15 = path.join(migrationsDir, '00015_admin_governance_schema.sql');
+    expect(fs.existsSync(migrationFile15)).toBe(true);
+    const sql = fs.readFileSync(migrationFile15, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.platform_config');
+    expect(sql).toContain('ALTER TABLE public.platform_config ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('p_platform_config_modify');
+    expect(sql).toContain('platform_admin');
+  });
 });
 
 

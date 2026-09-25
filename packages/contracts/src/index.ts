@@ -552,6 +552,45 @@ export const ProcessPaymentWebhookInputSchema = z.object({
 
 export type ProcessPaymentWebhookInput = z.infer<typeof ProcessPaymentWebhookInputSchema>;
 
+/**
+ * Platform Administration & Governance Contracts (F-17, F-35, BR-06, BR-28, BR-29, BR-067, BR-068)
+ */
+export const AdminUpdateUserStatusInputSchema = z.object({
+  status: z.enum(['active', 'suspended', 'deactivated']),
+  reason: z.string().min(3).max(500),
+});
+
+export type AdminUpdateUserStatusInput = z.infer<typeof AdminUpdateUserStatusInputSchema>;
+
+export const AdminUpdateUserRolesInputSchema = z.object({
+  roles: z.array(z.string()).min(1),
+});
+
+export type AdminUpdateUserRolesInput = z.infer<typeof AdminUpdateUserRolesInputSchema>;
+
+export const AdminToggleFeatureFlagInputSchema = z.object({
+  enabled: z.boolean(),
+  description: z.string().max(255).optional(),
+});
+
+export type AdminToggleFeatureFlagInput = z.infer<typeof AdminToggleFeatureFlagInputSchema>;
+
+export const AdminSetMaintenanceModeInputSchema = z.object({
+  inMaintenance: z.boolean(),
+  reason: z.string().max(255).optional(),
+});
+
+export type AdminSetMaintenanceModeInput = z.infer<typeof AdminSetMaintenanceModeInputSchema>;
+
+export const AdminQueryAuditLogsSchema = z.object({
+  actorId: z.string().uuid().optional(),
+  eventName: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export type AdminQueryAuditLogs = z.infer<typeof AdminQueryAuditLogsSchema>;
+
+
 
 
 

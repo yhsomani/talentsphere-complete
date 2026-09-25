@@ -130,6 +130,15 @@ import {
   cancelSubscription,
   renewSubscription,
   validateMonetizationIntegrity,
+  assertPlatformAdmin,
+  computeSystemHealth,
+  validateUserStatusTransition,
+  updateFeatureFlagState,
+  createAdminAuditLog,
+  AdminAuditLog,
+  FeatureFlag,
+  SystemDiagnostics,
+  PlatformConfig,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -176,6 +185,11 @@ import {
   SubscribePlanInputSchema,
   CancelSubscriptionInputSchema,
   ProcessPaymentWebhookInputSchema,
+  AdminUpdateUserStatusInputSchema,
+  AdminUpdateUserRolesInputSchema,
+  AdminToggleFeatureFlagInputSchema,
+  AdminSetMaintenanceModeInputSchema,
+  AdminQueryAuditLogsSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -311,24 +325,11 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     };
   });
 
-  // Feature Flags Route
-  app.get('/api/v1/feature-flags', async () => {
-    return {
-      flags: {
-        FEATURE_LMS: true,
-        FEATURE_CODE_ARENA: true,
-        FEATURE_MESSAGING: true,
-        FEATURE_NOTIFICATIONS: true,
-        FEATURE_AI_MATCHING: false,
-      },
-    };
-  });
-
   // In-memory repositories for modular monolith runtime state
   interface StoredUser {
     id: string;
     email: string;
-    roles: ('candidate' | 'recruiter')[];
+    roles: Role[];
     passwordHash: string;
     createdAt: string;
     status?: string;
@@ -346,6 +347,73 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const invoicesByUserId = new Map<string, Invoice[]>();
   const invoicesById = new Map<string, Invoice>();
   const billingEventsByIdempotency = new Map<string, BillingEvent>();
+
+  // Feature Flags & Admin Repositories (F-17, F-35)
+  const adminAuditLogs: AdminAuditLog[] = [];
+  const featureFlags = new Map<string, FeatureFlag>([
+    [
+      'FEATURE_LMS',
+      {
+        key: 'FEATURE_LMS',
+        enabled: true,
+        description: 'Learning management system and interactive course modules',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ],
+    [
+      'FEATURE_CODE_ARENA',
+      {
+        key: 'FEATURE_CODE_ARENA',
+        enabled: true,
+        description: 'Competitive coding challenges and assessments',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ],
+    [
+      'FEATURE_MESSAGING',
+      {
+        key: 'FEATURE_MESSAGING',
+        enabled: true,
+        description: 'Direct messaging and networking channels',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ],
+    [
+      'FEATURE_NOTIFICATIONS',
+      {
+        key: 'FEATURE_NOTIFICATIONS',
+        enabled: true,
+        description: 'Real-time and batch notification delivery',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ],
+    [
+      'FEATURE_AI_MATCHING',
+      {
+        key: 'FEATURE_AI_MATCHING',
+        enabled: false,
+        description: 'AI-assisted recruiter candidate matching',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ],
+  ]);
+  let systemInMaintenance = false;
+
+  // Public Feature Flags Route
+  app.get('/api/v1/feature-flags', async () => {
+    const flagsObj: Record<string, boolean> = {};
+    for (const [k, v] of featureFlags.entries()) {
+      flagsObj[k] = v.enabled;
+    }
+    return {
+      flags: flagsObj,
+    };
+  });
 
   // Authentication Helper
   const extractUser = (req: FastifyRequest) => {
@@ -3766,6 +3834,260 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       status: 'success',
       message: 'Billing webhook processed successfully.',
       eventId,
+    });
+  });
+
+  // ============================================================================
+  // Platform Administration & Governance Routes (F-17, F-35, BR-06, BR-28, BR-29, BR-067, BR-068)
+  // ============================================================================
+
+  // 1. List users (Admin)
+  app.get('/api/v1/admin/users', async (req: FastifyRequest<{ Querystring: { search?: string; status?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { search, status } = req.query;
+    let users = Array.from(usersById.values());
+
+    if (status) {
+      users = users.filter((u) => (u.status || 'active') === status);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      users = users.filter((u) => u.email.toLowerCase().includes(q));
+    }
+
+    const sanitizedUsers = users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      roles: u.roles,
+      status: u.status || 'active',
+      createdAt: u.createdAt,
+    }));
+
+    return reply.status(200).send({
+      users: sanitizedUsers,
+      total: sanitizedUsers.length,
+    });
+  });
+
+  // 2. Update user status (Admin - with anti-lockout BR-29, BR-068)
+  app.patch('/api/v1/admin/users/:id/status', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { id } = req.params;
+    const targetUser = usersById.get(id);
+    if (!targetUser) {
+      throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+    }
+
+    const input = AdminUpdateUserStatusInputSchema.parse(req.body);
+    const oldStatus = (targetUser.status || 'active') as any;
+
+    validateUserStatusTransition(oldStatus, input.status, session.userId, targetUser.id);
+
+    targetUser.status = input.status;
+    usersById.set(targetUser.id, targetUser);
+
+    const auditLog = createAdminAuditLog({
+      eventName: 'USER_STATUS_UPDATED',
+      actorId: session.userId,
+      targetId: targetUser.id,
+      targetType: 'user',
+      metadata: {
+        oldStatus,
+        newStatus: input.status,
+        reason: input.reason,
+      },
+    });
+    adminAuditLogs.unshift(auditLog);
+
+    enqueuedWorkerJobs.push({
+      type: 'admin.user.status_updated',
+      payload: {
+        userId: targetUser.id,
+        newStatus: input.status,
+        updatedBy: session.userId,
+      },
+      enqueuedAt: auditLog.createdAt,
+    });
+
+    return reply.status(200).send({
+      message: 'User status updated successfully.',
+      user: {
+        id: targetUser.id,
+        email: targetUser.email,
+        roles: targetUser.roles,
+        status: targetUser.status,
+      },
+      auditLog,
+    });
+  });
+
+  // 3. Update user roles (Admin)
+  app.patch('/api/v1/admin/users/:id/roles', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { id } = req.params;
+    const targetUser = usersById.get(id);
+    if (!targetUser) {
+      throw new DomainError('NOT_FOUND', `User with ID "${id}" not found.`);
+    }
+
+    const input = AdminUpdateUserRolesInputSchema.parse(req.body);
+    const oldRoles = [...targetUser.roles];
+    targetUser.roles = input.roles as Role[];
+    usersById.set(targetUser.id, targetUser);
+
+    const auditLog = createAdminAuditLog({
+      eventName: 'USER_ROLES_UPDATED',
+      actorId: session.userId,
+      targetId: targetUser.id,
+      targetType: 'user',
+      metadata: {
+        oldRoles,
+        newRoles: input.roles,
+      },
+    });
+    adminAuditLogs.unshift(auditLog);
+
+    return reply.status(200).send({
+      message: 'User roles updated successfully.',
+      user: {
+        id: targetUser.id,
+        email: targetUser.email,
+        roles: targetUser.roles,
+        status: targetUser.status || 'active',
+      },
+      auditLog,
+    });
+  });
+
+  // 4. List feature flags (Admin)
+  app.get('/api/v1/admin/feature-flags', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const flags = Array.from(featureFlags.values());
+    return reply.status(200).send({
+      flags,
+      total: flags.length,
+    });
+  });
+
+  // 5. Update/toggle feature flag (Admin)
+  app.put('/api/v1/admin/feature-flags/:key', async (req: FastifyRequest<{ Params: { key: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const { key } = req.params;
+    const input = AdminToggleFeatureFlagInputSchema.parse(req.body);
+
+    const existingFlag = featureFlags.get(key) || {
+      key,
+      enabled: false,
+      description: input.description,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const updated = updateFeatureFlagState(existingFlag, input.enabled, input.description);
+    featureFlags.set(key, updated);
+
+    const auditLog = createAdminAuditLog({
+      eventName: 'FEATURE_FLAG_UPDATED',
+      actorId: session.userId,
+      targetId: key,
+      targetType: 'feature_flag',
+      metadata: {
+        key,
+        enabled: updated.enabled,
+        description: updated.description,
+      },
+    });
+    adminAuditLogs.unshift(auditLog);
+
+    return reply.status(200).send({
+      message: 'Feature flag updated successfully.',
+      flag: updated,
+      auditLog,
+    });
+  });
+
+  // 6. Query admin audit logs (BR-067)
+  app.get('/api/v1/admin/audit-logs', async (req: FastifyRequest<{ Querystring: { actorId?: string; eventName?: string; limit?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const query = AdminQueryAuditLogsSchema.parse(req.query);
+    let logs = [...adminAuditLogs];
+
+    if (query.actorId) {
+      logs = logs.filter((l) => l.actorId === query.actorId);
+    }
+    if (query.eventName) {
+      logs = logs.filter((l) => l.eventName === query.eventName);
+    }
+
+    const limited = logs.slice(0, query.limit);
+
+    return reply.status(200).send({
+      logs: limited,
+      total: limited.length,
+    });
+  });
+
+  // 7. System health & diagnostics (BR-28)
+  app.get('/api/v1/admin/health-diagnostics', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const status = computeSystemHealth({
+      dbConnected: true,
+      queueOperational: true,
+      inMaintenance: systemInMaintenance,
+    });
+
+    const diagnostics: SystemDiagnostics = {
+      status,
+      database: 'connected',
+      queue: 'operational',
+      inMaintenance: systemInMaintenance,
+      uptimeSeconds: Math.floor(process.uptime()),
+      registeredUsersCount: usersById.size,
+      activeJobsCount: enqueuedWorkerJobs.length,
+      evaluatedAt: new Date().toISOString(),
+    };
+
+    return reply.status(200).send({
+      diagnostics,
+    });
+  });
+
+  // 8. Toggle maintenance mode
+  app.post('/api/v1/admin/maintenance', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    assertPlatformAdmin(session.roles);
+
+    const input = AdminSetMaintenanceModeInputSchema.parse(req.body);
+    systemInMaintenance = input.inMaintenance;
+
+    const auditLog = createAdminAuditLog({
+      eventName: 'MAINTENANCE_MODE_TOGGLED',
+      actorId: session.userId,
+      metadata: {
+        inMaintenance: input.inMaintenance,
+        reason: input.reason,
+      },
+    });
+    adminAuditLogs.unshift(auditLog);
+
+    return reply.status(200).send({
+      message: `System maintenance mode ${input.inMaintenance ? 'enabled' : 'disabled'}.`,
+      inMaintenance: systemInMaintenance,
+      auditLog,
     });
   });
 

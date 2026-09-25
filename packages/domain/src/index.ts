@@ -21,6 +21,7 @@ export * from './portfolio.js';
 export * from './gamification.js';
 export * from './settings.js';
 export * from './billing.js';
+export * from './admin.js';
 
 export type Role =
   | 'candidate'
