@@ -198,6 +198,10 @@ import {
   markFeedbackViewed,
   computeFeedbackAggregateInsights,
   createFeedbackTemplate,
+  SkillFreshnessRecord,
+  calculateFreshnessScore,
+  createSkillFreshnessRecord,
+  reverifySkill,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -273,6 +277,8 @@ import {
   SalaryBenchmarkQuerySchema,
   CreateApplicationFeedbackInputSchema,
   CreateFeedbackTemplateInputSchema,
+  RegisterSkillFreshnessInputSchema,
+  ReverifySkillInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -1086,6 +1092,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const applicationsByCandidateId = new Map<string, JobApplication[]>();
   const applicationFeedbackByAppId = new Map<string, ApplicationFeedback>();
   const feedbackTemplatesByOrgId = new Map<string, FeedbackTemplate[]>();
+  const skillFreshnessByCandidateId = new Map<string, Map<string, SkillFreshnessRecord>>();
 
   // Organization Endpoints
   app.post('/api/v1/organizations', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -2135,6 +2142,149 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const allFeedbacks = Array.from(applicationFeedbackByAppId.values());
     const insights = computeFeedbackAggregateInsights(allFeedbacks, 10);
     return reply.status(200).send({ insights });
+  });
+
+  // Skill Decay & Freshness Tracking Endpoints (F-123, BR-225..BR-232)
+  app.post('/api/v1/skills/freshness', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required to track skill freshness.');
+    }
+
+    const input = RegisterSkillFreshnessInputSchema.parse(req.body);
+    if (!skillsById.has(input.skillId)) {
+      throw new DomainError('VALIDATION_FAILED', `Skill ID ${input.skillId} is not a valid canonical skill (BR-144).`);
+    }
+
+    const record = createSkillFreshnessRecord({
+      candidateId: profile.id,
+      skillId: input.skillId,
+      category: input.category,
+      lastVerifiedAt: input.lastVerifiedAt,
+      verificationSource: input.verificationSource,
+    });
+
+    let userMap = skillFreshnessByCandidateId.get(profile.id);
+    if (!userMap) {
+      userMap = new Map();
+      skillFreshnessByCandidateId.set(profile.id, userMap);
+    }
+    userMap.set(record.skillId, record);
+
+    auditLogs.push({
+      event: 'skill_freshness.registered',
+      actorId: session.userId,
+      targetId: record.id,
+      metadata: { skillId: record.skillId, score: record.freshnessScore },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ freshness: record });
+  });
+
+  app.get('/api/v1/skills/freshness/my', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Profile not found.');
+    }
+
+    const records = Array.from(skillFreshnessByCandidateId.get(profile.id)?.values() || []);
+    return reply.status(200).send({ records });
+  });
+
+  app.get('/api/v1/candidates/:candidateProfileId/skills/freshness', async (req: FastifyRequest<{ Params: { candidateProfileId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { candidateProfileId } = req.params;
+
+    const targetProfile = profilesById.get(candidateProfileId);
+    if (!targetProfile) {
+      throw new DomainError('NOT_FOUND', `Candidate profile ${candidateProfileId} not found.`);
+    }
+
+    const isOwner = targetProfile.userId === session.userId;
+    const isAdmin = session.roles.includes('platform_admin');
+
+    const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
+    const recruiterOrgIds = new Set(userMemberships.map((m) => m.orgId));
+    const candidateApps = applicationsByCandidateId.get(candidateProfileId) || [];
+    const hasAppliedToRecruiterOrg = candidateApps.some((app) => {
+      const job = jobsById.get(app.jobId);
+      return job && recruiterOrgIds.has(job.orgId);
+    });
+
+    if (!isOwner && !isAdmin && !hasAppliedToRecruiterOrg) {
+      throw new DomainError('FORBIDDEN', 'Skill freshness is private to the candidate and visible to recruiters only within application context (BR-230).');
+    }
+
+    const records = Array.from(skillFreshnessByCandidateId.get(candidateProfileId)?.values() || []);
+    return reply.status(200).send({ records });
+  });
+
+  app.post('/api/v1/skills/:skillId/reverify', async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { skillId } = req.params;
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile required for skill re-verification.');
+    }
+
+    if (!skillsById.has(skillId)) {
+      throw new DomainError('VALIDATION_FAILED', `Skill ID ${skillId} is not a valid canonical skill (BR-144).`);
+    }
+
+    const input = ReverifySkillInputSchema.parse(req.body || {});
+
+    let userMap = skillFreshnessByCandidateId.get(profile.id);
+    if (!userMap) {
+      userMap = new Map();
+      skillFreshnessByCandidateId.set(profile.id, userMap);
+    }
+
+    let existing = userMap.get(skillId);
+    if (!existing) {
+      existing = createSkillFreshnessRecord({
+        candidateId: profile.id,
+        skillId,
+        category: 'moderate',
+        verificationSource: input.source,
+      });
+    }
+
+    const updated = reverifySkill(existing, input.source);
+    userMap.set(skillId, updated);
+
+    auditLogs.push({
+      event: 'skill_freshness.reverified',
+      actorId: session.userId,
+      targetId: updated.id,
+      metadata: { skillId, source: input.source, newScore: updated.freshnessScore },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: 'Skill successfully re-verified.',
+      freshness: updated,
+    });
+  });
+
+  app.post('/api/v1/skills/freshness/refresh-all', async (req: FastifyRequest, reply: FastifyReply) => {
+    for (const userMap of skillFreshnessByCandidateId.values()) {
+      for (const [skillId, record] of userMap.entries()) {
+        const { score, band, isDemoted } = calculateFreshnessScore(record.lastVerifiedAt, record.category);
+        const refreshed: SkillFreshnessRecord = {
+          ...record,
+          freshnessScore: score,
+          freshnessBand: band,
+          isDemoted,
+          updatedAt: new Date().toISOString(),
+        };
+        userMap.set(skillId, refreshed);
+      }
+    }
+
+    return reply.status(200).send({ message: 'Skill freshness scores updated successfully (BR-225).' });
   });
 
   // Challenges Arena & Assessment Engine Repositories (F-08, BR-24, BR-25, BR-49..51)

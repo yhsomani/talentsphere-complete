@@ -882,6 +882,24 @@ export const CreateFeedbackTemplateInputSchema = z.object({
 
 export type CreateFeedbackTemplateInput = z.infer<typeof CreateFeedbackTemplateInputSchema>;
 
+/**
+ * Skill Decay & Freshness Tracking Contracts (F-123, BR-225..BR-232)
+ */
+export const RegisterSkillFreshnessInputSchema = z.object({
+  skillId: z.string().min(1).max(100),
+  category: z.enum(['fast_changing', 'moderate', 'stable', 'foundational']).default('moderate'),
+  lastVerifiedAt: z.string().datetime().optional(),
+  verificationSource: z.enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation']).default('evidence'),
+});
+
+export type RegisterSkillFreshnessInput = z.infer<typeof RegisterSkillFreshnessInputSchema>;
+
+export const ReverifySkillInputSchema = z.object({
+  source: z.enum(['challenge', 'course', 'certification', 'evidence', 'self_attestation']).default('self_attestation'),
+});
+
+export type ReverifySkillInput = z.infer<typeof ReverifySkillInputSchema>;
+
 
 
 
