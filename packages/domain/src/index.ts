@@ -45,6 +45,7 @@ export * from './career-trajectory.js';
 export * from './learning-impact.js';
 export * from './talent-pool-intelligence.js';
 export * from './behavioral-talent-discovery.js';
+export * from './talent-segmentation.js';
 
 export type Role =
   | 'candidate'

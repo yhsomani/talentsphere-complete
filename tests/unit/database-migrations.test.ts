@@ -389,4 +389,18 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('uq_behavioral_profile_candidate UNIQUE(candidate_id)');
     expect(sql).toContain('idx_behavioral_composite_score');
   });
+
+  it('contains and validates migration 00040 talent segmentation schema (F-160, F-84, F-85)', () => {
+    const migrationFile40 = path.join(migrationsDir, '00040_talent_segmentation_schema.sql');
+    expect(fs.existsSync(migrationFile40)).toBe(true);
+    const sql = fs.readFileSync(migrationFile40, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.candidate_segmentations');
+    expect(sql).toContain('ALTER TABLE public.candidate_segmentations ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('specialization VARCHAR(50) NOT NULL');
+    expect(sql).toContain('seniority_tier VARCHAR(30) NOT NULL');
+    expect(sql).toContain('engagement_segment VARCHAR(30) NOT NULL');
+    expect(sql).toContain('readiness_band VARCHAR(30) NOT NULL');
+    expect(sql).toContain('uq_candidate_segmentation UNIQUE(candidate_id)');
+    expect(sql).toContain('idx_segmentation_specialization');
+  });
 });

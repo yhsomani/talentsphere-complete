@@ -1581,3 +1581,41 @@ export const ComputeBehavioralProfileInputSchema = z.object({
 });
 
 export type ComputeBehavioralProfileInput = z.infer<typeof ComputeBehavioralProfileInputSchema>;
+
+/**
+ * Talent Segmentation & Classification Contracts (F-160, F-84, F-85, BR-200)
+ */
+export const ClassifyCandidateInputSchema = z.object({
+  candidateId: z.string().uuid().optional(),
+  skills: z.array(z.string().min(1).max(100)).optional(),
+  yearsOfExperience: z.number().min(0).max(60).optional(),
+  lastActiveDays: z.number().int().min(0).max(1000).optional(),
+  isStealthMode: z.boolean().optional(),
+  recentApplicationCount: z.number().int().min(0).optional(),
+  verifiedEvidenceCount: z.number().int().min(0).optional(),
+  assessmentsPassedCount: z.number().int().min(0).optional(),
+  skillDecayRiskCount: z.number().int().min(0).optional(),
+  milestoneReadinessScore: z.number().min(0).max(100).optional(),
+});
+
+export type ClassifyCandidateInput = z.infer<typeof ClassifyCandidateInputSchema>;
+
+export const QuerySegmentDistributionInputSchema = z.object({
+  kThreshold: z.coerce.number().int().min(5).max(50).default(10),
+});
+
+export type QuerySegmentDistributionInput = z.infer<typeof QuerySegmentDistributionInputSchema>;
+
+export const FilterSegmentedTalentQuerySchema = z.object({
+  specialization: z.string().optional(),
+  seniorityTier: z.string().optional(),
+  engagementSegment: z.string().optional(),
+  readinessBand: z.string().optional(),
+  minConfidenceScore: z.coerce.number().min(0).max(100).optional(),
+  minYearsOfExperience: z.coerce.number().min(0).max(50).optional(),
+  maxYearsOfExperience: z.coerce.number().min(0).max(50).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+export type FilterSegmentedTalentQuery = z.infer<typeof FilterSegmentedTalentQuerySchema>;

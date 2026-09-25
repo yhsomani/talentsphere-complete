@@ -280,6 +280,16 @@ import {
   DEFAULT_BEHAVIORAL_WEIGHTS,
   evaluateBehavioralTalentProfile,
   filterAndRankBehavioralTalent,
+  CandidateSegmentation,
+  TalentSpecialization,
+  SeniorityTier,
+  EngagementSegment,
+  ReadinessBand,
+  CandidateClassificationInput,
+  SegmentDistributionReport,
+  classifyCandidate,
+  aggregateSegmentDistribution,
+  filterSegmentedTalent,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -401,6 +411,9 @@ import {
   QueryPoolIntelligenceInputSchema,
   DiscoverBehavioralTalentQuerySchema,
   ComputeBehavioralProfileInputSchema,
+  ClassifyCandidateInputSchema,
+  QuerySegmentDistributionInputSchema,
+  FilterSegmentedTalentQuerySchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
@@ -7763,6 +7776,248 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       return reply.status(200).send({ profile });
+    }
+  );
+
+  // =========================================================================
+  // Talent Segmentation & Classification Repositories & Endpoints (F-160, F-84, F-85, BR-200)
+  // =========================================================================
+  const candidateSegmentationsById = new Map<string, CandidateSegmentation>();
+
+  function synthesizeCandidateClassificationInput(
+    candidateId: string
+  ): CandidateClassificationInput {
+    const candidateUser = usersById.get(candidateId);
+    const candidateProfile =
+      profilesByUserId.get(candidateId) ||
+      Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
+    const userId = candidateUser?.id || candidateProfile?.userId || candidateId;
+
+    // Skills
+    const userEvidences = candidateProfile
+      ? evidenceBySubjectId.get(candidateProfile.id) || evidenceBySubjectId.get(userId) || []
+      : [];
+    const skillNames: string[] = [];
+    for (const ev of userEvidences) {
+      const sids = evidenceSkills.get(ev.id) || [];
+      for (const sid of sids) {
+        const sk = skillsById.get(sid);
+        if (sk) skillNames.push(sk.name);
+      }
+    }
+    const endorsements = skillEndorsementsByRecipientId.get(userId) || [];
+    for (const e of endorsements) {
+      const sk = skillsById.get(e.skillId);
+      if (sk) skillNames.push(sk.name);
+    }
+    const uniqueSkills = Array.from(new Set(skillNames));
+
+    // Activity & recency
+    const userEvents = activityEventsByUserId.get(userId) || [];
+    const lastEvent = userEvents[0];
+    let lastActiveDays = 30;
+    if (lastEvent) {
+      const diffMs = Date.now() - new Date(lastEvent.createdAt).getTime();
+      lastActiveDays = Math.max(0, Math.floor(diffMs / (24 * 60 * 60 * 1000)));
+    }
+
+    // Experience
+    const yearsOfExperience =
+      (candidateProfile as any)?.yearsOfExperience || (uniqueSkills.length > 3 ? 4 : 1);
+
+    // Applications count
+    const recentApps = Array.from(applicationsById.values()).filter(
+      (a) => a.candidateId === (candidateProfile?.id || userId)
+    ).length;
+
+    // Assessments passed
+    const sessions =
+      assessmentSessionsByCandidateId.get(candidateProfile?.id || '') ||
+      assessmentSessionsByCandidateId.get(userId) ||
+      [];
+    const assessmentsPassed = sessions.filter((s) => s.status === 'submitted').length;
+
+    // Skill decay risk
+    const userFreshnessMap =
+      skillFreshnessByCandidateId.get(candidateProfile?.id || '') ||
+      skillFreshnessByCandidateId.get(userId);
+    const freshnessRecords = userFreshnessMap
+      ? Array.from(userFreshnessMap.values()).filter(
+          (r) => r.freshnessBand === 'stale' || r.freshnessBand === 'expired'
+        ).length
+      : 0;
+
+    // Privacy
+    const userSettings = userSettingsByUserId.get(userId);
+    const isStealthMode = userSettings ? (userSettings as any).stealthMode === true : false;
+
+    return {
+      candidateId,
+      skills: uniqueSkills,
+      yearsOfExperience,
+      lastActiveDays,
+      isStealthMode,
+      recentApplicationCount: recentApps,
+      verifiedEvidenceCount: userEvidences.filter((e) => e.status === 'verified').length,
+      assessmentsPassedCount: assessmentsPassed,
+      skillDecayRiskCount: freshnessRecords,
+    };
+  }
+
+  // 1. Classify Candidate into Multidimensional Talent Segments (F-160)
+  app.post(
+    '/api/v1/recruiter/talent-segmentation/classify',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = ClassifyCandidateInputSchema.parse(req.body || {});
+      const targetCandidateId = input.candidateId || session.userId;
+
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (targetCandidateId !== session.userId && !isPrivileged) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Insufficient permissions to classify other candidates.'
+        );
+      }
+
+      const defaultInput = synthesizeCandidateClassificationInput(targetCandidateId);
+      const classificationParams: CandidateClassificationInput = {
+        candidateId: targetCandidateId,
+        skills: input.skills ?? defaultInput.skills,
+        yearsOfExperience: input.yearsOfExperience ?? defaultInput.yearsOfExperience,
+        lastActiveDays: input.lastActiveDays ?? defaultInput.lastActiveDays,
+        isStealthMode: input.isStealthMode ?? defaultInput.isStealthMode,
+        recentApplicationCount: input.recentApplicationCount ?? defaultInput.recentApplicationCount,
+        verifiedEvidenceCount: input.verifiedEvidenceCount ?? defaultInput.verifiedEvidenceCount,
+        assessmentsPassedCount: input.assessmentsPassedCount ?? defaultInput.assessmentsPassedCount,
+        skillDecayRiskCount: input.skillDecayRiskCount ?? defaultInput.skillDecayRiskCount,
+        milestoneReadinessScore: input.milestoneReadinessScore,
+      };
+
+      const segmentation = classifyCandidate(classificationParams);
+      candidateSegmentationsById.set(targetCandidateId, segmentation);
+
+      return reply.status(200).send({ segmentation });
+    }
+  );
+
+  // 2. Query Aggregate Talent Segment Distribution with K-Anonymity (F-160, BR-200)
+  app.get(
+    '/api/v1/recruiter/talent-segmentation/segments',
+    async (
+      req: FastifyRequest<{
+        Querystring: { kThreshold?: string };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (!isPrivileged) {
+        throw new DomainError('FORBIDDEN', 'Access denied to recruiter talent segmentation.');
+      }
+
+      const query = QuerySegmentDistributionInputSchema.parse(req.query || {});
+      const segmentations = Array.from(candidateSegmentationsById.values());
+      const report = aggregateSegmentDistribution(segmentations, query.kThreshold);
+
+      return reply.status(200).send({ report });
+    }
+  );
+
+  // 3. Filter and List Segmented Talent Candidates (F-160)
+  app.get(
+    '/api/v1/recruiter/talent-segmentation/candidates',
+    async (
+      req: FastifyRequest<{
+        Querystring: {
+          specialization?: string;
+          seniorityTier?: string;
+          engagementSegment?: string;
+          readinessBand?: string;
+          minConfidenceScore?: string;
+          minYearsOfExperience?: string;
+          maxYearsOfExperience?: string;
+          limit?: string;
+          offset?: string;
+        };
+      }>,
+      reply: FastifyReply
+    ) => {
+      const session = extractUser(req);
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (!isPrivileged) {
+        throw new DomainError('FORBIDDEN', 'Access denied to recruiter talent segmentation.');
+      }
+
+      const query = FilterSegmentedTalentQuerySchema.parse(req.query || {});
+      const specializations = query.specialization
+        ? (query.specialization.split(',').map((s) => s.trim()) as TalentSpecialization[])
+        : undefined;
+      const seniorityTiers = query.seniorityTier
+        ? (query.seniorityTier.split(',').map((s) => s.trim()) as SeniorityTier[])
+        : undefined;
+      const engagementSegments = query.engagementSegment
+        ? (query.engagementSegment.split(',').map((s) => s.trim()) as EngagementSegment[])
+        : undefined;
+      const readinessBands = query.readinessBand
+        ? (query.readinessBand.split(',').map((s) => s.trim()) as ReadinessBand[])
+        : undefined;
+
+      const segmentations = Array.from(candidateSegmentationsById.values());
+      const result = filterSegmentedTalent(segmentations, {
+        specializations,
+        seniorityTiers,
+        engagementSegments,
+        readinessBands,
+        minConfidenceScore: query.minConfidenceScore,
+        minYearsOfExperience: query.minYearsOfExperience,
+        maxYearsOfExperience: query.maxYearsOfExperience,
+        limit: query.limit,
+        offset: query.offset,
+      });
+
+      return reply.status(200).send({
+        candidates: result.results,
+        total: result.total,
+      });
+    }
+  );
+
+  // 4. Get Candidate Segmentation Profile Breakdown (F-160)
+  app.get(
+    '/api/v1/recruiter/talent-segmentation/candidates/:candidateId',
+    async (req: FastifyRequest<{ Params: { candidateId: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { candidateId } = req.params;
+
+      const isPrivileged = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
+      );
+      if (candidateId !== session.userId && !isPrivileged) {
+        throw new DomainError('FORBIDDEN', 'Access denied to candidate segmentation profile.');
+      }
+
+      let segmentation = candidateSegmentationsById.get(candidateId);
+      if (!segmentation) {
+        const candidateUser = usersById.get(candidateId);
+        const candidateProfile =
+          profilesByUserId.get(candidateId) ||
+          Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
+        if (!candidateUser && !candidateProfile) {
+          throw new DomainError('NOT_FOUND', `Candidate with ID "${candidateId}" not found.`);
+        }
+        const defaultInput = synthesizeCandidateClassificationInput(candidateId);
+        segmentation = classifyCandidate(defaultInput);
+        candidateSegmentationsById.set(candidateId, segmentation);
+      }
+
+      return reply.status(200).send({ segmentation });
     }
   );
 
