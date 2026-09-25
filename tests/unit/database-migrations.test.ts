@@ -210,6 +210,22 @@ describe('Database Migration & Schema Authority (E-04, E-05)', () => {
     expect(sql).toContain('profile_visibility VARCHAR(32) NOT NULL DEFAULT \'public\'');
     expect(sql).toContain('status VARCHAR(32) NOT NULL DEFAULT \'grace_period\'');
   });
+
+  it('contains and validates migration 00014 billing and subscriptions schema (F-16)', () => {
+    const migrationFile14 = path.join(migrationsDir, '00014_billing_subscriptions_schema.sql');
+    expect(fs.existsSync(migrationFile14)).toBe(true);
+    const sql = fs.readFileSync(migrationFile14, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.subscriptions');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.invoices');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.entitlements');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.billing_events');
+    expect(sql).toContain('ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.entitlements ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('ALTER TABLE public.billing_events ENABLE ROW LEVEL SECURITY;');
+    expect(sql).toContain('amount_cents INTEGER NOT NULL CHECK (amount_cents >= 0)');
+    expect(sql).toContain('idempotency_key VARCHAR(128) UNIQUE');
+  });
 });
 
 

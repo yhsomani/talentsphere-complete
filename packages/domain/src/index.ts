@@ -20,6 +20,7 @@ export * from './networking.js';
 export * from './portfolio.js';
 export * from './gamification.js';
 export * from './settings.js';
+export * from './billing.js';
 
 export type Role =
   | 'candidate'

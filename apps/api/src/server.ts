@@ -120,6 +120,16 @@ import {
   cancelAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
+  Subscription,
+  Invoice,
+  Entitlements,
+  BillingEvent,
+  PLATFORM_PLANS,
+  getPlanEntitlements,
+  createSubscription,
+  cancelSubscription,
+  renewSubscription,
+  validateMonetizationIntegrity,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -163,6 +173,9 @@ import {
   RequestErasureInputSchema,
   CancelErasureInputSchema,
   RequestDataExportInputSchema,
+  SubscribePlanInputSchema,
+  CancelSubscriptionInputSchema,
+  ProcessPaymentWebhookInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -328,6 +341,11 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const erasureRequestsByUserId = new Map<string, DataErasureRequest[]>();
   const erasureRequestsById = new Map<string, DataErasureRequest>();
   const exportRequestsByUserId = new Map<string, DataExportRequest[]>();
+  const subscriptionsByUserId = new Map<string, Subscription>();
+  const entitlementsByUserId = new Map<string, Entitlements>();
+  const invoicesByUserId = new Map<string, Invoice[]>();
+  const invoicesById = new Map<string, Invoice>();
+  const billingEventsByIdempotency = new Map<string, BillingEvent>();
 
   // Authentication Helper
   const extractUser = (req: FastifyRequest) => {
@@ -3553,6 +3571,201 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       message: 'Account logically anonymized and deactivated in compliance with GDPR Art 17 and §31.4.',
       anonymizedHash: result.anonymizedHash,
       completedAt: result.completedAt,
+    });
+  });
+
+  // ============================================================================
+  // Billing & Subscriptions Routes (F-16, Section 64, WF-16, WIT-016)
+  // ============================================================================
+
+  // 1. Get available platform plans (public catalog)
+  app.get('/api/v1/billing/plans', async (_req: FastifyRequest, reply: FastifyReply) => {
+    return reply.status(200).send({
+      plans: Object.values(PLATFORM_PLANS),
+    });
+  });
+
+  // 2. Get user's current subscription & active entitlements
+  app.get('/api/v1/billing/subscription', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+
+    let subscription = subscriptionsByUserId.get(session.userId);
+    if (!subscription) {
+      const now = new Date().toISOString();
+      subscription = {
+        id: crypto.randomUUID(),
+        userId: session.userId,
+        planTier: 'free',
+        status: 'active',
+        currentPeriodStart: now,
+        currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        cancelAtPeriodEnd: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      subscriptionsByUserId.set(session.userId, subscription);
+    }
+
+    let entitlements = entitlementsByUserId.get(session.userId);
+    if (!entitlements) {
+      entitlements = getPlanEntitlements(session.userId, subscription.planTier);
+      entitlementsByUserId.set(session.userId, entitlements);
+    }
+
+    return reply.status(200).send({
+      subscription,
+      entitlements,
+    });
+  });
+
+  // 3. Subscribe or upgrade plan tier
+  app.post('/api/v1/billing/subscribe', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = SubscribePlanInputSchema.parse(req.body);
+
+    // Idempotency check if idempotencyKey provided
+    if (input.idempotencyKey) {
+      const existingInvoices = invoicesByUserId.get(session.userId) || [];
+      const match = existingInvoices.find((i) => i.idempotencyKey === input.idempotencyKey);
+      if (match) {
+        const sub = subscriptionsByUserId.get(session.userId)!;
+        const ent = entitlementsByUserId.get(session.userId)!;
+        return reply.status(200).send({
+          message: 'Subscription already active for this idempotency key.',
+          subscription: sub,
+          invoice: match,
+          entitlements: ent,
+          isDuplicate: true,
+        });
+      }
+    }
+
+    const result = createSubscription({
+      userId: session.userId,
+      planTier: input.planTier,
+      billingCycle: input.billingCycle,
+      idempotencyKey: input.idempotencyKey,
+    });
+
+    subscriptionsByUserId.set(session.userId, result.subscription);
+    entitlementsByUserId.set(session.userId, result.entitlements);
+
+    const userInvoices = invoicesByUserId.get(session.userId) || [];
+    userInvoices.unshift(result.invoice);
+    invoicesByUserId.set(session.userId, userInvoices);
+    invoicesById.set(result.invoice.id, result.invoice);
+
+    enqueuedWorkerJobs.push({
+      type: 'billing.subscription.created',
+      payload: {
+        userId: session.userId,
+        subscriptionId: result.subscription.id,
+        planTier: result.subscription.planTier,
+        amountCents: result.invoice.amountCents,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({
+      message: 'Subscription successfully activated.',
+      subscription: result.subscription,
+      invoice: result.invoice,
+      entitlements: result.entitlements,
+    });
+  });
+
+  // 4. Cancel active subscription
+  app.post('/api/v1/billing/cancel', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = CancelSubscriptionInputSchema.parse(req.body || {});
+
+    const current = subscriptionsByUserId.get(session.userId);
+    if (!current || current.planTier === 'free' || current.status === 'canceled') {
+      throw new DomainError(
+        'INVALID_STATE_TRANSITION',
+        'No active paid subscription found to cancel.'
+      );
+    }
+
+    const cancelled = cancelSubscription(current, input.immediate);
+    subscriptionsByUserId.set(session.userId, cancelled);
+
+    if (input.immediate) {
+      const freeEntitlements = getPlanEntitlements(session.userId, 'free');
+      entitlementsByUserId.set(session.userId, freeEntitlements);
+    }
+
+    enqueuedWorkerJobs.push({
+      type: 'billing.subscription.cancelled',
+      payload: {
+        userId: session.userId,
+        subscriptionId: cancelled.id,
+        immediate: input.immediate,
+      },
+      enqueuedAt: new Date().toISOString(),
+    });
+
+    return reply.status(200).send({
+      message: input.immediate
+        ? 'Subscription canceled immediately.'
+        : 'Subscription set to cancel at end of current billing period.',
+      subscription: cancelled,
+    });
+  });
+
+  // 5. Get user invoices history
+  app.get('/api/v1/billing/invoices', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const invoices = invoicesByUserId.get(session.userId) || [];
+
+    return reply.status(200).send({
+      invoices,
+    });
+  });
+
+  // 6. External Payment Webhook (with replay resistance & idempotency - WIT-016)
+  app.post('/api/v1/billing/webhook', async (req: FastifyRequest, reply: FastifyReply) => {
+    const input = ProcessPaymentWebhookInputSchema.parse(req.body);
+
+    const existingEvent = billingEventsByIdempotency.get(input.idempotencyKey);
+    if (existingEvent) {
+      return reply.status(200).send({
+        replayed: true,
+        message: 'Billing event already processed (idempotent duplicate).',
+        eventId: existingEvent.id,
+      });
+    }
+
+    const eventId = crypto.randomUUID();
+    const event: BillingEvent = {
+      id: eventId,
+      userId: input.userId,
+      eventType: input.eventType,
+      payload: {
+        amountCents: input.amountCents,
+        currency: input.currency,
+        subscriptionId: input.subscriptionId,
+      },
+      idempotencyKey: input.idempotencyKey,
+      createdAt: new Date().toISOString(),
+    };
+
+    billingEventsByIdempotency.set(input.idempotencyKey, event);
+
+    enqueuedWorkerJobs.push({
+      type: 'billing.webhook.received',
+      payload: {
+        eventId,
+        eventType: input.eventType,
+        userId: input.userId,
+      },
+      enqueuedAt: event.createdAt,
+    });
+
+    return reply.status(200).send({
+      status: 'success',
+      message: 'Billing webhook processed successfully.',
+      eventId,
     });
   });
 

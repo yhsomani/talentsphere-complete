@@ -354,6 +354,19 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - `tests/integration/settings.test.ts` (6 integration tests verifying 401 unauthenticated rejection, initial default settings retrieval, PATCH updates with masked BYO AI key, profile privacy synchronization, GDPR export compilation, erasure request initiation, duplicate conflict prevention, cancellation within grace period, status polling, and §31.4 logical anonymization execution)
 - **Result:** All 30 test suites (237 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.82s.
 
+#### Change 22: Billing, Subscriptions, Invoices & Entitlements (F-16, Section 19, Section 64, WF-16, WIT-016)
+- **Why:** Implement monetization, subscription tiers, and entitlement enforcement in accordance with Section 19 (strict integer minor units / cents; no floating-point currency) and Section 64 (Monetization Invariant: commercial subscriptions must never buy fake skill credentials, inflate hiring rank, or bypass proctored assessment AI blocks). Features plan catalog (`free`, `candidate_pro`, `recruiter_starter`, `recruiter_enterprise`), automated entitlement derivation (AI tokens/requests limits, active jobs limit, analytics access), subscription activation, monthly/yearly billing periods, invoice generation in cents with idempotency keys, subscription cancellation with grace period, renewal mechanics, and external payment webhook processing with replay resistance and worker event dispatch (`billing.subscription.created`, `billing.subscription.cancelled`, `billing.webhook.received`).
+- **Files:**
+  - `supabase/migrations/00014_billing_subscriptions_schema.sql` (subscriptions, invoices, entitlements, billing_events with RLS, integer minor units check constraints, and idempotency indexes)
+  - `packages/domain/src/billing.ts` (PLATFORM_PLANS, getPlanEntitlements, createSubscription, cancelSubscription, renewSubscription, validateMonetizationIntegrity)
+  - `packages/domain/src/index.ts` (Exports billing domain types, methods, and constants)
+  - `packages/contracts/src/index.ts` (SubscribePlanInputSchema, CancelSubscriptionInputSchema, ProcessPaymentWebhookInputSchema)
+  - `apps/api/src/server.ts` (GET /api/v1/billing/plans, GET /api/v1/billing/subscription, POST /api/v1/billing/subscribe, POST /api/v1/billing/cancel, GET /api/v1/billing/invoices, POST /api/v1/billing/webhook)
+  - `tests/unit/database-migrations.test.ts` (Added tests for migration 00014)
+  - `tests/unit/billing-domain.test.ts` (12 unit tests verifying integer minor unit pricing, entitlement limits, subscription creation, cancellation modes, renewal periods, and Section 64 anti-corruption validation)
+  - `tests/integration/billing.test.ts` (7 integration tests verifying public pricing lookup, unauthenticated 401 rejection, default free tier retrieval, subscription creation with idempotency, invoice history, cancellation, webhook replay resistance, and worker event dispatch)
+- **Result:** All 32 test suites (257 tests) PASS. TypeScript composite build clean. Vite web bundle built in 1.80s.
+
 ---
 
 ## 9. Completed Work
@@ -381,6 +394,7 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 - **TASK-021:** Implemented Portfolio Showcase, Media Assets, and Verified Skills Link (F-26): Migration 00011, canonical skill mapping, digital credential evidence links, multi-media asset attachments, visibility gating (`public`, `connections_only`, `recruiters_only`, `private`), connection-aware showcase view, owner project lifecycle, async worker dispatch (`portfolio.project.created`, `portfolio.project.updated`, `portfolio.project.removed`), and test suites (18 tests added; 193/193 total PASS across 26 suites).
 - **TASK-022:** Implemented Gamification & XP Ledger + Leaderboard & Badges (F-22, F-23): Migration 00012, daily 200 XP ledger cap enforcement (BR-25, WIT-011), level progression curve with dynamic step increments, streak tracking with single-day continuity, baseline badges catalog and milestone unlocks, weekly & all-time leaderboards with streak tie-breaking (OD-06), async worker job telemetry (`gamification.xp.awarded`, `gamification.badge.unlocked`), and comprehensive test suites (25 tests added; 218/218 total PASS across 28 suites).
 - **TASK-023:** Implemented Account Settings, Privacy Control & GDPR/DPDP Erasure (F-15): Migration 00013, default user settings generator, validated preference updates with BYO key masking, profile privacy synchronization, GDPR Art 15 & 20 data portability JSON export compilation, erasure request initiation with 30-day grace period (GDPR Art 17), conflict prevention, cancellation within grace period, §31.4 logical anonymization / FERPA severance pattern preserving immutable ledger and credential relationships with SHA-256 hash verification, async worker telemetry (`user.settings.updated`, `gdpr.data.exported`, `gdpr.erasure.requested`, `gdpr.erasure.cancelled`, `gdpr.erasure.completed`), and test suites (19 tests added; 237/237 total PASS across 30 suites).
+- **TASK-024:** Implemented Billing, Subscriptions, Invoices & Entitlements (F-16): Migration 00014, canonical plan tiers with integer minor unit pricing (cents), automatic entitlement limits (AI daily tokens/requests, job postings, analytics), subscription creation, cancel at period end / immediate cancellation, renewal mechanics, invoice history, external payment webhook handler with replay resistance (WIT-016), Section 64 anti-corruption validation, async worker dispatch (`billing.subscription.created`, `billing.subscription.cancelled`, `billing.webhook.received`), and test suites (20 tests added; 257/257 total PASS across 32 suites).
 
 ---
 
@@ -690,15 +704,15 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
 ## 40. Final Current-State Summary
 
 - **Project:** TalentSphere
-- **Implementation:** 25 / 173 (14.45%)
-- **Verification:** 25 / 173 (14.45%)
+- **Implementation:** 26 / 173 (15.03%)
+- **Verification:** 26 / 173 (15.03%)
 - **Released:** 0 / 173 (0.00%)
 - **Current Phase:** Phase 2 — Verified Growth & Engagement Loops
 - **Current Milestone:** M2 — Gamification, Engagement & Networking
-- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15
-- **Test Suite Status:** 30 test suites / 237 tests passing (100% PASS)
+- **Verified Features to Date:** E-01, E-04, E-05, E-09, E-10, E-13, E-14, F-01, F-12, F-96, F-84, F-04, F-05, F-06, F-08, F-07, F-10, F-14, F-11, F-13, F-09, F-26, F-22, F-23, F-15, F-16
+- **Test Suite Status:** 32 test suites / 257 tests passing (100% PASS)
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA production bundle)
-- **Highest-Priority Remaining Work:** Feature F-16 (Organization Management & Workspaces), F-17 (Platform Administration Console)
+- **Highest-Priority Remaining Work:** Feature F-17 (Platform Administration Console & Governance), F-20 (Command Search ⌘K), F-24 (Trust, Safety & Moderation)
 - **Critical Blockers:** None
 - **Important Invariants Maintained:**
   - Zero-PII public SHA-256 verification proofs (BR-150, BR-155)
@@ -710,7 +724,10 @@ Scaffolded folders exist under `apps/` (`api`, `web`, `worker`) and `packages/` 
   - Append-only resume exports with soft delete (BR-26)
   - 30-day grace period for GDPR Art 17 account erasure requests
   - Logical anonymization (§31.4 severance pattern) preserving aggregate ledger and credential relationships
-- **Last Significant Change:** Completed Feature F-15: Account settings preferences, privacy toggles, BYO key masking, GDPR Art 15 & 20 data portability JSON export, GDPR Art 17 30-day grace period erasure lifecycle, and §31.4 logical anonymization.
-- **Last Verified Milestone:** All 30 test suites green, monorepo composite build clean.
-- **Next Action:** Git commit for F-15, then proceed to F-16 (Organization Management & Workspaces).
-- **Last Updated:** 2026-09-24 14:15
+  - Integer minor units + ISO currency for all monetization transactions (Section 19)
+  - Section 64 Monetization Invariant: commercial subscriptions never buy credibility, rank, or assessment AI bypass
+  - Webhook replay resistance and idempotency cache (WIT-016)
+- **Last Significant Change:** Completed Feature F-16: Canonical pricing plans, integer minor units, automatic entitlement limits, subscription creation/cancellation, renewal cycles, invoice tracking, and webhook replay resistance.
+- **Last Verified Milestone:** All 32 test suites green, monorepo composite build clean.
+- **Next Action:** Git commit for F-16, then proceed to Feature F-17 (Platform Administration Console).
+- **Last Updated:** 2026-09-24 14:35

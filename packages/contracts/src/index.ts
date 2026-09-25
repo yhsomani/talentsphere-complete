@@ -522,6 +522,36 @@ export const RequestDataExportInputSchema = z.object({
 
 export type RequestDataExportInput = z.infer<typeof RequestDataExportInputSchema>;
 
+/**
+ * Billing & Subscriptions Contracts (F-16, Section 64, WF-16, WIT-016)
+ */
+export const SubscribePlanInputSchema = z.object({
+  planTier: z.enum(['free', 'candidate_pro', 'recruiter_starter', 'recruiter_enterprise']),
+  billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
+  paymentMethodId: z.string().min(1).max(100).optional(),
+  idempotencyKey: z.string().min(1).max(128).optional(),
+});
+
+export type SubscribePlanInput = z.infer<typeof SubscribePlanInputSchema>;
+
+export const CancelSubscriptionInputSchema = z.object({
+  immediate: z.boolean().default(false),
+  reason: z.string().max(500).optional(),
+});
+
+export type CancelSubscriptionInput = z.infer<typeof CancelSubscriptionInputSchema>;
+
+export const ProcessPaymentWebhookInputSchema = z.object({
+  eventType: z.string().min(1).max(64),
+  idempotencyKey: z.string().min(1).max(128),
+  subscriptionId: z.string().uuid().optional(),
+  userId: z.string().uuid(),
+  amountCents: z.number().int().min(0),
+  currency: z.string().length(3).default('USD'),
+});
+
+export type ProcessPaymentWebhookInput = z.infer<typeof ProcessPaymentWebhookInputSchema>;
+
 
 
 
