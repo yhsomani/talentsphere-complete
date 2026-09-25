@@ -44,9 +44,6 @@ importers:
       '@talentsphere/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@talentsphere/observability':
-        specifier: workspace:*
-        version: link:../../packages/observability
       fastify:
         specifier: ^5.12.5
         version: 5.12.5
@@ -63,15 +60,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@talentsphere/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@talentsphere/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
-      '@talentsphere/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
       '@talentsphere/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -109,21 +97,9 @@ importers:
 
   apps/worker:
     dependencies:
-      '@talentsphere/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@talentsphere/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
-      '@talentsphere/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
       '@talentsphere/observability':
         specifier: workspace:*
         version: link:../../packages/observability
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^22.20.4
@@ -147,9 +123,6 @@ importers:
 
   packages/contracts:
     dependencies:
-      '@talentsphere/domain':
-        specifier: workspace:*
-        version: link:../domain
       zod:
         specifier: ^3.25.76
         version: 3.25.76

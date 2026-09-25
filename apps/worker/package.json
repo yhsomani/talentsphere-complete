@@ -13,11 +13,7 @@
     "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@talentsphere/config": "workspace:*",
-    "@talentsphere/contracts": "workspace:*",
-    "@talentsphere/domain": "workspace:*",
-    "@talentsphere/observability": "workspace:*",
-    "zod": "^3.25.76"
+    "@talentsphere/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",

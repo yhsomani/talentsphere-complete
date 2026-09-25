@@ -11,9 +11,6 @@
     "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\""
   },
   "dependencies": {
-    "@talentsphere/config": "workspace:*",
-    "@talentsphere/contracts": "workspace:*",
-    "@talentsphere/domain": "workspace:*",
     "@talentsphere/ui": "workspace:*",
     "@tanstack/react-query": "^5.103.2",
     "react": "^19.3.0",

@@ -19,7 +19,6 @@
     "@talentsphere/config": "workspace:*",
     "@talentsphere/contracts": "workspace:*",
     "@talentsphere/domain": "workspace:*",
-    "@talentsphere/observability": "workspace:*",
     "fastify": "^5.12.5",
     "zod": "^3.25.76"
   },
