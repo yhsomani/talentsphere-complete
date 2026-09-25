@@ -685,6 +685,26 @@ export const UpdateSavedSearchInputSchema = z.object({
 
 export type UpdateSavedSearchInput = z.infer<typeof UpdateSavedSearchInputSchema>;
 
+/**
+ * Application Draft Autosave Contracts (F-36, BR-18, SSOT 1015)
+ */
+export const SaveApplicationDraftInputSchema = z.object({
+  resumeId: z.string().uuid().optional(),
+  coverLetter: z.string().max(5000).optional(),
+  answers: z.record(z.unknown()).default({}),
+  attachedEvidenceIds: z.array(z.string().uuid()).default([]),
+  stepIndex: z.number().int().min(0).max(50).default(0),
+});
+
+export type SaveApplicationDraftInput = z.infer<typeof SaveApplicationDraftInputSchema>;
+
+export const RestoreApplicationDraftVersionInputSchema = z.object({
+  targetVersion: z.number().int().positive(),
+});
+
+export type RestoreApplicationDraftVersionInput = z.infer<typeof RestoreApplicationDraftVersionInputSchema>;
+
+
 
 
 

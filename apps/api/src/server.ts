@@ -168,6 +168,11 @@ import {
   evaluateJobAlertsForPublishedJob,
   createSavedJob,
   removeSavedJob,
+  ApplicationDraft,
+  ApplicationDraftVersion,
+  saveApplicationDraft,
+  restoreApplicationDraftVersion,
+  markDraftSubmitted,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -229,6 +234,8 @@ import {
   ReviewModerationAppealInputSchema,
   CreateSavedSearchInputSchema,
   UpdateSavedSearchInputSchema,
+  SaveApplicationDraftInputSchema,
+  RestoreApplicationDraftVersionInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -392,6 +399,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const savedSearchesById = new Map<string, SavedSearch>();
   const jobAlertsById = new Map<string, JobAlert>();
   const savedJobsByUserId = new Map<string, SavedJob[]>();
+  const applicationDraftsById = new Map<string, ApplicationDraft>();
+  const applicationDraftsByCandidateAndJob = new Map<string, string>(); // `${candidateId}:${jobId}` -> draftId
+  const applicationDraftVersionsByDraftId = new Map<string, ApplicationDraftVersion[]>();
 
   // Feature Flags & Admin Repositories (F-17, F-35)
   const adminAuditLogs: AdminAuditLog[] = [];
@@ -1254,6 +1264,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const candList = applicationsByCandidateId.get(profile.id) || [];
     candList.push(application);
     applicationsByCandidateId.set(profile.id, candList);
+
+    // Mark candidate draft as submitted if exists (F-36)
+    const draftKey = `${profile.id}:${jobId}`;
+    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+    if (draftId) {
+      const existingDraft = applicationDraftsById.get(draftId);
+      if (existingDraft && !existingDraft.isSubmitted) {
+        const submittedDraft = markDraftSubmitted(existingDraft);
+        applicationDraftsById.set(draftId, submittedDraft);
+      }
+    }
 
     enqueuedWorkerJobs.push({
       type: 'application.submitted',
@@ -4772,6 +4793,171 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const currentSaved = savedJobsByUserId.get(session.userId) || [];
     const jobs = currentSaved.map((s) => jobsById.get(s.jobId)).filter(Boolean);
     return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
+  });
+
+  // Application Draft Autosave & Version Recovery (F-36, BR-18, SSOT 1015)
+  app.put('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const { jobId } = req.params;
+    const job = jobsById.get(jobId);
+    if (!job) {
+      throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
+    }
+
+    const input = SaveApplicationDraftInputSchema.parse(req.body);
+
+    const draftKey = `${profile.id}:${jobId}`;
+    const existingDraftId = applicationDraftsByCandidateAndJob.get(draftKey);
+    const existingDraft = existingDraftId ? applicationDraftsById.get(existingDraftId) : undefined;
+
+    const { draft, versionSnapshot } = saveApplicationDraft({
+      candidateId: profile.id,
+      jobId,
+      actor: {
+        userId: session.userId,
+        roles: session.roles,
+      },
+      resumeId: input.resumeId,
+      coverLetter: input.coverLetter,
+      answers: input.answers,
+      attachedEvidenceIds: input.attachedEvidenceIds,
+      stepIndex: input.stepIndex,
+      existingDraft,
+    });
+
+    applicationDraftsById.set(draft.id, draft);
+    applicationDraftsByCandidateAndJob.set(draftKey, draft.id);
+
+    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+    versions.push(versionSnapshot);
+    applicationDraftVersionsByDraftId.set(draft.id, versions);
+
+    return reply.status(200).send({
+      message: 'Application draft saved successfully.',
+      draft,
+      version: draft.version,
+    });
+  });
+
+  app.get('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const { jobId } = req.params;
+    const draftKey = `${profile.id}:${jobId}`;
+    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+    if (!draftId) {
+      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+    }
+
+    const draft = applicationDraftsById.get(draftId);
+    if (!draft || draft.isSubmitted) {
+      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+    }
+
+    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+
+    return reply.status(200).send({
+      draft,
+      versions,
+    });
+  });
+
+  app.delete('/api/v1/jobs/:jobId/draft', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const { jobId } = req.params;
+    const draftKey = `${profile.id}:${jobId}`;
+    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+    if (!draftId) {
+      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+    }
+
+    applicationDraftsById.delete(draftId);
+    applicationDraftsByCandidateAndJob.delete(draftKey);
+    applicationDraftVersionsByDraftId.delete(draftId);
+
+    return reply.status(200).send({
+      message: 'Application draft discarded successfully.',
+    });
+  });
+
+  app.post('/api/v1/jobs/:jobId/draft/restore', async (req: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const { jobId } = req.params;
+    const draftKey = `${profile.id}:${jobId}`;
+    const draftId = applicationDraftsByCandidateAndJob.get(draftKey);
+    if (!draftId) {
+      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+    }
+
+    const draft = applicationDraftsById.get(draftId);
+    if (!draft || draft.isSubmitted) {
+      throw new DomainError('NOT_FOUND', 'No active application draft found for this job.');
+    }
+
+    const input = RestoreApplicationDraftVersionInputSchema.parse(req.body);
+    const versions = applicationDraftVersionsByDraftId.get(draft.id) || [];
+
+    const restored = restoreApplicationDraftVersion(
+      draft,
+      input.targetVersion,
+      versions,
+      {
+        userId: session.userId,
+        candidateProfileId: profile.id,
+      }
+    );
+
+    applicationDraftsById.set(restored.draft.id, restored.draft);
+    versions.push(restored.versionSnapshot);
+    applicationDraftVersionsByDraftId.set(restored.draft.id, versions);
+
+    return reply.status(200).send({
+      message: `Application draft restored to version ${input.targetVersion}.`,
+      draft: restored.draft,
+      version: restored.draft.version,
+    });
+  });
+
+  app.get('/api/v1/applications/drafts', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate profile not found.');
+    }
+
+    const candidateDrafts = Array.from(applicationDraftsById.values())
+      .filter((d) => d.candidateId === profile.id && !d.isSubmitted)
+      .map((draft) => {
+        const job = jobsById.get(draft.jobId);
+        return {
+          ...draft,
+          job: job ? { id: job.id, title: job.title, orgId: job.orgId, location: job.location } : undefined,
+        };
+      });
+
+    return reply.status(200).send({
+      drafts: candidateDrafts,
+      total: candidateDrafts.length,
+    });
   });
 
   // Internal test helper for inspecting async job dispatch
