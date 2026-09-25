@@ -34,6 +34,7 @@ export * from './skill-decay.js';
 export * from './technical-interview.js';
 export * from './reputation-engine.js';
 export * from './warm-introductions.js';
+export * from './referral-requests.js';
 
 export type Role =
   | 'candidate'

@@ -1049,6 +1049,27 @@ export const RespondWarmIntroRequestInputSchema = z.object({
 
 export type RespondWarmIntroRequestInput = z.infer<typeof RespondWarmIntroRequestInputSchema>;
 
+/**
+ * Referral Request System Contracts (F-142, S-11, BR-233..BR-240)
+ */
+export const CreateReferralRequestInputSchema = z.object({
+  referrerId: z.string().uuid(),
+  jobId: z.string().uuid(),
+  pitch: z.string().min(1).max(300),
+  resumeId: z.string().uuid().optional(),
+});
+
+export type CreateReferralRequestInput = z.infer<typeof CreateReferralRequestInputSchema>;
+
+export const RespondReferralRequestInputSchema = z.object({
+  action: z.enum(['refer', 'forward', 'decline']),
+  declineReason: z.string().max(500).optional(),
+  forwardedToUserId: z.string().uuid().optional(),
+});
+
+export type RespondReferralRequestInput = z.infer<typeof RespondReferralRequestInputSchema>;
+
+
 
 
 

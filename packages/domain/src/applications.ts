@@ -7,6 +7,8 @@ export interface JobApplication {
   status: ApplicationState;
   coverLetter?: string;
   attachedEvidenceIds: string[];
+  isReferred?: boolean;
+  referralId?: string;
   submittedAt?: string;
   withdrawnAt?: string;
   rejectedAt?: string;

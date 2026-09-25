@@ -12,6 +12,10 @@ export type NotificationType =
   | 'warm_intro_approved'
   | 'warm_intro_delivered'
   | 'warm_intro_declined'
+  | 'referral_requested'
+  | 'referral_approved'
+  | 'referral_declined'
+  | 'referral_forwarded'
   | 'system';
 
 export interface Notification {
