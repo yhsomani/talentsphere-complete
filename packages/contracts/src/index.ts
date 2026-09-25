@@ -1069,6 +1069,27 @@ export const RespondReferralRequestInputSchema = z.object({
 
 export type RespondReferralRequestInput = z.infer<typeof RespondReferralRequestInputSchema>;
 
+/**
+ * Activity & Contribution Tracking Contracts (F-146, S-09)
+ */
+export const RecordActivityEventInputSchema = z.object({
+  category: z.enum(['learning', 'creation', 'collaboration', 'social']),
+  activityType: z.string().min(1).max(100),
+  weight: z.number().positive().max(10).optional(),
+  metadata: z.record(z.unknown()).optional(),
+  occurredAt: z.string().datetime().optional(),
+});
+
+export type RecordActivityEventInput = z.infer<typeof RecordActivityEventInputSchema>;
+
+export const QueryActivityEventsInputSchema = z.object({
+  category: z.enum(['learning', 'creation', 'collaboration', 'social']).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+});
+
+export type QueryActivityEventsInput = z.infer<typeof QueryActivityEventsInputSchema>;
+
+
 
 
 

@@ -237,6 +237,13 @@ import {
   ReferralOutcome,
   createReferralRequest,
   respondToReferralRequest,
+  ActivityCategory,
+  EngagementBand,
+  ActivityEvent,
+  ContributionScore,
+  recordActivityEvent,
+  calculateContributionScores,
+  determineEngagementBand,
 } from '@talentsphere/domain';
 import {
   RegisterInputSchema,
@@ -329,6 +336,8 @@ import {
   RespondWarmIntroRequestInputSchema,
   CreateReferralRequestInputSchema,
   RespondReferralRequestInputSchema,
+  RecordActivityEventInputSchema,
+  QueryActivityEventsInputSchema,
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 import { createLogger } from '@talentsphere/observability';
@@ -5238,6 +5247,109 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
 
     return reply.status(200).send({ outcomes: list });
+  });
+
+  // Activity & Contribution Tracking Repositories & Endpoints (F-146, S-09)
+  const activityEventsById = new Map<string, ActivityEvent>();
+  const activityEventsByUserId = new Map<string, ActivityEvent[]>();
+  const contributionScoresByUserId = new Map<string, ContributionScore>();
+
+  app.post('/api/v1/activity/events', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const input = RecordActivityEventInputSchema.parse(req.body || {});
+
+    const event = recordActivityEvent({
+      userId: session.userId,
+      category: input.category,
+      activityType: input.activityType,
+      weight: input.weight,
+      metadata: input.metadata,
+      occurredAt: input.occurredAt,
+    });
+
+    activityEventsById.set(event.id, event);
+
+    const userEvents = activityEventsByUserId.get(session.userId) || [];
+    userEvents.unshift(event);
+    activityEventsByUserId.set(session.userId, userEvents);
+
+    const score = calculateContributionScores(session.userId, userEvents);
+    contributionScoresByUserId.set(session.userId, score);
+
+    auditLogs.push({
+      event: 'activity.recorded',
+      actorId: session.userId,
+      targetId: event.id,
+      metadata: {
+        category: event.category,
+        activityType: event.activityType,
+        compositeScore: score.compositeScore,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    return reply.status(201).send({ event, score });
+  });
+
+  app.get('/api/v1/activity/events', async (req: FastifyRequest<{ Querystring: { category?: string; limit?: string } }>, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const { category, limit } = req.query;
+
+    let userEvents = activityEventsByUserId.get(session.userId) || [];
+    if (category) {
+      userEvents = userEvents.filter((e) => e.category === category);
+    }
+
+    if (limit) {
+      const parsedLimit = parseInt(limit, 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        userEvents = userEvents.slice(0, parsedLimit);
+      }
+    }
+
+    return reply.status(200).send({ events: userEvents });
+  });
+
+  app.get('/api/v1/activity/scores/me', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userEvents = activityEventsByUserId.get(session.userId) || [];
+    const score = contributionScoresByUserId.get(session.userId) || calculateContributionScores(session.userId, userEvents);
+    return reply.status(200).send({ score });
+  });
+
+  app.get('/api/v1/activity/users/:userId/score', async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
+    extractUser(req);
+    const { userId } = req.params;
+
+    const user = usersById.get(userId);
+    if (!user) {
+      throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+    }
+
+    const userEvents = activityEventsByUserId.get(userId) || [];
+    const score = contributionScoresByUserId.get(userId) || calculateContributionScores(userId, userEvents);
+
+    return reply.status(200).send({
+      userId,
+      compositeScore: score.compositeScore,
+      engagementBand: score.engagementBand,
+      activeStreakDays: score.activeStreakDays,
+      totalEventsCount: score.totalEventsCount,
+      learningScore: score.learningScore,
+      creationScore: score.creationScore,
+      collaborationScore: score.collaborationScore,
+      socialScore: score.socialScore,
+      lastActiveAt: score.lastActiveAt,
+    });
+  });
+
+  app.post('/api/v1/activity/recalculate', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const userEvents = activityEventsByUserId.get(session.userId) || [];
+    const score = calculateContributionScores(session.userId, userEvents);
+    contributionScoresByUserId.set(session.userId, score);
+
+    return reply.status(200).send({ score });
   });
 
   // Portfolio Showcase Repositories & Endpoints (F-26)
