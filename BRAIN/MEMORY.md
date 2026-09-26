@@ -9,7 +9,7 @@
 - **Current Milestone:** M4/M5 — Career Trajectory, Learning Impact & Market Intelligence
 - **Current Phase:** Phase 0 through Phase 4/5 Core Loops
 - **Overall Implementation:** 51 / 173 (29.48%)
-- **Overall Verification:** 44 Vitest unit suites (537 tests PASS), 42 Fastify integration suites (333 tests PASS), 34 Playwright E2E suites (136 tests PASS) — 1006/1006 tests PASS (100% GREEN). 41 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`). In-app Reticle verification complete for Candidate Navigation, Login, and Checkout flows.
+- **Overall Verification:** 87 Vitest files (898 tests PASS: unit, integration, API and security), 38 Playwright E2E specs (160 tests PASS, including 17 accessibility and 3 performance baseline tests) — 1058/1058 automated tests PASS (100% GREEN). 41 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`). Prettier lint PASS. GitHub Actions CI defined in `.github/workflows/ci.yml`. In-app Reticle verification: **partially established** — a live app session connected and verified the checkout plan-selection keyboard flow (`verified: "yes"`); other routes remain unverified in-app.
 - **Current Release:** v0.4.0-intelligence
 - **Current Branch:** `main`
 - **Current Primary Task:** Web Shell User Flows & Reticle Verification (Completed)
@@ -19,16 +19,16 @@
 
 ## 2. Current Project Snapshot
 
-- **Implementation Status:** IN PROGRESS (100% verified test passes across 1006 automated tests)
+- **Implementation Status:** IN PROGRESS (100% verified test passes across 1058 automated tests)
 - **Backend:** Fastify 5 + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase, gamification XP & streaks, user privacy/GDPR erasure & export, billing & subscriptions, platform administration & governance, multi-entity search, trust/safety & moderation, application drafts, job templates, certificate verification, application feedback, technical interview assessment, alumni networks, activity contribution graph, candidate referral requests, warm introductions, skill decay freshness tracking, multi-dimensional reputation engine, instructor reputation, employer workplace reputation, salary intelligence, peer credibility networks, skill supply/demand forecasting, career trajectory benchmarks, learning impact tracking, talent pool intelligence, behavioral talent discovery, talent segmentation & classification, and verified work history network & structured references)
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA (active accessible shell, landing, cockpit dashboard, login flow, checkout & plan subscriptions flow, WCAG 2.2 AA compliant, Reticle & Playwright verified)
+- **Frontend:** React 19 + TypeScript + Vite + TanStack Query (active accessible shell, landing, cockpit dashboard, login flow, checkout & plan subscriptions flow). Accessibility is verified in real Chromium for keyboard, focus, semantics, names, reflow, zoom and reduced motion. **WCAG 2.2 AA conformance is NOT yet claimed**: contrast and screen-reader behaviour are not covered by automation and still need manual audit. Verified with Playwright.
 - **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS policies (00001 through 00041)
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
-- **PWA:** Service worker + IndexedDB offline-first architecture
-- **Testing:** 44 Vitest unit suites (537/537 passing), 42 Fastify integration suites (333/333 passing), 34 Playwright E2E suites (136/136 passing) — 1006 total tests PASS
-- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts)
-- **Deployment:** Staging / Production CI/CD pipelines defined in specification
+- **PWA:** Installable web app manifest only. **There is no service worker and no offline-first architecture** — the app is not offline-capable. The UI reports PWA capability truthfully from runtime detection (`apps/web/src/pwa.ts`).
+- **Testing:** 87 Vitest files (898/898 passing across unit, integration, API and security), 38 Playwright E2E specs (160/160 passing, including accessibility and performance) — 1058 total tests PASS
+- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts). **Open gap:** the billing webhook accepts unsigned requests (see `docs/quality/SECURITY.md` §9); self-service recruiter registration is unverified.
+- **Deployment:** CI defined in `.github/workflows/ci.yml` (lint, typecheck, tests, build, E2E/a11y/perf). No CD pipeline, no staging or production deployment automation.
 - **Current Focus:** Sequential execution of Phase 4/5 intelligence systems under the Golden Workflow
 - **Major Blocker:** None
 
@@ -78,7 +78,7 @@ Summary by status:
 
 The implementation is a clean, modular monolith with 10 workspace packages and applications:
 - `apps/api`: Fastify modular API server with structured routing, auth hooks, Zod validation, error handling, rate limiting, and 51 feature route modules.
-- `apps/web`: React 19 + TypeScript + Vite + TanStack Query PWA with WCAG 2.2 AA accessible layout and role-adaptive dashboard cockpit.
+- `apps/web`: React 19 + TypeScript + Vite + TanStack Query installable web app with an accessibility-verified layout and role-adaptive dashboard cockpit. WCAG 2.2 AA conformance is not yet claimed (contrast and screen-reader behaviour unverified).
 - `apps/worker`: Node.js async background job processor with DLQ, exponential retries, and idempotency cache.
 - `packages/config`: Environment validation and schema parsing.
 - `packages/domain`: Pure domain models, business rule invariants, cryptographic proof generators, and state machines.
@@ -91,22 +91,40 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 
 ## 7. Verification Progress
 
-- **Total Automated Tests Executed:** 1004
-- **Tests Passing:** 1004 (100% green)
+- **Total Automated Tests Executed:** 1058
+- **Tests Passing:** 1058 (100% green)
 - **Tests Failing:** 0
 - **Test Breakdown:**
   - Unit Tests: 537 passing across 44 test files (`pnpm test:unit`)
   - Integration Tests: 333 passing across 42 test files (`pnpm test:integration`)
-  - Playwright E2E Tests: 134 passing across 34 spec files (`pnpm exec playwright test`)
+  - API Security Tests: 28 passing across 1 test file (`pnpm test:security`)
+  - Playwright E2E Tests: 160 passing across 38 spec files (`pnpm test:e2e`), which include 17 accessibility tests (`pnpm test:a11y`) and 3 performance baseline tests (`pnpm test:performance`)
 - **Database Migrations:** 41 SQL migrations applied and verified
 - **TypeScript Composite Build:** 10/10 packages clean (`tsc -b`), 0 errors
 - **Lint Check:** Prettier code style 100% clean, 0 warnings
+- **Continuous Integration:** `.github/workflows/ci.yml` runs lint, typecheck, tests, build and Playwright on every push and pull request
+- **Not verified:** contrast and screen-reader accessibility, performance SLOs (none ratified), DB/queue performance (no real persistence), in-app Reticle verification for routes other than the checkout flow
 
 ---
 
 ## 8. Recent Changes
 
 ### 2026-09-25
+
+#### Change 39: Enforcement layer — security, accessibility, performance, CI
+- **Why:** Close the gap between documented quality gates and executable ones. `test:a11y` and `test:performance` previously exited 1 with "no test files", no CI workflow existed, and the PWA/WCAG/CI claims in this file were not backed by running code.
+- **Files:**
+  - `tests/security/api-security.test.ts` (28 tests: auth, token tampering, role escalation, admin authz, BOLA, CORS, error leakage, webhook validation/idempotency, rate limiting)
+  - `tests/e2e/accessibility.spec.ts` (17 tests, real Chromium: semantics, landmarks, heading order, accessible names, alt text, tabindex, skip link, keyboard, focus, 320px reflow, 200% zoom, reduced motion)
+  - `tests/e2e/performance.spec.ts` (3 tests: route startup, interaction and API latency percentiles written to `test-results/performance/`)
+  - `.github/workflows/ci.yml` (lint → typecheck → tests → build → Playwright, retries 0)
+  - `apps/web/src/styles/global.css` (new: box-sizing, `prefers-reduced-motion` reset)
+  - `apps/web/src/components/Layout.tsx`, `apps/web/src/pages/*.tsx` (responsive header and grids; checkout plans are now a real `radiogroup`)
+  - `apps/api/src/server.ts` (rate-limit responses no longer masked as 500)
+  - `package.json`, `playwright.config.ts`, `.prettierignore`
+  - `docs/quality/TESTING.md`, `docs/quality/SECURITY.md`, `BRAIN/MEMORY.md`
+- **Result:** 1058/1058 automated tests pass (898 Vitest, 160 Playwright). Six real accessibility defects fixed: non-wrapping header, three overflowing grid minimums, non-semantic clickable plan cards, and ignored reduced-motion preference.
+- **Known gaps (recorded, not closed):** unsigned billing webhook; no contrast or screen-reader automation; no performance SLOs ratified; no DB/queue performance baseline; Reticle in-app verification limited to the checkout flow.
 
 #### Change 38: Career Trajectory Analysis & Progression Benchmarks (F-152, F-85)
 - **Why:** Implement career progression analytics, transition velocity modeling, transition probabilities with Wilson score 95% confidence intervals (BR-163), milestone readiness evaluation, and public progression benchmarks protected by $k \ge 20$ sample threshold (BR-160).
@@ -268,10 +286,11 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **Current Phase:** Phase 4 / Phase 5 — Intelligence Systems & Market Dynamics
 - **Current Milestone:** M4/M5 — Career Trajectory, Learning Impact & Intelligence
 - **Test Suite Status:**
-  - **Unit Suite:** 40 test files / 440 tests passing (100% PASS)
-  - **Integration Suite:** 38 test files / 280 tests passing (100% PASS)
-  - **Playwright E2E Suite:** 30 spec files / 110 tests passing (100% PASS)
-  - **Total Automated Tests:** 830 / 830 tests passing (100% PASS)
-- **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite PWA bundle)
+  - **Unit Suite:** 44 test files / 537 tests passing (100% PASS)
+  - **Integration Suite:** 42 test files / 333 tests passing (100% PASS)
+  - **API Security Suite:** 1 test file / 28 tests passing (100% PASS)
+  - **Playwright E2E Suite:** 38 spec files / 160 tests passing (100% PASS), including accessibility and performance
+  - **Total Automated Tests:** 1058 / 1058 tests passing (100% PASS)
+- **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite bundle)
 - **Lint & Code Style:** 100% Prettier compliant
-- **Critical Blockers:** None
+- **Critical Blockers:** None blocking the build. Open security gap: billing webhook is unauthenticated (unsigned) — see `docs/quality/SECURITY.md` §9

@@ -51,7 +51,9 @@ const PLANS: Plan[] = [
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise'>('candidate_pro');
+  const [selectedPlan, setSelectedPlan] = useState<
+    'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise'
+  >('candidate_pro');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   // Payment Form States
@@ -61,7 +63,11 @@ export const CheckoutPage: React.FC = () => {
   const [cardCvc, setCardCvc] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [confirmedOrder, setConfirmedOrder] = useState<{ id: string; planName: string; amount: number } | null>(null);
+  const [confirmedOrder, setConfirmedOrder] = useState<{
+    id: string;
+    planName: string;
+    amount: number;
+  } | null>(null);
 
   const activePlan = PLANS.find((p) => p.id === selectedPlan) || PLANS[0];
   const price = billingCycle === 'monthly' ? activePlan.monthlyPrice : activePlan.yearlyPrice;
@@ -94,7 +100,9 @@ export const CheckoutPage: React.FC = () => {
     try {
       const token = localStorage.getItem('talentsphere_token');
       // Optional backend synchronization
-      await fetch('http://127.0.0.1:4000/api/v1/billing/subscribe', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 800);
+      await fetch('/api/v1/billing/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +113,9 @@ export const CheckoutPage: React.FC = () => {
           billingCycle,
           idempotencyKey: `checkout_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         }),
+        signal: controller.signal,
       }).catch(() => null);
+      clearTimeout(timeoutId);
 
       setConfirmedOrder({
         id: `ord_${Date.now().toString(36).toUpperCase()}`,
@@ -226,7 +236,14 @@ export const CheckoutPage: React.FC = () => {
           >
             ✓
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: colors.neutral[900], marginBottom: spacing.xs }}>
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              color: colors.neutral[900],
+              marginBottom: spacing.xs,
+            }}
+          >
             Subscription Confirmed!
           </h2>
           <p style={{ color: colors.neutral[600], fontSize: '0.875rem', marginBottom: spacing.md }}>
@@ -242,11 +259,15 @@ export const CheckoutPage: React.FC = () => {
               fontSize: '0.875rem',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.xs }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.xs }}
+            >
               <span>Order Reference:</span>
               <strong data-testid="order-reference">{confirmedOrder.id}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.xs }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', marginBottom: spacing.xs }}
+            >
               <span>Tier Activated:</span>
               <strong>{confirmedOrder.planName}</strong>
             </div>
@@ -275,21 +296,48 @@ export const CheckoutPage: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: spacing.xl }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))',
+            gap: spacing.xl,
+          }}
+        >
           {/* Plan Options Column */}
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: spacing.md, color: colors.neutral[900] }}>
+            <h2
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                marginBottom: spacing.md,
+                color: colors.neutral[900],
+              }}
+            >
               1. Select Plan
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
+            <div
+              role="radiogroup"
+              aria-label="Subscription plans"
+              style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}
+            >
               {PLANS.map((plan) => {
                 const isSelected = selectedPlan === plan.id;
-                const currentPrice = billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
+                const currentPrice =
+                  billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
                 return (
                   <div
                     key={plan.id}
                     data-testid={`plan-card-${plan.id}`}
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={0}
                     onClick={() => setSelectedPlan(plan.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedPlan(plan.id);
+                      }
+                    }}
                     style={{
                       border: `2px solid ${isSelected ? colors.primary[600] : colors.neutral[200]}`,
                       borderRadius: '8px',
@@ -299,13 +347,29 @@ export const CheckoutPage: React.FC = () => {
                       transition: 'all 0.15s ease',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '1rem', color: colors.neutral[900] }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span
+                        style={{ fontWeight: 700, fontSize: '1rem', color: colors.neutral[900] }}
+                      >
                         {plan.name}
                       </span>
-                      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.primary[700] }}>
+                      <span
+                        style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.primary[700] }}
+                      >
                         ${currentPrice}
-                        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: colors.neutral[500] }}>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 400,
+                            color: colors.neutral[500],
+                          }}
+                        >
                           /{billingCycle === 'monthly' ? 'mo' : 'yr'}
                         </span>
                       </span>
@@ -332,7 +396,14 @@ export const CheckoutPage: React.FC = () => {
 
           {/* Payment & Review Column */}
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: spacing.md, color: colors.neutral[900] }}>
+            <h2
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                marginBottom: spacing.md,
+                color: colors.neutral[900],
+              }}
+            >
               2. Payment Details
             </h2>
 
@@ -368,7 +439,13 @@ export const CheckoutPage: React.FC = () => {
               <div style={{ marginBottom: spacing.md }}>
                 <label
                   htmlFor="card-name"
-                  style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[700], marginBottom: spacing.xs }}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: colors.neutral[700],
+                    marginBottom: spacing.xs,
+                  }}
                 >
                   Cardholder Name
                 </label>
@@ -394,7 +471,13 @@ export const CheckoutPage: React.FC = () => {
               <div style={{ marginBottom: spacing.md }}>
                 <label
                   htmlFor="card-number"
-                  style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[700], marginBottom: spacing.xs }}
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: colors.neutral[700],
+                    marginBottom: spacing.xs,
+                  }}
                 >
                   Card Number
                 </label>
@@ -417,11 +500,24 @@ export const CheckoutPage: React.FC = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md, marginBottom: spacing.lg }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: spacing.md,
+                  marginBottom: spacing.lg,
+                }}
+              >
                 <div>
                   <label
                     htmlFor="card-expiry"
-                    style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[700], marginBottom: spacing.xs }}
+                    style={{
+                      display: 'block',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: colors.neutral[700],
+                      marginBottom: spacing.xs,
+                    }}
                   >
                     Expires (MM/YY)
                   </label>
@@ -447,7 +543,13 @@ export const CheckoutPage: React.FC = () => {
                 <div>
                   <label
                     htmlFor="card-cvc"
-                    style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[700], marginBottom: spacing.xs }}
+                    style={{
+                      display: 'block',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: colors.neutral[700],
+                      marginBottom: spacing.xs,
+                    }}
                   >
                     CVC Code
                   </label>
@@ -483,7 +585,9 @@ export const CheckoutPage: React.FC = () => {
                 }}
               >
                 <div>
-                  <span style={{ fontWeight: 600, fontSize: '0.875rem', color: colors.neutral[800] }}>
+                  <span
+                    style={{ fontWeight: 600, fontSize: '0.875rem', color: colors.neutral[800] }}
+                  >
                     {activePlan.name} ({billingCycle})
                   </span>
                 </div>

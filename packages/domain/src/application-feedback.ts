@@ -1,4 +1,4 @@
-import { DomainError, type Role } from './index.js';
+import { DomainError, type Role } from './core.js';
 
 export type FeedbackReasonCategory =
   | 'skills_gap'

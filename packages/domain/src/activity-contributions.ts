@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ActivityCategory = 'learning' | 'creation' | 'collaboration' | 'social';
 export type EngagementBand = 'passive' | 'active' | 'power_contributor' | 'luminary';

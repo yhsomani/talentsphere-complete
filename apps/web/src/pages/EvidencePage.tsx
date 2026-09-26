@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
-import { Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Modal, ShieldCheckIcon, CheckIcon, AlertCircleIcon, ExternalLinkIcon } from '../components/ui/index.js';
+import {
+  Button,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Input,
+  Modal,
+  CheckIcon,
+  AlertCircleIcon,
+} from '../components/ui/index.js';
 
 interface WorkHistoryEntry {
   id: string;
@@ -55,7 +67,13 @@ const INITIAL_ENTRIES: WorkHistoryEntry[] = [
   },
 ];
 
-const DISPOSABLE_DOMAINS = ['mailinator.com', 'tempmail.com', 'guerrillamail.com', '10minutemail.com', 'throwaway.com'];
+const DISPOSABLE_DOMAINS = [
+  'mailinator.com',
+  'tempmail.com',
+  'guerrillamail.com',
+  '10minutemail.com',
+  'throwaway.com',
+];
 
 export const EvidencePage: React.FC = () => {
   const [entries, setEntries] = useState<WorkHistoryEntry[]>(INITIAL_ENTRIES);
@@ -95,7 +113,9 @@ export const EvidencePage: React.FC = () => {
 
     const domain = email.includes('@') ? email.split('@')[1].toLowerCase() : '';
     if (domain && DISPOSABLE_DOMAINS.includes(domain)) {
-      setAddError('Disposable and temporary email addresses are rejected for corporate attestation.');
+      setAddError(
+        'Disposable and temporary email addresses are rejected for corporate attestation.'
+      );
       return;
     }
 
@@ -135,7 +155,9 @@ export const EvidencePage: React.FC = () => {
 
     const domain = refEmail.split('@')[1]?.toLowerCase();
     if (domain && DISPOSABLE_DOMAINS.includes(domain)) {
-      setRefError('Disposable email addresses are strictly prohibited for manager references (BR-084).');
+      setRefError(
+        'Disposable email addresses are strictly prohibited for manager references (BR-084).'
+      );
       return;
     }
 
@@ -160,7 +182,9 @@ export const EvidencePage: React.FC = () => {
       );
     }
 
-    setRefSuccess(`Reference request dispatched to ${refEmail}. Candidate work history upgraded to Gold Tier pending evaluation.`);
+    setRefSuccess(
+      `Reference request dispatched to ${refEmail}. Candidate work history upgraded to Gold Tier pending evaluation.`
+    );
     setTimeout(() => {
       setIsRefModalOpen(false);
       setRefSuccess(null);
@@ -185,7 +209,14 @@ export const EvidencePage: React.FC = () => {
         }}
       >
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: spacing.xs }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: spacing.xs,
+            }}
+          >
             <Badge variant="verified">VERIFIED EVIDENCE GRAPH</Badge>
             <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
               RFC-0041 Cryptographic Credentials
@@ -202,7 +233,13 @@ export const EvidencePage: React.FC = () => {
           >
             Verified Work History &amp; References
           </h1>
-          <p style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}>
+          <p
+            style={{
+              color: colors.neutral[600],
+              fontSize: '0.9375rem',
+              margin: `${spacing.xs} 0 0`,
+            }}
+          >
             Immutable employment attestations with domain checks and structured supervisor ratings.
           </p>
         </div>
@@ -220,12 +257,22 @@ export const EvidencePage: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
         {entries.map((item) => (
           <Card key={item.id} data-testid={`work-history-${item.id}`}>
-            <CardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm }}>
+            <CardHeader
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: spacing.sm,
+              }}
+            >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
                   <CardTitle>{item.jobTitle}</CardTitle>
                   <span style={{ color: colors.neutral[400] }}>&bull;</span>
-                  <strong style={{ fontSize: '1rem', color: colors.neutral[700] }}>{item.companyName}</strong>
+                  <strong style={{ fontSize: '1rem', color: colors.neutral[700] }}>
+                    {item.companyName}
+                  </strong>
                 </div>
                 <CardDescription>
                   {item.startDate} &mdash; {item.isCurrent ? 'Present' : item.endDate} &bull;{' '}
@@ -244,23 +291,45 @@ export const EvidencePage: React.FC = () => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
                   gap: spacing.lg,
                   fontSize: '0.875rem',
                 }}
               >
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[500], display: 'block', marginBottom: spacing.xs }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: colors.neutral[500],
+                      display: 'block',
+                      marginBottom: spacing.xs,
+                    }}
+                  >
                     DOMAIN ATTESTATION
                   </span>
                   {item.isEmailVerified ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: colors.semantic.success }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: colors.semantic.success,
+                      }}
+                    >
                       <CheckIcon size={16} />
                       <strong>{item.corporateEmail}</strong>
                       <Badge variant="verified">DKIM Verified</Badge>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: colors.neutral[500] }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: colors.neutral[500],
+                      }}
+                    >
                       <AlertCircleIcon size={16} />
                       <span>No corporate email attested</span>
                     </div>
@@ -268,19 +337,36 @@ export const EvidencePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[500], display: 'block', marginBottom: spacing.xs }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: colors.neutral[500],
+                      display: 'block',
+                      marginBottom: spacing.xs,
+                    }}
+                  >
                     STRUCTURED REFERENCE
                   </span>
                   {item.referee ? (
                     <div>
-                      <strong style={{ color: colors.neutral[800], display: 'block' }}>{item.referee.name}</strong>
+                      <strong style={{ color: colors.neutral[800], display: 'block' }}>
+                        {item.referee.name}
+                      </strong>
                       <span style={{ fontSize: '0.75rem', color: colors.neutral[500] }}>
-                        Verified relationship: {item.referee.relationship} &bull; Attested on {item.referee.submittedAt}
+                        Verified relationship: {item.referee.relationship} &bull; Attested on{' '}
+                        {item.referee.submittedAt}
                       </span>
                     </div>
                   ) : (
                     <div>
-                      <span style={{ color: colors.neutral[500], display: 'block', marginBottom: spacing.xs }}>
+                      <span
+                        style={{
+                          color: colors.neutral[500],
+                          display: 'block',
+                          marginBottom: spacing.xs,
+                        }}
+                      >
                         No supervisor reference attached
                       </span>
                       <Button
@@ -299,10 +385,25 @@ export const EvidencePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[500], display: 'block', marginBottom: spacing.xs }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: colors.neutral[500],
+                      display: 'block',
+                      marginBottom: spacing.xs,
+                    }}
+                  >
                     CONFIDENCE INTEGRITY
                   </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginTop: '4px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: spacing.sm,
+                      marginTop: '4px',
+                    }}
+                  >
                     <div
                       style={{
                         flex: 1,
@@ -325,7 +426,9 @@ export const EvidencePage: React.FC = () => {
                         }}
                       />
                     </div>
-                    <strong style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>{item.confidenceScore}%</strong>
+                    <strong style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
+                      {item.confidenceScore}%
+                    </strong>
                   </div>
                 </div>
               </div>
@@ -402,7 +505,15 @@ export const EvidencePage: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: spacing.md }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+              }}
+            >
               <input
                 type="checkbox"
                 checked={isCurrent}
@@ -424,7 +535,14 @@ export const EvidencePage: React.FC = () => {
             data-testid="input-corporate-email"
           />
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm, marginTop: spacing.lg }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: spacing.sm,
+              marginTop: spacing.lg,
+            }}
+          >
             <Button variant="secondary" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>

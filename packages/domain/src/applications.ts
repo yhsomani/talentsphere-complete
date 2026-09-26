@@ -1,9 +1,4 @@
-import {
-  DomainError,
-  type Role,
-  type ApplicationState,
-  canTransitionApplication,
-} from './index.js';
+import { DomainError, type Role, type ApplicationState, canTransitionApplication } from './core.js';
 
 export interface JobApplication {
   id: string;

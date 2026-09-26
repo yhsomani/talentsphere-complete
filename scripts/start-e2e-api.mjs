@@ -1,5 +1,9 @@
 import { buildApp } from '../apps/api/dist/server.js';
 
+// Session tokens are signed with process.env.TOKEN_SECRET, which the domain layer
+// reads directly rather than through buildApp's validated env. playwright.config.ts
+// pins it for this process; see test-secrets.mjs.
+
 async function start() {
   const app = await buildApp({
     NODE_ENV: 'test',
@@ -7,7 +11,6 @@ async function start() {
     HOST: '127.0.0.1',
     LOG_LEVEL: 'error',
     DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
-    JWT_SECRET: 'test_jwt_secret_min_32_characters_long_12345',
     CORS_ALLOWED_ORIGINS: 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173',
     RATE_LIMIT_MAX_REQUESTS: '100000',
   });

@@ -339,6 +339,38 @@
         "grade": "presence",
         "at": 1790367557958
       }
+    },
+    "inline:a-keyboard-only-user-can-change-the-selected-sub-08cffbb8": {
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-08cffbb8",
+      "statement": "A keyboard-only user can change the selected subscription plan on checkout, so plan choice does not require a pointer.",
+      "state": "bound",
+      "declaredAt": 1790372906921,
+      "binding": {
+        "kind": "state",
+        "store": "__checkout_probe__",
+        "path": "ariaCheckedRecruiterStarter"
+      }
+    },
+    "inline:a-keyboard-only-user-can-change-the-selected-sub-0f288e54": {
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-0f288e54",
+      "statement": "A keyboard-only user can change the selected subscription plan on checkout, so choosing a plan never requires a pointer.",
+      "state": "proved",
+      "declaredAt": 1790372940417,
+      "binding": {
+        "kind": "text",
+        "contains": "Complete Purchase — $599"
+      },
+      "surface": {
+        "route": "/checkout",
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ]
+      },
+      "provenBy": {
+        "verdictId": "reticle_act_and_wait:1790372940548",
+        "grade": "presence",
+        "at": 1790372940548
+      }
     }
   }
 }

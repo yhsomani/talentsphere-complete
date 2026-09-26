@@ -1,10 +1,5 @@
-import {
-  DomainError,
-  type AssessmentSession,
-  type Evidence,
-  createEvidence,
-  verifyEvidence,
-} from './index.js';
+import { DomainError, type AssessmentSession, type Evidence } from './core.js';
+import { createEvidence, verifyEvidence } from './evidence.js';
 import { type Challenge, type AllowedLanguage, ALLOWED_LANGUAGES } from './challenges.js';
 
 export interface SubmissionResult {
@@ -99,7 +94,7 @@ export function evaluateChallengeSubmission(params: {
 
   // Sandboxed test evaluation runner simulation
   // For algorithmic solutions, code is evaluated against test case inputs and outputs
-  for (const tc of testCases) {
+  for (const _tc of testCases) {
     // Basic verification: test that solution passes input/output constraints
     // If solution contains syntax/runtime exception keywords, simulate failure
     if (params.code.includes('throw new Error') || params.code.includes('syntax_error')) {

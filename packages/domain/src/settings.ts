@@ -3,7 +3,7 @@
  * Features: F-15, §31 Privacy & Compliance, BR-06, BR-242
  */
 
-import { DomainError, type User, type Profile } from './index.js';
+import { DomainError, type User, type Profile } from './core.js';
 import crypto from 'node:crypto';
 
 export type ThemePreference = 'light' | 'dark' | 'system';

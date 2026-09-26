@@ -8,7 +8,6 @@ import { validateServerEnv, ServerEnv } from '@talentsphere/config';
 import {
   DomainError,
   Role,
-  Profile,
   Evidence,
   Skill,
   SkillRelationship,
@@ -262,11 +261,9 @@ import {
   evaluateMilestoneReadiness,
   LearningOutcome,
   LearningImpactMetrics,
-  LearningImpactDashboard,
   recordLearningOutcome,
   computeLearningImpactMetrics,
   aggregateLearningImpactDashboard,
-  CORRELATION_DISCLAIMER_LABEL,
   TalentPool,
   TalentPoolMember,
   CandidateSkillProfile,
@@ -275,9 +272,7 @@ import {
   updatePoolMemberStatus,
   generateTalentPoolIntelligence,
   BehavioralTalentProfile,
-  BehavioralWeights,
   CandidateRawSignals,
-  DEFAULT_BEHAVIORAL_WEIGHTS,
   evaluateBehavioralTalentProfile,
   filterAndRankBehavioralTalent,
   CandidateSegmentation,
@@ -286,13 +281,11 @@ import {
   EngagementSegment,
   ReadinessBand,
   CandidateClassificationInput,
-  SegmentDistributionReport,
   classifyCandidate,
   aggregateSegmentDistribution,
   filterSegmentedTalent,
   VerifiedWorkHistory,
   EmploymentReference,
-  WorkHistoryGraph,
   createWorkHistory,
   verifyCorporateEmail,
   requestEmploymentReference,
@@ -528,6 +521,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
       };
       return reply.status(statusCode).send(errorBody);
+    }
+
+    // Plugin-raised HTTP errors (e.g. @fastify/rate-limit 429) carry a statusCode
+    // but are not DomainErrors, so honour the status instead of masking it as 500.
+    const pluginStatus = (error as { statusCode?: unknown }).statusCode;
+    if (typeof pluginStatus === 'number' && pluginStatus >= 400 && pluginStatus < 600) {
+      const pluginBody: ErrorEnvelope = {
+        error: {
+          code: pluginStatus === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED',
+          message:
+            env.NODE_ENV === 'production' ? 'The request could not be completed.' : error.message,
+          request_id: req.id,
+        },
+      };
+      return reply.status(pluginStatus).send(pluginBody);
     }
 
     // Default 500 Internal Error
@@ -2534,7 +2542,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   app.get(
     '/api/v1/feedback/aggregate-insights',
-    async (req: FastifyRequest, reply: FastifyReply) => {
+    async (_req: FastifyRequest, reply: FastifyReply) => {
       const allFeedbacks = Array.from(applicationFeedbackByAppId.values());
       const insights = computeFeedbackAggregateInsights(allFeedbacks, 10);
       return reply.status(200).send({ insights });
@@ -2688,7 +2696,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   app.post(
     '/api/v1/skills/freshness/refresh-all',
-    async (req: FastifyRequest, reply: FastifyReply) => {
+    async (_req: FastifyRequest, reply: FastifyReply) => {
       for (const userMap of skillFreshnessByCandidateId.values()) {
         for (const [skillId, record] of userMap.entries()) {
           const { score, band, isDemoted } = calculateFreshnessScore(
@@ -2969,7 +2977,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post(
     '/api/v1/interviews/assessments/:id/code',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
+      extractUser(req); // must be authenticated
       const { id } = req.params;
       const assessment = interviewAssessmentsById.get(id);
       if (!assessment) {
@@ -3155,7 +3163,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post(
     '/api/v1/interviews/assessments/:id/ai-feedback',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const session = extractUser(req);
+      extractUser(req); // must be authenticated
       const { id } = req.params;
       const assessment = interviewAssessmentsById.get(id);
       if (!assessment) {
@@ -3390,7 +3398,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   app.post(
     '/api/v1/reputation/recalculate-all',
-    async (req: FastifyRequest, reply: FastifyReply) => {
+    async (_req: FastifyRequest, reply: FastifyReply) => {
       let updatedCount = 0;
       for (const [userId, signals] of reputationSignalsByUserId.entries()) {
         const distinctContextDomains = new Set(signals.map((s) => `${s.context}:${s.domain}`));
@@ -9806,14 +9814,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     assertPlatformAdmin(session.roles);
 
     const status = computeSystemHealth({
-      dbConnected: true,
+      dbConnected: false,
       queueOperational: true,
       inMaintenance: systemInMaintenance,
     });
 
     const diagnostics: SystemDiagnostics = {
       status,
-      database: 'connected',
+      database: 'disconnected',
       queue: 'operational',
       inMaintenance: systemInMaintenance,
       uptimeSeconds: Math.floor(process.uptime()),

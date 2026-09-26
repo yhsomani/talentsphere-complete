@@ -3,7 +3,7 @@
  * Level progression curves, daily 200 XP ledger cap, streak maintenance, and badge unlocks.
  */
 
-import { XpTransaction } from './index.js';
+import { XpTransaction } from './assessment.js';
 
 export type BadgeCategory = 'skills' | 'challenges' | 'learning' | 'community' | 'streak';
 

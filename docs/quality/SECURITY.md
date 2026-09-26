@@ -85,9 +85,46 @@ UPLOAD
 - CORS allow-list.
 - No stack traces to clients.
 
+### Session signing key
+
+Session tokens are `base64url(payload).base64url(HMAC-SHA256(payload))`, where the
+payload carries `userId`, `email`, and `roles`. Every authorization decision in the API
+reads `roles` from that payload, so the signing key is a full privilege boundary.
+
+- The key is `process.env.TOKEN_SECRET` and **must be at least 32 characters** in any
+  deployed environment. `validateServerEnv()` enforces the length when it is set.
+- There is **no hardcoded fallback key**. If `TOKEN_SECRET` is unset, the domain layer
+  generates a random per-process key, so tokens remain unforgeable but do not survive a
+  restart. A committed constant would let anyone read a valid signing key out of the
+  source tree and mint a `platform_admin` token.
+- Generate a key with:
+  `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
+- Regression coverage: `tests/security/api-security.test.ts`, describe block
+  *"SEC: Session signing key is not a committed constant"*, asserts that a token signed
+  with the former hardcoded literal and with other guessed secrets is rejected.
+- Any component that mints tokens out of band (test harnesses, scripts) must set
+  `TOKEN_SECRET` for the API process as well; see `test-secrets.mjs`.
+
 ## 9. Webhooks
 
 Verify provider signature + timestamp/replay window. Record provider event ID and make handling idempotent.
+
+### Open gap — billing webhook is not authenticated
+
+`POST /api/v1/webhooks/billing` currently validates the payload shape and
+enforces idempotency on the provider event ID, but it accepts **unsigned**
+requests. It therefore does not meet the requirement above, and must not be
+described as replay-resistant or signature-verified.
+
+Impact: anyone who can reach the endpoint can post a fabricated billing event.
+
+Not fixed here because the signing scheme is a provider contract, not an
+implementation detail — the provider, algorithm, header name, secret
+distribution and tolerance window are all unspecified. Inventing them would
+produce a webhook that looks secured while rejecting real events.
+
+To close: specify the provider contract, then verify signature and timestamp
+before any processing, and reject on mismatch rather than falling through.
 
 ## 10. AI Security
 

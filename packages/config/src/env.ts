@@ -22,6 +22,11 @@ export const ServerEnvSchema = z.object({
   DIRECT_URL: z.string().optional(),
 
   // Security & Rate Limiting
+  // TOKEN_SECRET signs session tokens. It is optional so local development works
+  // without it (the domain layer then generates a random per-process key, so tokens
+  // are unforgeable but do not survive a restart). If provided it must be at least
+  // 32 characters. Production deployments should always set it.
+  TOKEN_SECRET: z.string().min(32).optional(),
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:5173'),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),

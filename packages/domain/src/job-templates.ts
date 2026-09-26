@@ -1,4 +1,4 @@
-import { DomainError, type Role } from './index.js';
+import { DomainError, type Role } from './core.js';
 import { Job, createJobPosting } from './jobs.js';
 
 export interface ScreeningQuestion {

@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type TalentPoolSource =
   'search' | 'referral' | 'inbound_application' | 'alumni' | 'outreach';

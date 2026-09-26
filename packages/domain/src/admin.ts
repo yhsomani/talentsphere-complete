@@ -3,7 +3,7 @@
  * Features: F-17, F-35, BR-06, BR-28, BR-29, BR-067, BR-068
  */
 
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 import crypto from 'node:crypto';
 
 export type AdminUserStatus = 'active' | 'suspended' | 'deactivated';
@@ -24,14 +24,6 @@ export interface FeatureFlag {
   enabled: boolean;
   description?: string;
   createdAt: string;
-  updatedAt: string;
-}
-
-export interface PlatformConfig {
-  key: string;
-  value: Record<string, unknown>;
-  description?: string;
-  updatedBy?: string;
   updatedAt: string;
 }
 
@@ -80,7 +72,7 @@ export function computeSystemHealth(params: {
  * Prevents self-suspension/self-deactivation to avoid administrative lockout.
  */
 export function validateUserStatusTransition(
-  currentStatus: string,
+  _currentStatus: string,
   newStatus: AdminUserStatus,
   actorId: string,
   targetUserId: string

@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type AISenderRole = 'user' | 'assistant' | 'system';
 export type AITier = 'free' | 'pro' | 'enterprise';
@@ -198,7 +198,7 @@ export function generateCareerAssistantResponse(params: {
   candidateSkills?: string[];
   careerInterests?: string[];
 }): AIEngineResponse {
-  const { conversationId, prompt, requestId, candidateSkills = [], careerInterests = [] } = params;
+  const { conversationId, prompt, requestId, candidateSkills = [] } = params;
 
   const { sanitized } = sanitizePromptInput(prompt);
   const inputTokens = estimateTokens(prompt);

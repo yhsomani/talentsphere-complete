@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ReputationContext =
   'candidate' | 'instructor' | 'employer' | 'peer' | 'community' | 'mentor';

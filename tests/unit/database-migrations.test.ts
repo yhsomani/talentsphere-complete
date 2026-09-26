@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 
-describe('Database Migration & Schema Authority (E-04, E-05)', () => {
+describe('Schema content authority (E-04, E-05) — SQL text assertions, does NOT execute SQL', () => {
   const migrationsDir = path.resolve('supabase/migrations');
   const migrationFile = path.join(migrationsDir, '00001_core_schema.sql');
 

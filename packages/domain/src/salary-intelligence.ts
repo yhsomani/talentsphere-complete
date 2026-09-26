@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type SeniorityLevel =
   'entry' | 'mid' | 'senior' | 'lead' | 'principal' | 'director' | 'executive';

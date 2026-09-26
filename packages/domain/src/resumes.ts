@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ResumeTemplate = 'modern' | 'minimal' | 'executive' | 'technical';
 export type ResumeFormat = 'json' | 'markdown' | 'html' | 'pdf';

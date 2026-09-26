@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { ShieldCheckIcon } from './ui/Icons.js';
+import { describePwaCapability, usePwaCapability } from '../pwa.js';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const pwaCapability = usePwaCapability();
+  const pwaStatus = describePwaCapability(pwaCapability);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -109,17 +112,28 @@ export const Layout: React.FC = () => {
         style={{
           backgroundColor: '#ffffff',
           borderBottom: `1px solid ${colors.neutral[200]}`,
-          padding: `0 ${spacing.xl}`,
-          height: '64px',
+          padding: `${spacing.sm} ${spacing.lg}`,
+          minHeight: '64px',
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'space-between',
           alignItems: 'center',
+          columnGap: spacing.md,
+          rowGap: spacing.sm,
           position: 'sticky',
           top: 0,
           zIndex: 50,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xl }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: spacing.md,
+            minWidth: 0,
+          }}
+        >
           <Link
             to="/"
             style={{
@@ -150,7 +164,10 @@ export const Layout: React.FC = () => {
             <span>TalentSphere</span>
           </Link>
 
-          <nav aria-label="Main Navigation" style={{ display: 'flex', gap: spacing.xs, alignItems: 'center' }}>
+          <nav
+            aria-label="Main Navigation"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' }}
+          >
             {navLinks.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -176,8 +193,18 @@ export const Layout: React.FC = () => {
           </nav>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: spacing.md,
+            minWidth: 0,
+          }}
+        >
           <div
+            data-testid="pwa-status"
+            title={pwaStatus.detail}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -192,22 +219,27 @@ export const Layout: React.FC = () => {
             }}
           >
             <span
+              aria-hidden="true"
+              data-testid={`pwa-status-tone-${pwaStatus.tone}`}
               style={{
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: colors.semantic.success,
+                backgroundColor:
+                  pwaStatus.tone === 'active'
+                    ? colors.semantic.success
+                    : pwaStatus.tone === 'pending'
+                      ? colors.semantic.warning
+                      : colors.neutral[400],
                 display: 'inline-block',
               }}
             />
-            <span>PWA Active</span>
+            <span>PWA {pwaStatus.label}</span>
           </div>
 
           {userEmail ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-                {userEmail}
-              </span>
+              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>{userEmail}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -285,44 +317,149 @@ export const Layout: React.FC = () => {
           }}
         >
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: colors.neutral[900], marginBottom: spacing.xs }}>
+            <div
+              style={{
+                fontWeight: 800,
+                fontSize: '1rem',
+                color: colors.neutral[900],
+                marginBottom: spacing.xs,
+              }}
+            >
               TalentSphere
             </div>
-            <p style={{ fontSize: '0.8125rem', color: colors.neutral[600], lineHeight: 1.6, margin: 0 }}>
-              The cryptographic talent network. Grounding human capability in verifiable evidence, proctored benchmarks, and transparent matching.
+            <p
+              style={{
+                fontSize: '0.8125rem',
+                color: colors.neutral[600],
+                lineHeight: 1.6,
+                margin: 0,
+              }}
+            >
+              The cryptographic talent network. Grounding human capability in verifiable evidence,
+              proctored benchmarks, and transparent matching.
             </p>
           </div>
 
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.8125rem', textTransform: 'uppercase', color: colors.neutral[400], marginBottom: spacing.sm, letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                textTransform: 'uppercase',
+                color: colors.neutral[400],
+                marginBottom: spacing.sm,
+                letterSpacing: '0.05em',
+              }}
+            >
               Platform
             </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: spacing.xs, fontSize: '0.875rem' }}>
-              <li><Link to="/evidence" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Evidence Graph</Link></li>
-              <li><Link to="/assessments" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Proctored Sandbox</Link></li>
-              <li><Link to="/jobs" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Verifiable Opportunities</Link></li>
-              <li><Link to="/checkout" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Plans & Pricing</Link></li>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.xs,
+                fontSize: '0.875rem',
+              }}
+            >
+              <li>
+                <Link to="/evidence" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                  Evidence Graph
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/assessments"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
+                  Proctored Sandbox
+                </Link>
+              </li>
+              <li>
+                <Link to="/jobs" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                  Verifiable Opportunities
+                </Link>
+              </li>
+              <li>
+                <Link to="/checkout" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                  Plans & Pricing
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.8125rem', textTransform: 'uppercase', color: colors.neutral[400], marginBottom: spacing.sm, letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                textTransform: 'uppercase',
+                color: colors.neutral[400],
+                marginBottom: spacing.sm,
+                letterSpacing: '0.05em',
+              }}
+            >
               Trust & Governance
             </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: spacing.xs, fontSize: '0.875rem' }}>
-              <li><Link to="/privacy" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Privacy Policy (GDPR/CCPA)</Link></li>
-              <li><Link to="/terms" style={{ color: colors.neutral[600], textDecoration: 'none' }}>Terms & Integrity Standards</Link></li>
-              <li><span style={{ color: colors.neutral[500], cursor: 'default' }}>Differential Privacy (k &ge; 10)</span></li>
-              <li><span style={{ color: colors.neutral[500], cursor: 'default' }}>Anti-LLM Scraping Safe</span></li>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.xs,
+                fontSize: '0.875rem',
+              }}
+            >
+              <li>
+                <Link to="/privacy" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                  Privacy Policy (GDPR/CCPA)
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                  Terms & Integrity Standards
+                </Link>
+              </li>
+              <li>
+                <span style={{ color: colors.neutral[500], cursor: 'default' }}>
+                  Differential Privacy (k &ge; 10)
+                </span>
+              </li>
+              <li>
+                <span style={{ color: colors.neutral[500], cursor: 'default' }}>
+                  Anti-LLM Scraping Safe
+                </span>
+              </li>
             </ul>
           </div>
 
           <div>
-            <div style={{ fontWeight: 600, fontSize: '0.8125rem', textTransform: 'uppercase', color: colors.neutral[400], marginBottom: spacing.sm, letterSpacing: '0.05em' }}>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: '0.8125rem',
+                textTransform: 'uppercase',
+                color: colors.neutral[400],
+                marginBottom: spacing.sm,
+                letterSpacing: '0.05em',
+              }}
+            >
               Verification SLA
             </div>
-            <p style={{ fontSize: '0.8125rem', color: colors.neutral[600], lineHeight: 1.6, margin: 0 }}>
-              All employer signature requests execute through cryptographically hashed challenge tokens. Disposable email domains strictly barred.
+            <p
+              style={{
+                fontSize: '0.8125rem',
+                color: colors.neutral[600],
+                lineHeight: 1.6,
+                margin: 0,
+              }}
+            >
+              All employer signature requests execute through cryptographically hashed challenge
+              tokens. Disposable email domains strictly barred.
             </p>
           </div>
         </div>
@@ -342,10 +479,17 @@ export const Layout: React.FC = () => {
             color: colors.neutral[500],
           }}
         >
-          <div>TalentSphere &copy; 2026. Cryptographically Verified Talent Network. All rights reserved.</div>
+          <div>
+            TalentSphere &copy; 2026. Cryptographically Verified Talent Network. All rights
+            reserved.
+          </div>
           <div style={{ display: 'flex', gap: spacing.md }}>
-            <Link to="/privacy" style={{ color: colors.neutral[500], textDecoration: 'none' }}>Privacy</Link>
-            <Link to="/terms" style={{ color: colors.neutral[500], textDecoration: 'none' }}>Terms</Link>
+            <Link to="/privacy" style={{ color: colors.neutral[500], textDecoration: 'none' }}>
+              Privacy
+            </Link>
+            <Link to="/terms" style={{ color: colors.neutral[500], textDecoration: 'none' }}>
+              Terms
+            </Link>
             <span style={{ color: colors.neutral[400] }}>SOC2 Type II Ready</span>
           </div>
         </div>

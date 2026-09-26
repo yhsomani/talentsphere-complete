@@ -3,7 +3,7 @@
  * Features: F-16, Section 19 (Integer Minor Units), Section 64 (Monetization Invariants), WF-16, WIT-016
  */
 
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 import crypto from 'node:crypto';
 
 export type PlanTier = 'free' | 'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise';

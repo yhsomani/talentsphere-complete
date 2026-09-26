@@ -28,11 +28,15 @@ export const LoginPage: React.FC = () => {
 
     try {
       // Authenticate with local or API session
-      const res = await fetch('http://127.0.0.1:4000/api/v1/auth/login', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 800);
+      const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        signal: controller.signal,
       }).catch(() => null);
+      clearTimeout(timeoutId);
 
       if (res && res.ok) {
         const data = await res.json();

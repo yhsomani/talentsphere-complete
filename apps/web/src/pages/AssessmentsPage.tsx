@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
-import { Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, Modal, CodeIcon, ShieldCheckIcon, CheckIcon } from '../components/ui/index.js';
+import {
+  Button,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Modal,
+  CodeIcon,
+  CheckIcon,
+} from '../components/ui/index.js';
 
 interface AssessmentChallenge {
   id: string;
@@ -21,7 +32,8 @@ const CHALLENGES: AssessmentChallenge[] = [
     tier: 'Staff',
     timeLimitMinutes: 45,
     domain: 'Distributed Systems & Queues',
-    description: 'Implement an idempotent transactional message queue that preserves strict at-least-once delivery with deduplication under simulated network partitions.',
+    description:
+      'Implement an idempotent transactional message queue that preserves strict at-least-once delivery with deduplication under simulated network partitions.',
     starterCode: `export class TransactionalQueue<T> {
   private store = new Map<string, { payload: T; delivered: boolean }>();
 
@@ -52,7 +64,8 @@ const CHALLENGES: AssessmentChallenge[] = [
     tier: 'Senior',
     timeLimitMinutes: 40,
     domain: 'Concurrency & Systems',
-    description: 'Build a lock-free thread-safe in-memory cache supporting high-concurrency read-heavy workloads with background probabilistic TTL cleanup.',
+    description:
+      'Build a lock-free thread-safe in-memory cache supporting high-concurrency read-heavy workloads with background probabilistic TTL cleanup.',
     starterCode: `export class ConcurrentCache<K, V> {
   private map = new Map<K, { val: V; expiresAt: number }>();
 
@@ -89,7 +102,10 @@ export const AssessmentsPage: React.FC = () => {
 
   const handleRunSandbox = () => {
     setIsRunning(true);
-    setExecutionLog(['Compiling TypeScript source in isolated V8 sandbox...', 'Injecting chaos network partitions & clock skews...']);
+    setExecutionLog([
+      'Compiling TypeScript source in isolated V8 sandbox...',
+      'Injecting chaos network partitions & clock skews...',
+    ]);
 
     setTimeout(() => {
       setExecutionLog((prev) => [
@@ -113,7 +129,14 @@ export const AssessmentsPage: React.FC = () => {
           marginBottom: spacing.xl,
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: spacing.xs }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: spacing.xs,
+          }}
+        >
           <Badge variant="info">EVIDENCE SANDBOX</Badge>
           <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
             Proctored Code Challenges &bull; Zero Hallucinated Ratings
@@ -130,16 +153,32 @@ export const AssessmentsPage: React.FC = () => {
         >
           Proctored Capability Assessments
         </h1>
-        <p style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}>
-          Reproducible coding environments evaluated against objective rubrics and stress invariants.
+        <p
+          style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}
+        >
+          Reproducible coding environments evaluated against objective rubrics and stress
+          invariants.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: spacing.lg }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
+          gap: spacing.lg,
+        }}
+      >
         {CHALLENGES.map((ch) => (
           <Card key={ch.id} data-testid={`challenge-card-${ch.id}`}>
             <CardHeader>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: spacing.xs,
+                }}
+              >
                 <Badge variant={ch.tier === 'Staff' ? 'gold' : 'silver'}>{ch.tier} Tier</Badge>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[500] }}>
                   {ch.timeLimitMinutes} min allocation
@@ -150,15 +189,37 @@ export const AssessmentsPage: React.FC = () => {
             </CardHeader>
 
             <CardContent>
-              <p style={{ fontSize: '0.875rem', color: colors.neutral[600], lineHeight: 1.5, marginBottom: spacing.md }}>
+              <p
+                style={{
+                  fontSize: '0.875rem',
+                  color: colors.neutral[600],
+                  lineHeight: 1.5,
+                  marginBottom: spacing.md,
+                }}
+              >
                 {ch.description}
               </p>
 
               <div style={{ marginBottom: spacing.md }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: colors.neutral[700], display: 'block', marginBottom: '4px' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: colors.neutral[700],
+                    display: 'block',
+                    marginBottom: '4px',
+                  }}
+                >
                   EVALUATION RUBRIC:
                 </span>
-                <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '0.8125rem', color: colors.neutral[600] }}>
+                <ul
+                  style={{
+                    paddingLeft: '18px',
+                    margin: 0,
+                    fontSize: '0.8125rem',
+                    color: colors.neutral[600],
+                  }}
+                >
                   {ch.rubric.map((r, i) => (
                     <li key={i} style={{ marginBottom: '2px' }}>
                       {r}
@@ -190,7 +251,14 @@ export const AssessmentsPage: React.FC = () => {
           description={`${selectedChallenge.domain} • ${selectedChallenge.timeLimitMinutes} min limit`}
           maxWidth="760px"
           footer={
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+                alignItems: 'center',
+              }}
+            >
               <div>
                 {isPassed && (
                   <Badge variant="verified">
@@ -217,7 +285,15 @@ export const AssessmentsPage: React.FC = () => {
         >
           <div>
             <div style={{ marginBottom: spacing.md }}>
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[800], display: 'block', marginBottom: '4px' }}>
+              <span
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  color: colors.neutral[800],
+                  display: 'block',
+                  marginBottom: '4px',
+                }}
+              >
                 STARTER IMPLEMENTATION:
               </span>
               <pre
@@ -239,7 +315,15 @@ export const AssessmentsPage: React.FC = () => {
 
             {executionLog.length > 0 && (
               <div>
-                <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: colors.neutral[800], display: 'block', marginBottom: '4px' }}>
+                <span
+                  style={{
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: colors.neutral[800],
+                    display: 'block',
+                    marginBottom: '4px',
+                  }}
+                >
                   SANDBOX EXECUTION LOG:
                 </span>
                 <div

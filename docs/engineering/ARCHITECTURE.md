@@ -99,6 +99,31 @@ Cross-domain → application interface/event
 
 Circular dependencies are prohibited.
 
+### 5.1 Intra-package import rule (barrel cycles)
+
+`packages/domain/src/index.ts` is a **barrel only**: it re-exports sibling modules and
+declares nothing. A module inside a package must never import that package's own
+barrel (`from './index.js'`), because the barrel re-exports the importing module and
+the edge becomes a cycle (`auth.ts → index.ts → auth.ts`).
+
+Rule: intra-package imports target the module that **declares** the symbol.
+
+- `core.ts` is the leaf foundation and must never import anything. It holds the shared
+  primitives that have no owning feature module: `Role`, `User`, `UserStatus`, `Profile`,
+  `ProfilePrivacy`, `Evidence`, `EvidenceType`, `VerificationLevel`, `EvidenceStatus`,
+  `ApplicationState`, `ALLOWED_APPLICATION_TRANSITIONS`, `canTransitionApplication`,
+  `AssessmentPolicyMode`, `AssessmentSession`, `isAIAssistanceAllowed`,
+  `DomainErrorCode`, `DomainError`.
+- Feature modules import from `core.ts` for the above, and from the specific sibling
+  that owns anything else (e.g. `gamification.ts → assessment.js` for `XpTransaction`,
+  `instructor-reputation.ts → reputation-engine.js` for `ReputationBand`).
+- Consumers outside the package (`apps/*`, `tests/*`) continue to import the public
+  surface via `@talentsphere/domain`. The public API is unchanged by this layering.
+
+Enforcement: `tsc` does not detect cycles, so this rule is checked by review plus a
+dependency-graph scan. Any new `from './index.js'` inside `packages/domain/src/` is a
+regression.
+
 ## 6. Persistence
 
 Postgres is authoritative for relational state. Storage is authoritative for binary objects. Queue state is operational state, not business truth.

@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type QuestionCategory = 'code' | 'design' | 'behavioral' | 'text';
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { DomainError, type Role } from './index.js';
+import { DomainError, type Role } from './core.js';
 
 export type CourseStatus = 'draft' | 'published' | 'archived';
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';

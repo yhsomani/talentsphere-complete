@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export interface EndorsementWeightBreakdown {
   endorserCredibility: number; // 0.10 to 1.00

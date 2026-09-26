@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)', () => {
-  test('renders landing page with accessibility skip-link and PWA indicator', async ({ page }) => {
+  test('renders landing page with accessibility skip-link and truthful PWA capability status', async ({
+    page,
+  }) => {
     await page.goto('/');
 
     // 1. Accessibility skip-link (WCAG 2.2 AA)
@@ -14,9 +16,23 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(heading).toContainText('The Career Operating System Built on');
     await expect(heading).toContainText('Verified Evidence');
 
-    // 3. PWA Status badge
-    const pwaBadge = page.locator('text=PWA Active');
+    // 3. PWA status must report MEASURED capability, not a hard-coded claim.
+    //    A web app manifest is declared, so the app is installable, but no
+    //    service worker is shipped, so it must NOT claim to be active/installed.
+    const manifestResponse = await page.request.get('/manifest.webmanifest');
+    expect(manifestResponse.status()).toBe(200);
+    const manifest = await manifestResponse.json();
+    expect(manifest.display).toBe('standalone');
+    expect(manifest.icons.length).toBeGreaterThan(0);
+
+    const pwaBadge = page.getByTestId('pwa-status');
     await expect(pwaBadge).toBeVisible();
+    await expect(pwaBadge).toHaveText('PWA Installable');
+    await expect(page.getByTestId('pwa-status-tone-pending')).toBeAttached();
+
+    // Offline support is NOT implemented, so nothing may claim a controller.
+    const controlled = await page.evaluate(() => navigator.serviceWorker?.controller ?? null);
+    expect(controlled).toBeNull();
 
     // 4. Feature pillars
     await expect(page.locator(':is(h2, h3):has-text("1. Talent Graph")')).toBeVisible();
@@ -48,7 +64,9 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(actionBtn).toBeEnabled();
   });
 
-  test('authenticates candidate via login page and redirects to dashboard (F-01)', async ({ page }) => {
+  test('authenticates candidate via login page and redirects to dashboard (F-01)', async ({
+    page,
+  }) => {
     await page.goto('/login');
 
     // Verify login heading and elements
@@ -164,7 +182,9 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
 
     // Verify execution log and verification badge
     await expect(page.getByTestId('sandbox-log')).toBeVisible();
-    await expect(page.getByTestId('sandbox-log')).toContainText('Test 1/3: Basic enqueue & dequeue invariant... PASS');
+    await expect(page.getByTestId('sandbox-log')).toContainText(
+      'Test 1/3: Basic enqueue & dequeue invariant... PASS'
+    );
     await expect(page.getByText('Sandbox Invariants Verified')).toBeVisible();
   });
 

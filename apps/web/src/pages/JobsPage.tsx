@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
-import { Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, ShieldCheckIcon, CheckIcon } from '../components/ui/index.js';
+import {
+  Button,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  ShieldCheckIcon,
+  CheckIcon,
+} from '../components/ui/index.js';
 
 interface JobOpportunity {
   id: string;
@@ -81,7 +91,14 @@ export const JobsPage: React.FC = () => {
           marginBottom: spacing.xl,
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: spacing.xs }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: spacing.xs,
+          }}
+        >
           <Badge variant="verified">GOVERNED MATCHMAKING</Badge>
           <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
             Zero Keyword Filters &bull; Evidence-Based Match Scoring
@@ -98,8 +115,11 @@ export const JobsPage: React.FC = () => {
         >
           Verifiable Career Opportunities
         </h1>
-        <p style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}>
-          Pre-screened roles that prioritize immutable evidence, supervisor references, and code artifacts.
+        <p
+          style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}
+        >
+          Pre-screened roles that prioritize immutable evidence, supervisor references, and code
+          artifacts.
         </p>
       </div>
 
@@ -108,7 +128,15 @@ export const JobsPage: React.FC = () => {
           const isApplied = Boolean(appliedJobs[job.id]);
           return (
             <Card key={job.id} data-testid={`job-card-${job.id}`}>
-              <CardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: spacing.sm }}>
+              <CardHeader
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                  gap: spacing.sm,
+                }}
+              >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
                     <CardTitle>{job.title}</CardTitle>
@@ -123,15 +151,26 @@ export const JobsPage: React.FC = () => {
 
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.neutral[900] }}>
-                    ${(job.salaryMin / 1000).toFixed(0)}k &ndash; ${(job.salaryMax / 1000).toFixed(0)}k
+                    ${(job.salaryMin / 1000).toFixed(0)}k &ndash; $
+                    {(job.salaryMax / 1000).toFixed(0)}k
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: colors.neutral[500] }}>Base Compensation (USD)</span>
+                  <span style={{ fontSize: '0.75rem', color: colors.neutral[500] }}>
+                    Base Compensation (USD)
+                  </span>
                 </div>
               </CardHeader>
 
               <CardContent>
                 <div style={{ marginBottom: spacing.md }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: colors.neutral[700], display: 'block', marginBottom: spacing.xs }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: colors.neutral[700],
+                      display: 'block',
+                      marginBottom: spacing.xs,
+                    }}
+                  >
                     REQUIRED VERIFIED EVIDENCE:
                   </span>
                   <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
@@ -156,7 +195,14 @@ export const JobsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.md }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: spacing.md,
+                  }}
+                >
                   <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
                     Deterministic matching powered by RFC-0041 Evidence Graphs.
                   </span>

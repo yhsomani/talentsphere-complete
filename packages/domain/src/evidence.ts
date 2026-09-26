@@ -6,7 +6,7 @@ import {
   type EvidenceType,
   type VerificationLevel,
   type EvidenceStatus,
-} from './index.js';
+} from './core.js';
 
 export interface CreateEvidenceParams {
   id?: string;

@@ -1,4 +1,4 @@
-import { DomainError, type Role } from './index.js';
+import { DomainError, type Role } from './core.js';
 
 export type JobStatus =
   'draft' | 'pending_approval' | 'approved' | 'published' | 'paused' | 'closed' | 'archived';

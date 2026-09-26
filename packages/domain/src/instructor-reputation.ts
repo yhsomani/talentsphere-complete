@@ -5,7 +5,8 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError, ReputationBand, determineReputationBand } from './index.js';
+import { DomainError } from './core.js';
+import { ReputationBand, determineReputationBand } from './reputation-engine.js';
 
 export interface FactorDetail {
   score: number; // 0 - 100

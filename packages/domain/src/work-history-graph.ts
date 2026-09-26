@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'internship' | 'freelance';
 
@@ -575,12 +575,6 @@ export interface BuildWorkHistoryGraphParams {
  */
 export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): WorkHistoryGraph {
   const { candidateId, candidateName, includeUnverified = false } = params;
-
-  const filteredHistories = includeUnverified
-    ? params.workHistories
-    : params.workHistories.filter(
-        (wh) => wh.verificationStatus === 'verified' || wh.badgeTier !== 'none'
-      );
 
   const nodes: WorkHistoryGraphNode[] = [];
   const edges: WorkHistoryGraphEdge[] = [];

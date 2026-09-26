@@ -2,7 +2,7 @@ import React from 'react';
 import { colors } from '@talentsphere/ui';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'verified' | 'gold' | 'silver' | 'bronze' | 'pending' | 'danger' | 'neutral' | 'info';
+  variant?: 'verified' | 'gold' | 'silver' | 'bronze' | 'neutral' | 'info';
   mono?: boolean;
 }
 
@@ -33,16 +33,6 @@ export const Badge: React.FC<BadgeProps> = ({
       backgroundColor: '#fff7ed',
       color: '#9a3412',
       border: '1px solid #fed7aa',
-    },
-    pending: {
-      backgroundColor: '#fffbeb',
-      color: '#92400e',
-      border: '1px solid #fde68a',
-    },
-    danger: {
-      backgroundColor: '#fef2f2',
-      color: '#991b1b',
-      border: '1px solid #fecaca',
     },
     neutral: {
       backgroundColor: colors.neutral[100],

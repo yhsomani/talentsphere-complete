@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type AlumniDegreeType =
   'bachelors' | 'masters' | 'phd' | 'bootcamp' | 'certification' | 'other';

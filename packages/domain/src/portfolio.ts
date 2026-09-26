@@ -3,7 +3,7 @@
  * Project showcase models, visibility gating, and canonical skill/evidence associations.
  */
 
-import { DomainError, Role } from './index.js';
+import { DomainError, Role } from './core.js';
 
 export type PortfolioVisibility = 'public' | 'connections_only' | 'recruiters_only' | 'private';
 export type PortfolioMediaType = 'image' | 'video' | 'document';

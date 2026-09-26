@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type SkillDecayCategory = 'fast_changing' | 'moderate' | 'stable' | 'foundational';
 export type SkillFreshnessBand = 'fresh' | 'current' | 'aging' | 'stale' | 'expired';

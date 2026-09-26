@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { Role } from './index.js';
+import { Role } from './core.js';
 
 const ITERATIONS = 10000;
 const KEY_LEN = 64;
@@ -53,7 +53,20 @@ export interface AuthPayload {
   expiresAt: number;
 }
 
-const TOKEN_SECRET = process.env.TOKEN_SECRET || 'talentsphere_local_secret_must_be_32_bytes_min!';
+/**
+ * HMAC key for session token signing.
+ *
+ * A hardcoded fallback would let anyone read a valid signing key out of the source
+ * tree and mint a token with arbitrary `roles`, which every authorization check in
+ * the API trusts. So when TOKEN_SECRET is unset we generate a random per-process
+ * key instead: tokens stay unforgeable, and the only cost is that sessions do not
+ * survive a restart. Set TOKEN_SECRET to a stable random value (>= 32 bytes) for
+ * any environment where sessions must outlive the process.
+ */
+const TOKEN_SECRET =
+  process.env.TOKEN_SECRET && process.env.TOKEN_SECRET.length >= 32
+    ? process.env.TOKEN_SECRET
+    : crypto.randomBytes(48).toString('hex');
 
 /**
  * Creates a signed session token using HMAC-SHA256.

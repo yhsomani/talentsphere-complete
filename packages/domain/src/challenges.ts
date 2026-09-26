@@ -1,4 +1,4 @@
-import { DomainError, type AssessmentPolicyMode, type Role } from './index.js';
+import { DomainError, type AssessmentPolicyMode, type Role } from './core.js';
 
 export interface TestCase {
   id: string;

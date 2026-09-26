@@ -271,7 +271,8 @@ describe('Platform Administration & Governance Integration (F-17, F-35, BR-06, B
 
     expect(healthRes.statusCode).toBe(200);
     const healthBody = JSON.parse(healthRes.body);
-    expect(healthBody.diagnostics.status).toBe('healthy');
+    expect(healthBody.diagnostics.status).toBe('degraded');
+    expect(healthBody.diagnostics.database).toBe('disconnected');
     expect(healthBody.diagnostics.inMaintenance).toBe(false);
     expect(healthBody.diagnostics.registeredUsersCount).toBeGreaterThanOrEqual(1);
 

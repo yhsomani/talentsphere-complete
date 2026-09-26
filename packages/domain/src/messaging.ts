@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type MessageStatus = 'sent' | 'delivered' | 'read';
 
@@ -27,12 +27,6 @@ export interface Message {
   status: MessageStatus;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ThreadWithDetails extends MessageThread {
-  participants: ThreadParticipant[];
-  lastMessage?: Message | null;
-  unreadCount: number;
 }
 
 /**

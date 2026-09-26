@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type EmployerReputationBand =
   'top_employer' | 'strong_reputation' | 'developing' | 'needs_improvement';

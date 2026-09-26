@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ModerationTargetType =
   'user' | 'job' | 'message' | 'evidence' | 'review' | 'portfolio_project';

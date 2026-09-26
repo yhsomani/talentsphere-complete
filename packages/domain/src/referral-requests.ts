@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ReferralRequestStatus = 'pending' | 'approved' | 'forwarded' | 'declined' | 'expired';
 export type ReferralOutcomeStatus = 'referred' | 'interviewing' | 'hired' | 'rejected';

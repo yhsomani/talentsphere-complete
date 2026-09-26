@@ -2,7 +2,7 @@ import React from 'react';
 import { colors } from '@talentsphere/ui';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
 }
@@ -44,11 +44,6 @@ export const Button: React.FC<ButtonProps> = ({
       backgroundColor: 'transparent',
       color: colors.neutral[700],
       border: '1px solid transparent',
-    },
-    danger: {
-      backgroundColor: colors.semantic.error,
-      color: '#ffffff',
-      border: `1px solid #b91c1c`,
     },
   };
 

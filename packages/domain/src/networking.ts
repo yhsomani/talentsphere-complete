@@ -4,7 +4,7 @@
  * and relationship queries.
  */
 
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 
 export type ConnectionStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 

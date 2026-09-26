@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "1790372917136-e1411",
+  "createdAt": 1790372917139,
+  "origin": "failed-assert",
+  "expected": "state __checkout_probe__",
+  "observed": "state \"__checkout_probe__\" never changed",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "plan-card-recruiter_starter",
+        "source": {
+          "file": "src/pages/CheckoutPage.tsx",
+          "line": 328,
+          "column": 18
+        }
+      },
+      "action": "press"
+    }
+  ]
+}

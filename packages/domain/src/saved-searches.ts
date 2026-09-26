@@ -1,4 +1,4 @@
-import { DomainError } from './index.js';
+import { DomainError } from './core.js';
 import type { Job } from './jobs.js';
 
 export type AlertFrequency = 'instant' | 'daily' | 'weekly' | 'never';

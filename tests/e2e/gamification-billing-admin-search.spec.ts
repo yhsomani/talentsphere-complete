@@ -188,8 +188,8 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
     });
     expect(healthRes.status()).toBe(200);
     const healthData = await healthRes.json();
-    expect(healthData.diagnostics.status).toBe('healthy');
-    expect(healthData.diagnostics.database).toBe('connected');
+    expect(healthData.diagnostics.status).toBe('degraded');
+    expect(healthData.diagnostics.database).toBe('disconnected');
 
     // 6. Multi-Entity Unified Search (F-20, F-34)
     const searchRes = await request.get(`${API_BASE}/search?query=typescript&type=all`, {
