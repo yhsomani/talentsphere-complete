@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { colors, spacing } from '@talentsphere/ui';
+import { colors, spacing, typography } from '@talentsphere/ui';
 import {
   Button,
   Badge,
@@ -11,6 +11,10 @@ import {
   LockIcon,
   ArrowRightIcon,
   CheckIcon,
+  HeroTitle,
+  SectionTitle,
+  SectionIntro,
+  MicroLabel,
 } from '../components/ui/index.js';
 
 export const LandingPage: React.FC = () => {
@@ -19,8 +23,8 @@ export const LandingPage: React.FC = () => {
       {/* Hero Section */}
       <section
         style={{
-          paddingTop: spacing.xl,
-          paddingBottom: spacing['2xl'],
+          paddingTop: spacing['3xl'],
+          paddingBottom: spacing['3xl'],
           borderBottom: `1px solid ${colors.neutral[200]}`,
         }}
       >
@@ -30,35 +34,33 @@ export const LandingPage: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              marginBottom: spacing.md,
+              marginBottom: spacing.lg,
             }}
           >
             <Badge variant="info">TalentSphere OS v0.4.0</Badge>
-            <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+            <span
+              style={{
+                fontSize: typography.fontSize.sm,
+                color: colors.neutral[600],
+                fontWeight: typography.fontWeight.medium,
+              }}
+            >
               Deterministic Verification &amp; Evidence Network
             </span>
           </div>
 
-          <h1
-            style={{
-              fontSize: '2.5rem',
-              fontWeight: 800,
-              color: colors.neutral[900],
-              lineHeight: 1.15,
-              letterSpacing: '-0.025em',
-              marginBottom: spacing.md,
-            }}
-          >
+          <HeroTitle>
             The Career Operating System Built on{' '}
             <span style={{ color: colors.primary[700] }}>Verified Evidence</span>
-          </h1>
+          </HeroTitle>
 
           <p
             style={{
-              fontSize: '1.125rem',
-              color: colors.neutral[600],
-              lineHeight: 1.6,
-              marginBottom: spacing.xl,
+              fontSize: typography.fontSize.xl,
+              color: colors.neutral[700],
+              lineHeight: typography.lineHeight.relaxed,
+              marginBottom: spacing['2xl'],
+              maxWidth: '65ch',
             }}
           >
             Move beyond unverified resumes and keyword games. Prove your capabilities through
@@ -66,7 +68,14 @@ export const LandingPage: React.FC = () => {
             employers trust.
           </p>
 
-          <div style={{ display: 'flex', gap: spacing.md, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: spacing.md,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <Link to="/dashboard" style={{ textDecoration: 'none' }}>
               <Button size="lg" data-testid="cta-dashboard">
                 Launch Career Cockpit <ArrowRightIcon size={18} />
@@ -81,14 +90,14 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Live Verifiable Evidence Card Preview */}
-        <div style={{ marginTop: spacing.xl }}>
+        <div style={{ marginTop: spacing['2xl'] }}>
           <div
             style={{
               backgroundColor: '#ffffff',
               border: `1px solid ${colors.neutral[300]}`,
-              borderRadius: '8px',
-              padding: spacing.lg,
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+              borderRadius: '12px',
+              padding: spacing.xl,
+              boxShadow: '0 4px 16px rgba(15, 23, 42, 0.08)',
             }}
           >
             <div
@@ -97,20 +106,24 @@ export const LandingPage: React.FC = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 borderBottom: `1px solid ${colors.neutral[100]}`,
-                paddingBottom: spacing.sm,
-                marginBottom: spacing.md,
+                paddingBottom: spacing.md,
+                marginBottom: spacing.lg,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                <ShieldCheckIcon size={20} style={{ color: colors.semantic.success }} />
+                <ShieldCheckIcon size={24} style={{ color: colors.semantic.successText }} />
                 <span
-                  style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
+                  style={{
+                    fontWeight: typography.fontWeight.bold,
+                    fontSize: typography.fontSize.base,
+                    color: colors.neutral[900],
+                  }}
                 >
-                  Verifiable Employment Credential &bull; Acme Infrastructure Corp
+                  Verifiable Employment Credential • Acme Infrastructure Corp
                 </span>
               </div>
               <Badge variant="gold" mono>
-                GOLD TIER &bull; 96/100
+                GOLD TIER • 96/100
               </Badge>
             </div>
 
@@ -118,44 +131,53 @@ export const LandingPage: React.FC = () => {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
-                gap: spacing.md,
-                fontSize: '0.8125rem',
+                gap: spacing.lg,
               }}
             >
               <div>
-                <span style={{ color: colors.neutral[500], display: 'block', marginBottom: '2px' }}>
-                  Role &amp; Tenure
-                </span>
-                <strong style={{ color: colors.neutral[800] }}>
+                <MicroLabel>Role &amp; Tenure</MicroLabel>
+                <strong
+                  style={{
+                    fontSize: typography.fontSize.base,
+                    color: colors.neutral[800],
+                    fontWeight: typography.fontWeight.semibold,
+                  }}
+                >
                   Staff Systems Architect (2.8 yrs)
                 </strong>
               </div>
               <div>
-                <span style={{ color: colors.neutral[500], display: 'block', marginBottom: '2px' }}>
-                  Corporate Attestation
-                </span>
-                <span style={{ color: colors.semantic.success, fontWeight: 600 }}>
-                  <CheckIcon size={14} style={{ display: 'inline', verticalAlign: '-2px' }} />{' '}
+                <MicroLabel>Corporate Attestation</MicroLabel>
+                <span
+                  style={{
+                    fontSize: typography.fontSize.base,
+                    color: colors.semantic.successText,
+                    fontWeight: typography.fontWeight.semibold,
+                  }}
+                >
+                  <CheckIcon size={16} style={{ display: 'inline', verticalAlign: '-3px' }} />{' '}
                   jordan@acme.corp (DKIM Verified)
                 </span>
               </div>
               <div>
-                <span style={{ color: colors.neutral[500], display: 'block', marginBottom: '2px' }}>
-                  Structured Referee
-                </span>
-                <strong style={{ color: colors.neutral[800] }}>
-                  VP of Engineering &bull; 5/5 Scorecard
+                <MicroLabel>Structured Referee</MicroLabel>
+                <strong
+                  style={{
+                    fontSize: typography.fontSize.base,
+                    color: colors.neutral[800],
+                    fontWeight: typography.fontWeight.semibold,
+                  }}
+                >
+                  VP of Engineering • 5/5 Scorecard
                 </strong>
               </div>
               <div>
-                <span style={{ color: colors.neutral[500], display: 'block', marginBottom: '2px' }}>
-                  Provenance Hash
-                </span>
+                <MicroLabel>Provenance Hash</MicroLabel>
                 <code
                   style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: '0.75rem',
-                    color: colors.neutral[600],
+                    fontFamily: typography.fontFamily.mono,
+                    fontSize: typography.fontSize.sm,
+                    color: colors.neutral[700],
                   }}
                 >
                   sha256:e3b0c44298fc...
@@ -167,39 +189,29 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Core Architectural Pillars */}
-      <section style={{ paddingTop: spacing['2xl'], paddingBottom: spacing['2xl'] }}>
-        <div style={{ marginBottom: spacing.xl }}>
-          <h2
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 800,
-              color: colors.neutral[900],
-              letterSpacing: '-0.02em',
-              marginBottom: spacing.xs,
-            }}
-          >
-            Engineering-Grade Verification Pillars
-          </h2>
-          <p style={{ color: colors.neutral[600], fontSize: '1rem' }}>
+      <section style={{ paddingTop: spacing['3xl'], paddingBottom: spacing['3xl'] }}>
+        <div style={{ marginBottom: spacing['2xl'] }}>
+          <SectionTitle>Engineering-Grade Verification Pillars</SectionTitle>
+          <SectionIntro>
             Built around strict cryptographic provenance, anti-fraud employment validation, and
             deterministic skills.
-          </p>
+          </SectionIntro>
         </div>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
-            gap: spacing.lg,
+            gap: spacing.xl,
           }}
         >
           <Card>
             <CardContent>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '6px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '8px',
                   backgroundColor: colors.primary[50],
                   color: colors.primary[700],
                   display: 'flex',
@@ -208,23 +220,24 @@ export const LandingPage: React.FC = () => {
                   marginBottom: spacing.md,
                 }}
               >
-                <GitBranchIcon size={20} />
+                <GitBranchIcon size={24} />
               </div>
               <h3
                 style={{
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
+                  fontSize: typography.fontSize.xl,
+                  fontWeight: typography.fontWeight.bold,
                   color: colors.neutral[900],
-                  marginBottom: spacing.xs,
+                  marginBottom: spacing.sm,
+                  letterSpacing: typography.letterSpacing.tight,
                 }}
               >
                 1. Talent Graph
               </h3>
               <p
                 style={{
-                  fontSize: '0.875rem',
+                  fontSize: typography.fontSize.base,
                   color: colors.neutral[600],
-                  lineHeight: 1.5,
+                  lineHeight: typography.lineHeight.relaxed,
                   marginBottom: spacing.md,
                 }}
               >
@@ -233,14 +246,15 @@ export const LandingPage: React.FC = () => {
               </p>
               <ul
                 style={{
-                  paddingLeft: '18px',
+                  paddingLeft: '20px',
                   margin: 0,
-                  fontSize: '0.8125rem',
+                  fontSize: typography.fontSize.sm,
                   color: colors.neutral[700],
+                  lineHeight: typography.lineHeight.relaxed,
                 }}
               >
-                <li style={{ marginBottom: '4px' }}>Hierarchical capability prerequisites</li>
-                <li style={{ marginBottom: '4px' }}>Skill decay and recency measurement</li>
+                <li style={{ marginBottom: spacing.xs }}>Hierarchical capability prerequisites</li>
+                <li style={{ marginBottom: spacing.xs }}>Skill decay and recency measurement</li>
                 <li>Cross-domain transferability vectors</li>
               </ul>
             </CardContent>
@@ -250,34 +264,35 @@ export const LandingPage: React.FC = () => {
             <CardContent>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '6px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '8px',
                   backgroundColor: '#ecfdf5',
-                  color: colors.semantic.success,
+                  color: colors.semantic.successText,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: spacing.md,
                 }}
               >
-                <ShieldCheckIcon size={20} />
+                <ShieldCheckIcon size={24} />
               </div>
               <h3
                 style={{
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
+                  fontSize: typography.fontSize.xl,
+                  fontWeight: typography.fontWeight.bold,
                   color: colors.neutral[900],
-                  marginBottom: spacing.xs,
+                  marginBottom: spacing.sm,
+                  letterSpacing: typography.letterSpacing.tight,
                 }}
               >
                 2. Evidence Graph
               </h3>
               <p
                 style={{
-                  fontSize: '0.875rem',
+                  fontSize: typography.fontSize.base,
                   color: colors.neutral[600],
-                  lineHeight: 1.5,
+                  lineHeight: typography.lineHeight.relaxed,
                   marginBottom: spacing.md,
                 }}
               >
@@ -287,14 +302,15 @@ export const LandingPage: React.FC = () => {
               </p>
               <ul
                 style={{
-                  paddingLeft: '18px',
+                  paddingLeft: '20px',
                   margin: 0,
-                  fontSize: '0.8125rem',
+                  fontSize: typography.fontSize.sm,
                   color: colors.neutral[700],
+                  lineHeight: typography.lineHeight.relaxed,
                 }}
               >
-                <li style={{ marginBottom: '4px' }}>Anti-fraud date validation (BR-084)</li>
-                <li style={{ marginBottom: '4px' }}>Disposable email blocking on references</li>
+                <li style={{ marginBottom: spacing.xs }}>Anti-fraud date validation (BR-084)</li>
+                <li style={{ marginBottom: spacing.xs }}>Disposable email blocking on references</li>
                 <li>Cryptographic JSON-LD verification export</li>
               </ul>
             </CardContent>
@@ -304,9 +320,9 @@ export const LandingPage: React.FC = () => {
             <CardContent>
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '6px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '8px',
                   backgroundColor: colors.neutral[100],
                   color: colors.neutral[800],
                   display: 'flex',
@@ -315,23 +331,24 @@ export const LandingPage: React.FC = () => {
                   marginBottom: spacing.md,
                 }}
               >
-                <LockIcon size={20} />
+                <LockIcon size={24} />
               </div>
               <h3
                 style={{
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
+                  fontSize: typography.fontSize.xl,
+                  fontWeight: typography.fontWeight.bold,
                   color: colors.neutral[900],
-                  marginBottom: spacing.xs,
+                  marginBottom: spacing.sm,
+                  letterSpacing: typography.letterSpacing.tight,
                 }}
               >
                 3. Governed Intelligence
               </h3>
               <p
                 style={{
-                  fontSize: '0.875rem',
+                  fontSize: typography.fontSize.base,
                   color: colors.neutral[600],
-                  lineHeight: 1.5,
+                  lineHeight: typography.lineHeight.relaxed,
                   marginBottom: spacing.md,
                 }}
               >
@@ -340,14 +357,15 @@ export const LandingPage: React.FC = () => {
               </p>
               <ul
                 style={{
-                  paddingLeft: '18px',
+                  paddingLeft: '20px',
                   margin: 0,
-                  fontSize: '0.8125rem',
+                  fontSize: typography.fontSize.sm,
                   color: colors.neutral[700],
+                  lineHeight: typography.lineHeight.relaxed,
                 }}
               >
-                <li style={{ marginBottom: '4px' }}>Deterministic matching algorithms</li>
-                <li style={{ marginBottom: '4px' }}>
+                <li style={{ marginBottom: spacing.xs }}>Deterministic matching algorithms</li>
+                <li style={{ marginBottom: spacing.xs }}>
                   Small-cell suppression against re-identification
                 </li>
                 <li>Zero LLM training on candidate code</li>
@@ -360,102 +378,103 @@ export const LandingPage: React.FC = () => {
       {/* How It Works: The 3-Step Verification Pipeline */}
       <section
         style={{
-          paddingTop: spacing.xl,
-          paddingBottom: spacing['2xl'],
+          paddingTop: spacing['3xl'],
+          paddingBottom: spacing['3xl'],
           borderTop: `1px solid ${colors.neutral[200]}`,
         }}
       >
-        <div style={{ marginBottom: spacing.xl }}>
-          <h2
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 800,
-              color: colors.neutral[900],
-              letterSpacing: '-0.02em',
-              marginBottom: spacing.xs,
-            }}
-          >
-            How Capability Verification Works
-          </h2>
-          <p style={{ color: colors.neutral[600], fontSize: '1rem' }}>
+        <div style={{ marginBottom: spacing['2xl'] }}>
+          <SectionTitle>How Capability Verification Works</SectionTitle>
+          <SectionIntro>
             A rigorous 3-stage validation process that creates trustworthy credentials without
             invasive surveillance.
-          </p>
+          </SectionIntro>
         </div>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-            gap: spacing.lg,
+            gap: spacing.xl,
           }}
         >
-          <div style={{ borderLeft: `3px solid ${colors.primary[600]}`, paddingLeft: spacing.md }}>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: colors.primary[700] }}>
-              STEP 01
-            </span>
+          <div style={{ borderLeft: `4px solid ${colors.primary[600]}`, paddingLeft: spacing.lg }}>
+            <MicroLabel tone="primary">STEP 01</MicroLabel>
             <h3
               style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
+                fontSize: typography.fontSize.xl,
+                fontWeight: typography.fontWeight.bold,
                 color: colors.neutral[900],
-                margin: `${spacing.xs} 0`,
+                margin: `${spacing.sm} 0`,
+                letterSpacing: typography.letterSpacing.tight,
               }}
             >
               Attest Work History
             </h3>
-            <p style={{ fontSize: '0.875rem', color: colors.neutral[600], lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: typography.fontSize.base,
+                color: colors.neutral[600],
+                lineHeight: typography.lineHeight.relaxed,
+              }}
+            >
               Record employment entries with strict start/end date validation. Attest corporate
               email domain ownership via token verification.
             </p>
           </div>
 
-          <div style={{ borderLeft: `3px solid ${colors.primary[600]}`, paddingLeft: spacing.md }}>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: colors.primary[700] }}>
-              STEP 02
-            </span>
+          <div style={{ borderLeft: `4px solid ${colors.primary[600]}`, paddingLeft: spacing.lg }}>
+            <MicroLabel tone="primary">STEP 02</MicroLabel>
             <h3
               style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
+                fontSize: typography.fontSize.xl,
+                fontWeight: typography.fontWeight.bold,
                 color: colors.neutral[900],
-                margin: `${spacing.xs} 0`,
+                margin: `${spacing.sm} 0`,
+                letterSpacing: typography.letterSpacing.tight,
               }}
             >
               Structured Peer Endorsement
             </h3>
-            <p style={{ fontSize: '0.875rem', color: colors.neutral[600], lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: typography.fontSize.base,
+                color: colors.neutral[600],
+                lineHeight: typography.lineHeight.relaxed,
+              }}
+            >
               Request verified references from managers or senior peers. System verifies referee
               corporate email domain and enforces anti-collusion boundaries.
             </p>
           </div>
 
-          <div
-            style={{ borderLeft: `3px solid ${colors.semantic.success}`, paddingLeft: spacing.md }}
-          >
-            <span
-              style={{ fontSize: '0.8125rem', fontWeight: 700, color: colors.semantic.success }}
-            >
-              STEP 03
-            </span>
+          <div style={{ borderLeft: `4px solid ${colors.semantic.success}`, paddingLeft: spacing.lg }}>
+            <MicroLabel tone="success">STEP 03</MicroLabel>
             <h3
               style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
+                fontSize: typography.fontSize.xl,
+                fontWeight: typography.fontWeight.bold,
                 color: colors.neutral[900],
-                margin: `${spacing.xs} 0`,
+                margin: `${spacing.sm} 0`,
+                letterSpacing: typography.letterSpacing.tight,
               }}
             >
               Score &amp; Mint Badge
             </h3>
-            <p style={{ fontSize: '0.875rem', color: colors.neutral[600], lineHeight: 1.5 }}>
+            <p
+              style={{
+                fontSize: typography.fontSize.base,
+                color: colors.neutral[600],
+                lineHeight: typography.lineHeight.relaxed,
+              }}
+            >
               Deterministic scoring engine assigns a 0-100 confidence score and awards Bronze,
               Silver, or Gold verification tiers backed by cryptographic hash.
             </p>
           </div>
         </div>
 
-        <div style={{ marginTop: spacing.xl, textAlign: 'center' }}>
+        <div style={{ marginTop: spacing['2xl'], textAlign: 'center' }}>
           <Link to="/evidence" style={{ textDecoration: 'none' }}>
             <Button variant="secondary" size="md">
               View Evidence Graph Demo &rarr;

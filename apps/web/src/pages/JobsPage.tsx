@@ -100,7 +100,7 @@ export const JobsPage: React.FC = () => {
           }}
         >
           <Badge variant="verified">GOVERNED MATCHMAKING</Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
             Zero Keyword Filters &bull; Evidence-Based Match Scoring
           </span>
         </div>
@@ -154,7 +154,7 @@ export const JobsPage: React.FC = () => {
                     ${(job.salaryMin / 1000).toFixed(0)}k &ndash; $
                     {(job.salaryMax / 1000).toFixed(0)}k
                   </div>
-                  <span style={{ fontSize: '0.75rem', color: colors.neutral[500] }}>
+                  <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
                     Base Compensation (USD)
                   </span>
                 </div>
@@ -203,7 +203,7 @@ export const JobsPage: React.FC = () => {
                     marginTop: spacing.md,
                   }}
                 >
-                  <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+                  <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
                     Deterministic matching powered by RFC-0041 Evidence Graphs.
                   </span>
                   <Button

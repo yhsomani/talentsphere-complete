@@ -138,7 +138,7 @@ export const AssessmentsPage: React.FC = () => {
           }}
         >
           <Badge variant="info">EVIDENCE SANDBOX</Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
             Proctored Code Challenges &bull; Zero Hallucinated Ratings
           </span>
         </div>
@@ -180,7 +180,7 @@ export const AssessmentsPage: React.FC = () => {
                 }}
               >
                 <Badge variant={ch.tier === 'Staff' ? 'gold' : 'silver'}>{ch.tier} Tier</Badge>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[500] }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[600] }}>
                   {ch.timeLimitMinutes} min allocation
                 </span>
               </div>

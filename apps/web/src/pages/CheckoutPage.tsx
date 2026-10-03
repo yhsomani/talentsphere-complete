@@ -225,7 +225,7 @@ export const CheckoutPage: React.FC = () => {
               height: '48px',
               borderRadius: '50%',
               backgroundColor: '#ecfdf5',
-              color: colors.semantic.success,
+              color: colors.semantic.successText,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -367,7 +367,7 @@ export const CheckoutPage: React.FC = () => {
                           style={{
                             fontSize: '0.75rem',
                             fontWeight: 400,
-                            color: colors.neutral[500],
+                            color: colors.neutral[600],
                           }}
                         >
                           /{billingCycle === 'monthly' ? 'mo' : 'yr'}
@@ -413,7 +413,7 @@ export const CheckoutPage: React.FC = () => {
                 data-testid="checkout-error"
                 style={{
                   backgroundColor: '#fef2f2',
-                  color: colors.semantic.error,
+                  color: colors.semantic.errorText,
                   border: `1px solid ${colors.semantic.error}`,
                   padding: `${spacing.sm} ${spacing.md}`,
                   borderRadius: '6px',
