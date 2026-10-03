@@ -13,6 +13,10 @@
 > - **Additional compliance copy:** beyond "GDPR & CCPA Compliant" (`PrivacyPage.tsx:28`), the footer also asserts **"SOC2 Type II Ready"** (`components/Layout.tsx:493`). Both remain unsupported by executable evidence (finding 22.6).
 > - **Accessibility detail confirmed:** the checkout plan selector uses custom `role="radio"` divs (`CheckoutPage.tsx:331`) without conventional arrow-key radio-group navigation.
 
+> **Revision C (2026-10-03):** incorporates a third same-day re-audit run against the live GitHub repository state, including a fresh check of the latest `main` CI run. All prior findings were re-confirmed unchanged; the CI failure at typecheck was independently observed again by the auditor on the remote trunk. One new operational fact is recorded below, and it does not soften any verdict.
+> - **In-flight remediation attempt exists but is not merged to `main`:** commit `d1b191e` ("Fix TypeScript CI failures by migrating from pnpm to npm and updating build cache") exists on a feature branch only. It adds `package-lock.json` alongside the retained `pnpm-lock.yaml`, but `.github/workflows/ci.yml` still invokes `pnpm install --frozen-lockfile` / `pnpm typecheck` (lines 40/50), so as authored it would not change the CI failure mode. Until a fix lands on `main`, blocker **P0-08 stands as of 2026-10-03**: no green automated proof beyond lint/install exists on the trunk, and tests/build/E2E remain skipped by the gate.
+> - **Consolidation note:** this revision supersedes nothing in Revision B; the three independent audit passes (documented → implemented → verified) produced materially identical findings, scorecard inputs (4.6/10), and the same go-live decision.
+
 ## 1. Executive Summary
 
 ### Claim
@@ -203,7 +207,7 @@ Added in Revision B. `EvidencePage.tsx` derives "verification" from `isEmailVeri
 
 ### P0-08 — Current `main` CI is red at typecheck before tests/build/E2E run
 
-Added in Revision B. The latest GitHub Actions run on 2026-10-03 failed at `pnpm typecheck` (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, so the release gate never reached unit/integration/security tests, build, or E2E. A local reproduction of the same failure family was observed in this working tree (`tsc -p apps/web/tsconfig.json --noEmit` reports the `@talentsphere/ui` TS2307 among unresolved modules). This means even the existing automated proof is currently not executing end-to-end on `main`.
+Added in Revision B and re-confirmed against the live remote in Revision C (third audit pass, 2026-10-03). The latest GitHub Actions run on 2026-10-03 failed at `pnpm typecheck` (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, so the release gate never reached unit/integration/security tests, build, or E2E (all skipped). A local reproduction of the same failure family was observed in this working tree (`tsc -p apps/web/tsconfig.json --noEmit` reports the `@talentsphere/ui` TS2307 among unresolved modules). This means even the existing automated proof is currently not executing end-to-end on `main`. Note (Revision C): an unmerged feature-branch commit (`d1b191e`) attempts a pnpm→npm migration but does not update `ci.yml`, which still runs `pnpm install --frozen-lockfile` and `pnpm typecheck`; the blocker remains open until a corrected fix lands on `main`.
 
 **Severity:** Critical (operational)
 
