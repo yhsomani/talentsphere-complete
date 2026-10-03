@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Button,
   Badge,
@@ -76,6 +77,11 @@ const DISPOSABLE_DOMAINS = [
 ];
 
 export const EvidencePage: React.FC = () => {
+  usePageMeta(
+    'Evidence Graph',
+    'Attest work history, request verified supervisor references, and manage your immutable cryptographic evidence graph.'
+  );
+
   const [entries, setEntries] = useState<WorkHistoryEntry[]>(INITIAL_ENTRIES);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);

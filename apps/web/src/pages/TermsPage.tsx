@@ -1,5 +1,6 @@
 import React from 'react';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Card,
   CardHeader,
@@ -10,6 +11,11 @@ import {
 } from '../components/ui/index.js';
 
 export const TermsPage: React.FC = () => {
+  usePageMeta(
+    'Terms of Service',
+    'TalentSphere terms of service and integrity standards governing verification, references, and platform use.'
+  );
+
   return (
     <div style={{ maxWidth: '840px', margin: '0 auto', paddingBottom: spacing['2xl'] }}>
       {/* Header */}

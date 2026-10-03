@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 
 interface Plan {
   id: 'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise';
@@ -50,6 +51,11 @@ const PLANS: Plan[] = [
 ];
 
 export const CheckoutPage: React.FC = () => {
+  usePageMeta(
+    'Plans & Pricing',
+    'Choose a TalentSphere plan: employer verification credits, proctored assessment access, and priority evidence review.'
+  );
+
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<
     'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise'
