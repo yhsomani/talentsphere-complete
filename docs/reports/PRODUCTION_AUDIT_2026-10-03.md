@@ -6,6 +6,13 @@
 **Audit basis:** executable repository structure, frontend routes/components, backend handlers, worker implementation, Supabase migrations, test suites, product/UX/security specifications.
 **Artifact note:** every finding below was re-verified line-by-line against the checked-out source on 2026-10-03 (file paths and line numbers included). This report is an external production audit record; it does not change the status vocabulary of `BRAIN/MEMORY.md` or `docs/registries/FEATURE_REGISTRY.md`.
 
+> **Revision B (2026-10-03):** incorporates a second independent end-user/business-owner audit received the same day. All findings were re-confirmed against the working tree at `8db0930`, and this revision adds four items verified during that pass:
+> - **CI red on `main`:** the latest GitHub Actions run (2026-10-03) failed at the `pnpm typecheck` step (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, before tests/build/E2E ran. A local reproduction of the typecheck failure (`tsc -p apps/web/tsconfig.json --noEmit`) emits the same `TS2307` family for `@talentsphere/ui` (and uninstalled workspace/runtime dependencies), consistent with the CI failure mode. Added as blocker **P0-08**.
+> - **Contact/birthday search nuance:** "zero paths" is accurate for browser surfaces, dedicated entities, and migrations; however, incidental substring matches for `contact` exist in `PrivacyPage.tsx` ("contact us" copy), `packages/domain/src/resumes.ts`, `packages/contracts/src/index.ts`, `packages/domain/src/talent-pool-intelligence.ts`, and `supabase/migrations/00038_talent_pool_intelligence_schema.sql` (contact-info fields inside resume/talent-pool payloads). There are still **zero paths containing `birthday`** anywhere in `apps/`, `packages/`, `supabase/`, or `tests/`. The "Missing" verdicts for both journeys are unchanged.
+> - **Assessment sandbox simulation confirmed:** `apps/web/src/pages/AssessmentsPage.tsx` — `handleRunSandbox` (line 103) emits precomputed PASS logs via `setTimeout` (line 110, ~1.2 s) ending in "Verification Complete"; no real code execution, container isolation, or profiling occurs in the browser journey.
+> - **Additional compliance copy:** beyond "GDPR & CCPA Compliant" (`PrivacyPage.tsx:28`), the footer also asserts **"SOC2 Type II Ready"** (`components/Layout.tsx:493`). Both remain unsupported by executable evidence (finding 22.6).
+> - **Accessibility detail confirmed:** the checkout plan selector uses custom `role="radio"` divs (`CheckoutPage.tsx:331`) without conventional arrow-key radio-group navigation.
+
 ## 1. Executive Summary
 
 ### Claim
@@ -187,6 +194,18 @@ instead of:
 `event → queue → provider → delivery → acknowledgment → retry/dead-letter`
 
 **Severity:** Critical for any notification-dependent business flow.
+
+### P0-07 — Evidence verification, application submission, and assessment execution are frontend simulations, not transactions
+
+Added in Revision B. `EvidencePage.tsx` derives "verification" from `isEmailVerified: Boolean(email)` (line 130) and fabricates the displayed `sha256:` digest with `Math.random()` (line 133); `JobsPage.tsx` flips local React state (`setAppliedJobs`, lines 79–82) to render "Application Transmitted" (line 218) without any backend application transaction; `AssessmentsPage.tsx` simulates sandbox execution with precomputed PASS logs behind a `setTimeout` (`handleRunSandbox`, line 103). The product's core promises — trustworthy evidence, real applications, proctored assessment — are represented by UI state rather than committed business state.
+
+**Severity:** Critical
+
+### P0-08 — Current `main` CI is red at typecheck before tests/build/E2E run
+
+Added in Revision B. The latest GitHub Actions run on 2026-10-03 failed at `pnpm typecheck` (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, so the release gate never reached unit/integration/security tests, build, or E2E. A local reproduction of the same failure family was observed in this working tree (`tsc -p apps/web/tsconfig.json --noEmit` reports the `@talentsphere/ui` TS2307 among unresolved modules). This means even the existing automated proof is currently not executing end-to-end on `main`.
+
+**Severity:** Critical (operational)
 
 ---
 
@@ -1317,6 +1336,8 @@ The decisive reasons are not cosmetic:
 5. application state is in memory;
 6. notification delivery is not implemented;
 7. major documented features are inaccessible through the browser;
+8. several business outcomes are simulated locally rather than committed through real transactions;
+9. *(Revision B)* the current `main` CI run is red at typecheck (`TS2307` for `@talentsphere/ui` / `@talentsphere/observability`), so the release gate never reaches tests, build, or E2E — there is no green automated proof on the trunk today.
 8. several business outcomes are simulated locally rather than committed through real transactions.
 
 A polished UI does not compensate for those failures.
