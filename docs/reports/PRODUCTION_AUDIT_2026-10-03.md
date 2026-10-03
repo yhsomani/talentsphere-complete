@@ -1338,6 +1338,7 @@ The decisive reasons are not cosmetic:
 7. major documented features are inaccessible through the browser;
 8. several business outcomes are simulated locally rather than committed through real transactions;
 9. *(Revision B)* the current `main` CI run is red at typecheck (`TS2307` for `@talentsphere/ui` / `@talentsphere/observability`), so the release gate never reaches tests, build, or E2E — there is no green automated proof on the trunk today.
+8. several business outcomes are simulated locally rather than committed through real transactions.
 
 A polished UI does not compensate for those failures.
 
