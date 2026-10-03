@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 
 export const LoginPage: React.FC = () => {
+  usePageMeta(
+    'Sign In',
+    'Sign in to TalentSphere to access your verified career graph, proctored assessments, and evidence-based job matches.'
+  );
+
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

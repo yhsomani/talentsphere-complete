@@ -1,5 +1,6 @@
 import React from 'react';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Card,
   CardHeader,
@@ -11,6 +12,11 @@ import {
 } from '../components/ui/index.js';
 
 export const PrivacyPage: React.FC = () => {
+  usePageMeta(
+    'Privacy Policy',
+    'How TalentSphere collects, protects, and lets you control your personal data under GDPR and CCPA.'
+  );
+
   return (
     <div style={{ maxWidth: '840px', margin: '0 auto', paddingBottom: spacing['2xl'] }}>
       {/* Header */}

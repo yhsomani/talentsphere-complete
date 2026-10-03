@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
-import { ShieldCheckIcon } from './ui/Icons.js';
+import { MenuIcon, PhoneIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
+
+const SUPPORT_EMAIL = 'support@talentsphere.io';
+const SUPPORT_PHONE = '+1-415-555-0142';
+const SUPPORT_PHONE_HREF = 'tel:+14155550142';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const pwaCapability = usePwaCapability();
   const pwaStatus = describePwaCapability(pwaCapability);
+
+  // Close the mobile menu whenever the route changes.
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -165,8 +175,10 @@ export const Layout: React.FC = () => {
             <span>TalentSphere</span>
           </Link>
 
+          {/* Desktop navigation — hidden on small screens in favour of the menu button */}
           <nav
             aria-label="Main Navigation"
+            className="desktop-nav"
             style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' }}
           >
             {navLinks.map((item) => {
@@ -192,6 +204,32 @@ export const Layout: React.FC = () => {
               );
             })}
           </nav>
+
+          {/* Mobile hamburger toggle */}
+          <button
+            type="button"
+            data-testid="mobile-menu-toggle"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+            className="mobile-menu-button"
+            style={{
+              display: 'none',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '44px',
+              height: '44px',
+              padding: 0,
+              border: `1px solid ${colors.neutral[300]}`,
+              borderRadius: '8px',
+              backgroundColor: isMobileMenuOpen ? colors.primary[50] : '#ffffff',
+              color: isMobileMenuOpen ? colors.primary[800] : colors.neutral[800],
+              cursor: 'pointer',
+            }}
+          >
+            {isMobileMenuOpen ? <XIcon size={20} /> : <MenuIcon size={20} />}
+          </button>
         </div>
 
         <div
@@ -281,6 +319,93 @@ export const Layout: React.FC = () => {
         </div>
       </header>
 
+      {/* Mobile Navigation Menu (rendered below the sticky header) */}
+      {isMobileMenuOpen && (
+        <nav
+          id="mobile-navigation"
+          aria-label="Mobile Navigation"
+          data-testid="mobile-menu"
+          style={{
+            backgroundColor: '#ffffff',
+            borderBottom: `1px solid ${colors.neutral[200]}`,
+            padding: spacing.md,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: spacing.xs,
+            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
+          }}
+        >
+          {navLinks.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                data-testid={`mobile-nav-${item.path.replace('/', '')}`}
+                style={{
+                  textDecoration: 'none',
+                  color: isActive ? colors.primary[800] : colors.neutral[800],
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '1rem',
+                  padding: `${spacing.sm} ${spacing.md}`,
+                  borderRadius: '8px',
+                  backgroundColor: isActive ? colors.primary[50] : 'transparent',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {item.label}
+              </NavLink>
+            );
+          })}
+          <div
+            style={{
+              borderTop: `1px solid ${colors.neutral[200]}`,
+              marginTop: spacing.xs,
+              paddingTop: spacing.sm,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.xs,
+            }}
+          >
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              data-testid="footer-email-mobile"
+              style={{
+                color: colors.primary[700],
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.9375rem',
+                padding: `${spacing.sm} ${spacing.md}`,
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {SUPPORT_EMAIL}
+            </a>
+            <a
+              href={SUPPORT_PHONE_HREF}
+              data-testid="footer-phone-mobile"
+              style={{
+                color: colors.primary[700],
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.9375rem',
+                padding: `${spacing.sm} ${spacing.md}`,
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <PhoneIcon size={16} /> {SUPPORT_PHONE}
+            </a>
+          </div>
+        </nav>
+      )}
+
       {/* Main Content Area */}
       <main
         id="main-content"
@@ -350,7 +475,6 @@ export const Layout: React.FC = () => {
                 letterSpacing: '0.06em',
                 color: colors.neutral[600],
                 marginBottom: spacing.sm,
-                letterSpacing: '0.05em',
               }}
             >
               Platform
@@ -401,7 +525,6 @@ export const Layout: React.FC = () => {
                 letterSpacing: '0.06em',
                 color: colors.neutral[600],
                 marginBottom: spacing.sm,
-                letterSpacing: '0.05em',
               }}
             >
               Trust & Governance
@@ -449,7 +572,6 @@ export const Layout: React.FC = () => {
                 letterSpacing: '0.06em',
                 color: colors.neutral[600],
                 marginBottom: spacing.sm,
-                letterSpacing: '0.05em',
               }}
             >
               Verification SLA
@@ -465,6 +587,68 @@ export const Layout: React.FC = () => {
               All employer signature requests execute through cryptographically hashed challenge
               tokens. Disposable email domains strictly barred.
             </p>
+          </div>
+
+          <div>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
+                marginBottom: spacing.sm,
+              }}
+            >
+              Support
+            </div>
+            <ul
+              style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.xs,
+                fontSize: '0.875rem',
+              }}
+            >
+              <li>
+                {/* Clickable email */}
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  data-testid="footer-email"
+                  style={{
+                    color: colors.primary[700],
+                    textDecoration: 'underline',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    minHeight: '44px',
+                  }}
+                >
+                  {SUPPORT_EMAIL}
+                </a>
+              </li>
+              <li>
+                {/* Clickable phone number */}
+                <a
+                  href={SUPPORT_PHONE_HREF}
+                  data-testid="footer-phone"
+                  style={{
+                    color: colors.primary[700],
+                    textDecoration: 'underline',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    minHeight: '44px',
+                  }}
+                >
+                  <PhoneIcon size={14} /> {SUPPORT_PHONE}
+                </a>
+              </li>
+              <li style={{ color: colors.neutral[600] }}>Mon–Fri, 9:00–18:00 UTC</li>
+            </ul>
           </div>
         </div>
 

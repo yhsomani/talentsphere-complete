@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Button,
   Badge,
@@ -76,6 +77,11 @@ const JOBS: JobOpportunity[] = [
 ];
 
 export const JobsPage: React.FC = () => {
+  usePageMeta(
+    'Verifiable Career Opportunities',
+    'Browse pre-screened roles matched by verified evidence, supervisor references, and code artifacts — not keywords.'
+  );
+
   const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
 
   const handleApply = (jobId: string) => {

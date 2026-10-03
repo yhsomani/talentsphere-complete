@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Card,
   CardHeader,
@@ -22,6 +23,11 @@ interface UserProfile {
 }
 
 export const DashboardPage: React.FC = () => {
+  usePageMeta(
+    'Career Cockpit — Dashboard',
+    'Track your verified evidence, skill readiness score, and active applications in one career cockpit.'
+  );
+
   const [user, setUser] = useState<UserProfile>({
     name: 'Sarah Chen',
     email: 'sarah.chen@example.com',

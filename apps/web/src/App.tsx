@@ -8,6 +8,7 @@ import { CheckoutPage } from './pages/CheckoutPage.js';
 import { EvidencePage } from './pages/EvidencePage.js';
 import { AssessmentsPage } from './pages/AssessmentsPage.js';
 import { JobsPage } from './pages/JobsPage.js';
+import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
 
@@ -25,6 +26,8 @@ export const App: React.FC = () => {
           <Route path="jobs" element={<JobsPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="terms" element={<TermsPage />} />
+          {/* Catch-all: friendly 404 page for any unknown route */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

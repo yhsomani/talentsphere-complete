@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { colors, spacing, typography } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Button,
   Badge,
@@ -18,6 +19,11 @@ import {
 } from '../components/ui/index.js';
 
 export const LandingPage: React.FC = () => {
+  usePageMeta(
+    'Career Operating System \u2014 Verified Talent & Evidence Graph',
+    'Prove your capabilities with verifiable projects, proctored code assessments, and an immutable evidence graph that employers trust. Explore TalentSphere.'
+  );
+
   return (
     <div style={{ maxWidth: '1160px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
       {/* Hero Section */}

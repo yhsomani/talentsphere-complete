@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
+import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
   Button,
   Badge,
@@ -89,6 +90,11 @@ const CHALLENGES: AssessmentChallenge[] = [
 ];
 
 export const AssessmentsPage: React.FC = () => {
+  usePageMeta(
+    'Proctored Assessments',
+    'Take proctored, reproducible coding assessments that turn real problem-solving into shareable verified credentials.'
+  );
+
   const [selectedChallenge, setSelectedChallenge] = useState<AssessmentChallenge | null>(null);
   const [executionLog, setExecutionLog] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
