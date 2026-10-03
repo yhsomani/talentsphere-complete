@@ -1,6 +1,8 @@
-# Dependencies
-node_modules/
+# Build artifacts
+dist/
 
+# TypeScript build info
+*.tsbuildinfo
 # Build artifacts and caches
 *.tsbuildinfo
 (empty)
