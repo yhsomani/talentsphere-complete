@@ -55,3 +55,4 @@ For root agent operational guidelines, see [`../AGENTS.md`](../AGENTS.md).
 - [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md) — Traceability matrix identifying previously unmapped requirements and closing gaps.
 - [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) — SSOT change control, RFC escalation procedures, and agent authority boundaries.
 - [`reports/FINAL_VALIDATION_REPORT.md`](reports/FINAL_VALIDATION_REPORT.md) — Executable validation metrics, test pass rates, migration milestones, and operational status.
+- [`reports/PRODUCTION_AUDIT_2026-10-03.md`](reports/PRODUCTION_AUDIT_2026-10-03.md) — External end-user / business-owner production audit (2026-10-03). Verdict: NOT READY (4.6/10); documents P0 blockers, broken journeys, requirement mismatches, and a prioritized remediation roadmap. Evidence-based against the executable repository state at commit `8db0930`.
