@@ -30,10 +30,16 @@ export const colors = {
     950: '#020617',
   },
   semantic: {
+    // Bright display tones — icons/badges/large graphics ONLY, never body text.
     success: '#10b981',
     warning: '#f59e0b',
     error: '#ef4444',
     info: '#3b82f6',
+    // Text-safe tones — >=4.5:1 contrast on white surfaces (WCAG AA).
+    successText: '#047857',
+    warningText: '#92400e',
+    errorText: '#b91c1c',
+    infoText: '#1d4ed8',
   },
   surface: {
     background: '#ffffff',
@@ -68,13 +74,42 @@ export const typography = {
     '2xl': '1.5rem',
     '3xl': '1.875rem',
     '4xl': '2.25rem',
+    // Fluid display sizes for hero-level hierarchy (clamp keeps mobile sane).
+    '5xl': 'clamp(2.5rem, 1.6rem + 3.2vw, 3.75rem)',
+    '6xl': 'clamp(3rem, 1.9rem + 4.2vw, 4.5rem)',
+  },
+  lineHeight: {
+    none: '1',
+    tight: '1.15',
+    snug: '1.35',
+    normal: '1.5',
+    relaxed: '1.65',
+  },
+  letterSpacing: {
+    tighter: '-0.025em',
+    tight: '-0.02em',
+    normal: '0',
+    wide: '0.06em',
   },
   fontWeight: {
     normal: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
+    extrabold: 800,
   },
+} as const;
+
+/**
+ * Text colors guaranteed to pass WCAG AA on light surfaces.
+ * Use these instead of neutral[400]/neutral[500] for meaningful copy.
+ */
+export const textColors = {
+  heading: colors.neutral[900],
+  body: colors.neutral[700],
+  muted: colors.neutral[600],
+  label: colors.neutral[600], // uppercase micro-labels: AA on white & neutral-50
+  faint: colors.neutral[500], // decorative/large text only
 } as const;
 
 export const motion = {

@@ -74,10 +74,10 @@ export const LoginPage: React.FC = () => {
         maxWidth: '440px',
         margin: `${spacing['2xl']} auto`,
         backgroundColor: colors.surface.card,
-        borderRadius: '8px',
+        borderRadius: '12px',
         border: `1px solid ${colors.neutral[200]}`,
-        padding: spacing.xl,
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        padding: spacing['2xl'],
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
       }}
     >
       <div style={{ textAlign: 'center', marginBottom: spacing.lg }}>
@@ -102,7 +102,7 @@ export const LoginPage: React.FC = () => {
           data-testid="login-error"
           style={{
             backgroundColor: '#fef2f2',
-            color: colors.semantic.error,
+            color: colors.semantic.errorText,
             border: `1px solid ${colors.semantic.error}`,
             padding: `${spacing.sm} ${spacing.md}`,
             borderRadius: '6px',
@@ -121,7 +121,7 @@ export const LoginPage: React.FC = () => {
           data-testid="login-success"
           style={{
             backgroundColor: '#ecfdf5',
-            color: colors.semantic.success,
+            color: colors.semantic.successText,
             border: `1px solid ${colors.semantic.success}`,
             padding: `${spacing.sm} ${spacing.md}`,
             borderRadius: '6px',
@@ -250,7 +250,7 @@ export const LoginPage: React.FC = () => {
           <Link
             to="/dashboard"
             style={{
-              color: colors.neutral[500],
+              color: colors.neutral[600],
               fontSize: '0.8125rem',
               textDecoration: 'none',
             }}

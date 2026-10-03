@@ -218,7 +218,7 @@ export const EvidencePage: React.FC = () => {
             }}
           >
             <Badge variant="verified">VERIFIED EVIDENCE GRAPH</Badge>
-            <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+            <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
               RFC-0041 Cryptographic Credentials
             </span>
           </div>
@@ -301,7 +301,7 @@ export const EvidencePage: React.FC = () => {
                     style={{
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       display: 'block',
                       marginBottom: spacing.xs,
                     }}
@@ -314,7 +314,7 @@ export const EvidencePage: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        color: colors.semantic.success,
+                        color: colors.semantic.successText,
                       }}
                     >
                       <CheckIcon size={16} />
@@ -327,7 +327,7 @@ export const EvidencePage: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        color: colors.neutral[500],
+                        color: colors.neutral[600],
                       }}
                     >
                       <AlertCircleIcon size={16} />
@@ -341,7 +341,7 @@ export const EvidencePage: React.FC = () => {
                     style={{
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       display: 'block',
                       marginBottom: spacing.xs,
                     }}
@@ -353,7 +353,7 @@ export const EvidencePage: React.FC = () => {
                       <strong style={{ color: colors.neutral[800], display: 'block' }}>
                         {item.referee.name}
                       </strong>
-                      <span style={{ fontSize: '0.75rem', color: colors.neutral[500] }}>
+                      <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
                         Verified relationship: {item.referee.relationship} &bull; Attested on{' '}
                         {item.referee.submittedAt}
                       </span>
@@ -362,7 +362,7 @@ export const EvidencePage: React.FC = () => {
                     <div>
                       <span
                         style={{
-                          color: colors.neutral[500],
+                          color: colors.neutral[600],
                           display: 'block',
                           marginBottom: spacing.xs,
                         }}
@@ -389,7 +389,7 @@ export const EvidencePage: React.FC = () => {
                     style={{
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       display: 'block',
                       marginBottom: spacing.xs,
                     }}
@@ -450,7 +450,7 @@ export const EvidencePage: React.FC = () => {
             data-testid="add-error"
             style={{
               backgroundColor: '#fef2f2',
-              color: colors.semantic.error,
+              color: colors.semantic.errorText,
               border: `1px solid ${colors.semantic.error}`,
               padding: `${spacing.sm} ${spacing.md}`,
               borderRadius: '6px',
@@ -566,7 +566,7 @@ export const EvidencePage: React.FC = () => {
             data-testid="ref-error"
             style={{
               backgroundColor: '#fef2f2',
-              color: colors.semantic.error,
+              color: colors.semantic.errorText,
               border: `1px solid ${colors.semantic.error}`,
               padding: `${spacing.sm} ${spacing.md}`,
               borderRadius: '6px',
@@ -584,7 +584,7 @@ export const EvidencePage: React.FC = () => {
             data-testid="ref-success"
             style={{
               backgroundColor: '#ecfdf5',
-              color: colors.semantic.success,
+              color: colors.semantic.successText,
               border: `1px solid ${colors.semantic.success}`,
               padding: `${spacing.sm} ${spacing.md}`,
               borderRadius: '6px',

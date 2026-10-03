@@ -23,7 +23,7 @@ export const TermsPage: React.FC = () => {
           }}
         >
           <Badge variant="neutral">Legal Agreement</Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
             Effective Date: September 25, 2026 &bull; Version 3.1
           </span>
         </div>

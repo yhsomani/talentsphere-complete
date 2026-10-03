@@ -27,7 +27,7 @@ export const PrivacyPage: React.FC = () => {
             <ShieldCheckIcon size={12} />
             <span>GDPR & CCPA Compliant</span>
           </Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
             Effective Date: September 25, 2026 &bull; Version 2.4
           </span>
         </div>

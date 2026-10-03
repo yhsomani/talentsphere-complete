@@ -113,7 +113,7 @@ export const Layout: React.FC = () => {
           backgroundColor: '#ffffff',
           borderBottom: `1px solid ${colors.neutral[200]}`,
           padding: `${spacing.sm} ${spacing.lg}`,
-          minHeight: '64px',
+          minHeight: '68px',
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'space-between',
@@ -123,6 +123,7 @@ export const Layout: React.FC = () => {
           position: 'sticky',
           top: 0,
           zIndex: 50,
+          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
         }}
       >
         <div
@@ -177,11 +178,11 @@ export const Layout: React.FC = () => {
                   data-testid={item.testId}
                   style={{
                     textDecoration: 'none',
-                    color: isActive ? colors.primary[700] : colors.neutral[600],
-                    fontWeight: isActive ? 600 : 500,
+                    color: isActive ? colors.primary[800] : colors.neutral[700],
+                    fontWeight: isActive ? 700 : 500,
                     fontSize: '0.875rem',
-                    padding: `${spacing.xs} ${spacing.sm}`,
-                    borderRadius: '4px',
+                    padding: `${spacing.sm} ${spacing.md}`,
+                    borderRadius: '6px',
                     backgroundColor: isActive ? colors.primary[50] : 'transparent',
                     transition: 'all 0.15s ease-in-out',
                   }}
@@ -249,7 +250,7 @@ export const Layout: React.FC = () => {
                 }}
                 style={{
                   fontSize: '0.75rem',
-                  color: colors.neutral[500],
+                  color: colors.neutral[600],
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
@@ -343,10 +344,11 @@ export const Layout: React.FC = () => {
           <div>
             <div
               style={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '0.8125rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[400],
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
                 marginBottom: spacing.sm,
                 letterSpacing: '0.05em',
               }}
@@ -393,10 +395,11 @@ export const Layout: React.FC = () => {
           <div>
             <div
               style={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '0.8125rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[400],
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
                 marginBottom: spacing.sm,
                 letterSpacing: '0.05em',
               }}
@@ -425,12 +428,12 @@ export const Layout: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <span style={{ color: colors.neutral[500], cursor: 'default' }}>
+                <span style={{ color: colors.neutral[600], cursor: 'default' }}>
                   Differential Privacy (k &ge; 10)
                 </span>
               </li>
               <li>
-                <span style={{ color: colors.neutral[500], cursor: 'default' }}>
+                <span style={{ color: colors.neutral[600], cursor: 'default' }}>
                   Anti-LLM Scraping Safe
                 </span>
               </li>
@@ -440,10 +443,11 @@ export const Layout: React.FC = () => {
           <div>
             <div
               style={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '0.8125rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[400],
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
                 marginBottom: spacing.sm,
                 letterSpacing: '0.05em',
               }}
@@ -476,7 +480,7 @@ export const Layout: React.FC = () => {
             flexWrap: 'wrap',
             gap: spacing.sm,
             fontSize: '0.75rem',
-            color: colors.neutral[500],
+            color: colors.neutral[600],
           }}
         >
           <div>
@@ -484,13 +488,13 @@ export const Layout: React.FC = () => {
             reserved.
           </div>
           <div style={{ display: 'flex', gap: spacing.md }}>
-            <Link to="/privacy" style={{ color: colors.neutral[500], textDecoration: 'none' }}>
+            <Link to="/privacy" style={{ color: colors.neutral[600], textDecoration: 'underline' }}>
               Privacy
             </Link>
-            <Link to="/terms" style={{ color: colors.neutral[500], textDecoration: 'none' }}>
+            <Link to="/terms" style={{ color: colors.neutral[600], textDecoration: 'underline' }}>
               Terms
             </Link>
-            <span style={{ color: colors.neutral[400] }}>SOC2 Type II Ready</span>
+            <span style={{ color: colors.neutral[600] }}>SOC2 Type II Ready</span>
           </div>
         </div>
       </footer>

@@ -82,22 +82,23 @@ export const DashboardPage: React.FC = () => {
               <span>Identity Verified</span>
             </Badge>
             <Badge variant="gold">Level 5 Contributor</Badge>
-            <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+            <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
               DID: did:ts:8f7b2c...a91
             </span>
           </div>
           <h1
             style={{
-              fontSize: '1.875rem',
+              fontSize: '2.25rem',
               fontWeight: 800,
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
+              lineHeight: 1.15,
               color: colors.neutral[900],
-              margin: '0 0 4px',
+              margin: '0 0 6px',
             }}
           >
             Candidate Career Cockpit
           </h1>
-          <p style={{ margin: 0, color: colors.neutral[600], fontSize: '0.9375rem' }}>
+          <p style={{ margin: 0, color: colors.neutral[600], fontSize: '1rem' }}>
             {user.name} &bull; {user.role} &bull; Real-time readiness, verified credentials, and
             explainable matches.
           </p>
@@ -133,8 +134,9 @@ export const DashboardPage: React.FC = () => {
               style={{
                 fontSize: '0.75rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[500],
-                fontWeight: 600,
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
+                fontWeight: 700,
               }}
             >
               Verified Evidence
@@ -147,11 +149,11 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2rem', fontWeight: 800, color: colors.neutral[900] }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
                 12
               </span>
               <span
-                style={{ fontSize: '0.8125rem', color: colors.semantic.success, fontWeight: 600 }}
+                style={{ fontSize: '0.8125rem', color: colors.semantic.successText, fontWeight: 600 }}
               >
                 +2 this month
               </span>
@@ -170,8 +172,9 @@ export const DashboardPage: React.FC = () => {
               style={{
                 fontSize: '0.75rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[500],
-                fontWeight: 600,
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
+                fontWeight: 700,
               }}
             >
               Skill Readiness
@@ -184,10 +187,10 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2rem', fontWeight: 800, color: colors.primary[600] }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.primary[700] }}>
                 88%
               </span>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>
+              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
                 High Confidence
               </span>
             </div>
@@ -205,8 +208,9 @@ export const DashboardPage: React.FC = () => {
               style={{
                 fontSize: '0.75rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[500],
-                fontWeight: 600,
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
+                fontWeight: 700,
               }}
             >
               Active Applications
@@ -219,10 +223,10 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2rem', fontWeight: 800, color: colors.neutral[900] }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
                 3
               </span>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[500] }}>In Review</span>
+              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>In Review</span>
             </div>
             <div
               style={{ marginTop: spacing.xs, fontSize: '0.8125rem', color: colors.neutral[600] }}
@@ -238,8 +242,9 @@ export const DashboardPage: React.FC = () => {
               style={{
                 fontSize: '0.75rem',
                 textTransform: 'uppercase',
-                color: colors.neutral[500],
-                fontWeight: 600,
+                letterSpacing: '0.06em',
+                color: colors.neutral[600],
+                fontWeight: 700,
               }}
             >
               Eligible Opportunities
@@ -252,7 +257,7 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2rem', fontWeight: 800, color: colors.neutral[900] }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
                 6
               </span>
               <span style={{ fontSize: '0.8125rem', color: colors.primary[600], fontWeight: 600 }}>
@@ -326,7 +331,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
@@ -363,7 +368,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
@@ -547,7 +552,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
@@ -584,7 +589,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
@@ -648,7 +653,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
@@ -698,7 +703,7 @@ export const DashboardPage: React.FC = () => {
                   <div
                     style={{
                       fontSize: '0.8125rem',
-                      color: colors.neutral[500],
+                      color: colors.neutral[600],
                       marginBottom: spacing.xs,
                     }}
                   >
