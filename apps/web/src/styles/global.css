@@ -155,6 +155,66 @@ pre {
 }
 
 /*
+ * Centralised keyframes.
+ *
+ * Components reference these by name only — no component may invent its own
+ * motion values. Durations/easings mirror `motion` in @talentsphere/ui tokens
+ * (fast = 150ms, normal = 250ms, ease-out entrance curves).
+ */
+
+/* Button loading spinner: linear is correct for continuous rotation. */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal panel entrance: short rise + fade, no bounce (Emil-style ease-out). */
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal backdrop: opacity-only so there is no competing motion with the panel. */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Skip link visibility. The hidden state lives here (not in inline styles)
+ * so the :focus reveal can be a plain CSS transition instead of JS DOM
+ * mutation — keyboard users get immediate, predictable feedback.
+ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  z-index: 10000;
+}
+
+/*
  * WCAG 2.3.3 Animation from Interactions (AAA) / 2.2.2 Pause, Stop, Hide.
  * Honour the OS-level reduced-motion preference: no component may keep a
  * non-zero animation or transition once the user has asked for stillness.

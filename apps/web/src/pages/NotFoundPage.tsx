@@ -106,7 +106,7 @@ export const NotFoundPage: React.FC = () => {
         </Link>
       </div>
 
-      <p style={{ fontSize: typography.fontSize.sm, color: colors.neutral[500] }}>
+      <p style={{ fontSize: typography.fontSize.sm, color: colors.neutral[600] }}>
         Need help?{' '}
         <a
           href="mailto:support@talentsphere.io"
