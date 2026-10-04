@@ -229,3 +229,55 @@ pre {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Hover affordances that inline styles cannot express (no :hover in the
+ * style prop). Kept deliberately subtle: colour shift only, token durations.
+ */
+@media (hover: hover) {
+  .footer-link:hover {
+    color: #0358a1 !important; /* colors.primary[700] */
+    text-decoration: underline !important;
+  }
+}
+
+/*
+ * Brand display face: Newsreader (self-hosted, latin subset).
+ * Used for the wordmark and hero emphasis to break the all-sans generic look.
+ */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/newsreader-n400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/newsreader-n500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/newsreader-i400.ttf') format('truetype');
+}
+
+.serif-display {
+  font-family: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Wordmark: serif "Talent" + sans "Sphere" — the brand's signature pairing. */
+.wordmark-serif {
+  font-family: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

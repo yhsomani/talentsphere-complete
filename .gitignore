@@ -1,5 +1,11 @@
-# Build artifacts
-dist/
+# Python
+__pycache__/
+*.pyc
 
-# Dependencies
-node_modules/
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log

@@ -54,6 +54,9 @@ export const Layout: React.FC = () => {
     { label: 'Pricing', path: '/checkout', testId: 'nav-checkout' },
   ];
 
+  // Hover affordance for desktop nav links (declarative, token-driven).
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+
   return (
     <div
       style={{
@@ -102,10 +105,12 @@ export const Layout: React.FC = () => {
       {/* App Header */}
       <header
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'rgba(255, 255, 255, 0.94)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           borderBottom: `1px solid ${colors.neutral[200]}`,
           padding: `${spacing.sm} ${spacing.lg}`,
-          minHeight: '68px',
+          minHeight: '64px',
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'space-between',
@@ -115,7 +120,6 @@ export const Layout: React.FC = () => {
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
         }}
       >
         <div
@@ -129,21 +133,21 @@ export const Layout: React.FC = () => {
         >
           <Link
             to="/"
+            aria-label="TalentSphere home"
             style={{
               textDecoration: 'none',
-              fontWeight: 800,
-              fontSize: '1.1875rem',
+              fontSize: '1.125rem',
               letterSpacing: '-0.02em',
               color: colors.neutral[900],
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '8px',
             }}
           >
             <div
               style={{
-                width: '24px',
-                height: '24px',
+                width: '26px',
+                height: '26px',
                 backgroundColor: colors.primary[700],
                 borderRadius: '4px',
                 display: 'flex',
@@ -154,7 +158,9 @@ export const Layout: React.FC = () => {
             >
               <ShieldCheckIcon size={16} />
             </div>
-            <span>TalentSphere</span>
+            <span style={{ fontWeight: 800 }}>
+              <span className="wordmark-serif">Talent</span>Sphere
+            </span>
           </Link>
 
           {/* Desktop navigation — hidden on small screens in favour of the menu button */}
@@ -165,11 +171,15 @@ export const Layout: React.FC = () => {
           >
             {navLinks.map((item) => {
               const isActive = location.pathname === item.path;
+              const isHovered = hoveredNav === item.path && !isActive;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   data-testid={item.testId}
+                  aria-current={isActive ? 'page' : undefined}
+                  onMouseEnter={() => setHoveredNav(item.path)}
+                  onMouseLeave={() => setHoveredNav(null)}
                   style={{
                     textDecoration: 'none',
                     color: isActive ? colors.primary[800] : colors.neutral[700],
@@ -177,7 +187,11 @@ export const Layout: React.FC = () => {
                     fontSize: '0.875rem',
                     padding: `${spacing.sm} ${spacing.md}`,
                     borderRadius: '6px',
-                    backgroundColor: isActive ? colors.primary[50] : 'transparent',
+                    backgroundColor: isActive
+                      ? colors.primary[50]
+                      : isHovered
+                        ? colors.neutral[100]
+                        : 'transparent',
                     transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, color ${motion.duration.fast} ${motion.easing.easeOut}`,
                   }}
                 >
@@ -260,7 +274,12 @@ export const Layout: React.FC = () => {
 
           {userEmail ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>{userEmail}</span>
+              <span
+                style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}
+                title={userEmail}
+              >
+                {userEmail}
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -269,12 +288,15 @@ export const Layout: React.FC = () => {
                   setUserEmail(null);
                 }}
                 style={{
-                  fontSize: '0.75rem',
-                  color: colors.neutral[600],
+                  fontSize: '0.8125rem',
+                  color: colors.neutral[700],
                   background: 'none',
-                  border: 'none',
+                  border: `1px solid ${colors.neutral[300]}`,
+                  borderRadius: '6px',
                   cursor: 'pointer',
-                  textDecoration: 'underline',
+                  padding: `${spacing.xs} ${spacing.sm}`,
+                  minHeight: '36px',
+                  fontWeight: 600,
                 }}
               >
                 Sign Out
@@ -286,13 +308,18 @@ export const Layout: React.FC = () => {
               data-testid="nav-login"
               style={{
                 textDecoration: 'none',
-                color: location.pathname === '/login' ? colors.primary[800] : colors.primary[700],
-                fontWeight: 600,
+                color: location.pathname === '/login' ? '#ffffff' : colors.primary[700],
+                fontWeight: 700,
                 fontSize: '0.875rem',
-                padding: '6px 14px',
-                borderRadius: '4px',
-                border: `1px solid ${colors.primary[300]}`,
-                backgroundColor: location.pathname === '/login' ? colors.primary[50] : '#ffffff',
+                padding: '8px 18px',
+                minHeight: '40px',
+                borderRadius: '6px',
+                border: `1px solid ${location.pathname === '/login' ? colors.primary[700] : colors.primary[300]}`,
+                backgroundColor:
+                  location.pathname === '/login' ? colors.primary[700] : '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, border-color ${motion.duration.fast} ${motion.easing.easeOut}`,
               }}
             >
               Sign In
@@ -394,7 +421,7 @@ export const Layout: React.FC = () => {
         tabIndex={-1}
         style={{
           flex: 1,
-          padding: `${spacing.xl} ${spacing.lg}`,
+          padding: `${spacing.xl} ${spacing.lg} ${spacing['2xl']}`,
           maxWidth: '1200px',
           margin: '0 auto',
           width: '100%',
@@ -431,9 +458,10 @@ export const Layout: React.FC = () => {
                 fontSize: '1rem',
                 color: colors.neutral[900],
                 marginBottom: spacing.xs,
+                letterSpacing: '-0.02em',
               }}
             >
-              TalentSphere
+              <span className="wordmark-serif">Talent</span>Sphere
             </div>
             <p
               style={{
@@ -473,7 +501,7 @@ export const Layout: React.FC = () => {
               }}
             >
               <li>
-                <Link to="/evidence" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link to="/evidence" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
                   Evidence Graph
                 </Link>
               </li>
@@ -486,12 +514,12 @@ export const Layout: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/jobs" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link to="/jobs" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
                   Verifiable Opportunities
                 </Link>
               </li>
               <li>
-                <Link to="/checkout" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link to="/checkout" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
                   Plans & Pricing
                 </Link>
               </li>
@@ -523,12 +551,12 @@ export const Layout: React.FC = () => {
               }}
             >
               <li>
-                <Link to="/privacy" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link to="/privacy" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
                   Privacy Policy (GDPR/CCPA)
                 </Link>
               </li>
               <li>
-                <Link to="/terms" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link to="/terms" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
                   Terms & Integrity Standards
                 </Link>
               </li>
