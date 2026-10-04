@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { colors, spacing } from '@talentsphere/ui';
+import { colors, spacing, motion } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 
 interface Plan {
@@ -350,7 +350,7 @@ export const CheckoutPage: React.FC = () => {
                       padding: spacing.md,
                       backgroundColor: isSelected ? colors.primary[50] : '#ffffff',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
+                      transition: `border-color ${motion.duration.fast} ${motion.easing.easeOut}, background-color ${motion.duration.fast} ${motion.easing.easeOut}`,
                     }}
                   >
                     <div

@@ -1,5 +1,5 @@
-import React from 'react';
-import { colors, spacing } from '@talentsphere/ui';
+import React, { useState } from 'react';
+import { colors, spacing, motion } from '@talentsphere/ui';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,6 +7,12 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   error?: string;
 }
 
+/**
+ * Canonical input. Focus/hover styling is declarative (React state), never
+ * imperative DOM mutation. Error text uses the AA-safe semantic tone so the
+ * message is readable, not just red. The focus ring mirrors Button's so the
+ * form surfaces share one interaction language.
+ */
 export const Input: React.FC<InputProps> = ({
   label,
   helperText,
@@ -14,8 +20,11 @@ export const Input: React.FC<InputProps> = ({
   id,
   required,
   style,
+  onFocus,
+  onBlur,
   ...props
 }) => {
+  const [focused, setFocused] = useState(false);
   const generatedId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
   const errorId = generatedId ? `${generatedId}-error` : undefined;
   const helperId = generatedId ? `${generatedId}-helper` : undefined;
@@ -33,7 +42,7 @@ export const Input: React.FC<InputProps> = ({
             marginBottom: spacing.xs,
           }}
         >
-          {label} {required && <span style={{ color: colors.semantic.error }}>*</span>}
+          {label} {required && <span style={{ color: colors.semantic.errorText }}>*</span>}
         </label>
       )}
       <input
@@ -45,22 +54,33 @@ export const Input: React.FC<InputProps> = ({
           width: '100%',
           padding: '8px 12px',
           borderRadius: '6px',
-          border: `1px solid ${error ? colors.semantic.error : colors.neutral[300]}`,
+          border: `1px solid ${
+            focused
+              ? error
+                ? colors.semantic.errorText
+                : colors.primary[600]
+              : error
+                ? colors.semantic.error
+                : colors.neutral[300]
+          }`,
+          boxShadow: focused
+            ? `0 0 0 3px ${error ? '#fee2e2' : colors.primary[100]}`
+            : 'none',
           fontSize: '0.875rem',
           color: colors.neutral[900],
           backgroundColor: '#ffffff',
           boxSizing: 'border-box',
           outline: 'none',
-          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+          transition: `border-color ${motion.duration.fast} ${motion.easing.easeOut}, box-shadow ${motion.duration.fast} ${motion.easing.easeOut}`,
           ...style,
         }}
         onFocus={(e) => {
-          e.currentTarget.style.borderColor = error ? colors.semantic.error : colors.primary[600];
-          e.currentTarget.style.boxShadow = `0 0 0 3px ${error ? '#fee2e2' : colors.primary[100]}`;
+          setFocused(true);
+          onFocus?.(e);
         }}
         onBlur={(e) => {
-          e.currentTarget.style.borderColor = error ? colors.semantic.error : colors.neutral[300];
-          e.currentTarget.style.boxShadow = 'none';
+          setFocused(false);
+          onBlur?.(e);
         }}
         {...props}
       />
@@ -70,7 +90,7 @@ export const Input: React.FC<InputProps> = ({
           role="alert"
           style={{
             fontSize: '0.75rem',
-            color: colors.semantic.error,
+            color: colors.semantic.errorText,
             margin: `${spacing.xs} 0 0`,
             fontWeight: 500,
           }}
@@ -83,7 +103,7 @@ export const Input: React.FC<InputProps> = ({
           id={helperId}
           style={{
             fontSize: '0.75rem',
-            color: colors.neutral[500],
+            color: colors.neutral[600],
             margin: `${spacing.xs} 0 0`,
           }}
         >

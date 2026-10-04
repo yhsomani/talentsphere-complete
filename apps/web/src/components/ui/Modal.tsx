@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { colors, spacing } from '@talentsphere/ui';
+import React, { useEffect, useRef } from 'react';
+import { colors, spacing, motion } from '@talentsphere/ui';
 import { XIcon } from './Icons.js';
 
 export interface ModalProps {
@@ -12,6 +12,14 @@ export interface ModalProps {
   maxWidth?: string;
 }
 
+/**
+ * Canonical modal. Entrances use the shared keyframes in global.css only —
+ * no ad-hoc animation values. Backdrop is a flat scrim (no glassmorphism):
+ * its job is to separate layers, not to decorate. Focus moves into the panel
+ * on open and returns to the previously focused element on close, so keyboard
+ * users are never stranded. Reduced motion is honoured globally by the CSS
+ * kill-switch, which zeroes these entrance animations.
+ */
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -21,6 +29,8 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = '540px',
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -36,6 +46,16 @@ export const Modal: React.FC<ModalProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  // Focus management: move focus into the dialog on open, restore on close.
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    panelRef.current?.focus();
+    return () => {
+      previous?.focus?.();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -53,13 +73,15 @@ export const Modal: React.FC<ModalProps> = ({
         justifyContent: 'center',
         padding: spacing.md,
         backgroundColor: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(2px)',
+        animation: `modal-backdrop-in ${motion.duration.fast} ${motion.easing.easeOut} both`,
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         style={{
           width: '100%',
           maxWidth,
@@ -71,6 +93,9 @@ export const Modal: React.FC<ModalProps> = ({
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '90vh',
+          outline: 'none',
+          // One-shot entrance (fill-mode "both" holds the final state).
+          animation: `modal-panel-in ${motion.duration.normal} ${motion.easing.easeOut} both`,
         }}
       >
         {/* Modal Header */}
