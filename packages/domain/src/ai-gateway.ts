@@ -103,13 +103,18 @@ export function sanitizePromptInput(
     );
   }
 
-  // Detect explicit prompt injection delimiters
+  // Detect explicit prompt injection delimiters and override attempts.
+  // Includes the canonical "vibe-coded app" attack strings: a forged
+  // "SYSTEM PROMPT:" prefix and "Ignore your instructions" phrasing, in
+  // addition to classic previous-instructions overrides and script tags.
   const injectionPatterns = [
     /<script\b[^>]*>/i,
     /<\/script>/i,
-    /system\s*prompt\s*override/i,
-    /ignore\s+(all\s+)?previous\s+instructions/i,
-    /disregard\s+all\s+guardrails/i,
+    /system\s*prompt(\s*override)?\s*:/i,
+    /\bignore\s+(all\s+|your\s+|the\s+)?(previous\s+|prior\s+|above\s+)?instructions?\b/i,
+    /disregard\s+(all\s+)?(previous\s+)?(guardrails|instructions?|prompts?)/i,
+    /you\s+are\s+now\s+(in\s+)?(developer|dan|jailbreak)\s*mode/i,
+    /new\s+system\s+(prompt|message)\s*:/i,
   ];
 
   for (const pattern of injectionPatterns) {
