@@ -15,6 +15,7 @@ export * from './lms.js';
 export * from './messaging.js';
 export * from './notifications.js';
 export * from './ai-gateway.js';
+export * from './input-security.js';
 export * from './resumes.js';
 export * from './networking.js';
 export * from './portfolio.js';
