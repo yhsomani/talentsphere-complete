@@ -1,0 +1,4 @@
+# LF in the repository and in every working tree, on every platform.
+# Windows checkouts with core.autocrlf=true otherwise hand Prettier CRLF
+# files that fail `pnpm lint` locally while CI (Linux) stays green.
+* text=auto eol=lf

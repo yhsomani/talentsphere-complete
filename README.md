@@ -4,13 +4,13 @@ PWA-first Career Operating System built around a Talent Graph + Evidence Graph.
 
 ## Current status
 
-**IN ACTIVE DEVELOPMENT — 47 / 173 FEATURES VERIFIED (100% GREEN TESTS)**
+**IN ACTIVE DEVELOPMENT — 47 / 173 FEATURES VERIFIED**
 
-- **Total Automated Tests:** 830 / 830 passing
-  - **Unit Tests:** 440 tests across 40 test files (`pnpm test:unit`)
-  - **Integration Tests:** 280 tests across 38 test files (`pnpm test:integration`)
-  - **Playwright E2E Tests:** 110 tests across 30 test spec files (`pnpm exec playwright test`)
-- **Database Migrations:** 37 sequential Supabase SQL migrations with comprehensive RLS policies (`supabase/migrations/`)
+- **Automated Tests:** 1,090 tests
+  - **Unit, integration and security:** 930 tests across 89 files (`pnpm test`)
+  - **Playwright E2E, accessibility and performance:** 160 tests (`pnpm test:e2e`)
+  - **Continuous Integration:** every push and pull request runs lint, typecheck, tests, build and E2E through GitHub Actions (`.github/workflows/ci.yml`)
+- **Database Migrations:** 41 sequential Supabase SQL migrations with comprehensive RLS policies (`supabase/migrations/`)
 - **Monorepo Build:** 10/10 packages and applications cleanly compiling with TypeScript project references (`pnpm typecheck`)
 
 ## Core loop
@@ -23,7 +23,7 @@ Goal → Gap → Learn → Practice → Prove → Verify
 ## Architecture & Stack
 
 - **Backend:** Node.js + Fastify modular monolith (`apps/api`) with Zod contract validation, central AI Gateway, rate limiting, and standard error envelopes.
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA shell (`apps/web`) with WCAG 2.2 AA accessibility and offline resilience.
+- **Frontend:** React 19 + TypeScript + Vite + TanStack Query + PWA shell (`apps/web`), targeting WCAG 2.2 AA accessibility and offline resilience.
 - **Background Worker:** Async job queue engine with dead letter queue (DLQ) and idempotency (`apps/worker`).
 - **Shared Packages:** Pure domain models (`packages/domain`), API/error contracts (`packages/contracts`), UI design tokens (`packages/ui`), structured logging & audit sink (`packages/observability`), environment configuration (`packages/config`), and test utilities (`packages/testing`).
 - **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS, and integer-minor-unit monetary calculations.
@@ -62,10 +62,10 @@ pnpm db:migrate
 pnpm dev
 
 # Execute full automated test suites
-pnpm test               # Runs unit and integration suites
-pnpm test:unit          # Runs 440 unit tests
-pnpm test:integration   # Runs 280 integration tests
-pnpm test:e2e           # Runs 110 Playwright E2E browser and API tests
+pnpm test               # Runs unit, integration and security suites
+pnpm test:unit          # Runs unit tests only
+pnpm test:integration   # Runs integration tests only
+pnpm test:e2e           # Runs Playwright E2E browser and API tests
 
 # Typecheck and lint
 pnpm typecheck          # Compiles all packages with tsc -b
