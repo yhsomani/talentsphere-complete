@@ -1,0 +1,24 @@
+{
+  "name": "TalentSphere Career OS",
+  "short_name": "TalentSphere",
+  "description": "PWA-first Career Operating System built around a verified Talent & Evidence Graph",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0e8ce9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

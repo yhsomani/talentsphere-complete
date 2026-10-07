@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "name": "candidate-navigation",
+  "intent": "Candidate can launch the Career Cockpit Dashboard from the landing page and return home using the logo",
+  "intentId": "flow:candidate-navigation",
+  "projectId": "talentsphere-web-e1830450",
+  "startPath": "/",
+  "createdAt": 1790365762983,
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "link",
+        "name": "Launch Dashboard"
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "route": {
+          "pathname": "/dashboard"
+        }
+      }
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "role",
+        "role": "link",
+        "name": "TalentSphere"
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "route": {
+          "pathname": "/"
+        }
+      }
+    }
+  ],
+  "learned": [
+    {
+      "kind": "route-rendered-nothing",
+      "step": 0,
+      "state": "open"
+    }
+  ]
+}

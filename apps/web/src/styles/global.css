@@ -1,0 +1,283 @@
+/*
+ * Global baseline styles.
+ *
+ * The app is built almost entirely from inline styles, so the rules that must
+ * apply document-wide (typography defaults, focus visibility, resets) live here.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/*
+ * Mobile overflow / horizontal scroll guard.
+ *
+ * Wide content (code blocks, tables) must scroll INSIDE its own container —
+ * never at the document level. `overflow-x: clip` on html/body eliminates the
+ * horizontal scrollbar without creating a scrolling ancestor that would break
+ * position: sticky headers.
+ */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+#root {
+  max-width: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Long unbroken strings (hashes, URLs, emails) may not push layout wider. */
+pre,
+code,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+td,
+th {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+/* Keep monospace code blocks readable and swipable on narrow screens. */
+@media (max-width: 640px) {
+  pre {
+    white-space: pre;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+code,
+pre {
+  font-family:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/*
+ * Visible keyboard focus everywhere (WCAG 2.4.7). Components that set their
+ * own ring can keep it; this is the safety net for links/inputs/buttons.
+ */
+:focus-visible {
+  outline: 2px solid #026fc7;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/*
+ * Responsive navigation: desktop links vs. mobile hamburger menu.
+ * Inline styles set the desktop defaults; these media-query rules override
+ * them on small screens (plain CSS wins over inline styles only when marked
+ * !important, which is why the toggles below use it).
+ */
+@media (max-width: 767px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-menu-button {
+    display: flex !important;
+  }
+
+  /* Tighter page padding on phones so content never touches the edges. */
+  #main-content {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/*
+ * Centralised keyframes.
+ *
+ * Components reference these by name only — no component may invent its own
+ * motion values. Durations/easings mirror `motion` in @talentsphere/ui tokens
+ * (fast = 150ms, normal = 250ms, ease-out entrance curves).
+ */
+
+/* Button loading spinner: linear is correct for continuous rotation. */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal panel entrance: short rise + fade, no bounce (Emil-style ease-out). */
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal backdrop: opacity-only so there is no competing motion with the panel. */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Skip link visibility. The hidden state lives here (not in inline styles)
+ * so the :focus reveal can be a plain CSS transition instead of JS DOM
+ * mutation — keyboard users get immediate, predictable feedback.
+ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: auto;
+  z-index: 10000;
+}
+
+/*
+ * WCAG 2.3.3 Animation from Interactions (AAA) / 2.2.2 Pause, Stop, Hide.
+ * Honour the OS-level reduced-motion preference: no component may keep a
+ * non-zero animation or transition once the user has asked for stillness.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Hover affordances that inline styles cannot express (no :hover in the
+ * style prop). Kept deliberately subtle: colour shift only, token durations.
+ */
+@media (hover: hover) {
+  .footer-link:hover {
+    color: #0358a1 !important; /* colors.primary[700] */
+    text-decoration: underline !important;
+  }
+}
+
+/*
+ * Brand display face: Newsreader (self-hosted, latin subset).
+ * Used for the wordmark and hero emphasis to break the all-sans generic look.
+ */
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/newsreader-n400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/newsreader-n500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/newsreader-i400.ttf') format('truetype');
+}
+
+.serif-display {
+  font-family: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Wordmark: serif "Talent" + sans "Sphere" — the brand's signature pairing. */
+.wordmark-serif {
+  font-family: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

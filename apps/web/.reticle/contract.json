@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "generatedAt": 1790365712702,
+  "capabilities": {
+    "testids": [],
+    "signals": [],
+    "stores": [
+      "query"
+    ],
+    "flows": []
+  }
+}
