@@ -59,6 +59,8 @@ test.describe('A11Y: Document semantics (WCAG 2.2 AA)', () => {
   test('heading levels never skip a level', async ({ page }) => {
     for (const route of ROUTES) {
       await page.goto(route.path);
+      // Wait for the SPA (and any auth redirect) to settle before measuring.
+      await expect(page.locator('h1')).toHaveCount(1);
       const levels = await page
         .locator('h1, h2, h3, h4, h5, h6')
         .evaluateAll((nodes) =>

@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
 test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)', () => {
   test('renders landing page with accessibility skip-link and truthful PWA capability status', async ({
     page,
@@ -40,13 +42,30 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.locator(':is(h2, h3):has-text("3. Governed Intelligence")')).toBeVisible();
   });
 
-  test('navigates to dashboard and displays career cockpit with readiness metrics', async ({
+  test('guards the dashboard and displays career cockpit after real sign-in', async ({
     page,
+    request,
   }) => {
-    await page.goto('/');
+    const email = `e2e.ui.dashboard.${Date.now()}@example.com`;
+    const password = 'Password123!Secure';
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, fullName: 'UI Dashboard Candidate', role: 'candidate' },
+    });
+    expect(reg.status()).toBe(201);
 
-    // Click launch career cockpit button
+    // Direct navigation without a session must bounce to /login (QW-04).
+    await page.goto('/dashboard');
+    await expect(page).toHaveURL(/.*login/);
+
+    // The landing call-to-action sends unauthenticated visitors to sign in.
+    await page.goto('/');
     await page.click('text=Launch Career Cockpit');
+    await expect(page).toHaveURL(/.*login/);
+
+    // Real credentials grant access to the cockpit.
+    await page.getByTestId('login-email').fill(email);
+    await page.getByTestId('login-password').fill(password);
+    await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/.*dashboard/);
 
     // Verify dashboard heading
@@ -66,7 +85,16 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
 
   test('authenticates candidate via login page and redirects to dashboard (F-01)', async ({
     page,
+    request,
   }) => {
+    // Register a real candidate so the UI login is a genuine API transaction.
+    const email = `e2e.ui.login.${Date.now()}@example.com`;
+    const password = 'Password123!Secure';
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, fullName: 'UI Login Candidate', role: 'candidate' },
+    });
+    expect(reg.status()).toBe(201);
+
     await page.goto('/login');
 
     // Verify login heading and elements
@@ -75,21 +103,37 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByTestId('login-password')).toBeVisible();
     await expect(page.getByTestId('login-submit')).toBeVisible();
 
-    // Prefill test credentials
-    await page.getByTestId('prefill-credentials').click();
-    await expect(page.getByTestId('login-email')).toHaveValue('jordan.candidate@example.com');
-
-    // Submit form
+    // A wrong password must surface an error and keep the user on /login.
+    await page.getByTestId('login-email').fill(email);
+    await page.getByTestId('login-password').fill('WrongPassword!');
     await page.getByTestId('login-submit').click();
+    await expect(page.getByTestId('login-error')).toBeVisible();
+    await expect(page).toHaveURL(/.*login/);
 
-    // Verify redirection to dashboard
+    // Correct credentials sign in through the API and redirect to the dashboard.
+    await page.getByTestId('login-password').fill(password);
+    await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/.*dashboard/);
     await expect(page.locator('h1')).toHaveText('Candidate Career Cockpit');
+
+    // The stored session must be API-issued, never a client-fabricated demo token.
+    const token = await page.evaluate(() => localStorage.getItem('talentsphere_token'));
+    expect(token).toBeTruthy();
+    expect(token?.startsWith('demo_token')).toBe(false);
   });
 
   test('selects subscription tier and completes checkout flow with validation handling (F-16)', async ({
     page,
+    request,
   }) => {
+    // A real account is required: the billing endpoint refuses anonymous callers.
+    const email = `e2e.ui.checkout.${Date.now()}@example.com`;
+    const password = 'Password123!Secure';
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, fullName: 'UI Checkout Candidate', role: 'candidate' },
+    });
+    expect(reg.status()).toBe(201);
+
     await page.goto('/checkout');
 
     // Verify checkout heading and plan cards
@@ -99,7 +143,7 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
 
     // Test Annual toggle
     await page.getByTestId('billing-cycle-yearly').click();
-    await expect(page.getByTestId('checkout-submit')).toContainText('$279');
+    await expect(page.getByTestId('checkout-submit')).toContainText('$199.90');
 
     // Test form validation on invalid card input
     await page.getByTestId('card-name').fill('Tester');
@@ -111,24 +155,64 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByTestId('checkout-error')).toBeVisible();
     await expect(page.getByTestId('checkout-error')).toContainText('valid 15 or 16-digit');
 
-    // Prefill valid test payment
+    // Prefill valid test payment; without a session the API call must be
+    // refused and NO confirmation may be shown.
     await page.getByTestId('prefill-payment').click();
     await page.getByTestId('checkout-submit').click();
+    await expect(page.getByTestId('checkout-error')).toContainText('sign in');
+    await expect(page.getByTestId('checkout-success')).toBeHidden();
 
-    // Verify confirmation
+    // Sign in through the UI, then repeat checkout with a real session token.
+    await page.goto('/login');
+    await page.getByTestId('login-email').fill(email);
+    await page.getByTestId('login-password').fill(password);
+    await page.getByTestId('login-submit').click();
+    await expect(page).toHaveURL(/.*dashboard/);
+
+    await page.goto('/checkout');
+    await page.getByTestId('billing-cycle-yearly').click();
+    await page.getByTestId('card-name').fill('Tester');
+    await page.getByTestId('card-number').fill('4242 4242 4242 4242');
+    await page.getByTestId('card-expiry').fill('12/28');
+    await page.getByTestId('card-cvc').fill('123');
+    await page.getByTestId('checkout-submit').click();
+
+    // Verify confirmation: reference must come from the API invoice, not a
+    // client-generated id.
     await expect(page.getByTestId('checkout-success')).toBeVisible();
     await expect(page.getByTestId('order-reference')).toBeVisible();
-    await expect(page.getByTestId('order-amount')).toHaveText('$279');
+    await expect(page.getByTestId('order-amount')).toHaveText('$199.90');
+    const orderReference = await page.getByTestId('order-reference').textContent();
+    expect(orderReference).toMatch(/^[0-9a-f-]{36}$/i); // API invoice UUID
   });
 
   test('navigates to evidence page and validates work history attestations with anti-fraud checks', async ({
     page,
+    request,
   }) => {
-    await page.goto('/evidence');
+    const email = `e2e.ui.evidence.${Date.now()}@example.com`;
+    const password = 'Password123!Secure';
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, fullName: 'UI Evidence Candidate', role: 'candidate' },
+    });
+    expect(reg.status()).toBe(201);
 
-    // Heading verification
-    await expect(page.locator('h1')).toContainText('Verified Work History');
+    // Signed-out navigation must bounce to sign-in (QW-04), never a data page.
+    await page.goto('/evidence');
+    await expect(page).toHaveURL(/.*login/);
+
+    // Sign in through the UI so attestations run with a real session token.
+    await page.goto('/login');
+    await page.getByTestId('login-email').fill(email);
+    await page.getByTestId('login-password').fill(password);
+    await page.getByTestId('login-submit').click();
+    await expect(page).toHaveURL(/.*dashboard/);
+
+    await page.goto('/evidence');
     await expect(page.getByTestId('add-work-history-btn')).toBeVisible();
+
+    // A fresh account starts with NO starter attestations.
+    await expect(page.getByTestId('evidence-empty')).toBeVisible();
 
     // Open add modal
     await page.getByTestId('add-work-history-btn').click();
@@ -154,17 +238,34 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(alert).toBeVisible();
     await expect(alert).toContainText('Disposable');
 
-    // Submit valid attestation
+    // Submit valid attestation — persisted by the API, email attested server-side.
     await page.getByTestId('input-corporate-email').fill('jordan@verified-domain.com');
     await page.getByTestId('submit-employment-btn').click();
 
-    // Verify new record appears in list
+    // Record appears from the API with SERVER-computed tier and score.
     await expect(page.getByText('Fraudulent Corp')).toBeVisible();
+    await expect(page.getByText('BRONZE TIER')).toBeVisible();
+    await expect(page.getByText('Email Verified')).toBeVisible();
   });
 
   test('runs proctored assessment sandbox execution with verifiable invariants', async ({
     page,
+    request,
   }) => {
+    // The assessments workspace requires a session (QW-04 guard).
+    const email = `e2e.ui.assess.${Date.now()}@example.com`;
+    const password = 'Password123!Secure';
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, fullName: 'UI Assessment Candidate', role: 'candidate' },
+    });
+    expect(reg.status()).toBe(201);
+
+    await page.goto('/login');
+    await page.getByTestId('login-email').fill(email);
+    await page.getByTestId('login-password').fill(password);
+    await page.getByTestId('login-submit').click();
+    await expect(page).toHaveURL(/.*dashboard/);
+
     await page.goto('/assessments');
 
     // Heading verification
@@ -177,15 +278,15 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByTestId('run-sandbox-btn')).toBeVisible();
     await expect(page.locator('pre')).toContainText('TransactionalQueue');
 
-    // Execute sandbox runner
+    // The preview must report honestly: nothing executed, nothing recorded.
     await page.getByTestId('run-sandbox-btn').click();
 
-    // Verify execution log and verification badge
     await expect(page.getByTestId('sandbox-log')).toBeVisible();
     await expect(page.getByTestId('sandbox-log')).toContainText(
-      'Test 1/3: Basic enqueue & dequeue invariant... PASS'
+      'no code was executed in this session'
     );
-    await expect(page.getByText('Sandbox Invariants Verified')).toBeVisible();
+    await expect(page.getByTestId('sandbox-log')).toContainText('no result was stored');
+    await expect(page.getByText('Sandbox Invariants Verified')).toHaveCount(0);
   });
 
   test('browses verifiable job opportunities and applies with verified evidence graph', async ({
@@ -203,14 +304,15 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(jobCard).toContainText('94% MATCH');
     await expect(jobCard).toContainText('CoreDB Infrastructure');
 
-    // Apply with evidence graph
+    // Apply is a real API transaction: without a session it must be refused
+    // and NO success state may appear.
     const applyBtn = page.getByTestId('apply-btn-job-001');
     await expect(applyBtn).toBeVisible();
     await applyBtn.click();
 
-    // Verify state transition to transmitted
-    await expect(jobCard).toContainText('Application Transmitted');
-    await expect(applyBtn).toBeDisabled();
+    await expect(page.getByTestId('apply-error')).toContainText('Sign in');
+    await expect(jobCard).not.toContainText('Application Transmitted');
+    await expect(applyBtn).toBeEnabled();
   });
 
   test('renders privacy policy and terms of service pre-launch gates', async ({ page }) => {

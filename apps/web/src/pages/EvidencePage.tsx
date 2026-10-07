@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
@@ -15,58 +15,21 @@ import {
   AlertCircleIcon,
 } from '../components/ui/index.js';
 
+// Mirrors VerifiedWorkHistory in packages/domain/src/work-history-graph.ts —
+// every field shown on this page comes from the API, never from client state.
 interface WorkHistoryEntry {
   id: string;
   companyName: string;
-  jobTitle: string;
+  title: string;
   startDate: string;
-  endDate: string | null;
+  endDate?: string;
   isCurrent: boolean;
-  corporateEmail: string;
-  isEmailVerified: boolean;
-  confidenceScore: number;
-  tier: 'gold' | 'silver' | 'bronze';
-  referee?: {
-    name: string;
-    relationship: string;
-    submittedAt: string;
-  };
-  hash: string;
+  corporateEmail?: string;
+  emailVerifiedAt?: string;
+  verificationStatus: string;
+  verificationScore: number;
+  badgeTier: 'none' | 'bronze' | 'silver' | 'gold';
 }
-
-const INITIAL_ENTRIES: WorkHistoryEntry[] = [
-  {
-    id: 'wh-001',
-    companyName: 'Acme Cloud Infrastructure',
-    jobTitle: 'Staff Distributed Systems Engineer',
-    startDate: '2023-01-15',
-    endDate: null,
-    isCurrent: true,
-    corporateEmail: 'jordan@acme.corp',
-    isEmailVerified: true,
-    confidenceScore: 96,
-    tier: 'gold',
-    referee: {
-      name: 'Sarah Chen, VP Engineering',
-      relationship: 'Direct Manager',
-      submittedAt: '2024-11-20',
-    },
-    hash: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-  },
-  {
-    id: 'wh-002',
-    companyName: 'DataMesh Solutions',
-    jobTitle: 'Senior Backend Engineer',
-    startDate: '2020-06-01',
-    endDate: '2022-12-31',
-    isCurrent: false,
-    corporateEmail: 'jordan.eng@datamesh.io',
-    isEmailVerified: true,
-    confidenceScore: 78,
-    tier: 'silver',
-    hash: 'sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
-  },
-];
 
 const DISPOSABLE_DOMAINS = [
   'mailinator.com',
@@ -82,10 +45,16 @@ export const EvidencePage: React.FC = () => {
     'Attest work history, request verified supervisor references, and manage your immutable cryptographic evidence graph.'
   );
 
-  const [entries, setEntries] = useState<WorkHistoryEntry[]>(INITIAL_ENTRIES);
+  const [entries, setEntries] = useState<WorkHistoryEntry[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [signedIn] = useState(() =>
+    Boolean(localStorage.getItem('talentsphere_token') && localStorage.getItem('talentsphere_user'))
+  );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Form states for Add Work History
   const [company, setCompany] = useState('');
@@ -103,7 +72,43 @@ export const EvidencePage: React.FC = () => {
   const [refError, setRefError] = useState<string | null>(null);
   const [refSuccess, setRefSuccess] = useState<string | null>(null);
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const loadEntries = useCallback(async () => {
+    const token = localStorage.getItem('talentsphere_token');
+    const rawUser = localStorage.getItem('talentsphere_user');
+    let userId: string | undefined;
+    try {
+      userId = rawUser ? (JSON.parse(rawUser) as { id?: string }).id : undefined;
+    } catch {
+      userId = undefined;
+    }
+    if (!token || !userId) {
+      setEntries([]);
+      setLoadingList(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/v1/candidates/${userId}/work-history`, {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        throw new Error('load failed');
+      }
+      const data = await res.json();
+      setEntries(data.workHistories ?? []);
+      setNotice(null);
+    } catch {
+      // Never render an empty state for data we failed to fetch — say so.
+      setNotice('Could not load your attestations. Please try again.');
+    } finally {
+      setLoadingList(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadEntries();
+  }, [loadEntries]);
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError(null);
 
@@ -125,31 +130,74 @@ export const EvidencePage: React.FC = () => {
       return;
     }
 
-    const newEntry: WorkHistoryEntry = {
-      id: `wh-${Date.now()}`,
-      companyName: company,
-      jobTitle: title,
-      startDate,
-      endDate: isCurrent ? null : endDate,
-      isCurrent,
-      corporateEmail: email,
-      isEmailVerified: Boolean(email),
-      confidenceScore: email ? 70 : 40,
-      tier: email ? 'silver' : 'bronze',
-      hash: `sha256:${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
-    };
+    const token = localStorage.getItem('talentsphere_token');
+    if (!token) {
+      setAddError('Please sign in before attesting work history.');
+      return;
+    }
 
-    setEntries([newEntry, ...entries]);
-    setIsAddModalOpen(false);
-    // Reset form
-    setCompany('');
-    setTitle('');
-    setStartDate('');
-    setEndDate('');
-    setEmail('');
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/v1/candidates/work-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          companyName: company,
+          title,
+          startDate,
+          isCurrent,
+          ...(isCurrent || !endDate ? {} : { endDate }),
+          ...(email ? { corporateEmail: email } : {}),
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setAddError(body?.error?.message ?? 'Attestation could not be saved. Please try again.');
+        return;
+      }
+
+      const created = await res.json();
+      const createdId = created?.workHistory?.id as string | undefined;
+
+      // Email attestation runs server-side (disposable/webmail checks, scoring, tier).
+      if (createdId && email) {
+        const verifyRes = await fetch(`/api/v1/candidates/work-history/${createdId}/verify-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ corporateEmail: email }),
+        });
+        if (!verifyRes.ok) {
+          const body = await verifyRes.json().catch(() => null);
+          setNotice(
+            `Record saved, but the email attestation was rejected: ${
+              body?.error?.message ?? 'verification failed.'
+            }`
+          );
+        }
+      }
+
+      setIsAddModalOpen(false);
+      setCompany('');
+      setTitle('');
+      setStartDate('');
+      setEndDate('');
+      setEmail('');
+      await loadEntries();
+    } catch {
+      setAddError('Attestation could not be saved. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleReferenceSubmit = (e: React.FormEvent) => {
+  const handleReferenceSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRefError(null);
     setRefSuccess(null);
@@ -167,36 +215,57 @@ export const EvidencePage: React.FC = () => {
       return;
     }
 
-    // Upgrade target entry to gold tier
-    if (selectedEntryId) {
-      setEntries(
-        entries.map((entry) => {
-          if (entry.id === selectedEntryId) {
-            return {
-              ...entry,
-              confidenceScore: Math.min(100, entry.confidenceScore + 18),
-              tier: 'gold',
-              referee: {
-                name: `${refName} (${refRole === 'manager' ? 'Direct Manager' : 'Technical Lead'})`,
-                relationship: refRole,
-                submittedAt: new Date().toISOString().split('T')[0],
-              },
-            };
-          }
-          return entry;
-        })
-      );
+    const token = localStorage.getItem('talentsphere_token');
+    if (!token) {
+      setRefError('Please sign in before requesting references.');
+      return;
+    }
+    if (!selectedEntryId) {
+      setRefError('No employment record selected.');
+      return;
     }
 
-    setRefSuccess(
-      `Reference request dispatched to ${refEmail}. Candidate work history upgraded to Gold Tier pending evaluation.`
-    );
-    setTimeout(() => {
-      setIsRefModalOpen(false);
-      setRefSuccess(null);
-      setRefName('');
-      setRefEmail('');
-    }, 1200);
+    setSubmitting(true);
+    try {
+      const res = await fetch(
+        `/api/v1/candidates/work-history/${selectedEntryId}/references/request`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            refereeName: refName,
+            refereeEmail: refEmail,
+            relationship: refRole,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setRefError(body?.error?.message ?? 'Reference request could not be created.');
+        return;
+      }
+
+      const data = await res.json();
+      // Server-confirmed state only — the tier and score update when the
+      // referee actually submits, not when we ask.
+      setRefSuccess(
+        `Reference request created for ${refEmail} (status: ${data?.reference?.status ?? 'requested'}).`
+      );
+      setTimeout(() => {
+        setIsRefModalOpen(false);
+        setRefSuccess(null);
+        setRefName('');
+        setRefEmail('');
+      }, 1200);
+    } catch {
+      setRefError('Reference request could not be created.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -259,112 +328,161 @@ export const EvidencePage: React.FC = () => {
         </Button>
       </div>
 
+      {/* Page-level notice: never claim emptiness when the fetch itself failed */}
+      {notice && (
+        <div
+          role="alert"
+          data-testid="evidence-notice"
+          style={{
+            backgroundColor: '#fef2f2',
+            color: colors.semantic.errorText,
+            border: `1px solid ${colors.semantic.error}`,
+            padding: `${spacing.sm} ${spacing.md}`,
+            borderRadius: '6px',
+            marginBottom: spacing.lg,
+            fontSize: '0.875rem',
+          }}
+        >
+          {notice}
+        </div>
+      )}
+
       {/* Work History Entries List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-        {entries.map((item) => (
-          <Card key={item.id} data-testid={`work-history-${item.id}`}>
-            <CardHeader
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: spacing.sm,
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                  <CardTitle>{item.jobTitle}</CardTitle>
-                  <span style={{ color: colors.neutral[400] }}>&bull;</span>
-                  <strong style={{ fontSize: '1rem', color: colors.neutral[700] }}>
-                    {item.companyName}
-                  </strong>
-                </div>
-                <CardDescription>
-                  {item.startDate} &mdash; {item.isCurrent ? 'Present' : item.endDate} &bull;{' '}
-                  <span style={{ fontFamily: 'monospace' }}>{item.hash.substring(0, 24)}...</span>
-                </CardDescription>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                <Badge variant={item.tier} mono>
-                  {item.tier.toUpperCase()} TIER &bull; {item.confidenceScore}/100
-                </Badge>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <div
+        {!signedIn ? (
+          <div
+            data-testid="evidence-signin-required"
+            style={{
+              border: `1px dashed ${colors.neutral[300]}`,
+              borderRadius: '8px',
+              padding: `${spacing.xl} ${spacing.lg}`,
+              textAlign: 'center',
+              color: colors.neutral[600],
+              fontSize: '0.9375rem',
+            }}
+          >
+            Sign in to attest and verify your employment records.
+          </div>
+        ) : loadingList ? (
+          <div
+            data-testid="evidence-loading"
+            style={{ color: colors.neutral[600], fontSize: '0.9375rem' }}
+          >
+            Loading attestations…
+          </div>
+        ) : entries.length === 0 && !notice ? (
+          <div
+            data-testid="evidence-empty"
+            style={{
+              border: `1px dashed ${colors.neutral[300]}`,
+              borderRadius: '8px',
+              padding: `${spacing.xl} ${spacing.lg}`,
+              textAlign: 'center',
+              color: colors.neutral[600],
+              fontSize: '0.9375rem',
+            }}
+          >
+            No employment attestations yet. Add your first record above.
+          </div>
+        ) : (
+          entries.map((item) => (
+            <Card key={item.id} data-testid={`work-history-${item.id}`}>
+              <CardHeader
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
-                  gap: spacing.lg,
-                  fontSize: '0.875rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: spacing.sm,
                 }}
               >
                 <div>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: colors.neutral[600],
-                      display: 'block',
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    DOMAIN ATTESTATION
-                  </span>
-                  {item.isEmailVerified ? (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        color: colors.semantic.successText,
-                      }}
-                    >
-                      <CheckIcon size={16} />
-                      <strong>{item.corporateEmail}</strong>
-                      <Badge variant="verified">DKIM Verified</Badge>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        color: colors.neutral[600],
-                      }}
-                    >
-                      <AlertCircleIcon size={16} />
-                      <span>No corporate email attested</span>
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                    <CardTitle>{item.title}</CardTitle>
+                    <span style={{ color: colors.neutral[400] }}>&bull;</span>
+                    <strong style={{ fontSize: '1rem', color: colors.neutral[700] }}>
+                      {item.companyName}
+                    </strong>
+                  </div>
+                  <CardDescription>
+                    {item.startDate} &mdash; {item.isCurrent ? 'Present' : (item.endDate ?? '—')}{' '}
+                    &bull; {item.verificationStatus}
+                  </CardDescription>
                 </div>
 
-                <div>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: colors.neutral[600],
-                      display: 'block',
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    STRUCTURED REFERENCE
-                  </span>
-                  {item.referee ? (
-                    <div>
-                      <strong style={{ color: colors.neutral[800], display: 'block' }}>
-                        {item.referee.name}
-                      </strong>
-                      <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
-                        Verified relationship: {item.referee.relationship} &bull; Attested on{' '}
-                        {item.referee.submittedAt}
-                      </span>
-                    </div>
-                  ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                  <Badge variant={item.badgeTier === 'none' ? 'neutral' : item.badgeTier} mono>
+                    {item.badgeTier === 'none'
+                      ? 'UNVERIFIED'
+                      : `${item.badgeTier.toUpperCase()} TIER`}
+                    &bull; {item.verificationScore}/100
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
+                    gap: spacing.lg,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: colors.neutral[600],
+                        display: 'block',
+                        marginBottom: spacing.xs,
+                      }}
+                    >
+                      DOMAIN ATTESTATION
+                    </span>
+                    {item.emailVerifiedAt ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          color: colors.semantic.successText,
+                        }}
+                      >
+                        <CheckIcon size={16} />
+                        <strong>{item.corporateEmail}</strong>
+                        <Badge variant="verified">Email Verified</Badge>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          color: colors.neutral[600],
+                        }}
+                      >
+                        <AlertCircleIcon size={16} />
+                        <span>No corporate email attested</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: colors.neutral[600],
+                        display: 'block',
+                        marginBottom: spacing.xs,
+                      }}
+                    >
+                      STRUCTURED REFERENCE
+                    </span>
+                    {/* Reference state is not readable back from the API yet, so
+                      this column offers the action instead of asserting state. */}
                     <div>
                       <span
                         style={{
@@ -373,7 +491,7 @@ export const EvidencePage: React.FC = () => {
                           marginBottom: spacing.xs,
                         }}
                       >
-                        No supervisor reference attached
+                        Request a structured reference from a supervisor.
                       </span>
                       <Button
                         variant="outline"
@@ -387,60 +505,60 @@ export const EvidencePage: React.FC = () => {
                         Request Reference
                       </Button>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <div>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: colors.neutral[600],
-                      display: 'block',
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    CONFIDENCE INTEGRITY
-                  </span>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: spacing.sm,
-                      marginTop: '4px',
-                    }}
-                  >
+                  <div>
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: colors.neutral[600],
+                        display: 'block',
+                        marginBottom: spacing.xs,
+                      }}
+                    >
+                      CONFIDENCE INTEGRITY
+                    </span>
                     <div
                       style={{
-                        flex: 1,
-                        height: '8px',
-                        backgroundColor: colors.neutral[200],
-                        borderRadius: '4px',
-                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: spacing.sm,
+                        marginTop: '4px',
                       }}
                     >
                       <div
                         style={{
-                          width: `${item.confidenceScore}%`,
-                          height: '100%',
-                          backgroundColor:
-                            item.confidenceScore >= 85
-                              ? colors.semantic.success
-                              : item.confidenceScore >= 70
-                                ? colors.primary[600]
-                                : colors.semantic.warning,
+                          flex: 1,
+                          height: '8px',
+                          backgroundColor: colors.neutral[200],
+                          borderRadius: '4px',
+                          overflow: 'hidden',
                         }}
-                      />
+                      >
+                        <div
+                          style={{
+                            width: `${item.verificationScore}%`,
+                            height: '100%',
+                            backgroundColor:
+                              item.verificationScore >= 85
+                                ? colors.semantic.success
+                                : item.verificationScore >= 70
+                                  ? colors.primary[600]
+                                  : colors.semantic.warning,
+                          }}
+                        />
+                      </div>
+                      <strong style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
+                        {item.verificationScore}%
+                      </strong>
                     </div>
-                    <strong style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                      {item.confidenceScore}%
-                    </strong>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Add Employment Modal */}
@@ -535,7 +653,7 @@ export const EvidencePage: React.FC = () => {
             type="email"
             label="Corporate Email (for domain attestation)"
             placeholder="you@company.com"
-            helperText="We will send a single verification link to verify your corporate domain."
+            helperText="Checked server-side against disposable and generic webmail domains."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             data-testid="input-corporate-email"
@@ -552,7 +670,12 @@ export const EvidencePage: React.FC = () => {
             <Button variant="secondary" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit" data-testid="submit-employment-btn">
+            <Button
+              variant="primary"
+              type="submit"
+              data-testid="submit-employment-btn"
+              disabled={submitting}
+            >
               Attest Record
             </Button>
           </div>
@@ -564,7 +687,7 @@ export const EvidencePage: React.FC = () => {
         isOpen={isRefModalOpen}
         onClose={() => setIsRefModalOpen(false)}
         title="Request Structured Reference"
-        description="Invite a verified manager or tech lead to submit a structured capability scorecard."
+        description="Create a structured reference request for a supervisor on this record."
       >
         {refError && (
           <div
@@ -655,7 +778,7 @@ export const EvidencePage: React.FC = () => {
               }}
             >
               <option value="manager">Direct Manager / Engineering Director</option>
-              <option value="tech_lead">Staff / Principal Tech Lead</option>
+              <option value="mentor">Mentor / Staff Tech Lead</option>
               <option value="peer">Cross-functional Peer (Senior / Principal)</option>
             </select>
           </div>
@@ -664,8 +787,13 @@ export const EvidencePage: React.FC = () => {
             <Button variant="secondary" type="button" onClick={() => setIsRefModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit" data-testid="submit-reference-btn">
-              Dispatch Verification Request
+            <Button
+              variant="primary"
+              type="submit"
+              data-testid="submit-reference-btn"
+              disabled={submitting}
+            >
+              Create Reference Request
             </Button>
           </div>
         </form>

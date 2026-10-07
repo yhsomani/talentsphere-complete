@@ -11,12 +11,15 @@ interface Plan {
   features: string[];
 }
 
+// Prices mirror the billing catalog in packages/domain/src/billing.ts — the
+// authority the API actually charges from. Displaying any other number would
+// quote the customer a price we never bill.
 const PLANS: Plan[] = [
   {
     id: 'candidate_pro',
     name: 'Candidate Pro',
-    monthlyPrice: 29,
-    yearlyPrice: 279,
+    monthlyPrice: 19.99,
+    yearlyPrice: 199.9,
     features: [
       'Gold Verified Evidence Badge',
       'Unlimited Proctored Skill Assessments',
@@ -27,8 +30,8 @@ const PLANS: Plan[] = [
   {
     id: 'recruiter_starter',
     name: 'Recruiter Starter',
-    monthlyPrice: 199,
-    yearlyPrice: 1899,
+    monthlyPrice: 99,
+    yearlyPrice: 990,
     features: [
       'Verified Candidate Talent Pool Search',
       'Direct Verified Warm Introductions',
@@ -39,8 +42,8 @@ const PLANS: Plan[] = [
   {
     id: 'recruiter_enterprise',
     name: 'Recruiter Enterprise',
-    monthlyPrice: 599,
-    yearlyPrice: 5750,
+    monthlyPrice: 299,
+    yearlyPrice: 2990,
     features: [
       'Full Multi-Tenant Evidence Graph Access',
       'Custom Skill Taxonomy & Benchmarking',
@@ -105,31 +108,43 @@ export const CheckoutPage: React.FC = () => {
 
     try {
       const token = localStorage.getItem('talentsphere_token');
-      // Optional backend synchronization
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 800);
-      await fetch('/api/v1/billing/subscribe', {
+      if (!token) {
+        setError('Please sign in before subscribing.');
+        return;
+      }
+
+      const res = await fetch('/api/v1/billing/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { authorization: `Bearer ${token}` } : {}),
+          authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           planTier: selectedPlan,
           billingCycle,
           idempotencyKey: `checkout_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         }),
-        signal: controller.signal,
-      }).catch(() => null);
-      clearTimeout(timeoutId);
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? 'Subscription could not be confirmed. Please try again.');
+        return;
+      }
+
+      const data = await res.json();
+      if (!data?.invoice?.id) {
+        setError('Subscription could not be confirmed. Please try again.');
+        return;
+      }
 
       setConfirmedOrder({
-        id: `ord_${Date.now().toString(36).toUpperCase()}`,
+        id: data.invoice.id,
         planName: activePlan.name,
-        amount: price,
+        amount: data.invoice.amountCents / 100,
       });
     } catch {
-      setError('Transaction could not be completed. Please check your card information.');
+      setError('Subscription could not be confirmed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -279,7 +294,7 @@ export const CheckoutPage: React.FC = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>Total Paid:</span>
-              <strong data-testid="order-amount">${confirmedOrder.amount}</strong>
+              <strong data-testid="order-amount">${confirmedOrder.amount.toFixed(2)}</strong>
             </div>
           </div>
 
@@ -368,7 +383,7 @@ export const CheckoutPage: React.FC = () => {
                       <span
                         style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.primary[700] }}
                       >
-                        ${currentPrice}
+                        ${currentPrice.toFixed(2)}
                         <span
                           style={{
                             fontSize: '0.75rem',
@@ -598,7 +613,7 @@ export const CheckoutPage: React.FC = () => {
                   </span>
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.primary[700] }}>
-                  ${price}
+                  ${price.toFixed(2)}
                 </div>
               </div>
 
@@ -620,7 +635,7 @@ export const CheckoutPage: React.FC = () => {
                   marginBottom: spacing.md,
                 }}
               >
-                {loading ? 'Processing...' : `Complete Purchase — $${price}`}
+                {loading ? 'Processing...' : `Complete Purchase — $${price.toFixed(2)}`}
               </button>
 
               <div style={{ textAlign: 'center' }}>

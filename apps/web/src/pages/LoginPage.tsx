@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 
@@ -33,29 +33,25 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Authenticate with local or API session
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 800);
       const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        signal: controller.signal,
-      }).catch(() => null);
-      clearTimeout(timeoutId);
+      });
 
-      if (res && res.ok) {
-        const data = await res.json();
-        localStorage.setItem('talentsphere_token', data.token);
-        localStorage.setItem('talentsphere_user', JSON.stringify(data.user));
-      } else {
-        // Fallback for standalone frontend demonstration session
-        localStorage.setItem('talentsphere_token', `demo_token_${Date.now()}`);
-        localStorage.setItem(
-          'talentsphere_user',
-          JSON.stringify({ email, fullName: email.split('@')[0], roles: ['candidate'] })
-        );
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? 'Failed to sign in. Please verify your credentials.');
+        return;
       }
+
+      const data = await res.json();
+      if (!data?.token) {
+        setError('Failed to sign in. Please verify your credentials.');
+        return;
+      }
+      localStorage.setItem('talentsphere_token', data.token);
+      localStorage.setItem('talentsphere_user', JSON.stringify(data.user));
 
       setSuccess(true);
       setTimeout(() => {
@@ -66,12 +62,6 @@ export const LoginPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePrefillCandidate = () => {
-    setEmail('jordan.candidate@example.com');
-    setPassword('Password123!Secure');
-    setError(null);
   };
 
   return (
@@ -235,35 +225,6 @@ export const LoginPage: React.FC = () => {
         >
           {loading ? 'Signing In...' : 'Sign In'}
         </button>
-
-        <div style={{ textAlign: 'center', marginTop: spacing.md }}>
-          <button
-            type="button"
-            data-testid="prefill-credentials"
-            onClick={handlePrefillCandidate}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: colors.primary[600],
-              fontSize: '0.8125rem',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              marginRight: spacing.md,
-            }}
-          >
-            Prefill Test Credentials
-          </button>
-          <Link
-            to="/dashboard"
-            style={{
-              color: colors.neutral[600],
-              fontSize: '0.8125rem',
-              textDecoration: 'none',
-            }}
-          >
-            Continue as Guest &rarr;
-          </Link>
-        </div>
       </form>
     </div>
   );

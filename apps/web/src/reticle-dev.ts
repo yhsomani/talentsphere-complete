@@ -25,7 +25,6 @@ if (import.meta.env.DEV) {
       'login-submit',
       'login-error',
       'login-success',
-      'prefill-credentials',
       'checkout-form',
       'billing-cycle-monthly',
       'billing-cycle-yearly',

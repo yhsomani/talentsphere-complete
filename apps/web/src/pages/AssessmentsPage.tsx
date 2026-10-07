@@ -97,33 +97,20 @@ export const AssessmentsPage: React.FC = () => {
 
   const [selectedChallenge, setSelectedChallenge] = useState<AssessmentChallenge | null>(null);
   const [executionLog, setExecutionLog] = useState<string[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPassed, setIsPassed] = useState(false);
 
   const handleOpenChallenge = (ch: AssessmentChallenge) => {
     setSelectedChallenge(ch);
     setExecutionLog([]);
-    setIsPassed(false);
   };
 
   const handleRunSandbox = () => {
-    setIsRunning(true);
+    // P0-07c: this preview executes nothing, so the log says exactly that —
+    // no fabricated PASS lines, no server-verified claim.
     setExecutionLog([
-      'Compiling TypeScript source in isolated V8 sandbox...',
-      'Injecting chaos network partitions & clock skews...',
+      'UI preview only — no code was executed in this session.',
+      'No tests ran, no score was generated, and no result was stored on the server.',
+      'Proctored execution will run against the assessment backend when it ships.',
     ]);
-
-    setTimeout(() => {
-      setExecutionLog((prev) => [
-        ...prev,
-        'Running Test 1/3: Basic enqueue & dequeue invariant... PASS (1.2ms)',
-        'Running Test 2/3: Duplicate submission replay deduplication... PASS (0.8ms)',
-        'Running Test 3/3: Simulated 500ms network partition with retry recovery... PASS (2.4ms)',
-        'Verification Complete: 3/3 test cases satisfied. Memory profile: 14.2 MB. Zero leaks detected.',
-      ]);
-      setIsRunning(false);
-      setIsPassed(true);
-    }, 1200);
   };
 
   return (
@@ -266,11 +253,9 @@ export const AssessmentsPage: React.FC = () => {
               }}
             >
               <div>
-                {isPassed && (
-                  <Badge variant="verified">
-                    <CheckIcon size={14} /> Sandbox Invariants Verified (Score: 100/100)
-                  </Badge>
-                )}
+                <Badge variant="info">
+                  <CheckIcon size={14} /> PREVIEW &mdash; no server record
+                </Badge>
               </div>
               <div style={{ display: 'flex', gap: spacing.sm }}>
                 <Button variant="secondary" size="md" onClick={() => setSelectedChallenge(null)}>
@@ -280,10 +265,9 @@ export const AssessmentsPage: React.FC = () => {
                   variant="primary"
                   size="md"
                   data-testid="run-sandbox-btn"
-                  loading={isRunning}
                   onClick={handleRunSandbox}
                 >
-                  Run In Sandbox
+                  Show Preview
                 </Button>
               </div>
             </div>

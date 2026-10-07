@@ -129,7 +129,29 @@ test.describe('PERF: API latency baseline', () => {
 });
 
 test.describe('PERF: Interaction latency baseline', () => {
-  test('client-side navigation responds within the gross-regression guard', async ({ page }) => {
+  test('client-side navigation responds within the gross-regression guard', async ({
+    page,
+    request,
+  }) => {
+    // /dashboard is guarded (QW-04), so the benchmark needs a real session.
+    const registered = await request.post(`${API_BASE}/auth/register`, {
+      data: {
+        email: `perf.nav.${Date.now()}@example.com`,
+        password: 'StrongPassword123!',
+        fullName: 'Perf Navigation',
+        role: 'candidate',
+      },
+    });
+    expect(registered.status()).toBe(201);
+    const { token, user } = await registered.json();
+    await page.addInitScript(
+      (session: { token: string; user: unknown }) => {
+        localStorage.setItem('talentsphere_token', session.token);
+        localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
+      },
+      { token, user }
+    );
+
     await page.goto('/');
 
     const samples: number[] = [];

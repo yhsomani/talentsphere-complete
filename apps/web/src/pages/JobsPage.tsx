@@ -83,9 +83,37 @@ export const JobsPage: React.FC = () => {
   );
 
   const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
+  const [applyError, setApplyError] = useState<string | null>(null);
+  const [applyingId, setApplyingId] = useState<string | null>(null);
 
-  const handleApply = (jobId: string) => {
-    setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+  const handleApply = async (jobId: string) => {
+    setApplyError(null);
+    const token = localStorage.getItem('talentsphere_token');
+    if (!token) {
+      setApplyError('Sign in to apply for this role.');
+      return;
+    }
+    setApplyingId(jobId);
+    try {
+      const res = await fetch(`/api/v1/jobs/${jobId}/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setApplyError(
+          body?.error?.message ?? 'Application could not be submitted. Please try again.'
+        );
+        return;
+      }
+      // Only a 201 from the API may mark this job as applied.
+      setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+    } catch {
+      setApplyError('Application could not be submitted. Please try again.');
+    } finally {
+      setApplyingId(null);
+    }
   };
 
   return (
@@ -128,6 +156,24 @@ export const JobsPage: React.FC = () => {
           artifacts.
         </p>
       </div>
+
+      {applyError && (
+        <div
+          role="alert"
+          data-testid="apply-error"
+          style={{
+            backgroundColor: '#fef2f2',
+            color: colors.semantic.errorText,
+            border: `1px solid ${colors.semantic.error}`,
+            padding: `${spacing.sm} ${spacing.md}`,
+            borderRadius: '6px',
+            marginBottom: spacing.lg,
+            fontSize: '0.875rem',
+          }}
+        >
+          {applyError}
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
         {JOBS.map((job) => {
@@ -216,8 +262,8 @@ export const JobsPage: React.FC = () => {
                     variant={isApplied ? 'secondary' : 'primary'}
                     size="md"
                     data-testid={`apply-btn-${job.id}`}
-                    disabled={isApplied}
-                    onClick={() => handleApply(job.id)}
+                    disabled={isApplied || applyingId === job.id}
+                    onClick={() => void handleApply(job.id)}
                   >
                     {isApplied ? (
                       <>
