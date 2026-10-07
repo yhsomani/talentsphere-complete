@@ -16,16 +16,18 @@ export const HeroTitle: React.FC<{ children: React.ReactNode; style?: React.CSSP
   style,
 }) => (
   <h1
-    style={{
-      fontSize: typography.fontSize['5xl'],
-      fontWeight: typography.fontWeight.extrabold,
-      color: colors.neutral[900],
-      lineHeight: typography.lineHeight.tight,
-      letterSpacing: typography.letterSpacing.tighter,
-      margin: `0 0 ${spacing.md}`,
-      textWrap: 'balance',
-      ...style,
-    } as React.CSSProperties}
+    style={
+      {
+        fontSize: typography.fontSize['5xl'],
+        fontWeight: typography.fontWeight.extrabold,
+        color: colors.neutral[900],
+        lineHeight: typography.lineHeight.tight,
+        letterSpacing: typography.letterSpacing.tighter,
+        margin: `0 0 ${spacing.md}`,
+        textWrap: 'balance',
+        ...style,
+      } as React.CSSProperties
+    }
   >
     {children}
   </h1>

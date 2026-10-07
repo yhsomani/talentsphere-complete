@@ -274,10 +274,7 @@ export const Layout: React.FC = () => {
 
           {userEmail ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-              <span
-                style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}
-                title={userEmail}
-              >
+              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }} title={userEmail}>
                 {userEmail}
               </span>
               <button
@@ -315,8 +312,7 @@ export const Layout: React.FC = () => {
                 minHeight: '40px',
                 borderRadius: '6px',
                 border: `1px solid ${location.pathname === '/login' ? colors.primary[700] : colors.primary[300]}`,
-                backgroundColor:
-                  location.pathname === '/login' ? colors.primary[700] : '#ffffff',
+                backgroundColor: location.pathname === '/login' ? colors.primary[700] : '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
                 transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, border-color ${motion.duration.fast} ${motion.easing.easeOut}`,
@@ -501,7 +497,11 @@ export const Layout: React.FC = () => {
               }}
             >
               <li>
-                <Link to="/evidence" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link
+                  to="/evidence"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
                   Evidence Graph
                 </Link>
               </li>
@@ -514,12 +514,20 @@ export const Layout: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/jobs" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link
+                  to="/jobs"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
                   Verifiable Opportunities
                 </Link>
               </li>
               <li>
-                <Link to="/checkout" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link
+                  to="/checkout"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
                   Plans & Pricing
                 </Link>
               </li>
@@ -551,12 +559,20 @@ export const Layout: React.FC = () => {
               }}
             >
               <li>
-                <Link to="/privacy" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link
+                  to="/privacy"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
                   Privacy Policy (GDPR/CCPA)
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="footer-link" style={{ color: colors.neutral[600], textDecoration: 'none' }}>
+                <Link
+                  to="/terms"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                >
                   Terms & Integrity Standards
                 </Link>
               </li>

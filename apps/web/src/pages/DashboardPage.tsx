@@ -155,11 +155,22 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
+              <span
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: colors.neutral[900],
+                }}
+              >
                 12
               </span>
               <span
-                style={{ fontSize: '0.8125rem', color: colors.semantic.successText, fontWeight: 600 }}
+                style={{
+                  fontSize: '0.8125rem',
+                  color: colors.semantic.successText,
+                  fontWeight: 600,
+                }}
               >
                 +2 this month
               </span>
@@ -193,7 +204,14 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.primary[700] }}>
+              <span
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: colors.primary[700],
+                }}
+              >
                 88%
               </span>
               <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
@@ -229,7 +247,14 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
+              <span
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: colors.neutral[900],
+                }}
+              >
                 3
               </span>
               <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>In Review</span>
@@ -263,7 +288,14 @@ export const DashboardPage: React.FC = () => {
                 marginTop: spacing.xs,
               }}
             >
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', color: colors.neutral[900] }}>
+              <span
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: colors.neutral[900],
+                }}
+              >
                 6
               </span>
               <span style={{ fontSize: '0.8125rem', color: colors.primary[600], fontWeight: 600 }}>

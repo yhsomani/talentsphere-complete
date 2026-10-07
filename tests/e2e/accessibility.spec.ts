@@ -200,7 +200,12 @@ test.describe('A11Y: Keyboard operation (WCAG 2.1.1 Keyboard / 2.4.1 Bypass Bloc
   test('every interactive control on the login form is operable by keyboard', async ({ page }) => {
     await page.goto('/login');
 
-    const focusable = page.locator(`${INTERACTIVE}:visible`);
+    // NOTE: `${INTERACTIVE}:visible` would bind :visible only to the last
+    // selector branch, letting the (correctly) display:none mobile menu
+    // button through as an unfocusable "control". Filter visibility across
+    // every branch instead: WCAG keyboard operability applies to controls a
+    // user can actually see.
+    const focusable = page.locator(INTERACTIVE).filter({ visible: true });
     const count = await focusable.count();
     expect(count, 'login page must expose interactive controls').toBeGreaterThan(0);
 

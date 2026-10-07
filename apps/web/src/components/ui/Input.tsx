@@ -63,9 +63,7 @@ export const Input: React.FC<InputProps> = ({
                 ? colors.semantic.error
                 : colors.neutral[300]
           }`,
-          boxShadow: focused
-            ? `0 0 0 3px ${error ? '#fee2e2' : colors.primary[100]}`
-            : 'none',
+          boxShadow: focused ? `0 0 0 3px ${error ? '#fee2e2' : colors.primary[100]}` : 'none',
           fontSize: '0.875rem',
           color: colors.neutral[900],
           backgroundColor: '#ffffff',

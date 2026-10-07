@@ -56,7 +56,9 @@ describe('INJ-1: SQL Injection defense (input-security tripwires)', () => {
   });
 
   it('accepts ordinary free-text input (no false-positive lockdown)', () => {
-    expect(() => assertNoSqlInjection('I am a senior React engineer with 5y experience')).not.toThrow();
+    expect(() =>
+      assertNoSqlInjection('I am a senior React engineer with 5y experience')
+    ).not.toThrow();
     expect(() => assertNoSqlInjection('salary expectation: $120k - 150k (USD)')).not.toThrow();
   });
 
@@ -123,9 +125,7 @@ describe('INJ-3: Prompt Injection defense (Context Firewall, WIT-007)', () => {
   });
 
   it('still accepts benign career-advice prompts', () => {
-    expect(() =>
-      sanitizePromptInput('How do I negotiate a staff-engineer offer?')
-    ).not.toThrow();
+    expect(() => sanitizePromptInput('How do I negotiate a staff-engineer offer?')).not.toThrow();
   });
 
   it('frames accepted input as data inside <user_content>, never as instructions', () => {

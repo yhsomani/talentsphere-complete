@@ -1,6 +1,6 @@
 # TalentSphere — ARCHITECTURE.md
 
-**Status:** Canonical architectural Single Source of Truth for the repository *as actually implemented*.
+**Status:** Canonical architectural Single Source of Truth for the repository _as actually implemented_.
 **Basis:** Direct inspection of the working tree at branch `main` (commit `8afc6d7`), October 2026.
 **Governs:** Implementation decisions that cannot be safely inferred from reading individual files: ownership, boundaries, dependency direction, extension points, and stop conditions.
 **Does NOT document:** Product vision, the 173-feature portfolio, UX micro-interactions, or future intent. Those live in `SSOT.md` and `docs/`. Where those documents describe systems that do not exist in this repository (Supabase Auth JWT flow, TanStack Query, Stripe adapters, Edge Functions, RLS enforcement in a live database, feature folders in `apps/web/src/features/`), **this file wins for "what exists today"** and the divergence is recorded in §24.
@@ -13,12 +13,12 @@
 This document preserves architectural intent that source code alone cannot reveal. It exists because:
 
 1. **Documentation and implementation materially disagree.** `SSOT.md` declares itself "GREENFIELD / 0% VERIFIED" while the repository contains a large, tested Fastify API, a pure-TypeScript domain package, a React PWA shell, SQL migrations, and CI. A new engineer (or AI agent) reading only `SSOT.md` or only `docs/engineering/ARCHITECTURE.md` would build the wrong things (e.g., wiring Supabase Auth into an app whose auth is HMAC session tokens signed by `packages/domain/src/auth.ts`).
-2. **Deliberate choices look like defects.** In-memory Maps as the runtime store, a single 11k-line `server.ts`, log-only worker handlers, and a local-heuristic AI engine are the *current* architecture; agents must not "fix" them casually (§3, §24).
+2. **Deliberate choices look like defects.** In-memory Maps as the runtime store, a single 11k-line `server.ts`, log-only worker handlers, and a local-heuristic AI engine are the _current_ architecture; agents must not "fix" them casually (§3, §24).
 3. **Duplicate ownership already exists** (design tokens in two places, per-route inline auth parsing) and must not grow (§5).
 
 **Audience:** human developers and AI coding agents. Agents must treat §25 (Invariants), §26 (Decision Register), and §27 (Quick Reference) as binding before making changes. This document ranks **ACTUAL IMPLEMENTATION > OLD DOCUMENTATION > ASSUMPTION**; every major claim here carries file-path evidence (§28 conventions: CONFIRMED / INFERRED / UNKNOWN).
 
-Relationship to other docs: `AGENTS.md`/`CLAUDE.md` define agent workflow and verification tooling (Reticle); `SSOT.md` and `docs/**` define *intended* product architecture; this file defines *enforceable current* architecture. On conflict about what exists, this file governs. On conflict about what should eventually exist, `SSOT.md` governs — but only after explicit human-approved work, never silently during unrelated tasks.
+Relationship to other docs: `AGENTS.md`/`CLAUDE.md` define agent workflow and verification tooling (Reticle); `SSOT.md` and `docs/**` define _intended_ product architecture; this file defines _enforceable current_ architecture. On conflict about what exists, this file governs. On conflict about what should eventually exist, `SSOT.md` governs — but only after explicit human-approved work, never silently during unrelated tasks.
 
 ---
 
@@ -56,6 +56,7 @@ flowchart TD
 ```
 
 Key facts (CONFIRMED):
+
 - **API surface:** 265 route registrations, all under `/api/v1/*` plus `/health` and `/api/v1/health` (`grep app.get/post/patch/delete apps/api/src/server.ts`).
 - **Persistence gap:** zero Postgres/Supabase clients anywhere in `apps/` or `packages/` (verified by `tests/unit/persistence-honesty.test.ts`, which asserts no `pg`/`postgres`/`@supabase/supabase-js`/`knex`/`typeorm` dependency exists).
 - **No production queue broker:** the worker polls its own in-process `JobQueueEngine` (`apps/worker/src/queue.ts`); nothing enqueues into it from the API process.
@@ -66,19 +67,19 @@ Key facts (CONFIRMED):
 
 ## 3. System Boundary
 
-| Area | Responsibility | Inside System? | Notes |
-|---|---|---|---|
-| Authentication | Register/login/session tokens | Yes | Own code: `packages/domain/src/auth.ts` (PBKDF2 + HMAC tokens). **Supabase Auth is NOT integrated** despite env keys existing. |
-| Authorization | Role checks, ownership checks | Yes | Server-side in `apps/api/src/server.ts` via `extractUser` + role assertions + domain functions (`canViewProfile`, `assertPlatformAdmin`, …). |
-| Database | Relational persistence | **No (disconnected)** | 41 SQL migrations exist under `supabase/migrations/`; no runtime connects to them. Truth lives in in-process Maps. |
-| Payments | Card processing | No — and **no provider exists** | Checkout collects raw card fields in the browser (`CheckoutPage.tsx`) and calls a mock billing API. No Stripe/MID dependency anywhere. |
-| Notifications delivery | Email/push/SMS | No | Worker handler only logs ("Delivering queued notification", `apps/worker/src/index.ts`). |
-| AI inference | Career assistant | Partially | Local heuristic inside domain package. External providers (Gemini/Claude) documented in SSOT but **not implemented**. |
-| Storage buckets | Avatars/resumes/etc. | No | Env vars defined (`SUPABASE_BUCKET_*`) but no storage client code. |
-| Identity provider | OAuth/social login | No | Not implemented; email+password only. |
-| Analytics | Product events | Yes (in-memory) | `POST /api/v1/analytics/events` records into an in-process array. |
-| Cloud infra (Supabase/Vercel/etc.) | Hosting/managed services | No | Only referenced by config/docs; nothing in CI deploys. |
-| Verification tooling | Reticle MCP | External tool, inside dev loop | Dev-time only (`@reticlehq/react` is a devDependency). |
+| Area                               | Responsibility                | Inside System?                  | Notes                                                                                                                                        |
+| ---------------------------------- | ----------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication                     | Register/login/session tokens | Yes                             | Own code: `packages/domain/src/auth.ts` (PBKDF2 + HMAC tokens). **Supabase Auth is NOT integrated** despite env keys existing.               |
+| Authorization                      | Role checks, ownership checks | Yes                             | Server-side in `apps/api/src/server.ts` via `extractUser` + role assertions + domain functions (`canViewProfile`, `assertPlatformAdmin`, …). |
+| Database                           | Relational persistence        | **No (disconnected)**           | 41 SQL migrations exist under `supabase/migrations/`; no runtime connects to them. Truth lives in in-process Maps.                           |
+| Payments                           | Card processing               | No — and **no provider exists** | Checkout collects raw card fields in the browser (`CheckoutPage.tsx`) and calls a mock billing API. No Stripe/MID dependency anywhere.       |
+| Notifications delivery             | Email/push/SMS                | No                              | Worker handler only logs ("Delivering queued notification", `apps/worker/src/index.ts`).                                                     |
+| AI inference                       | Career assistant              | Partially                       | Local heuristic inside domain package. External providers (Gemini/Claude) documented in SSOT but **not implemented**.                        |
+| Storage buckets                    | Avatars/resumes/etc.          | No                              | Env vars defined (`SUPABASE_BUCKET_*`) but no storage client code.                                                                           |
+| Identity provider                  | OAuth/social login            | No                              | Not implemented; email+password only.                                                                                                        |
+| Analytics                          | Product events                | Yes (in-memory)                 | `POST /api/v1/analytics/events` records into an in-process array.                                                                            |
+| Cloud infra (Supabase/Vercel/etc.) | Hosting/managed services      | No                              | Only referenced by config/docs; nothing in CI deploys.                                                                                       |
+| Verification tooling               | Reticle MCP                   | External tool, inside dev loop  | Dev-time only (`@reticlehq/react` is a devDependency).                                                                                       |
 
 External providers claimed by docs but absent from code (do NOT assume they exist): Supabase (auth/storage/realtime/queues), Stripe, Resend, Gemini/Claude, Mux, LinkedIn.
 
@@ -87,6 +88,7 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 ## 4. QUESTION 01 — WHAT'S IN THE SYSTEM?
 
 **Component: `apps/api` (@talentsphere/api)**
+
 - Purpose: the only server-side application surface. Fastify 5 modular monolith.
 - Owns: HTTP routing, request lifecycle, canonical error mapping, **all runtime state (in-memory Maps)**, endpoint-level authorization wiring.
 - Consumes: `@talentsphere/domain`, `@talentsphere/contracts`, `@talentsphere/config`.
@@ -96,6 +98,7 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 - Primary location: `apps/api/src/server.ts` (`buildApp()` factory), `apps/api/src/index.ts` (bootstrap, skips listen under `NODE_ENV=test`).
 
 **Component: `packages/domain` (@talentsphere/domain)**
+
 - Purpose: canonical business logic — entities, invariants, state machines, policy gates, and the auth crypto primitives. Pure TypeScript, no framework, no I/O.
 - Owns: `Role`/`UserStatus` unions, `DomainError` + codes, application/job/subscription/evidence/notification state machines, XP caps & badge rules, AI quota tables & prompt sanitizer, assessment AI policy (`isAIAssistanceAllowed`), password hashing & session-token signing/verification.
 - Consumes: nothing (leaf; `core.ts` has zero imports by design).
@@ -105,12 +108,14 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 - Primary location: `packages/domain/src/*.ts` (~45 modules, one per bounded context; barrel `index.ts` re-exports only).
 
 **Component: `packages/contracts` (@talentsphere/contracts)**
+
 - Purpose: the shared API contract — Zod schemas for every request body/query, pagination shapes, and the canonical `ErrorEnvelope`.
 - Owns: input validation schemas (single source), `ErrorEnvelopeSchema`.
 - Must not: duplicate entity definitions owned by domain (it validates payloads; domain defines entities).
 - Primary location: `packages/contracts/src/index.ts` (1679 lines, flat schema list).
 
 **Component: `apps/web` (@talentsphere/web)**
+
 - Purpose: React 19 + Vite PWA consumer shell. 9 routes only (`App.tsx`: `/`, dashboard, login, checkout, evidence, assessments, jobs, privacy, terms).
 - Owns: routing, page composition, client form state, localStorage session keys (`talentsphere_token`, `talentsphere_user`), offline-status UI (`pwa.ts`), PWA manifest/icons.
 - Consumes: `@talentsphere/ui` tokens; API via relative `fetch('/api/v1/...')`.
@@ -118,6 +123,7 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 - Primary location: `apps/web/src/{pages,components,hooks}`. Note: components live in `apps/web/src/components/ui/`, largely duplicating `packages/ui` scope (§24 risk R-3).
 
 **Component: `apps/worker` (@talentsphere/worker)**
+
 - Purpose: async job consumer skeleton. `JobQueueEngine` with retry/backoff-to-requeue, idempotency-key set, and dead-letter queue.
 - Owns: queue semantics (`enqueue`, `processNext`, DLQ, `registerHandler`).
 - Consumes: `@talentsphere/observability`.
@@ -125,19 +131,23 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 - Primary location: `apps/worker/src/queue.ts`, `apps/worker/src/index.ts` (poll loop, 2 s idle sleep).
 
 **Component: `packages/config`**
+
 - Purpose: zod-validated environment schema (`ServerEnvSchema`) — the single definition of every env var incl. `TOKEN_SECRET` (min 32 chars, optional with documented random-per-process fallback), CORS origins, rate limits, AI policy flags.
 - Primary location: `packages/config/src/env.ts`.
 
 **Component: `packages/observability`**
+
 - Purpose: pino logger factory with standard redaction list (authorization headers, password, token, apiKey, secret, accessToken, refreshToken) and an `AuditEvent`/`AuditSink` interface with an in-memory implementation.
 - Must not: log unredacted credentials; become the only audit trail (admin audit currently lives in API Maps, not this sink — §24 R-6).
 
 **Component: `packages/ui` + `packages/testing`**
+
 - `packages/ui`: canonical design tokens (`colors`, `spacing`) per WCAG-oriented design system. No components.
 - `packages/testing`: mock factories (`createMockUser/Profile/Evidence`) used by unit tests.
 
 **Component: `supabase/migrations` + `scripts/`**
-- 41 numbered SQL migrations defining the *intended* schema with RLS statements; validated only as text by `tests/unit/database-migrations.test.ts` ("SQL text assertions, does NOT execute SQL"). `scripts/migrate.mjs` deliberately refuses to claim execution and points at `supabase db push` (guarded by `persistence-honesty.test.ts`). `scripts/start-e2e-api.mjs` boots the built API for Playwright.
+
+- 41 numbered SQL migrations defining the _intended_ schema with RLS statements; validated only as text by `tests/unit/database-migrations.test.ts` ("SQL text assertions, does NOT execute SQL"). `scripts/migrate.mjs` deliberately refuses to claim execution and points at `supabase db push` (guarded by `persistence-honesty.test.ts`). `scripts/start-e2e-api.mjs` boots the built API for Playwright.
 
 **Communication paths (CONFIRMED):** Browser → API (HTTP, Bearer token) → domain functions → in-memory Maps. Worker runs standalone. Tests hit the API in-process (`buildApp()` + `app.inject`) or over HTTP for E2E. There is **no** API→Worker path, **no** API→DB path, **no** realtime channel, **no** outbound external integration.
 
@@ -145,28 +155,29 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 
 ## 5. QUESTION 02 — WHO'S RESPONSIBLE FOR WHAT?
 
-| Responsibility | Single Owner | Location | Notes |
-|---|---|---|---|
-| Password hashing / verification | `hashPassword`/`verifyPassword` | `packages/domain/src/auth.ts` | PBKDF2-SHA512, constant-time compare. |
-| Session token mint/verify/expiry | `createSessionToken`/`verifySessionToken` | `packages/domain/src/auth.ts` | HMAC-SHA256, base64url payload.signature, TTL 86400 s default. |
-| Extracting identity from a request | `extractUser` closure | `apps/api/src/server.ts:672` | Canonical helper; see duplication risk R-2. |
-| Role/permission rules | Domain functions (`assertPlatformAdmin`, `canViewProfile`, `assertModeratorAuthority`, `assertThreadParticipant`, `assertAIAssistanceAllowed`, …) | `packages/domain/src/{admin,profile,moderation,messaging,assessment}.ts` | API routes call them; routes also do some inline `session.roles.includes('platform_admin')` checks (R-2). |
-| Application lifecycle states | `ALLOWED_APPLICATION_TRANSITIONS` + `transitionApplicationState` | `packages/domain/src/core.ts` + `applications.ts` | The state machine is canonical in domain. |
-| Evidence lifecycle (verify/dispute/revoke/provenance) | domain `evidence.ts` functions | `packages/domain/src/evidence.ts` | |
-| Billing plans/entitlements/subscriptions | domain `billing.ts` (`PLATFORM_PLANS`, `getPlanEntitlements`, `createSubscription`, `cancelSubscription`) | `packages/domain/src/billing.ts` | Payment *processing* is owned by nobody (mock webhook only). |
-| AI quota/policy/sanitization | domain `ai-gateway.ts` (`AI_QUOTA_LIMITS`, `assertWithinAIQuota`, `sanitizePromptInput`) | `packages/domain/src/ai-gateway.ts` | Tier selection currently hardcoded `'free'` at route level (`server.ts:5198`) — R-4. |
-| Request-payload validation | `@talentsphere/contracts` Zod schemas | `packages/contracts/src/index.ts` | `.parse(req.body)` inside route handlers; ZodError → 400 centrally. |
-| Error→HTTP status mapping | Global `setErrorHandler` | `apps/api/src/server.ts` (~lines 470–545) | Sole translator of `DomainError.code` → status + `ErrorEnvelope`. |
-| Runtime persistence | In-process Maps inside `buildApp()` | `apps/api/src/server.ts:571+` | Deliberate current-state owner; replacement requires §8 stop-condition. |
-| Intended relational schema | SQL migrations | `supabase/migrations/*.sql` | Text-verified only; not executed by app. |
-| Async job semantics (retry/DLQ/idempotency) | `JobQueueEngine` | `apps/worker/src/queue.ts` | Handlers registered in `worker/src/index.ts`. |
-| Client session storage | Web pages/Layout | `apps/web/src/pages/LoginPage.tsx`, `Layout.tsx` | localStorage keys `talentsphere_token`/`talentsphere_user`. |
-| Design tokens | `packages/ui/tokens.ts` | `packages/ui/src/tokens.ts` | Competes with `apps/web/src/components/ui/` — R-3. |
-| Audit logging (admin actions) | `createAdminAuditLog` + `adminAuditLogs` array | domain `admin.ts` + API Map | `packages/observability/audit.ts` sink exists but is unused by API — R-6. |
-| Test fixtures | `packages/testing/factories.ts` | | |
+| Responsibility                                        | Single Owner                                                                                                                                      | Location                                                                 | Notes                                                                                                     |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Password hashing / verification                       | `hashPassword`/`verifyPassword`                                                                                                                   | `packages/domain/src/auth.ts`                                            | PBKDF2-SHA512, constant-time compare.                                                                     |
+| Session token mint/verify/expiry                      | `createSessionToken`/`verifySessionToken`                                                                                                         | `packages/domain/src/auth.ts`                                            | HMAC-SHA256, base64url payload.signature, TTL 86400 s default.                                            |
+| Extracting identity from a request                    | `extractUser` closure                                                                                                                             | `apps/api/src/server.ts:672`                                             | Canonical helper; see duplication risk R-2.                                                               |
+| Role/permission rules                                 | Domain functions (`assertPlatformAdmin`, `canViewProfile`, `assertModeratorAuthority`, `assertThreadParticipant`, `assertAIAssistanceAllowed`, …) | `packages/domain/src/{admin,profile,moderation,messaging,assessment}.ts` | API routes call them; routes also do some inline `session.roles.includes('platform_admin')` checks (R-2). |
+| Application lifecycle states                          | `ALLOWED_APPLICATION_TRANSITIONS` + `transitionApplicationState`                                                                                  | `packages/domain/src/core.ts` + `applications.ts`                        | The state machine is canonical in domain.                                                                 |
+| Evidence lifecycle (verify/dispute/revoke/provenance) | domain `evidence.ts` functions                                                                                                                    | `packages/domain/src/evidence.ts`                                        |                                                                                                           |
+| Billing plans/entitlements/subscriptions              | domain `billing.ts` (`PLATFORM_PLANS`, `getPlanEntitlements`, `createSubscription`, `cancelSubscription`)                                         | `packages/domain/src/billing.ts`                                         | Payment _processing_ is owned by nobody (mock webhook only).                                              |
+| AI quota/policy/sanitization                          | domain `ai-gateway.ts` (`AI_QUOTA_LIMITS`, `assertWithinAIQuota`, `sanitizePromptInput`)                                                          | `packages/domain/src/ai-gateway.ts`                                      | Tier selection currently hardcoded `'free'` at route level (`server.ts:5198`) — R-4.                      |
+| Request-payload validation                            | `@talentsphere/contracts` Zod schemas                                                                                                             | `packages/contracts/src/index.ts`                                        | `.parse(req.body)` inside route handlers; ZodError → 400 centrally.                                       |
+| Error→HTTP status mapping                             | Global `setErrorHandler`                                                                                                                          | `apps/api/src/server.ts` (~lines 470–545)                                | Sole translator of `DomainError.code` → status + `ErrorEnvelope`.                                         |
+| Runtime persistence                                   | In-process Maps inside `buildApp()`                                                                                                               | `apps/api/src/server.ts:571+`                                            | Deliberate current-state owner; replacement requires §8 stop-condition.                                   |
+| Intended relational schema                            | SQL migrations                                                                                                                                    | `supabase/migrations/*.sql`                                              | Text-verified only; not executed by app.                                                                  |
+| Async job semantics (retry/DLQ/idempotency)           | `JobQueueEngine`                                                                                                                                  | `apps/worker/src/queue.ts`                                               | Handlers registered in `worker/src/index.ts`.                                                             |
+| Client session storage                                | Web pages/Layout                                                                                                                                  | `apps/web/src/pages/LoginPage.tsx`, `Layout.tsx`                         | localStorage keys `talentsphere_token`/`talentsphere_user`.                                               |
+| Design tokens                                         | `packages/ui/tokens.ts`                                                                                                                           | `packages/ui/src/tokens.ts`                                              | Competes with `apps/web/src/components/ui/` — R-3.                                                        |
+| Audit logging (admin actions)                         | `createAdminAuditLog` + `adminAuditLogs` array                                                                                                    | domain `admin.ts` + API Map                                              | `packages/observability/audit.ts` sink exists but is unused by API — R-6.                                 |
+| Test fixtures                                         | `packages/testing/factories.ts`                                                                                                                   |                                                                          |                                                                                                           |
 
 **ARCHITECTURAL RISK — duplicated ownership**
-- **R-2 (MEDIUM-HIGH):** Authorization is *mostly* delegated to domain predicates, but many routes additionally do inline `session.roles.includes('platform_admin')` checks, and several endpoints re-implement token extraction inline (`server.ts` lines 804–812, 979–987, 1022–1030 parse `authorization` manually instead of calling `extractUser`). Canonical owner: domain predicates called through `extractUser`-provided sessions. Human confirmation needed before consolidating (behavior must stay identical; security suite covers it).
+
+- **R-2 (MEDIUM-HIGH):** Authorization is _mostly_ delegated to domain predicates, but many routes additionally do inline `session.roles.includes('platform_admin')` checks, and several endpoints re-implement token extraction inline (`server.ts` lines 804–812, 979–987, 1022–1030 parse `authorization` manually instead of calling `extractUser`). Canonical owner: domain predicates called through `extractUser`-provided sessions. Human confirmation needed before consolidating (behavior must stay identical; security suite covers it).
 - **R-3 (MEDIUM):** UI primitives exist in `apps/web/src/components/ui/` while `packages/ui` holds only tokens. Not yet conflicting, but a second component library must not appear in `packages/ui` without a decision.
 - **R-4 (HIGH, security-adjacent):** AI tier is hardcoded `'free'` in the route even though subscription entitlements exist in domain/billing; the canonical owner of "which tier is this user" is undefined between `subscriptionsByUserId` Map and `ai-gateway.ts`. STOP-and-ask applies.
 
@@ -183,7 +194,7 @@ Status: KNOWN DECISION (`SSOT.md` Founder Amendment A.1; `docs/engineering/ARCHI
 Status: KNOWN DECISION (import-rule section of `docs/engineering/ARCHITECTURE.md` §5; enforced structurally — domain has zero framework deps). Reason: rules must be testable without HTTP and reusable by worker/tests. Alternative: logic in Fastify services. Rejected: untestable duplication. Trade-off: routes become thin but numerous. Revisit: never (candidate invariant INV-002).
 
 **D3 — In-memory Maps as runtime persistence.**
-Status: INFERRED DECISION — the code comment says "In-memory repositories for modular monolith runtime state" (`server.ts:571`) and `persistence-honesty.test.ts` actively *guards* against pretending a DB is connected. Strong evidence this is a deliberate staging choice pending Supabase wiring, not an oversight. Alternative: wire Postgres now. Not selected: no DB client dependency exists by design; honesty tests enforce that. Trade-off accepted: **all runtime state is lost on restart**. Justifies revisiting: first deployment target requiring durability (requires human decision — §8, §28 U-1).
+Status: INFERRED DECISION — the code comment says "In-memory repositories for modular monolith runtime state" (`server.ts:571`) and `persistence-honesty.test.ts` actively _guards_ against pretending a DB is connected. Strong evidence this is a deliberate staging choice pending Supabase wiring, not an oversight. Alternative: wire Postgres now. Not selected: no DB client dependency exists by design; honesty tests enforce that. Trade-off accepted: **all runtime state is lost on restart**. Justifies revisiting: first deployment target requiring durability (requires human decision — §8, §28 U-1).
 
 **D4 — Self-signed HMAC session tokens instead of Supabase Auth/JWT.**
 Status: KNOWN DECISION rationale recorded in-code (`auth.ts` TOKEN_SECRET comment: hardcoded fallback key would let anyone mint privileged tokens; random per-process key keeps tokens unforgeable at the cost of surviving restarts). Alternative: Supabase Auth (documented in `docs/engineering/ARCHITECTURE.md` §20.3 — NOT implemented). Trade-off: no refresh mechanism, no revocation list, sessions die with process unless `TOKEN_SECRET` set. Revisit when real auth provider is introduced — escalation required (`AGENTS.md`: security architecture changes).
@@ -201,12 +212,13 @@ Status: KNOWN DECISION direction (SSOT C: "AI Gateway foundational"; env flags `
 Status: INFERRED DECISION (skeleton-first; `queue.ts` implements retry/DLQ/idempotency properly, handlers don't do work yet). Trade-off: async pipeline is not durable and not connected. Any real producer/consumer wiring = new infrastructure decision → ask.
 
 **D9 — Schema-as-text with honesty-guarded migration script.**
-Status: KNOWN DECISION (`migrate.mjs` validates contiguity and refuses success-claims; `database-migrations.test.ts` title states "does NOT execute SQL"). Reason: prevent "documented = implemented" drift the repo explicitly fights. 
+Status: KNOWN DECISION (`migrate.mjs` validates contiguity and refuses success-claims; `database-migrations.test.ts` title states "does NOT execute SQL"). Reason: prevent "documented = implemented" drift the repo explicitly fights.
 
 **D10 — pnpm workspace with strict layered dependencies.**
 Status: CONFIRMED (`pnpm-workspace.yaml`; apps depend on packages, packages depend on nothing but zod/pino/crypto). Alternatives considered: UNKNOWN.
 
 **UNKNOWN — HUMAN DECISION REQUIRED**
+
 - U-1: Target hosting/topology (nothing deploys; no Dockerfile/IaC found).
 - U-2: Whether relative `/api/v1` fetches imply a planned same-origin proxy/gateway (none configured in `vite.config.ts`).
 - U-3: Ownership model for multi-tenancy beyond `TENANT_ISOLATION_VIOLATION` error code and org-scoped maps.
@@ -221,27 +233,29 @@ Status: CONFIRMED (`pnpm-workspace.yaml`; apps depend on packages, packages depe
 Everything may depend on `@talentsphere/config` (processes) and `@talentsphere/testing` (tests only).
 
 **Allowed:**
+
 - UI → API HTTP only (relative `/api/v1/*`).
 - API route → contracts schema `.parse()` → domain function → Map store.
 - Domain → `core.ts` leaf and sibling declaring-module imports (never its own barrel).
 
 **Forbidden Dependencies**
 
-| Source | Must Not Depend On | Reason |
-|---|---|---|
-| `apps/web` | PostgreSQL/Supabase clients, service-role keys | Browser cannot hold privileged credentials; API is the sole authority (SSOT A.2). |
-| `apps/web` | `@talentsphere/domain` internals as business authority | Client checks are UX conveniences; server enforcement is mandatory (INV-004). |
-| `packages/domain` | fastify, zod, supabase clients, any provider SDK, network/fs I/O | Purity is why domain is testable everywhere; breaks tree-shaking & reuse. |
-| `packages/domain` module | its own `index.ts` barrel | Documented circular-import regression rule (`docs/engineering/ARCHITECTURE.md` §5.1). |
-| `packages/contracts` | `@talentsphere/domain` | Contracts must stay independently consumable (today: zero coupling). |
-| `apps/api` route handler | direct `verifySessionToken(...)` ad-hoc parsing where `extractUser` applies | Prevents divergent auth behavior (existing violations = R-2, do not add more). |
-| `apps/api` | inventing response/error shapes outside `ErrorEnvelope`/contract schemas | One canonical envelope; parallel shapes break clients and tests. |
-| `apps/worker` | `@talentsphere/domain`… currently allowed, but must not reach into API process Maps | They are separate processes; there is no shared memory — cross-process state transfer requires a real queue decision. |
-| Any `apps/*` | committing secrets / `TOKEN_SECRET` / service-role keys | `.env.example` is the only committed env artifact; env is validated fail-fast in config. |
-| Tests | weakening assertions to pass | `CLAUDE.md`/Reticle rules + CI retries=0; a red test is a finding. |
+| Source                   | Must Not Depend On                                                                  | Reason                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`               | PostgreSQL/Supabase clients, service-role keys                                      | Browser cannot hold privileged credentials; API is the sole authority (SSOT A.2).                                     |
+| `apps/web`               | `@talentsphere/domain` internals as business authority                              | Client checks are UX conveniences; server enforcement is mandatory (INV-004).                                         |
+| `packages/domain`        | fastify, zod, supabase clients, any provider SDK, network/fs I/O                    | Purity is why domain is testable everywhere; breaks tree-shaking & reuse.                                             |
+| `packages/domain` module | its own `index.ts` barrel                                                           | Documented circular-import regression rule (`docs/engineering/ARCHITECTURE.md` §5.1).                                 |
+| `packages/contracts`     | `@talentsphere/domain`                                                              | Contracts must stay independently consumable (today: zero coupling).                                                  |
+| `apps/api` route handler | direct `verifySessionToken(...)` ad-hoc parsing where `extractUser` applies         | Prevents divergent auth behavior (existing violations = R-2, do not add more).                                        |
+| `apps/api`               | inventing response/error shapes outside `ErrorEnvelope`/contract schemas            | One canonical envelope; parallel shapes break clients and tests.                                                      |
+| `apps/worker`            | `@talentsphere/domain`… currently allowed, but must not reach into API process Maps | They are separate processes; there is no shared memory — cross-process state transfer requires a real queue decision. |
+| Any `apps/*`             | committing secrets / `TOKEN_SECRET` / service-role keys                             | `.env.example` is the only committed env artifact; env is validated fail-fast in config.                              |
+| Tests                    | weakening assertions to pass                                                        | `CLAUDE.md`/Reticle rules + CI retries=0; a red test is a finding.                                                    |
 
 **Existing coupling to watch (do not extend):**
-- `server.ts` is a god-file: all Maps, helpers, and 265 routes share one closure. New features land *inside* it following the per-feature Map + route block pattern until a human approves decomposition.
+
+- `server.ts` is a god-file: all Maps, helpers, and 265 routes share one closure. New features land _inside_ it following the per-feature Map + route block pattern until a human approves decomposition.
 - Hidden coupling: `vitest.config.ts`/`playwright.config.ts` pin `TEST_TOKEN_SECRET` because tests import domain **from source** while the API imports the **built** package — two copies of `auth.ts` must agree on the signing key. Changing token logic requires updating both loaders' assumptions.
 - No circular dependencies detected among workspace packages (domain is the leaf; api depends on domain/contracts/config; web depends on ui only). Keep it that way.
 
@@ -250,6 +264,7 @@ Everything may depend on `@talentsphere/config` (processes) and `@talentsphere/t
 ## 8. QUESTION 05 — HOW DOES DATA ACTUALLY MOVE?
 
 ### Flow A — Login / session establishment (security-critical)
+
 Trigger: user submits credentials.
 `LoginPage.tsx handleSubmit` → `POST /api/v1/auth/login` → `LoginInputSchema.parse` → route looks up `usersByEmail` Map → `verifyPassword` (domain, timing-safe) → `createSessionToken(userId,email,roles)` → `{token,user,profile}` → UI writes `localStorage['talentsphere_token'|'talentsphere_user']` → redirect `/dashboard`.
 Authenticated requests: `Authorization: Bearer <token>` → `extractUser` → `verifySessionToken` (HMAC + expiry) → session payload `{userId,email,roles}` drives all downstream checks.
@@ -258,26 +273,31 @@ Failure path: unknown user or bad password → `DomainError UNAUTHENTICATED` →
 State transition: anonymous → authenticated. Ownership: token payload roles are trusted **only** because HMAC-verified server-side; localStorage is convenience copy, not truth.
 
 ### Flow B — Evidence creation & verification (core product loop)
+
 `EvidencePage`/client → `POST /api/v1/evidence` → parse → `extractUser` → domain `createEvidence` (status `pending`, provenance recorded) → stored in evidence Maps → response. Verifier role → `POST .../verify|dispute|revoke` → domain transitions (`verifyEvidence` etc. enforce who may move which state) → updated record; public proof generation available (`generatePublicProof`).
 Failure: wrong role → `FORBIDDEN`/`UNAUTHORIZED` 403; bad state → `INVALID_STATE_TRANSITION` 422.
 Ownership: evidence state truth = API Maps (runtime) / `public.evidence` table (intended, disconnected).
 **CURRENT GAP (P0-07):** `EvidencePage.tsx:133` fabricates `sha256:` hashes with `Math.random()` client-side — simulation, not transaction.
 
 ### Flow C — Job application submission (business transaction)
+
 `JobsPage` → `POST /api/v1/jobs/:id/apply` → `SubmitApplicationInputSchema` → participant checks → `submitJobApplication` (domain) → recruiter transitions via `transitionApplicationState` guarded by `ALLOWED_APPLICATION_TRANSITIONS` (draft→submitted→in_review→shortlisted→interviewing→offered→hired|rejected|withdrawn; terminal states immutable).
 Failure: illegal edge → 422 `INVALID_STATE_TRANSITION`; non-party → 403.
 **CURRENT GAP (P0-07):** `JobsPage.tsx:79-82,218` shows "Application Transmitted" from local React state without fetching — UI simulates the transaction.
 
 ### Flow D — Subscription checkout (money-adjacent)
+
 `CheckoutPage` → (raw card fields collected client-side — **CURRENT GAP P0-03**, no processor/tokenizer exists) → `POST /api/v1/billing/subscribe` with Bearer token + client-generated `idempotencyKey` → domain `createSubscription` against `PLATFORM_PLANS` → `subscriptionsByUserId`/`entitlementsByUserId` Maps + invoice record. Cancel → `cancelSubscription` (at-period-end semantics). Webhook `POST /api/v1/billing/webhook` dedupes via `billingEventsByIdempotency` Map.
 Failure: **swallowed** — UI uses `.catch(() => null)` then unconditionally renders "Subscription Confirmed!" (**CURRENT GAP P0-02**). Webhook is unsigned (**P0-05**, acknowledged in `docs/quality/SECURITY.md` §9).
 Ownership: subscription/entitlement truth = domain functions + API Maps. Nothing external is source of truth.
 
 ### Flow E — AI assistant query (policy-critical)
+
 Client → `POST /api/v1/ai/chat` → `extractUser` → `sanitizePromptInput` → tier (hardcoded `'free'` — R-4) → `getOrCreateAIUsageMeter` → `assertWithinAIQuota` (tokens/day, requests/day) → `generateCareerAssistantResponse` (local heuristic) → message + `AIProvenance{executionMode:'local_heuristic', disclaimer}` persisted in Maps. Assessment context: `assertAIAssistanceAllowed(policyMode)` blocks AI during `AI_PROHIBITED` sessions server-side → 403 `ASSESSMENT_AI_PROHIBITED`; quota breach → 402 `FREE_USER_AI_QUOTA_EXCEEDED`.
 Ownership: quota meters in API Maps; limits in domain constants.
 
 ### Flow F — Async jobs (designed, not connected)
+
 Intended: producer → `queueEngine.enqueue(type,payload,{idempotencyKey})` → poll loop `processNext` → registered handler → completion or requeue (≤ maxRetries=3) → DLQ. Actual: **no producer exists in the API process**; handlers log only. Treat `evidence.propagate`, `notifications.send`, `analytics.aggregate` as reserved contracts, not behavior.
 
 Cross-cutting: every response carries `x-request-id` (echoing inbound header or generated `req_uuid`) — the correlation primitive for logs and `ErrorEnvelope.request_id`.
@@ -302,22 +322,22 @@ Violating any of these justifies stopping implementation (§11/§27), not workin
 
 ## 10. QUESTION 07 — WHERE DOES NEW CODE BELONG?
 
-| New Requirement | Correct Location | Existing Pattern to Follow | Must Not Do |
-|---|---|---|---|
-| New business rule / state machine | `packages/domain/src/<context>.ts`; shared primitives go to `core.ts` only if no feature owns them | Export pure function throwing `DomainError(code,...)`; unit-test in `tests/unit/*-domain.test.ts` | Inline the rule in a route; duplicate an existing predicate. |
-| New API endpoint | Add a route block in `apps/api/src/server.ts` under `/api/v1/<context>` using `extractUser` + contract schema + domain call + Maps | See Jobs/Evidence blocks; register feature flag in `featureFlags` Map if gated | Create a second router file/framework, another error shape, or a parallel version namespace. |
-| New request/response shape | `packages/contracts/src/index.ts` Zod schema | `<Verb><Noun>InputSchema` naming | Define ad-hoc object types in server.ts. |
-| New persistent entity (runtime) | A dedicated `Map` group inside `buildApp()` keyed by id + owner | e.g. `talentPoolsById` + `talentPoolsByOrgId` | Write to the API process from the worker (separate process, no shared memory). |
-| New table/column | Append next-numbered `supabase/migrations/000NN_*.sql` (sequence must stay contiguous — `migrate.mjs` enforces) + text assertions in `tests/unit/database-migrations.test.ts` | RLS enabled per existing migrations | Claim the schema is "live"; connect a driver without §28 approval. |
-| New background task | Register handler type in `apps/worker/src/index.ts`; enqueue via `queueEngine.enqueue` with `idempotencyKey` | `evidence.propagate` style | Build an independent scheduler/`setInterval` runner or a second queue class. |
-| New notification type | Extend `NotificationType` + `shouldDeliverNotification` in domain `notifications.ts`; preferences via `createDefaultNotificationPreferences` | Route persists Notification entity; delivery remains worker's reserved concern | Send email/SMS directly from a route. |
-| New validation | Zod schema in contracts (shape) + domain guard (semantics/invariant) | 400 vs 422 handled centrally | Validate only in the browser. |
-| New page/route (web) | `apps/web/src/pages/XPage.tsx` + `<Route>` in `App.tsx` + nav entry in `Layout.tsx navLinks` | Existing 9-route pattern; `usePageMeta` hook for titles | Introduce a router abstraction or fetch from anything but `/api/v1`. |
-| New shared UI component | `apps/web/src/components/ui/` consuming tokens from `@talentsphere/ui` | Button/Card/Input/Modal patterns | Add colors/spacing literals; start a component library inside `packages/ui` without a decision (R-3). |
-| New client state | Local `useState`/`useEffect` per page (current convention; no global store exists) | Layout reads localStorage user copy | Add Redux/TanStack Query/Zustand because docs mention them — that is a new-pattern decision. |
-| New env var | `packages/config/src/env.ts` schema (+ `.env.example`) | zod defaults + comments explaining trade-offs | Read `process.env` directly outside config (exception: `auth.ts` TOKEN_SECRET by design, `logger.ts` LOG_LEVEL fallback). |
-| New external integration | Propose an adapter module first — **STOP and ask** (§11). No adapter directory exists yet. | — | Call a provider SDK from a route or the browser. |
-| New test | Unit: `tests/unit/<context>-domain.test.ts`; API behavior: `tests/integration/*.test.ts` via `buildApp()+inject`; journey: `tests/e2e/*.spec.ts` | Pin nothing new around tokens — configs already pin `TEST_TOKEN_SECRET` | Weaken an assertion to get green. |
+| New Requirement                   | Correct Location                                                                                                                                                              | Existing Pattern to Follow                                                                        | Must Not Do                                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| New business rule / state machine | `packages/domain/src/<context>.ts`; shared primitives go to `core.ts` only if no feature owns them                                                                            | Export pure function throwing `DomainError(code,...)`; unit-test in `tests/unit/*-domain.test.ts` | Inline the rule in a route; duplicate an existing predicate.                                                              |
+| New API endpoint                  | Add a route block in `apps/api/src/server.ts` under `/api/v1/<context>` using `extractUser` + contract schema + domain call + Maps                                            | See Jobs/Evidence blocks; register feature flag in `featureFlags` Map if gated                    | Create a second router file/framework, another error shape, or a parallel version namespace.                              |
+| New request/response shape        | `packages/contracts/src/index.ts` Zod schema                                                                                                                                  | `<Verb><Noun>InputSchema` naming                                                                  | Define ad-hoc object types in server.ts.                                                                                  |
+| New persistent entity (runtime)   | A dedicated `Map` group inside `buildApp()` keyed by id + owner                                                                                                               | e.g. `talentPoolsById` + `talentPoolsByOrgId`                                                     | Write to the API process from the worker (separate process, no shared memory).                                            |
+| New table/column                  | Append next-numbered `supabase/migrations/000NN_*.sql` (sequence must stay contiguous — `migrate.mjs` enforces) + text assertions in `tests/unit/database-migrations.test.ts` | RLS enabled per existing migrations                                                               | Claim the schema is "live"; connect a driver without §28 approval.                                                        |
+| New background task               | Register handler type in `apps/worker/src/index.ts`; enqueue via `queueEngine.enqueue` with `idempotencyKey`                                                                  | `evidence.propagate` style                                                                        | Build an independent scheduler/`setInterval` runner or a second queue class.                                              |
+| New notification type             | Extend `NotificationType` + `shouldDeliverNotification` in domain `notifications.ts`; preferences via `createDefaultNotificationPreferences`                                  | Route persists Notification entity; delivery remains worker's reserved concern                    | Send email/SMS directly from a route.                                                                                     |
+| New validation                    | Zod schema in contracts (shape) + domain guard (semantics/invariant)                                                                                                          | 400 vs 422 handled centrally                                                                      | Validate only in the browser.                                                                                             |
+| New page/route (web)              | `apps/web/src/pages/XPage.tsx` + `<Route>` in `App.tsx` + nav entry in `Layout.tsx navLinks`                                                                                  | Existing 9-route pattern; `usePageMeta` hook for titles                                           | Introduce a router abstraction or fetch from anything but `/api/v1`.                                                      |
+| New shared UI component           | `apps/web/src/components/ui/` consuming tokens from `@talentsphere/ui`                                                                                                        | Button/Card/Input/Modal patterns                                                                  | Add colors/spacing literals; start a component library inside `packages/ui` without a decision (R-3).                     |
+| New client state                  | Local `useState`/`useEffect` per page (current convention; no global store exists)                                                                                            | Layout reads localStorage user copy                                                               | Add Redux/TanStack Query/Zustand because docs mention them — that is a new-pattern decision.                              |
+| New env var                       | `packages/config/src/env.ts` schema (+ `.env.example`)                                                                                                                        | zod defaults + comments explaining trade-offs                                                     | Read `process.env` directly outside config (exception: `auth.ts` TOKEN_SECRET by design, `logger.ts` LOG_LEVEL fallback). |
+| New external integration          | Propose an adapter module first — **STOP and ask** (§11). No adapter directory exists yet.                                                                                    | —                                                                                                 | Call a provider SDK from a route or the browser.                                                                          |
+| New test                          | Unit: `tests/unit/<context>-domain.test.ts`; API behavior: `tests/integration/*.test.ts` via `buildApp()+inject`; journey: `tests/e2e/*.spec.ts`                              | Pin nothing new around tokens — configs already pin `TEST_TOKEN_SECRET`                           | Weaken an assertion to get green.                                                                                         |
 
 ---
 
@@ -335,6 +355,7 @@ Violating any of these justifies stopping implementation (§11/§27), not workin
 8. Do not introduce an alternative architecture without human approval.
 
 Also STOP when:
+
 - Two owners compete for a responsibility (known cases: R-2 auth-check duplication, R-4 AI-tier ownership) and your change touches either.
 - Required behavior has no obvious home (e.g., "real payments", "push delivery", "search index") — the current architecture has no slot for them.
 - The task needs a new infrastructure dependency (DB driver, Redis/queue broker, Stripe, LLM SDK, Supabase client, auth provider). Per `AGENTS.md` these are escalation categories.
@@ -381,7 +402,7 @@ Also STOP when:
 - **Routing structure:** flat registrations on the Fastify instance grouped by commented feature blocks inside `buildApp()`; 265 endpoints covering auth/profile/evidence/skills/jobs/applications/challenges/assessments/LMS/messaging/notifications/AI/resumes/networking/portfolio/gamification/settings/billing/admin/search/moderation/saved-searches/drafts/analytics/templates/salaries/feedback/skill-decay/interviews/reputation/warm-intros/referrals/activity/instructors/alumni/employers/forecasting/career-trajectory/learning-impact/talent-pools/behavioral/segmentation/work-history.
 - **Request flow:** plugin hooks (helmet → cors → rate-limit) → route → `Schema.parse(body/query/params)` → `extractUser` → domain guard/function → Map mutation → JSON reply. Unknown routes → 404 `NOT_FOUND` envelope.
 - **Response conventions:** resource objects serialized from domain types; errors exclusively `ErrorEnvelope {error:{code,message,request_id,details?}}`; `x-request-id` on every response; pagination schemas exist in contracts (`PaginationQuerySchema`, `PaginatedMetaSchema`) though not every list endpoint uses them (INFERRED partial adoption).
-- **Validation:** contracts at boundary (400 VALIDATION_FAILED) + domain semantic invariants (422). 
+- **Validation:** contracts at boundary (400 VALIDATION_FAILED) + domain semantic invariants (422).
 - **AuthN/AuthZ:** Bearer HMAC token; role/ownership predicates per §12.
 - **Rate limiting:** global `@fastify/rate-limit` (default 100 req/15 min window, env-tunable; E2E raises to 100000). 429 mapped to `RATE_LIMIT_EXCEEDED` envelope.
 - **Idempotency:** implemented for billing webhook (`billingEventsByIdempotency`) and accepted on subscribe (`idempotencyKey` passthrough); not generalized elsewhere.
@@ -450,6 +471,7 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 ## 20. Security Architecture
 
 **Implemented boundaries (CONFIRMED):**
+
 - Trust boundary at the token signature: privileges come only from HMAC-verified payloads; random per-process key fallback documented and defended (`auth.ts` comment).
 - Password storage: PBKDF2-SHA512 10 000 iters, per-user salt, constant-time verify.
 - Log redaction lists in both `packages/observability` and Fastify logger config (authorization headers, password/token/secret/apiKey/accessToken/refreshToken).
@@ -458,6 +480,7 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 - Secrets hygiene: `.env.example` only; env validated fail-fast; `test-secrets.mjs` isolates test signing key from any real secret.
 
 **CURRENT GAPS (do not present as intended design; do not widen):**
+
 - G-1 P0-01 demo-token login fallback in `LoginPage.tsx` (auth bypass UX).
 - G-2 P0-02 checkout confirms success despite failed backend call.
 - G-3 P0-03 raw PAN/CVC fields handled by browser app with no tokenizer/processor.
@@ -466,7 +489,7 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 - G-6 No refresh/revocation; 24 h stolen-token window.
 - G-7 Fake evidence hashes / simulated submissions in web pages (misleading trust artifacts).
 - G-8 Compliance marketing copy ("GDPR & CCPA Compliant", "SOC2 Type II Ready") unsupported by controls (audit finding 22.6).
-Each gap is a fix candidate **only** as an explicit, tested remediation task; agents must not add code that deepens them (e.g., new client-side auth shortcuts, new unsigned callback endpoints).
+  Each gap is a fix candidate **only** as an explicit, tested remediation task; agents must not add code that deepens them (e.g., new client-side auth shortcuts, new unsigned callback endpoints).
 
 ---
 
@@ -483,16 +506,16 @@ Each gap is a fix candidate **only** as an explicit, tested remediation task; ag
 
 ## 22. Testing Architecture
 
-| Layer | Home | Convention |
-|---|---|---|
-| Pure business rules | `tests/unit/*-domain.test.ts` (Vitest) | Import domain **from source** (`packages/domain/src`); one suite per context module. |
-| Honesty/architecture guards | `tests/unit/persistence-honesty.test.ts`, `database-migrations.test.ts`, `foundation.test.ts`, `web-shell.test.ts` | Static source/dependency assertions — these encode architecture; changing them IS an architecture change. |
-| API behavior | `tests/integration/*.test.ts` | `buildApp(customEnv)` + Fastify `inject`; full route→domain→Map path. |
-| Security | `tests/security/api-security.test.ts` (`pnpm test:security`) | Token forgery, authz bypass, redaction probes. |
-| Complete journeys | `tests/e2e/*.spec.ts` (Playwright, chromium, workers=1, retries=0) | Boots real built API (`start-e2e-api.mjs`) + preview web build; mints tokens with pinned `TEST_TOKEN_SECRET`. |
-| A11y / performance | `accessibility.spec.ts`, `performance.spec.ts` (dedicated npm scripts) | Perf baseline artifact uploaded in CI. |
-| Fixtures/factories | `packages/testing` | Mock domain entities only. |
-| Agent-facing verification | Reticle flows (`CLAUDE.md`) | UI-affecting changes require a driven verdict before "done". |
+| Layer                       | Home                                                                                                               | Convention                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Pure business rules         | `tests/unit/*-domain.test.ts` (Vitest)                                                                             | Import domain **from source** (`packages/domain/src`); one suite per context module.                          |
+| Honesty/architecture guards | `tests/unit/persistence-honesty.test.ts`, `database-migrations.test.ts`, `foundation.test.ts`, `web-shell.test.ts` | Static source/dependency assertions — these encode architecture; changing them IS an architecture change.     |
+| API behavior                | `tests/integration/*.test.ts`                                                                                      | `buildApp(customEnv)` + Fastify `inject`; full route→domain→Map path.                                         |
+| Security                    | `tests/security/api-security.test.ts` (`pnpm test:security`)                                                       | Token forgery, authz bypass, redaction probes.                                                                |
+| Complete journeys           | `tests/e2e/*.spec.ts` (Playwright, chromium, workers=1, retries=0)                                                 | Boots real built API (`start-e2e-api.mjs`) + preview web build; mints tokens with pinned `TEST_TOKEN_SECRET`. |
+| A11y / performance          | `accessibility.spec.ts`, `performance.spec.ts` (dedicated npm scripts)                                             | Perf baseline artifact uploaded in CI.                                                                        |
+| Fixtures/factories          | `packages/testing`                                                                                                 | Mock domain entities only.                                                                                    |
+| Agent-facing verification   | Reticle flows (`CLAUDE.md`)                                                                                        | UI-affecting changes require a driven verdict before "done".                                                  |
 
 Both Vitest and Playwright pin the same token secret because source-built and dist-built copies of `auth.ts` coexist (§7 hidden coupling). CI gate order: prettier → tsc → vitest suites → build → Playwright (`ci.yml`; documented as hard release gate — note audit P0-08: trunk CI was red at typecheck on 2026-10-03; verifying current CI color is UNKNOWN from this snapshot).
 
@@ -511,18 +534,18 @@ Both Vitest and Playwright pin the same token secret because source-built and di
 
 ## 24. Architectural Risks & Drift
 
-| # | Issue | Evidence | Affected | Why It Matters | Current State | Recommended Direction | Human Decision? |
-|---|---|---|---|---|---|---|---|
-| CRIT-1 | Runtime state evaporates on restart while product promises durable careers/billing | `server.ts:571` Maps; honesty tests | API, all flows | Blocks any production claim; invites accidental persistence assumptions | Deliberate staging choice (D3) | Approved persistence layer inside API only | **Yes** |
-| CRIT-2 | Auth/payment client-side simulations contradict server truth | LoginPage fallback, CheckoutPage swallow, JobsPage fake transmit, EvidencePage random hash | Web | Users/agents may believe flows work; security theater | Recorded P0 gaps in audit report | Remediate behind tests, one flow at a time | No (fix), Yes (if redesign) |
-| HIGH-3 | `server.ts` god-file (11 232 lines, 265 routes, 147 Maps in one closure) | wc/grep counts | API | Merge conflicts, hidden coupling, no module isolation for extraction plan | Matches "modular monolith" wording loosely; modularity lives in domain, not API layout | Split per-context route modules sharing injected stores — refactor, keep contracts stable | Suggested yes (large blast radius) |
-| HIGH-4 | Duplicate/inline auth handling beside `extractUser` | manual `verifySessionToken` at lines 804/979/1022 | API | Divergent auth semantics = security drift | R-2 | Consolidate onto `extractUser` + typed optional-auth decorator | Yes |
-| HIGH-5 | AI tier hardcoded `'free'` ignoring subscriptions | `server.ts:5198` | AI, billing | Entitlement inconsistency; quota/monetization mismatch | R-4 | Define single tier-resolution owner (billing → ai-gateway) | **Yes** |
-| MED-6 | Two audit mechanisms (API Map vs `AuditSink`) | `admin.ts`/`server.ts` vs `observability/audit.ts` (unused) | Admin, ops | Unclear operational truth once DB lands | R-6 | Pick sink-backed audit at persistence time | Yes |
-| MED-7 | Docs depict unimplemented architecture (Supabase Auth JWT, TanStack Query, Edge Functions, Stripe, Tailwind/Radix) | `docs/engineering/ARCHITECTURE.md` §20.x vs code | Whole repo | Agents may build against fiction | Governance already separates DOCUMENTED≠IMPLEMENTED | Treat docs as roadmap; this file as current law | No |
-| MED-8 | Web fetches relative `/api/v1` with no configured proxy | `vite.config.ts` lacks proxy; preview origin differs from API origin | Web↔API | Dev cross-origin behavior undocumented (U-2) | Works in E2E because tests use API directly/page copy | Decide gateway/dev-proxy explicitly | Yes |
-| LOW-9 | Dual lockfiles (`package-lock.json` + `pnpm-lock.yaml`) from unmerged CI-fix attempt | root listing; audit Rev C | Toolchain | Ambiguous package manager; `packageManager` field says pnpm | P0-08 remediation in flight | Remove stray lockfile after CI fix lands | Minor |
-| LOW-10 | Pagination contracts defined but inconsistently applied | `PaginationQuerySchema` vs plain-list endpoints | API | Clients can't rely on paging | Partial adoption | Adopt progressively on list endpoints | No |
+| #      | Issue                                                                                                              | Evidence                                                                                   | Affected       | Why It Matters                                                            | Current State                                                                          | Recommended Direction                                                                     | Human Decision?                    |
+| ------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------- |
+| CRIT-1 | Runtime state evaporates on restart while product promises durable careers/billing                                 | `server.ts:571` Maps; honesty tests                                                        | API, all flows | Blocks any production claim; invites accidental persistence assumptions   | Deliberate staging choice (D3)                                                         | Approved persistence layer inside API only                                                | **Yes**                            |
+| CRIT-2 | Auth/payment client-side simulations contradict server truth                                                       | LoginPage fallback, CheckoutPage swallow, JobsPage fake transmit, EvidencePage random hash | Web            | Users/agents may believe flows work; security theater                     | Recorded P0 gaps in audit report                                                       | Remediate behind tests, one flow at a time                                                | No (fix), Yes (if redesign)        |
+| HIGH-3 | `server.ts` god-file (11 232 lines, 265 routes, 147 Maps in one closure)                                           | wc/grep counts                                                                             | API            | Merge conflicts, hidden coupling, no module isolation for extraction plan | Matches "modular monolith" wording loosely; modularity lives in domain, not API layout | Split per-context route modules sharing injected stores — refactor, keep contracts stable | Suggested yes (large blast radius) |
+| HIGH-4 | Duplicate/inline auth handling beside `extractUser`                                                                | manual `verifySessionToken` at lines 804/979/1022                                          | API            | Divergent auth semantics = security drift                                 | R-2                                                                                    | Consolidate onto `extractUser` + typed optional-auth decorator                            | Yes                                |
+| HIGH-5 | AI tier hardcoded `'free'` ignoring subscriptions                                                                  | `server.ts:5198`                                                                           | AI, billing    | Entitlement inconsistency; quota/monetization mismatch                    | R-4                                                                                    | Define single tier-resolution owner (billing → ai-gateway)                                | **Yes**                            |
+| MED-6  | Two audit mechanisms (API Map vs `AuditSink`)                                                                      | `admin.ts`/`server.ts` vs `observability/audit.ts` (unused)                                | Admin, ops     | Unclear operational truth once DB lands                                   | R-6                                                                                    | Pick sink-backed audit at persistence time                                                | Yes                                |
+| MED-7  | Docs depict unimplemented architecture (Supabase Auth JWT, TanStack Query, Edge Functions, Stripe, Tailwind/Radix) | `docs/engineering/ARCHITECTURE.md` §20.x vs code                                           | Whole repo     | Agents may build against fiction                                          | Governance already separates DOCUMENTED≠IMPLEMENTED                                    | Treat docs as roadmap; this file as current law                                           | No                                 |
+| MED-8  | Web fetches relative `/api/v1` with no configured proxy                                                            | `vite.config.ts` lacks proxy; preview origin differs from API origin                       | Web↔API        | Dev cross-origin behavior undocumented (U-2)                              | Works in E2E because tests use API directly/page copy                                  | Decide gateway/dev-proxy explicitly                                                       | Yes                                |
+| LOW-9  | Dual lockfiles (`package-lock.json` + `pnpm-lock.yaml`) from unmerged CI-fix attempt                               | root listing; audit Rev C                                                                  | Toolchain      | Ambiguous package manager; `packageManager` field says pnpm               | P0-08 remediation in flight                                                            | Remove stray lockfile after CI fix lands                                                  | Minor                              |
+| LOW-10 | Pagination contracts defined but inconsistently applied                                                            | `PaginationQuerySchema` vs plain-list endpoints                                            | API            | Clients can't rely on paging                                              | Partial adoption                                                                       | Adopt progressively on list endpoints                                                     | No                                 |
 
 Dead/experimental paths noted, not documented as architecture: `TalentSphere/` Obsidian vault, `BRAIN/` memory files, `test-secrets.mjs` (active test utility), `reticle-dev.ts` (dev instrumentation).
 
@@ -547,25 +570,26 @@ Dead/experimental paths noted, not documented as architecture: `TalentSphere/` O
 
 ## 26. DECISION REGISTER
 
-| ID | Decision | Reason | Trade-off | Revisit When |
-|---|---|---|---|---|
-| ADR-001 | Modular monolith (Fastify single API) over microservices | SSOT founder amendment; extraction-ready boundaries via domain package | Big single `server.ts`; deploy granularity limited | Measured scale/ownership need |
-| ADR-002 | Pure domain package owning all rules | Testability, reuse, single source of truth | Thin-but-numerous routes; indirection | Never (invariant) |
-| ADR-003 | In-memory Maps as runtime persistence | Pre-production honesty: no fake DB claims; fastest honest iteration | Total state loss on restart | First durability requirement — human decision |
-| ADR-004 | HMAC self-signed session tokens over Supabase Auth | Zero external dependency; unforgeable without committed secret; documented key strategy | No refresh/revocation; restart kills sessions (unless TOKEN_SECRET set) | Real IdP adoption approved |
-| ADR-005 | Zod contracts package as single validation source | Browser/tests/API share one schema truth | Flat 1.7k-line file | File split when contexts stabilize |
-| ADR-006 | Central DomainError→status→ErrorEnvelope handler | Uniform client handling, traceable failures | Mapping table must be extended deliberately | New error taxonomy (escalate) |
-| ADR-007 | Local-heuristic AI behind gateway-shaped domain API | Cost invariant for free users; deterministic tests; provider-swappable seam | Not real LLM quality | Approved provider adapter |
-| ADR-008 | Queue engine with retry/DLQ/idempotency built ahead of producers | Contract-first async; engine is tested | Not durable, not connected | Broker selection (human) |
-| ADR-009 | SQL migrations as text + honesty-guarded migrate script | Prevents "documented=implemented" drift | Schema unexecuted/unverified against live DB | Persistence decision ADR-003 revisit |
-| ADR-010 | pnpm workspace, packages-before-apps build order | Explicit layering; frozen-lockfile CI | Requires dist builds before api dev/test runs | Toolchain change (escalate) |
-| ADR-011 | Reticle-based agent verification loop for UI changes | "Done" requires a driven verdict, not diff reading | Extra tool-call cost per UI change | Never (workflow invariant) |
+| ID      | Decision                                                         | Reason                                                                                  | Trade-off                                                               | Revisit When                                  |
+| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------- |
+| ADR-001 | Modular monolith (Fastify single API) over microservices         | SSOT founder amendment; extraction-ready boundaries via domain package                  | Big single `server.ts`; deploy granularity limited                      | Measured scale/ownership need                 |
+| ADR-002 | Pure domain package owning all rules                             | Testability, reuse, single source of truth                                              | Thin-but-numerous routes; indirection                                   | Never (invariant)                             |
+| ADR-003 | In-memory Maps as runtime persistence                            | Pre-production honesty: no fake DB claims; fastest honest iteration                     | Total state loss on restart                                             | First durability requirement — human decision |
+| ADR-004 | HMAC self-signed session tokens over Supabase Auth               | Zero external dependency; unforgeable without committed secret; documented key strategy | No refresh/revocation; restart kills sessions (unless TOKEN_SECRET set) | Real IdP adoption approved                    |
+| ADR-005 | Zod contracts package as single validation source                | Browser/tests/API share one schema truth                                                | Flat 1.7k-line file                                                     | File split when contexts stabilize            |
+| ADR-006 | Central DomainError→status→ErrorEnvelope handler                 | Uniform client handling, traceable failures                                             | Mapping table must be extended deliberately                             | New error taxonomy (escalate)                 |
+| ADR-007 | Local-heuristic AI behind gateway-shaped domain API              | Cost invariant for free users; deterministic tests; provider-swappable seam             | Not real LLM quality                                                    | Approved provider adapter                     |
+| ADR-008 | Queue engine with retry/DLQ/idempotency built ahead of producers | Contract-first async; engine is tested                                                  | Not durable, not connected                                              | Broker selection (human)                      |
+| ADR-009 | SQL migrations as text + honesty-guarded migrate script          | Prevents "documented=implemented" drift                                                 | Schema unexecuted/unverified against live DB                            | Persistence decision ADR-003 revisit          |
+| ADR-010 | pnpm workspace, packages-before-apps build order                 | Explicit layering; frozen-lockfile CI                                                   | Requires dist builds before api dev/test runs                           | Toolchain change (escalate)                   |
+| ADR-011 | Reticle-based agent verification loop for UI changes             | "Done" requires a driven verdict, not diff reading                                      | Extra tool-call cost per UI change                                      | Never (workflow invariant)                    |
 
 ---
 
 ## 27. QUICK REFERENCE FOR AI CODING AGENTS
 
 **Before changing code**
+
 1. Name the responsibility (§5 table) → its single owner.
 2. Locate the layer (web / api / domain / contracts / config / observability / worker / migrations).
 3. Find the existing extension point (§10 table) — there is almost always one.
@@ -577,9 +601,10 @@ Dead/experimental paths noted, not documented as architecture: `TalentSphere/` O
 Does this capability already exist (search `server.ts` route blocks and `packages/domain` — 265 endpoints/45 modules cover most of the product)? Who owns it? Where does similar code live (copy the nearest commented feature block)? Am I creating a second implementation (auth check, error shape, queue, scheduler, store, component library)? Am I crossing a forbidden boundary (browser→infra, domain→framework, route→inline rule)? Am I introducing a new pattern (store library, ORM, provider SDK)?
 
 **STOP CONDITIONS** — stop and ask when:
+
 - ownership is ambiguous (R-2/R-4 touchpoints);
 - architecture conflicts with the request (durability, real payments, real AI, push delivery);
-- `SSOT.md`/`docs/**` and code disagree materially and the task depends on which wins (this file wins for *current* behavior);
+- `SSOT.md`/`docs/**` and code disagree materially and the task depends on which wins (this file wins for _current_ behavior);
 - a new infrastructure dependency seems necessary (INV-011);
 - a security boundary must be crossed or a CURRENT GAP would widen;
 - you'd need to weaken a test (especially honesty/migration/security suites) to proceed;
@@ -587,6 +612,7 @@ Does this capability already exist (search `server.ts` route blocks and `package
 - correct extension point can't be established after searching domain + server.ts + contracts.
 
 **DO NOT**
+
 - Add business rules to routes, pages, or contracts.
 - Return hand-written error JSON outside `ErrorEnvelope`/global handler.
 - Create a second auth helper, token verifier, queue, scheduler, audit trail, state store, or UI kit.
@@ -603,6 +629,7 @@ Does this capability already exist (search `server.ts` route blocks and `package
 Classification used throughout: **CONFIRMED** (direct file/line evidence), **INFERRED** (strong structural signal), **UNKNOWN** (not determinable from repo).
 
 Representative evidence anchors:
+
 - Monolith topology & deps: `package.json`, `pnpm-workspace.yaml`, each workspace `package.json`.
 - 265 routes / 147 Maps / god-file size: `grep`/`wc` on `apps/api/src/server.ts` (11 232 lines).
 - Auth mechanics: `packages/domain/src/auth.ts` (PBKDF2 params, TOKEN_SECRET comment, TTL), `server.ts:672` `extractUser`, register/login blocks 699–763.

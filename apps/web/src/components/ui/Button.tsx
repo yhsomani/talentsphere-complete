@@ -47,10 +47,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   // Base + hover values per variant, selected declaratively.
-  const variantStyles: Record<
-    string,
-    { base: React.CSSProperties; hover: React.CSSProperties }
-  > = {
+  const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CSSProperties }> = {
     primary: {
       base: {
         backgroundColor: colors.primary[700],
@@ -106,7 +103,9 @@ export const Button: React.FC<ButtonProps> = ({
   const interactive = !isDisabled;
   const stateOverlay = interactive && hovered ? v.hover : {};
   const focusRing =
-    interactive && focused ? { boxShadow: `0 0 0 2px #ffffff, 0 0 0 4px ${colors.primary[600]}` } : {};
+    interactive && focused
+      ? { boxShadow: `0 0 0 2px #ffffff, 0 0 0 4px ${colors.primary[600]}` }
+      : {};
 
   return (
     <button

@@ -316,7 +316,9 @@ export const LandingPage: React.FC = () => {
                 }}
               >
                 <li style={{ marginBottom: spacing.xs }}>Anti-fraud date validation (BR-084)</li>
-                <li style={{ marginBottom: spacing.xs }}>Disposable email blocking on references</li>
+                <li style={{ marginBottom: spacing.xs }}>
+                  Disposable email blocking on references
+                </li>
                 <li>Cryptographic JSON-LD verification export</li>
               </ul>
             </CardContent>
@@ -454,7 +456,9 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div style={{ borderLeft: `4px solid ${colors.semantic.success}`, paddingLeft: spacing.lg }}>
+          <div
+            style={{ borderLeft: `4px solid ${colors.semantic.success}`, paddingLeft: spacing.lg }}
+          >
             <MicroLabel tone="success">STEP 03</MicroLabel>
             <h3
               style={{
