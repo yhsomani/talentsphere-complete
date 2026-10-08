@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { colors, spacing, motion } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { apiFetch } from '../lib/api.js';
 
 interface Plan {
   id: 'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise';
@@ -113,12 +114,9 @@ export const CheckoutPage: React.FC = () => {
         return;
       }
 
-      const res = await fetch('/api/v1/billing/subscribe', {
+      const res = await apiFetch('/api/v1/billing/subscribe', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planTier: selectedPlan,
           billingCycle,
@@ -177,6 +175,8 @@ export const CheckoutPage: React.FC = () => {
 
         {/* Billing cycle toggle */}
         <div
+          role="group"
+          aria-label="Billing cycle"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -189,6 +189,7 @@ export const CheckoutPage: React.FC = () => {
           <button
             type="button"
             data-testid="billing-cycle-monthly"
+            aria-pressed={billingCycle === 'monthly'}
             onClick={() => setBillingCycle('monthly')}
             style={{
               padding: '6px 16px',
@@ -207,6 +208,7 @@ export const CheckoutPage: React.FC = () => {
           <button
             type="button"
             data-testid="billing-cycle-yearly"
+            aria-pressed={billingCycle === 'yearly'}
             onClick={() => setBillingCycle('yearly')}
             style={{
               padding: '6px 16px',
@@ -351,12 +353,27 @@ export const CheckoutPage: React.FC = () => {
                     data-testid={`plan-card-${plan.id}`}
                     role="radio"
                     aria-checked={isSelected}
-                    tabIndex={0}
+                    tabIndex={isSelected ? 0 : -1}
                     onClick={() => setSelectedPlan(plan.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         setSelectedPlan(plan.id);
+                        return;
+                      }
+                      // WAI-ARIA radiogroup: arrows move the selection with
+                      // wrap-around, and focus follows the new selection.
+                      let delta = 0;
+                      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') delta = 1;
+                      else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') delta = -1;
+                      if (delta !== 0) {
+                        e.preventDefault();
+                        const idx = PLANS.findIndex((p) => p.id === plan.id);
+                        const next = PLANS[(idx + delta + PLANS.length) % PLANS.length];
+                        setSelectedPlan(next.id);
+                        document
+                          .querySelector<HTMLElement>(`[data-testid="plan-card-${next.id}"]`)
+                          ?.focus();
                       }
                     }}
                     style={{
@@ -443,7 +460,16 @@ export const CheckoutPage: React.FC = () => {
                   fontWeight: 500,
                 }}
               >
-                {error}
+                {error === 'Please sign in before subscribing.' ? (
+                  <Link
+                    to="/login?return=%2Fcheckout"
+                    style={{ fontWeight: 600, textDecoration: 'underline' }}
+                  >
+                    Please sign in before subscribing.
+                  </Link>
+                ) : (
+                  error
+                )}
               </div>
             )}
 
@@ -473,6 +499,7 @@ export const CheckoutPage: React.FC = () => {
                 <input
                   id="card-name"
                   type="text"
+                  autoComplete="cc-name"
                   required
                   data-testid="card-name"
                   value={cardName}
@@ -505,6 +532,7 @@ export const CheckoutPage: React.FC = () => {
                 <input
                   id="card-number"
                   type="text"
+                  autoComplete="cc-number"
                   required
                   data-testid="card-number"
                   value={cardNumber}
@@ -545,6 +573,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     id="card-expiry"
                     type="text"
+                    autoComplete="cc-exp"
                     required
                     data-testid="card-expiry"
                     value={cardExpiry}
@@ -577,6 +606,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     id="card-cvc"
                     type="text"
+                    autoComplete="cc-csc"
                     required
                     data-testid="card-cvc"
                     value={cardCvc}

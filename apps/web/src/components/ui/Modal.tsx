@@ -12,13 +12,17 @@ export interface ModalProps {
   maxWidth?: string;
 }
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 /**
  * Canonical modal. Entrances use the shared keyframes in global.css only —
  * no ad-hoc animation values. Backdrop is a flat scrim (no glassmorphism):
  * its job is to separate layers, not to decorate. Focus moves into the panel
  * on open and returns to the previously focused element on close, so keyboard
- * users are never stranded. Reduced motion is honoured globally by the CSS
- * kill-switch, which zeroes these entrance animations.
+ * users are never stranded. Tab cycles inside the panel while open — without
+ * that, aria-modal would be a lie and focus would disappear behind the
+ * backdrop. Reduced motion is honoured globally by the CSS kill-switch.
  */
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
@@ -33,8 +37,31 @@ export const Modal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) return;
+      if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      if (focusables.length === 0) {
+        e.preventDefault();
+        panel.focus();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      // The panel itself is programmatically focused on open; from there the
+      // browser's default Tab would leave the dialog, so both edges wrap.
+      const atStart = active === panel || active === first || !panel.contains(active);
+      const atEnd = active === panel || active === last || !panel.contains(active);
+      if (e.shiftKey ? atStart : atEnd) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
       }
     };
     if (isOpen) {
@@ -64,6 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      aria-describedby={description ? 'modal-description' : undefined}
       style={{
         position: 'fixed',
         inset: 0,
@@ -122,6 +150,7 @@ export const Modal: React.FC<ModalProps> = ({
             </h2>
             {description && (
               <p
+                id="modal-description"
                 style={{
                   fontSize: '0.8125rem',
                   color: colors.neutral[500],
@@ -141,7 +170,7 @@ export const Modal: React.FC<ModalProps> = ({
               border: 'none',
               cursor: 'pointer',
               color: colors.neutral[400],
-              padding: '4px',
+              padding: '8px',
               borderRadius: '4px',
               display: 'flex',
               alignItems: 'center',

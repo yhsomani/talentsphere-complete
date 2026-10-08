@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { getToken } from './lib/session.js';
 import { Layout } from './components/Layout.js';
 import { LandingPage } from './pages/LandingPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
@@ -13,9 +14,15 @@ import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session token;
-// anyone else is sent to /login instead of seeing private UI.
-const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) =>
-  localStorage.getItem('talentsphere_token') ? children : <Navigate to="/login" replace />;
+// anyone else is sent to /login with the requested destination preserved in
+// ?return= (SSOT auth contract), so signing in resumes the deep link instead
+// of silently dropping the user on /dashboard.
+const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const location = useLocation();
+  if (getToken()) return children;
+  const from = `${location.pathname}${location.search}`;
+  return <Navigate to={`/login?return=${encodeURIComponent(from)}`} replace />;
+};
 
 export const App: React.FC = () => {
   return (

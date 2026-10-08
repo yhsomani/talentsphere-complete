@@ -231,6 +231,16 @@ pre {
 }
 
 /*
+ * Footer navigation links must read as links at rest, not only on hover:
+ * the Trust column sits next to inert metadata spans of the same size, and
+ * "looks like a link only when hovered" is not an affordance.
+ */
+.footer-link {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/*
  * Hover affordances that inline styles cannot express (no :hover in the
  * style prop). Kept deliberately subtle: colour shift only, token durations.
  */

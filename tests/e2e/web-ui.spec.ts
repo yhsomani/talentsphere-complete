@@ -77,10 +77,10 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByText('Skill Readiness', { exact: true })).toBeVisible();
     await expect(page.getByText('Active Applications', { exact: true })).toBeVisible();
 
-    // Verify action button
-    const actionBtn = page.locator('button:has-text("Begin Verification Challenge")');
+    // Verify action button (navigation is an anchor — ButtonLink, not a nested button)
+    const actionBtn = page.getByRole('link', { name: 'Browse Assessments' });
     await expect(actionBtn).toBeVisible();
-    await expect(actionBtn).toBeEnabled();
+    await expect(actionBtn).toHaveAttribute('href', '/assessments');
   });
 
   test('authenticates candidate via login page and redirects to dashboard (F-01)', async ({

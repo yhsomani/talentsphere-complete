@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { storeSession } from '../lib/session.js';
+
+// Resume only same-origin in-app paths from ?return=. This rejects absolute
+// URLs (https://evil.example) and protocol-relative ones (//evil.example),
+// so the login redirect can never leave the site.
+const resolveReturnPath = (value: string | null): string =>
+  value && value.startsWith('/') && !value.startsWith('//') ? value : '/dashboard';
+
+type LoginError = { message: string; field?: 'email' | 'password' };
 
 export const LoginPage: React.FC = () => {
   usePageMeta(
@@ -10,9 +19,10 @@ export const LoginPage: React.FC = () => {
   );
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<LoginError | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -22,17 +32,19 @@ export const LoginPage: React.FC = () => {
 
     // Validation
     if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email address.');
+      setError({ message: 'Please enter a valid email address.', field: 'email' });
       return;
     }
     if (!password || password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError({ message: 'Password must be at least 6 characters.', field: 'password' });
       return;
     }
 
     setLoading(true);
 
     try {
+      // Plain fetch on purpose: here a 401 means "wrong credentials", not
+      // "dead session" (see lib/api.ts apiFetch).
       const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,24 +53,27 @@ export const LoginPage: React.FC = () => {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        setError(body?.error?.message ?? 'Failed to sign in. Please verify your credentials.');
+        setError({
+          message: body?.error?.message ?? 'Failed to sign in. Please verify your credentials.',
+        });
         return;
       }
 
       const data = await res.json();
       if (!data?.token) {
-        setError('Failed to sign in. Please verify your credentials.');
+        setError({ message: 'Failed to sign in. Please verify your credentials.' });
         return;
       }
-      localStorage.setItem('talentsphere_token', data.token);
-      localStorage.setItem('talentsphere_user', JSON.stringify(data.user));
+      storeSession(data.token, data.user);
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/dashboard');
+        // ?return= (from a guarded deep link) decides the destination;
+        // without it, sign-in lands on the dashboard as before.
+        navigate(resolveReturnPath(searchParams.get('return')), { replace: true });
       }, 400);
     } catch {
-      setError('Failed to sign in. Please verify your credentials.');
+      setError({ message: 'Failed to sign in. Please verify your credentials.' });
     } finally {
       setLoading(false);
     }
@@ -95,6 +110,7 @@ export const LoginPage: React.FC = () => {
       {error && (
         <div
           role="alert"
+          id="login-error"
           data-testid="login-error"
           style={{
             backgroundColor: '#fef2f2',
@@ -107,7 +123,7 @@ export const LoginPage: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {error}
+          {error.message}
         </div>
       )}
 
@@ -127,7 +143,7 @@ export const LoginPage: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          Authentication successful. Redirecting to dashboard...
+          Authentication successful. Redirecting...
         </div>
       )}
 
@@ -154,11 +170,14 @@ export const LoginPage: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
+            autoComplete="email"
+            aria-invalid={error?.field === 'email' || undefined}
+            aria-describedby={error?.field === 'email' ? 'login-error' : undefined}
             style={{
               width: '100%',
               padding: `${spacing.sm} ${spacing.md}`,
               borderRadius: '6px',
-              border: `1px solid ${colors.neutral[300]}`,
+              border: `1px solid ${error?.field === 'email' ? colors.semantic.error : colors.neutral[300]}`,
               fontSize: '0.875rem',
               boxSizing: 'border-box',
             }}
@@ -194,11 +213,14 @@ export const LoginPage: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
+            autoComplete="current-password"
+            aria-invalid={error?.field === 'password' || undefined}
+            aria-describedby={error?.field === 'password' ? 'login-error' : undefined}
             style={{
               width: '100%',
               padding: `${spacing.sm} ${spacing.md}`,
               borderRadius: '6px',
-              border: `1px solid ${colors.neutral[300]}`,
+              border: `1px solid ${error?.field === 'password' ? colors.semantic.error : colors.neutral[300]}`,
               fontSize: '0.875rem',
               boxSizing: 'border-box',
             }}

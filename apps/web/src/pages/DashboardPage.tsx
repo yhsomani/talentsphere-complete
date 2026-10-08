@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
@@ -8,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  Button,
+  ButtonLink,
   Badge,
   ShieldCheckIcon,
   CodeIcon,
@@ -111,18 +110,14 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm }}>
-          <Link to="/evidence" style={{ textDecoration: 'none' }}>
-            <Button variant="secondary" size="md">
-              <GitBranchIcon size={16} />
-              <span>Manage Evidence</span>
-            </Button>
-          </Link>
-          <Link to="/assessments" style={{ textDecoration: 'none' }}>
-            <Button variant="primary" size="md">
-              <CodeIcon size={16} />
-              <span>Begin Verification Challenge</span>
-            </Button>
-          </Link>
+          <ButtonLink to="/evidence" variant="secondary" size="md">
+            <GitBranchIcon size={16} />
+            <span>Manage Evidence</span>
+          </ButtonLink>
+          <ButtonLink to="/assessments" variant="primary" size="md">
+            <CodeIcon size={16} />
+            <span>Browse Assessments</span>
+          </ButtonLink>
         </div>
       </div>
 
@@ -334,12 +329,10 @@ export const DashboardPage: React.FC = () => {
                     Cryptographically signed by authorized employers and managers
                   </CardDescription>
                 </div>
-                <Link to="/evidence" style={{ textDecoration: 'none' }}>
-                  <Button variant="ghost" size="sm">
-                    <span>View All (14)</span>
-                    <ArrowRightIcon size={14} />
-                  </Button>
-                </Link>
+                <ButtonLink to="/evidence" variant="ghost" size="sm">
+                  <span>View All (14)</span>
+                  <ArrowRightIcon size={14} />
+                </ButtonLink>
               </div>
             </CardHeader>
             <CardContent>
@@ -555,12 +548,10 @@ export const DashboardPage: React.FC = () => {
                     Deterministic benchmark evaluations executed in isolated containers
                   </CardDescription>
                 </div>
-                <Link to="/assessments" style={{ textDecoration: 'none' }}>
-                  <Button variant="ghost" size="sm">
-                    <span>Catalog</span>
-                    <ArrowRightIcon size={14} />
-                  </Button>
-                </Link>
+                <ButtonLink to="/assessments" variant="ghost" size="sm">
+                  <span>View Assessments</span>
+                  <ArrowRightIcon size={14} />
+                </ButtonLink>
               </div>
             </CardHeader>
             <CardContent>
@@ -634,8 +625,8 @@ export const DashboardPage: React.FC = () => {
                     Completed Sep 15, 2026 &bull; Runtime: 19 min &bull; Sub-millisecond latency
                   </div>
                   <div style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                    Rubric: Memory efficiency $O(1)$ space complexity per tenant. Burst window
-                    handled cleanly.
+                    Rubric: Memory efficiency O(1) space complexity per tenant. Burst window handled
+                    cleanly.
                   </div>
                 </div>
               </div>
@@ -656,12 +647,10 @@ export const DashboardPage: React.FC = () => {
                     Roles where your verified evidence satisfies 100% of hard constraints
                   </CardDescription>
                 </div>
-                <Link to="/jobs" style={{ textDecoration: 'none' }}>
-                  <Button variant="ghost" size="sm">
-                    <span>Explore (6)</span>
-                    <ArrowRightIcon size={14} />
-                  </Button>
-                </Link>
+                <ButtonLink to="/jobs" variant="ghost" size="sm">
+                  <span>View Opportunities</span>
+                  <ArrowRightIcon size={14} />
+                </ButtonLink>
               </div>
             </CardHeader>
             <CardContent>
@@ -695,7 +684,7 @@ export const DashboardPage: React.FC = () => {
                       marginBottom: spacing.xs,
                     }}
                   >
-                    Acme Cloud Infrastructure &bull; \$240k - \$310k &bull; Fully Remote
+                    Acme Cloud Infrastructure &bull; $240k - $310k &bull; Fully Remote
                   </div>
                   <div
                     style={{
@@ -708,11 +697,14 @@ export const DashboardPage: React.FC = () => {
                     <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
                       Requires: Raft/Paxos proof &bull; DLM-902 &gt; 90
                     </span>
-                    <Link to="/jobs" style={{ textDecoration: 'none' }}>
-                      <Button variant="primary" size="sm">
-                        <span>Review & Apply</span>
-                      </Button>
-                    </Link>
+                    <ButtonLink
+                      to="/jobs"
+                      variant="primary"
+                      size="sm"
+                      aria-label="Review & Apply — Staff Distributed Systems Engineer"
+                    >
+                      <span>Review & Apply</span>
+                    </ButtonLink>
                   </div>
                 </div>
 
@@ -745,7 +737,7 @@ export const DashboardPage: React.FC = () => {
                       marginBottom: spacing.xs,
                     }}
                   >
-                    Apex Global Fintech &bull; \$260k - \$340k &bull; San Francisco / Remote
+                    Apex Global Fintech &bull; $260k - $340k &bull; San Francisco / Remote
                   </div>
                   <div
                     style={{
@@ -758,11 +750,14 @@ export const DashboardPage: React.FC = () => {
                     <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
                       Requires: Idempotency proof &bull; RBAC audit
                     </span>
-                    <Link to="/jobs" style={{ textDecoration: 'none' }}>
-                      <Button variant="outline" size="sm">
-                        <span>Review & Apply</span>
-                      </Button>
-                    </Link>
+                    <ButtonLink
+                      to="/jobs"
+                      variant="outline"
+                      size="sm"
+                      aria-label="Review & Apply — Principal Platform Architect"
+                    >
+                      <span>Review & Apply</span>
+                    </ButtonLink>
                   </div>
                 </div>
               </div>

@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+} from 'react-router-dom';
 import { colors, spacing, motion } from '@talentsphere/ui';
 import { MenuIcon, PhoneIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
+import { clearSession, getStoredUser } from '../lib/session.js';
 
 const SUPPORT_EMAIL = 'support@talentsphere.io';
 const SUPPORT_PHONE = '+1-415-555-0142';
@@ -10,11 +18,16 @@ const SUPPORT_PHONE_HREF = 'tel:+14155550142';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [routeAnnouncement, setRouteAnnouncement] = useState<string>('');
   const pwaCapability = usePwaCapability();
   const pwaStatus = describePwaCapability(pwaCapability);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const isFirstRouteChange = useRef(true);
 
   // Close the mobile menu whenever the route changes.
   useEffect(() => {
@@ -30,21 +43,54 @@ export const Layout: React.FC = () => {
 
     setIsOnline(navigator.onLine);
 
-    try {
-      const stored = localStorage.getItem('talentsphere_user');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.email) setUserEmail(parsed.email);
-      }
-    } catch {
-      // Ignored
-    }
+    const storedUser = getStoredUser();
+    if (storedUser?.email) setUserEmail(storedUser.email);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, [location.pathname]);
+
+  // Route-change contract: scroll, announce, and keep focus in the document.
+  useEffect(() => {
+    if (isFirstRouteChange.current) {
+      isFirstRouteChange.current = false;
+      return;
+    }
+    // Push/replace navigations start at the top; on Back/Forward (POP) the
+    // browser restores the previous scroll position, so leave it alone.
+    if (navigationType !== 'POP') window.scrollTo(0, 0);
+    // Child pages set document.title in their effects, which run before this
+    // parent effect, so the title already names the new destination.
+    setRouteAnnouncement(document.title);
+    // Focus strands on <body> when navigation unmounts the active element:
+    // the mobile menu closes on this route change (close-menu effect above),
+    // dropping its focused link one commit later — after this effect has
+    // already run. So recover now, while that link still exists: if focus is
+    // on <body> or inside the closing menu, move it to the main landmark.
+    // Focus resting anywhere else (e.g. a desktop nav link, which stays
+    // mounted) is left alone. preventScroll keeps the browser's restored
+    // scroll position on Back/Forward intact.
+    const active = document.activeElement;
+    if (active === document.body || active?.closest('[data-testid="mobile-menu"]')) {
+      document.getElementById('main-content')?.focus({ preventScroll: true });
+    }
+  }, [location.pathname, navigationType]);
+
+  // The mobile menu is a disclosure: Escape must close it and return focus
+  // to the toggle that opened it.
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMobileMenuOpen]);
 
   const navLinks = [
     { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
@@ -83,6 +129,29 @@ export const Layout: React.FC = () => {
       >
         Skip to main content
       </a>
+
+      {/* SPA route-change announcement: role="status" + aria-live="polite"
+          announces the new destination after client-side navigation (the
+          title itself is set by each page's usePageMeta effect, whose child
+          effect runs before this parent effect). */}
+      <div
+        role="status"
+        aria-live="polite"
+        data-testid="route-announcer"
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        {routeAnnouncement}
+      </div>
 
       {/* Offline Safety Indicator */}
       {!isOnline && (
@@ -204,9 +273,10 @@ export const Layout: React.FC = () => {
           {/* Mobile hamburger toggle */}
           <button
             type="button"
+            ref={menuButtonRef}
             data-testid="mobile-menu-toggle"
             aria-expanded={isMobileMenuOpen}
-            aria-controls="mobile-navigation"
+            aria-controls={isMobileMenuOpen ? 'mobile-navigation' : undefined}
             aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             onClick={() => setIsMobileMenuOpen((open) => !open)}
             className="mobile-menu-button"
@@ -280,9 +350,12 @@ export const Layout: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  localStorage.removeItem('talentsphere_user');
-                  localStorage.removeItem('talentsphere_token');
+                  clearSession();
                   setUserEmail(null);
+                  // Signing out must not leave the signed-out user parked on a
+                  // protected page until some later route change notices;
+                  // replace so Back does not return to protected UI.
+                  navigate('/login', { replace: true });
                 }}
                 style={{
                   fontSize: '0.8125rem',
@@ -496,41 +569,22 @@ export const Layout: React.FC = () => {
                 fontSize: '0.875rem',
               }}
             >
-              <li>
-                <Link
-                  to="/evidence"
-                  className="footer-link"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Evidence Graph
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/assessments"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Proctored Sandbox
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/jobs"
-                  className="footer-link"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Verifiable Opportunities
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/checkout"
-                  className="footer-link"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Plans & Pricing
-                </Link>
-              </li>
+              {/* Footer destinations mirror the header nav verbatim so the
+                  same action never carries two names. Dashboard is the
+                  signed-in home and does not belong in the public footer. */}
+              {navLinks
+                .filter((item) => item.path !== '/dashboard')
+                .map((item) => (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      className="footer-link"
+                      style={{ color: colors.neutral[600], textDecoration: 'none' }}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 

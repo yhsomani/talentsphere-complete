@@ -414,10 +414,10 @@ Also STOP when:
 ## 15. Frontend Architecture
 
 - **Bootstrap:** `index.html` → `main.tsx` mounts `<App/>` in StrictMode; Vite dev server port 5173; Reticle plugin wraps React.
-- **Routing:** `react-router-dom` v7 `BrowserRouter`, one `Layout` wrapper with `<Outlet/>`, 9 leaf routes + catch-all `NotFoundPage`. No route guards: protected pages render and degrade locally (DashboardPage reads localStorage) — server rejects bad tokens regardless.
+- **Routing:** `react-router-dom` v7 `BrowserRouter`, one `Layout` wrapper with `<Outlet/>`, 9 leaf routes + catch-all `NotFoundPage`. `/dashboard`, `/evidence` and `/assessments` sit behind `RequireAuth` (App.tsx): no session → replace-redirect to `/login?return=<path>`, and LoginPage resumes that path after sign-in (`resolveReturnPath` rejects open redirects). The guard is UX, not the security boundary — the server still rejects bad tokens regardless.
 - **Hierarchy:** pages → `components/Layout` + `components/ui/*` primitives → tokens from `@talentsphere/ui`.
 - **State management:** per-component `useState`/`useEffect` only; no store library; session cached in localStorage; online/offline via window events.
-- **Data fetching:** bare `fetch('/api/v1/...')` inline in pages (LoginPage, CheckoutPage); several pages render hardcoded/demo data instead (audit findings) — treat demo data as CURRENT GAP, not a pattern to extend.
+- **Data fetching:** `apiFetch` (`apps/web/src/lib/api.ts`) for authenticated calls — attaches the bearer token and turns a 401 into a `/login?return=<path>` bounce (clears the dead session first); LoginPage keeps a bare `fetch` so wrong credentials surface as a form error, never a redirect; several pages render hardcoded/demo data instead (audit findings) — treat demo data as CURRENT GAP, not a pattern to extend.
 - **Forms/validation:** local client checks (e.g., CVC format) mirroring but not replacing server Zod.
 - **Auth state:** localStorage presence = "logged-in" signal for UI chrome; authoritative only server-side.
 - **Error/loading states:** manual `loading`/`error` booleans per page; no global error boundary.

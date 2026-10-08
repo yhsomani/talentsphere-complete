@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { colors, spacing, typography } from '@talentsphere/ui';
-import { Button, SearchXIcon, ShieldCheckIcon } from '../components/ui/index.js';
+import { ButtonLink, SearchXIcon, ShieldCheckIcon } from '../components/ui/index.js';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 
 /**
@@ -89,21 +88,15 @@ export const NotFoundPage: React.FC = () => {
           marginTop: spacing.sm,
         }}
       >
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <Button variant="outline" data-testid="not-found-home">
-            Back to Home
-          </Button>
-        </Link>
-        <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-          <Button data-testid="not-found-dashboard">
-            <ShieldCheckIcon size={16} /> Career Cockpit
-          </Button>
-        </Link>
-        <Link to="/jobs" style={{ textDecoration: 'none' }}>
-          <Button variant="ghost" data-testid="not-found-jobs">
-            Browse Opportunities
-          </Button>
-        </Link>
+        <ButtonLink to="/" variant="outline" data-testid="not-found-home">
+          Back to Home
+        </ButtonLink>
+        <ButtonLink to="/dashboard" data-testid="not-found-dashboard">
+          <ShieldCheckIcon size={16} /> Dashboard
+        </ButtonLink>
+        <ButtonLink to="/jobs" variant="ghost" data-testid="not-found-jobs">
+          Browse Opportunities
+        </ButtonLink>
       </div>
 
       <p style={{ fontSize: typography.fontSize.sm, color: colors.neutral[600] }}>

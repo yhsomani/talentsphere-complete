@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { apiFetch } from '../lib/api.js';
 import {
   Button,
   Badge,
@@ -87,9 +89,8 @@ export const EvidencePage: React.FC = () => {
       return;
     }
     try {
-      const res = await fetch(`/api/v1/candidates/${userId}/work-history`, {
-        headers: { authorization: `Bearer ${token}` },
-      });
+      // apiFetch attaches the session token and handles 401 (lib/api.ts).
+      const res = await apiFetch(`/api/v1/candidates/${userId}/work-history`);
       if (!res.ok) {
         throw new Error('load failed');
       }
@@ -138,12 +139,9 @@ export const EvidencePage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/v1/candidates/work-history', {
+      const res = await apiFetch('/api/v1/candidates/work-history', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           companyName: company,
           title,
@@ -165,14 +163,14 @@ export const EvidencePage: React.FC = () => {
 
       // Email attestation runs server-side (disposable/webmail checks, scoring, tier).
       if (createdId && email) {
-        const verifyRes = await fetch(`/api/v1/candidates/work-history/${createdId}/verify-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ corporateEmail: email }),
-        });
+        const verifyRes = await apiFetch(
+          `/api/v1/candidates/work-history/${createdId}/verify-email`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ corporateEmail: email }),
+          }
+        );
         if (!verifyRes.ok) {
           const body = await verifyRes.json().catch(() => null);
           setNotice(
@@ -227,14 +225,11 @@ export const EvidencePage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/v1/candidates/work-history/${selectedEntryId}/references/request`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             refereeName: refName,
             refereeEmail: refEmail,
@@ -361,7 +356,14 @@ export const EvidencePage: React.FC = () => {
               fontSize: '0.9375rem',
             }}
           >
-            Sign in to attest and verify your employment records.
+            {/* Actionable: the sign-in prompt links to sign-in with the
+                intended destination preserved. */}
+            <Link
+              to="/login?return=%2Fevidence"
+              style={{ color: colors.primary[700], fontWeight: 600 }}
+            >
+              Sign in to attest and verify your employment records.
+            </Link>
           </div>
         ) : loadingList ? (
           <div
@@ -497,6 +499,7 @@ export const EvidencePage: React.FC = () => {
                         variant="outline"
                         size="sm"
                         data-testid={`request-ref-${item.id}`}
+                        aria-label={`Request Reference — ${item.companyName}`}
                         onClick={() => {
                           setSelectedEntryId(item.id);
                           setIsRefModalOpen(true);

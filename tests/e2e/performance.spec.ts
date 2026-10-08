@@ -47,7 +47,29 @@ function summarise(samples: number[]) {
 test.describe('PERF: Route startup baseline', () => {
   test('every route renders within the gross-regression guard and records a baseline', async ({
     page,
+    request,
   }) => {
+    // Guarded routes must be measured as themselves, not as the login bounce
+    // they render without a session (same pattern as the interaction
+    // baseline below).
+    const registered = await request.post(`${API_BASE}/auth/register`, {
+      data: {
+        email: `perf.routes.${Date.now()}@example.com`,
+        password: 'StrongPassword123!',
+        fullName: 'Perf Routes',
+        role: 'candidate',
+      },
+    });
+    expect(registered.status()).toBe(201);
+    const { token, user } = await registered.json();
+    await page.addInitScript(
+      (session: { token: string; user: unknown }) => {
+        localStorage.setItem('talentsphere_token', session.token);
+        localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
+      },
+      { token, user }
+    );
+
     const baseline: Record<string, ReturnType<typeof summarise>> = {};
 
     for (const route of ROUTES) {

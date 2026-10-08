@@ -318,6 +318,8 @@ export const AssessmentsPage: React.FC = () => {
                 </span>
                 <div
                   data-testid="sandbox-log"
+                  role="log"
+                  aria-label="Sandbox execution log"
                   style={{
                     backgroundColor: colors.neutral[950],
                     color: '#a7f3d0',

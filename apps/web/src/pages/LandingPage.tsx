@@ -1,9 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { colors, spacing, typography } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import {
-  Button,
+  ButtonLink,
   Badge,
   Card,
   CardContent,
@@ -82,16 +81,12 @@ export const LandingPage: React.FC = () => {
               flexWrap: 'wrap',
             }}
           >
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-              <Button size="lg" data-testid="cta-dashboard">
-                Launch Career Cockpit <ArrowRightIcon size={18} />
-              </Button>
-            </Link>
-            <Link to="/evidence" style={{ textDecoration: 'none' }}>
-              <Button variant="outline" size="lg" data-testid="cta-evidence">
-                Explore Evidence Hub
-              </Button>
-            </Link>
+            <ButtonLink to="/dashboard" size="lg" data-testid="cta-dashboard">
+              Launch Career Cockpit <ArrowRightIcon size={18} />
+            </ButtonLink>
+            <ButtonLink to="/evidence" variant="outline" size="lg" data-testid="cta-evidence">
+              Explore Evidence Hub
+            </ButtonLink>
           </div>
         </div>
 
@@ -360,8 +355,8 @@ export const LandingPage: React.FC = () => {
                   marginBottom: spacing.md,
                 }}
               >
-                Explainable opportunity matching with differential privacy small-cell suppression
-                ($k \ge 10$) and zero AI compute costs billed silently to free candidates.
+                Explainable opportunity matching with differential privacy small-cell suppression (k
+                &ge; 10) and zero AI compute costs billed silently to free candidates.
               </p>
               <ul
                 style={{
@@ -485,11 +480,9 @@ export const LandingPage: React.FC = () => {
         </div>
 
         <div style={{ marginTop: spacing['2xl'], textAlign: 'center' }}>
-          <Link to="/evidence" style={{ textDecoration: 'none' }}>
-            <Button variant="secondary" size="md">
-              View Evidence Graph Demo &rarr;
-            </Button>
-          </Link>
+          <ButtonLink to="/evidence" variant="secondary" size="md">
+            View Evidence Graph Demo &rarr;
+          </ButtonLink>
         </div>
       </section>
     </div>

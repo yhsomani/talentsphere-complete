@@ -461,10 +461,21 @@ export const PrivacyPage: React.FC = () => {
           >
             <strong>TalentSphere Privacy Operations</strong>
             <br />
-            Email: <code style={{ color: colors.primary[700] }}>privacy@talentsphere.dev</code>
+            Email:{' '}
+            <a
+              href="mailto:privacy@talentsphere.dev"
+              style={{ color: colors.primary[700], fontWeight: 600 }}
+            >
+              <code>privacy@talentsphere.dev</code>
+            </a>
             <br />
             Security Incident Response:{' '}
-            <code style={{ color: colors.primary[700] }}>security@talentsphere.dev</code>
+            <a
+              href="mailto:security@talentsphere.dev"
+              style={{ color: colors.primary[700], fontWeight: 600 }}
+            >
+              <code>security@talentsphere.dev</code>
+            </a>
             <br />
             Response SLA: Within 48 business hours.
           </div>

@@ -9,6 +9,8 @@
  */
 import { test, expect } from '@playwright/test';
 
+const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
 const ROUTES = [
   { path: '/', name: 'Landing' },
   { path: '/dashboard', name: 'Dashboard' },
@@ -23,6 +25,31 @@ const ROUTES = [
 
 const INTERACTIVE = 'a[href], button, input, select, textarea, [role="button"], [role="link"]';
 const IMAGES = 'img';
+
+// /dashboard, /evidence and /assessments are auth-gated (App.tsx RequireAuth):
+// without a session they bounce to /login, and every audit below would then
+// silently measure the login screen instead of the route named in ROUTES.
+// Register a throwaway user per test and install the session before the first
+// navigation so the audited page is the page under test.
+test.beforeEach(async ({ page, request }) => {
+  const registered = await request.post(`${API_BASE}/auth/register`, {
+    data: {
+      email: `e2e.a11y.${Date.now()}.${Math.random().toString(36).slice(2, 8)}@example.com`,
+      password: 'Password123!Secure',
+      fullName: 'A11Y Probe',
+      role: 'candidate',
+    },
+  });
+  expect(registered.ok()).toBeTruthy();
+  const { token, user } = await registered.json();
+  await page.addInitScript(
+    (session: { token: string; user: unknown }) => {
+      localStorage.setItem('talentsphere_token', session.token);
+      localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
+    },
+    { token, user }
+  );
+});
 
 test.describe('A11Y: Document semantics (WCAG 2.2 AA)', () => {
   test('every route declares a language and a descriptive title', async ({ page }) => {
@@ -351,5 +378,28 @@ test.describe('A11Y: Page-specific structure', () => {
       (els) => els.filter((e) => e.getAttribute('aria-checked') === 'true').length
     );
     expect(checkedAfter, 'keyboard selection must still leave exactly one plan checked').toBe(1);
+
+    // WAI-ARIA radiogroup: arrows move the selection with wrap-around, and
+    // focus follows the new selection (roving tabindex keeps one Tab stop).
+    await plans.first().focus();
+    await page.keyboard.press('ArrowDown');
+    expect(
+      await plans.evaluateAll((els) =>
+        els.findIndex((e) => e.getAttribute('aria-checked') === 'true')
+      ),
+      'ArrowDown must move the selection to the next plan'
+    ).toBe(1);
+    expect(
+      await plans.nth(1).evaluate((el) => el === document.activeElement),
+      'focus must follow the moved selection'
+    ).toBe(true);
+
+    await page.keyboard.press('ArrowUp');
+    expect(
+      await plans.evaluateAll((els) =>
+        els.findIndex((e) => e.getAttribute('aria-checked') === 'true')
+      ),
+      'ArrowUp must move the selection back'
+    ).toBe(0);
   });
 });

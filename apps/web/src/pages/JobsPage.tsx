@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { apiFetch } from '../lib/api.js';
+import { getToken } from '../lib/session.js';
 import {
   Button,
   Badge,
@@ -88,16 +91,18 @@ export const JobsPage: React.FC = () => {
 
   const handleApply = async (jobId: string) => {
     setApplyError(null);
-    const token = localStorage.getItem('talentsphere_token');
+    const token = getToken();
     if (!token) {
       setApplyError('Sign in to apply for this role.');
       return;
     }
     setApplyingId(jobId);
     try {
-      const res = await fetch(`/api/v1/jobs/${jobId}/apply`, {
+      // apiFetch attaches the session token and turns a dead session (401)
+      // into a return to sign-in with ?return= — see lib/api.ts.
+      const res = await apiFetch(`/api/v1/jobs/${jobId}/apply`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       });
       if (!res.ok) {
@@ -171,7 +176,18 @@ export const JobsPage: React.FC = () => {
             fontSize: '0.875rem',
           }}
         >
-          {applyError}
+          {/* The auth prompt is actionable: the message itself links to
+              sign-in with the intended destination preserved. */}
+          {applyError === 'Sign in to apply for this role.' ? (
+            <Link
+              to="/login?return=%2Fjobs"
+              style={{ color: colors.primary[700], fontWeight: 600 }}
+            >
+              Sign in to apply for this role.
+            </Link>
+          ) : (
+            applyError
+          )}
         </div>
       )}
 
@@ -258,12 +274,32 @@ export const JobsPage: React.FC = () => {
                   <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
                     Deterministic matching powered by RFC-0041 Evidence Graphs.
                   </span>
+                  {/* Screen-reader success channel: the button's own label
+                      change is not announced, so the outcome gets a status. */}
+                  <span
+                    role="status"
+                    data-testid={`apply-status-${job.id}`}
+                    style={{
+                      position: 'absolute',
+                      width: '1px',
+                      height: '1px',
+                      padding: 0,
+                      margin: '-1px',
+                      overflow: 'hidden',
+                      clip: 'rect(0, 0, 0, 0)',
+                      whiteSpace: 'nowrap',
+                      border: 0,
+                    }}
+                  >
+                    {isApplied ? `Application submitted for ${job.title}` : ''}
+                  </span>
                   <Button
                     variant={isApplied ? 'secondary' : 'primary'}
                     size="md"
                     data-testid={`apply-btn-${job.id}`}
                     disabled={isApplied || applyingId === job.id}
                     onClick={() => void handleApply(job.id)}
+                    aria-label={`${isApplied ? 'Application Transmitted' : 'Apply with Evidence Graph'} — ${job.title}`}
                   >
                     {isApplied ? (
                       <>
