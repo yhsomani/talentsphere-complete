@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { MemoryJobStore, createPgJobStore, type JobStore } from '@talentsphere/domain';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
@@ -18,6 +19,11 @@ export interface StorageHealth {
 
 export interface Storage {
   readonly mode: StorageMode;
+  /**
+   * Background-job store (SSOT §27.1 ADR-009): durable in pg mode, in-process
+   * in memory mode — same honesty rule as entity data.
+   */
+  readonly jobs: JobStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   close(): Promise<void>;
@@ -30,6 +36,7 @@ function redactDsn(dsn: string): string {
 
 class PgStorage implements Storage {
   readonly mode = 'pg' as const;
+  readonly jobs: JobStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
 
@@ -46,6 +53,8 @@ class PgStorage implements Storage {
     this.pool.on('error', (err: Error) => {
       console.error(`[storage] idle postgres client error: ${err.message}`);
     });
+    // One pool, one boundary: dispatch enqueues and health checks share it.
+    this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
   }
 
   async health(): Promise<StorageHealth> {
@@ -67,6 +76,7 @@ class PgStorage implements Storage {
 
 class MemoryStorage implements Storage {
   readonly mode = 'memory' as const;
+  readonly jobs: JobStore = new MemoryJobStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

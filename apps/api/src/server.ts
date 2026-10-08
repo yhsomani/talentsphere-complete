@@ -470,6 +470,39 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     await storage.close();
   });
 
+  // Durable background-job dispatch (SSOT §27.1 ADR-009). Replaces the old
+  // in-memory `enqueuedWorkerJobs` array, which never drained, died with the
+  // process, and reported a hardcoded healthy queue. Every dispatch is written
+  // to the job store before the caller continues, so dispatched work is
+  // observable and survives a restart (STORAGE=pg). dispatchJob never throws:
+  // a failed enqueue is logged rather than failing the user's request, which
+  // makes event loss visible in logs instead of silent.
+  const JOB_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+  let dispatchCount = 0;
+  const dispatchJob = async (event: {
+    type: string;
+    payload: Record<string, unknown>;
+    /** Legacy call-site timestamp; the store's created_at is authoritative. */
+    enqueuedAt?: string;
+  }): Promise<void> => {
+    try {
+      await storage.jobs.enqueue({ kind: event.type, payload: event.payload });
+      dispatchCount += 1;
+      if (dispatchCount % 100 === 0) {
+        // Opportunistic retention: terminal records older than 7 days are
+        // purged; queued/running rows are never touched.
+        const purged = await storage.jobs.purgeOlderThan(
+          new Date(Date.now() - JOB_RETENTION_MS).toISOString()
+        );
+        if (purged > 0) {
+          app.log.info({ purged }, 'background job retention purge');
+        }
+      }
+    } catch (err) {
+      app.log.error({ err, jobType: event.type }, 'background job dispatch failed');
+    }
+  };
+
   // Attach x-request-id header to all outgoing responses for tracing
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-request-id', req.id);
@@ -857,21 +890,20 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const skillRelationships: SkillRelationship[] = [];
   const evidenceSkills = new Map<string, Set<string>>();
   const auditLogs: any[] = [];
-  const enqueuedWorkerJobs: any[] = [];
 
   // Notification Center Repositories & Helper (F-14, BR-120)
   const notificationsById = new Map<string, Notification>();
   const notificationsByRecipientId = new Map<string, Notification[]>();
   const notificationPreferencesByUserId = new Map<string, NotificationPreferences>();
 
-  const sendNotification = (params: {
+  const sendNotification = async (params: {
     recipientId: string;
     type: NotificationType;
     title: string;
     body: string;
     referenceType?: string;
     referenceId?: string;
-  }): Notification | null => {
+  }): Promise<Notification | null> => {
     let prefs = notificationPreferencesByUserId.get(params.recipientId);
     if (!prefs) {
       prefs = createDefaultNotificationPreferences(params.recipientId);
@@ -889,7 +921,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     list.unshift(notif);
     notificationsByRecipientId.set(params.recipientId, list);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'notification.push',
       payload: {
         notificationId: notif.id,
@@ -1093,7 +1125,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const index = list.findIndex((e) => e.id === updated.id);
       if (index >= 0) list[index] = updated;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'evidence.propagate',
         payload: {
           evidenceId: updated.id,
@@ -1140,7 +1172,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const index = list.findIndex((e) => e.id === updated.id);
       if (index >= 0) list[index] = updated;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'evidence.propagate',
         payload: { evidenceId: updated.id, status: updated.status },
         enqueuedAt: new Date().toISOString(),
@@ -1176,7 +1208,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const index = list.findIndex((e) => e.id === updated.id);
       if (index >= 0) list[index] = updated;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'evidence.propagate',
         payload: { evidenceId: updated.id, status: updated.status },
         enqueuedAt: new Date().toISOString(),
@@ -2160,7 +2192,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
       }
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'application.submitted',
         payload: { applicationId: application.id, jobId, candidateId: profile.id },
         enqueuedAt: new Date().toISOString(),
@@ -2297,7 +2329,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const jobIdx = jobList.findIndex((a) => a.id === updated.id);
       if (jobIdx >= 0) jobList[jobIdx] = updated;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'application.status_changed',
         payload: { applicationId: updated.id, status: updated.status },
         enqueuedAt: new Date().toISOString(),
@@ -2380,7 +2412,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       applicationFeedbackByAppId.set(application.id, feedback);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'application.feedback_delivered',
         payload: { applicationId: application.id, candidateId: application.candidateId },
         enqueuedAt: new Date().toISOString(),
@@ -3532,7 +3564,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const profile = calculateInstructorReputation(updatedMetrics);
       instructorBreakdownsById.set(instructorId, profile);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'instructor.reputation.updated',
         payload: { instructorId, compositeScore: profile.compositeScore, band: profile.band },
         enqueuedAt: new Date().toISOString(),
@@ -3745,7 +3777,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         updatedAt: profile.updatedAt,
       });
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'employer.reputation.updated',
         payload: {
           organizationId,
@@ -3984,7 +4016,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           evList.push(evalResult.evidence);
           evidenceBySubjectId.set(profile.id, evList);
 
-          enqueuedWorkerJobs.push({
+          await dispatchJob({
             type: 'evidence.propagate',
             payload: {
               evidenceId: evalResult.evidence.id,
@@ -4585,7 +4617,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         evList.push(evidence);
         evidenceBySubjectId.set(profile.id, evList);
 
-        enqueuedWorkerJobs.push({
+        await dispatchJob({
           type: 'evidence.propagate',
           payload: {
             evidenceId: evidence.id,
@@ -4619,7 +4651,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           xpTransactionsByUserId.set(session.userId, userTxs);
         }
 
-        enqueuedWorkerJobs.push({
+        await dispatchJob({
           type: 'lms.course.completed',
           payload: {
             courseId: course.id,
@@ -4871,7 +4903,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
       thread.lastMessageAt = initialMessage.createdAt;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'messaging.message.sent',
         payload: {
           threadId: thread.id,
@@ -4882,7 +4914,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         enqueuedAt: initialMessage.createdAt,
       });
 
-      sendNotification({
+      await sendNotification({
         recipientId: input.recipientId,
         type: 'message',
         title: `New message from ${profile.fullName}`,
@@ -4982,7 +5014,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       currentParticipant.lastReadAt = message.createdAt;
 
       const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'messaging.message.sent',
         payload: {
           threadId: thread.id,
@@ -4994,7 +5026,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       });
 
       for (const recipientId of recipientIds) {
-        sendNotification({
+        await sendNotification({
           recipientId,
           type: 'message',
           title: `New message from ${profile.fullName}`,
@@ -5276,7 +5308,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     meter.updatedAt = new Date().toISOString();
 
     // 8. Enqueue async worker job for interaction telemetry
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'ai.interaction.logged',
       payload: {
         userId: session.userId,
@@ -5403,7 +5435,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       resumeExports.unshift(exportItem);
       resumeExportsByResumeId.set(resume.id, resumeExports);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'resume.exported',
         payload: {
           userId: session.userId,
@@ -5525,7 +5557,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const notifRecipientProfile = profilesByUserId.get(targetUserId);
     const notifRecipientId = notifRecipientProfile?.id || targetUserId;
 
-    sendNotification({
+    await sendNotification({
       recipientId: notifRecipientId,
       type: 'connection_request',
       title: 'New Connection Request',
@@ -5535,7 +5567,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
 
     // Enqueue async worker job
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'connection.requested',
       payload: {
         connectionId: connection.id,
@@ -5624,7 +5656,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         const senderProfile = profilesByUserId.get(conn.senderId);
         const notifRecipientId = senderProfile?.id || conn.senderId;
 
-        sendNotification({
+        await sendNotification({
           recipientId: notifRecipientId,
           type: 'connection_accepted',
           title: 'Connection Request Accepted',
@@ -5633,7 +5665,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           referenceId: conn.id,
         });
 
-        enqueuedWorkerJobs.push({
+        await dispatchJob({
           type: 'connection.accepted',
           payload: {
             connectionId: conn.id,
@@ -5645,7 +5677,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       } else {
         updated = rejectConnection(conn, session.userId);
 
-        enqueuedWorkerJobs.push({
+        await dispatchJob({
           type: 'connection.rejected',
           payload: {
             connectionId: conn.id,
@@ -5692,7 +5724,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const rIdx = recipientList.findIndex((c) => c.id === updated.id);
       if (rIdx !== -1) recipientList[rIdx] = updated;
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'connection.withdrawn',
         payload: {
           connectionId: conn.id,
@@ -5735,7 +5767,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         recipientList.filter((c) => c.id !== id)
       );
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'connection.removed',
         payload: {
           connectionId: conn.id,
@@ -5899,7 +5931,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const notifRecipientProfile = profilesByUserId.get(introducerUserId);
       const notifRecipientId = notifRecipientProfile?.id || introducerUserId;
 
-      sendNotification({
+      await sendNotification({
         recipientId: notifRecipientId,
         type: 'warm_intro_requested',
         title: 'New Introduction Request',
@@ -5996,7 +6028,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const notifRequesterId = notifRequesterProfile?.id || updated.requesterUserId;
 
       if (updated.status === 'approved') {
-        sendNotification({
+        await sendNotification({
           recipientId: notifRequesterId,
           type: 'warm_intro_approved',
           title: 'Introduction Approved',
@@ -6007,7 +6039,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
         const notifTargetProfile = profilesByUserId.get(updated.targetUserId);
         const notifTargetId = notifTargetProfile?.id || updated.targetUserId;
-        sendNotification({
+        await sendNotification({
           recipientId: notifTargetId,
           type: 'warm_intro_delivered',
           title: 'New Warm Introduction',
@@ -6016,7 +6048,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           referenceId: updated.id,
         });
       } else {
-        sendNotification({
+        await sendNotification({
           recipientId: notifRequesterId,
           type: 'warm_intro_declined',
           title: 'Introduction Declined',
@@ -6105,7 +6137,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const notifRecipientProfile = profilesByUserId.get(referrerUserId);
     const notifRecipientId = notifRecipientProfile?.id || referrerUserId;
 
-    sendNotification({
+    await sendNotification({
       recipientId: notifRecipientId,
       type: 'referral_requested',
       title: 'New Referral Request',
@@ -6226,7 +6258,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           applicationsById.set(matchingApp.id, matchingApp);
         }
 
-        sendNotification({
+        await sendNotification({
           recipientId: notifCandidateId,
           type: 'referral_approved',
           title: 'Referral Submitted',
@@ -6241,7 +6273,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
         const fwdProfile = profilesByUserId.get(input.forwardedToUserId);
         const notifFwdId = fwdProfile?.id || input.forwardedToUserId;
-        sendNotification({
+        await sendNotification({
           recipientId: notifFwdId,
           type: 'referral_forwarded',
           title: 'Referral Request Forwarded',
@@ -6250,7 +6282,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           referenceId: result.request.id,
         });
       } else {
-        sendNotification({
+        await sendNotification({
           recipientId: notifCandidateId,
           type: 'referral_declined',
           title: 'Referral Request Declined',
@@ -6399,7 +6431,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     endorserHistory.unshift(endorsement);
     skillEndorsementsByEndorserId.set(session.userId, endorserHistory);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'skill.endorsed',
       payload: {
         endorsementId: endorsement.id,
@@ -6692,7 +6724,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // Invalidate cached forecast so subsequent reads compute fresh metrics
       skillForecastsBySkillId.delete(skillId);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'skill.market_signal_recorded',
         payload: {
           signalId: signal.id,
@@ -6799,7 +6831,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       skillForecastsBySkillId.set(skillId, forecast);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'skill.forecast_generated',
         payload: {
           skillId,
@@ -6919,7 +6951,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       timestamp: new Date().toISOString(),
     });
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'career.transition_recorded',
       payload: {
         transitionId: transition.id,
@@ -7158,7 +7190,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       timestamp: new Date().toISOString(),
     });
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'learning.outcome_recorded',
       payload: {
         outcomeId: outcome.id,
@@ -8138,7 +8170,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     instAffs.unshift(affiliation);
     alumniAffiliationsByInstitutionId.set(affiliation.institutionId, instAffs);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'alumni.affiliation.created',
       payload: {
         affiliationId: affiliation.id,
@@ -8217,7 +8249,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       alumniAffiliationsById.set(affiliation.id, affiliation);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'alumni.affiliation.verified',
         payload: {
           affiliationId: affiliation.id,
@@ -8490,7 +8522,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       instMentorships.unshift(mentorshipRequest);
       alumniMentorshipByInstitutionId.set(input.institutionId, instMentorships);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'alumni.mentorship.requested',
         payload: {
           mentorshipId: mentorshipRequest.id,
@@ -8679,7 +8711,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     userProjects.push(project);
     portfolioProjectsByUserId.set(session.userId, userProjects);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'portfolio.project.created',
       payload: {
         userId: session.userId,
@@ -8761,7 +8793,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         portfolioProjectsByUserId.set(session.userId, userProjects);
       }
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'portfolio.project.updated',
         payload: {
           userId: session.userId,
@@ -8797,7 +8829,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         userProjects.filter((p) => p.id !== id)
       );
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'portfolio.project.removed',
         payload: {
           userId: session.userId,
@@ -9062,7 +9094,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         };
         userBadges.push(ub);
 
-        enqueuedWorkerJobs.push({
+        await dispatchJob({
           type: 'gamification.badge.unlocked',
           payload: {
             userId: session.userId,
@@ -9075,7 +9107,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
       userBadgesByUserId.set(session.userId, userBadges);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'gamification.xp.awarded',
         payload: {
           userId: session.userId,
@@ -9145,7 +9177,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
     }
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'user.settings.updated',
       payload: {
         userId: session.userId,
@@ -9233,7 +9265,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     userExports.unshift(exportRequest);
     exportRequestsByUserId.set(session.userId, userExports);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'gdpr.data.exported',
       payload: {
         userId: session.userId,
@@ -9280,7 +9312,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     erasureRequestsByUserId.set(session.userId, userRequests);
     erasureRequestsById.set(erasureRequest.id, erasureRequest);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'gdpr.erasure.requested',
       payload: {
         userId: session.userId,
@@ -9333,7 +9365,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       erasureRequestsByUserId.set(session.userId, list);
     }
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'gdpr.erasure.cancelled',
       payload: {
         userId: session.userId,
@@ -9394,7 +9426,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       erasureRequestsById.set(active.id, active);
     }
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'gdpr.erasure.completed',
       payload: {
         userId: session.userId,
@@ -9492,7 +9524,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     invoicesByUserId.set(session.userId, userInvoices);
     invoicesById.set(result.invoice.id, result.invoice);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'billing.subscription.created',
       payload: {
         userId: session.userId,
@@ -9532,7 +9564,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       entitlementsByUserId.set(session.userId, freeEntitlements);
     }
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'billing.subscription.cancelled',
       payload: {
         userId: session.userId,
@@ -9589,7 +9621,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     billingEventsByIdempotency.set(input.idempotencyKey, event);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'billing.webhook.received',
       payload: {
         eventId,
@@ -9680,7 +9712,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       });
       adminAuditLogs.unshift(auditLog);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'admin.user.status_updated',
         payload: {
           userId: targetUser.id,
@@ -9839,21 +9871,26 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     // Measured, not assumed (Phase 1): one live storage round-trip per query.
     const dbHealth = await storage.health();
 
+    // Queue health is derived, never asserted: dispatch reaches a durable
+    // store only when STORAGE=pg is reachable right now. Memory mode reports
+    // degraded because there the queue neither persists nor processes.
+    const queueOperational = storage.mode === 'pg' && dbHealth.ok;
+
     const status = computeSystemHealth({
       dbConnected: dbHealth.ok,
-      queueOperational: true,
+      queueOperational,
       inMaintenance: systemInMaintenance,
     });
 
     const diagnostics: SystemDiagnostics = {
       status,
       database: dbHealth.ok ? 'connected' : 'disconnected',
-      queue: 'operational',
+      queue: queueOperational ? 'operational' : 'degraded',
       inMaintenance: systemInMaintenance,
       uptimeSeconds: Math.floor(process.uptime()),
       // Phase 1 (users → pg): switch to a COUNT query when users leave the Map.
       registeredUsersCount: usersById.size,
-      activeJobsCount: enqueuedWorkerJobs.length,
+      activeJobsCount: await storage.jobs.countActive(),
       evaluatedAt: new Date().toISOString(),
     };
 
@@ -10118,7 +10155,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       searchHistoryByUserId.set(session.userId, userHistory);
     }
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'search.queried',
       payload: {
         userId: viewerId || 'anonymous',
@@ -10284,7 +10321,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     moderationReportsById.set(report.id, report);
 
-    enqueuedWorkerJobs.push({
+    await dispatchJob({
       type: 'moderation.report_created',
       payload: {
         reportId: report.id,
@@ -10415,7 +10452,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         if (job) job.status = 'closed';
       }
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'moderation.report_resolved',
         payload: {
           reportId: resolved.id,
@@ -10446,7 +10483,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const appeal = createModerationAppeal(report, session.userId, input.reason, existingAppeals);
       moderationAppealsById.set(appeal.id, appeal);
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'moderation.appeal_submitted',
         payload: { appealId: appeal.id, reportId: report.id, appellantId: appeal.appellantId },
         enqueuedAt: new Date().toISOString(),
@@ -10498,7 +10535,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
       }
 
-      enqueuedWorkerJobs.push({
+      await dispatchJob({
         type: 'moderation.appeal_reviewed',
         payload: { appealId: reviewed.id, status: reviewed.status },
         enqueuedAt: new Date().toISOString(),
@@ -11306,9 +11343,24 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
-  // Internal test helper for inspecting async job dispatch
-  app.get('/api/v1/internal/worker-jobs', async () => {
-    return { jobs: enqueuedWorkerJobs };
+  // Internal helper for inspecting async job dispatch (tests + ops).
+  // Hidden in production (least privilege): job payloads carry user ids, and
+  // production state is observable through the admin health diagnostics.
+  app.get('/api/v1/internal/worker-jobs', async (_req, reply) => {
+    if (env.NODE_ENV === 'production') {
+      return reply.callNotFound();
+    }
+    const records = await storage.jobs.list({ limit: 1000 });
+    return {
+      jobs: records.map((record) => ({
+        id: record.id,
+        type: record.kind,
+        payload: record.payload,
+        status: record.status,
+        attempts: record.attempts,
+        enqueuedAt: record.createdAt,
+      })),
+    };
   });
 
   return app;

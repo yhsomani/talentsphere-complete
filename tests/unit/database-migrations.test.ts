@@ -421,4 +421,29 @@ describe('Schema content authority (E-04, E-05) — SQL text assertions, does NO
     expect(sql).toContain('idx_work_history_candidate');
     expect(sql).toContain('idx_references_work_history');
   });
+
+  it('contains and validates migration 00042 background jobs schema (ADR-009 §27.4)', () => {
+    const migrationFile42 = path.join(migrationsDir, '00042_background_jobs_schema.sql');
+    expect(fs.existsSync(migrationFile42)).toBe(true);
+    const sql = fs.readFileSync(migrationFile42, 'utf8');
+    expect(sql).toContain('CREATE TABLE IF NOT EXISTS public.background_jobs');
+    // §27.4 lifecycle statuses; 'canceled' added per M-06/UXC-006.
+    expect(sql).toContain("status VARCHAR(16) NOT NULL DEFAULT 'queued'");
+    expect(sql).toContain("'queued', 'running', 'succeeded', 'failed', 'dead', 'canceled'");
+    // Idempotency via business key, UNIQUE(kind, idempotency_key) (§27.4).
+    expect(sql).toContain('idempotency_key VARCHAR(128)');
+    expect(sql).toContain('uq_background_jobs_kind_idempotency');
+    expect(sql).toContain('ON public.background_jobs(kind, idempotency_key)');
+    // Claim path (FOR UPDATE SKIP LOCKED scan) and lease columns.
+    expect(sql).toContain('run_after TIMESTAMPTZ NOT NULL DEFAULT NOW()');
+    expect(sql).toContain('lock_expires_at TIMESTAMPTZ');
+    expect(sql).toContain('idx_background_jobs_claim');
+    expect(sql).toContain('ON public.background_jobs(status, run_after)');
+    // Bounded error capture + retention index.
+    expect(sql).toContain('last_error VARCHAR(4096)');
+    expect(sql).toContain('ON public.background_jobs(updated_at)');
+    // Infrastructure table: service-role only, no user policies (least privilege).
+    expect(sql).toContain('ALTER TABLE public.background_jobs ENABLE ROW LEVEL SECURITY;');
+    expect(sql).not.toContain('CREATE POLICY');
+  });
 });

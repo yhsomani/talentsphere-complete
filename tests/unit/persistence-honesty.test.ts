@@ -91,5 +91,13 @@ describe('Persistence honesty guards', () => {
       expect(diagnosticsBlock).not.toMatch(/dbConnected:\s*(true|false)/);
       expect(diagnosticsBlock).not.toMatch(/database:\s*'(connected|disconnected)'/);
     });
+
+    it('derives queue health from the measured store, never a hardcoded claim', () => {
+      expect(diagnosticsBlock).toMatch(/queueOperational = storage\.mode === 'pg' && dbHealth\.ok/);
+      expect(diagnosticsBlock).toMatch(/queueOperational \? 'operational' : 'degraded'/);
+      expect(diagnosticsBlock).not.toMatch(/queue:\s*'operational'/);
+      expect(diagnosticsBlock).not.toMatch(/queueOperational:\s*(true|false)/);
+      expect(diagnosticsBlock).toMatch(/activeJobsCount: await storage\.jobs\.countActive\(\)/);
+    });
   });
 });
