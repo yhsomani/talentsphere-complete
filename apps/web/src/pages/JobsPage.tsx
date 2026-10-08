@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
@@ -87,16 +87,49 @@ export const JobsPage: React.FC = () => {
 
   const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
   const [applyError, setApplyError] = useState<string | null>(null);
-  const [applyingId, setApplyingId] = useState<string | null>(null);
+  // Per-job pending set (not a single id): parallel applies keep their own
+  // visible pending state, and keyed applied flags mean an out-of-order
+  // response can never overwrite another job's result.
+  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
+
+  // Hydrate applied state from server truth on mount: a refresh must not
+  // re-enable Apply for a job this candidate already applied to. Best-effort —
+  // on failure the server's BR-039 409 still protects the real submission.
+  useEffect(() => {
+    if (!getToken()) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await apiFetch('/api/v1/applications/my');
+        if (!res.ok) return;
+        const data = await res.json();
+        const applied: Record<string, boolean> = {};
+        for (const application of data.applications ?? []) {
+          if (application?.jobId) applied[application.jobId] = true;
+        }
+        if (!cancelled && Object.keys(applied).length > 0) {
+          setAppliedJobs((prev) => ({ ...prev, ...applied }));
+        }
+      } catch {
+        // Hydration is best-effort; BR-039 on the server remains the backstop.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleApply = async (jobId: string) => {
+    // Re-entry guard in the handler itself — don't rely solely on the
+    // disabled attribute for duplicate-request protection.
+    if (pendingIds.has(jobId) || appliedJobs[jobId]) return;
     setApplyError(null);
     const token = getToken();
     if (!token) {
       setApplyError('Sign in to apply for this role.');
       return;
     }
-    setApplyingId(jobId);
+    setPendingIds((prev) => new Set(prev).add(jobId));
     try {
       // apiFetch attaches the session token and turns a dead session (401)
       // into a return to sign-in with ?return= — see lib/api.ts.
@@ -107,6 +140,12 @@ export const JobsPage: React.FC = () => {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
+        if (res.status === 409) {
+          // Conflict means the server already holds an active application
+          // (BR-039) — reconcile to server truth instead of leaving a dead
+          // "Apply" button that would only ever 409 again.
+          setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+        }
         setApplyError(
           body?.error?.message ?? 'Application could not be submitted. Please try again.'
         );
@@ -117,7 +156,11 @@ export const JobsPage: React.FC = () => {
     } catch {
       setApplyError('Application could not be submitted. Please try again.');
     } finally {
-      setApplyingId(null);
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(jobId);
+        return next;
+      });
     }
   };
 
@@ -194,6 +237,7 @@ export const JobsPage: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
         {JOBS.map((job) => {
           const isApplied = Boolean(appliedJobs[job.id]);
+          const isPending = pendingIds.has(job.id);
           return (
             <Card key={job.id} data-testid={`job-card-${job.id}`}>
               <CardHeader
@@ -274,8 +318,8 @@ export const JobsPage: React.FC = () => {
                   <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
                     Deterministic matching powered by RFC-0041 Evidence Graphs.
                   </span>
-                  {/* Screen-reader success channel: the button's own label
-                      change is not announced, so the outcome gets a status. */}
+                  {/* Screen-reader channel: the button's own label change is
+                      not announced, so pending and success both get a status. */}
                   <span
                     role="status"
                     data-testid={`apply-status-${job.id}`}
@@ -291,20 +335,33 @@ export const JobsPage: React.FC = () => {
                       border: 0,
                     }}
                   >
-                    {isApplied ? `Application submitted for ${job.title}` : ''}
+                    {isApplied
+                      ? `Application submitted for ${job.title}`
+                      : isPending
+                        ? `Submitting application for ${job.title}`
+                        : ''}
                   </span>
                   <Button
                     variant={isApplied ? 'secondary' : 'primary'}
                     size="md"
                     data-testid={`apply-btn-${job.id}`}
-                    disabled={isApplied || applyingId === job.id}
+                    loading={isPending}
+                    disabled={isApplied}
                     onClick={() => void handleApply(job.id)}
-                    aria-label={`${isApplied ? 'Application Transmitted' : 'Apply with Evidence Graph'} — ${job.title}`}
+                    aria-label={`${
+                      isApplied
+                        ? 'Application Transmitted'
+                        : isPending
+                          ? 'Applying'
+                          : 'Apply with Evidence Graph'
+                    } — ${job.title}`}
                   >
                     {isApplied ? (
                       <>
                         <CheckIcon size={16} /> Application Transmitted
                       </>
+                    ) : isPending ? (
+                      'Applying…'
                     ) : (
                       'Apply with Evidence Graph'
                     )}

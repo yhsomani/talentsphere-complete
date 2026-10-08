@@ -12,6 +12,7 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
   let recruiterUserId: string;
   let orgId: string;
   let jobId: string;
+  let job2Id: string;
 
   beforeAll(async () => {
     app = await buildApp({
@@ -256,7 +257,7 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
       },
     });
     expect(job2Res.statusCode).toBe(201);
-    const job2Id = JSON.parse(job2Res.payload).job.id;
+    job2Id = JSON.parse(job2Res.payload).job.id;
 
     // 2. Candidate saves draft for job 2
     await app.inject({
@@ -281,5 +282,63 @@ describe('Integration: Application Draft Autosave & Recovery (F-36, BR-18, SSOT 
       headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(getRes.statusCode).toBe(404);
+  });
+
+  describe('optimistic concurrency (expectedVersion, SSOT M-66)', () => {
+    it('accepts a matching expectedVersion and rejects a stale one with 409', async () => {
+      // Fresh draft for job 2 (the previous one was discarded).
+      const createRes = await app.inject({
+        method: 'PUT',
+        url: `/api/v1/jobs/${job2Id}/draft`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { coverLetter: 'Concurrency draft v1' },
+      });
+      expect(createRes.statusCode).toBe(200);
+      expect(JSON.parse(createRes.payload).draft.version).toBe(1);
+
+      // Reader at version 1 saves successfully.
+      const okRes = await app.inject({
+        method: 'PUT',
+        url: `/api/v1/jobs/${job2Id}/draft`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { coverLetter: 'Concurrency draft v2', expectedVersion: 1 },
+      });
+      expect(okRes.statusCode).toBe(200);
+      expect(JSON.parse(okRes.payload).draft.version).toBe(2);
+
+      // A second writer still holding version 1 is refused, not silently
+      // overwritten — explicit conflict, caller must reload.
+      const staleRes = await app.inject({
+        method: 'PUT',
+        url: `/api/v1/jobs/${job2Id}/draft`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { coverLetter: 'Stale overwrite attempt', expectedVersion: 1 },
+      });
+      expect(staleRes.statusCode).toBe(409);
+      const staleData = JSON.parse(staleRes.payload);
+      expect(staleData.error.code).toBe('CONFLICT');
+      expect(staleData.error.message).toContain('Draft has changed');
+
+      // The refused write must not have changed anything.
+      const getRes = await app.inject({
+        method: 'GET',
+        url: `/api/v1/jobs/${job2Id}/draft`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+      });
+      const getData = JSON.parse(getRes.payload);
+      expect(getData.draft.version).toBe(2);
+      expect(getData.draft.coverLetter).toBe('Concurrency draft v2');
+    });
+
+    it('preserves last-write-wins when expectedVersion is omitted', async () => {
+      const res = await app.inject({
+        method: 'PUT',
+        url: `/api/v1/jobs/${job2Id}/draft`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { coverLetter: 'Legacy caller without version' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.payload).draft.version).toBe(3);
+    });
   });
 });

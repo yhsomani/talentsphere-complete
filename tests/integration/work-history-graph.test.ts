@@ -477,4 +477,95 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.graph.summary.topVerifiedSkills.length).toBeGreaterThanOrEqual(1);
     });
   });
+
+  // Isolated describe: uses otherCandidateToken so the exact-count graph
+  // assertions above (totalRoles/totalReferences) stay untouched.
+  describe('7. Duplicate submission replay guards (clientRequestId, WF-10 idiom)', () => {
+    it('returns the original record when a work-history create is replayed', async () => {
+      const payload = {
+        companyName: 'Replay Corp',
+        title: 'Site Reliability Engineer',
+        startDate: '2021-03-01',
+        endDate: '2023-06-01',
+        isCurrent: false,
+        clientRequestId: `wh-replay-${Date.now()}`,
+      };
+
+      const first = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload,
+      });
+      expect(first.statusCode).toBe(201);
+      const firstId = JSON.parse(first.body).workHistory.id;
+
+      // Retry after double tap / timeout-after-commit: same key → same record.
+      const replay = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload,
+      });
+      expect(replay.statusCode).toBe(200);
+      const replayData = JSON.parse(replay.body);
+      expect(replayData.deduplicated).toBe(true);
+      expect(replayData.workHistory.id).toBe(firstId);
+
+      // A different key is a new submission, not a replay.
+      const second = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload: { ...payload, clientRequestId: `${payload.clientRequestId}-b` },
+      });
+      expect(second.statusCode).toBe(201);
+      expect(JSON.parse(second.body).workHistory.id).not.toBe(firstId);
+    });
+
+    it('returns the original reference when a reference request is replayed', async () => {
+      const entryRes = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload: {
+          companyName: 'Replay Corp',
+          title: 'Staff Engineer',
+          startDate: '2019-01-01',
+          endDate: '2021-01-01',
+          isCurrent: false,
+        },
+      });
+      expect(entryRes.statusCode).toBe(201);
+      const entryId = JSON.parse(entryRes.body).workHistory.id;
+
+      const payload = {
+        refereeName: 'Replay Manager',
+        refereeEmail: `replay.manager.${Date.now()}@corp.test`,
+        relationship: 'manager',
+        clientRequestId: `ref-replay-${Date.now()}`,
+      };
+
+      const first = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${entryId}/references/request`,
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload,
+      });
+      expect(first.statusCode).toBe(201);
+      const firstId = JSON.parse(first.body).reference.id;
+
+      // Replay must not create a second request (and so cannot re-email the referee).
+      const replay = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${entryId}/references/request`,
+        headers: { authorization: `Bearer ${otherCandidateToken}` },
+        payload,
+      });
+      expect(replay.statusCode).toBe(200);
+      const replayData = JSON.parse(replay.body);
+      expect(replayData.deduplicated).toBe(true);
+      expect(replayData.reference.id).toBe(firstId);
+    });
+  });
 });

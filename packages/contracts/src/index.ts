@@ -769,6 +769,10 @@ export const SaveApplicationDraftInputSchema = z.object({
   answers: z.record(z.unknown()).default({}),
   attachedEvidenceIds: z.array(z.string().uuid()).default([]),
   stepIndex: z.number().int().min(0).max(50).default(0),
+  // Optimistic concurrency (SSOT M-66): when provided, the save is rejected
+  // with 409 CONFLICT if another writer advanced the draft since this version.
+  // Omitting it preserves the original last-write-wins behavior.
+  expectedVersion: z.number().int().positive().optional(),
 });
 
 export type SaveApplicationDraftInput = z.infer<typeof SaveApplicationDraftInputSchema>;
@@ -1639,6 +1643,9 @@ export const CreateWorkHistoryInputSchema = z.object({
   description: z.string().max(3000).optional(),
   corporateEmail: z.string().email('Valid corporate email is required').optional(),
   skills: z.array(z.string().min(1).max(100)).default([]),
+  // Replay guard: a retried submit reuses the same key so the server returns
+  // the original record instead of creating a duplicate (WF-10 idiom).
+  clientRequestId: z.string().min(1).max(100).optional(),
 });
 
 export type CreateWorkHistoryInput = z.infer<typeof CreateWorkHistoryInputSchema>;
@@ -1654,6 +1661,9 @@ export const RequestEmploymentReferenceInputSchema = z.object({
   refereeName: z.string().min(2, 'Referee name must be at least 2 characters').max(150),
   refereeEmail: z.string().email('Valid referee email is required'),
   relationship: z.enum(['manager', 'peer', 'direct_report', 'mentor', 'client']),
+  // Replay guard: a retried submit reuses the same key so the server returns
+  // the original request instead of emailing the referee twice (WF-10 idiom).
+  clientRequestId: z.string().min(1).max(100).optional(),
 });
 
 export type RequestEmploymentReferenceInput = z.infer<typeof RequestEmploymentReferenceInputSchema>;

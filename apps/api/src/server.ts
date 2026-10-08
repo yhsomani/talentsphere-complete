@@ -10704,6 +10704,19 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         ? applicationDraftsById.get(existingDraftId)
         : undefined;
 
+      // Optimistic concurrency (SSOT M-66): if the caller names the version it
+      // read, refuse to overwrite a draft another writer has since advanced.
+      if (
+        input.expectedVersion !== undefined &&
+        existingDraft &&
+        existingDraft.version !== input.expectedVersion
+      ) {
+        throw new DomainError(
+          'CONFLICT',
+          `Draft has changed (version ${existingDraft.version}, expected ${input.expectedVersion}). Reload before saving.`
+        );
+      }
+
       const { draft, versionSnapshot } = saveApplicationDraft({
         candidateId: profile.id,
         jobId,
@@ -10961,11 +10974,32 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const verifiedWorkHistoriesByCandidateId = new Map<string, VerifiedWorkHistory[]>();
   const employmentReferencesById = new Map<string, EmploymentReference>();
   const employmentReferencesByHistoryId = new Map<string, EmploymentReference[]>();
+  // Replay guards (WF-10 idiom, same as messagesByClientMessageId): a retried
+  // create with the same clientRequestId returns the original record instead
+  // of creating a duplicate or re-emailing a referee.
+  const workHistoriesByClientRequest = new Map<string, VerifiedWorkHistory>(); // key: `${candidateId}:${clientRequestId}`
+  const referencesByClientRequest = new Map<string, EmploymentReference>(); // key: `${candidateId}:${clientRequestId}`
 
   // 1. Add Work History Entry (F-94)
   app.post('/api/v1/candidates/work-history', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const body = CreateWorkHistoryInputSchema.parse(req.body);
+
+    // Replay guard: retrying the same submission (double tap, timeout after
+    // the server already committed) must not create a second record.
+    const dedupeKey = body.clientRequestId
+      ? `${session.userId}:${body.clientRequestId}`
+      : undefined;
+    if (dedupeKey) {
+      const existing = workHistoriesByClientRequest.get(dedupeKey);
+      if (existing) {
+        return reply.status(200).send({
+          workHistory: existing,
+          message: 'Attestation already recorded for this submission.',
+          deduplicated: true,
+        });
+      }
+    }
 
     const candidateId = session.userId;
 
@@ -10987,6 +11021,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const list = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
     list.push(history);
     verifiedWorkHistoriesByCandidateId.set(candidateId, list);
+    if (dedupeKey) {
+      workHistoriesByClientRequest.set(dedupeKey, history);
+    }
 
     return reply.status(201).send({
       workHistory: history,
@@ -11051,6 +11088,22 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const { id } = req.params;
       const body = RequestEmploymentReferenceInputSchema.parse(req.body);
 
+      // Replay guard: a retried request with the same clientRequestId returns
+      // the original reference instead of emailing the referee twice.
+      const dedupeKey = body.clientRequestId
+        ? `${session.userId}:${body.clientRequestId}`
+        : undefined;
+      if (dedupeKey) {
+        const existing = referencesByClientRequest.get(dedupeKey);
+        if (existing) {
+          return reply.status(200).send({
+            reference: existing,
+            message: 'Reference request already created for this submission.',
+            deduplicated: true,
+          });
+        }
+      }
+
       const workHistory = verifiedWorkHistoriesById.get(id);
       if (!workHistory) {
         throw new DomainError('NOT_FOUND', `Work history record "${id}" not found.`);
@@ -11083,6 +11136,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const refs = employmentReferencesByHistoryId.get(id) || [];
       refs.push(reference);
       employmentReferencesByHistoryId.set(id, refs);
+      if (dedupeKey) {
+        referencesByClientRequest.set(dedupeKey, reference);
+      }
 
       return reply.status(201).send({
         reference,

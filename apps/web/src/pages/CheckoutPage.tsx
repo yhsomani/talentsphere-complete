@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { colors, spacing, motion } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiFetch } from '../lib/api.js';
+import { createStableKeyer } from '../lib/idempotency.js';
 
 interface Plan {
   id: 'candidate_pro' | 'recruiter_starter' | 'recruiter_enterprise';
@@ -80,6 +81,10 @@ export const CheckoutPage: React.FC = () => {
   } | null>(null);
 
   const activePlan = PLANS.find((p) => p.id === selectedPlan) || PLANS[0];
+  // One idempotency key per (plan, cycle): a retry of the same purchase reuses
+  // the key so the server's replay guard actually fires; changing plan or
+  // cycle mints a new key because that is a different purchase.
+  const checkoutKeyer = useRef(createStableKeyer());
   const price = billingCycle === 'monthly' ? activePlan.monthlyPrice : activePlan.yearlyPrice;
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -120,7 +125,7 @@ export const CheckoutPage: React.FC = () => {
         body: JSON.stringify({
           planTier: selectedPlan,
           billingCycle,
-          idempotencyKey: `checkout_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          idempotencyKey: checkoutKeyer.current({ planTier: selectedPlan, billingCycle }),
         }),
       });
 

@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiFetch } from '../lib/api.js';
+import { createStableKeyer } from '../lib/idempotency.js';
 import {
   Button,
   Badge,
@@ -56,7 +57,14 @@ export const EvidencePage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  // One pending flag per form: a shared flag let one form's submission hide
+  // (or wipe) the other form's state.
+  const [addSubmitting, setAddSubmitting] = useState(false);
+  const [refSubmitting, setRefSubmitting] = useState(false);
+  // Stable clientRequestId per form — unchanged across retries of an
+  // unedited payload so the server can deduplicate replays.
+  const addKeyer = useRef(createStableKeyer());
+  const refKeyer = useRef(createStableKeyer());
 
   // Form states for Add Work History
   const [company, setCompany] = useState('');
@@ -137,19 +145,25 @@ export const EvidencePage: React.FC = () => {
       return;
     }
 
-    setSubmitting(true);
+    // Re-entry guard in the handler itself — don't rely solely on the
+    // disabled attribute for duplicate-request protection.
+    if (addSubmitting) return;
+
+    const payload = {
+      companyName: company,
+      title,
+      startDate,
+      isCurrent,
+      ...(isCurrent || !endDate ? {} : { endDate }),
+      ...(email ? { corporateEmail: email } : {}),
+    };
+
+    setAddSubmitting(true);
     try {
       const res = await apiFetch('/api/v1/candidates/work-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          companyName: company,
-          title,
-          startDate,
-          isCurrent,
-          ...(isCurrent || !endDate ? {} : { endDate }),
-          ...(email ? { corporateEmail: email } : {}),
-        }),
+        body: JSON.stringify({ ...payload, clientRequestId: addKeyer.current(payload) }),
       });
 
       if (!res.ok) {
@@ -162,6 +176,7 @@ export const EvidencePage: React.FC = () => {
       const createdId = created?.workHistory?.id as string | undefined;
 
       // Email attestation runs server-side (disposable/webmail checks, scoring, tier).
+      let verifyNotice: string | null = null;
       if (createdId && email) {
         const verifyRes = await apiFetch(
           `/api/v1/candidates/work-history/${createdId}/verify-email`,
@@ -173,11 +188,9 @@ export const EvidencePage: React.FC = () => {
         );
         if (!verifyRes.ok) {
           const body = await verifyRes.json().catch(() => null);
-          setNotice(
-            `Record saved, but the email attestation was rejected: ${
-              body?.error?.message ?? 'verification failed.'
-            }`
-          );
+          verifyNotice = `Record saved, but the email attestation was rejected: ${
+            body?.error?.message ?? 'verification failed.'
+          }`;
         }
       }
 
@@ -188,10 +201,13 @@ export const EvidencePage: React.FC = () => {
       setEndDate('');
       setEmail('');
       await loadEntries();
+      // Set after the refetch, never before: loadEntries clears stale notices
+      // on success and would otherwise wipe this rejection unseen.
+      if (verifyNotice) setNotice(verifyNotice);
     } catch {
       setAddError('Attestation could not be saved. Please try again.');
     } finally {
-      setSubmitting(false);
+      setAddSubmitting(false);
     }
   };
 
@@ -223,7 +239,18 @@ export const EvidencePage: React.FC = () => {
       return;
     }
 
-    setSubmitting(true);
+    // Re-entry guard in the handler itself — don't rely solely on the
+    // disabled attribute for duplicate-request protection.
+    if (refSubmitting) return;
+
+    const payload = {
+      workHistoryId: selectedEntryId,
+      refereeName: refName,
+      refereeEmail: refEmail,
+      relationship: refRole,
+    };
+
+    setRefSubmitting(true);
     try {
       const res = await apiFetch(
         `/api/v1/candidates/work-history/${selectedEntryId}/references/request`,
@@ -231,9 +258,8 @@ export const EvidencePage: React.FC = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            refereeName: refName,
-            refereeEmail: refEmail,
-            relationship: refRole,
+            ...payload,
+            clientRequestId: refKeyer.current(payload),
           }),
         }
       );
@@ -259,7 +285,7 @@ export const EvidencePage: React.FC = () => {
     } catch {
       setRefError('Reference request could not be created.');
     } finally {
-      setSubmitting(false);
+      setRefSubmitting(false);
     }
   };
 
@@ -568,6 +594,7 @@ export const EvidencePage: React.FC = () => {
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        busy={addSubmitting}
         title="Attest Employment Record"
         description="Submit employment history with start/end date invariants and corporate email verification."
       >
@@ -670,16 +697,21 @@ export const EvidencePage: React.FC = () => {
               marginTop: spacing.lg,
             }}
           >
-            <Button variant="secondary" type="button" onClick={() => setIsAddModalOpen(false)}>
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={addSubmitting}
+              onClick={() => setIsAddModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button
               variant="primary"
               type="submit"
               data-testid="submit-employment-btn"
-              disabled={submitting}
+              loading={addSubmitting}
             >
-              Attest Record
+              {addSubmitting ? 'Attesting…' : 'Attest Record'}
             </Button>
           </div>
         </form>
@@ -689,6 +721,7 @@ export const EvidencePage: React.FC = () => {
       <Modal
         isOpen={isRefModalOpen}
         onClose={() => setIsRefModalOpen(false)}
+        busy={refSubmitting}
         title="Request Structured Reference"
         description="Create a structured reference request for a supervisor on this record."
       >
@@ -787,16 +820,21 @@ export const EvidencePage: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
-            <Button variant="secondary" type="button" onClick={() => setIsRefModalOpen(false)}>
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={refSubmitting}
+              onClick={() => setIsRefModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button
               variant="primary"
               type="submit"
               data-testid="submit-reference-btn"
-              disabled={submitting}
+              loading={refSubmitting}
             >
-              Create Reference Request
+              {refSubmitting ? 'Sending…' : 'Create Reference Request'}
             </Button>
           </div>
         </form>

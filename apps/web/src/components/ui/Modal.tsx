@@ -10,6 +10,10 @@ export interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxWidth?: string;
+  /** While true, dismissal (Escape/backdrop/close button) is blocked — used
+   *  during in-flight submissions so a request cannot outlive the form whose
+   *  result it reports. */
+  busy?: boolean;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -32,6 +36,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   footer,
   maxWidth = '540px',
+  busy = false,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +44,7 @@ export const Modal: React.FC<ModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (e.key === 'Escape') {
+        if (busy) return;
         onClose();
         return;
       }
@@ -72,7 +78,7 @@ export const Modal: React.FC<ModalProps> = ({
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, busy]);
 
   // Focus management: move focus into the dialog on open, restore on close.
   useEffect(() => {
@@ -104,7 +110,7 @@ export const Modal: React.FC<ModalProps> = ({
         animation: `modal-backdrop-in ${motion.duration.fast} ${motion.easing.easeOut} both`,
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget && !busy) onClose();
       }}
     >
       <div
@@ -164,7 +170,9 @@ export const Modal: React.FC<ModalProps> = ({
           <button
             type="button"
             aria-label="Close modal"
-            onClick={onClose}
+            onClick={() => {
+              if (!busy) onClose();
+            }}
             style={{
               background: 'none',
               border: 'none',
