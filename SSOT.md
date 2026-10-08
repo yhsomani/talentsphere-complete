@@ -3380,7 +3380,7 @@ Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) �
 ### 27.4 Job Schema
 
 ```
-id UUID · kind · payload jsonb · status (queued/running/succeeded/failed/dead)
+id UUID · kind · payload jsonb · status (queued/running/succeeded/failed/dead/canceled)
 attempts · run_after · lock_expires_at · last_error (≤4KB)
 idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 ```

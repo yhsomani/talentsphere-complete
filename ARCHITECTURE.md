@@ -124,11 +124,11 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 
 **Component: `apps/worker` (@talentsphere/worker)**
 
-- Purpose: async job consumer skeleton. `JobQueueEngine` with retry/backoff-to-requeue, idempotency-key set, and dead-letter queue.
-- Owns: queue semantics (`enqueue`, `processNext`, DLQ, `registerHandler`).
-- Consumes: `@talentsphere/observability`.
-- Must not: be assumed durable across restarts (queue is in-memory, per-process); be treated as wired to the API (no producer exists).
-- Primary location: `apps/worker/src/queue.ts`, `apps/worker/src/index.ts` (poll loop, 2 s idle sleep).
+- Purpose: async job consumer — the durable claim runner for the API's dispatch events, plus `JobQueueEngine` (retry/backoff-to-requeue, idempotency-key set, dead-letter queue) kept as a unit-tested reserved contract.
+- Owns: durable claim cycle (`claim.ts`: lease 60 s > handler timeout 30 s, bounded retries with backoff + jitter, `PermanentJobError`, cooperative cancel, dead-letter for unregistered kinds) over the `background_jobs` store; engine queue semantics (`enqueue`, `processNext`, DLQ, `registerHandler`).
+- Consumes: `@talentsphere/observability`, `@talentsphere/domain` (JobStore), `pg`. Loads `.env` like the API entry.
+- Must not: be assumed to process anything under STORAGE=memory (that mode neither persists nor processes — the worker idles with an honest log); the `JobQueueEngine` itself still has no producer (reserved contract, exercised by unit tests only).
+- Primary location: `apps/worker/src/queue.ts` (engine), `apps/worker/src/claim.ts` (durable runner), `apps/worker/src/index.ts` (pg claim loop, 1 s idle sleep).
 
 **Component: `packages/config`**
 
@@ -296,9 +296,11 @@ Ownership: subscription/entitlement truth = domain functions + API Maps. Nothing
 Client → `POST /api/v1/ai/chat` → `extractUser` → `sanitizePromptInput` → tier (hardcoded `'free'` — R-4) → `getOrCreateAIUsageMeter` → `assertWithinAIQuota` (tokens/day, requests/day) → `generateCareerAssistantResponse` (local heuristic) → message + `AIProvenance{executionMode:'local_heuristic', disclaimer}` persisted in Maps. Assessment context: `assertAIAssistanceAllowed(policyMode)` blocks AI during `AI_PROHIBITED` sessions server-side → 403 `ASSESSMENT_AI_PROHIBITED`; quota breach → 402 `FREE_USER_AI_QUOTA_EXCEEDED`.
 Ownership: quota meters in API Maps; limits in domain constants.
 
-### Flow F — Async jobs (designed, not connected)
+### Flow F — Async jobs (durable dispatch connected; engine path reserved)
 
-Intended: producer → `queueEngine.enqueue(type,payload,{idempotencyKey})` → poll loop `processNext` → registered handler → completion or requeue (≤ maxRetries=3) → DLQ. Actual: **no producer exists in the API process**; handlers log only. Treat `evidence.propagate`, `notifications.send`, `analytics.aggregate` as reserved contracts, not behavior.
+Implemented: route side effects stay inline and awaited → API `dispatchJob` → `storage.jobs.enqueue` (pg `background_jobs` via SKIP LOCKED, migration 00042; in-process under STORAGE=memory) → worker claim loop (`claim.ts`, 60 s lease > 30 s handler timeout) → per-kind ack handler → `succeeded` | retry (exponential backoff + ±20 % jitter, ≤3 attempts) | `failed` (permanent) | `dead` (unregistered kind or exhausted retries) | `canceled` (cooperative). Dispatch is observable truthfully at `GET /api/v1/internal/worker-jobs` (404 in production) and via `activeJobsCount`/`queue` in health-diagnostics — queue health is derived from the measured store, never asserted (it reflects reachability of the dispatch store, not worker liveness: there is no heartbeat).
+
+Still reserved: the in-process `queueEngine.enqueue → processNext` chain has **no producer**; `evidence.propagate`, `notifications.send`, `analytics.aggregate` remain unit-test contracts, not behavior. Scheduled §27.2 kinds (digests, rollups, reindex) remain spec-only — there is no scheduler.
 
 Cross-cutting: every response carries `x-request-id` (echoing inbound header or generated `req_uuid`) — the correlation primitive for logs and `ErrorEnvelope.request_id`.
 
@@ -449,11 +451,11 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 
 ## 18. Asynchronous Architecture
 
-- **Engine:** `JobQueueEngine` (`apps/worker/src/queue.ts`) — FIFO array, per-job `maxRetries` (default 3) with immediate requeue (no backoff delay), idempotency via in-memory `processedKeys` Set, unregistered types and exhausted-retry jobs go to an in-memory DLQ (`getDLQ/getDLQCount` exposed for ops/tests).
-- **Consumers:** poll loop in `worker/src/index.ts` — `processNext()` else sleep 2 s. Registered types: `evidence.propagate`, `notifications.send`, `analytics.aggregate` — **all log-only**.
-- **Producers:** none (API does not enqueue; no broker bridges processes).
-- **Ordering:** single-worker FIFO; **durability:** none (restart loses queue + DLQ); **dead-letter behavior:** retained in memory only.
-- Full chain today: `handler registration → in-memory queue → poll → log line → completed`. Treat everything beyond the engine mechanics as designed-but-unimplemented.
+- **Durable dispatch path (implemented — ADR-009 §27.1):** API `dispatchJob` awaits `storage.jobs.enqueue` before the caller continues (never throws; an enqueue failure is logged, so event loss is visible, not silent) → `background_jobs` (migration 00042: `UNIQUE(kind, idempotency_key)`, claim index `(status, run_after)`, retention index, RLS enabled with no user policies — service-role only) → worker claims with `FOR UPDATE SKIP LOCKED` + a 60 s lease (must exceed the 30 s handler timeout so live handlers are never double-claimed; lease expiry re-claims crashed work) → handler under hard timeout → exactly one terminal transition: `succeeded`, retry (exponential backoff, 30 s cap, ±20 % jitter, ≤3 attempts), `failed` (`PermanentJobError`, never retried), `dead` (unregistered kind or exhausted budget), or cooperative `canceled` (ack-boundary enforcement). `last_error` is truncated to 4 KB; retention purges terminal rows older than 7 days opportunistically (every 100th enqueue). Failure-injection tests cover backoff windows, timeout, permanent errors, cancel-during-run, exhaustion, and truncation.
+- **Engine (reserved, unit-tested):** `JobQueueEngine` (`apps/worker/src/queue.ts`) — FIFO array, per-job `maxRetries` (default 3) with immediate requeue (no backoff delay), idempotency via in-memory `processedKeys` Set, unregistered types and exhausted-retry jobs go to an in-memory DLQ (`getDLQ/getDLQCount` exposed for ops/tests). Still **no producer**; registered types (`evidence.propagate`, `notifications.send`, `analytics.aggregate`) are log-only.
+- **Ordering:** single worker, sequential per claim batch (10 max); **durability:** pg mode survives restarts and process crashes (lease recovery); memory mode is per-process — it records dispatch events (observable) but never processes them, and says so in health (`queue: 'degraded'`) and in the worker's idle log.
+- **Producers:** the 43 API dispatch kinds → durable store. Engine path: none.
+- Full chain today: `inline route side effect (awaited) → dispatchJob → background_jobs → claim → ack handler → succeeded | retry | failed | dead | canceled`. Scheduled §27.2 kinds (digests, rollups, reindex) remain designed-but-unimplemented — there is no scheduler.
 
 ---
 

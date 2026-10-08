@@ -4,6 +4,20 @@ import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsp
 import { JobQueueEngine } from './queue.js';
 import { runClaimCycle, type ClaimHandler } from './claim.js';
 
+// Load .env natively (Node process.loadEnvFile) exactly like the API entry
+// (apps/api/src/index.ts): found from the repo root, or two levels up when
+// started from apps/worker (pnpm --filter dev). A missing file is fine — CI
+// and production pass environment variables directly — and values already in
+// process.env are never overridden by the file.
+for (const candidate of ['.env', '../../.env']) {
+  try {
+    process.loadEnvFile(candidate);
+    break;
+  } catch {
+    // not here — try the next location
+  }
+}
+
 const logger = createLogger({ name: 'talentsphere-worker' });
 export const queueEngine = new JobQueueEngine();
 

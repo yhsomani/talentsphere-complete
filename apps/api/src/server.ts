@@ -9874,6 +9874,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     // Queue health is derived, never asserted: dispatch reaches a durable
     // store only when STORAGE=pg is reachable right now. Memory mode reports
     // degraded because there the queue neither persists nor processes.
+    // Measured: enqueue-path reachability. NOT measured: worker liveness —
+    // there is no heartbeat, so a dead worker over a live database still
+    // reports the queue as healthy. Jobs never report false completion, so
+    // this ceiling is one of reachability, not of job truth.
     const queueOperational = storage.mode === 'pg' && dbHealth.ok;
 
     const status = computeSystemHealth({
