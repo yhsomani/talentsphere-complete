@@ -8,6 +8,9 @@ export default defineConfig({
     // same process. Both read TOKEN_SECRET, so pinning it keeps them in agreement.
     env: {
       TOKEN_SECRET: TEST_TOKEN_SECRET,
+      // Phase 1: the suite runs on the explicit non-durable backend; pg-backed
+      // tests opt in with STORAGE:'pg' (see tests/integration/storage-boot.test.ts).
+      STORAGE: 'memory',
     },
     include: [
       'tests/unit/**/*.test.ts',

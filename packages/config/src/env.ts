@@ -20,6 +20,10 @@ export const ServerEnvSchema = z.object({
   // Database
   DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/postgres'),
   DIRECT_URL: z.string().optional(),
+  // Persistence backend: 'pg' (real Postgres, the product default) or
+  // 'memory' (explicit non-durable Maps, tests only). Unset resolves to
+  // memory when NODE_ENV=test, pg otherwise — see apps/api/src/storage.
+  STORAGE: z.enum(['pg', 'memory']).optional(),
 
   // Security & Rate Limiting
   // TOKEN_SECRET signs session tokens. It is optional so local development works

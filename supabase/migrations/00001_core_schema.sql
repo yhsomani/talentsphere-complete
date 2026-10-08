@@ -88,6 +88,28 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
+-- 0. Users Table (self-owned auth, decision D4 — not Supabase auth.users).
+--    Restores the table migrations 00008+ reference as public.users(id).
+--    roles is TEXT[] because policy expressions use `'x' = ANY(users.roles)`
+--    and the domain Role union is broader than the user_role enum; the domain
+--    layer validates role values on write.
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  roles TEXT[] NOT NULL DEFAULT '{}',
+  status VARCHAR(32) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ
+);
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY users_own_row ON public.users
+    FOR ALL
+    USING (id = auth.uid())
+    WITH CHECK (id = auth.uid());
+
 -- 1. Profiles Table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

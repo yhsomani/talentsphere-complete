@@ -13,6 +13,7 @@ describe('Schema content authority (E-04, E-05) — SQL text assertions, does NO
   it('defines the required canonical core tables', () => {
     const sql = fs.readFileSync(migrationFile, 'utf8');
     const requiredTables = [
+      'public.users',
       'public.profiles',
       'public.evidence',
       'public.organizations',
@@ -31,6 +32,7 @@ describe('Schema content authority (E-04, E-05) — SQL text assertions, does NO
   it('enforces RLS enablement across all core tables', () => {
     const sql = fs.readFileSync(migrationFile, 'utf8');
     const requiredRlsTables = [
+      'public.users',
       'public.profiles',
       'public.evidence',
       'public.organizations',

@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import crypto from 'node:crypto';
 import { ZodError } from 'zod';
 import { validateServerEnv, ServerEnv } from '@talentsphere/config';
+import { createStorage } from './storage/index.js';
 import {
   DomainError,
   Role,
@@ -445,6 +446,28 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
       return `req_${crypto.randomUUID()}`;
     },
+  });
+
+  // Phase 1 (production audit): persistence goes through createStorage().
+  // STORAGE=pg (the default outside tests) must reach Postgres or the API
+  // refuses to start — there is no silent in-memory fallback. STORAGE=memory
+  // is the explicit non-durable mode the test suite runs on.
+  const storage = createStorage(env);
+  if (storage.mode === 'pg') {
+    const boot = await storage.health();
+    if (!boot.ok) {
+      await storage.close();
+      throw new Error(
+        `Database unreachable at boot (STORAGE=pg): ${boot.detail}. ` +
+          'Fix DATABASE_URL or start PostgreSQL; set STORAGE=memory only for an explicitly non-durable server.'
+      );
+    }
+    app.log.info(`storage: pg — ${boot.detail}`);
+  } else {
+    app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
+  }
+  app.addHook('onClose', async () => {
+    await storage.close();
   });
 
   // Attach x-request-id header to all outgoing responses for tracing
@@ -9813,18 +9836,22 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const session = extractUser(req);
     assertPlatformAdmin(session.roles);
 
+    // Measured, not assumed (Phase 1): one live storage round-trip per query.
+    const dbHealth = await storage.health();
+
     const status = computeSystemHealth({
-      dbConnected: false,
+      dbConnected: dbHealth.ok,
       queueOperational: true,
       inMaintenance: systemInMaintenance,
     });
 
     const diagnostics: SystemDiagnostics = {
       status,
-      database: 'disconnected',
+      database: dbHealth.ok ? 'connected' : 'disconnected',
       queue: 'operational',
       inMaintenance: systemInMaintenance,
       uptimeSeconds: Math.floor(process.uptime()),
+      // Phase 1 (users → pg): switch to a COUNT query when users leave the Map.
       registeredUsersCount: usersById.size,
       activeJobsCount: enqueuedWorkerJobs.length,
       evaluatedAt: new Date().toISOString(),

@@ -20,10 +20,12 @@
     "@talentsphere/contracts": "workspace:*",
     "@talentsphere/domain": "workspace:*",
     "fastify": "^5.12.5",
+    "pg": "^8.23.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
+    "@types/pg": "^8.23.1",
     "typescript": "^5.9.3"
   }
 }
