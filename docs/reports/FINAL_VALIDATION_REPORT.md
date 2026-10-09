@@ -43,20 +43,26 @@
 
 ## Executable Evidence & Implementation Verification
 
-The implementation has systematically progressed through Phase 0, Phase 1, Phase 2, Phase 3, and Phase 4/5 intelligence systems.
+Measured at HEAD `aad8b54d` (2026-10-08). Counts below are machine-reported, not estimated.
 
-- **Verified Features:** 51 / 173 (29.48%) fully implemented, integrated, and verified against business rules.
-- **Automated Test Coverage:**
-  - **Unit Tests:** 44 test suites / 537 tests PASS (100% green)
-  - **Integration Tests:** 42 test suites / 333 tests PASS (100% green)
-  - **Playwright E2E Tests:** 34 spec files / 134 tests PASS (100% green)
-  - **Total Automated Tests:** 1004 / 1004 tests PASS (100% green)
-- **Database Migrations:** 41 sequential SQL migrations (`00001` through `00041`) with strict RLS policies, foreign keys, and indexes.
+- **Automated tests (Vitest):** 94 files / **976 tests PASS** (`npx vitest run`).
+- **Automated tests (Playwright E2E):** **183 tests PASS**.
+- **Database Migrations:** **42** sequential SQL migrations (`00001` through `00042`) with RLS policies, foreign keys, and indexes.
 - **Monorepo Build:** 10/10 workspace packages and apps build cleanly (`tsc -b`), zero type errors.
-- **Lint & Code Style:** 100% Prettier formatting compliant, zero warnings.
+- **Lint & Code Style:** Prettier formatting clean.
+- **Per-feature verification:** tracked in `BRAIN/MEMORY.md`; not re-asserted here.
 
 ## Current Operational Status
 
-- **Documentation:** Production-ready baseline.
-- **Implementation:** Core platform operational modules for Phase 0–4 loops are **VERIFIED & OPERATIONAL**.
-- **Production Gate:** Core loops verified; continuing sequential execution toward 173-feature portfolio completion under the Golden Workflow.
+- **Production readiness: NOT met.** An independent end-user/business-owner audit
+  (`docs/reports/PRODUCTION_AUDIT_2026-10-03.md`) scored the product **NOT READY (4.6/10)**
+  at commit `8db0930`. Several items it raised have since been remediated — honest login
+  failure, checkout that confirms only on a 2xx response with a real invoice id, a real
+  storage boundary, durable background-job dispatch, and green CI.
+- **Open at HEAD `aad8b54d`:**
+  - checkout collects raw card fields (number/expiry/CVC) it never transmits — no payment processor;
+  - `/api/v1/billing/webhook` accepts unsigned payloads;
+  - entity data still lives in in-process Maps (`apps/api/src/server.ts`) — only background jobs are durable;
+  - no real payment, AI, or notification provider is wired.
+- **Production Gate:** open — see the audit for the current blocker list. Readiness is an
+  executable evidence gate, not an assertion.
