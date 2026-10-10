@@ -1,4 +1,5 @@
 import { buildApp } from '../apps/api/dist/server.js';
+import { TEST_WEBHOOK_SECRET } from '../test-secrets.mjs';
 
 // Session tokens are signed with process.env.TOKEN_SECRET, which the domain layer
 // reads directly rather than through buildApp's validated env. playwright.config.ts
@@ -16,6 +17,10 @@ async function start() {
     // One API process serves every E2E spec from 127.0.0.1; the production
     // credential-endpoint budget (10 per 15 min) would throttle the suite.
     AUTH_RATE_LIMIT_MAX_REQUESTS: '100000',
+    // No payment processor exists; the E2E billing journey exercises the
+    // explicit simulated mode, and webhooks are signed like a provider's.
+    BILLING_MODE: 'simulated',
+    BILLING_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
   });
 
   const address = await app.listen({ port: 4000, host: '127.0.0.1' });

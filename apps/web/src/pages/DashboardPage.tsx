@@ -1,770 +1,457 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { apiJson } from '../lib/api.js';
+import { useSession } from '../lib/SessionContext.js';
+import { formatDate } from '../lib/format.js';
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  ButtonLink,
-  Badge,
-  ShieldCheckIcon,
-  CodeIcon,
-  GitBranchIcon,
-  ArrowRightIcon,
-} from '../components/ui/index.js';
+  ACTIVE_APPLICATION_STATUSES,
+  type Application,
+  type EvidenceItem,
+  type Job,
+} from '../lib/types.js';
+import { ButtonLink, CheckIcon, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
 
-interface UserProfile {
-  name: string;
-  email: string;
-  role: string;
+interface WorkHistorySummary {
+  id: string;
+  emailVerifiedAt?: string;
+  badgeTier: string;
+  references?: Array<{ status: string }>;
 }
 
-export const DashboardPage: React.FC = () => {
-  usePageMeta(
-    'Career Cockpit — Dashboard',
-    'Track your verified evidence, skill readiness score, and active applications in one career cockpit.'
-  );
+interface Step {
+  done: boolean;
+  title: string;
+  detail: string;
+  to: string;
+  action: string;
+}
 
-  const [user, setUser] = useState<UserProfile>({
-    name: 'Sarah Chen',
-    email: 'sarah.chen@example.com',
-    role: 'Principal Systems Architect',
-  });
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('talentsphere_user');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.email) {
-          setUser({
-            name: parsed.email.split('@')[0].replace('.', ' '),
-            email: parsed.email,
-            role: 'Senior Software Engineer',
-          });
-        }
-      }
-    } catch {
-      // Fallback to default demo state
-    }
-  }, []);
-
+/**
+ * An ordered list of what to do next, derived from the account's real data.
+ * It is numbered because it IS a sequence: each step builds on the last.
+ */
+const NextSteps: React.FC<{ steps: Step[] }> = ({ steps }) => {
+  const remaining = steps.filter((s) => !s.done).length;
   return (
-    <div
-      style={{
-        maxWidth: '1100px',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing.xl,
-      }}
-    >
-      {/* Cockpit Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: spacing.md,
-          borderBottom: `1px solid ${colors.neutral[200]}`,
-          paddingBottom: spacing.lg,
-        }}
+    <section aria-labelledby="next-steps" style={{ marginBottom: spacing['2xl'] }}>
+      <h2 id="next-steps" style={{ fontSize: '1.25rem', marginBottom: spacing.xs }}>
+        {remaining === 0 ? 'You’re all set' : 'Next steps'}
+      </h2>
+      <p style={{ color: colors.neutral[600], marginBottom: spacing.md }}>
+        {remaining === 0
+          ? 'Everything here is done. Keep your work history current as you change roles.'
+          : `${steps.length - remaining} of ${steps.length} done.`}
+      </p>
+      <ol
+        style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: spacing.sm }}
+        data-testid="next-steps"
       >
-        <div>
-          <div
+        {steps.map((step, i) => (
+          <li
+            key={step.title}
+            data-testid={`step-${i + 1}`}
+            data-done={step.done}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: spacing.sm,
-              marginBottom: spacing.xs,
+              gap: spacing.md,
+              padding: `${spacing.md} ${spacing.lg}`,
+              backgroundColor: '#ffffff',
+              border: `1px solid ${step.done ? colors.neutral[200] : colors.primary[200]}`,
+              borderRadius: '10px',
             }}
           >
-            <Badge variant="verified">
-              <ShieldCheckIcon size={12} />
-              <span>Identity Verified</span>
-            </Badge>
-            <Badge variant="gold">Level 5 Contributor</Badge>
-            <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-              DID: did:ts:8f7b2c...a91
+            <span
+              aria-hidden="true"
+              style={{
+                flex: '0 0 32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                backgroundColor: step.done ? '#ecfdf5' : colors.primary[50],
+                color: step.done ? colors.semantic.successText : colors.primary[800],
+              }}
+            >
+              {step.done ? <CheckIcon size={16} /> : i + 1}
             </span>
-          </div>
-          <h1
-            style={{
-              fontSize: '2.25rem',
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-              lineHeight: 1.15,
-              color: colors.neutral[900],
-              margin: '0 0 6px',
-            }}
-          >
-            Candidate Career Cockpit
-          </h1>
-          <p style={{ margin: 0, color: colors.neutral[600], fontSize: '1rem' }}>
-            {user.name} &bull; {user.role} &bull; Real-time readiness, verified credentials, and
-            explainable matches.
-          </p>
-        </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <strong style={{ color: step.done ? colors.neutral[600] : colors.neutral[900] }}>
+                {step.title}
+                <span className="sr-only">{step.done ? ' (done)' : ''}</span>
+              </strong>
+              <div style={{ fontSize: '0.875rem', color: colors.neutral[600] }}>{step.detail}</div>
+            </div>
+            {!step.done && (
+              <ButtonLink to={step.to} size="sm" variant="outline">
+                {step.action}
+              </ButtonLink>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+};
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm }}>
-          <ButtonLink to="/evidence" variant="secondary" size="md">
-            <GitBranchIcon size={16} />
-            <span>Manage Evidence</span>
-          </ButtonLink>
-          <ButtonLink to="/assessments" variant="primary" size="md">
-            <CodeIcon size={16} />
-            <span>Browse Assessments</span>
-          </ButtonLink>
-        </div>
-      </div>
+const Figure: React.FC<{ value: React.ReactNode; label: string; testId: string }> = ({
+  value,
+  label,
+  testId,
+}) => (
+  <div
+    style={{
+      padding: `${spacing.md} ${spacing.lg}`,
+      backgroundColor: '#ffffff',
+      border: `1px solid ${colors.neutral[200]}`,
+      borderRadius: '10px',
+    }}
+  >
+    <div
+      data-testid={testId}
+      style={{ fontSize: '2rem', fontWeight: 700, color: colors.neutral[900], lineHeight: 1.1 }}
+    >
+      {value}
+    </div>
+    <div style={{ color: colors.neutral[600], fontSize: '0.875rem', marginTop: 4 }}>{label}</div>
+  </div>
+);
 
-      {/* Metrics Row */}
+const CandidateDashboard: React.FC = () => {
+  const session = useSession();
+  const profile = session.profile;
+  const [applications, setApplications] = useState<Application[] | null>(null);
+  const [history, setHistory] = useState<WorkHistorySummary[] | null>(null);
+  const [evidence, setEvidence] = useState<EvidenceItem[] | null>(null);
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!session.user) return;
+    let cancelled = false;
+    Promise.all([
+      apiJson<{ applications: Application[] }>('/api/v1/applications/my'),
+      apiJson<{ workHistories: WorkHistorySummary[] }>(
+        `/api/v1/candidates/${session.user.id}/work-history`
+      ),
+      apiJson<{ evidence: EvidenceItem[] }>('/api/v1/evidence/mine'),
+      apiJson<{ jobs: Job[] }>('/api/v1/jobs'),
+    ])
+      .then(([a, h, e, j]) => {
+        if (cancelled) return;
+        setApplications(a.applications);
+        setHistory(h.workHistories);
+        setEvidence(e.evidence);
+        setJobs(j.jobs);
+      })
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [session.user]);
+
+  if (failed)
+    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (!applications || !history || !evidence || !jobs) {
+    return (
+      <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
+        Loading your dashboard…
+      </p>
+    );
+  }
+
+  const active = applications.filter((a) => ACTIVE_APPLICATION_STATUSES.includes(a.status));
+  const verifiedRoles = history.filter((h) => h.emailVerifiedAt).length;
+  const referencesIn = history.reduce(
+    (n, h) => n + (h.references ?? []).filter((r) => r.status === 'submitted').length,
+    0
+  );
+  const appliedJobIds = new Set(applications.map((a) => a.jobId));
+  const freshJobs = jobs.filter((j) => !appliedJobIds.has(j.id)).slice(0, 3);
+
+  const steps: Step[] = [
+    {
+      done: Boolean(profile?.headline && profile?.location),
+      title: 'Complete your profile',
+      detail: 'Add a headline and location so recruiters know what you do and where.',
+      to: '/profile',
+      action: 'Edit profile',
+    },
+    {
+      done: history.length > 0,
+      title: 'Add your work history',
+      detail: 'List your current or most recent role.',
+      to: '/evidence',
+      action: 'Add a role',
+    },
+    {
+      done: verifiedRoles > 0,
+      title: 'Verify a role',
+      detail: 'Confirm a work email at that employer — it raises the role to bronze.',
+      to: '/evidence',
+      action: 'Verify',
+    },
+    {
+      done: applications.length > 0,
+      title: 'Apply to a job',
+      detail: 'Companies see your profile and how your history is verified.',
+      to: '/jobs',
+      action: 'Browse jobs',
+    },
+  ];
+
+  return (
+    <>
+      <NextSteps steps={steps} />
+
+      <section
+        aria-label="Summary"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
+          gap: spacing.md,
+          marginBottom: spacing['2xl'],
+        }}
+      >
+        <Figure
+          value={active.length}
+          label="Applications in progress"
+          testId="figure-active-applications"
+        />
+        <Figure
+          value={`${verifiedRoles} of ${history.length}`}
+          label="Roles with a confirmed work email"
+          testId="figure-verified-roles"
+        />
+        <Figure value={referencesIn} label="References received" testId="figure-references" />
+        <Figure value={evidence.length} label="Evidence items" testId="figure-evidence" />
+      </section>
+
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))',
+          gap: spacing.xl,
+        }}
+      >
+        <section aria-labelledby="recent-applications">
+          <h2 id="recent-applications" style={{ fontSize: '1.125rem', marginBottom: spacing.sm }}>
+            Recent applications
+          </h2>
+          {applications.length === 0 ? (
+            <p style={{ color: colors.neutral[600] }}>
+              None yet. <Link to="/jobs">Find a job to apply to.</Link>
+            </p>
+          ) : (
+            <ul
+              style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: spacing.sm }}
+            >
+              {applications.slice(0, 5).map((a) => (
+                <li
+                  key={a.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: spacing.sm,
+                    alignItems: 'center',
+                  }}
+                >
+                  <span style={{ minWidth: 0 }}>
+                    <Link to={`/jobs/${a.jobId}`}>{a.job?.title ?? 'Job'}</Link>
+                    <span style={{ color: colors.neutral[600] }}>
+                      {' '}
+                      {a.job?.organization?.name ? `at ${a.job.organization.name}` : ''}
+                    </span>
+                  </span>
+                  <StatusPill kind="application" status={a.status} />
+                </li>
+              ))}
+            </ul>
+          )}
+          {applications.length > 0 && (
+            <p style={{ marginTop: spacing.md }}>
+              <Link to="/applications">All applications</Link>
+            </p>
+          )}
+        </section>
+
+        <section aria-labelledby="new-jobs">
+          <h2 id="new-jobs" style={{ fontSize: '1.125rem', marginBottom: spacing.sm }}>
+            New jobs
+          </h2>
+          {freshJobs.length === 0 ? (
+            <p style={{ color: colors.neutral[600] }}>No new roles since you last applied.</p>
+          ) : (
+            <ul
+              style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: spacing.sm }}
+            >
+              {freshJobs.map((j) => (
+                <li key={j.id}>
+                  <Link to={`/jobs/${j.id}`} style={{ fontWeight: 600 }}>
+                    {j.title}
+                  </Link>
+                  <div style={{ color: colors.neutral[600], fontSize: '0.875rem' }}>
+                    {j.organization?.name}, {j.location}. Posted {formatDate(j.updatedAt)}.
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p style={{ marginTop: spacing.md }}>
+            <Link to="/jobs">All jobs</Link>
+          </p>
+        </section>
+      </div>
+    </>
+  );
+};
+
+const RecruiterDashboard: React.FC = () => {
+  const [orgs, setOrgs] = useState<Array<{ id: string; name: string }> | null>(null);
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiJson<{ organizations: Array<{ id: string; name: string }> }>('/api/v1/organizations/mine')
+      .then(async (res) => {
+        if (cancelled) return;
+        setOrgs(res.organizations);
+        if (res.organizations[0]) {
+          const j = await apiJson<{ jobs: Job[] }>(
+            `/api/v1/organizations/${res.organizations[0].id}/jobs`
+          );
+          if (!cancelled) setJobs(j.jobs);
+        } else {
+          setJobs([]);
+        }
+      })
+      .catch(() => !cancelled && setFailed(true));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (failed)
+    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (!orgs || !jobs)
+    return (
+      <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
+        Loading your dashboard…
+      </p>
+    );
+
+  const count = (status: string) =>
+    jobs.reduce((n, j) => n + (j.applicationCounts?.[status] ?? 0), 0);
+  const published = jobs.filter((j) => j.status === 'published').length;
+  const activeApplicants = ACTIVE_APPLICATION_STATUSES.reduce((n, s) => n + count(s), 0);
+  const anyApplicantMoved = jobs.some((j) =>
+    Object.entries(j.applicationCounts ?? {}).some(([s, n]) => s !== 'submitted' && n > 0)
+  );
+
+  const steps: Step[] = [
+    {
+      done: orgs.length > 0,
+      title: 'Set up your company',
+      detail: 'Jobs are posted on behalf of a company.',
+      to: '/hiring',
+      action: 'Set up',
+    },
+    {
+      done: jobs.length > 0,
+      title: 'Post a job',
+      detail: 'Describe the role, location and pay range.',
+      to: '/hiring',
+      action: 'Post a job',
+    },
+    {
+      done: published > 0,
+      title: 'Publish it',
+      detail: 'Published jobs appear on the Jobs page.',
+      to: '/hiring',
+      action: 'Go to jobs',
+    },
+    {
+      done: anyApplicantMoved,
+      title: 'Review applicants',
+      detail: 'Move people through review, shortlist, interviews and offer.',
+      to: '/hiring',
+      action: 'Review',
+    },
+  ];
+
+  return (
+    <>
+      <NextSteps steps={steps} />
+      <section
+        aria-label="Summary"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
           gap: spacing.md,
         }}
       >
-        <Card>
-          <CardContent style={{ padding: spacing.md }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                fontWeight: 700,
-              }}
-            >
-              Verified Evidence
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: spacing.xs,
-                marginTop: spacing.xs,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: colors.neutral[900],
-                }}
-              >
-                12
-              </span>
-              <span
-                style={{
-                  fontSize: '0.8125rem',
-                  color: colors.semantic.successText,
-                  fontWeight: 600,
-                }}
-              >
-                +2 this month
-              </span>
-            </div>
-            <div
-              style={{ marginTop: spacing.xs, fontSize: '0.8125rem', color: colors.neutral[600] }}
-            >
-              3 Gold &bull; 8 Silver &bull; 1 Bronze
-            </div>
-          </CardContent>
-        </Card>
+        <Figure value={published} label="Published jobs" testId="figure-published-jobs" />
+        <Figure
+          value={activeApplicants}
+          label="Active applicants"
+          testId="figure-active-applicants"
+        />
+        <Figure
+          value={count('submitted')}
+          label="Waiting for first review"
+          testId="figure-unreviewed"
+        />
+        <Figure value={count('hired')} label="Hired" testId="figure-hired" />
+      </section>
+    </>
+  );
+};
 
-        <Card>
-          <CardContent style={{ padding: spacing.md }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                fontWeight: 700,
-              }}
-            >
-              Skill Readiness
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: spacing.xs,
-                marginTop: spacing.xs,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: colors.primary[700],
-                }}
-              >
-                88%
-              </span>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-                High Confidence
-              </span>
-            </div>
-            <div
-              style={{ marginTop: spacing.xs, fontSize: '0.8125rem', color: colors.neutral[600] }}
-            >
-              Matches 94% of Staff/Principal requisitions
-            </div>
-          </CardContent>
-        </Card>
+export const DashboardPage: React.FC = () => {
+  usePageMeta('Dashboard', 'Your applications, work history and what to do next on TalentSphere.');
+  const session = useSession();
 
-        <Card>
-          <CardContent style={{ padding: spacing.md }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                fontWeight: 700,
-              }}
-            >
-              Active Applications
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: spacing.xs,
-                marginTop: spacing.xs,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: colors.neutral[900],
-                }}
-              >
-                3
-              </span>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>In Review</span>
-            </div>
-            <div
-              style={{ marginTop: spacing.xs, fontSize: '0.8125rem', color: colors.neutral[600] }}
-            >
-              Acme Cloud, Stripe, Apex Fintech
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent style={{ padding: spacing.md }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                fontWeight: 700,
-              }}
-            >
-              Eligible Opportunities
-            </span>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: spacing.xs,
-                marginTop: spacing.xs,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: colors.neutral[900],
-                }}
-              >
-                6
-              </span>
-              <span style={{ fontSize: '0.8125rem', color: colors.primary[600], fontWeight: 600 }}>
-                Zero ghost jobs
-              </span>
-            </div>
-            <div
-              style={{ marginTop: spacing.xs, fontSize: '0.8125rem', color: colors.neutral[600] }}
-            >
-              Instant verifiable 1-click apply enabled
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Grid: 2 Columns */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(460px, 100%), 1fr))',
-          gap: spacing.lg,
-        }}
-      >
-        {/* Column 1: Verification Graph & Work History */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-          <Card>
-            <CardHeader>
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              >
-                <div>
-                  <CardTitle style={{ fontSize: '1.125rem', fontWeight: 700 }}>
-                    Verified Career Evidence
-                  </CardTitle>
-                  <CardDescription>
-                    Cryptographically signed by authorized employers and managers
-                  </CardDescription>
-                </div>
-                <ButtonLink to="/evidence" variant="ghost" size="sm">
-                  <span>View All (14)</span>
-                  <ArrowRightIcon size={14} />
-                </ButtonLink>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Acme Distributed Cloud &bull; Staff Infrastructure Engineer
-                    </span>
-                    <Badge variant="gold">Gold Credential</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    2023 - Present &bull; Reference: Marcus Vance (VP Infrastructure)
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                    Designed multi-region Raft state-machine replicating 450k op/s. Zero data loss
-                    during regional failover drills.
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Stripe Payments Infrastructure &bull; Senior Backend Engineer
-                    </span>
-                    <Badge variant="silver">Silver Credential</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    2021 - 2023 &bull; Reference: Elena Rostova (Engineering Director)
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                    Authored transactional idempotency layer across distributed database partitions.
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Capability Matrix */}
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: '1.125rem', fontWeight: 700 }}>
-                Technical Capability Matrix
-              </CardTitle>
-              <CardDescription>
-                Evidence-weighted evaluation derived from proctored challenges & verified PRs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: '0.875rem',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>Distributed Systems & Consensus</span>
-                    <span style={{ fontWeight: 700, color: colors.primary[700] }}>94%</span>
-                  </div>
-                  <div
-                    style={{
-                      height: '6px',
-                      backgroundColor: colors.neutral[200],
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{ width: '94%', height: '100%', backgroundColor: colors.primary[600] }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: '0.875rem',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>TypeScript / Systems Architecture</span>
-                    <span style={{ fontWeight: 700, color: colors.primary[700] }}>91%</span>
-                  </div>
-                  <div
-                    style={{
-                      height: '6px',
-                      backgroundColor: colors.neutral[200],
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{ width: '91%', height: '100%', backgroundColor: colors.primary[600] }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: '0.875rem',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>Database Partitioning & Idempotency</span>
-                    <span style={{ fontWeight: 700, color: colors.primary[700] }}>88%</span>
-                  </div>
-                  <div
-                    style={{
-                      height: '6px',
-                      backgroundColor: colors.neutral[200],
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{ width: '88%', height: '100%', backgroundColor: colors.primary[600] }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      fontSize: '0.875rem',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>Security, RBAC & Row-Level Security</span>
-                    <span style={{ fontWeight: 700, color: colors.primary[700] }}>95%</span>
-                  </div>
-                  <div
-                    style={{
-                      height: '6px',
-                      backgroundColor: colors.neutral[200],
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <div
-                      style={{ width: '95%', height: '100%', backgroundColor: colors.primary[600] }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Column 2: Assessment Transcripts & Recommended Roles */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-          <Card>
-            <CardHeader>
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              >
-                <div>
-                  <CardTitle style={{ fontSize: '1.125rem', fontWeight: 700 }}>
-                    Proctored Assessment Transcripts
-                  </CardTitle>
-                  <CardDescription>
-                    Deterministic benchmark evaluations executed in isolated containers
-                  </CardDescription>
-                </div>
-                <ButtonLink to="/assessments" variant="ghost" size="sm">
-                  <span>View Assessments</span>
-                  <ArrowRightIcon size={14} />
-                </ButtonLink>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Distributed Lock Manager (DLM-902)
-                    </span>
-                    <Badge variant="gold">Score: 94 / 100</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    Completed Sep 22, 2026 &bull; Runtime: 28 min &bull; Fencing tokens verified
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                    Rubric: 100% test pass rate under 10k concurrent lock contention threads. Zero
-                    split-brain states.
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Token Bucket Rate Limiter (SYS-401)
-                    </span>
-                    <Badge variant="silver">Score: 89 / 100</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    Completed Sep 15, 2026 &bull; Runtime: 19 min &bull; Sub-millisecond latency
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                    Rubric: Memory efficiency O(1) space complexity per tenant. Burst window handled
-                    cleanly.
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Matched Opportunities */}
-          <Card>
-            <CardHeader>
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-              >
-                <div>
-                  <CardTitle style={{ fontSize: '1.125rem', fontWeight: 700 }}>
-                    Eligible Verifiable Roles
-                  </CardTitle>
-                  <CardDescription>
-                    Roles where your verified evidence satisfies 100% of hard constraints
-                  </CardDescription>
-                </div>
-                <ButtonLink to="/jobs" variant="ghost" size="sm">
-                  <span>View Opportunities</span>
-                  <ArrowRightIcon size={14} />
-                </ButtonLink>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Staff Distributed Systems Engineer
-                    </span>
-                    <Badge variant="verified">97% Evidence Match</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    Acme Cloud Infrastructure &bull; $240k - $310k &bull; Fully Remote
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: spacing.xs,
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
-                      Requires: Raft/Paxos proof &bull; DLM-902 &gt; 90
-                    </span>
-                    <ButtonLink
-                      to="/jobs"
-                      variant="primary"
-                      size="sm"
-                      aria-label="Review & Apply — Staff Distributed Systems Engineer"
-                    >
-                      <span>Review & Apply</span>
-                    </ButtonLink>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    padding: spacing.sm,
-                    border: `1px solid ${colors.neutral[200]}`,
-                    borderRadius: '6px',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span
-                      style={{ fontWeight: 700, fontSize: '0.9375rem', color: colors.neutral[900] }}
-                    >
-                      Principal Platform Architect
-                    </span>
-                    <Badge variant="verified">92% Evidence Match</Badge>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      color: colors.neutral[600],
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    Apex Global Fintech &bull; $260k - $340k &bull; San Francisco / Remote
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: spacing.xs,
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
-                      Requires: Idempotency proof &bull; RBAC audit
-                    </span>
-                    <ButtonLink
-                      to="/jobs"
-                      variant="outline"
-                      size="sm"
-                      aria-label="Review & Apply — Principal Platform Architect"
-                    >
-                      <span>Review & Apply</span>
-                    </ButtonLink>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+  const name = session.profile?.fullName;
+  return (
+    <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+      <PageHeader
+        title={name ?? 'Dashboard'}
+        intro={
+          session.isRecruiter
+            ? session.memberships[0]?.organizationName
+              ? `Hiring at ${session.memberships[0].organizationName}.`
+              : 'Set up your company to start hiring.'
+            : session.profile?.headline || 'Your applications, work history and what to do next.'
+        }
+        actions={
+          session.isRecruiter && !session.isRestricted ? (
+            <ButtonLink to="/hiring" data-testid="dashboard-hiring-link">
+              Open hiring
+            </ButtonLink>
+          ) : undefined
+        }
+      />
+      {session.status === 'error' ? (
+        <Notice tone="error">We could not confirm your session. Refresh to try again.</Notice>
+      ) : session.status !== 'ready' ? (
+        <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
+          Loading your dashboard…
+        </p>
+      ) : session.isRestricted ? (
+        <Notice tone="warning" data-testid="restricted-notice">
+          Your account is restricted after a moderation decision. You can still view your reports,
+          appeal, and export or delete your data.
+        </Notice>
+      ) : session.isRecruiter ? (
+        <RecruiterDashboard />
+      ) : (
+        <CandidateDashboard />
+      )}
     </div>
   );
 };

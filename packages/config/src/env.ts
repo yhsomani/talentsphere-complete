@@ -42,6 +42,15 @@ export const ServerEnvSchema = z.object({
   SUPABASE_BUCKET_COURSE_CONTENT: z.string().default('course-content'),
   SUPABASE_BUCKET_PORTFOLIO: z.string().default('portfolio'),
 
+  // Billing. No payment processor is integrated yet, so paid plans cannot be
+  // bought: 'disabled' (default) refuses paid subscriptions honestly;
+  // 'simulated' activates them WITHOUT payment for development and tests
+  // only (refused in production by productionConfigProblems).
+  BILLING_MODE: z.enum(['disabled', 'simulated']).default('disabled'),
+  // HMAC-SHA256 secret for /api/v1/billing/webhook. Unset = the webhook is
+  // not configured and refuses every call (it never accepts unsigned events).
+  BILLING_WEBHOOK_SECRET: z.string().min(16).optional(),
+
   // AI Policy Invariants
   AI_ENABLED: z.coerce.boolean().default(true),
   AI_FREE_USER_PAID_INFERENCE: z.coerce.boolean().default(false),
@@ -73,6 +82,9 @@ export function productionConfigProblems(env: ServerEnv): string[] {
   }
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');
+  }
+  if (env.BILLING_MODE === 'simulated') {
+    problems.push('BILLING_MODE=simulated activates paid plans without payment');
   }
   if (/localhost/.test(env.CORS_ALLOWED_ORIGINS)) {
     problems.push('CORS_ALLOWED_ORIGINS still allows localhost in production');

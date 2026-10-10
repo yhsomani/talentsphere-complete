@@ -18,6 +18,8 @@ import { FastifyInstance } from 'fastify';
 import crypto from 'node:crypto';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken, Role } from '../../packages/domain/src/index.js';
+import { signWebhook } from '../helpers/webhook.js';
+import { TEST_WEBHOOK_SECRET } from '../../test-secrets.mjs';
 
 const ALLOWED_ORIGIN = 'http://localhost:5173';
 const ATTACKER_ORIGIN = 'https://evil.example.com';
@@ -497,9 +499,19 @@ describe('SEC: Error and secret leakage (SECURITY.md §6, §8)', () => {
   });
 });
 
-describe('SEC: Webhook replay and billing idempotency (SECURITY.md §9)', () => {
+describe('SEC: Webhook authenticity, replay and billing idempotency (SECURITY.md §9)', () => {
   let app: FastifyInstance;
   let sequence = 0;
+  const event = (overrides: Record<string, unknown> = {}) => ({
+    eventType: 'invoice.paid',
+    idempotencyKey: `sec-hook-${sequence++}`,
+    userId: crypto.randomUUID(),
+    amountCents: 1900,
+    currency: 'USD',
+    ...overrides,
+  });
+  const post = (body: string, headers: Record<string, string>) =>
+    app.inject({ method: 'POST', url: '/api/v1/billing/webhook', headers, payload: body });
 
   beforeAll(async () => {
     app = await buildApp({
@@ -507,7 +519,8 @@ describe('SEC: Webhook replay and billing idempotency (SECURITY.md §9)', () => 
       LOG_LEVEL: 'error',
       CORS_ALLOWED_ORIGINS: ALLOWED_ORIGIN,
       RATE_LIMIT_MAX_REQUESTS: '10000',
-    });
+      BILLING_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
+    } as never);
     await app.ready();
   });
 
@@ -515,55 +528,59 @@ describe('SEC: Webhook replay and billing idempotency (SECURITY.md §9)', () => 
     await app.close();
   });
 
-  it('processes a valid billing webhook', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/api/v1/billing/webhook',
-      payload: {
-        eventType: 'invoice.paid',
-        idempotencyKey: `sec-hook-ok-${sequence++}`,
-        userId: crypto.randomUUID(),
-        amountCents: 1900,
-        currency: 'USD',
-      },
-    });
+  it('processes a correctly signed billing webhook', async () => {
+    const signed = signWebhook(event());
+    const res = await post(signed.body, signed.headers);
 
     expect(res.statusCode).toBe(200);
     expect(res.json().status).toBe('success');
     expect(res.json().eventId).toBeDefined();
   });
 
-  it('treats a replayed provider event id as idempotent', async () => {
-    const idempotencyKey = `sec-hook-replay-${sequence++}`;
-    const payload = {
-      eventType: 'invoice.paid',
-      idempotencyKey,
-      userId: crypto.randomUUID(),
-      amountCents: 1900,
-      currency: 'USD',
-    };
-
-    const first = await app.inject({ method: 'POST', url: '/api/v1/billing/webhook', payload });
-    const replay = await app.inject({ method: 'POST', url: '/api/v1/billing/webhook', payload });
-
-    expect(first.statusCode).toBe(200);
-    expect(replay.statusCode).toBe(200);
-    expect(replay.json().replayed).toBe(true);
-    expect(replay.json().eventId).toBe(first.json().eventId);
+  it('rejects an unsigned webhook (forged payment notification)', async () => {
+    const res = await post(JSON.stringify(event()), { 'content-type': 'application/json' });
+    expect(res.statusCode).toBe(401);
   });
 
-  it('rejects a malformed billing webhook at the validation boundary', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/api/v1/billing/webhook',
-      payload: {
-        eventType: 'invoice.paid',
-        idempotencyKey: '',
-        userId: 'not-a-uuid',
-        amountCents: -1,
-        currency: 'DOLLARS',
-      },
+  it('rejects a webhook signed with the wrong secret', async () => {
+    const signed = signWebhook(event(), { secret: 'not-the-real-webhook-secret' });
+    expect((await post(signed.body, signed.headers)).statusCode).toBe(401);
+  });
+
+  it('rejects a body altered after signing', async () => {
+    const signed = signWebhook(event({ amountCents: 1900 }));
+    const tampered = signed.body.replace('1900', '1');
+    expect((await post(tampered, signed.headers)).statusCode).toBe(401);
+  });
+
+  it('rejects a stale signature (replay outside the 5-minute window)', async () => {
+    const signed = signWebhook(event(), { timestamp: Math.floor(Date.now() / 1000) - 600 });
+    expect((await post(signed.body, signed.headers)).statusCode).toBe(401);
+  });
+
+  it('treats a replayed provider event id as idempotent', async () => {
+    const payload = event();
+    const first = signWebhook(payload);
+    const second = signWebhook(payload);
+
+    const a = await post(first.body, first.headers);
+    const b = await post(second.body, second.headers);
+
+    expect(a.statusCode).toBe(200);
+    expect(b.statusCode).toBe(200);
+    expect(b.json().replayed).toBe(true);
+    expect(b.json().eventId).toBe(a.json().eventId);
+  });
+
+  it('rejects a malformed (but signed) billing webhook at the validation boundary', async () => {
+    const signed = signWebhook({
+      eventType: 'invoice.paid',
+      idempotencyKey: '',
+      userId: 'not-a-uuid',
+      amountCents: -1,
+      currency: 'DOLLARS',
     });
+    const res = await post(signed.body, signed.headers);
 
     expect(res.statusCode).toBe(400);
     expect(res.json().error.code).toBe('VALIDATION_FAILED');

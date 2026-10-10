@@ -16,6 +16,7 @@ import {
   Input,
   Modal,
   Notice,
+  PageHeader,
   Select,
   CheckIcon,
   AlertCircleIcon,
@@ -432,30 +433,15 @@ export const EvidencePage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          borderBottom: `1px solid ${colors.neutral[200]}`,
-          paddingBottom: spacing.lg,
-          marginBottom: spacing.xl,
-          flexWrap: 'wrap',
-          gap: spacing.md,
-        }}
-      >
-        <div style={{ maxWidth: '640px' }}>
-          <h1 style={{ fontSize: '2rem', color: colors.neutral[900] }}>Work history</h1>
-          <p style={{ color: colors.neutral[600], marginTop: spacing.xs }}>
-            Each role you add gets stronger as you prove it: confirm a work email at that employer,
-            then ask a manager or colleague to vouch for you. Recruiters see how a role was verified
-            — never your private email address.
-          </p>
-        </div>
-        <Button data-testid="add-work-history-btn" onClick={() => setIsAddModalOpen(true)}>
-          + Add a role
-        </Button>
-      </div>
+      <PageHeader
+        title="Work history"
+        intro="Each role you add gets stronger as you prove it: confirm a work email at that employer, then ask a manager or colleague to vouch for you. Recruiters see how a role was verified — never your private email address."
+        actions={
+          <Button data-testid="add-work-history-btn" onClick={() => setIsAddModalOpen(true)}>
+            + Add a role
+          </Button>
+        }
+      />
 
       {notice && (
         <Notice tone="error" data-testid="evidence-notice" style={{ marginBottom: spacing.lg }}>

@@ -1,20 +1,12 @@
 import React from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Badge,
-  ShieldCheckIcon,
-  LockIcon,
-} from '../components/ui/index.js';
+import { Card, CardHeader, CardTitle, CardContent, LockIcon } from '../components/ui/index.js';
 
 export const PrivacyPage: React.FC = () => {
   usePageMeta(
     'Privacy Policy',
-    'How TalentSphere collects, protects, and lets you control your personal data under GDPR and CCPA.'
+    'What TalentSphere collects, why, who can see it, and how to remove it.'
   );
 
   return (
@@ -29,13 +21,25 @@ export const PrivacyPage: React.FC = () => {
             marginBottom: spacing.sm,
           }}
         >
-          <Badge variant="verified">
-            <ShieldCheckIcon size={12} />
-            <span>GDPR & CCPA Compliant</span>
-          </Badge>
           <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-            Effective Date: September 25, 2026 &bull; Version 2.4
+            Draft dated September 25, 2026
           </span>
+        </div>
+        <div
+          role="note"
+          data-testid="legal-draft-notice"
+          style={{
+            backgroundColor: '#fffbeb',
+            color: colors.semantic.warningText,
+            border: `1px solid ${colors.semantic.warning}`,
+            borderRadius: '6px',
+            padding: `${spacing.sm} ${spacing.md}`,
+            fontSize: '0.875rem',
+            marginBottom: spacing.md,
+          }}
+        >
+          This policy is a draft that has not been reviewed by a lawyer. Where it describes a
+          capability the product does not have yet, the “Today” note in the summary below says so.
         </div>
         <h1
           style={{
@@ -50,8 +54,7 @@ export const PrivacyPage: React.FC = () => {
           TalentSphere Privacy Policy
         </h1>
         <p style={{ fontSize: '1.0625rem', color: colors.neutral[600], lineHeight: 1.6 }}>
-          How we collect, verify, protect, and cryptographically govern candidate evidence, career
-          records, and employer interactions under strict zero-trust standards.
+          What we collect, why, who can see it, and how to remove it.
         </p>
       </div>
 
@@ -90,13 +93,19 @@ export const PrivacyPage: React.FC = () => {
               explicit cryptographic consent.
             </li>
             <li>
-              <strong>Cryptographic Audit Trail:</strong> Every employer profile view and evidence
-              verification generates an immutable audit record visible in your Career Cockpit.
+              <strong>Your work email stays private:</strong> recruiters see that a role was
+              confirmed by email, never the address itself. Verification codes and referee links are
+              stored only as one-way hashes.
             </li>
             <li>
-              <strong>30-Day Erasure Grace Period:</strong> You can export your data (JSON /
-              Verifiable Credential format) or request complete erasure under GDPR Article 17 at any
-              time.
+              <strong>Deleting your account:</strong> you can delete your account from your Profile
+              at any time. Your name, work history, references and evidence are removed immediately
+              and open applications are withdrawn. <em>Today:</em> self-service data export and a
+              grace period before deletion are not available yet.
+            </li>
+            <li>
+              <em>Today:</em> a per-view audit trail of who looked at your profile is not available
+              yet.
             </li>
           </ul>
         </CardContent>

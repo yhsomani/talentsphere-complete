@@ -8,26 +8,72 @@ import {
   useNavigationType,
 } from 'react-router-dom';
 import { colors, spacing, motion } from '@talentsphere/ui';
-import { MenuIcon, PhoneIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
+import { MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
-import { clearSession, getStoredUser } from '../lib/session.js';
+import { getStoredUser } from '../lib/session.js';
+import { useSession } from '../lib/SessionContext.js';
 
-const SUPPORT_EMAIL = 'support@talentsphere.io';
-const SUPPORT_PHONE = '+1-415-555-0142';
-const SUPPORT_PHONE_HREF = 'tel:+14155550142';
+/**
+ * Support contact is configuration, not copy: an address that nobody reads
+ * (or a domain the business does not own) is worse than none. When
+ * VITE_SUPPORT_EMAIL is unset the contact block is simply not rendered.
+ */
+const SUPPORT_EMAIL: string | undefined = import.meta.env.VITE_SUPPORT_EMAIL || undefined;
+
+const HIRING_ROLES = ['recruiter', 'hiring_manager', 'platform_admin'];
+
+interface NavItem {
+  label: string;
+  path: string;
+  testId: string;
+}
+
+const PUBLIC_NAV: NavItem[] = [
+  { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
+  { label: 'Pricing', path: '/checkout', testId: 'nav-checkout' },
+];
+
+const CANDIDATE_NAV: NavItem[] = [
+  { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
+  { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
+  { label: 'Applications', path: '/applications', testId: 'nav-applications' },
+  { label: 'Work history', path: '/evidence', testId: 'nav-evidence' },
+  { label: 'Profile', path: '/profile', testId: 'nav-profile' },
+];
+
+const HIRING_NAV: NavItem[] = [
+  { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
+  { label: 'Hiring', path: '/hiring', testId: 'nav-hiring' },
+  { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
+  { label: 'Profile', path: '/profile', testId: 'nav-profile' },
+];
+
+const isActivePath = (pathname: string, path: string) =>
+  pathname === path || pathname.startsWith(`${path}/`);
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
+  const session = useSession();
   const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [routeAnnouncement, setRouteAnnouncement] = useState<string>('');
-  const pwaCapability = usePwaCapability();
-  const pwaStatus = describePwaCapability(pwaCapability);
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+  const pwaStatus = describePwaCapability(usePwaCapability());
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const isFirstRouteChange = useRef(true);
+
+  // Until the server answers, the roles saved at sign-in decide which
+  // navigation to draw, so the header does not flicker on every load.
+  const signedIn = session.status !== 'anonymous';
+  const roles = session.user?.roles ?? (getStoredUser()?.roles as string[] | undefined) ?? [];
+  const navLinks = !signedIn
+    ? PUBLIC_NAV
+    : roles.some((r) => HIRING_ROLES.includes(r))
+      ? HIRING_NAV
+      : CANDIDATE_NAV;
+  const accountLabel = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
 
   // Close the mobile menu whenever the route changes.
   useEffect(() => {
@@ -37,20 +83,14 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
     setIsOnline(navigator.onLine);
-
-    const storedUser = getStoredUser();
-    if (storedUser?.email) setUserEmail(storedUser.email);
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [location.pathname]);
+  }, []);
 
   // Route-change contract: scroll, announce, and keep focus in the document.
   useEffect(() => {
@@ -64,22 +104,15 @@ export const Layout: React.FC = () => {
     // Child pages set document.title in their effects, which run before this
     // parent effect, so the title already names the new destination.
     setRouteAnnouncement(document.title);
-    // Focus strands on <body> when navigation unmounts the active element:
-    // the mobile menu closes on this route change (close-menu effect above),
-    // dropping its focused link one commit later — after this effect has
-    // already run. So recover now, while that link still exists: if focus is
-    // on <body> or inside the closing menu, move it to the main landmark.
-    // Focus resting anywhere else (e.g. a desktop nav link, which stays
-    // mounted) is left alone. preventScroll keeps the browser's restored
-    // scroll position on Back/Forward intact.
+    // Focus strands on <body> when navigation unmounts the active element
+    // (e.g. a link inside the closing mobile menu): recover to <main>.
     const active = document.activeElement;
     if (active === document.body || active?.closest('[data-testid="mobile-menu"]')) {
       document.getElementById('main-content')?.focus({ preventScroll: true });
     }
   }, [location.pathname, navigationType]);
 
-  // The mobile menu is a disclosure: Escape must close it and return focus
-  // to the toggle that opened it.
+  // The mobile menu is a disclosure: Escape closes it and returns focus to the toggle.
   useEffect(() => {
     if (!isMobileMenuOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -92,16 +125,11 @@ export const Layout: React.FC = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isMobileMenuOpen]);
 
-  const navLinks = [
-    { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
-    { label: 'Evidence', path: '/evidence', testId: 'nav-evidence' },
-    { label: 'Assessments', path: '/assessments', testId: 'nav-assessments' },
-    { label: 'Opportunities', path: '/jobs', testId: 'nav-jobs' },
-    { label: 'Pricing', path: '/checkout', testId: 'nav-checkout' },
-  ];
-
-  // Hover affordance for desktop nav links (declarative, token-driven).
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+  const signOut = () => {
+    session.signOut();
+    // Replace, so Back does not return to protected UI.
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div
@@ -113,7 +141,7 @@ export const Layout: React.FC = () => {
         color: colors.neutral[900],
       }}
     >
-      {/* WCAG 2.2 AA Skip Link — hidden/revealed by .skip-link CSS (:focus-visible), not JS */}
+      {/* WCAG 2.2 AA skip link — revealed by .skip-link:focus-visible */}
       <a
         href="#main-content"
         className="skip-link"
@@ -130,30 +158,11 @@ export const Layout: React.FC = () => {
         Skip to main content
       </a>
 
-      {/* SPA route-change announcement: role="status" + aria-live="polite"
-          announces the new destination after client-side navigation (the
-          title itself is set by each page's usePageMeta effect, whose child
-          effect runs before this parent effect). */}
-      <div
-        role="status"
-        aria-live="polite"
-        data-testid="route-announcer"
-        style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          padding: 0,
-          margin: '-1px',
-          overflow: 'hidden',
-          clip: 'rect(0, 0, 0, 0)',
-          whiteSpace: 'nowrap',
-          border: 0,
-        }}
-      >
+      {/* SPA route-change announcement (the page title of the destination). */}
+      <div role="status" aria-live="polite" data-testid="route-announcer" className="sr-only">
         {routeAnnouncement}
       </div>
 
-      {/* Offline Safety Indicator */}
       {!isOnline && (
         <div
           role="status"
@@ -167,16 +176,14 @@ export const Layout: React.FC = () => {
             fontWeight: 600,
           }}
         >
-          You are currently offline. Viewing cached credentials and saved opportunities.
+          You are offline. Pages you open and changes you make will not load or save until you
+          reconnect.
         </div>
       )}
 
-      {/* App Header */}
       <header
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.94)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.96)',
           borderBottom: `1px solid ${colors.neutral[200]}`,
           padding: `${spacing.sm} ${spacing.lg}`,
           minHeight: '64px',
@@ -201,7 +208,7 @@ export const Layout: React.FC = () => {
           }}
         >
           <Link
-            to="/"
+            to={signedIn ? '/dashboard' : '/'}
             aria-label="TalentSphere home"
             style={{
               textDecoration: 'none',
@@ -213,7 +220,8 @@ export const Layout: React.FC = () => {
               gap: '8px',
             }}
           >
-            <div
+            <span
+              aria-hidden="true"
               style={{
                 width: '26px',
                 height: '26px',
@@ -226,20 +234,19 @@ export const Layout: React.FC = () => {
               }}
             >
               <ShieldCheckIcon size={16} />
-            </div>
+            </span>
             <span style={{ fontWeight: 800 }}>
               <span className="wordmark-serif">Talent</span>Sphere
             </span>
           </Link>
 
-          {/* Desktop navigation — hidden on small screens in favour of the menu button */}
           <nav
             aria-label="Main Navigation"
             className="desktop-nav"
             style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' }}
           >
             {navLinks.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = isActivePath(location.pathname, item.path);
               const isHovered = hoveredNav === item.path && !isActive;
               return (
                 <Link
@@ -270,7 +277,6 @@ export const Layout: React.FC = () => {
             })}
           </nav>
 
-          {/* Mobile hamburger toggle */}
           <button
             type="button"
             ref={menuButtonRef}
@@ -342,21 +348,25 @@ export const Layout: React.FC = () => {
             <span>PWA {pwaStatus.label}</span>
           </div>
 
-          {userEmail ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-              <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }} title={userEmail}>
-                {userEmail}
+          {signedIn ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0 }}>
+              <span
+                data-testid="account-label"
+                style={{
+                  fontSize: '0.8125rem',
+                  color: colors.neutral[600],
+                  maxWidth: '200px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+                title={accountLabel}
+              >
+                {accountLabel}
               </span>
               <button
                 type="button"
-                onClick={() => {
-                  clearSession();
-                  setUserEmail(null);
-                  // Signing out must not leave the signed-out user parked on a
-                  // protected page until some later route change notices;
-                  // replace so Back does not return to protected UI.
-                  navigate('/login', { replace: true });
-                }}
+                onClick={signOut}
                 style={{
                   fontSize: '0.8125rem',
                   color: colors.neutral[700],
@@ -373,31 +383,46 @@ export const Layout: React.FC = () => {
               </button>
             </div>
           ) : (
-            <Link
-              to="/login"
-              data-testid="nav-login"
-              style={{
-                textDecoration: 'none',
-                color: location.pathname === '/login' ? '#ffffff' : colors.primary[700],
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                padding: '8px 18px',
-                minHeight: '40px',
-                borderRadius: '6px',
-                border: `1px solid ${location.pathname === '/login' ? colors.primary[700] : colors.primary[300]}`,
-                backgroundColor: location.pathname === '/login' ? colors.primary[700] : '#ffffff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, border-color ${motion.duration.fast} ${motion.easing.easeOut}`,
-              }}
-            >
-              Sign In
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+              <Link
+                to="/login"
+                data-testid="nav-login"
+                style={{
+                  textDecoration: 'none',
+                  color: colors.primary[700],
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  padding: '8px 12px',
+                  minHeight: '40px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                data-testid="nav-signup"
+                style={{
+                  textDecoration: 'none',
+                  color: '#ffffff',
+                  backgroundColor: colors.primary[700],
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  padding: '8px 16px',
+                  minHeight: '40px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Create account
+              </Link>
+            </div>
           )}
         </div>
       </header>
 
-      {/* Mobile Navigation Menu (rendered below the sticky header) */}
       {isMobileMenuOpen && (
         <nav
           id="mobile-navigation"
@@ -414,7 +439,7 @@ export const Layout: React.FC = () => {
           }}
         >
           {navLinks.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = isActivePath(location.pathname, item.path);
             return (
               <NavLink
                 key={item.path}
@@ -437,54 +462,9 @@ export const Layout: React.FC = () => {
               </NavLink>
             );
           })}
-          <div
-            style={{
-              borderTop: `1px solid ${colors.neutral[200]}`,
-              marginTop: spacing.xs,
-              paddingTop: spacing.sm,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: spacing.xs,
-            }}
-          >
-            <a
-              href={`mailto:${SUPPORT_EMAIL}`}
-              data-testid="footer-email-mobile"
-              style={{
-                color: colors.primary[700],
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '0.9375rem',
-                padding: `${spacing.sm} ${spacing.md}`,
-                minHeight: '44px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {SUPPORT_EMAIL}
-            </a>
-            <a
-              href={SUPPORT_PHONE_HREF}
-              data-testid="footer-phone-mobile"
-              style={{
-                color: colors.primary[700],
-                textDecoration: 'none',
-                fontWeight: 600,
-                fontSize: '0.9375rem',
-                padding: `${spacing.sm} ${spacing.md}`,
-                minHeight: '44px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              <PhoneIcon size={16} /> {SUPPORT_PHONE}
-            </a>
-          </div>
         </nav>
       )}
 
-      {/* Main Content Area */}
       <main
         id="main-content"
         tabIndex={-1}
@@ -501,12 +481,11 @@ export const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Production Footer */}
       <footer
         style={{
           borderTop: `1px solid ${colors.neutral[200]}`,
           backgroundColor: '#ffffff',
-          padding: `${spacing['2xl']} ${spacing.xl} ${spacing.xl}`,
+          padding: `${spacing.xl} ${spacing.lg}`,
           marginTop: 'auto',
         }}
       >
@@ -514,252 +493,57 @@ export const Layout: React.FC = () => {
           style={{
             maxWidth: '1200px',
             margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: spacing.xl,
-            marginBottom: spacing.xl,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: spacing.lg,
+            fontSize: '0.875rem',
+            color: colors.neutral[600],
           }}
         >
-          <div>
-            <div
-              style={{
-                fontWeight: 800,
-                fontSize: '1rem',
-                color: colors.neutral[900],
-                marginBottom: spacing.xs,
-                letterSpacing: '-0.02em',
-              }}
-            >
+          <div style={{ maxWidth: '360px' }}>
+            <div style={{ fontWeight: 800, color: colors.neutral[900], marginBottom: spacing.xs }}>
               <span className="wordmark-serif">Talent</span>Sphere
             </div>
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                color: colors.neutral[600],
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              The cryptographic talent network. Grounding human capability in verifiable evidence,
-              proctored benchmarks, and transparent matching.
+            <p style={{ margin: 0, lineHeight: 1.6 }}>
+              Work history that is checked, not just claimed — and the jobs to use it on.
             </p>
           </div>
-
-          <div>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                marginBottom: spacing.sm,
-              }}
-            >
-              Platform
-            </div>
-            <ul
-              style={{
-                listStyle: 'none',
-                margin: 0,
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing.xs,
-                fontSize: '0.875rem',
-              }}
-            >
-              {/* Footer destinations mirror the header nav verbatim so the
-                  same action never carries two names. Dashboard is the
-                  signed-in home and does not belong in the public footer. */}
-              {navLinks
-                .filter((item) => item.path !== '/dashboard')
-                .map((item) => (
-                  <li key={item.path}>
-                    <Link
-                      to={item.path}
-                      className="footer-link"
-                      style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-            </ul>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                marginBottom: spacing.sm,
-              }}
-            >
-              Trust & Governance
-            </div>
-            <ul
-              style={{
-                listStyle: 'none',
-                margin: 0,
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing.xs,
-                fontSize: '0.875rem',
-              }}
-            >
-              <li>
-                <Link
-                  to="/privacy"
-                  className="footer-link"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Privacy Policy (GDPR/CCPA)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms"
-                  className="footer-link"
-                  style={{ color: colors.neutral[600], textDecoration: 'none' }}
-                >
-                  Terms & Integrity Standards
-                </Link>
-              </li>
-              <li>
-                <span style={{ color: colors.neutral[600], cursor: 'default' }}>
-                  Differential Privacy (k &ge; 10)
-                </span>
-              </li>
-              <li>
-                <span style={{ color: colors.neutral[600], cursor: 'default' }}>
-                  Anti-LLM Scraping Safe
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                marginBottom: spacing.sm,
-              }}
-            >
-              Verification SLA
-            </div>
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                color: colors.neutral[600],
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              All employer signature requests execute through cryptographically hashed challenge
-              tokens. Disposable email domains strictly barred.
-            </p>
-          </div>
-
-          <div>
-            <div
-              style={{
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: colors.neutral[600],
-                marginBottom: spacing.sm,
-              }}
-            >
-              Support
-            </div>
-            <ul
-              style={{
-                listStyle: 'none',
-                margin: 0,
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing.xs,
-                fontSize: '0.875rem',
-              }}
-            >
-              <li>
-                {/* Clickable email */}
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}`}
-                  data-testid="footer-email"
-                  style={{
-                    color: colors.primary[700],
-                    textDecoration: 'underline',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    minHeight: '44px',
-                  }}
-                >
-                  {SUPPORT_EMAIL}
-                </a>
-              </li>
-              <li>
-                {/* Clickable phone number */}
-                <a
-                  href={SUPPORT_PHONE_HREF}
-                  data-testid="footer-phone"
-                  style={{
-                    color: colors.primary[700],
-                    textDecoration: 'underline',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    minHeight: '44px',
-                  }}
-                >
-                  <PhoneIcon size={14} /> {SUPPORT_PHONE}
-                </a>
-              </li>
-              <li style={{ color: colors.neutral[600] }}>Mon–Fri, 9:00–18:00 UTC</li>
-            </ul>
-          </div>
+          <nav aria-label="Footer" style={{ display: 'flex', gap: spacing.lg, flexWrap: 'wrap' }}>
+            <Link to="/jobs" className="footer-link" style={{ color: colors.neutral[600] }}>
+              Jobs
+            </Link>
+            <Link to="/checkout" className="footer-link" style={{ color: colors.neutral[600] }}>
+              Pricing
+            </Link>
+            <Link to="/privacy" className="footer-link" style={{ color: colors.neutral[600] }}>
+              Privacy
+            </Link>
+            <Link to="/terms" className="footer-link" style={{ color: colors.neutral[600] }}>
+              Terms
+            </Link>
+            {SUPPORT_EMAIL && (
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                data-testid="footer-email"
+                className="footer-link"
+                style={{ color: colors.neutral[600] }}
+              >
+                Contact support
+              </a>
+            )}
+          </nav>
         </div>
-
         <div
           style={{
             maxWidth: '1200px',
-            margin: '0 auto',
-            borderTop: `1px solid ${colors.neutral[200]}`,
-            paddingTop: spacing.md,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: spacing.sm,
+            margin: `${spacing.lg} auto 0`,
             fontSize: '0.75rem',
             color: colors.neutral[600],
           }}
         >
-          <div>
-            TalentSphere &copy; 2026. Cryptographically Verified Talent Network. All rights
-            reserved.
-          </div>
-          <div style={{ display: 'flex', gap: spacing.md }}>
-            <Link to="/privacy" style={{ color: colors.neutral[600], textDecoration: 'underline' }}>
-              Privacy
-            </Link>
-            <Link to="/terms" style={{ color: colors.neutral[600], textDecoration: 'underline' }}>
-              Terms
-            </Link>
-            <span style={{ color: colors.neutral[600] }}>SOC2 Type II Ready</span>
-          </div>
+          © 2026 TalentSphere
         </div>
       </footer>
     </div>

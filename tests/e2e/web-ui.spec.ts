@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { publishJob, registerAccount, useSession } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -13,10 +14,9 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(skipLink).toBeAttached();
     await expect(skipLink).toHaveText('Skip to main content');
 
-    // 2. Main heading
+    // 2. Main heading states what the product does
     const heading = page.locator('h1');
-    await expect(heading).toContainText('The Career Operating System Built on');
-    await expect(heading).toContainText('Verified Evidence');
+    await expect(heading).toHaveText('Work history that’s checked, not just claimed.');
 
     // 3. PWA status must report MEASURED capability, not a hard-coded claim.
     //    A web app manifest is declared, so the app is installable, but no
@@ -36,10 +36,13 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     const controlled = await page.evaluate(() => navigator.serviceWorker?.controller ?? null);
     expect(controlled).toBeNull();
 
-    // 4. Feature pillars
-    await expect(page.locator(':is(h2, h3):has-text("1. Talent Graph")')).toBeVisible();
-    await expect(page.locator(':is(h2, h3):has-text("2. Evidence Graph")')).toBeVisible();
-    await expect(page.locator(':is(h2, h3):has-text("3. Governed Intelligence")')).toBeVisible();
+    // 4. Who it is for, and what "verified" means — no unbacked claims
+    await expect(page.locator('h2', { hasText: 'Looking for work' })).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Hiring' })).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'What “verified” means here' })).toBeVisible();
+    for (const claim of ['SOC2', 'GDPR & CCPA Compliant', 'DKIM', 'proctored', 'cryptograph']) {
+      await expect(page.getByText(claim, { exact: false })).toHaveCount(0);
+    }
   });
 
   test('guards the dashboard and displays career cockpit after real sign-in', async ({
@@ -57,30 +60,37 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/.*login/);
 
-    // The landing call-to-action sends unauthenticated visitors to sign in.
+    // The landing call-to-action sends new visitors to create an account,
+    // and sign-in is one link away from there.
     await page.goto('/');
-    await page.click('text=Launch Career Cockpit');
-    await expect(page).toHaveURL(/.*login/);
+    await page.getByTestId('cta-signup').click();
+    await expect(page).toHaveURL(/\/signup$/);
+    await page.getByRole('link', { name: 'Sign in', exact: true }).click();
+    await expect(page).toHaveURL(/\/login$/);
 
-    // Real credentials grant access to the cockpit.
+    // Real credentials grant access to the dashboard.
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill(password);
     await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/.*dashboard/);
 
-    // Verify dashboard heading
-    const dashboardTitle = page.locator('h1');
-    await expect(dashboardTitle).toHaveText('Candidate Career Cockpit');
+    // The dashboard is about THIS account: its name, its real numbers.
+    await expect(page.locator('h1')).toHaveText('UI Dashboard Candidate');
+    await expect(page.getByTestId('figure-active-applications')).toHaveText('0');
+    await expect(page.getByTestId('figure-verified-roles')).toHaveText('0 of 0');
+    await expect(page.getByTestId('figure-references')).toHaveText('0');
+    // A brand-new account has every next step still to do.
+    for (let step = 1; step <= 4; step++) {
+      await expect(page.getByTestId(`step-${step}`)).toHaveAttribute('data-done', 'false');
+    }
+    // No invented people, employers or scores.
+    for (const fabricated of ['Sarah Chen', 'Acme', 'Stripe', '88%', 'Level 5']) {
+      await expect(page.getByText(fabricated, { exact: false })).toHaveCount(0);
+    }
 
-    // Verify metrics
-    await expect(page.getByText('Verified Evidence', { exact: true })).toBeVisible();
-    await expect(page.getByText('Skill Readiness', { exact: true })).toBeVisible();
-    await expect(page.getByText('Active Applications', { exact: true })).toBeVisible();
-
-    // Verify action button (navigation is an anchor — ButtonLink, not a nested button)
-    const actionBtn = page.getByRole('link', { name: 'Browse Assessments' });
-    await expect(actionBtn).toBeVisible();
-    await expect(actionBtn).toHaveAttribute('href', '/assessments');
+    // Navigation is an anchor (ButtonLink), not a nested button.
+    const browse = page.getByRole('link', { name: 'Browse jobs' }).first();
+    await expect(browse).toHaveAttribute('href', '/jobs');
   });
 
   test('authenticates candidate via login page and redirects to dashboard (F-01)', async ({
@@ -114,7 +124,7 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await page.getByTestId('login-password').fill(password);
     await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/.*dashboard/);
-    await expect(page.locator('h1')).toHaveText('Candidate Career Cockpit');
+    await expect(page.locator('h1')).toHaveText('UI Login Candidate');
 
     // The stored session must be API-issued, never a client-fabricated demo token.
     const token = await page.evaluate(() => localStorage.getItem('talentsphere_token'));
@@ -122,68 +132,31 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     expect(token?.startsWith('demo_token')).toBe(false);
   });
 
-  test('selects subscription tier and completes checkout flow with validation handling (F-16)', async ({
+  test('pricing is truthful: free, no card, and paid plans cannot be bought (F-16)', async ({
     page,
     request,
   }) => {
-    // A real account is required: the billing endpoint refuses anonymous callers.
-    const email = `e2e.ui.checkout.${Date.now()}@example.com`;
-    const password = 'Password123!Secure';
-    const reg = await request.post(`${API_BASE}/auth/register`, {
-      data: { email, password, fullName: 'UI Checkout Candidate', role: 'candidate' },
+    await page.goto('/checkout');
+    await expect(page.locator('h1')).toHaveText('Pricing');
+    await expect(page.getByTestId('plan-candidates-price')).toHaveText('Free');
+    await expect(page.getByTestId('plan-employers-price')).toHaveText('Free during early access');
+    // Nothing on the page collects payment details.
+    await expect(page.locator('input')).toHaveCount(0);
+    await expect(page.getByTestId('plan-candidates-cta')).toHaveAttribute('href', '/signup');
+    await expect(page.getByTestId('plan-employers-cta')).toHaveAttribute(
+      'href',
+      '/signup?role=recruiter'
+    );
+
+    // The API agrees: with no payment processor, a paid plan is refused
+    // rather than activated for free. (The E2E API runs BILLING_MODE=simulated
+    // for the billing journey, so this checks the endpoint contract directly
+    // on an account whose plan stays free.)
+    const account = await registerAccount(request, 'pricing');
+    const sub = await request.get(`${API_BASE}/billing/subscription`, {
+      headers: { authorization: `Bearer ${account.token}` },
     });
-    expect(reg.status()).toBe(201);
-
-    await page.goto('/checkout');
-
-    // Verify checkout heading and plan cards
-    await expect(page.locator('h1')).toHaveText('Checkout & Plan Subscriptions');
-    await expect(page.getByTestId('plan-card-candidate_pro')).toBeVisible();
-    await expect(page.getByTestId('plan-card-recruiter_starter')).toBeVisible();
-
-    // Test Annual toggle
-    await page.getByTestId('billing-cycle-yearly').click();
-    await expect(page.getByTestId('checkout-submit')).toContainText('$199.90');
-
-    // Test form validation on invalid card input
-    await page.getByTestId('card-name').fill('Tester');
-    await page.getByTestId('card-number').fill('123'); // invalid length
-    await page.getByTestId('card-expiry').fill('12/28');
-    await page.getByTestId('card-cvc').fill('123');
-    await page.getByTestId('checkout-submit').click();
-
-    await expect(page.getByTestId('checkout-error')).toBeVisible();
-    await expect(page.getByTestId('checkout-error')).toContainText('valid 15 or 16-digit');
-
-    // Prefill valid test payment; without a session the API call must be
-    // refused and NO confirmation may be shown.
-    await page.getByTestId('prefill-payment').click();
-    await page.getByTestId('checkout-submit').click();
-    await expect(page.getByTestId('checkout-error')).toContainText('sign in');
-    await expect(page.getByTestId('checkout-success')).toBeHidden();
-
-    // Sign in through the UI, then repeat checkout with a real session token.
-    await page.goto('/login');
-    await page.getByTestId('login-email').fill(email);
-    await page.getByTestId('login-password').fill(password);
-    await page.getByTestId('login-submit').click();
-    await expect(page).toHaveURL(/.*dashboard/);
-
-    await page.goto('/checkout');
-    await page.getByTestId('billing-cycle-yearly').click();
-    await page.getByTestId('card-name').fill('Tester');
-    await page.getByTestId('card-number').fill('4242 4242 4242 4242');
-    await page.getByTestId('card-expiry').fill('12/28');
-    await page.getByTestId('card-cvc').fill('123');
-    await page.getByTestId('checkout-submit').click();
-
-    // Verify confirmation: reference must come from the API invoice, not a
-    // client-generated id.
-    await expect(page.getByTestId('checkout-success')).toBeVisible();
-    await expect(page.getByTestId('order-reference')).toBeVisible();
-    await expect(page.getByTestId('order-amount')).toHaveText('$199.90');
-    const orderReference = await page.getByTestId('order-reference').textContent();
-    expect(orderReference).toMatch(/^[0-9a-f-]{36}$/i); // API invoice UUID
+    expect((await sub.json()).subscription.planTier).toBe('free');
   });
 
   test('navigates to evidence page and validates work history attestations with anti-fraud checks', async ({
@@ -287,7 +260,8 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await page.goto('/assessments');
 
     // Heading verification
-    await expect(page.locator('h1')).toContainText('Proctored Capability Assessments');
+    await expect(page.locator('h1')).toContainText('Skill assessments (preview)');
+    await expect(page.getByText('nothing on this page is scored or saved')).toBeVisible();
 
     // Launch first sandbox challenge
     await page.getByTestId('start-challenge-ch-dist-01').click();
@@ -307,43 +281,57 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByText('Sandbox Invariants Verified')).toHaveCount(0);
   });
 
-  test('browses verifiable job opportunities and applies with verified evidence graph', async ({
+  test('browses real job postings, is asked to sign in, then applies and tracks it', async ({
     page,
+    request,
   }) => {
+    const job = await publishJob(request, { title: 'Distributed Systems Engineer' });
+
     await page.goto('/jobs');
+    await expect(page.locator('h1')).toHaveText('Jobs');
+    const card = page.getByTestId(`job-card-${job.jobId}`);
+    await expect(card).toBeVisible();
+    await expect(card).toContainText('Distributed Systems Engineer');
+    await expect(card).toContainText(job.orgName);
+    // No invented match scores or companies.
+    await expect(page.getByText(/% MATCH/)).toHaveCount(0);
+    await expect(page.getByText('CoreDB Infrastructure')).toHaveCount(0);
 
-    // Heading verification
-    await expect(page.locator('h1')).toContainText('Verifiable Career Opportunities');
+    // Signed out: the job page offers sign-in, never a fake success.
+    await page.getByTestId(`job-link-${job.jobId}`).click();
+    await expect(page.locator('h1')).toHaveText('Distributed Systems Engineer');
+    await expect(page.getByTestId('apply-signin')).toBeVisible();
+    await expect(page.getByTestId('apply-form')).toHaveCount(0);
 
-    // First job card checks
-    const jobCard = page.getByTestId('job-card-job-001');
-    await expect(jobCard).toBeVisible();
-    await expect(jobCard).toContainText('Staff Distributed Systems Engineer');
-    await expect(jobCard).toContainText('94% MATCH');
-    await expect(jobCard).toContainText('CoreDB Infrastructure');
+    // Signed in: apply with a note, then find it on the applications page.
+    const candidate = await registerAccount(request, 'jobs-apply');
+    await useSession(page, candidate);
+    await page.goto(`/jobs/${job.jobId}`);
+    await page.getByTestId('apply-cover-letter').fill('Ten years building distributed systems.');
+    await page.getByTestId(`apply-btn-${job.jobId}`).click();
+    await expect(page.getByTestId('apply-done')).toBeVisible();
+    await expect(page.getByTestId(`apply-status-${job.jobId}`)).toHaveText('Submitted');
 
-    // Apply is a real API transaction: without a session it must be refused
-    // and NO success state may appear.
-    const applyBtn = page.getByTestId('apply-btn-job-001');
-    await expect(applyBtn).toBeVisible();
-    await applyBtn.click();
-
-    await expect(page.getByTestId('apply-error')).toContainText('Sign in');
-    await expect(jobCard).not.toContainText('Application Transmitted');
-    await expect(applyBtn).toBeEnabled();
+    await page.goto('/applications');
+    await expect(page.getByTestId('applications-active')).toContainText(
+      'Distributed Systems Engineer'
+    );
   });
 
   test('renders privacy policy and terms of service pre-launch gates', async ({ page }) => {
     // Privacy Page
     await page.goto('/privacy');
     await expect(page.locator('h1')).toHaveText('TalentSphere Privacy Policy');
-    await expect(page.getByText('GDPR & CCPA Compliant')).toBeVisible();
+    // Unreviewed legal text says so, and makes no compliance claim it can't back.
+    await expect(page.getByTestId('legal-draft-notice')).toBeVisible();
+    await expect(page.getByText('GDPR & CCPA Compliant')).toHaveCount(0);
     await expect(page.getByText('Anti-LLM Scraping Clause')).toBeVisible();
     await expect(page.getByText('privacy@talentsphere.dev')).toBeVisible();
 
     // Terms Page
     await page.goto('/terms');
     await expect(page.locator('h1')).toHaveText('Terms of Service & Verification Standards');
+    await expect(page.getByTestId('legal-draft-notice')).toBeVisible();
     await expect(page.getByText('Credential Integrity Notice')).toBeVisible();
     await expect(page.getByText('Prohibition of AI Proxy Agents')).toBeVisible();
   });

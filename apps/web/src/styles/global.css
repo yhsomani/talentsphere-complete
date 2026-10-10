@@ -116,6 +116,12 @@ textarea {
   font: inherit;
 }
 
+/* Links that don't set their own colour use the brand's AA-safe blue. */
+a {
+  color: #0358a1; /* colors.primary[700] */
+  text-underline-offset: 2px;
+}
+
 code,
 pre {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -289,4 +295,17 @@ pre {
   font-family: 'Newsreader', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+
+/* Visually hidden, still announced by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

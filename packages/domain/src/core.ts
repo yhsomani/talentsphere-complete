@@ -145,6 +145,7 @@ export type DomainErrorCode =
   | 'POLICY_VIOLATION'
   | 'RATE_LIMIT_EXCEEDED'
   | 'TENANT_ISOLATION_VIOLATION'
+  | 'SERVICE_UNAVAILABLE'
   | 'INTERNAL_ERROR';
 
 export class DomainError extends Error {

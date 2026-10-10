@@ -22,6 +22,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    # ADR-015: the core loop persists to PostgreSQL, so CI proves it against a
+    # real one. Without this service the only tests of durability would be
+    # tests that cannot fail.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +68,22 @@ jobs:
       # Runs unit, integration and the API security suite together.
       - name: Unit, integration and security tests
         run: pnpm test
+
+      # Every migration applies cleanly to an empty database, and re-running
+      # the runner is a no-op (idempotent ledger).
+      - name: Migrations on a clean database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/talentsphere_ci
+        run: |
+          node scripts/migrate.mjs
+          node scripts/migrate.mjs | tee /tmp/second-run.log
+          grep -q "Already up to date" /tmp/second-run.log
+
+      # Restart round-trip, race arbitration, BR-15 and erasure on real PG.
+      - name: Persistence tests (real PostgreSQL)
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: pnpm test:pg
 
       - name: Build
         run: pnpm build

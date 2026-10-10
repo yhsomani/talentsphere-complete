@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { signWebhook } from '../helpers/webhook.js';
+import { TEST_WEBHOOK_SECRET } from '../../test-secrets.mjs';
 
 describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, WF-16, WIT-016)', () => {
   let app: FastifyInstance;
@@ -13,7 +15,11 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
       PORT: '0',
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
       JWT_SECRET: 'test_jwt_secret_min_32_characters_long_12345',
-    });
+      // No payment processor exists: paid plans activate only in the explicit
+      // simulated mode (see the 'disabled' suite below for the default).
+      BILLING_MODE: 'simulated',
+      BILLING_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
+    } as never);
     await app.ready();
 
     // Register a test candidate
@@ -162,16 +168,19 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
     const idempotencyKey = 'stripe_evt_webhook_999';
 
     // First arrival of webhook event
+    const event = {
+      eventType: 'invoice.payment_succeeded',
+      idempotencyKey,
+      userId: candidateUserId,
+      amountCents: 1999,
+      currency: 'USD',
+    };
+    const signed = signWebhook(event);
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/billing/webhook',
-      payload: {
-        eventType: 'invoice.payment_succeeded',
-        idempotencyKey,
-        userId: candidateUserId,
-        amountCents: 1999,
-        currency: 'USD',
-      },
+      headers: signed.headers,
+      payload: signed.body,
     });
 
     expect(res.statusCode).toBe(200);
@@ -180,16 +189,12 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
     expect(body.eventId).toBeDefined();
 
     // Replay of same webhook event
+    const resigned = signWebhook(event);
     const replayRes = await app.inject({
       method: 'POST',
       url: '/api/v1/billing/webhook',
-      payload: {
-        eventType: 'invoice.payment_succeeded',
-        idempotencyKey,
-        userId: candidateUserId,
-        amountCents: 1999,
-        currency: 'USD',
-      },
+      headers: resigned.headers,
+      payload: resigned.body,
     });
 
     expect(replayRes.statusCode).toBe(200);
@@ -207,5 +212,69 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
     expect(jobTypes).toContain('billing.subscription.created');
     expect(jobTypes).toContain('billing.subscription.cancelled');
     expect(jobTypes).toContain('billing.webhook.received');
+  });
+});
+
+describe('Billing without a payment processor (BILLING_MODE default)', () => {
+  let app: FastifyInstance;
+  let token: string;
+
+  beforeAll(async () => {
+    app = await buildApp({ NODE_ENV: 'test', LOG_LEVEL: 'error' } as never);
+    await app.ready();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'no.payments@example.com',
+        password: 'Password123!Secure',
+        fullName: 'No Payments',
+      },
+    });
+    token = JSON.parse(res.body).token;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('refuses to activate a paid plan that nobody paid for', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/subscribe',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { planTier: 'candidate_pro', billingCycle: 'monthly' },
+    });
+    expect(res.statusCode).toBe(503);
+    expect(res.json().error.message).toContain('Paid plans are not available yet');
+
+    const sub = await app.inject({
+      method: 'GET',
+      url: '/api/v1/billing/subscription',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(sub.json().subscription.planTier).toBe('free');
+    const invoices = await app.inject({
+      method: 'GET',
+      url: '/api/v1/billing/invoices',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(invoices.json().invoices).toHaveLength(0);
+  });
+
+  it('refuses every webhook while no signing secret is configured', async () => {
+    const signed = signWebhook({
+      eventType: 'invoice.paid',
+      idempotencyKey: 'unconfigured-1',
+      userId: '00000000-0000-4000-a000-000000000001',
+      amountCents: 100,
+    });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/webhook',
+      headers: signed.headers,
+      payload: signed.body,
+    });
+    expect(res.statusCode).toBe(503);
   });
 });

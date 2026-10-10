@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { signWebhook } from '../helpers/webhook.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -132,30 +133,31 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
 
     // 3. Process external billing webhook with idempotency (WIT-016)
     const webhookKey = `wh-evt-${Date.now()}`;
+    const webhookEvent = {
+      idempotencyKey: webhookKey,
+      eventType: 'invoice.paid',
+      userId,
+      amountCents: 2900,
+      currency: 'USD',
+      subscriptionId: subData.subscription.id,
+    };
+    // Unsigned events are refused outright.
+    const forged = await request.post(`${API_BASE}/billing/webhook`, { data: webhookEvent });
+    expect(forged.status()).toBe(401);
+    const first = signWebhook(webhookEvent);
     const whRes1 = await request.post(`${API_BASE}/billing/webhook`, {
-      data: {
-        idempotencyKey: webhookKey,
-        eventType: 'invoice.paid',
-        userId,
-        amountCents: 2900,
-        currency: 'USD',
-        subscriptionId: subData.subscription.id,
-      },
+      headers: first.headers,
+      data: first.body,
     });
     expect(whRes1.status()).toBe(200);
     const whData1 = await whRes1.json();
     expect(whData1.status).toBe('success');
 
     // Replay same webhook -> Must return replayed: true
+    const second = signWebhook(webhookEvent);
     const whRes2 = await request.post(`${API_BASE}/billing/webhook`, {
-      data: {
-        idempotencyKey: webhookKey,
-        eventType: 'invoice.paid',
-        userId,
-        amountCents: 2900,
-        currency: 'USD',
-        subscriptionId: subData.subscription.id,
-      },
+      headers: second.headers,
+      data: second.body,
     });
     expect(whRes2.status()).toBe(200);
     const whData2 = await whRes2.json();

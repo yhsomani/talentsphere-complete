@@ -1,377 +1,258 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { apiFetch } from '../lib/api.js';
-import { getToken } from '../lib/session.js';
+import { apiJson, errorMessage } from '../lib/api.js';
+import { useSession } from '../lib/SessionContext.js';
+import { formatDate, formatSalaryRange, jobTypeLabel, workModeLabel } from '../lib/format.js';
+import type { Application, Job } from '../lib/types.js';
 import {
-  Button,
-  Badge,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  ShieldCheckIcon,
-  CheckIcon,
+  ButtonLink,
+  EmptyState,
+  Input,
+  Notice,
+  PageHeader,
+  Select,
+  StatusPill,
 } from '../components/ui/index.js';
 
-interface JobOpportunity {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salaryMin: number;
-  salaryMax: number;
-  currency: string;
-  matchScore: number;
-  requiredEvidence: string[];
-}
-
-const JOBS: JobOpportunity[] = [
-  {
-    id: 'job-001',
-    title: 'Staff Distributed Systems Engineer',
-    company: 'CoreDB Infrastructure',
-    location: 'Remote (US/Canada)',
-    type: 'Full-time',
-    salaryMin: 220000,
-    salaryMax: 275000,
-    currency: 'USD',
-    matchScore: 94,
-    requiredEvidence: [
-      'Gold Tier: Distributed Systems Work History',
-      'DKIM Corporate Domain Attestation',
-      'Passing score on Transactional Queue Sandbox',
-    ],
-  },
-  {
-    id: 'job-002',
-    title: 'Lead Platform Reliability Architect',
-    company: 'FinTech Ledger Systems',
-    location: 'San Francisco, CA / Hybrid',
-    type: 'Full-time',
-    salaryMin: 240000,
-    salaryMax: 290000,
-    currency: 'USD',
-    matchScore: 88,
-    requiredEvidence: [
-      'Silver+ Tier: 3+ years Backend Systems',
-      'Verified Supervisor Reference',
-      'Concurrency & Partition Tolerance Assessment',
-    ],
-  },
-  {
-    id: 'job-003',
-    title: 'Principal TypeScript / Web Runtime Engineer',
-    company: 'NextGen Cloud Edge',
-    location: 'Remote (Global)',
-    type: 'Full-time',
-    salaryMin: 210000,
-    salaryMax: 260000,
-    currency: 'USD',
-    matchScore: 82,
-    requiredEvidence: [
-      'Cryptographic Evidence of Browser Sandbox Architecture',
-      'Verified Open Source / Enterprise Contributions',
-    ],
-  },
+const WORK_MODE_FILTERS = [
+  { value: '', label: 'Any work mode' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'On-site' },
 ];
 
+/** Every posting shown here is a published job from the API — nothing is invented. */
 export const JobsPage: React.FC = () => {
-  usePageMeta(
-    'Verifiable Career Opportunities',
-    'Browse pre-screened roles matched by verified evidence, supervisor references, and code artifacts — not keywords.'
-  );
+  usePageMeta('Jobs', 'Open roles posted by companies hiring on TalentSphere.');
+  const session = useSession();
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [applied, setApplied] = useState<Record<string, string>>({});
+  const [query, setQuery] = useState('');
+  const [workMode, setWorkMode] = useState('');
 
-  const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
-  const [applyError, setApplyError] = useState<string | null>(null);
-  // Per-job pending set (not a single id): parallel applies keep their own
-  // visible pending state, and keyed applied flags mean an out-of-order
-  // response can never overwrite another job's result.
-  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
-
-  // Hydrate applied state from server truth on mount: a refresh must not
-  // re-enable Apply for a job this candidate already applied to. Best-effort —
-  // on failure the server's BR-039 409 still protects the real submission.
   useEffect(() => {
-    if (!getToken()) return;
     let cancelled = false;
-    void (async () => {
-      try {
-        const res = await apiFetch('/api/v1/applications/my');
-        if (!res.ok) return;
-        const data = await res.json();
-        const applied: Record<string, boolean> = {};
-        for (const application of data.applications ?? []) {
-          if (application?.jobId) applied[application.jobId] = true;
-        }
-        if (!cancelled && Object.keys(applied).length > 0) {
-          setAppliedJobs((prev) => ({ ...prev, ...applied }));
-        }
-      } catch {
-        // Hydration is best-effort; BR-039 on the server remains the backstop.
-      }
-    })();
+    apiJson<{ jobs: Job[] }>('/api/v1/jobs')
+      .then((data) => !cancelled && setJobs(data.jobs))
+      .catch((err) => !cancelled && setError(errorMessage(err)));
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const handleApply = async (jobId: string) => {
-    // Re-entry guard in the handler itself — don't rely solely on the
-    // disabled attribute for duplicate-request protection.
-    if (pendingIds.has(jobId) || appliedJobs[jobId]) return;
-    setApplyError(null);
-    const token = getToken();
-    if (!token) {
-      setApplyError('Sign in to apply for this role.');
-      return;
-    }
-    setPendingIds((prev) => new Set(prev).add(jobId));
-    try {
-      // apiFetch attaches the session token and turns a dead session (401)
-      // into a return to sign-in with ?return= — see lib/api.ts.
-      const res = await apiFetch(`/api/v1/jobs/${jobId}/apply`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        if (res.status === 409) {
-          // Conflict means the server already holds an active application
-          // (BR-039) — reconcile to server truth instead of leaving a dead
-          // "Apply" button that would only ever 409 again.
-          setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
+  // Applied state comes from the server so a refresh never re-offers Apply.
+  useEffect(() => {
+    if (session.status !== 'ready' || session.isRecruiter) return;
+    let cancelled = false;
+    apiJson<{ applications: Application[] }>('/api/v1/applications/my')
+      .then((data) => {
+        if (cancelled) return;
+        const byJob: Record<string, string> = {};
+        for (const a of data.applications) {
+          // The most recent application per job wins (re-applying is allowed).
+          if (!byJob[a.jobId]) byJob[a.jobId] = a.status;
         }
-        setApplyError(
-          body?.error?.message ?? 'Application could not be submitted. Please try again.'
-        );
-        return;
-      }
-      // Only a 201 from the API may mark this job as applied.
-      setAppliedJobs((prev) => ({ ...prev, [jobId]: true }));
-    } catch {
-      setApplyError('Application could not be submitted. Please try again.');
-    } finally {
-      setPendingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(jobId);
-        return next;
-      });
-    }
-  };
+        setApplied(byJob);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [session.status, session.isRecruiter]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (jobs ?? []).filter(
+      (job) =>
+        (!workMode || job.workMode === workMode) &&
+        (!q ||
+          [job.title, job.location, job.organization?.name ?? '', job.description]
+            .join(' ')
+            .toLowerCase()
+            .includes(q))
+    );
+  }, [jobs, query, workMode]);
 
   return (
-    <div style={{ maxWidth: '1160px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <PageHeader
+        title="Jobs"
+        intro="Open roles from companies hiring on TalentSphere. Open a role to read the full description and apply."
+        actions={
+          session.isRecruiter ? (
+            <ButtonLink to="/hiring" variant="outline" data-testid="jobs-post-link">
+              Post a job
+            </ButtonLink>
+          ) : undefined
+        }
+      />
+
       <div
+        role="search"
         style={{
-          borderBottom: `1px solid ${colors.neutral[200]}`,
-          paddingBottom: spacing.lg,
-          marginBottom: spacing.xl,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
+          gap: spacing.md,
+          marginBottom: spacing.md,
         }}
       >
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: spacing.xs,
-          }}
-        >
-          <Badge variant="verified">GOVERNED MATCHMAKING</Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-            Zero Keyword Filters &bull; Evidence-Based Match Scoring
-          </span>
-        </div>
-        <h1
-          style={{
-            fontSize: '2rem',
-            fontWeight: 800,
-            color: colors.neutral[900],
-            margin: 0,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Verifiable Career Opportunities
-        </h1>
-        <p
-          style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}
-        >
-          Pre-screened roles that prioritize immutable evidence, supervisor references, and code
-          artifacts.
-        </p>
+        <Input
+          id="jobs-search"
+          label="Search"
+          type="search"
+          placeholder="Title, company or location"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          data-testid="jobs-search"
+        />
+        <Select
+          id="jobs-work-mode"
+          label="Work mode"
+          value={workMode}
+          onChange={(e) => setWorkMode(e.target.value)}
+          options={WORK_MODE_FILTERS}
+        />
       </div>
 
-      {applyError && (
-        <div
-          role="alert"
-          data-testid="apply-error"
-          style={{
-            backgroundColor: '#fef2f2',
-            color: colors.semantic.errorText,
-            border: `1px solid ${colors.semantic.error}`,
-            padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: '6px',
-            marginBottom: spacing.lg,
-            fontSize: '0.875rem',
-          }}
-        >
-          {/* The auth prompt is actionable: the message itself links to
-              sign-in with the intended destination preserved. */}
-          {applyError === 'Sign in to apply for this role.' ? (
-            <Link
-              to="/login?return=%2Fjobs"
-              style={{ color: colors.primary[700], fontWeight: 600 }}
-            >
-              Sign in to apply for this role.
-            </Link>
-          ) : (
-            applyError
-          )}
-        </div>
+      {error && (
+        <Notice tone="error" data-testid="jobs-error">
+          Could not load jobs: {error}
+        </Notice>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-        {JOBS.map((job) => {
-          const isApplied = Boolean(appliedJobs[job.id]);
-          const isPending = pendingIds.has(job.id);
-          return (
-            <Card key={job.id} data-testid={`job-card-${job.id}`}>
-              <CardHeader
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  flexWrap: 'wrap',
-                  gap: spacing.sm,
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                    <CardTitle>{job.title}</CardTitle>
-                    <Badge variant={job.matchScore >= 90 ? 'gold' : 'info'} mono>
-                      {job.matchScore}% MATCH
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    {job.company} &bull; {job.location} &bull; {job.type}
-                  </CardDescription>
-                </div>
+      {!error && jobs === null && (
+        <p data-testid="jobs-loading" style={{ color: colors.neutral[600] }}>
+          Loading jobs…
+        </p>
+      )}
 
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: colors.neutral[900] }}>
-                    ${(job.salaryMin / 1000).toFixed(0)}k &ndash; $
-                    {(job.salaryMax / 1000).toFixed(0)}k
-                  </div>
-                  <span style={{ fontSize: '0.75rem', color: colors.neutral[600] }}>
-                    Base Compensation (USD)
-                  </span>
-                </div>
-              </CardHeader>
+      {jobs !== null && jobs.length === 0 && (
+        <EmptyState
+          title="No open roles yet"
+          description={
+            session.isRecruiter
+              ? 'Post the first job for your company — it appears here once you publish it.'
+              : 'Companies publish roles here as they start hiring. Meanwhile, strengthen your work history so you are ready to apply.'
+          }
+          action={
+            session.isRecruiter ? (
+              <ButtonLink to="/hiring">Post a job</ButtonLink>
+            ) : (
+              <ButtonLink to="/evidence" variant="outline">
+                Add work history
+              </ButtonLink>
+            )
+          }
+        />
+      )}
 
-              <CardContent>
-                <div style={{ marginBottom: spacing.md }}>
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: colors.neutral[700],
-                      display: 'block',
-                      marginBottom: spacing.xs,
-                    }}
-                  >
-                    REQUIRED VERIFIED EVIDENCE:
-                  </span>
-                  <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
-                    {job.requiredEvidence.map((ev, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: '0.8125rem',
-                          backgroundColor: colors.neutral[100],
-                          color: colors.neutral[800],
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}
-                      >
-                        <ShieldCheckIcon size={14} style={{ color: colors.primary[700] }} />
-                        {ev}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div
+      {jobs !== null && jobs.length > 0 && (
+        <>
+          <p aria-live="polite" style={{ color: colors.neutral[600], fontSize: '0.875rem' }}>
+            {visible.length === jobs.length
+              ? `${jobs.length} open ${jobs.length === 1 ? 'role' : 'roles'}`
+              : `${visible.length} of ${jobs.length} roles match`}
+          </p>
+          <ul
+            data-testid="jobs-list"
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: `${spacing.sm} 0 0`,
+              backgroundColor: '#ffffff',
+              border: `1px solid ${colors.neutral[200]}`,
+              borderRadius: '10px',
+            }}
+          >
+            {visible.map((job, index) => {
+              const facts = [
+                job.location,
+                job.location
+                  .toLowerCase()
+                  .includes((workModeLabel(job.workMode) ?? '~').toLowerCase())
+                  ? null
+                  : workModeLabel(job.workMode),
+                jobTypeLabel(job.jobType),
+                formatSalaryRange(job.salaryRange),
+              ].filter(Boolean);
+              const myStatus = applied[job.id];
+              return (
+                <li
+                  key={job.id}
+                  data-testid={`job-card-${job.id}`}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginTop: spacing.md,
+                    flexWrap: 'wrap',
+                    gap: spacing.md,
+                    padding: `${spacing.md} ${spacing.lg}`,
+                    borderTop: index === 0 ? 'none' : `1px solid ${colors.neutral[200]}`,
                   }}
                 >
-                  <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-                    Deterministic matching powered by RFC-0041 Evidence Graphs.
-                  </span>
-                  {/* Screen-reader channel: the button's own label change is
-                      not announced, so pending and success both get a status. */}
-                  <span
-                    role="status"
-                    data-testid={`apply-status-${job.id}`}
-                    style={{
-                      position: 'absolute',
-                      width: '1px',
-                      height: '1px',
-                      padding: 0,
-                      margin: '-1px',
-                      overflow: 'hidden',
-                      clip: 'rect(0, 0, 0, 0)',
-                      whiteSpace: 'nowrap',
-                      border: 0,
-                    }}
-                  >
-                    {isApplied
-                      ? `Application submitted for ${job.title}`
-                      : isPending
-                        ? `Submitting application for ${job.title}`
-                        : ''}
-                  </span>
-                  <Button
-                    variant={isApplied ? 'secondary' : 'primary'}
-                    size="md"
-                    data-testid={`apply-btn-${job.id}`}
-                    loading={isPending}
-                    disabled={isApplied}
-                    onClick={() => void handleApply(job.id)}
-                    aria-label={`${
-                      isApplied
-                        ? 'Application Transmitted'
-                        : isPending
-                          ? 'Applying'
-                          : 'Apply with Evidence Graph'
-                    } — ${job.title}`}
-                  >
-                    {isApplied ? (
-                      <>
-                        <CheckIcon size={16} /> Application Transmitted
-                      </>
-                    ) : isPending ? (
-                      'Applying…'
+                  <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+                    <h2 style={{ fontSize: '1.0625rem', margin: 0 }}>
+                      <Link
+                        to={`/jobs/${job.id}`}
+                        data-testid={`job-link-${job.id}`}
+                        style={{
+                          color: colors.neutral[900],
+                          fontWeight: 700,
+                          fontSize: '1.0625rem',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        {job.title}
+                      </Link>
+                    </h2>
+                    <div style={{ color: colors.neutral[700], marginTop: '2px' }}>
+                      {job.organization?.name ?? 'Company'}
+                    </div>
+                    <div
+                      style={{
+                        color: colors.neutral[600],
+                        fontSize: '0.8125rem',
+                        marginTop: '4px',
+                      }}
+                    >
+                      {facts.join(', ')}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                    {myStatus ? (
+                      <StatusPill
+                        kind="application"
+                        status={myStatus}
+                        data-testid={`apply-status-${job.id}`}
+                      />
                     ) : (
-                      'Apply with Evidence Graph'
+                      <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
+                        Posted {formatDate(job.updatedAt)}
+                      </span>
                     )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <ButtonLink
+                      to={`/jobs/${job.id}`}
+                      size="sm"
+                      variant="outline"
+                      aria-label={`View ${job.title}`}
+                    >
+                      View
+                    </ButtonLink>
+                  </div>
+                </li>
+              );
+            })}
+            {visible.length === 0 && (
+              <li style={{ padding: spacing.lg, color: colors.neutral[600] }}>
+                No roles match these filters.
+              </li>
+            )}
+          </ul>
+        </>
+      )}
     </div>
   );
 };

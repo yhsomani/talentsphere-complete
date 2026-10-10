@@ -11,3 +11,6 @@
  * production secret, and nothing reads it outside the test configuration.
  */
 export const TEST_TOKEN_SECRET = 'talentsphere_test_only_token_secret_min_32_chars';
+
+/** Test-only billing webhook secret (BILLING_WEBHOOK_SECRET). */
+export const TEST_WEBHOOK_SECRET = 'talentsphere_test_only_webhook_secret';

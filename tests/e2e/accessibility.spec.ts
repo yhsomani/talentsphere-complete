@@ -8,6 +8,7 @@
  * order, keyboard reachability, skip link, focus order, reflow, reduced motion.
  */
 import { test, expect } from '@playwright/test';
+import { publishJob } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -327,10 +328,16 @@ test.describe('A11Y: Reflow and motion preferences (WCAG 1.4.10 / 2.3.3)', () =>
 });
 
 test.describe('A11Y: Page-specific structure', () => {
-  test('every vacancy on the jobs page is named and actionable by keyboard', async ({ page }) => {
+  test('every vacancy on the jobs page is named and actionable by keyboard', async ({
+    page,
+    request,
+  }) => {
+    // Real postings: the page renders only what the API publishes.
+    await publishJob(request, { title: 'Accessible Vacancy Engineer' });
     await page.goto('/jobs');
 
     const cards = page.locator('[data-testid^="job-card-"]');
+    await expect(cards.first()).toBeVisible();
     const count = await cards.count();
     expect(count, 'jobs page must render vacancy entries').toBeGreaterThan(0);
 
@@ -347,59 +354,26 @@ test.describe('A11Y: Page-specific structure', () => {
     }
   });
 
-  test('plan selection is a keyboard-operable single-select group', async ({ page }) => {
+  test('each pricing option is a labelled region whose action is keyboard reachable', async ({
+    browser,
+  }) => {
+    // Signed out, so the sign-up actions are present.
+    const context = await browser.newContext();
+    const page = await context.newPage();
     await page.goto('/checkout');
 
-    const group = page.getByRole('radiogroup', { name: 'Subscription plans' });
-    await expect(group).toBeVisible();
-
-    const plans = group.getByRole('radio');
-    const count = await plans.count();
-    expect(count, 'checkout must offer selectable plans').toBeGreaterThan(0);
-
-    // Exactly one plan is checked at a time (single-select semantics).
-    const checked = await plans.evaluateAll(
-      (els) => els.filter((e) => e.getAttribute('aria-checked') === 'true').length
-    );
-    expect(checked, 'a single-select plan group must have one selected plan').toBe(1);
-
-    // Every plan must be reachable by Tab and selectable with the keyboard.
+    const regions = page.locator('section[data-testid^="plan-"]');
+    const count = await regions.count();
+    expect(count, 'pricing must list its options').toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
-      const plan = plans.nth(i);
-      await plan.focus();
-      expect(
-        await plan.evaluate((el) => el === document.activeElement),
-        `plan #${i} must be focusable`
-      ).toBe(true);
-      await page.keyboard.press('Enter');
+      const region = regions.nth(i);
+      const labelledBy = await region.getAttribute('aria-labelledby');
+      expect(labelledBy, `option #${i} must be labelled by its heading`).toBeTruthy();
+      await expect(page.locator(`#${labelledBy}`)).toHaveText(/\S/);
+      const cta = region.locator('a[href]');
+      await cta.focus();
+      expect(await cta.evaluate((el) => el === document.activeElement)).toBe(true);
     }
-
-    const checkedAfter = await plans.evaluateAll(
-      (els) => els.filter((e) => e.getAttribute('aria-checked') === 'true').length
-    );
-    expect(checkedAfter, 'keyboard selection must still leave exactly one plan checked').toBe(1);
-
-    // WAI-ARIA radiogroup: arrows move the selection with wrap-around, and
-    // focus follows the new selection (roving tabindex keeps one Tab stop).
-    await plans.first().focus();
-    await page.keyboard.press('ArrowDown');
-    expect(
-      await plans.evaluateAll((els) =>
-        els.findIndex((e) => e.getAttribute('aria-checked') === 'true')
-      ),
-      'ArrowDown must move the selection to the next plan'
-    ).toBe(1);
-    expect(
-      await plans.nth(1).evaluate((el) => el === document.activeElement),
-      'focus must follow the moved selection'
-    ).toBe(true);
-
-    await page.keyboard.press('ArrowUp');
-    expect(
-      await plans.evaluateAll((els) =>
-        els.findIndex((e) => e.getAttribute('aria-checked') === 'true')
-      ),
-      'ArrowUp must move the selection back'
-    ).toBe(0);
+    await context.close();
   });
 });

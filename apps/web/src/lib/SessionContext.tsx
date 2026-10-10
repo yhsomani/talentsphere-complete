@@ -92,9 +92,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
     window.addEventListener(SESSION_EVENT, onSessionChange);
     window.addEventListener('storage', onStorage);
+    // A session check that failed while offline is retried on reconnect, so
+    // a dropped connection at page load does not leave the app stuck.
+    window.addEventListener('online', onSessionChange);
     return () => {
       window.removeEventListener(SESSION_EVENT, onSessionChange);
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('online', onSessionChange);
     };
   }, [refresh]);
 

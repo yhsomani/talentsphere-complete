@@ -586,6 +586,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         POLICY_VIOLATION: 422,
         RATE_LIMIT_EXCEEDED: 429,
         TENANT_ISOLATION_VIOLATION: 403,
+        SERVICE_UNAVAILABLE: 503,
       };
       const statusCode = statusMap[error.code] || 400;
 
@@ -2365,11 +2366,19 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('NOT_FOUND', 'Profile not found.');
     }
 
-    const list = applicationsByCandidateId.get(profile.id) || [];
-    const withJobDetails = list.map((app) => ({
-      ...app,
-      job: jobsById.get(app.jobId),
-    }));
+    const list = [...(applicationsByCandidateId.get(profile.id) || [])].sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt)
+    );
+    const withJobDetails = list.map((app) => {
+      const job = jobsById.get(app.jobId);
+      const org = job ? organizationsById.get(job.orgId) : undefined;
+      return {
+        ...app,
+        job: job
+          ? { ...job, organization: org ? { id: org.id, name: org.name } : undefined }
+          : undefined,
+      };
+    });
 
     return reply.status(200).send({ applications: withJobDetails });
   });
@@ -2421,12 +2430,30 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         );
       }
 
-      const list = applicationsByJobId.get(jobId) || [];
-      const enriched = list.map((app) => ({
-        ...app,
-        candidate: profilesById.get(app.candidateId),
-        evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
-      }));
+      const list = [...(applicationsByJobId.get(jobId) || [])].sort((a, b) =>
+        a.createdAt.localeCompare(b.createdAt)
+      );
+      const enriched = list.map((app) => {
+        const candidate = profilesById.get(app.candidateId);
+        // Verified work history is the evidence recruiters weigh most; give the
+        // pipeline a summary without a request per applicant.
+        const histories = candidate
+          ? verifiedWorkHistoriesByCandidateId.get(candidate.userId) || []
+          : [];
+        return {
+          ...app,
+          candidate,
+          evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+          workHistorySummary: {
+            roles: histories.length,
+            emailVerifiedRoles: histories.filter((h) => h.emailVerifiedAt).length,
+            bestTier:
+              (['gold', 'silver', 'bronze'] as const).find((tier) =>
+                histories.some((h) => h.badgeTier === tier)
+              ) ?? 'none',
+          },
+        };
+      });
 
       return reply.status(200).send({ applications: enriched });
     }
@@ -9649,6 +9676,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const session = extractUser(req);
     const input = SubscribePlanInputSchema.parse(req.body);
 
+    // No payment processor is integrated. Activating a paid plan here would
+    // hand out paid entitlements and an "invoice" for money never collected,
+    // so outside BILLING_MODE=simulated (dev/test only) paid plans are refused.
+    if (input.planTier !== 'free' && env.BILLING_MODE !== 'simulated') {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'Paid plans are not available yet. TalentSphere is free while payments are being set up.',
+        { billingMode: env.BILLING_MODE }
+      );
+    }
+
     // Idempotency check if idempotencyKey provided
     if (input.idempotencyKey) {
       const existingInvoices = invoicesByUserId.get(session.userId) || [];
@@ -9749,49 +9787,90 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     });
   });
 
-  // 6. External Payment Webhook (with replay resistance & idempotency - WIT-016)
-  app.post('/api/v1/billing/webhook', async (req: FastifyRequest, reply: FastifyReply) => {
-    const input = ProcessPaymentWebhookInputSchema.parse(req.body);
-
-    const existingEvent = billingEventsByIdempotency.get(input.idempotencyKey);
-    if (existingEvent) {
-      return reply.status(200).send({
-        replayed: true,
-        message: 'Billing event already processed (idempotent duplicate).',
-        eventId: existingEvent.id,
-      });
-    }
-
-    const eventId = crypto.randomUUID();
-    const event: BillingEvent = {
-      id: eventId,
-      userId: input.userId,
-      eventType: input.eventType,
-      payload: {
-        amountCents: input.amountCents,
-        currency: input.currency,
-        subscriptionId: input.subscriptionId,
-      },
-      idempotencyKey: input.idempotencyKey,
-      createdAt: new Date().toISOString(),
-    };
-
-    billingEventsByIdempotency.set(input.idempotencyKey, event);
-
-    await dispatchJob({
-      type: 'billing.webhook.received',
-      payload: {
-        eventId,
-        eventType: input.eventType,
-        userId: input.userId,
-      },
-      enqueuedAt: event.createdAt,
+  // 6. External Payment Webhook (signed, replay-resistant, idempotent - WIT-016)
+  //
+  // Previously this accepted any unsigned JSON (SECURITY.md §9 open gap).
+  // Every call must now carry
+  //   x-talentsphere-signature: t=<unix seconds>,v1=<hex HMAC-SHA256>
+  // over `${t}.${rawBody}` with BILLING_WEBHOOK_SECRET, within five minutes.
+  // With no secret configured the endpoint refuses everything: an
+  // unconfigured webhook must never fall back to trusting its callers.
+  const WEBHOOK_TOLERANCE_SECONDS = 300;
+  await app.register(async (scope) => {
+    // The signature covers the exact bytes received, so this route keeps the
+    // raw body; parsing still goes through Fastify's hardened JSON parser.
+    const defaultJsonParser = scope.getDefaultJsonParser('error', 'error');
+    scope.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+      (req as FastifyRequest & { rawBody?: string }).rawBody = body as string;
+      defaultJsonParser(req, body as string, done);
     });
 
-    return reply.status(200).send({
-      status: 'success',
-      message: 'Billing webhook processed successfully.',
-      eventId,
+    scope.post('/api/v1/billing/webhook', async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!env.BILLING_WEBHOOK_SECRET) {
+        throw new DomainError('SERVICE_UNAVAILABLE', 'Billing webhooks are not configured.');
+      }
+      const header = req.headers['x-talentsphere-signature'];
+      const parts = new Map(
+        (typeof header === 'string' ? header : '')
+          .split(',')
+          .map((kv) => kv.trim().split('=') as [string, string])
+      );
+      const timestamp = Number(parts.get('t'));
+      const provided = parts.get('v1') ?? '';
+      const rawBody = (req as FastifyRequest & { rawBody?: string }).rawBody ?? '';
+      const expected = crypto
+        .createHmac('sha256', env.BILLING_WEBHOOK_SECRET)
+        .update(`${timestamp}.${rawBody}`)
+        .digest('hex');
+      const fresh =
+        Number.isFinite(timestamp) &&
+        Math.abs(Date.now() / 1000 - timestamp) <= WEBHOOK_TOLERANCE_SECONDS;
+      if (!fresh || !safeEqualHex(provided, expected)) {
+        throw new DomainError('UNAUTHENTICATED', 'Webhook signature is missing, invalid or stale.');
+      }
+
+      const input = ProcessPaymentWebhookInputSchema.parse(req.body);
+
+      const existingEvent = billingEventsByIdempotency.get(input.idempotencyKey);
+      if (existingEvent) {
+        return reply.status(200).send({
+          replayed: true,
+          message: 'Billing event already processed (idempotent duplicate).',
+          eventId: existingEvent.id,
+        });
+      }
+
+      const eventId = crypto.randomUUID();
+      const event: BillingEvent = {
+        id: eventId,
+        userId: input.userId,
+        eventType: input.eventType,
+        payload: {
+          amountCents: input.amountCents,
+          currency: input.currency,
+          subscriptionId: input.subscriptionId,
+        },
+        idempotencyKey: input.idempotencyKey,
+        createdAt: new Date().toISOString(),
+      };
+
+      billingEventsByIdempotency.set(input.idempotencyKey, event);
+
+      await dispatchJob({
+        type: 'billing.webhook.received',
+        payload: {
+          eventId,
+          eventType: input.eventType,
+          userId: input.userId,
+        },
+        enqueuedAt: event.createdAt,
+      });
+
+      return reply.status(200).send({
+        status: 'success',
+        message: 'Billing webhook processed successfully.',
+        eventId,
+      });
     });
   });
 

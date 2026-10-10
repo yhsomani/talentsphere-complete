@@ -45,6 +45,22 @@ export const TermsPage: React.FC = () => {
         >
           Terms of Service & Verification Standards
         </h1>
+        <div
+          role="note"
+          data-testid="legal-draft-notice"
+          style={{
+            backgroundColor: '#fffbeb',
+            color: colors.semantic.warningText,
+            border: `1px solid ${colors.semantic.warning}`,
+            borderRadius: '6px',
+            padding: `${spacing.sm} ${spacing.md}`,
+            fontSize: '0.875rem',
+            margin: `${spacing.sm} 0`,
+          }}
+        >
+          These terms are a draft that has not been reviewed by a lawyer, including the dispute
+          resolution clause. They are not yet a final agreement.
+        </div>
         <p style={{ fontSize: '1.0625rem', color: colors.neutral[600], lineHeight: 1.6 }}>
           These terms govern your access to TalentSphere, candidate credential verification,
           proctored skill assessments, and employer interactions.

@@ -96,8 +96,12 @@ test.describe('NAV: deep links and session transitions', () => {
       '/jobs',
       '/checkout',
       '/login',
+      '/signup',
       '/dashboard',
+      '/applications',
       '/evidence',
+      '/profile',
+      '/hiring',
       '/assessments',
       '/no-such-page',
     ];
@@ -133,7 +137,8 @@ test.describe('NAV: announcements, current-page state, scroll', () => {
   test('the active header destination carries aria-current="page"', async ({ page }) => {
     await page.goto('/jobs');
     await expect(page.getByTestId('nav-jobs')).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByTestId('nav-evidence')).not.toHaveAttribute('aria-current', 'page');
+    await expect(page.getByTestId('nav-checkout')).toBeVisible();
+    await expect(page.getByTestId('nav-checkout')).not.toHaveAttribute('aria-current', 'page');
   });
 
   test('push navigation returns the viewport to the top', async ({ page }) => {
@@ -211,16 +216,56 @@ test.describe('NAV: disclosures and overlays', () => {
     await expect(dialog).toBeHidden();
     await expect(opener).toBeFocused();
   });
+});
 
-  test('the billing cycle toggle exposes pressed state', async ({ page }) => {
-    await page.goto('/checkout');
-    const monthly = page.getByTestId('billing-cycle-monthly');
-    const yearly = page.getByTestId('billing-cycle-yearly');
-    await expect(monthly).toHaveAttribute('aria-pressed', 'true');
-    await expect(yearly).toHaveAttribute('aria-pressed', 'false');
+test.describe('NAV: the header follows the account, not a fixed list', () => {
+  test('signed out, candidate and hiring accounts each get their own destinations', async ({
+    browser,
+    request,
+  }) => {
+    const anonymous = await browser.newPage();
+    await anonymous.goto('/');
+    await expect(anonymous.getByTestId('nav-jobs')).toBeVisible();
+    await expect(anonymous.getByTestId('nav-signup')).toBeVisible();
+    await expect(anonymous.getByTestId('nav-dashboard')).toHaveCount(0);
+    await anonymous.close();
 
-    await yearly.click();
-    await expect(monthly).toHaveAttribute('aria-pressed', 'false');
-    await expect(yearly).toHaveAttribute('aria-pressed', 'true');
+    const candidate = await browser.newPage();
+    await mintSession(candidate, request, 'nav-candidate');
+    await candidate.goto('/dashboard');
+    for (const id of [
+      'nav-dashboard',
+      'nav-jobs',
+      'nav-applications',
+      'nav-evidence',
+      'nav-profile',
+    ]) {
+      await expect(candidate.getByTestId(id)).toBeVisible();
+    }
+    await expect(candidate.getByTestId('nav-hiring')).toHaveCount(0);
+    await candidate.close();
+
+    const recruiter = await browser.newPage();
+    const registered = await request.post(`${API_BASE}/auth/register`, {
+      data: {
+        email: `nav.recruiter.${Date.now()}@example.com`,
+        password: 'Password123!Secure',
+        fullName: 'Nav Recruiter',
+        role: 'recruiter',
+      },
+    });
+    const { token, user } = await registered.json();
+    await recruiter.goto('/');
+    await recruiter.evaluate(
+      (session: { token: string; user: unknown }) => {
+        localStorage.setItem('talentsphere_token', session.token);
+        localStorage.setItem('talentsphere_user', JSON.stringify(session.user));
+      },
+      { token, user }
+    );
+    await recruiter.goto('/dashboard');
+    await expect(recruiter.getByTestId('nav-hiring')).toBeVisible();
+    await expect(recruiter.getByTestId('nav-applications')).toHaveCount(0);
+    await recruiter.close();
   });
 });

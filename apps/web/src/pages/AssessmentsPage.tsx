@@ -91,8 +91,8 @@ const CHALLENGES: AssessmentChallenge[] = [
 
 export const AssessmentsPage: React.FC = () => {
   usePageMeta(
-    'Proctored Assessments',
-    'Take proctored, reproducible coding assessments that turn real problem-solving into shareable verified credentials.'
+    'Skill assessments (preview)',
+    'A preview of planned coding exercises. Nothing on this page is scored or saved yet.'
   );
 
   const [selectedChallenge, setSelectedChallenge] = useState<AssessmentChallenge | null>(null);
@@ -130,9 +130,9 @@ export const AssessmentsPage: React.FC = () => {
             marginBottom: spacing.xs,
           }}
         >
-          <Badge variant="info">EVIDENCE SANDBOX</Badge>
+          <Badge variant="info">PREVIEW</Badge>
           <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-            Proctored Code Challenges &bull; Zero Hallucinated Ratings
+            Not available yet — nothing on this page is scored or saved
           </span>
         </div>
         <h1
@@ -144,13 +144,13 @@ export const AssessmentsPage: React.FC = () => {
             letterSpacing: '-0.02em',
           }}
         >
-          Proctored Capability Assessments
+          Skill assessments (preview)
         </h1>
         <p
           style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}
         >
-          Reproducible coding environments evaluated against objective rubrics and stress
-          invariants.
+          A look at the coding exercises we plan to offer. You can read the brief and starter code;
+          running and scoring them is not built yet, so they do not count as evidence.
         </p>
       </div>
 

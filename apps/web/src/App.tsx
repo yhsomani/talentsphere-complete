@@ -6,10 +6,17 @@ import { Layout } from './components/Layout.js';
 import { LandingPage } from './pages/LandingPage.js';
 import { DashboardPage } from './pages/DashboardPage.js';
 import { LoginPage } from './pages/LoginPage.js';
+import { SignUpPage } from './pages/SignUpPage.js';
 import { CheckoutPage } from './pages/CheckoutPage.js';
 import { EvidencePage } from './pages/EvidencePage.js';
 import { AssessmentsPage } from './pages/AssessmentsPage.js';
 import { JobsPage } from './pages/JobsPage.js';
+import { JobDetailPage } from './pages/JobDetailPage.js';
+import { ApplicationsPage } from './pages/ApplicationsPage.js';
+import { ProfilePage } from './pages/ProfilePage.js';
+import { HiringPage } from './pages/HiringPage.js';
+import { HiringJobPage } from './pages/HiringJobPage.js';
+import { ReferencePage } from './pages/ReferencePage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
@@ -25,6 +32,8 @@ const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) =
   return <Navigate to={`/login?return=${encodeURIComponent(from)}`} replace />;
 };
 
+const guarded = (element: React.ReactElement) => <RequireAuth>{element}</RequireAuth>;
+
 export const App: React.FC = () => {
   return (
     <SessionProvider>
@@ -33,35 +42,22 @@ export const App: React.FC = () => {
           <Route path="/" element={<Layout />}>
             <Route index element={<LandingPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="signup" element={<SignUpPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="terms" element={<TermsPage />} />
-            {/* Job browsing is public; the apply transaction itself requires auth. */}
+            {/* Job browsing is public; applying requires a session. */}
             <Route path="jobs" element={<JobsPage />} />
-            <Route
-              path="dashboard"
-              element={
-                <RequireAuth>
-                  <DashboardPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="evidence"
-              element={
-                <RequireAuth>
-                  <EvidencePage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="assessments"
-              element={
-                <RequireAuth>
-                  <AssessmentsPage />
-                </RequireAuth>
-              }
-            />
+            <Route path="jobs/:id" element={<JobDetailPage />} />
+            {/* A referee responds from an emailed link, without an account. */}
+            <Route path="reference/:id" element={<ReferencePage />} />
+            <Route path="dashboard" element={guarded(<DashboardPage />)} />
+            <Route path="applications" element={guarded(<ApplicationsPage />)} />
+            <Route path="evidence" element={guarded(<EvidencePage />)} />
+            <Route path="profile" element={guarded(<ProfilePage />)} />
+            <Route path="hiring" element={guarded(<HiringPage />)} />
+            <Route path="hiring/jobs/:id" element={guarded(<HiringJobPage />)} />
+            <Route path="assessments" element={guarded(<AssessmentsPage />)} />
             {/* Catch-all: friendly 404 page for any unknown route */}
             <Route path="*" element={<NotFoundPage />} />
           </Route>

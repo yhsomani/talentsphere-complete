@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { storeSession } from '../lib/session.js';
@@ -15,7 +15,7 @@ type LoginError = { message: string; field?: 'email' | 'password' };
 export const LoginPage: React.FC = () => {
   usePageMeta(
     'Sign In',
-    'Sign in to TalentSphere to access your verified career graph, proctored assessments, and evidence-based job matches.'
+    'Sign in to TalentSphere to manage your work history, applications and hiring.'
   );
 
   const navigate = useNavigate();
@@ -35,8 +35,8 @@ export const LoginPage: React.FC = () => {
       setError({ message: 'Please enter a valid email address.', field: 'email' });
       return;
     }
-    if (!password || password.length < 6) {
-      setError({ message: 'Password must be at least 6 characters.', field: 'password' });
+    if (!password) {
+      setError({ message: 'Enter your password.', field: 'password' });
       return;
     }
 
@@ -103,7 +103,7 @@ export const LoginPage: React.FC = () => {
           Sign In to TalentSphere
         </h1>
         <p style={{ color: colors.neutral[600], fontSize: '0.875rem' }}>
-          Access your verified career graph, assessments, and applications.
+          Pick up where you left off: your work history, applications and hiring.
         </p>
       </div>
 
@@ -248,6 +248,16 @@ export const LoginPage: React.FC = () => {
           {loading ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
+      <p style={{ textAlign: 'center', fontSize: '0.875rem', color: colors.neutral[600] }}>
+        New to TalentSphere?{' '}
+        <Link
+          to="/signup"
+          data-testid="login-signup-link"
+          style={{ color: colors.primary[700], fontWeight: 600 }}
+        >
+          Create an account
+        </Link>
+      </p>
     </div>
   );
 };
