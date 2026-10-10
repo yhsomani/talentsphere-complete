@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 import { validateServerEnv, ServerEnv } from '@talentsphere/config';
 import { DURABLE_ROUTES, isEphemeralRoute } from './durability.js';
 import {
+  concurrentModification,
   createStorage,
   type CoreOp,
   type EmailChallenge,
@@ -557,10 +558,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // Global Error Handler - Canonical Error Envelope
-  app.setErrorHandler((error: Error, req: FastifyRequest, reply: FastifyReply) => {
-    req.log.error({ err: error, reqId: req.id }, 'API request failed');
+  // A refused request (4xx) is the API working: logged at info with its code,
+  // no stack. Only server faults (5xx) log at error, so an alert on error-level
+  // logs means something is actually broken.
+  const logRejected = (req: FastifyRequest, statusCode: number, code: string) =>
+    req.log.info({ reqId: req.id, statusCode, code }, 'API request rejected');
 
+  app.setErrorHandler((error: Error, req: FastifyRequest, reply: FastifyReply) => {
     if (error instanceof ZodError) {
+      logRejected(req, 400, 'VALIDATION_FAILED');
       const errorBody: ErrorEnvelope = {
         error: {
           code: 'VALIDATION_FAILED',
@@ -589,6 +595,11 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         SERVICE_UNAVAILABLE: 503,
       };
       const statusCode = statusMap[error.code] || 400;
+      if (statusCode >= 500) {
+        req.log.error({ err: error, reqId: req.id }, 'API request failed');
+      } else {
+        logRejected(req, statusCode, error.code);
+      }
 
       const errorBody: ErrorEnvelope = {
         error: {
@@ -605,6 +616,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     // but are not DomainErrors, so honour the status instead of masking it as 500.
     const pluginStatus = (error as { statusCode?: unknown }).statusCode;
     if (typeof pluginStatus === 'number' && pluginStatus >= 400 && pluginStatus < 600) {
+      if (pluginStatus >= 500) {
+        req.log.error({ err: error, reqId: req.id }, 'API request failed');
+      } else {
+        logRejected(
+          req,
+          pluginStatus,
+          pluginStatus === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED'
+        );
+      }
       const pluginBody: ErrorEnvelope = {
         error: {
           code: pluginStatus === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED',
@@ -617,6 +637,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
 
     // Default 500 Internal Error
+    req.log.error({ err: error, reqId: req.id }, 'API request failed');
     const errorBody: ErrorEnvelope = {
       error: {
         code: 'INTERNAL_SERVER_ERROR',
@@ -1260,7 +1281,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         subjectProfile?.userId
       );
 
-      await persist({ kind: 'evidence', value: updated });
+      await persist({ kind: 'evidence', value: updated, base: evidence });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1304,7 +1325,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      await persist({ kind: 'evidence', value: updated });
+      await persist({ kind: 'evidence', value: updated, base: evidence });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1337,7 +1358,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      await persist({ kind: 'evidence', value: updated });
+      await persist({ kind: 'evidence', value: updated, base: evidence });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1726,7 +1747,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         orgId: actorOrgId,
       });
 
-      await persist({ kind: 'job', value: updated });
+      await persist({ kind: 'job', value: updated, base: job });
 
       if (updated.status === 'published' && job.status !== 'published') {
         const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
@@ -2490,7 +2511,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      await persist({ kind: 'application', value: updated });
+      await persist({ kind: 'application', value: updated, base: application });
 
       await dispatchJob({
         type: 'application.status_changed',
@@ -3014,6 +3035,46 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
+  // Who may act on an interview assessment. Every route below used to load
+  // the assessment by id and act on it for ANY signed-in user — joining as
+  // the interviewer, ending it, scoring it, and (through a scorecard) moving
+  // another company's job application. The panel is the hiring org's members,
+  // the assigned interviewer and platform admins; the candidate is the
+  // assessed profile.
+  function interviewAccess(session: { userId: string; roles: string[] }, a: InterviewAssessment) {
+    const profile = profilesByUserId.get(session.userId);
+    const isCandidate = profile !== undefined && profile.id === a.candidateProfileId;
+    const isOrgMember = (orgMembershipsByUserId.get(session.userId) || []).some(
+      (m) => m.orgId === a.orgId
+    );
+    const isPanel =
+      !isCandidate &&
+      (isOrgMember ||
+        session.userId === a.interviewerUserId ||
+        session.roles.includes('platform_admin'));
+    return { isCandidate, isPanel, isParticipant: isCandidate || isPanel };
+  }
+
+  function requireInterviewPanel(
+    session: { userId: string; roles: string[] },
+    a: InterviewAssessment
+  ) {
+    if (!interviewAccess(session, a).isPanel) {
+      throw new DomainError('FORBIDDEN', 'Only the hiring team can do this for this interview.');
+    }
+  }
+
+  function requireInterviewParticipant(
+    session: { userId: string; roles: string[] },
+    a: InterviewAssessment
+  ) {
+    const access = interviewAccess(session, a);
+    if (!access.isParticipant) {
+      throw new DomainError('FORBIDDEN', 'Access to this interview assessment is restricted.');
+    }
+    return access;
+  }
+
   app.post('/api/v1/interviews/assessments', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = ScheduleInterviewAssessmentInputSchema.parse(req.body);
@@ -3034,6 +3095,36 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         'NOT_FOUND',
         `Candidate profile ${input.candidateProfileId} not found.`
       );
+    }
+
+    // The interviewer must belong to the hiring organization: being assigned
+    // grants panel access (scoring, ending, private notes).
+    const interviewerIsMember = (orgMembershipsByUserId.get(input.interviewerUserId) || []).some(
+      (m) => m.orgId === input.orgId
+    );
+    if (!interviewerIsMember) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'The interviewer must be a member of the hiring organization.'
+      );
+    }
+
+    // A linked application must be this organization's, for this candidate —
+    // a scorecard on the assessment later moves that application.
+    if (input.applicationId) {
+      const linked = applicationsById.get(input.applicationId);
+      const linkedJob = linked ? jobsById.get(linked.jobId) : undefined;
+      if (
+        !linked ||
+        !linkedJob ||
+        linkedJob.orgId !== input.orgId ||
+        linked.candidateId !== input.candidateProfileId
+      ) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          "applicationId must be an application to one of this organization's jobs from this candidate."
+        );
+      }
     }
 
     const assessment = scheduleInterviewAssessment({
@@ -3078,16 +3169,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
 
-      const userProfile = profilesByUserId.get(session.userId);
-      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
-      const isInterviewer = session.userId === assessment.interviewerUserId;
-      const isAdmin = session.roles.includes('platform_admin');
-
-      if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
-        throw new DomainError('FORBIDDEN', 'Access to this interview assessment is restricted.');
-      }
+      const { isCandidate } = requireInterviewParticipant(session, assessment);
 
       // BR-173: Candidates receive questions with hidden test cases stripped
       const questions = assessment.questionIds
@@ -3117,8 +3199,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
 
-      const userProfile = profilesByUserId.get(session.userId);
-      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
+      const { isCandidate } = requireInterviewParticipant(session, assessment);
       const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
 
       const updated = joinInterviewAssessment(assessment, role);
@@ -3146,9 +3227,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
 
+      const { isCandidate } = requireInterviewParticipant(session, assessment);
       const input = SetRecordingConsentInputSchema.parse(req.body);
-      const userProfile = profilesByUserId.get(session.userId);
-      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
       const role: 'candidate' | 'interviewer' = isCandidate ? 'candidate' : 'interviewer';
 
       const updated = updateRecordingConsent(assessment, role, input.consent);
@@ -3167,6 +3247,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       if (!assessment) {
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
+
+      requireInterviewPanel(session, assessment);
 
       const body = (req.body as any) || {};
       const resolution = body.resolution || 'completed';
@@ -3195,16 +3277,22 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post(
     '/api/v1/interviews/assessments/:id/code',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      extractUser(req); // must be authenticated
+      const session = extractUser(req);
       const { id } = req.params;
       const assessment = interviewAssessmentsById.get(id);
       if (!assessment) {
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
+      const { isCandidate } = requireInterviewParticipant(session, assessment);
 
       const input = ExecuteInterviewCodeInputSchema.parse(req.body);
       let testCases = input.customTestCases || [];
       if (input.questionId) {
+        // Only this assessment's questions: any other id could be another
+        // company's private question bank.
+        if (!assessment.questionIds.includes(input.questionId)) {
+          throw new DomainError('NOT_FOUND', 'That question is not part of this interview.');
+        }
         const q = interviewQuestionsById.get(input.questionId);
         if (q) {
           testCases = q.testCases;
@@ -3212,6 +3300,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       const result = executeInterviewCode(input.code, testCases);
+      // BR-173: the candidate learns whether hidden tests passed, never their
+      // inputs or expected outputs.
+      if (isCandidate) {
+        return reply.status(200).send({
+          result: {
+            ...result,
+            runs: result.runs.map((run, index) =>
+              testCases[index]?.isHidden ? { hidden: true, passed: run.passed } : run
+            ),
+          },
+        });
+      }
       return reply.status(200).send({ result });
     }
   );
@@ -3234,6 +3334,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           'Candidates are not authorized to submit interview scorecards.'
         );
       }
+      requireInterviewPanel(session, assessment);
 
       const input = SubmitInterviewScorecardInputSchema.parse(req.body);
       const { assessment: scoredAssessment, scorecard } = submitInterviewScorecard(assessment, {
@@ -3259,9 +3360,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // directly, bypassing BR-03/BR-40 and the persisted record).
       if (assessment.applicationId) {
         const linked = applicationsById.get(assessment.applicationId);
-        if (linked && canTransitionApplication(linked.status, 'interviewing')) {
+        const linkedJob = linked ? jobsById.get(linked.jobId) : undefined;
+        // Re-checked here, not only at scheduling: the application must still
+        // be this organization's (BR-12) before a scorecard may move it.
+        if (
+          linked &&
+          linkedJob?.orgId === assessment.orgId &&
+          canTransitionApplication(linked.status, 'interviewing')
+        ) {
           await persist({
             kind: 'application',
+            base: linked,
             value: { ...linked, status: 'interviewing', updatedAt: new Date().toISOString() },
           });
         }
@@ -3300,6 +3409,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           'Candidates are not authorized to submit scorecard compensations.'
         );
       }
+      requireInterviewPanel(session, assessment);
 
       const cards = interviewScorecardsByAssessmentId.get(id) || [];
       if (cards.length === 0) {
@@ -3352,16 +3462,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
 
-      const userProfile = profilesByUserId.get(session.userId);
-      const isCandidate = userProfile && userProfile.id === assessment.candidateProfileId;
-      const userMemberships = orgMembershipsByUserId.get(session.userId) || [];
-      const isOrgMember = userMemberships.some((m) => m.orgId === assessment.orgId);
-      const isInterviewer = session.userId === assessment.interviewerUserId;
-      const isAdmin = session.roles.includes('platform_admin');
-
-      if (!isCandidate && !isOrgMember && !isInterviewer && !isAdmin) {
-        throw new DomainError('FORBIDDEN', 'Access to scorecards is restricted.');
-      }
+      const { isCandidate } = requireInterviewParticipant(session, assessment);
 
       const cards = interviewScorecardsByAssessmentId.get(id) || [];
 
@@ -3386,12 +3487,13 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post(
     '/api/v1/interviews/assessments/:id/ai-feedback',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      extractUser(req); // must be authenticated
+      const session = extractUser(req);
       const { id } = req.params;
       const assessment = interviewAssessmentsById.get(id);
       if (!assessment) {
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
+      requireInterviewPanel(session, assessment);
 
       const feedback = generateAdvisoryAiFeedback(assessment);
       const list = interviewAiFeedbacksByAssessmentId.get(id) || [];
@@ -3412,6 +3514,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Interview assessment ${id} not found.`);
       }
 
+      requireInterviewPanel(session, assessment);
       const reviewed = reviewInterviewAssessment(assessment);
       interviewAssessmentsById.set(reviewed.id, reviewed);
 
@@ -6417,6 +6520,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         if (matchingApp) {
           await persist({
             kind: 'application',
+            base: matchingApp,
             value: {
               ...matchingApp,
               isReferred: true,
@@ -9587,6 +9691,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
       erasureOps.push({
         kind: 'application',
+        base: application,
         value: {
           ...application,
           status: terminal ? application.status : 'withdrawn',
@@ -10714,6 +10819,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         if (job && job.status !== 'closed' && job.status !== 'archived') {
           await persist({
             kind: 'job',
+            base: job,
             value: { ...job, status: 'closed', updatedAt: new Date().toISOString() },
           });
         }
@@ -11418,7 +11524,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         );
       }
       if (Date.parse(challenge.expiresAt) <= Date.now()) {
-        await persist({ kind: 'emailChallengeDelete', workHistoryId: id });
+        await persist({ kind: 'emailChallengeDelete', workHistoryId: id, base: challenge });
         throw new DomainError('VALIDATION_FAILED', 'This code has expired. Request a new code.');
       }
       if (challenge.attempts >= EMAIL_CHALLENGE_MAX_ATTEMPTS) {
@@ -11428,9 +11534,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         );
       }
       if (!safeEqualHex(sha256Hex(`${id}:${body.verificationCode.trim()}`), challenge.codeHash)) {
+        // base: two concurrent wrong guesses must count as two attempts —
+        // the loser of the race is refused (409), never folded into one.
         await persist({
           kind: 'emailChallenge',
           value: { ...challenge, attempts: challenge.attempts + 1 },
+          base: challenge,
         });
         throw new DomainError('VALIDATION_FAILED', 'That code is not correct.');
       }
@@ -11449,8 +11558,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         clientRequestId: workHistory.clientRequestId,
       };
       await persist(
-        { kind: 'workHistory', value: saved },
-        { kind: 'emailChallengeDelete', workHistoryId: id }
+        { kind: 'workHistory', value: saved, base: workHistory },
+        { kind: 'emailChallengeDelete', workHistoryId: id, base: challenge }
       );
 
       return reply.status(200).send({
@@ -11629,7 +11738,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         clientRequestId: reference.clientRequestId,
       };
 
-      const ops: CoreOp[] = [{ kind: 'reference', value: updatedRef }];
+      // base on both: the token is single use, and the role's score must be
+      // computed from the references as they are, not as they were.
+      const ops: CoreOp[] = [{ kind: 'reference', value: updatedRef, base: reference }];
       const workHistory = verifiedWorkHistoriesById.get(reference.workHistoryId);
       let updatedHistory: StoredWorkHistory | undefined;
       if (workHistory) {
@@ -11644,7 +11755,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           verificationStatus: status,
           updatedAt: new Date().toISOString(),
         };
-        ops.push({ kind: 'workHistory', value: updatedHistory });
+        ops.push({ kind: 'workHistory', value: updatedHistory, base: workHistory });
       }
       await persist(...ops);
 
@@ -11934,9 +12045,80 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   }
 
+  // Optimistic concurrency (CoreOp.base). Handlers check a record and then
+  // await the commit; without this, two requests could both pass the check
+  // and the later commit would silently overwrite the earlier one — two
+  // concurrent wrong email codes counted as one attempt, a hire and a
+  // withdrawal both acknowledged with only one surviving. A write is refused
+  // (409) when another write to the same record is in flight or the record
+  // no longer is the value the update was derived from. Postgres re-checks
+  // the decisive columns inside the transaction (core-store.ts).
+  const writesInFlight = new Set<string>();
+
+  function recordKey(op: CoreOp): string | undefined {
+    switch (op.kind) {
+      case 'job':
+        return `job:${op.value.id}`;
+      case 'application':
+        return `application:${op.value.id}`;
+      case 'evidence':
+        return `evidence:${op.value.id}`;
+      case 'evidenceDelete':
+        return `evidence:${op.id}`;
+      case 'workHistory':
+        return `workHistory:${op.value.id}`;
+      case 'workHistoryDelete':
+        return `workHistory:${op.id}`;
+      case 'reference':
+        return `reference:${op.value.id}`;
+      case 'emailChallenge':
+        return `emailChallenge:${op.value.workHistoryId}`;
+      case 'emailChallengeDelete':
+        return `emailChallenge:${op.workHistoryId}`;
+      default:
+        return undefined;
+    }
+  }
+
+  function currentRecord(op: CoreOp): unknown {
+    switch (op.kind) {
+      case 'job':
+        return jobsById.get(op.value.id);
+      case 'application':
+        return applicationsById.get(op.value.id);
+      case 'evidence':
+        return evidenceById.get(op.value.id);
+      case 'workHistory':
+        return verifiedWorkHistoriesById.get(op.value.id);
+      case 'reference':
+        return employmentReferencesById.get(op.value.id);
+      case 'emailChallenge':
+        return emailChallengesByHistoryId.get(op.value.workHistoryId);
+      case 'emailChallengeDelete':
+        return emailChallengesByHistoryId.get(op.workHistoryId);
+      default:
+        return undefined;
+    }
+  }
+
   async function persist(...ops: CoreOp[]): Promise<void> {
-    await storage.core.commit(ops);
-    for (const op of ops) applyToReadModel(op);
+    const keys = new Set<string>();
+    for (const op of ops) {
+      const key = recordKey(op);
+      if (key === undefined) continue;
+      if (writesInFlight.has(key)) throw concurrentModification();
+      if ('base' in op && op.base !== undefined && currentRecord(op) !== op.base) {
+        throw concurrentModification();
+      }
+      keys.add(key);
+    }
+    for (const key of keys) writesInFlight.add(key);
+    try {
+      await storage.core.commit(ops);
+      for (const op of ops) applyToReadModel(op);
+    } finally {
+      for (const key of keys) writesInFlight.delete(key);
+    }
   }
 
   // Boot hydration: rebuild the read model from the database. Runs before the

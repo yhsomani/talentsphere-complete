@@ -1,6 +1,48 @@
 import { z } from 'zod';
 
 /**
+ * Shared field validators for values that reach Postgres columns. Each of
+ * these used to pass validation and then fail inside the database (a 500 in
+ * STORAGE=pg) or be silently stored in memory mode: an impossible date like
+ * 2023-02-30, a 300-character email, a salary of 1e20, a duplicated id.
+ */
+const isRealCalendarDate = (value: string): boolean => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    year >= 1900 &&
+    year <= 2100 &&
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+};
+
+/** A YYYY-MM-DD date that exists on the calendar (1900–2100). */
+export const calendarDate = (field: string) =>
+  z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, `${field} must be in YYYY-MM-DD format`)
+    .refine(isRealCalendarDate, `${field} must be a real calendar date`);
+
+/** RFC 5321 caps an address at 254 characters; surrounding spaces are dropped. */
+export const emailAddress = (message?: string) =>
+  z.string().trim().max(254, 'Email must be at most 254 characters').email(message);
+
+/** Minor units (cents); 1e12 is ten billion in the major unit — far above any salary. */
+export const MAX_SALARY_MINOR = 1_000_000_000_000;
+const salaryMinor = () => z.number().int().nonnegative().max(MAX_SALARY_MINOR);
+
+/** A bounded id list with duplicates removed (duplicates violated join-table keys). */
+const uniqueIdList = (item: z.ZodString, max = 50) =>
+  z
+    .array(item)
+    .max(max)
+    .transform((ids) => Array.from(new Set(ids)));
+
+/**
  * Standard Canonical Error Envelope
  * Per Section 20 of Master Execution Prompt and docs/engineering/API_CONTRACTS.md
  */
@@ -39,7 +81,7 @@ export type PaginatedMeta = z.infer<typeof PaginatedMetaSchema>;
  * Authentication Contracts
  */
 export const RegisterInputSchema = z.object({
-  email: z.string().email(),
+  email: emailAddress(),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -55,7 +97,7 @@ export const RegisterInputSchema = z.object({
 export type RegisterInput = z.infer<typeof RegisterInputSchema>;
 
 export const LoginInputSchema = z.object({
-  email: z.string().email(),
+  email: emailAddress(),
   password: z.string().min(1, 'Password is required').max(1024),
 });
 
@@ -105,8 +147,8 @@ export const CreateEvidenceInputSchema = z.object({
   description: z.string().max(5000),
   source: z.string().max(500),
   provenance: z.string().max(500),
-  recencyDate: z.string(),
-  skillIds: z.array(z.string().uuid()).optional(),
+  recencyDate: calendarDate('recencyDate'),
+  skillIds: uniqueIdList(z.string().uuid()).optional(),
 });
 
 export type CreateEvidenceInput = z.infer<typeof CreateEvidenceInputSchema>;
@@ -192,9 +234,9 @@ export const CreateJobInputSchema = z.object({
   location: z.string().min(2).max(100),
   workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
   jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
-  requiredSkillIds: z.array(z.string().uuid()).optional(),
-  salaryMinMinor: z.number().int().nonnegative().optional(),
-  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  requiredSkillIds: uniqueIdList(z.string().uuid()).optional(),
+  salaryMinMinor: salaryMinor().optional(),
+  salaryMaxMinor: salaryMinor().optional(),
   currency: z.string().length(3).default('USD'),
 });
 
@@ -219,7 +261,7 @@ export type UpdateJobStatusInput = z.infer<typeof UpdateJobStatusInputSchema>;
  */
 export const SubmitApplicationInputSchema = z.object({
   coverLetter: z.string().max(3000).optional(),
-  attachedEvidenceIds: z.array(z.string().uuid()).optional(),
+  attachedEvidenceIds: uniqueIdList(z.string().uuid()).optional(),
 });
 
 export type SubmitApplicationInput = z.infer<typeof SubmitApplicationInputSchema>;
@@ -873,9 +915,9 @@ export const CreateJobTemplateInputSchema = z.object({
   location: z.string().min(1).max(255),
   workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
   jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
-  requiredSkillIds: z.array(z.string()).default([]),
-  salaryMinMinor: z.number().int().nonnegative().optional(),
-  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  requiredSkillIds: uniqueIdList(z.string()).default([]),
+  salaryMinMinor: salaryMinor().optional(),
+  salaryMaxMinor: salaryMinor().optional(),
   currency: z.string().length(3).default('USD'),
   department: z.string().max(100).optional(),
   screeningQuestions: z.array(ScreeningQuestionSchema).default([]),
@@ -890,9 +932,9 @@ export const UpdateJobTemplateInputSchema = z.object({
   location: z.string().min(1).max(255).optional(),
   workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
   jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
-  requiredSkillIds: z.array(z.string()).optional(),
-  salaryMinMinor: z.number().int().nonnegative().nullable().optional(),
-  salaryMaxMinor: z.number().int().nonnegative().nullable().optional(),
+  requiredSkillIds: uniqueIdList(z.string()).optional(),
+  salaryMinMinor: salaryMinor().nullable().optional(),
+  salaryMaxMinor: salaryMinor().nullable().optional(),
   currency: z.string().length(3).optional(),
   department: z.string().max(100).optional(),
   screeningQuestions: z.array(ScreeningQuestionSchema).optional(),
@@ -907,9 +949,9 @@ export const InstantiateJobFromTemplateInputSchema = z.object({
   location: z.string().min(1).max(255).optional(),
   workMode: z.enum(['remote', 'hybrid', 'onsite']).optional(),
   jobType: z.enum(['full_time', 'part_time', 'contract', 'internship']).optional(),
-  requiredSkillIds: z.array(z.string()).optional(),
-  salaryMinMinor: z.number().int().nonnegative().optional(),
-  salaryMaxMinor: z.number().int().nonnegative().optional(),
+  requiredSkillIds: uniqueIdList(z.string()).optional(),
+  salaryMinMinor: salaryMinor().optional(),
+  salaryMaxMinor: salaryMinor().optional(),
   currency: z.string().length(3).optional(),
 });
 
@@ -1670,14 +1712,11 @@ export const CreateWorkHistoryInputSchema = z.object({
   employmentType: z
     .enum(['full_time', 'part_time', 'contract', 'internship', 'freelance'])
     .default('full_time'),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'startDate must be in YYYY-MM-DD format'),
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'endDate must be in YYYY-MM-DD format')
-    .optional(),
+  startDate: calendarDate('startDate'),
+  endDate: calendarDate('endDate').optional(),
   isCurrent: z.boolean().default(false),
   description: z.string().max(3000).optional(),
-  corporateEmail: z.string().email('Valid corporate email is required').optional(),
+  corporateEmail: emailAddress('Valid corporate email is required').optional(),
   skills: z.array(z.string().min(1).max(100)).default([]),
   // Replay guard: a retried submit reuses the same key so the server returns
   // the original record instead of creating a duplicate (WF-10 idiom).
@@ -1687,7 +1726,7 @@ export const CreateWorkHistoryInputSchema = z.object({
 export type CreateWorkHistoryInput = z.infer<typeof CreateWorkHistoryInputSchema>;
 
 export const VerifyWorkHistoryEmailInputSchema = z.object({
-  corporateEmail: z.string().email('Valid corporate email is required'),
+  corporateEmail: emailAddress('Valid corporate email is required'),
   verificationCode: z.string().min(4).max(32).optional(),
 });
 
@@ -1695,7 +1734,7 @@ export type VerifyWorkHistoryEmailInput = z.infer<typeof VerifyWorkHistoryEmailI
 
 export const RequestEmploymentReferenceInputSchema = z.object({
   refereeName: z.string().min(2, 'Referee name must be at least 2 characters').max(150),
-  refereeEmail: z.string().email('Valid referee email is required'),
+  refereeEmail: emailAddress('Valid referee email is required'),
   relationship: z.enum(['manager', 'peer', 'direct_report', 'mentor', 'client']),
   // Replay guard: a retried submit reuses the same key so the server returns
   // the original request instead of emailing the referee twice (WF-10 idiom).

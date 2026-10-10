@@ -75,19 +75,27 @@ export interface EmailChallenge {
   createdAt: string;
 }
 
+/**
+ * `base` (optimistic concurrency): the read-model value an update was derived
+ * from. persist() refuses the write if that value has changed, or another
+ * write to the same record is in flight, and Postgres re-checks the decisive
+ * columns inside the transaction, so a check-then-act handler can never
+ * silently overwrite a concurrent change (two state transitions racing, two
+ * wrong email codes counted as one). Creates omit it.
+ */
 export type CoreOp =
   | { kind: 'user'; value: StoredUser }
   | { kind: 'profile'; value: Profile }
   | { kind: 'organization'; value: StoredOrganization }
   | { kind: 'membership'; value: StoredOrgMembership }
   | { kind: 'skill'; value: Skill }
-  | { kind: 'job'; value: Job }
-  | { kind: 'application'; value: JobApplication }
-  | { kind: 'evidence'; value: Evidence; skillIds?: string[] }
-  | { kind: 'workHistory'; value: StoredWorkHistory }
-  | { kind: 'reference'; value: StoredReference }
-  | { kind: 'emailChallenge'; value: EmailChallenge }
-  | { kind: 'emailChallengeDelete'; workHistoryId: string }
+  | { kind: 'job'; value: Job; base?: Job }
+  | { kind: 'application'; value: JobApplication; base?: JobApplication }
+  | { kind: 'evidence'; value: Evidence; skillIds?: string[]; base?: Evidence }
+  | { kind: 'workHistory'; value: StoredWorkHistory; base?: StoredWorkHistory }
+  | { kind: 'reference'; value: StoredReference; base?: StoredReference }
+  | { kind: 'emailChallenge'; value: EmailChallenge; base?: EmailChallenge }
+  | { kind: 'emailChallengeDelete'; workHistoryId: string; base?: EmailChallenge }
   /** Cascades to its references and email challenge (erasure). */
   | { kind: 'workHistoryDelete'; id: string }
   /** Cascades to evidence_skills and application_evidence (erasure). */
@@ -149,12 +157,27 @@ const isoRequired = (v: unknown): string => iso(v) ?? new Date(0).toISOString();
 const opt = <T>(v: T | null | undefined): T | undefined => (v === null ? undefined : v);
 const nullable = <T>(v: T | undefined): T | null => (v === undefined ? null : v);
 
+/** The error every lost optimistic-concurrency check surfaces as (409). */
+export function concurrentModification(): DomainError {
+  return new DomainError(
+    'CONFLICT',
+    'This record was changed by another request at the same time. Reload it and try again.',
+    { reason: 'concurrent_modification' }
+  );
+}
+
+/** rowCount 0 on a guarded write means the base row no longer matched. */
+function assertGuardHeld(guarded: boolean, result: { rowCount: number | null }): void {
+  if (guarded && result.rowCount !== 1) throw concurrentModification();
+}
+
 /**
  * Maps Postgres integrity errors to the API's error vocabulary, so a race
  * that slips past the read-model check (two concurrent sign-ups with the same
  * email) still surfaces as a 409, not a 500.
  */
 function translatePgError(err: unknown): never {
+  if (err instanceof DomainError) throw err;
   const e = err as { code?: string; constraint?: string; detail?: string };
   if (e?.code === '23505') {
     throw new DomainError('CONFLICT', 'This record conflicts with one that already exists.', {
@@ -173,6 +196,14 @@ function translatePgError(err: unknown): never {
   if (e?.code === '23514') {
     throw new DomainError('VALIDATION_FAILED', 'This record violates a data rule.', {
       constraint: e.constraint,
+    });
+  }
+  // Class 22 (data exception): a value the database cannot store — an
+  // impossible date, a number out of range, an over-long string. Contract
+  // validation should reject these first; this keeps any gap a 422, not a 500.
+  if (typeof e?.code === 'string' && e.code.startsWith('22')) {
+    throw new DomainError('VALIDATION_FAILED', 'A value in this request cannot be stored.', {
+      sqlState: e.code,
     });
   }
   throw err;
@@ -253,7 +284,7 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
     }
     case 'job': {
       const j = op.value;
-      await db.query(
+      const result = await db.query(
         `INSERT INTO public.jobs
            (id, org_id, title, description, status, location, work_mode, job_type,
             salary_min_minor, salary_max_minor, salary_currency, created_at, updated_at)
@@ -262,7 +293,8 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
            title = EXCLUDED.title, description = EXCLUDED.description, status = EXCLUDED.status,
            location = EXCLUDED.location, work_mode = EXCLUDED.work_mode, job_type = EXCLUDED.job_type,
            salary_min_minor = EXCLUDED.salary_min_minor, salary_max_minor = EXCLUDED.salary_max_minor,
-           salary_currency = EXCLUDED.salary_currency, updated_at = EXCLUDED.updated_at`,
+           salary_currency = EXCLUDED.salary_currency, updated_at = EXCLUDED.updated_at
+         WHERE $14::text IS NULL OR jobs.status::text = $14::text`,
         [
           j.id,
           j.orgId,
@@ -277,8 +309,10 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           j.salaryRange ? j.salaryRange.currency : null,
           j.createdAt,
           j.updatedAt,
+          op.base ? op.base.status : null,
         ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       await db.query('DELETE FROM public.job_skills WHERE job_id = $1', [j.id]);
       if (j.requiredSkillIds.length > 0) {
         await db.query(
@@ -291,7 +325,7 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
     }
     case 'application': {
       const a = op.value;
-      await db.query(
+      const result = await db.query(
         `INSERT INTO public.job_applications
            (id, job_id, candidate_id, status, cover_letter, is_referred, referral_id,
             submitted_at, withdrawn_at, rejected_at, rejection_reason, hired_at, created_at, updated_at)
@@ -301,7 +335,8 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
            is_referred = EXCLUDED.is_referred, referral_id = EXCLUDED.referral_id,
            submitted_at = EXCLUDED.submitted_at, withdrawn_at = EXCLUDED.withdrawn_at,
            rejected_at = EXCLUDED.rejected_at, rejection_reason = EXCLUDED.rejection_reason,
-           hired_at = EXCLUDED.hired_at, updated_at = EXCLUDED.updated_at`,
+           hired_at = EXCLUDED.hired_at, updated_at = EXCLUDED.updated_at
+         WHERE $15::text IS NULL OR job_applications.status::text = $15::text`,
         [
           a.id,
           a.jobId,
@@ -317,8 +352,10 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           nullable(a.hiredAt),
           a.createdAt,
           a.updatedAt,
+          op.base ? op.base.status : null,
         ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       await db.query('DELETE FROM public.application_evidence WHERE application_id = $1', [a.id]);
       if (a.attachedEvidenceIds.length > 0) {
         await db.query(
@@ -331,7 +368,7 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
     }
     case 'evidence': {
       const e = op.value;
-      await db.query(
+      const result = await db.query(
         `INSERT INTO public.evidence
            (id, subject_id, type, title, description, source, provenance, verification_level,
             verified_by, verified_at, status, conflict_state, recency_date, metadata, created_at, updated_at)
@@ -343,7 +380,9 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
            verified_by = EXCLUDED.verified_by, verified_at = EXCLUDED.verified_at,
            status = EXCLUDED.status, conflict_state = EXCLUDED.conflict_state,
            recency_date = EXCLUDED.recency_date, metadata = EXCLUDED.metadata,
-           updated_at = EXCLUDED.updated_at`,
+           updated_at = EXCLUDED.updated_at
+         WHERE $17::text IS NULL
+            OR (evidence.status::text = $17::text AND evidence.verification_level::text = $18::text)`,
         [
           e.id,
           e.subjectId,
@@ -361,8 +400,11 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           JSON.stringify(e.metadata ?? {}),
           e.createdAt,
           e.updatedAt,
+          op.base ? op.base.status : null,
+          op.base ? op.base.verificationLevel : null,
         ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       if (op.skillIds !== undefined) {
         await db.query('DELETE FROM public.evidence_skills WHERE evidence_id = $1', [e.id]);
         if (op.skillIds.length > 0) {
@@ -377,7 +419,7 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
     }
     case 'workHistory': {
       const h = op.value;
-      await db.query(
+      const result = await db.query(
         `INSERT INTO public.verified_work_histories
            (id, candidate_id, company_name, company_id, title, employment_type, start_date, end_date,
             is_current, description, corporate_email, email_verified_at, verification_status,
@@ -392,7 +434,10 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
            corporate_email = EXCLUDED.corporate_email, email_verified_at = EXCLUDED.email_verified_at,
            verification_status = EXCLUDED.verification_status,
            verification_score = EXCLUDED.verification_score, badge_tier = EXCLUDED.badge_tier,
-           skills = EXCLUDED.skills, updated_at = EXCLUDED.updated_at`,
+           skills = EXCLUDED.skills, updated_at = EXCLUDED.updated_at
+         WHERE $20::boolean IS NOT TRUE
+            OR (verified_work_histories.verification_score = $21
+                AND verified_work_histories.email_verified_at IS NOT DISTINCT FROM $22::timestamptz)`,
         [
           h.id,
           h.candidateId,
@@ -413,13 +458,17 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           nullable(h.clientRequestId),
           h.createdAt,
           h.updatedAt,
+          op.base !== undefined,
+          op.base ? op.base.verificationScore : null,
+          op.base ? nullable(op.base.emailVerifiedAt) : null,
         ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       return;
     }
     case 'reference': {
       const r = op.value;
-      await db.query(
+      const result = await db.query(
         `INSERT INTO public.employment_references
            (id, work_history_id, candidate_id, referee_id, referee_name, referee_email, relationship,
             status, confirm_dates, confirm_title, ratings, endorsed_skills, summary_notes, token_hash,
@@ -431,7 +480,8 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
            confirm_dates = EXCLUDED.confirm_dates, confirm_title = EXCLUDED.confirm_title,
            ratings = EXCLUDED.ratings, endorsed_skills = EXCLUDED.endorsed_skills,
            summary_notes = EXCLUDED.summary_notes, token_hash = EXCLUDED.token_hash,
-           submitted_at = EXCLUDED.submitted_at, updated_at = EXCLUDED.updated_at`,
+           submitted_at = EXCLUDED.submitted_at, updated_at = EXCLUDED.updated_at
+         WHERE $20::text IS NULL OR employment_references.status::text = $20::text`,
         [
           r.id,
           r.workHistoryId,
@@ -452,12 +502,27 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
           nullable(r.submittedAt),
           r.createdAt,
           r.updatedAt,
+          op.base ? op.base.status : null,
         ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       return;
     }
     case 'emailChallenge': {
       const c = op.value;
+      if (op.base) {
+        // Counting a wrong guess: a plain UPDATE that only matches the exact
+        // challenge state it was derived from, never an upsert that could
+        // resurrect a consumed or replaced challenge.
+        const result = await db.query(
+          `UPDATE public.work_history_email_challenges
+           SET attempts = $2
+           WHERE work_history_id = $1 AND code_hash = $3 AND attempts = $4`,
+          [c.workHistoryId, c.attempts, op.base.codeHash, op.base.attempts]
+        );
+        assertGuardHeld(true, result);
+        return;
+      }
       await db.query(
         `INSERT INTO public.work_history_email_challenges
            (work_history_id, email, code_hash, attempts, expires_at, created_at)
@@ -470,6 +535,16 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       return;
     }
     case 'emailChallengeDelete': {
+      if (op.base) {
+        // Consuming a challenge: only the exact state that was checked.
+        const result = await db.query(
+          `DELETE FROM public.work_history_email_challenges
+           WHERE work_history_id = $1 AND code_hash = $2 AND attempts = $3`,
+          [op.workHistoryId, op.base.codeHash, op.base.attempts]
+        );
+        assertGuardHeld(true, result);
+        return;
+      }
       await db.query(
         'DELETE FROM public.work_history_email_challenges WHERE work_history_id = $1',
         [op.workHistoryId]

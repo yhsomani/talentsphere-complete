@@ -108,6 +108,21 @@ export function decideFailure(params: {
   };
 }
 
+/**
+ * Payload fields that are credentials: a referee's one-time link token and a
+ * corporate-email verification code. The email job needs them until it is
+ * delivered; after that they are only a liability (anyone who can read the
+ * jobs table could submit the reference or verify the mailbox). Every
+ * terminal transition — succeeded, failed, dead, canceled — strips them.
+ */
+export const SECRET_PAYLOAD_KEYS = ['token', 'code'] as const;
+
+export function withoutSecrets(payload: Record<string, unknown>): Record<string, unknown> {
+  const copy = { ...payload };
+  for (const key of SECRET_PAYLOAD_KEYS) delete copy[key];
+  return copy;
+}
+
 export function truncateError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   // §27.4: last_error is bounded to 4KB in the durable record.
@@ -224,6 +239,7 @@ export class MemoryJobStore implements JobStore {
     if (!job) return null;
     if (job.status !== 'queued' && job.status !== 'running') return null;
     job.status = 'canceled';
+    job.payload = withoutSecrets(job.payload);
     job.updatedAt = new Date().toISOString();
     return { ...job };
   }
@@ -253,6 +269,7 @@ export class MemoryJobStore implements JobStore {
     // A canceled record refuses the success transition (cooperative cancel).
     if (!job || job.status !== 'running') return false;
     job.status = 'succeeded';
+    job.payload = withoutSecrets(job.payload);
     job.lockExpiresAt = null;
     job.updatedAt = new Date().toISOString();
     return true;
@@ -276,6 +293,7 @@ export class MemoryJobStore implements JobStore {
       job.runAfter = new Date(Date.now() + delayMs).toISOString();
     } else {
       job.status = nextStatus;
+      job.payload = withoutSecrets(job.payload);
     }
     job.updatedAt = new Date().toISOString();
     return { ...job };
@@ -370,10 +388,11 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
     async cancel(id: string): Promise<BackgroundJobRecord | null> {
       const result = await query(
         `UPDATE public.background_jobs
-         SET status = 'canceled', lock_expires_at = NULL, updated_at = NOW()
+         SET status = 'canceled', lock_expires_at = NULL, updated_at = NOW(),
+             payload = payload - $2::text[]
          WHERE id = $1 AND status IN ('queued', 'running')
          RETURNING *`,
-        [id]
+        [id, SECRET_PAYLOAD_KEYS]
       );
       return result.rows.length > 0 ? mapRow(result.rows[0]) : null;
     },
@@ -402,9 +421,10 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
     async complete(id: string): Promise<boolean> {
       const result = await query(
         `UPDATE public.background_jobs
-         SET status = 'succeeded', lock_expires_at = NULL, updated_at = NOW()
+         SET status = 'succeeded', lock_expires_at = NULL, updated_at = NOW(),
+             payload = payload - $2::text[]
          WHERE id = $1 AND status = 'running'`,
-        [id]
+        [id, SECRET_PAYLOAD_KEYS]
       );
       return (result.rowCount ?? 0) > 0;
     },
@@ -429,10 +449,11 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
                               ELSE run_after END,
              last_error = LEFT($4::text, 4096),
              lock_expires_at = NULL,
-             updated_at = NOW()
+             updated_at = NOW(),
+             payload = CASE WHEN $2::text = 'queued' THEN payload ELSE payload - $5::text[] END
          WHERE id = $1 AND status = 'running'
          RETURNING *`,
-        [id, nextStatus, delayMs, outcome.error]
+        [id, nextStatus, delayMs, outcome.error, SECRET_PAYLOAD_KEYS]
       );
       return result.rows.length > 0 ? mapRow(result.rows[0]) : null;
     },

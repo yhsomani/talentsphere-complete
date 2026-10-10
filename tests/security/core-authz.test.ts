@@ -317,3 +317,339 @@ describe('Durability is stated, not implied (ADR-015)', () => {
     expect(res.headers['x-talentsphere-durability']).toBe('ephemeral');
   });
 });
+
+describe('SEC: interview assessments are scoped to the hiring team (BR-12, BR-173, BR-176)', () => {
+  let app: FastifyInstance;
+  let victim: Json; // recruiter at acme
+  let attacker: Json; // recruiter at rival
+  let candidate: Json;
+  let acme: Json;
+  let rival: Json;
+  let applicationId: string;
+  let questionId: string;
+  let assessmentId: string;
+
+  const scorecard = {
+    technicalCorrectness: 5,
+    communication: 5,
+    problemSolving: 5,
+    codeQuality: 5,
+    recommendation: 'strong_yes',
+    strengths: 'Clear, careful reasoning.',
+    areasForImprovement: 'None noted.',
+  };
+
+  beforeAll(async () => {
+    app = await boot();
+    victim = await register(app, 'victim@acme.example', 'recruiter');
+    attacker = await register(app, 'attacker@rival.example', 'recruiter');
+    candidate = await register(app, 'cand@example.org');
+    acme = await orgWithJob(app, victim.token, 'acme-int');
+    rival = await orgWithJob(app, attacker.token, 'rival-int');
+    await call(app, 'PATCH', `/api/v1/jobs/${acme.jobId}/status`, victim.token, {
+      status: 'published',
+    });
+    const applied = await call(
+      app,
+      'POST',
+      `/api/v1/jobs/${acme.jobId}/apply`,
+      candidate.token,
+      {}
+    );
+    applicationId = applied.body.application.id;
+    for (const targetState of ['in_review', 'shortlisted']) {
+      await call(app, 'POST', `/api/v1/applications/${applicationId}/transition`, victim.token, {
+        applicationId,
+        targetState,
+      });
+    }
+    const q = await call(app, 'POST', '/api/v1/interviews/questions', victim.token, {
+      orgId: acme.orgId,
+      title: 'Design a rate limiter',
+      statement: 'Token bucket, per key.',
+      category: 'code',
+      difficulty: 'medium',
+      durationMinutes: 30,
+      expectedCompetencies: ['Systems'],
+      testCases: [
+        { input: 'allow(1)', expectedOutput: 'true', isHidden: false },
+        { input: 'SECRET-HIDDEN-INPUT', expectedOutput: 'SECRET-HIDDEN-OUTPUT', isHidden: true },
+      ],
+    });
+    expect(q.status).toBe(201);
+    questionId = q.body.question.id;
+    const scheduled = await call(app, 'POST', '/api/v1/interviews/assessments', victim.token, {
+      orgId: acme.orgId,
+      applicationId,
+      candidateProfileId: candidate.profile.id,
+      interviewerUserId: victim.user.id,
+      title: 'Technical round',
+      scheduledAt: new Date(Date.now() + 3_600_000).toISOString(),
+      durationMinutes: 45,
+      questionIds: [questionId],
+    });
+    expect(scheduled.status).toBe(201);
+    assessmentId = scheduled.body.assessment.id;
+  });
+  afterAll(() => app.close());
+
+  it("refuses linking another company's application to an assessment", async () => {
+    // The original exploit: rival schedules its own assessment pointing at
+    // acme's application, then scores it to move acme's pipeline.
+    const res = await call(app, 'POST', '/api/v1/interviews/assessments', attacker.token, {
+      orgId: rival.orgId,
+      applicationId,
+      candidateProfileId: candidate.profile.id,
+      interviewerUserId: attacker.user.id,
+      title: 'Hijack',
+      scheduledAt: new Date(Date.now() + 3_600_000).toISOString(),
+      durationMinutes: 30,
+      questionIds: [],
+    });
+    expect(res.status).toBe(422);
+    const app_ = await call(app, 'GET', `/api/v1/applications/${applicationId}`, victim.token);
+    expect(app_.body.application.status).toBe('shortlisted');
+  });
+
+  it('refuses an interviewer from outside the hiring organization', async () => {
+    const res = await call(app, 'POST', '/api/v1/interviews/assessments', victim.token, {
+      orgId: acme.orgId,
+      candidateProfileId: candidate.profile.id,
+      interviewerUserId: attacker.user.id,
+      title: 'Outsider on the panel',
+      scheduledAt: new Date(Date.now() + 3_600_000).toISOString(),
+      durationMinutes: 30,
+      questionIds: [],
+    });
+    expect(res.status).toBe(422);
+  });
+
+  it('refuses an outsider joining, consenting, running code, ending, scoring or reviewing', async () => {
+    const base = `/api/v1/interviews/assessments/${assessmentId}`;
+    const attempts = [
+      await call(app, 'GET', base, attacker.token),
+      await call(app, 'POST', `${base}/join`, attacker.token),
+      await call(app, 'POST', `${base}/consent`, attacker.token, { consent: true }),
+      await call(app, 'POST', `${base}/code`, attacker.token, {
+        code: 'x',
+        language: 'javascript',
+        questionId,
+      }),
+      await call(app, 'POST', `${base}/scorecard`, attacker.token, scorecard),
+      await call(app, 'POST', `${base}/ai-feedback`, attacker.token),
+      await call(app, 'POST', `${base}/review`, attacker.token),
+      await call(app, 'POST', `${base}/end`, attacker.token, { resolution: 'cancelled' }),
+    ];
+    expect(attempts.map((a) => a.status)).toEqual([403, 403, 403, 403, 403, 403, 403, 403]);
+    const after = await call(app, 'GET', base, victim.token);
+    expect(after.body.assessment.status).toBe('scheduled');
+  });
+
+  it('never shows the candidate hidden test inputs or expected outputs', async () => {
+    const res = await call(
+      app,
+      'POST',
+      `/api/v1/interviews/assessments/${assessmentId}/code`,
+      candidate.token,
+      {
+        code: 'function limit() { return true; }',
+        language: 'javascript',
+        questionId,
+      }
+    );
+    expect(res.status).toBe(200);
+    expect(res.body.result.total).toBe(2);
+    expect(JSON.stringify(res.body)).not.toContain('SECRET-HIDDEN');
+  });
+
+  it("refuses running another company's private question inside this assessment", async () => {
+    const theirs = await call(app, 'POST', '/api/v1/interviews/questions', attacker.token, {
+      orgId: rival.orgId,
+      title: 'Rival private question',
+      statement: 'Private.',
+      category: 'code',
+      difficulty: 'easy',
+      durationMinutes: 10,
+      expectedCompetencies: ['x'],
+      testCases: [{ input: 'RIVAL-PRIVATE', expectedOutput: 'RIVAL-ANSWER', isHidden: true }],
+    });
+    expect(theirs.status).toBe(201);
+    const res = await call(
+      app,
+      'POST',
+      `/api/v1/interviews/assessments/${assessmentId}/code`,
+      victim.token,
+      {
+        code: 'x',
+        language: 'javascript',
+        questionId: theirs.body.question.id,
+      }
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it('lets the hiring team score, which moves its own application to interviewing', async () => {
+    const base = `/api/v1/interviews/assessments/${assessmentId}`;
+    expect((await call(app, 'POST', `${base}/join`, candidate.token)).status).toBe(200);
+    expect(
+      (await call(app, 'POST', `${base}/end`, victim.token, { resolution: 'completed' })).status
+    ).toBe(200);
+    const res = await call(
+      app,
+      'POST',
+      `/api/v1/interviews/assessments/${assessmentId}/scorecard`,
+      victim.token,
+      scorecard
+    );
+    expect(res.status).toBe(201);
+    const app_ = await call(app, 'GET', `/api/v1/applications/${applicationId}`, victim.token);
+    expect(app_.body.application.status).toBe('interviewing');
+  });
+});
+
+describe('SEC: a check-then-act write cannot be raced (optimistic concurrency)', () => {
+  let app: FastifyInstance;
+  beforeAll(async () => {
+    app = await boot();
+  });
+  afterAll(() => app.close());
+
+  it('counts every evaluated wrong email code, however many arrive at once', async () => {
+    const cand = await register(app, 'racer@example.org');
+    const wh = await call(app, 'POST', '/api/v1/candidates/work-history', cand.token, {
+      companyName: 'Acme Corp',
+      title: 'Engineer',
+      startDate: '2020-01-01',
+      isCurrent: true,
+    });
+    const id = wh.body.workHistory.id;
+    const url = `/api/v1/candidates/work-history/${id}/verify-email`;
+    await call(app, 'POST', url, cand.token, { corporateEmail: 'me@acme-corp.io' });
+    const jobs = await call(app, 'GET', '/api/v1/internal/worker-jobs');
+    const code: string = jobs.body.jobs.find(
+      (j: Json) => j.type === 'work_history.email_verification_requested'
+    ).payload.code;
+    const wrong = (n: number) => String((Number(code) + n) % 1_000_000).padStart(6, '0');
+
+    const burst = await Promise.all(
+      Array.from({ length: 40 }, (_, i) =>
+        call(app, 'POST', url, cand.token, {
+          corporateEmail: 'me@acme-corp.io',
+          verificationCode: wrong(i + 1),
+        })
+      )
+    );
+    const evaluated = burst.filter((r) => r.status === 422).length;
+    // Each response is "wrong" (422, counted), "busy" (409, not evaluated) or
+    // "locked" (429). No more than the limit can ever be evaluated.
+    expect(evaluated).toBeLessThanOrEqual(5);
+    expect(burst.every((r) => [409, 422, 429].includes(r.status))).toBe(true);
+
+    // Exhaust the remaining attempts one at a time; the right code is then refused.
+    for (let i = evaluated; i < 5; i++) {
+      const r = await call(app, 'POST', url, cand.token, {
+        corporateEmail: 'me@acme-corp.io',
+        verificationCode: wrong(100 + i),
+      });
+      expect(r.status).toBe(422);
+    }
+    const locked = await call(app, 'POST', url, cand.token, {
+      corporateEmail: 'me@acme-corp.io',
+      verificationCode: code,
+    });
+    expect(locked.status).toBe(429);
+  });
+
+  it('acknowledges only one of two conflicting application transitions', async () => {
+    const rec = await register(app, 'race-rec@acme.example', 'recruiter');
+    const cand = await register(app, 'race-cand@example.org');
+    const { jobId } = await orgWithJob(app, rec.token, 'race-org');
+    await call(app, 'PATCH', `/api/v1/jobs/${jobId}/status`, rec.token, { status: 'published' });
+    const applied = await call(app, 'POST', `/api/v1/jobs/${jobId}/apply`, cand.token, {});
+    const id = applied.body.application.id;
+    for (const s of ['in_review', 'shortlisted', 'interviewing', 'offered']) {
+      await call(app, 'POST', `/api/v1/applications/${id}/transition`, rec.token, {
+        applicationId: id,
+        targetState: s,
+      });
+    }
+    const [hire, withdraw] = await Promise.all([
+      call(app, 'POST', `/api/v1/applications/${id}/transition`, rec.token, {
+        applicationId: id,
+        targetState: 'hired',
+      }),
+      call(app, 'POST', `/api/v1/applications/${id}/transition`, cand.token, {
+        applicationId: id,
+        targetState: 'withdrawn',
+      }),
+    ]);
+    const winners = [hire, withdraw].filter((r) => r.status === 200);
+    expect(winners).toHaveLength(1);
+    const final = await call(app, 'GET', `/api/v1/applications/${id}`, rec.token);
+    expect(final.body.application.status).toBe(winners[0].body.application.status);
+  });
+});
+
+describe('Input the database cannot store is rejected as invalid (400), never a 500', () => {
+  let app: FastifyInstance;
+  let cand: Json;
+  let rec: Json;
+  let orgId: string;
+  beforeAll(async () => {
+    app = await boot();
+    cand = await register(app, 'dates@example.org');
+    rec = await register(app, 'salary@acme.example', 'recruiter');
+    orgId = (await orgWithJob(app, rec.token, 'salary-org')).orgId;
+  });
+  afterAll(() => app.close());
+
+  it('rejects impossible calendar dates', async () => {
+    const wh = await call(app, 'POST', '/api/v1/candidates/work-history', cand.token, {
+      companyName: 'Acme',
+      title: 'Eng',
+      startDate: '2023-02-30',
+      isCurrent: true,
+    });
+    expect(wh.status).toBe(400);
+    const ev = await call(app, 'POST', '/api/v1/evidence', cand.token, {
+      type: 'project',
+      title: 'Thing',
+      description: 'd',
+      source: 's',
+      provenance: 'p',
+      recencyDate: 'not-a-date',
+    });
+    expect(ev.status).toBe(400);
+  });
+
+  it('rejects an email longer than RFC 5321 allows', async () => {
+    const res = await call(app, 'POST', '/api/v1/auth/register', undefined, {
+      email: `${'a'.repeat(250)}@example.com`,
+      password: 'a-long-enough-passphrase',
+      fullName: 'Long Email',
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects an absurd salary and de-duplicates repeated skill ids', async () => {
+    const huge = await call(app, 'POST', '/api/v1/jobs', rec.token, {
+      orgId,
+      title: 'Job A',
+      description: 'A long description',
+      location: 'Remote',
+      salaryMinMinor: 1e20,
+      salaryMaxMinor: 1e20,
+    });
+    expect(huge.status).toBe(400);
+    const skill = '10000000-0000-4000-a000-000000000001';
+    const dup = await call(app, 'POST', '/api/v1/jobs', rec.token, {
+      orgId,
+      title: 'Job B',
+      description: 'A long description',
+      location: 'Remote',
+      requiredSkillIds: [skill, skill],
+    });
+    expect(dup.status).toBe(201);
+    expect(dup.body.job.requiredSkillIds).toEqual([skill]);
+  });
+});
