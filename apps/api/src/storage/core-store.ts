@@ -37,6 +37,8 @@ export interface StoredUser {
   passwordHash: string;
   createdAt: string;
   status?: string;
+  /** Tokens issued before this instant are refused (password change). */
+  sessionsValidAfter?: string;
 }
 
 export interface StoredOrganization {
@@ -86,7 +88,7 @@ export interface EmailChallenge {
  * wrong email codes counted as one). Creates omit it.
  */
 export type CoreOp =
-  | { kind: 'user'; value: StoredUser }
+  | { kind: 'user'; value: StoredUser; base?: StoredUser }
   | { kind: 'profile'; value: Profile }
   | { kind: 'organization'; value: StoredOrganization }
   | { kind: 'membership'; value: StoredOrgMembership }
@@ -224,14 +226,30 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
   switch (op.kind) {
     case 'user': {
       const u = op.value;
-      await db.query(
-        `INSERT INTO public.users (id, email, password_hash, roles, status, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, now())
+      // With base, the credential it was derived from must still be current:
+      // a login re-hash or a status change computed from a stale record must
+      // never write back a password the owner has just replaced.
+      const result = await db.query(
+        `INSERT INTO public.users
+           (id, email, password_hash, roles, status, sessions_valid_after, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, now())
          ON CONFLICT (id) DO UPDATE SET
            email = EXCLUDED.email, password_hash = EXCLUDED.password_hash,
-           roles = EXCLUDED.roles, status = EXCLUDED.status, updated_at = now()`,
-        [u.id, u.email, u.passwordHash, u.roles, u.status ?? 'active', u.createdAt]
+           roles = EXCLUDED.roles, status = EXCLUDED.status,
+           sessions_valid_after = EXCLUDED.sessions_valid_after, updated_at = now()
+         WHERE $8::text IS NULL OR users.password_hash = $8::text`,
+        [
+          u.id,
+          u.email,
+          u.passwordHash,
+          u.roles,
+          u.status ?? 'active',
+          nullable(u.sessionsValidAfter),
+          u.createdAt,
+          op.base ? op.base.passwordHash : null,
+        ]
       );
+      assertGuardHeld(op.base !== undefined, result);
       return;
     }
     case 'profile': {
@@ -749,6 +767,7 @@ export class PgCoreStore implements CoreStore {
         roles: r.roles as Role[],
         passwordHash: r.password_hash,
         status: r.status,
+        sessionsValidAfter: iso(r.sessions_valid_after),
         createdAt: isoRequired(r.created_at),
       })),
       profiles: profiles.map((r) => ({

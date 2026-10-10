@@ -91,6 +91,18 @@
       "subject": "drive-a-submitted-application-is-listed"
     },
     {
+      "id": "flow:drive-a-user-can-change-their-password-from-the-profil",
+      "statement": "A user can change their password from the profile page and stays signed…",
+      "status": "proposed",
+      "subject": "drive-a-user-can-change-their-password-f"
+    },
+    {
+      "id": "flow:drive-a-user-can-change-their-password-from-the-profil-022d98",
+      "statement": "A user can change their password from the profile page and is told what…",
+      "status": "proposed",
+      "subject": "drive-a-user-can-change-their-password-f"
+    },
+    {
       "id": "flow:drive-an-existing-candidate-can-sign-in-with-email-and",
       "statement": "An existing candidate can sign in with email and password and reaches t…",
       "status": "proposed",
@@ -136,6 +148,18 @@
       "id": "inline:a-submitted-application-is-listed-under-the-cand-d3820074",
       "statement": "A submitted application is listed under the candidate's active applicat…",
       "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-user-can-change-their-password-from-the-profil-0b63662d",
+      "statement": "A user can change their password from the profile page and is told what…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-user-can-change-their-password-from-the-profil-75be14dd",
+      "statement": "A user can change their password from the profile page and stays signed…",
+      "status": "proposed",
       "subject": "unsorted"
     },
     {

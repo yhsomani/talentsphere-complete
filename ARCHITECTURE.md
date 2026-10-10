@@ -375,7 +375,7 @@ Also STOP when:
 
 - **Provider:** self-owned. No external IdP is integrated (CONFIRMED: no `@supabase/supabase-js`, no JWT libs).
 - **Login mechanisms:** email+password only (`/api/v1/auth/register`, `/login`). Registration assigns a single role from the `Role` union (10 roles, `core.ts`).
-- **Token model:** HMAC-SHA256 `base64url(payload).signature`, payload `{userId,email,roles,issuedAt,expiresAt}`, default TTL 24 h (`auth.ts`). No refresh token and no logout revocation (sign-out deletes the client copy), but `resolveSession` applies the account's current status and roles on every request, so suspension, erasure and role changes take effect immediately.
+- **Token model:** HMAC-SHA256 `base64url(payload).signature`, payload `{userId,email,roles,issuedAt,expiresAt}`, default TTL 24 h (`auth.ts`). No refresh token. `resolveSession` applies the account's current status and roles on every request, so suspension, erasure and role changes take effect immediately, and refuses tokens issued before `users.sessions_valid_after` — set by a password change (`POST /api/v1/auth/password`, migration 00045), which ends every other session. Sign-out alone still only deletes the client copy.
 - **Storage:** browser localStorage (`talentsphere_token`, `talentsphere_user`). CURRENT GAP: XSS-readable; acceptable only because the whole app is pre-production (audit P0-01 context).
 - **Request authentication:** `extractUser(req)` (`server.ts:672`) parses `Authorization: Bearer`, verifies, throws `UNAUTHENTICATED` → 401. Optional-auth endpoints (public profile/evidence views that adapt to the viewer) use `maybeExtractUser` (`server.ts:686`), which returns `null` on missing/invalid tokens; some routes additionally re-implement this inline (R-2 — do not add more).
 - **Authorization model:** role membership + resource ownership + tenant/org checks, all implemented as domain predicates surfaced through route calls (`assertPlatformAdmin`, `canViewProfile` honoring `ProfilePrivacy`, `assertModeratorAuthority`, `assertThreadParticipant`, `areConnected`, `TENANT_ISOLATION_VIOLATION` code). Feature availability additionally gated by `featureFlags` Map and maintenance-mode flag.
@@ -491,7 +491,7 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 
 - ~~G-1 demo-token login fallback~~, ~~G-2 checkout false success~~, ~~G-3 raw card fields~~, ~~G-4 unsigned webhook~~, ~~G-7 fabricated hashes/simulated submissions~~, ~~G-8 unsupported compliance copy~~ — closed 2026-10-10 (`docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`).
 - G-5 localStorage token exposure (standard XSS surface).
-- G-6 No refresh token and no revocation on sign-out; a stolen token works for up to 24 h unless the account is suspended or erased.
+- G-6 No refresh token, and sign-out does not revoke server-side; a stolen token works for up to 24 h unless the owner changes their password (which ends every other session) or the account is suspended or erased.
 - G-9 No email provider: verification codes and referee links reach nobody outside development.
 - G-10 Long-tail modules (~220 routes) are not durable; interview "code execution" is simulated.
   Each gap is a fix candidate **only** as an explicit, tested remediation task; agents must not add code that deepens them (e.g., new client-side auth shortcuts, new unsigned callback endpoints).

@@ -23,7 +23,7 @@ Test suites (counts as measured on 2026-10-10; re-run rather than trust them):
 - `pnpm test:e2e` — Playwright: end-to-end journeys, accessibility, performance (~190 tests)
 - CI (`.github/workflows/ci.yml`) runs lint, typecheck, all three suites (with a Postgres
   service container), a migration-idempotency check and the build on every push and PR.
-- 44 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
+- 45 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
 
 ## Core loop
 

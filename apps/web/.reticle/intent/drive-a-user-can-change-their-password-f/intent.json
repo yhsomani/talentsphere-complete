@@ -1,0 +1,33 @@
+{
+  "intents": {
+    "flow:drive-a-user-can-change-their-password-from-the-profil": {
+      "declaredAt": 1791672155678,
+      "id": "flow:drive-a-user-can-change-their-password-from-the-profil",
+      "state": "declared",
+      "statement": "A user can change their password from the profile page and stays signed in on this device",
+      "status": "proposed",
+      "subject": "drive-a-user-can-change-their-password-f",
+      "surface": {
+        "flow": "drive-a-user-can-change-their-password-from-the-profil"
+      },
+      "updatedAt": 1791672155928
+    },
+    "flow:drive-a-user-can-change-their-password-from-the-profil-022d98": {
+      "binding": {
+        "flow": "drive-a-user-can-change-their-password-from-the-profil-022d98"
+      },
+      "declaredAt": 1791672155973,
+      "id": "flow:drive-a-user-can-change-their-password-from-the-profil-022d98",
+      "state": "bound",
+      "statement": "A user can change their password from the profile page and is told what happened",
+      "status": "proposed",
+      "subject": "drive-a-user-can-change-their-password-f",
+      "surface": {
+        "flow": "drive-a-user-can-change-their-password-from-the-profil-022d98"
+      },
+      "updatedAt": 1791672156275
+    }
+  },
+  "subject": "drive-a-user-can-change-their-password-f",
+  "version": 1
+}

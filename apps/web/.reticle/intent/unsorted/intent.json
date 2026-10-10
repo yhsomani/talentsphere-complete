@@ -299,6 +299,78 @@
       },
       "updatedAt": 1791643199150
     },
+    "inline:a-user-can-change-their-password-from-the-profil-0b63662d": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/auth/password"
+          },
+          {
+            "contains": "Password changed. You have been signed out on every other device.",
+            "kind": "text",
+            "visible": true
+          },
+          {
+            "absent": true,
+            "kind": "console",
+            "level": "error"
+          }
+        ]
+      },
+      "declaredAt": 1791672153864,
+      "id": "inline:a-user-can-change-their-password-from-the-profil-0b63662d",
+      "provenBy": {
+        "at": 1791672155384,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791672155383"
+      },
+      "state": "proved",
+      "statement": "A user can change their password from the profile page and is told what happened",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/profile"
+      },
+      "updatedAt": 1791672155402
+    },
+    "inline:a-user-can-change-their-password-from-the-profil-75be14dd": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/auth/password"
+          },
+          {
+            "contains": "Password changed. You have been signed out on every other device.",
+            "kind": "text",
+            "visible": true
+          },
+          {
+            "kind": "route",
+            "pathname": "/profile"
+          }
+        ]
+      },
+      "declaredAt": 1791672112878,
+      "id": "inline:a-user-can-change-their-password-from-the-profil-75be14dd",
+      "state": "bound",
+      "statement": "A user can change their password from the profile page and stays signed in on this device",
+      "status": "proposed",
+      "subject": "unsorted",
+      "updatedAt": 1791672112995
+    },
     "inline:an-existing-candidate-can-sign-in-with-email-and-cf2c5c73": {
       "binding": {
         "kind": "allOf",

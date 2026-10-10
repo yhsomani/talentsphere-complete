@@ -53,6 +53,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 | 24 | P1  | _(Reticle)_ The global rate limit was **100 requests per 15 minutes per address**. A dashboard view makes ~5 API calls, so a normal user was locked out after ~20 page views and shown "Refresh to try again" (which spent more budget); behind a load balancer every user would share one bucket, and health checks counted against it. The E2E suite raises the limit to 100,000, so it never saw this. | **Fixed** — 300/min per signed-in account (per address when anonymous), `TRUST_PROXY`, health exempt, plain 429 message with the wait time, session error offers *Try again* | `api-security` "Rate limiting" (mutation-checked), `tests/unit/rate-limit-config.test.ts`, e2e `session-resilience` |
 | 25 | P1  | Nothing in the core loop sent a notification: a candidate was never told their application moved or that a referee had responded, and a hiring team never heard of a new applicant. Notifications that other modules did send lived only in memory, and the `notifications` table would have rejected 10 of the domain's 16 types. | **Fixed** — durable notifications in the same transaction as their event (migration 00044); hiring team told of applications and withdrawals, candidate of every move and of referee responses, no candidate names or private rejection reasons in the text; bell with unread count and a notifications page; erasure deletes the person's notifications | `tests/integration/core-notifications.test.ts`, `tests/pg/notifications.test.ts`, e2e `notifications`, Reticle (§G) |
 | 26 | P2  | Signed-in pages shifted as they loaded (Cumulative Layout Shift): up to **0.82** on the profile page and 0.16–0.39 elsewhere at phone width ("poor" is > 0.25). The PWA pill first rendered "Not installable" then "Installable", the account label changed from email to name, and the footer sat in view during loading then jumped. | **Fixed** — PWA status detected before first paint, fixed-width account label (hidden on phones), content area at least one screen tall; every page now ≤ 0.008 | e2e `performance` "Layout stability" (CLS ≤ 0.1 at 390 px and 1280 px; mutation-checked: 0.28 on the old layout) |
+| 27 | P1  | There was no way to change a password, and no session could be ended before its 24-hour expiry — someone who suspected their password was known could do nothing. Adding it exposed a latent race: the login re-hash and moderation/admin status changes rewrite the whole user record, so one computed from a stale read could restore an old password. | **Fixed** — change password on the profile page (current password required, throttled per account); every earlier session refused from the next second (migration 00045), this device kept signed in; user-record writes carry `base` with a database re-check | `core-authz` "changing a password ends every other session" (mutation-checked; 10/10 repeat runs), `tests/pg/concurrency.test.ts`, e2e `account-security` (two devices), Reticle (§G) |
 
 **Open findings** are in section H.
 
@@ -92,7 +93,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 5. Persist the next modules users will expect to survive a restart: messaging, saved searches/drafts, erasure requests (30-day grace flow). Notifications are done (finding 25).
 6. Recruiter account erasure semantics (owned organizations, posted jobs) — not handled today.
 7. Interview code execution is **simulated** (results do not depend on the code). Either integrate a sandbox or remove the feature from any user-visible surface.
-8. Session hardening: server-side revocation on sign-out; consider httpOnly cookies over localStorage.
+8. Session hardening: revocation on sign-out (a password change now ends every other session — finding 27); consider httpOnly cookies over localStorage.
 9. Deployment: one documented target (single API replica per ADR-015), backups with a tested restore, alerting on error-level logs.
 
 **P2 — scale and maintainability**
@@ -122,10 +123,10 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 | -------------------------------------------------- | ---------------------------------------- |
 | `pnpm lint` (Prettier)                              | clean                                    |
 | `pnpm typecheck` (`tsc -b`, 10 projects)            | clean                                    |
-| `pnpm test` (Vitest: unit, integration, security)   | **1044 / 1044** passed, 100 files        |
-| `pnpm test:pg` (real PostgreSQL 16)                 | **14 / 14** passed, 3 files              |
+| `pnpm test` (Vitest: unit, integration, security)   | **1049 / 1049** passed, 100 files        |
+| `pnpm test:pg` (real PostgreSQL 16)                 | **15 / 15** passed, 3 files              |
 | `pnpm build`                                        | clean                                    |
-| Playwright (Chromium; e2e, a11y, performance)       | **195 / 195** passed                     |
+| Playwright (Chromium; e2e, a11y, performance)       | **196 / 196** passed                     |
 
 **Mutation checks (the tests catch the bug they claim to):**
 
@@ -146,6 +147,7 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 - **Finding 24** surfaced while replaying: after a few minutes of driving, the dashboard showed "We could not confirm your session" — the API was answering 429 to everything. Fixed, then re-verified in the running app: 20 navigations at a human pace, every step `yes`, and an assertion that no request was throttled `yes`. Driving ~10× faster than a person still trips the new limit, which is the limiter working.
 - **Not verified / limits:** not every Reticle verdict in the session was "yes" (its end-of-session summary for the last tab: 84 of 96 claims held). The ones that were not fall into four groups: the saved flow's drift above; real throttling (finding 24); throttling I caused by driving ~10× faster than a person after the fix; and checks where my expectation was wrong — a miscounted note length, a logo click on the dashboard (for signed-in users the logo leads to the dashboard by design), and navigation checks whose target link also existed on the previous page. None of the last group is an app defect. Correction (2026-10-11): I described Reticle's layout-shift figures (0.24–0.46) as per-navigation shifts; they are a running total for the session. Measured directly, real page-load CLS was a genuine problem (finding 26, now fixed), while client-side navigation driven by real clicks adds exactly 0 — the running total keeps growing only under Reticle's own driving (reported to Reticle). Response-body capture was left off on purpose (login/register bodies carry session tokens).
 - **Notifications (2026-10-11):** signed in as the candidate after the recruiter moved her application — the header's accessible count "Notifications, 1 unread" `yes`; opening notifications shows "Platform Engineer: in review" and the plain-words message `yes`; *Mark all as read* sends one request, clears the count, and holds after a reload `yes`. One `unknown` on the way: the badge digit is `aria-hidden` (its count is in the link's accessible name), so Reticle would not call it on screen; the browser test asserts its visual visibility instead.
+- **Password change (2026-10-11):** on a fresh account — sign in `yes`, profile shows the password form `yes`, changing it sends one request and shows the confirmation `yes`, and after a reload this device is still signed in (`reticle_assert` wait: pass). The session from before the change gets 401 from the API. One `no` on the way was my condition: I first required the one-off confirmation to survive a reload.
 - The Playwright suite (including `core-loop.spec.ts`, three people driving the whole loop through the UI) remains the CI-level UI verification.
 - No load, soak, backup/restore or deployment testing — there is no deployment target.
 - Email delivery, payments and notifications are not integrated, so they are not verified.
@@ -170,7 +172,7 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 | A second API replica is started against the same database (ADR-015 single writer)            | Medium     | High   | Documented in OPERATIONS and ADR; database guards stop lost updates on guarded records, not stale reads |
 | Verification loop unusable outside development (no email provider)                          | Certain    | High   | Worker fails such jobs permanently and visibly              |
 | Interview "code execution" is simulated                                                      | Certain    | Medium | API only — no screen in the web app exposes interviews      |
-| Session tokens in localStorage; no server-side revocation on sign-out                        | Medium     | Medium | 24 h expiry; suspension/erasure take effect per request     |
+| Session tokens in localStorage; sign-out does not revoke server-side                          | Medium     | Medium | 24 h expiry; a password change ends every other session; suspension/erasure take effect per request |
 | Migration 00043's case-insensitive email index fails on a database with case-duplicate emails | Low        | Medium | Noted in ADR-015; no populated database exists              |
 | `server.ts` size slows change and review                                                     | Certain    | Medium | Roadmap P2                                                  |
 

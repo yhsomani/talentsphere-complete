@@ -123,9 +123,11 @@ export function createSessionToken(
   userId: string,
   email: string,
   roles: Role[],
-  ttlSeconds: number = 86400
+  ttlSeconds: number = 86400,
+  /** Issue time in ms; defaults to now. Used to mint a token just after a session cut-off. */
+  issuedAtMs: number = Date.now()
 ): string {
-  const issuedAt = Math.floor(Date.now() / 1000);
+  const issuedAt = Math.floor(issuedAtMs / 1000);
   const expiresAt = issuedAt + ttlSeconds;
   const payload: AuthPayload = { userId, email, roles, issuedAt, expiresAt };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');

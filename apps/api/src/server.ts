@@ -313,6 +313,7 @@ import {
 import {
   RegisterInputSchema,
   LoginInputSchema,
+  ChangePasswordInputSchema,
   UpdateProfileInputSchema,
   CreateEvidenceInputSchema,
   VerifyEvidenceInputSchema,
@@ -819,6 +820,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   // nothing else. Erased accounts have no credential and no access at all.
   const RESTRICTED_SESSION_ROUTES = new Set([
     'GET /api/v1/profile/me',
+    'POST /api/v1/auth/password',
     'GET /api/v1/moderation/reports/my',
     'POST /api/v1/moderation/reports/:id/appeal',
     'POST /api/v1/settings/export',
@@ -838,6 +840,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const access = accountAccess(account);
     if (access === 'none') {
       throw new DomainError('UNAUTHENTICATED', 'This account has been closed.');
+    }
+    // A password change ends every session issued before it (see
+    // POST /api/v1/auth/password for how the cut-off meets second-precision
+    // issuedAt).
+    if (
+      account.sessionsValidAfter &&
+      session.issuedAt * 1000 < Date.parse(account.sessionsValidAfter)
+    ) {
+      throw new DomainError(
+        'UNAUTHENTICATED',
+        'This session ended because the password was changed. Sign in again.'
+      );
     }
     if (access === 'restricted') {
       const route = req ? `${req.method} ${req.routeOptions?.url ?? ''}` : '';
@@ -998,6 +1012,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         try {
           await persist({
             kind: 'user',
+            base: user,
             value: { ...user, passwordHash: await hashPassword(input.password) },
           });
         } catch (err) {
@@ -1010,7 +1025,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // is returned so the client can say so instead of failing mysteriously.
 
       const profile = profilesByUserId.get(user.id);
-      const token = createSessionToken(user.id, user.email, user.roles);
+      // Right after a password change the session cut-off can still be up to
+      // a second ahead; a sign-in with the new password is minted at it.
+      const issuedAtMs = Math.max(Date.now(), Date.parse(user.sessionsValidAfter ?? '') || 0);
+      const token = createSessionToken(user.id, user.email, user.roles, undefined, issuedAtMs);
 
       return reply.status(200).send({
         message: 'Login successful',
@@ -1022,6 +1040,76 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           status: user.status ?? 'active',
         },
         profile,
+      });
+    }
+  );
+
+  // Change password. Requires the current one, ends every other session
+  // (tokens issued before the change are refused by resolveSession), and
+  // returns a fresh token so this device stays signed in. Throttled like
+  // login, per account.
+  app.post(
+    '/api/v1/auth/password',
+    {
+      config: {
+        rateLimit: {
+          max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+          timeWindow: AUTH_WINDOW_MS,
+          keyGenerator: (req: FastifyRequest) => {
+            const auth = req.headers.authorization;
+            const session =
+              typeof auth === 'string' && auth.startsWith('Bearer ')
+                ? verifySessionToken(auth.substring(7).trim())
+                : null;
+            return session ? `password:${session.userId}` : `password-ip:${req.ip}`;
+          },
+        },
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = ChangePasswordInputSchema.parse(req.body);
+      const user = usersById.get(session.userId);
+      if (!user) {
+        throw new DomainError('UNAUTHENTICATED', 'Sign in again to change your password.');
+      }
+      if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
+        throw new DomainError('VALIDATION_FAILED', 'Your current password is not correct.', {
+          field: 'currentPassword',
+        });
+      }
+      if (input.newPassword === input.currentPassword) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          'Choose a new password that is different from the current one.',
+          { field: 'newPassword' }
+        );
+      }
+      // Tokens record issuedAt in whole seconds, so the cut-off is the start
+      // of the NEXT second: every token issued up to now — including one
+      // issued earlier in this same second — is refused, and the token
+      // returned below is minted at the cut-off itself.
+      const cutoffMs = (Math.floor(Date.now() / 1000) + 1) * 1000;
+      const cutoff = new Date(cutoffMs).toISOString();
+      await persist({
+        kind: 'user',
+        base: user,
+        value: {
+          ...user,
+          passwordHash: await hashPassword(input.newPassword),
+          sessionsValidAfter: cutoff,
+        },
+      });
+      auditLogs.push({
+        event: 'auth.password_changed',
+        actorId: user.id,
+        targetId: user.id,
+        timestamp: new Date().toISOString(),
+      });
+      const token = createSessionToken(user.id, user.email, user.roles, undefined, cutoffMs);
+      return reply.status(200).send({
+        message: 'Password changed. You have been signed out everywhere else.',
+        token,
       });
     }
   );
@@ -9809,6 +9897,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const erasureOps: CoreOp[] = [
       {
         kind: 'user',
+        base: user,
         value: {
           ...user,
           email: result.anonymizedUser.email,
@@ -10178,7 +10267,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       validateUserStatusTransition(oldStatus, input.status, session.userId, targetUser.id);
 
       const savedUser: StoredUser = { ...targetUser, status: input.status };
-      await persist({ kind: 'user', value: savedUser });
+      await persist({ kind: 'user', value: savedUser, base: targetUser });
 
       const auditLog = createAdminAuditLog({
         eventName: 'USER_STATUS_UPDATED',
@@ -10244,7 +10333,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
       const oldRoles = [...targetUser.roles];
       const savedUser: StoredUser = { ...targetUser, roles: input.roles as Role[] };
-      await persist({ kind: 'user', value: savedUser });
+      await persist({ kind: 'user', value: savedUser, base: targetUser });
 
       const auditLog = createAdminAuditLog({
         eventName: 'USER_ROLES_UPDATED',
@@ -10950,10 +11039,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // Apply side effects of enforcement
       if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
         const user = usersById.get(resolved.targetId);
-        if (user) await persist({ kind: 'user', value: { ...user, status: 'suspended' } });
+        if (user) {
+          await persist({ kind: 'user', base: user, value: { ...user, status: 'suspended' } });
+        }
       } else if (resolved.actionTaken === 'user_banned' && resolved.targetType === 'user') {
         const user = usersById.get(resolved.targetId);
-        if (user) await persist({ kind: 'user', value: { ...user, status: 'deactivated' } });
+        if (user) {
+          await persist({ kind: 'user', base: user, value: { ...user, status: 'deactivated' } });
+        }
       } else if (resolved.actionTaken === 'content_removed' && resolved.targetType === 'job') {
         const job = jobsById.get(resolved.targetId);
         if (job && job.status !== 'closed' && job.status !== 'archived') {
@@ -11043,7 +11136,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           origReport.status = 'dismissed';
           if (origReport.targetType === 'user') {
             const user = usersById.get(origReport.targetId);
-            if (user) await persist({ kind: 'user', value: { ...user, status: 'active' } });
+            if (user) {
+              await persist({ kind: 'user', base: user, value: { ...user, status: 'active' } });
+            }
           }
         }
       }
@@ -12234,6 +12329,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   function recordKey(op: CoreOp): string | undefined {
     switch (op.kind) {
+      case 'user':
+        return `user:${op.value.id}`;
       case 'job':
         return `job:${op.value.id}`;
       case 'application':
@@ -12261,6 +12358,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   function currentRecord(op: CoreOp): unknown {
     switch (op.kind) {
+      case 'user':
+        return usersById.get(op.value.id);
       case 'job':
         return jobsById.get(op.value.id);
       case 'application':

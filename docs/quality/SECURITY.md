@@ -120,6 +120,19 @@ keep their signed claims, so the signing key is still a full privilege boundary.
   `STORAGE=memory`, the local default `DATABASE_URL`, localhost CORS, or
   `BILLING_MODE=simulated`) — `productionConfigProblems()` in `packages/config`.
 
+### Ending sessions
+
+Tokens are stateless, so a session can only be ended by a rule the API checks on every
+request. Changing a password (`POST /api/v1/auth/password`: current password required,
+throttled per account like login) sets `users.sessions_valid_after`; `resolveSession`
+refuses every token issued before it, and the response carries a fresh token so this
+device stays signed in. Tokens record their issue time in whole seconds, so the cut-off
+is the start of the next second — a token minted earlier in the same second is refused
+too. Suspended accounts may change their password. User-record writes carry `base`, so a
+concurrent login re-hash or moderation action computed from the old record cannot
+restore the old password (`tests/pg/concurrency.test.ts`). Sign-out alone does not
+revoke server-side (G-6).
+
 ### Account state
 
 - Suspended or banned accounts are confined to viewing their reports, appealing, and

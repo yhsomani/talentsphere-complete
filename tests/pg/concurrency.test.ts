@@ -261,6 +261,46 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     ).rejects.toMatchObject({ name: 'DomainError', code: 'VALIDATION_FAILED' });
   });
 
+  it('a password change survives a restart and a stale write cannot restore the old password', async () => {
+    const acct = await register(app, 'rotate@example.org');
+    const changed = await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+      currentPassword: 'a-long-enough-passphrase',
+      newPassword: 'a-brand-new-passphrase',
+    });
+    expect(changed.status).toBe(200);
+    const [row] = await sql<{ password_hash: string; sessions_valid_after: Date }>(
+      'SELECT password_hash, sessions_valid_after FROM public.users WHERE id = $1',
+      [acct.user.id]
+    );
+    expect(row.sessions_valid_after).not.toBeNull();
+
+    // A write computed from the record as it was before the change (what a
+    // concurrent login re-hash or moderation action would send) is refused.
+    const store = new PgCoreStore(pool);
+    const stale = {
+      id: acct.user.id,
+      email: 'rotate@example.org',
+      roles: ['candidate' as const],
+      passwordHash: 'pbkdf2-sha512$10000$stale$stale',
+      createdAt: new Date().toISOString(),
+      status: 'active',
+    };
+    await expect(
+      store.commit([{ kind: 'user', base: stale, value: { ...stale, status: 'suspended' } }])
+    ).rejects.toMatchObject({ code: 'CONFLICT' });
+    const [after] = await sql<{ password_hash: string; status: string }>(
+      'SELECT password_hash, status FROM public.users WHERE id = $1',
+      [acct.user.id]
+    );
+    expect(after).toEqual({ password_hash: row.password_hash, status: 'active' });
+
+    // After a restart the old session is still refused and the new one works.
+    await app.close();
+    app = await boot();
+    expect((await call(app, 'GET', '/api/v1/auth/session', acct.token)).status).toBe(401);
+    expect((await call(app, 'GET', '/api/v1/auth/session', changed.body.token)).status).toBe(200);
+  });
+
   it('labels exactly the routes whose data does not survive a restart', async () => {
     const durable = await app.inject({ method: 'GET', url: '/api/v1/jobs' });
     expect(durable.headers['x-talentsphere-durability']).toBeUndefined();

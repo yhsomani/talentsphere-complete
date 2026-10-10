@@ -685,3 +685,101 @@ describe('Input the database cannot store is rejected as invalid (400), never a 
     expect(dup.body.job.requiredSkillIds).toEqual([skill]);
   });
 });
+
+describe('SEC: changing a password ends every other session', () => {
+  let app: FastifyInstance;
+  beforeAll(async () => {
+    app = await boot({ AUTH_RATE_LIMIT_MAX_REQUESTS: '3' });
+  });
+  afterAll(() => app.close());
+
+  const login = async (email: string, password: string) =>
+    call(app, 'POST', '/api/v1/auth/login', undefined, { email, password });
+
+  it('refuses a wrong current password and changes nothing', async () => {
+    const acct = await register(app, 'wrong-current@example.org');
+    const res = await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+      currentPassword: 'not-my-password',
+      newPassword: 'a-brand-new-passphrase',
+    });
+    expect(res.status).toBe(422);
+    expect((await login('wrong-current@example.org', 'a-long-enough-passphrase')).status).toBe(200);
+    expect((await call(app, 'GET', '/api/v1/auth/session', acct.token)).status).toBe(200);
+  });
+
+  it('refuses reusing the same password', async () => {
+    const acct = await register(app, 'same@example.org');
+    const res = await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+      currentPassword: 'a-long-enough-passphrase',
+      newPassword: 'a-long-enough-passphrase',
+    });
+    expect(res.status).toBe(422);
+  });
+
+  it('ends the old sessions at once, keeps this device signed in, and swaps the credential', async () => {
+    const acct = await register(app, 'rotate@example.org');
+    // A second device (or a stolen token), issued in the same second.
+    const other = (await login('rotate@example.org', 'a-long-enough-passphrase')).body.token;
+
+    const changed = await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+      currentPassword: 'a-long-enough-passphrase',
+      newPassword: 'a-brand-new-passphrase',
+    });
+    expect(changed.status).toBe(200);
+
+    for (const stale of [acct.token, other]) {
+      const res = await call(app, 'GET', '/api/v1/auth/session', stale);
+      expect(res.status).toBe(401);
+      expect(res.body.error.message).toContain('password was changed');
+    }
+    expect((await call(app, 'GET', '/api/v1/auth/session', changed.body.token)).status).toBe(200);
+
+    expect((await login('rotate@example.org', 'a-long-enough-passphrase')).status).toBe(401);
+    const fresh = await login('rotate@example.org', 'a-brand-new-passphrase');
+    expect(fresh.status).toBe(200);
+    // Signing in right after the change works immediately.
+    expect((await call(app, 'GET', '/api/v1/auth/session', fresh.body.token)).status).toBe(200);
+  });
+
+  it('lets a suspended account change its password (its credentials may be what is compromised)', async () => {
+    const acct = await register(app, 'suspended-pw@example.org');
+    const admin = createSessionToken(
+      '00000000-0000-4000-a000-00000000ad98',
+      'ops@talentsphere.example',
+      ['platform_admin']
+    );
+    const suspended = await call(
+      app,
+      'PATCH',
+      `/api/v1/admin/users/${acct.user.id}/status`,
+      admin,
+      {
+        status: 'suspended',
+        reason: 'Under review',
+      }
+    );
+    expect(suspended.status).toBe(200);
+    const res = await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+      currentPassword: 'a-long-enough-passphrase',
+      newPassword: 'a-brand-new-passphrase',
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it('throttles guessing the current password, per account', async () => {
+    const acct = await register(app, 'guess@example.org');
+    const statuses: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      statuses.push(
+        (
+          await call(app, 'POST', '/api/v1/auth/password', acct.token, {
+            currentPassword: `guess-${i}`,
+            newPassword: 'a-brand-new-passphrase',
+          })
+        ).status
+      );
+    }
+    expect(statuses.slice(0, 3)).toEqual([422, 422, 422]);
+    expect(statuses.slice(3)).toEqual([429, 429]);
+  });
+});

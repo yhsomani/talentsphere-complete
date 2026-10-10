@@ -5,6 +5,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession, type SessionProfile } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
+import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
 import {
   Button,
   Card,
@@ -203,7 +204,12 @@ export const ProfilePage: React.FC = () => {
           <p style={{ color: colors.neutral[700], marginTop: spacing.xs }}>
             Signed in as <strong>{session.user?.email}</strong>.
           </p>
-          <h3 style={{ fontSize: '1rem', marginTop: spacing.lg }}>Delete your account</h3>
+          <h3 style={{ fontSize: '1rem', marginTop: spacing.lg }}>Password</h3>
+          <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
+            Changing it signs you out on every other device.
+          </p>
+          <ChangePasswordForm />
+          <h3 style={{ fontSize: '1rem', marginTop: spacing.xl }}>Delete your account</h3>
           <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
             Removes your name, work history, references and evidence, and withdraws open
             applications. You will be signed out and cannot sign in again. This cannot be undone.

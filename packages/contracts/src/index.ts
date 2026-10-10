@@ -103,6 +103,16 @@ export const LoginInputSchema = z.object({
 
 export type LoginInput = z.infer<typeof LoginInputSchema>;
 
+export const ChangePasswordInputSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required').max(1024),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(256, 'Password must be at most 256 characters'),
+});
+
+export type ChangePasswordInput = z.infer<typeof ChangePasswordInputSchema>;
+
 export const UserSessionSchema = z.object({
   user: z.object({
     id: z.string().uuid(),
