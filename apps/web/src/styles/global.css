@@ -152,6 +152,11 @@ pre {
     display: flex !important;
   }
 
+  /* The name is on the dashboard; phones keep the header to one row. */
+  .account-label {
+    display: none !important;
+  }
+
   /* Tighter page padding on phones so content never touches the edges. */
   #main-content {
     padding-left: 16px !important;

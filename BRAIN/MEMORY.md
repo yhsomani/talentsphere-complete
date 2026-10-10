@@ -8,7 +8,7 @@
 - **Last Updated:** 2026-10-10
 - **Current Branch:** `improvement/core-loop-durability` (not yet merged to `main`)
 - **Current Primary Task:** Improvement program — durable core loop, proof-based verification, authorization and honesty fixes. Report: `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
-- **Overall Verification (measured 2026-10-10):** Vitest 100 files / 1044 tests PASS (in-memory storage); `pnpm test:pg` 14/14 PASS on PostgreSQL 16; Playwright 194/194 PASS; `tsc -b`, Prettier and build clean; 44 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
+- **Overall Verification (measured 2026-10-10):** Vitest 100 files / 1044 tests PASS (in-memory storage); `pnpm test:pg` 14/14 PASS on PostgreSQL 16; Playwright 195/195 PASS; `tsc -b`, Prettier and build clean; 44 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
 - **Production readiness:** NOT met — see §10.
 - **Next Action:** owner decisions in the improvement report §H (architecture of record, ADR-015 ratification, email provider, pricing, legal review, deletion semantics), then the P0/P1 roadmap there.
 - Sections 2–9 and 11–13 below are the 2026-09-25 snapshot and are partly superseded: the frontend has no TanStack Query; the billing webhook is now signed; the core loop is durable (ADR-015). Where they conflict with §1 and §10, §1 and §10 win.
@@ -114,6 +114,7 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **`93dfe125` Adversarial review fixes:** email-code brute force via concurrency (pg), interview-assessment IDOR (incl. cross-tenant application moves), hire/withdraw lost update, one-time secrets left in job payloads, pg-only 500s on invalid input, 4xx logged as errors.
 - **Docs:** ADR-015 (`docs/engineering/adr/`), improvement report, ARCHITECTURE/README/SECURITY/OPERATIONS/FINAL_VALIDATION_REPORT revised.
 - **Verification:** see §1.
+- **Layout stability (2026-10-11):** page-load CLS was up to 0.82 at phone width (PWA pill, account label, footer); fixed to ≤ 0.008 and guarded by an e2e CLS budget.
 - **Core-loop notifications (2026-10-11):** hiring team told of new applications/withdrawals, candidate told of every move and of referee responses; durable (migration 00044), same transaction as the event; bell + page in the web app; verified with Reticle.
 - **Follow-up (same day):** Reticle verification in the running app; P1 fix — global rate limit (was 100 per 15 min per address) now 300/min per account, `TRUST_PROXY`, health exempt, clear 429 UX with Try again.
 

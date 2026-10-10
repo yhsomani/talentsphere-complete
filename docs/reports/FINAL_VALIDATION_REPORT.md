@@ -51,7 +51,7 @@ not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
   job-payload credential stripping, notifications across a restart and erasure. Mutation-checked (see the improvement report §G).
-- **Playwright (Chromium; E2E, accessibility, performance):** **194 tests PASS**, including
+- **Playwright (Chromium; E2E, accessibility, performance):** **195 tests PASS**, including
   `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only).
 - **Database migrations:** **44** sequential SQL migrations (`00001`–`00044`); CI applies them
   to an empty database and re-runs the runner as an idempotency check.

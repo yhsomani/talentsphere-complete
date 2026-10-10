@@ -207,3 +207,54 @@ test.describe('PERF: Interaction latency baseline', () => {
     ).toBeLessThan(INTERACTION_GUARD_MS);
   });
 });
+
+/**
+ * Layout stability (Core Web Vitals CLS; "good" is <= 0.1). Measured with
+ * Reticle on 2026-10-10 and confirmed here: signed-in pages shifted by up to
+ * 0.82 on a phone — the PWA pill re-rendered with a different label, the
+ * account label changed width, and the footer jumped when data arrived.
+ */
+test.describe('PERF: Layout stability', () => {
+  test('signed-in pages do not shift as they load, on a phone or a desktop', async ({
+    browser,
+    request,
+  }) => {
+    const { registerAccount } = await import('./fixtures.js');
+    const account = await registerAccount(request, 'cls', 'candidate', 'Layout Stability Tester');
+    const results: string[] = [];
+    for (const width of [390, 1280]) {
+      const context = await browser.newContext({ viewport: { width, height: 800 } });
+      await context.addInitScript(() => {
+        (window as unknown as { __cls: number }).__cls = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as unknown as Array<{
+            value: number;
+            hadRecentInput: boolean;
+          }>) {
+            if (!entry.hadRecentInput)
+              (window as unknown as { __cls: number }).__cls += entry.value;
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+      });
+      const page = await context.newPage();
+      await page.goto('/privacy');
+      await page.evaluate(
+        (s) => {
+          localStorage.setItem('talentsphere_token', s.token);
+          localStorage.setItem('talentsphere_user', JSON.stringify(s.user));
+        },
+        { token: account.token, user: account.user }
+      );
+      for (const path of ['/dashboard', '/jobs', '/applications', '/evidence', '/profile']) {
+        await page.goto(path);
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(500);
+        const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+        results.push(`${width}px ${path} CLS=${cls.toFixed(3)}`);
+        expect(cls, `${width}px ${path}`).toBeLessThanOrEqual(0.1);
+      }
+      await context.close();
+    }
+    console.log(results.join('\n'));
+  });
+});

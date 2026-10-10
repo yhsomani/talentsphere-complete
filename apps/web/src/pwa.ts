@@ -24,11 +24,9 @@ function detect(): PwaCapability {
 }
 
 export function usePwaCapability(): PwaCapability {
-  const [capability, setCapability] = useState<PwaCapability>({
-    manifest: false,
-    installed: false,
-    offlineReady: false,
-  });
+  // Detected before the first paint: starting from "nothing" and correcting
+  // a moment later changed the header's width and shifted every page (CLS).
+  const [capability, setCapability] = useState<PwaCapability>(detect);
 
   useEffect(() => {
     setCapability(detect());

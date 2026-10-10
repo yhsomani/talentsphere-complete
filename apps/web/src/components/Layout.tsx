@@ -428,10 +428,15 @@ export const Layout: React.FC = () => {
               </Link>
               <span
                 data-testid="account-label"
+                className="account-label"
                 style={{
                   fontSize: '0.8125rem',
                   color: colors.neutral[600],
-                  maxWidth: '200px',
+                  // Fixed width: the label starts as the stored email and becomes
+                  // the profile name once the session loads; a width change here
+                  // shifted the header (CLS).
+                  width: '160px',
+                  textAlign: 'right',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -546,6 +551,9 @@ export const Layout: React.FC = () => {
         tabIndex={-1}
         style={{
           flex: 1,
+          // At least a screen tall, so the footer starts below the fold and
+          // does not jump down when a page's data arrives (CLS).
+          minHeight: '100vh',
           padding: `${spacing.xl} ${spacing.lg} ${spacing['2xl']}`,
           maxWidth: '1200px',
           margin: '0 auto',
