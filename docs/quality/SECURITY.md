@@ -88,8 +88,11 @@ UPLOAD
 ### Session signing key
 
 Session tokens are `base64url(payload).base64url(HMAC-SHA256(payload))`, where the
-payload carries `userId`, `email`, and `roles`. Every authorization decision in the API
-reads `roles` from that payload, so the signing key is a full privilege boundary.
+payload carries `userId`, `email`, and `roles`. The signature proves who the caller was
+when the token was issued; for any account the API knows, `resolveSession`
+(`apps/api/src/server.ts`) then applies the account's **current** roles and status on
+every request (see "Account state" below). Tokens for identities with no account row
+keep their signed claims, so the signing key is still a full privilege boundary.
 
 - The key is `process.env.TOKEN_SECRET` and **must be at least 32 characters** in any
   deployed environment. `validateServerEnv()` enforces the length when it is set.
@@ -104,27 +107,79 @@ reads `roles` from that payload, so the signing key is a full privilege boundary
   with the former hardcoded literal and with other guessed secrets is rejected.
 - Any component that mints tokens out of band (test harnesses, scripts) must set
   `TOKEN_SECRET` for the API process as well; see `test-secrets.mjs`.
+- In `NODE_ENV=production` the API refuses to start without `TOKEN_SECRET` (and with
+  `STORAGE=memory`, the local default `DATABASE_URL`, localhost CORS, or
+  `BILLING_MODE=simulated`) — `productionConfigProblems()` in `packages/config`.
+
+### Account state
+
+- Suspended or banned accounts are confined to viewing their reports, appealing, and
+  exporting or erasing their data (`RESTRICTED_SESSION_ROUTES`); every other route
+  returns 403. Erased accounts have no credential (`!erased`) and every token for them
+  returns 401. Role changes apply on the next request.
+- Coverage: `tests/security/core-authz.test.ts` "account state is enforced on every request".
+
+### Passwords and credential endpoints
+
+- PBKDF2-SHA512, 210,000 iterations, per-user salt, stored as
+  `pbkdf2-sha512$<iterations>$<salt>$<hash>`; older hashes are upgraded on the next
+  successful login. Unknown-email logins run a decoy hash so response time does not
+  reveal whether an account exists.
+- Login is rate-limited per client IP + email and sign-up per client IP
+  (`AUTH_RATE_LIMIT_MAX_REQUESTS`, default 10 per window), on top of the global limiter.
+
+### Verification credentials (the product's trust boundary)
+
+A verification tier is only as strong as the proof behind it, so the person being
+verified must never hold the proof.
+
+- **Corporate email:** a single-use 6-digit code is emailed to the address; only its
+  SHA-256 is stored (`work_history_email_challenges`), it expires after 15 minutes and
+  allows 5 wrong attempts. The code is never returned to the browser that asked for it.
+- **References:** the referee's one-time token is delivered only to the referee; only
+  its SHA-256 is stored (`employment_references.token_hash`), submission requires it,
+  and it dies on use. The candidate never sees it.
+- **Concurrency:** both checks are check-then-act; `persist()` refuses a write whose base
+  record changed or has another write in flight, and Postgres re-checks the decisive
+  columns, so concurrent guesses cannot be folded into one attempt
+  (`tests/pg/concurrency.test.ts`).
+- **At rest in the job queue:** the email job carries the code/token until delivered;
+  every terminal job transition strips `token` and `code` from the payload.
+- **Delivery:** no email provider is integrated. In development the worker prints these
+  messages ("DEV OUTBOX"); in any other environment it fails them permanently, so the
+  verification loop does not work outside development until a provider is chosen.
+
+### Object-level authorization
+
+Every route that loads a record by id must check the caller's relationship to it
+(owner, organization member, participant, admin) — "signed in" is not enough. The
+adversarial review of 2026-10-10 found the interview-assessment routes acting for any
+signed-in user (including moving another company's job application through a
+scorecard); they are now scoped to the hiring team and the assessed candidate
+(`tests/security/core-authz.test.ts`, "interview assessments are scoped…").
 
 ## 9. Webhooks
 
 Verify provider signature + timestamp/replay window. Record provider event ID and make handling idempotent.
 
-### Open gap — billing webhook is not authenticated
+### Billing webhook — signed (closed 2026-10-10)
 
-`POST /api/v1/webhooks/billing` currently validates the payload shape and
-enforces idempotency on the provider event ID, but it accepts **unsigned**
-requests. It therefore does not meet the requirement above, and must not be
-described as replay-resistant or signature-verified.
+`POST /api/v1/billing/webhook` rejects every request that does not carry
 
-Impact: anyone who can reach the endpoint can post a fabricated billing event.
+```text
+x-talentsphere-signature: t=<unix seconds>,v1=<hex HMAC-SHA256(BILLING_WEBHOOK_SECRET, "<t>.<raw body>")>
+```
 
-Not fixed here because the signing scheme is a provider contract, not an
-implementation detail — the provider, algorithm, header name, secret
-distribution and tolerance window are all unspecified. Inventing them would
-produce a webhook that looks secured while rejecting real events.
+with `t` within 300 seconds of the server clock (constant-time comparison over the exact
+bytes received). With no `BILLING_WEBHOOK_SECRET` configured the endpoint refuses
+everything (503) rather than trusting callers. Duplicate event ids are idempotent.
+Coverage: `tests/security/api-security.test.ts` (unsigned, wrong secret, stale timestamp,
+tampered body, valid).
 
-To close: specify the provider contract, then verify signature and timestamp
-before any processing, and reject on mismatch rather than falling through.
+**Caveat:** no payment provider is integrated, so this scheme is TalentSphere's own
+(modelled on Stripe's `t=…,v1=…`). When a provider is chosen, verify **its** signature
+contract instead; do not keep this one alongside it. Paid plans cannot be bought until
+then (`BILLING_MODE=disabled`; `simulated` is for demos/tests and refused in production).
 
 ## 10. AI Security
 

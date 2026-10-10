@@ -488,6 +488,38 @@ describe('SEC: interview assessments are scoped to the hiring team (BR-12, BR-17
     expect(res.status).toBe(404);
   });
 
+  it('a scorecard never resurrects a rejected application (ATS state machine)', async () => {
+    const other = await register(app, 'rejected-cand@example.org');
+    const applied = await call(app, 'POST', `/api/v1/jobs/${acme.jobId}/apply`, other.token, {});
+    const rejectedId = applied.body.application.id;
+    const rejected = await call(
+      app,
+      'POST',
+      `/api/v1/applications/${rejectedId}/transition`,
+      victim.token,
+      { applicationId: rejectedId, targetState: 'rejected', reason: 'Not a fit' }
+    );
+    expect(rejected.status).toBe(200);
+    const scheduled = await call(app, 'POST', '/api/v1/interviews/assessments', victim.token, {
+      orgId: acme.orgId,
+      applicationId: rejectedId,
+      candidateProfileId: other.profile.id,
+      interviewerUserId: victim.user.id,
+      title: 'Late round',
+      scheduledAt: new Date(Date.now() + 3_600_000).toISOString(),
+      durationMinutes: 30,
+      questionIds: [],
+    });
+    expect(scheduled.status).toBe(201);
+    const base = `/api/v1/interviews/assessments/${scheduled.body.assessment.id}`;
+    await call(app, 'POST', `${base}/join`, other.token);
+    await call(app, 'POST', `${base}/end`, victim.token, { resolution: 'completed' });
+    const scored = await call(app, 'POST', `${base}/scorecard`, victim.token, scorecard);
+    expect(scored.status).toBe(201);
+    const after = await call(app, 'GET', `/api/v1/applications/${rejectedId}`, victim.token);
+    expect(after.body.application.status).toBe('rejected');
+  });
+
   it('lets the hiring team score, which moves its own application to interviewing', async () => {
     const base = `/api/v1/interviews/assessments/${assessmentId}`;
     expect((await call(app, 'POST', `${base}/join`, candidate.token)).status).toBe(200);

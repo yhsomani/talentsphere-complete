@@ -43,26 +43,39 @@
 
 ## Executable Evidence & Implementation Verification
 
-Measured at HEAD `aad8b54d` (2026-10-08). Counts below are machine-reported, not estimated.
+Measured on branch `improvement/core-loop-durability` (2026-10-10). Counts are machine-reported,
+not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Automated tests (Vitest):** 94 files / **976 tests PASS** (`npx vitest run`).
-- **Automated tests (Playwright E2E):** **183 tests PASS**.
-- **Database Migrations:** **42** sequential SQL migrations (`00001` through `00042`) with RLS policies, foreign keys, and indexes.
-- **Monorepo Build:** 10/10 workspace packages and apps build cleanly (`tsc -b`), zero type errors.
-- **Lint & Code Style:** Prettier formatting clean.
+- **Vitest (unit, integration, security; in-memory storage):** 98 files / **1026 tests PASS** (`pnpm test`).
+- **Real PostgreSQL 16 (`pnpm test:pg`):** 2 files / **10 tests PASS** — restart round-trip of the
+  whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
+  email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
+  job-payload credential stripping. Mutation-checked (see the improvement report §G).
+- **Playwright (Chromium; E2E, accessibility, performance):** **190 tests PASS**, including
+  `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only).
+- **Database migrations:** **43** sequential SQL migrations (`00001`–`00043`); CI applies them
+  to an empty database and re-runs the runner as an idempotency check.
+- **Typecheck / lint / build:** `tsc -b` clean, Prettier clean, `pnpm build` clean.
+- **Not produced:** Reticle in-app verdicts (no Reticle tools in the verifying session);
+  load, soak, backup/restore and deployment tests (no deployment target exists).
 - **Per-feature verification:** tracked in `BRAIN/MEMORY.md`; not re-asserted here.
 
 ## Current Operational Status
 
-- **Production readiness: NOT met.** An independent end-user/business-owner audit
-  (`docs/reports/PRODUCTION_AUDIT_2026-10-03.md`) scored the product **NOT READY (4.6/10)**
-  at commit `8db0930`. Several items it raised have since been remediated — honest login
-  failure, checkout that confirms only on a 2xx response with a real invoice id, a real
-  storage boundary, durable background-job dispatch, and green CI.
-- **Open at HEAD `aad8b54d`:**
-  - checkout collects raw card fields (number/expiry/CVC) it never transmits — no payment processor;
-  - `/api/v1/billing/webhook` accepts unsigned payloads;
-  - entity data still lives in in-process Maps (`apps/api/src/server.ts`) — only background jobs are durable;
-  - no real payment, AI, or notification provider is wired.
-- **Production Gate:** open — see the audit for the current blocker list. Readiness is an
-  executable evidence gate, not an assertion.
+- **Production readiness: NOT met.** The 2026-10-03 audit (`docs/reports/PRODUCTION_AUDIT_2026-10-03.md`)
+  scored the product **NOT READY (4.6/10)** at `8db0930`. The 2026-10-10 improvement program
+  (`docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`) closed, with regression tests: core-loop
+  durability (entity data was not written in pg mode), forgeable verification (self-submitted
+  references, unproven email "verification"), cross-tenant job and interview authorization,
+  the fabricated web dashboard and jobs, card collection and free paid-plan activation, the
+  unsigned billing webhook, and concurrency races found in adversarial review.
+- **Open:**
+  - no email provider — verification codes and referee links are delivered only in development;
+  - no payment processor — paid plans cannot be bought (`BILLING_MODE=disabled`);
+  - ~225 routes outside the core loop keep state in process memory (labelled
+    `x-talentsphere-durability: ephemeral`);
+  - single API writer per database (ADR-015) until core reads move to SQL;
+  - no notification or AI provider; interview code execution is simulated;
+  - owner decisions pending: architecture of record, ADR-015/migration 00043 ratification,
+    pricing, legal review, deletion semantics (see the improvement report §H).
+- **Production Gate:** open. Readiness is an executable evidence gate, not an assertion.

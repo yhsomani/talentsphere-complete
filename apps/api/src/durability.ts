@@ -7,8 +7,9 @@
  * restart. That is a fact about the product, so the API states it instead of
  * hiding it: every response from a route NOT listed here carries
  * `x-talentsphere-durability: ephemeral`, and the admin health diagnostics
- * report the split. tests/unit/durability-registry.test.ts guards this list
- * against drift.
+ * report the split. tests/security/core-authz.test.ts checks every listed
+ * route exists; tests/pg/concurrency.test.ts checks the header on a real
+ * database (durable route unlabelled, long-tail route labelled).
  *
  * Moving a module to durable storage = route its writes through persist()
  * (apps/api/src/server.ts), add its tables to core-store.ts, then list its

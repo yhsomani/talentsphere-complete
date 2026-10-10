@@ -1,7 +1,7 @@
 # TalentSphere — ARCHITECTURE.md
 
 **Status:** Canonical architectural Single Source of Truth for the repository _as actually implemented_.
-**Basis:** Direct inspection of the working tree at branch `main` (commit `8afc6d7`), October 2026.
+**Basis:** Direct inspection of the working tree at branch `main` (commit `8afc6d7`), October 2026; **revised 2026-10-10** on branch `improvement/core-loop-durability` for the core-loop persistence (ADR-015) and the security fixes recorded in `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`. Revised sections: 2, 3, 4, 5, 6 (D3, D9), 7, 8 (Flows A–D), 9, 12, 13, 16, 17, 19, 20, 22, 24, 25, 26, 28. Where an unrevised passage still says "no database client" or "in-memory only", it predates the revision — §2 and §13 govern.
 **Governs:** Implementation decisions that cannot be safely inferred from reading individual files: ownership, boundaries, dependency direction, extension points, and stop conditions.
 **Does NOT document:** Product vision, the 173-feature portfolio, UX micro-interactions, or future intent. Those live in `SSOT.md` and `docs/`. Where those documents describe systems that do not exist in this repository (Supabase Auth JWT flow, TanStack Query, Stripe adapters, Edge Functions, RLS enforcement in a live database, feature folders in `apps/web/src/features/`), **this file wins for "what exists today"** and the divergence is recorded in §24.
 **Note on `AGENTS.md`:** its "Before coding → read `ARCHITECTURE.md`" step refers to **this root file**; `docs/engineering/ARCHITECTURE.md` is the intended/target architecture corpus.
@@ -24,44 +24,48 @@ Relationship to other docs: `AGENTS.md`/`CLAUDE.md` define agent workflow and ve
 
 ## 2. Architecture At A Glance
 
-TalentSphere is a **pnpm monorepo modular monolith**: one browser app, one HTTP API process, one async worker process, sharing pure-TypeScript workspace packages. Persistence is currently **in-process memory inside the API**; SQL schema exists but is **not connected to any runtime**.
+TalentSphere is a **pnpm monorepo modular monolith**: one browser app, one HTTP API process, one async worker process, sharing pure-TypeScript workspace packages. **The core career loop is persisted to PostgreSQL** (ADR-015): the API writes those entities in one transaction per request and keeps an in-memory read model hydrated at boot. **Every other module still keeps its state in in-process Maps** and says so on every response (`x-talentsphere-durability: ephemeral`).
 
 ```mermaid
 flowchart TD
     subgraph Browser
-        WEB["apps/web — React 19 + Vite PWA<br/>(9 routes, localStorage token)"]
+        WEB["apps/web — React 19 + Vite PWA<br/>(candidate, recruiter, referee journeys; localStorage token)"]
     end
     subgraph Runtime processes
-        API["apps/api — Fastify 5 modular monolith<br/>server.ts: routes + extractUser() + in-memory Maps"]
-        WORKER["apps/worker — JobQueueEngine poller<br/>(log-only handlers)"]
+        API["apps/api — Fastify 5 modular monolith<br/>server.ts: routes + extractUser()/resolveSession() + persist()"]
+        WORKER["apps/worker — claims background_jobs<br/>(SKIP LOCKED leases, retries, dead-letter)"]
     end
     subgraph Shared workspace packages
         DOM["@talentsphere/domain — pure business rules,<br/>auth primitives, state machines (no I/O)"]
         CON["@talentsphere/contracts — Zod input schemas + ErrorEnvelope"]
-        CFG["@talentsphere/config — env validation (zod)"]
+        CFG["@talentsphere/config — env validation + production refusals"]
         OBS["@talentsphere/observability — pino logger + audit sink"]
         UI["@talentsphere/ui — design tokens"]
-        TST["@talentsphere/testing — factories"]
     end
-    PG[("PostgreSQL / Supabase<br/>SCHEMA ONLY — 41 migrations, no client")]
-    MEM[("Runtime truth: ~147 in-process Maps<br/>inside buildApp() — lost on restart")]
+    PG[("PostgreSQL — 43 migrations<br/>core-loop tables + background_jobs")]
+    RM[("API read model: Maps hydrated from PG at boot,<br/>updated only after COMMIT (single writer)")]
+    MEM[("Long-tail module state: in-process Maps<br/>lost on restart, labelled ephemeral")]
 
     WEB -- "fetch('/api/v1/...') Bearer token" --> API
     API --> DOM
     API --> CON
     API --> CFG
+    API == "persist(): one transaction" ==> PG
+    API --> RM
+    API --> MEM
+    API -- "dispatchJob → enqueue" --> PG
+    WORKER -- "claim / complete / fail" --> PG
     WORKER --> OBS
-    API ==> MEM
-    API -. "NO client — not connected" .-x PG
 ```
 
-Key facts (CONFIRMED):
+Key facts (CONFIRMED, 2026-10-10):
 
-- **API surface:** 265 route registrations, all under `/api/v1/*` plus `/health` and `/api/v1/health` (`grep app.get/post/patch/delete apps/api/src/server.ts`).
-- **Persistence gap:** zero Postgres/Supabase clients anywhere in `apps/` or `packages/` (verified by `tests/unit/persistence-honesty.test.ts`, which asserts no `pg`/`postgres`/`@supabase/supabase-js`/`knex`/`typeorm` dependency exists).
-- **No production queue broker:** the worker polls its own in-process `JobQueueEngine` (`apps/worker/src/queue.ts`); nothing enqueues into it from the API process.
-- **AI is local:** `generateCareerAssistantResponse` is a deterministic heuristic (`packages/domain/src/ai-gateway.ts`, `executionMode: 'local_heuristic'`); no LLM provider SDK exists.
-- **Verification layer:** the web app is instrumented with Reticle (`@reticlehq/vite-plugin` in `apps/web/vite.config.ts`, `src/reticle-dev.ts`) per `CLAUDE.md`.
+- **API surface:** 269 route registrations under `/api/v1/*` plus `/health`. 41 are durable (`DURABLE_ROUTES`, `apps/api/src/durability.ts`), 3 stateless, ~225 ephemeral.
+- **Persistence:** `apps/api/src/storage/core-store.ts` (`PgCoreStore`) writes users, profiles, organizations, memberships, skills, jobs, applications, evidence, work history, references and email challenges; `packages/domain/src/background-jobs.ts` (`createPgJobStore`) writes jobs. `STORAGE=memory` exists for tests and is refused in production.
+- **Single writer:** the read model makes the API a single writer per database (ADR-015). Optimistic concurrency (`CoreOp.base` + database re-check) prevents lost updates on guarded records; it does not make two replicas consistent.
+- **No external providers:** no email, payment, notification, storage or LLM provider is integrated. Email jobs are printed in development and fail permanently elsewhere; paid plans cannot be bought (`BILLING_MODE=disabled`).
+- **AI is local:** `generateCareerAssistantResponse` is a deterministic heuristic (`packages/domain/src/ai-gateway.ts`, `executionMode: 'local_heuristic'`).
+- **Verification layer:** the web app is instrumented with Reticle (`@reticlehq/vite-plugin`, `src/reticle-dev.ts`) per `CLAUDE.md`.
 
 ---
 
@@ -71,9 +75,9 @@ Key facts (CONFIRMED):
 | ---------------------------------- | ----------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Authentication                     | Register/login/session tokens | Yes                             | Own code: `packages/domain/src/auth.ts` (PBKDF2 + HMAC tokens). **Supabase Auth is NOT integrated** despite env keys existing.               |
 | Authorization                      | Role checks, ownership checks | Yes                             | Server-side in `apps/api/src/server.ts` via `extractUser` + role assertions + domain functions (`canViewProfile`, `assertPlatformAdmin`, …). |
-| Database                           | Relational persistence        | **No (disconnected)**           | 41 SQL migrations exist under `supabase/migrations/`; no runtime connects to them. Truth lives in in-process Maps.                           |
-| Payments                           | Card processing               | No — and **no provider exists** | Checkout collects raw card fields in the browser (`CheckoutPage.tsx`) and calls a mock billing API. No Stripe/MID dependency anywhere.       |
-| Notifications delivery             | Email/push/SMS                | No                              | Worker handler only logs ("Delivering queued notification", `apps/worker/src/index.ts`).                                                     |
+| Database                           | Relational persistence        | **Yes — core loop only**        | 43 migrations; `pnpm db:migrate` applies them. Core loop + background jobs persisted (ADR-015); long-tail modules in-process only.           |
+| Payments                           | Card processing               | No — and **no provider exists** | No card fields anywhere. Paid plans refused unless `BILLING_MODE=simulated` (demo/test; refused in production). Webhook HMAC-signed.         |
+| Notifications delivery             | Email/push/SMS                | No                              | Email jobs print a "DEV OUTBOX" log in development and fail permanently elsewhere (`apps/worker/src/index.ts`). No push/SMS.                 |
 | AI inference                       | Career assistant              | Partially                       | Local heuristic inside domain package. External providers (Gemini/Claude) documented in SSOT but **not implemented**.                        |
 | Storage buckets                    | Avatars/resumes/etc.          | No                              | Env vars defined (`SUPABASE_BUCKET_*`) but no storage client code.                                                                           |
 | Identity provider                  | OAuth/social login            | No                              | Not implemented; email+password only.                                                                                                        |
@@ -90,11 +94,11 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 **Component: `apps/api` (@talentsphere/api)**
 
 - Purpose: the only server-side application surface. Fastify 5 modular monolith.
-- Owns: HTTP routing, request lifecycle, canonical error mapping, **all runtime state (in-memory Maps)**, endpoint-level authorization wiring.
+- Owns: HTTP routing, request lifecycle, canonical error mapping, endpoint-level authorization wiring, **core-loop persistence** (`persist()` → `storage/core-store.ts`, ADR-015) and its in-memory read model, and the in-memory state of every non-durable module.
 - Consumes: `@talentsphere/domain`, `@talentsphere/contracts`, `@talentsphere/config`.
 - Produces: JSON responses conforming to contracts; `ErrorEnvelope` on failure; `x-request-id` header on every response.
 - Depends on: fastify, @fastify/cors|helmet|rate-limit, zod, node:crypto.
-- Must not: contain business rules inline when a domain function exists; add a second error envelope shape; introduce direct DB access without an approved persistence decision (§8).
+- Must not: contain business rules inline when a domain function exists; add a second error envelope shape; write a core-loop entity anywhere but through `persist()`; run as more than one replica per database (ADR-015).
 - Primary location: `apps/api/src/server.ts` (`buildApp()` factory), `apps/api/src/index.ts` (bootstrap, skips listen under `NODE_ENV=test`).
 
 **Component: `packages/domain` (@talentsphere/domain)**
@@ -116,7 +120,7 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 
 **Component: `apps/web` (@talentsphere/web)**
 
-- Purpose: React 19 + Vite PWA consumer shell. 9 routes only (`App.tsx`: `/`, dashboard, login, checkout, evidence, assessments, jobs, privacy, terms).
+- Purpose: React 19 + Vite PWA. Routes (`App.tsx`): public `/`, `/login`, `/signup`, `/jobs`, `/jobs/:id`, `/reference/:id`, `/checkout` (pricing), `/privacy`, `/terms`; signed-in (`guarded`) `/dashboard`, `/evidence`, `/applications`, `/profile`, `/assessments` (preview), `/hiring`, `/hiring/jobs/:id`. Session state from `GET /api/v1/auth/session` (`SessionContext.tsx`).
 - Owns: routing, page composition, client form state, localStorage session keys (`talentsphere_token`, `talentsphere_user`), offline-status UI (`pwa.ts`), PWA manifest/icons.
 - Consumes: `@talentsphere/ui` tokens; API via relative `fetch('/api/v1/...')`.
 - Must not: hold business rules; mint/simulate authoritative state as if persisted (see CURRENT GAPs §24); call anything except the API.
@@ -147,9 +151,9 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 
 **Component: `supabase/migrations` + `scripts/`**
 
-- 41 numbered SQL migrations defining the _intended_ schema with RLS statements; validated only as text by `tests/unit/database-migrations.test.ts` ("SQL text assertions, does NOT execute SQL"). `scripts/migrate.mjs` deliberately refuses to claim execution and points at `supabase db push` (guarded by `persistence-honesty.test.ts`). `scripts/start-e2e-api.mjs` boots the built API for Playwright.
+- 43 numbered SQL migrations with RLS statements. `scripts/migrate.mjs` applies them (one transaction per file, `schema_migrations` ledger; guarded by `persistence-honesty.test.ts`); CI applies them to an empty Postgres and re-runs the runner as an idempotency check; `tests/pg/*` run the API against the result. `scripts/start-e2e-api.mjs` boots the built API for Playwright.
 
-**Communication paths (CONFIRMED):** Browser → API (HTTP, Bearer token) → domain functions → in-memory Maps. Worker runs standalone. Tests hit the API in-process (`buildApp()` + `app.inject`) or over HTTP for E2E. There is **no** API→Worker path, **no** API→DB path, **no** realtime channel, **no** outbound external integration.
+**Communication paths (CONFIRMED):** Browser → API (HTTP, Bearer token) → domain functions → `persist()` → Postgres (core loop) or in-memory Maps (long tail). API → Postgres `background_jobs` → worker (claim). Tests hit the API in-process (`buildApp()` + `app.inject`), against real Postgres (`tests/pg`), or over HTTP for E2E. There is **no** realtime channel and **no** outbound external integration.
 
 ---
 
@@ -163,12 +167,12 @@ External providers claimed by docs but absent from code (do NOT assume they exis
 | Role/permission rules                                 | Domain functions (`assertPlatformAdmin`, `canViewProfile`, `assertModeratorAuthority`, `assertThreadParticipant`, `assertAIAssistanceAllowed`, …) | `packages/domain/src/{admin,profile,moderation,messaging,assessment}.ts` | API routes call them; routes also do some inline `session.roles.includes('platform_admin')` checks (R-2). |
 | Application lifecycle states                          | `ALLOWED_APPLICATION_TRANSITIONS` + `transitionApplicationState`                                                                                  | `packages/domain/src/core.ts` + `applications.ts`                        | The state machine is canonical in domain.                                                                 |
 | Evidence lifecycle (verify/dispute/revoke/provenance) | domain `evidence.ts` functions                                                                                                                    | `packages/domain/src/evidence.ts`                                        |                                                                                                           |
-| Billing plans/entitlements/subscriptions              | domain `billing.ts` (`PLATFORM_PLANS`, `getPlanEntitlements`, `createSubscription`, `cancelSubscription`)                                         | `packages/domain/src/billing.ts`                                         | Payment _processing_ is owned by nobody (mock webhook only).                                              |
+| Billing plans/entitlements/subscriptions              | domain `billing.ts` (`PLATFORM_PLANS`, `getPlanEntitlements`, `createSubscription`, `cancelSubscription`)                                         | `packages/domain/src/billing.ts`                                         | No processor: paid plans refused unless `BILLING_MODE=simulated`; webhook signed (SECURITY.md §9).        |
 | AI quota/policy/sanitization                          | domain `ai-gateway.ts` (`AI_QUOTA_LIMITS`, `assertWithinAIQuota`, `sanitizePromptInput`)                                                          | `packages/domain/src/ai-gateway.ts`                                      | Tier selection currently hardcoded `'free'` at route level (`server.ts:5198`) — R-4.                      |
 | Request-payload validation                            | `@talentsphere/contracts` Zod schemas                                                                                                             | `packages/contracts/src/index.ts`                                        | `.parse(req.body)` inside route handlers; ZodError → 400 centrally.                                       |
 | Error→HTTP status mapping                             | Global `setErrorHandler`                                                                                                                          | `apps/api/src/server.ts` (~lines 470–545)                                | Sole translator of `DomainError.code` → status + `ErrorEnvelope`.                                         |
-| Runtime persistence                                   | In-process Maps inside `buildApp()`                                                                                                               | `apps/api/src/server.ts:571+`                                            | Deliberate current-state owner; replacement requires §8 stop-condition.                                   |
-| Intended relational schema                            | SQL migrations                                                                                                                                    | `supabase/migrations/*.sql`                                              | Text-verified only; not executed by app.                                                                  |
+| Core-loop persistence                                 | `persist()` + `PgCoreStore` (ADR-015)                                                                                                             | `apps/api/src/server.ts`, `apps/api/src/storage/core-store.ts`           | The only write path for core entities; read model updated after COMMIT. Long tail: in-process Maps.       |
+| Relational schema                                     | SQL migrations                                                                                                                                    | `supabase/migrations/*.sql`                                              | Applied by `scripts/migrate.mjs`; exercised by `tests/pg`.                                                |
 | Async job semantics (retry/DLQ/idempotency)           | `JobQueueEngine`                                                                                                                                  | `apps/worker/src/queue.ts`                                               | Handlers registered in `worker/src/index.ts`.                                                             |
 | Client session storage                                | Web pages/Layout                                                                                                                                  | `apps/web/src/pages/LoginPage.tsx`, `Layout.tsx`                         | localStorage keys `talentsphere_token`/`talentsphere_user`.                                               |
 | Design tokens                                         | `packages/ui/tokens.ts`                                                                                                                           | `packages/ui/src/tokens.ts`                                              | Competes with `apps/web/src/components/ui/` — R-3.                                                        |
@@ -193,8 +197,8 @@ Status: KNOWN DECISION (`SSOT.md` Founder Amendment A.1; `docs/engineering/ARCHI
 **D2 — Business logic lives in a pure `@talentsphere/domain` package; API holds no rules.**
 Status: KNOWN DECISION (import-rule section of `docs/engineering/ARCHITECTURE.md` §5; enforced structurally — domain has zero framework deps). Reason: rules must be testable without HTTP and reusable by worker/tests. Alternative: logic in Fastify services. Rejected: untestable duplication. Trade-off: routes become thin but numerous. Revisit: never (candidate invariant INV-002).
 
-**D3 — In-memory Maps as runtime persistence.**
-Status: INFERRED DECISION — the code comment says "In-memory repositories for modular monolith runtime state" (`server.ts:571`) and `persistence-honesty.test.ts` actively _guards_ against pretending a DB is connected. Strong evidence this is a deliberate staging choice pending Supabase wiring, not an oversight. Alternative: wire Postgres now. Not selected: no DB client dependency exists by design; honesty tests enforce that. Trade-off accepted: **all runtime state is lost on restart**. Justifies revisiting: first deployment target requiring durability (requires human decision — §8, §28 U-1).
+**D3 — In-memory Maps as runtime persistence.** _Superseded for the core loop by ADR-015 (2026-10-10); still true for long-tail modules._
+Status (original): INFERRED DECISION — the code comment says "In-memory repositories for modular monolith runtime state" (`server.ts:571`) and `persistence-honesty.test.ts` actively _guards_ against pretending a DB is connected. Strong evidence this is a deliberate staging choice pending Supabase wiring, not an oversight. Alternative: wire Postgres now. Not selected: no DB client dependency exists by design; honesty tests enforce that. Trade-off accepted: **all runtime state is lost on restart**. Justifies revisiting: first deployment target requiring durability (requires human decision — §8, §28 U-1).
 
 **D4 — Self-signed HMAC session tokens instead of Supabase Auth/JWT.**
 Status: KNOWN DECISION rationale recorded in-code (`auth.ts` TOKEN_SECRET comment: hardcoded fallback key would let anyone mint privileged tokens; random per-process key keeps tokens unforgeable at the cost of surviving restarts). Alternative: Supabase Auth (documented in `docs/engineering/ARCHITECTURE.md` §20.3 — NOT implemented). Trade-off: no refresh mechanism, no revocation list, sessions die with process unless `TOKEN_SECRET` set. Revisit when real auth provider is introduced — escalation required (`AGENTS.md`: security architecture changes).
@@ -211,8 +215,8 @@ Status: KNOWN DECISION direction (SSOT C: "AI Gateway foundational"; env flags `
 **D8 — Worker with in-process queue engine and log-only handlers.**
 Status: INFERRED DECISION (skeleton-first; `queue.ts` implements retry/DLQ/idempotency properly, handlers don't do work yet). Trade-off: async pipeline is not durable and not connected. Any real producer/consumer wiring = new infrastructure decision → ask.
 
-**D9 — Schema-as-text with honesty-guarded migration script.**
-Status: KNOWN DECISION (`migrate.mjs` validates contiguity and refuses success-claims; `database-migrations.test.ts` title states "does NOT execute SQL"). Reason: prevent "documented = implemented" drift the repo explicitly fights.
+**D9 — Schema-as-text with honesty-guarded migration script.** _Superseded: `migrate.mjs` now applies SQL (Phase 1) and the pg suite runs against it._
+Status (original): KNOWN DECISION (`migrate.mjs` validates contiguity and refuses success-claims; `database-migrations.test.ts` title states "does NOT execute SQL"). Reason: prevent "documented = implemented" drift the repo explicitly fights.
 
 **D10 — pnpm workspace with strict layered dependencies.**
 Status: CONFIRMED (`pnpm-workspace.yaml`; apps depend on packages, packages depend on nothing but zod/pino/crypto). Alternatives considered: UNKNOWN.
@@ -228,14 +232,14 @@ Status: CONFIRMED (`pnpm-workspace.yaml`; apps depend on packages, packages depe
 ## 7. QUESTION 04 — WHAT'S ALLOWED TO TOUCH WHAT?
 
 **Allowed Direction:**
-`apps/web → apps/api → (@talentsphere/contracts validation → @talentsphere/domain rules) → in-memory Maps (runtime) / supabase schema (text only)`
+`apps/web → apps/api → (@talentsphere/contracts validation → @talentsphere/domain rules) → persist() → Postgres (core loop) | in-memory Maps (long tail)`
 `apps/worker → @talentsphere/observability`
 Everything may depend on `@talentsphere/config` (processes) and `@talentsphere/testing` (tests only).
 
 **Allowed:**
 
 - UI → API HTTP only (relative `/api/v1/*`).
-- API route → contracts schema `.parse()` → domain function → Map store.
+- API route → contracts schema `.parse()` → domain function → `persist()` (core loop, with `base` for updates) or Map store (long tail).
 - Domain → `core.ts` leaf and sibling declaring-module imports (never its own barrel).
 
 **Forbidden Dependencies**
@@ -266,30 +270,27 @@ Everything may depend on `@talentsphere/config` (processes) and `@talentsphere/t
 ### Flow A — Login / session establishment (security-critical)
 
 Trigger: user submits credentials.
-`LoginPage.tsx handleSubmit` → `POST /api/v1/auth/login` → `LoginInputSchema.parse` → route looks up `usersByEmail` Map → `verifyPassword` (domain, timing-safe) → `createSessionToken(userId,email,roles)` → `{token,user,profile}` → UI writes `localStorage['talentsphere_token'|'talentsphere_user']` → redirect `/dashboard`.
-Authenticated requests: `Authorization: Bearer <token>` → `extractUser` → `verifySessionToken` (HMAC + expiry) → session payload `{userId,email,roles}` drives all downstream checks.
-Failure path: unknown user or bad password → `DomainError UNAUTHENTICATED` → 401 `ErrorEnvelope`. Expired/tampered token → verify returns null → 401.
-**CURRENT GAP (P0-01, audit):** on non-OK response the UI falls back to `demo_token_<timestamp>` + fake identity and still "logs in". This is a defect, not architecture — do not replicate; do not remove without fixing the real path (tests depend on flows).
-State transition: anonymous → authenticated. Ownership: token payload roles are trusted **only** because HMAC-verified server-side; localStorage is convenience copy, not truth.
+`LoginPage.tsx handleSubmit` → `POST /api/v1/auth/login` (rate-limited per IP+email, `preHandler` hook) → `LoginInputSchema.parse` → `usersByEmail` read model → `verifyPassword` (PBKDF2-SHA512 210k, timing-safe; decoy hash for unknown emails; legacy hashes re-hashed via `persist`) → `createSessionToken(userId,email,roles)` → `{token,user,profile}` → UI stores the token; `SessionProvider` loads `GET /api/v1/auth/session` for roles, profile and memberships.
+Authenticated requests: `Authorization: Bearer <token>` → `extractUser` → `verifySessionToken` (HMAC + expiry) → `resolveSession`: the account's **current** status and roles (suspended/banned → only appeal and data-rights routes; erased → 401).
+Failure path: unknown user or bad password → 401 `ErrorEnvelope`, shown as a form error. (The former demo-token fallback, P0-01, is gone.)
+Ownership: identity from the signed token; privileges from the account record.
 
 ### Flow B — Evidence creation & verification (core product loop)
 
-`EvidencePage`/client → `POST /api/v1/evidence` → parse → `extractUser` → domain `createEvidence` (status `pending`, provenance recorded) → stored in evidence Maps → response. Verifier role → `POST .../verify|dispute|revoke` → domain transitions (`verifyEvidence` etc. enforce who may move which state) → updated record; public proof generation available (`generatePublicProof`).
-Failure: wrong role → `FORBIDDEN`/`UNAUTHORIZED` 403; bad state → `INVALID_STATE_TRANSITION` 422.
-Ownership: evidence state truth = API Maps (runtime) / `public.evidence` table (intended, disconnected).
-**CURRENT GAP (P0-07):** `EvidencePage.tsx:133` fabricates `sha256:` hashes with `Math.random()` client-side — simulation, not transaction.
+`EvidencePage` → `POST /api/v1/evidence` → parse (real calendar dates, de-duplicated skill ids) → `extractUser` → every skill validated **before** writing → domain `createEvidence` → `persist({kind:'evidence', skillIds})` (evidence + `evidence_skills` in one transaction). Verifier → `POST .../verify|dispute|revoke` → domain transition → `persist({..., base: evidence})`.
+Work history (the trust core): `POST /candidates/work-history` → `persist`; `POST .../verify-email` step 1 sends a 6-digit code (hash stored, 15 min, 5 attempts) via the worker; step 2 checks it (`base: challenge`, so concurrent guesses cannot be folded into one attempt). References: `POST .../references/request` stores the token hash and emails the referee; `POST .../references/:refId/submit` requires the token, consumes it, and rescores the role (`base` on reference and work history).
+Failure: wrong role → 403; bad state → 422; a concurrent write to the same record → 409 `CONFLICT` (`reason: concurrent_modification`).
+Ownership: Postgres (`evidence`, `verified_work_histories`, `employment_references`, `work_history_email_challenges`); the Maps are a read model. (The client-side fabricated hashes, P0-07, are gone.)
 
 ### Flow C — Job application submission (business transaction)
 
-`JobsPage` → `POST /api/v1/jobs/:id/apply` → `SubmitApplicationInputSchema` → participant checks → `submitJobApplication` (domain) → recruiter transitions via `transitionApplicationState` guarded by `ALLOWED_APPLICATION_TRANSITIONS` (draft→submitted→in_review→shortlisted→interviewing→offered→hired|rejected|withdrawn; terminal states immutable).
-Failure: illegal edge → 422 `INVALID_STATE_TRANSITION`; non-party → 403.
-**CURRENT GAP (P0-07):** `JobsPage.tsx:79-82,218` shows "Application Transmitted" from local React state without fetching — UI simulates the transaction.
+`JobDetailPage` → `POST /api/v1/jobs/:id/apply` → `SubmitApplicationInputSchema` → evidence ownership checks → `submitJobApplication` (domain; BR-15 one active application per job) → `persist` (Postgres partial unique index arbitrates races → 409). Recruiter (`HiringJobPage`) and candidate (`ApplicationsPage`, withdraw) move it via `POST /applications/:id/transition` → `transitionApplicationState` guarded by `ALLOWED_APPLICATION_TRANSITIONS` → `persist({..., base: application})` — of two conflicting concurrent transitions exactly one is acknowledged.
+Failure: illegal edge → 422; non-party → 403; concurrent change → 409. (The simulated "Application Transmitted", P0-07, is gone.)
 
 ### Flow D — Subscription checkout (money-adjacent)
 
-`CheckoutPage` → (raw card fields collected client-side — **CURRENT GAP P0-03**, no processor/tokenizer exists) → `POST /api/v1/billing/subscribe` with Bearer token + client-generated `idempotencyKey` → domain `createSubscription` against `PLATFORM_PLANS` → `subscriptionsByUserId`/`entitlementsByUserId` Maps + invoice record. Cancel → `cancelSubscription` (at-period-end semantics). Webhook `POST /api/v1/billing/webhook` dedupes via `billingEventsByIdempotency` Map.
-Failure: **swallowed** — UI uses `.catch(() => null)` then unconditionally renders "Subscription Confirmed!" (**CURRENT GAP P0-02**). Webhook is unsigned (**P0-05**, acknowledged in `docs/quality/SECURITY.md` §9).
-Ownership: subscription/entitlement truth = domain functions + API Maps. Nothing external is source of truth.
+`CheckoutPage` is a pricing page: the free plan needs nothing; paid plans state they are not yet available. No card data is collected anywhere. `POST /api/v1/billing/subscribe` refuses paid plans unless `BILLING_MODE=simulated` (demos/tests; refused in production) → domain `createSubscription` → in-memory Maps (billing is not durable). Webhook `POST /api/v1/billing/webhook` requires `x-talentsphere-signature` (HMAC-SHA256 over `t.rawBody`, 300 s tolerance; no secret ⇒ 503) and dedupes event ids.
+Ownership: no payment processor exists; choosing one (and its webhook contract) is an owner decision.
 
 ### Flow E — AI assistant query (policy-critical)
 
@@ -312,7 +313,7 @@ Cross-cutting: every response carries `x-request-id` (echoing inbound header or 
 2. **Session tokens must remain unforgeable.** Never reintroduce a hardcoded/default signing secret; `TOKEN_SECRET` optional-fallback randomness (`auth.ts`) is intentional.
 3. **Business rules live only in `@talentsphere/domain`.** State machines (`ALLOWED_APPLICATION_TRANSITIONS`, evidence lifecycle, subscription cancel semantics, AI quotas, XP caps) have exactly one definition. Routes call, never reimplement.
 4. **One error contract.** All failures return `ErrorEnvelope` translated by the single global handler; `DomainError.code` → status mapping stays centralized.
-5. **Secrets never ship to the client or the repo.** Service-role keys, `TOKEN_SECRET`, and card data stay out of `apps/web`, bundles, and commits. (Card data currently violates this as a documented GAP — it must never spread further.)
+5. **Secrets never ship to the client or the repo.** Service-role keys, `TOKEN_SECRET`, and card data stay out of `apps/web`, bundles, and commits. Verification codes and referee tokens are stored only as SHA-256 and never returned to the person being verified.
 6. **Honesty guards stay green.** `tests/unit/persistence-honesty.test.ts` and `database-migrations.test.ts` encode "documented ≠ implemented": never add code or claims that pretend DB/queue/provider connectivity.
 7. **Free-user AI cost invariant.** `AI_FREE_USER_PAID_INFERENCE=false` default and `assertWithinAIQuota` must not be bypassed; paid inference for free users requires explicit founder-level policy change.
 8. **Assessment integrity propagates server-side.** During `AI_PROHIBITED`, every AI entry point is blocked by domain check; hiding UI affordances is not enforcement (SSOT D).
@@ -374,27 +375,28 @@ Also STOP when:
 
 - **Provider:** self-owned. No external IdP is integrated (CONFIRMED: no `@supabase/supabase-js`, no JWT libs).
 - **Login mechanisms:** email+password only (`/api/v1/auth/register`, `/login`). Registration assigns a single role from the `Role` union (10 roles, `core.ts`).
-- **Token model:** stateless HMAC-SHA256 `base64url(payload).signature`, payload `{userId,email,roles,issuedAt,expiresAt}`, default TTL 24 h (`auth.ts`). **No refresh token, no logout endpoint, no server-side revocation** — logout is purely client-side key deletion (`Layout.tsx:285-286`). Expiry enforced in `verifySessionToken`.
+- **Token model:** HMAC-SHA256 `base64url(payload).signature`, payload `{userId,email,roles,issuedAt,expiresAt}`, default TTL 24 h (`auth.ts`). No refresh token and no logout revocation (sign-out deletes the client copy), but `resolveSession` applies the account's current status and roles on every request, so suspension, erasure and role changes take effect immediately.
 - **Storage:** browser localStorage (`talentsphere_token`, `talentsphere_user`). CURRENT GAP: XSS-readable; acceptable only because the whole app is pre-production (audit P0-01 context).
 - **Request authentication:** `extractUser(req)` (`server.ts:672`) parses `Authorization: Bearer`, verifies, throws `UNAUTHENTICATED` → 401. Optional-auth endpoints (public profile/evidence views that adapt to the viewer) use `maybeExtractUser` (`server.ts:686`), which returns `null` on missing/invalid tokens; some routes additionally re-implement this inline (R-2 — do not add more).
 - **Authorization model:** role membership + resource ownership + tenant/org checks, all implemented as domain predicates surfaced through route calls (`assertPlatformAdmin`, `canViewProfile` honoring `ProfilePrivacy`, `assertModeratorAuthority`, `assertThreadParticipant`, `areConnected`, `TENANT_ISOLATION_VIOLATION` code). Feature availability additionally gated by `featureFlags` Map and maintenance-mode flag.
 - **Frontend authorization:** decorative navigation gating only; the API never trusts client claims beyond the signed token.
 - **Service-to-service:** none exists (`service_account` role is declared but unused).
 - **Canonical identity truth:** the signed token payload + `usersByEmail/usersById` Maps. localStorage copies are caches.
-- **Failure behavior:** uniform 401/403 `ErrorEnvelope` with `request_id`; `AUTH_RATE_LIMIT_MAX_REQUESTS` is defined in config but **never referenced by any code** (CONFIRMED via grep) — per-route auth rate limiting is NOT implemented; only the global limiter applies. Optional-auth endpoints use the documented `maybeExtractUser` helper (`server.ts:686`) which returns `null` instead of throwing.
+- **Failure behavior:** uniform 401/403 `ErrorEnvelope` with `request_id`. `AUTH_RATE_LIMIT_MAX_REQUESTS` is enforced: login per client IP + email, sign-up per client IP, on top of the global limiter. Optional-auth endpoints use `maybeExtractUser`, which returns `null` instead of throwing.
+- **Object-level authorization:** every route that loads a record by id must check the caller's relationship to it (owner, org member via `canManageJobs`/memberships, participant, admin). The 2026-10-10 review found and fixed routes that checked only "signed in" (interview assessments) or trusted the record's own org as the actor's (job status).
 
 ---
 
 ## 13. Data Architecture
 
-- **Primary stores:** (1) authoritative-at-runtime: ~147 in-process Maps + arrays inside `buildApp()`; (2) authoritative-at-design: PostgreSQL schema in 41 migrations (`profiles`, `evidence`, `organizations`, `jobs`, `job_applications`, `audit_logs`, `feature_flags`, plus per-context tables), including RLS policies — **never executed by the application**.
-- **Repositories:** none as classes; the Map groups ARE the repositories, accessed only within route closures. Keying convention: by-id plus by-owner/by-org secondary indexes (`talentPoolsById` + `talentPoolsByOrgId`).
-- **Transactions/consistency:** single-process synchronous JS mutation sequences; no ACID guarantees; multi-Map writes can partially fail (no rollback) — acceptable only under the ephemeral-state premise.
-- **Caching/local persistence:** none server-side; browser localStorage session cache; PWA capability detection only (`pwa.ts`), no offline sync engine.
-- **Migrations:** numbering contract `000NN_name.sql` contiguous from 00001 (enforced by `scripts/migrate.mjs`, which refuses to run against a placeholder DB URL and directs real application to `supabase db push`). Seed: `supabase/seed/01_initial_seed.sql`, `scripts/seed.mjs`.
-- **Sensitive data:** passwords stored as PBKDF2 `salt:hash`; emails lowercased keys; salary reports & interview recordings carry consent flows (`updateRecordingConsent`); erasure/export implemented in domain `settings.ts` (`executeLogicalAnonymization`, `compileDataExportArchive`) against Maps.
-- **Retention/deletion:** GDPR-style request workflows exist as code paths; actual retention policy values are configuration per SSOT G — UNKNOWN beyond that.
-- **Who may touch the database:** today, nobody (no client). When persistence lands, only an approved repository layer inside `apps/api` may hold a DB client — never domain, never web (INV-005).
+- **Primary stores:** (1) **PostgreSQL** for the core loop — `users`, `profiles`, `organizations`, `org_memberships`, `skills`, `jobs` + `job_skills`, `job_applications` + `application_evidence`, `evidence` + `evidence_skills`, `verified_work_histories`, `employment_references`, `work_history_email_challenges` — and for `background_jobs`; (2) **in-process Maps** for every other module (~225 routes), lost on restart and labelled `x-talentsphere-durability: ephemeral`.
+- **Write path (ADR-015):** `persist(...ops)` → `PgCoreStore.commit` runs all ops in one transaction (parents before children, deletes last) → after `COMMIT`, `applyToReadModel` updates the primary Map and every secondary index. A failed commit leaves the read model untouched and fails the request.
+- **Read path:** the Maps, hydrated from Postgres at boot before the server listens.
+- **Consistency:** single writer per database (one API replica). Updates carry `base`; `persist()` refuses (409) when the record changed or another write to it is in flight, and Postgres re-checks the decisive columns (`status`, `attempts`+`code_hash`, …). Postgres integrity errors map to 409 (unique) / 422 (FK, CHECK, data exceptions) instead of 500.
+- **Migrations:** `000NN_name.sql` contiguous from 00001, applied by `scripts/migrate.mjs` (transaction per file, `schema_migrations` ledger). `00043` aligned the schema with the domain (see ADR-015).
+- **Sensitive data:** passwords PBKDF2-SHA512 (versioned format); email codes and referee tokens as SHA-256 only; one-time secrets stripped from job payloads on completion; emails unique case-insensitively.
+- **Retention/deletion:** GDPR erasure (`POST /settings/erasure/execute`) anonymises the user and profile, deletes work history, references and evidence, withdraws open applications and blanks cover letters — in one transaction. The 30-day-grace request/cancel flow exists but is in-memory (owner decision pending on deletion semantics).
+- **Who may touch the database:** only `apps/api/src/storage/*` and the job store; never domain logic, never web (INV-005). Out-of-band SQL changes are seen after an API restart.
 
 ---
 
@@ -434,7 +436,7 @@ Also STOP when:
 - **Middleware/hooks:** helmet (CSP only in production), cors (allowlist from env, credentials on), global rate limit, `onSend` x-request-id echo, 404 handler, unified error handler. No auth middleware globally — per-route `extractUser` (deliberate: mixed public/protected endpoints).
 - **Controllers/routes:** thin handlers; each parses contracts, calls domain, mutates Maps.
 - **Business layer:** `@talentsphere/domain` — canonical location for ALL business logic (INV-002).
-- **Repositories/adapters:** Maps (runtime) only; no DB adapter, no external adapters exist.
+- **Repositories/adapters:** `storage/core-store.ts` (`PgCoreStore`/`MemoryCoreStore`) for the core loop; the job store for `background_jobs`; Maps for everything else. No external provider adapters exist.
 - **Jobs/queues:** none in API; worker stands alone (§18).
 - **Observability:** Fastify's pino with redaction; admin audit array in-process; health endpoints `/health`, `/api/v1/health`; admin diagnostics endpoint guarded by honesty tests against fake `dbConnected:true`.
 - **Configuration:** `validateServerEnv()` fail-fast at boot; every knob documented inline in `env.ts`.
@@ -443,7 +445,7 @@ Also STOP when:
 
 ## 17. External Systems & Integrations
 
-**There are none implemented.** No provider SDK, webhook receiver (the billing "webhook" is a plain internal endpoint), SMTP, SMS, storage upload, or LLM call exists in code. Env variables (`SUPABASE_*`, bucket names) and doc references (Stripe/Resend/Gemini/Mux/LinkedIn in `docs/engineering/ARCHITECTURE.md` §20.1) are **reserved placeholders, not integrations** — CONFIRMED absence via dependency scans.
+**There are none implemented.** No provider SDK, SMTP, SMS, storage upload, or LLM call exists in code. The billing webhook verifies a TalentSphere-defined HMAC signature; no provider sends to it yet. Env variables (`SUPABASE_*`, bucket names) and doc references (Stripe/Resend/Gemini/Mux/LinkedIn in `docs/engineering/ARCHITECTURE.md` §20.1) are **reserved placeholders, not integrations** — CONFIRMED absence via dependency scans.
 
 Consequence: any task that says "integrate X" hits §11 stop conditions immediately. The agreed landing shape (per SSOT replaceability principle) would be: adapter module inside `apps/api` (or a new `packages/integrations` upon approval), credentials only via `packages/config` env schema, timeouts/retries explicit, and failure behavior returning `DomainError` mapped through the central handler. Until a human picks that structure, do not improvise it.
 
@@ -462,7 +464,8 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 ## 19. Error & Failure Architecture
 
 - **Canonical mechanism:** throw `DomainError(code, message, details)` (domain) or ZodError (contracts) → global `setErrorHandler` → status map (`UNAUTHENTICATED`→401, `UNAUTHORIZED/FORBIDDEN/TENANT_ISOLATION_VIOLATION/ASSESSMENT_AI_PROHIBITED`→403, `NOT_FOUND`→404, `CONFLICT`→409, `VALIDATION_FAILED/INVALID_STATE_TRANSITION/POLICY_VIOLATION`→422, `FREE_USER_AI_QUOTA_EXCEEDED`→402, `RATE_LIMIT_EXCEEDED`→429) → `ErrorEnvelope` with `request_id`. Production masks internal messages ("unexpected internal error"); non-production leaks `error.message` (dev aid — do not rely on it client-side).
-- **Infrastructure failures:** effectively unreachable (no DB/network deps in-process); plugin HTTP errors honored via statusCode branch.
+- **Infrastructure failures:** Postgres errors from `PgCoreStore` map to `CONFLICT`/`VALIDATION_FAILED` where they are the caller's fault (unique, FK, CHECK, SQLSTATE class 22); anything else is a 500. Plugin HTTP errors honored via statusCode branch.
+- **Logging levels:** refused requests (4xx) log at info (`API request rejected`, status + code, no stack); faults (5xx) at error (`API request failed`, with stack) — so error-level alerting means a fault.
 - **Retryable vs not:** only the worker distinguishes (attempt count). Client side: none standardized.
 - **User-visible errors:** pages show local strings; two pages swallow errors (gaps P0-01/P0-02) — fixes should propagate errors visibly, matching `docs/experience/UI_UX_DESIGN_SYSTEM.md` §UX-MICRO-05, without creating a second client error framework.
 - **Logging/telemetry:** pino structured logs with redaction; analytics events endpoint stores in-memory `AnalyticsEvent`s (`recordAnalyticsEvent`, `computeKPIs`). No metrics exporter/tracing backend.
@@ -475,7 +478,10 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 **Implemented boundaries (CONFIRMED):**
 
 - Trust boundary at the token signature: privileges come only from HMAC-verified payloads; random per-process key fallback documented and defended (`auth.ts` comment).
-- Password storage: PBKDF2-SHA512 10 000 iters, per-user salt, constant-time verify.
+- Password storage: PBKDF2-SHA512 210 000 iterations, per-user salt, versioned format with re-hash on login, constant-time verify, decoy hash for unknown emails.
+- Account state per request (`resolveSession`); credential endpoints rate-limited per account and client.
+- Verification credentials (email codes, referee tokens) stored only as SHA-256, delivered only to the third party, single-use, attempt-limited with race-proof counting.
+- Production refuses unsafe configuration at boot (`productionConfigProblems`).
 - Log redaction lists in both `packages/observability` and Fastify logger config (authorization headers, password/token/secret/apiKey/accessToken/refreshToken).
 - Helmet + allowlisted CORS + global rate limit; CSP enabled in production mode.
 - Server-side enforcement of profile privacy, thread participation, moderation authority, platform-admin actions (each admin mutation appends `AdminAuditLog`), assessment AI policy, AI quotas, application state legality.
@@ -483,14 +489,11 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 
 **CURRENT GAPS (do not present as intended design; do not widen):**
 
-- G-1 P0-01 demo-token login fallback in `LoginPage.tsx` (auth bypass UX).
-- G-2 P0-02 checkout confirms success despite failed backend call.
-- G-3 P0-03 raw PAN/CVC fields handled by browser app with no tokenizer/processor.
-- G-4 P0-05 billing webhook accepts unauthenticated callers (acknowledged in `SECURITY.md` §9).
+- ~~G-1 demo-token login fallback~~, ~~G-2 checkout false success~~, ~~G-3 raw card fields~~, ~~G-4 unsigned webhook~~, ~~G-7 fabricated hashes/simulated submissions~~, ~~G-8 unsupported compliance copy~~ — closed 2026-10-10 (`docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`).
 - G-5 localStorage token exposure (standard XSS surface).
-- G-6 No refresh/revocation; 24 h stolen-token window.
-- G-7 Fake evidence hashes / simulated submissions in web pages (misleading trust artifacts).
-- G-8 Compliance marketing copy ("GDPR & CCPA Compliant", "SOC2 Type II Ready") unsupported by controls (audit finding 22.6).
+- G-6 No refresh token and no revocation on sign-out; a stolen token works for up to 24 h unless the account is suspended or erased.
+- G-9 No email provider: verification codes and referee links reach nobody outside development.
+- G-10 Long-tail modules (~225 routes) are not durable; interview "code execution" is simulated.
   Each gap is a fix candidate **only** as an explicit, tested remediation task; agents must not add code that deepens them (e.g., new client-side auth shortcuts, new unsigned callback endpoints).
 
 ---
@@ -513,13 +516,14 @@ Consequence: any task that says "integrate X" hits §11 stop conditions immediat
 | Pure business rules         | `tests/unit/*-domain.test.ts` (Vitest)                                                                             | Import domain **from source** (`packages/domain/src`); one suite per context module.                          |
 | Honesty/architecture guards | `tests/unit/persistence-honesty.test.ts`, `database-migrations.test.ts`, `foundation.test.ts`, `web-shell.test.ts` | Static source/dependency assertions — these encode architecture; changing them IS an architecture change.     |
 | API behavior                | `tests/integration/*.test.ts`                                                                                      | `buildApp(customEnv)` + Fastify `inject`; full route→domain→Map path.                                         |
-| Security                    | `tests/security/api-security.test.ts` (`pnpm test:security`)                                                       | Token forgery, authz bypass, redaction probes.                                                                |
+| Security                    | `tests/security/*.test.ts` (`pnpm test:security`)                                                                  | Token forgery, authz bypass, redaction probes; `core-authz.test.ts` reproduces each 2026-10-10 exploit.       |
+| Real database               | `tests/pg/*.test.ts` (`pnpm test:pg`, needs `TEST_DATABASE_URL`)                                                   | Fresh database per file; restart round-trips, races, erasure, data exceptions. CI runs it on `postgres:16`.   |
 | Complete journeys           | `tests/e2e/*.spec.ts` (Playwright, chromium, workers=1, retries=0)                                                 | Boots real built API (`start-e2e-api.mjs`) + preview web build; mints tokens with pinned `TEST_TOKEN_SECRET`. |
 | A11y / performance          | `accessibility.spec.ts`, `performance.spec.ts` (dedicated npm scripts)                                             | Perf baseline artifact uploaded in CI.                                                                        |
 | Fixtures/factories          | `packages/testing`                                                                                                 | Mock domain entities only.                                                                                    |
 | Agent-facing verification   | Reticle flows (`CLAUDE.md`)                                                                                        | UI-affecting changes require a driven verdict before "done".                                                  |
 
-Both Vitest and Playwright pin the same token secret because source-built and dist-built copies of `auth.ts` coexist (§7 hidden coupling). CI gate order: prettier → tsc → vitest suites → build → Playwright (`ci.yml`; documented as hard release gate — note audit P0-08: trunk CI was red at typecheck on 2026-10-03; verifying current CI color is UNKNOWN from this snapshot).
+Both Vitest and Playwright pin the same token secret because source-built and dist-built copies of `auth.ts` coexist (§7 hidden coupling). CI gate order: prettier → tsc → vitest → migrations on an empty Postgres (+ idempotent re-run) → pg suite → build → Playwright (`ci.yml`). Vitest runs `STORAGE=memory`; concurrency bugs that only appear with an awaited database commit are caught only by `tests/pg`.
 
 ---
 
@@ -536,18 +540,21 @@ Both Vitest and Playwright pin the same token secret because source-built and di
 
 ## 24. Architectural Risks & Drift
 
-| #      | Issue                                                                                                              | Evidence                                                                                   | Affected       | Why It Matters                                                            | Current State                                                                          | Recommended Direction                                                                     | Human Decision?                    |
-| ------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------- |
-| CRIT-1 | Runtime state evaporates on restart while product promises durable careers/billing                                 | `server.ts:571` Maps; honesty tests                                                        | API, all flows | Blocks any production claim; invites accidental persistence assumptions   | Deliberate staging choice (D3)                                                         | Approved persistence layer inside API only                                                | **Yes**                            |
-| CRIT-2 | Auth/payment client-side simulations contradict server truth                                                       | LoginPage fallback, CheckoutPage swallow, JobsPage fake transmit, EvidencePage random hash | Web            | Users/agents may believe flows work; security theater                     | Recorded P0 gaps in audit report                                                       | Remediate behind tests, one flow at a time                                                | No (fix), Yes (if redesign)        |
-| HIGH-3 | `server.ts` god-file (11 232 lines, 265 routes, 147 Maps in one closure)                                           | wc/grep counts                                                                             | API            | Merge conflicts, hidden coupling, no module isolation for extraction plan | Matches "modular monolith" wording loosely; modularity lives in domain, not API layout | Split per-context route modules sharing injected stores — refactor, keep contracts stable | Suggested yes (large blast radius) |
-| HIGH-4 | Duplicate/inline auth handling beside `extractUser`                                                                | manual `verifySessionToken` at lines 804/979/1022                                          | API            | Divergent auth semantics = security drift                                 | R-2                                                                                    | Consolidate onto `extractUser` + typed optional-auth decorator                            | Yes                                |
-| HIGH-5 | AI tier hardcoded `'free'` ignoring subscriptions                                                                  | `server.ts:5198`                                                                           | AI, billing    | Entitlement inconsistency; quota/monetization mismatch                    | R-4                                                                                    | Define single tier-resolution owner (billing → ai-gateway)                                | **Yes**                            |
-| MED-6  | Two audit mechanisms (API Map vs `AuditSink`)                                                                      | `admin.ts`/`server.ts` vs `observability/audit.ts` (unused)                                | Admin, ops     | Unclear operational truth once DB lands                                   | R-6                                                                                    | Pick sink-backed audit at persistence time                                                | Yes                                |
-| MED-7  | Docs depict unimplemented architecture (Supabase Auth JWT, TanStack Query, Edge Functions, Stripe, Tailwind/Radix) | `docs/engineering/ARCHITECTURE.md` §20.x vs code                                           | Whole repo     | Agents may build against fiction                                          | Governance already separates DOCUMENTED≠IMPLEMENTED                                    | Treat docs as roadmap; this file as current law                                           | No                                 |
-| MED-8  | Web fetches relative `/api/v1` with no configured proxy                                                            | `vite.config.ts` lacks proxy; preview origin differs from API origin                       | Web↔API        | Dev cross-origin behavior undocumented (U-2)                              | Works in E2E because tests use API directly/page copy                                  | Decide gateway/dev-proxy explicitly                                                       | Yes                                |
-| LOW-9  | Dual lockfiles (`package-lock.json` + `pnpm-lock.yaml`) from unmerged CI-fix attempt                               | root listing; audit Rev C                                                                  | Toolchain      | Ambiguous package manager; `packageManager` field says pnpm               | P0-08 remediation in flight                                                            | Remove stray lockfile after CI fix lands                                                  | Minor                              |
-| LOW-10 | Pagination contracts defined but inconsistently applied                                                            | `PaginationQuerySchema` vs plain-list endpoints                                            | API            | Clients can't rely on paging                                              | Partial adoption                                                                       | Adopt progressively on list endpoints                                                     | No                                 |
+| #      | Issue                                                                                                              | Evidence                                                             | Affected      | Why It Matters                                                            | Current State                                                                          | Recommended Direction                                                                     | Human Decision?                    |
+| ------ | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------- |
+| CRIT-1 | Long-tail module state (~225 routes) evaporates on restart                                                         | `durability.ts`; `x-talentsphere-durability` header                  | API           | Messaging, notifications, learning, billing records are not durable       | Core loop durable since ADR-015 (2026-10-10); long tail labelled                       | Move modules through `persist()` one at a time, users' expectations first                 | Ratify ADR-015                     |
+| CRIT-2 | ~~Auth/payment client-side simulations~~                                                                           | —                                                                    | Web           | —                                                                         | **Closed 2026-10-10**                                                                  | —                                                                                         | —                                  |
+| CRIT-3 | Single writer: the read model is per process                                                                       | ADR-015                                                              | API, ops      | A second replica serves diverging state                                   | Documented in OPERATIONS §9; database guards stop lost updates on guarded records      | ADR-015 exit path: core reads in SQL                                                      | Yes (when scaling)                 |
+| CRIT-4 | No email provider: the verification loop cannot run outside development                                            | `apps/worker/src/index.ts` `deliverEmail`                            | Trust loop    | The product's differentiator is unusable in staging/production            | Fails permanently and visibly                                                          | Integrate a provider behind the worker                                                    | **Yes** (new infrastructure)       |
+| CRIT-5 | Three architectures in circulation (this repo; Next.js/Supabase blueprint; Spring Boot plan)                       | claude.ai project docs vs repo                                       | Whole program | Work may be planned against a codebase that does not exist                | This file records the implemented one                                                  | Owner picks the architecture of record; archive the rest                                  | **Yes**                            |
+| HIGH-3 | `server.ts` god-file (11 232 lines, 265 routes, 147 Maps in one closure)                                           | wc/grep counts                                                       | API           | Merge conflicts, hidden coupling, no module isolation for extraction plan | Matches "modular monolith" wording loosely; modularity lives in domain, not API layout | Split per-context route modules sharing injected stores — refactor, keep contracts stable | Suggested yes (large blast radius) |
+| HIGH-4 | Duplicate/inline auth handling beside `extractUser`                                                                | manual `verifySessionToken` at lines 804/979/1022                    | API           | Divergent auth semantics = security drift                                 | R-2                                                                                    | Consolidate onto `extractUser` + typed optional-auth decorator                            | Yes                                |
+| HIGH-5 | AI tier hardcoded `'free'` ignoring subscriptions                                                                  | `server.ts:5198`                                                     | AI, billing   | Entitlement inconsistency; quota/monetization mismatch                    | R-4                                                                                    | Define single tier-resolution owner (billing → ai-gateway)                                | **Yes**                            |
+| MED-6  | Two audit mechanisms (API Map vs `AuditSink`)                                                                      | `admin.ts`/`server.ts` vs `observability/audit.ts` (unused)          | Admin, ops    | Unclear operational truth once DB lands                                   | R-6                                                                                    | Pick sink-backed audit at persistence time                                                | Yes                                |
+| MED-7  | Docs depict unimplemented architecture (Supabase Auth JWT, TanStack Query, Edge Functions, Stripe, Tailwind/Radix) | `docs/engineering/ARCHITECTURE.md` §20.x vs code                     | Whole repo    | Agents may build against fiction                                          | Governance already separates DOCUMENTED≠IMPLEMENTED                                    | Treat docs as roadmap; this file as current law                                           | No                                 |
+| MED-8  | Web fetches relative `/api/v1` with no configured proxy                                                            | `vite.config.ts` lacks proxy; preview origin differs from API origin | Web↔API       | Dev cross-origin behavior undocumented (U-2)                              | Works in E2E because tests use API directly/page copy                                  | Decide gateway/dev-proxy explicitly                                                       | Yes                                |
+| LOW-9  | Dual lockfiles (`package-lock.json` + `pnpm-lock.yaml`) from unmerged CI-fix attempt                               | root listing; audit Rev C                                            | Toolchain     | Ambiguous package manager; `packageManager` field says pnpm               | P0-08 remediation in flight                                                            | Remove stray lockfile after CI fix lands                                                  | Minor                              |
+| LOW-10 | Pagination contracts defined but inconsistently applied                                                            | `PaginationQuerySchema` vs plain-list endpoints                      | API           | Clients can't rely on paging                                              | Partial adoption                                                                       | Adopt progressively on list endpoints                                                     | No                                 |
 
 Dead/experimental paths noted, not documented as architecture: `TalentSphere/` Obsidian vault, `BRAIN/` memory files, `test-secrets.mjs` (active test utility), `reticle-dev.ts` (dev instrumentation).
 
@@ -559,7 +566,7 @@ Dead/experimental paths noted, not documented as architecture: `TalentSphere/` O
 - **INVARIANT-002:** Every business rule/state machine has exactly one definition in `@talentsphere/domain`; routes and UI call it, never restate it.
 - **INVARIANT-003:** `packages/domain` never imports frameworks, providers, or performs I/O; `core.ts` never imports anything; no domain module imports its own barrel.
 - **INVARIANT-004:** All API failures are expressed as `DomainError`/`ZodError` and rendered solely through the global handler's `ErrorEnvelope` with a `request_id`.
-- **INVARIANT-005:** Only code inside `apps/api` (once an approved persistence layer exists) may hold a database client; neither `apps/web`, `packages/domain`, nor `packages/contracts` ever may.
+- **INVARIANT-005:** Only `apps/api` (its `storage/` layer) and `apps/worker` may hold a database client; neither `apps/web`, `packages/domain` logic, nor `packages/contracts` ever may. (The domain package's job store takes an injected query function — it holds no client.)
 - **INVARIANT-006:** Session tokens are signed with `TOKEN_SECRET` or a random per-process key — never a committed/hardcoded secret.
 - **INVARIANT-007:** Free-tier AI usage always passes `assertWithinAIQuota`; paid inference for free users requires the explicit env policy flag plus human approval.
 - **INVARIANT-008:** During `AI_PROHIBITED` assessment sessions, every AI entry point is rejected server-side (`ASSESSMENT_AI_PROHIBITED`).
@@ -567,24 +574,28 @@ Dead/experimental paths noted, not documented as architecture: `TalentSphere/` O
 - **INVARIANT-010:** Application records move only along `ALLOWED_APPLICATION_TRANSITIONS`; terminal states are immutable.
 - **INVARIANT-011:** New infrastructure technology (DB driver, broker, provider SDK, auth provider) enters the system only through a recorded human decision (ADR added to §26).
 - **INVARIANT-012:** The worker's queue engine is the sole job-execution mechanism; no second scheduler/queue appears in any process.
+- **INVARIANT-013:** A core-loop entity changes only through `persist()`; an update passes the read-model value it was derived from as `base`. The read model is never mutated before the database commits.
+- **INVARIANT-014:** Every route that loads a record by id authorizes the caller against that record (owner, organization, participant, admin); "authenticated" is never sufficient on its own.
+- **INVARIANT-015:** A verification credential (email code, referee token) is never returned to the person it verifies and is stored only as a hash.
 
 ---
 
 ## 26. DECISION REGISTER
 
-| ID      | Decision                                                         | Reason                                                                                  | Trade-off                                                               | Revisit When                                  |
-| ------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------- |
-| ADR-001 | Modular monolith (Fastify single API) over microservices         | SSOT founder amendment; extraction-ready boundaries via domain package                  | Big single `server.ts`; deploy granularity limited                      | Measured scale/ownership need                 |
-| ADR-002 | Pure domain package owning all rules                             | Testability, reuse, single source of truth                                              | Thin-but-numerous routes; indirection                                   | Never (invariant)                             |
-| ADR-003 | In-memory Maps as runtime persistence                            | Pre-production honesty: no fake DB claims; fastest honest iteration                     | Total state loss on restart                                             | First durability requirement — human decision |
-| ADR-004 | HMAC self-signed session tokens over Supabase Auth               | Zero external dependency; unforgeable without committed secret; documented key strategy | No refresh/revocation; restart kills sessions (unless TOKEN_SECRET set) | Real IdP adoption approved                    |
-| ADR-005 | Zod contracts package as single validation source                | Browser/tests/API share one schema truth                                                | Flat 1.7k-line file                                                     | File split when contexts stabilize            |
-| ADR-006 | Central DomainError→status→ErrorEnvelope handler                 | Uniform client handling, traceable failures                                             | Mapping table must be extended deliberately                             | New error taxonomy (escalate)                 |
-| ADR-007 | Local-heuristic AI behind gateway-shaped domain API              | Cost invariant for free users; deterministic tests; provider-swappable seam             | Not real LLM quality                                                    | Approved provider adapter                     |
-| ADR-008 | Queue engine with retry/DLQ/idempotency built ahead of producers | Contract-first async; engine is tested                                                  | Not durable, not connected                                              | Broker selection (human)                      |
-| ADR-009 | SQL migrations as text + honesty-guarded migrate script          | Prevents "documented=implemented" drift                                                 | Schema unexecuted/unverified against live DB                            | Persistence decision ADR-003 revisit          |
-| ADR-010 | pnpm workspace, packages-before-apps build order                 | Explicit layering; frozen-lockfile CI                                                   | Requires dist builds before api dev/test runs                           | Toolchain change (escalate)                   |
-| ADR-011 | Reticle-based agent verification loop for UI changes             | "Done" requires a driven verdict, not diff reading                                      | Extra tool-call cost per UI change                                      | Never (workflow invariant)                    |
+| ID      | Decision                                                                                                                                                               | Reason                                                                                      | Trade-off                                                               | Revisit When                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| ADR-001 | Modular monolith (Fastify single API) over microservices                                                                                                               | SSOT founder amendment; extraction-ready boundaries via domain package                      | Big single `server.ts`; deploy granularity limited                      | Measured scale/ownership need                                                        |
+| ADR-002 | Pure domain package owning all rules                                                                                                                                   | Testability, reuse, single source of truth                                                  | Thin-but-numerous routes; indirection                                   | Never (invariant)                                                                    |
+| ADR-003 | In-memory Maps as runtime persistence — **superseded for the core loop by ADR-015**                                                                                    | Pre-production honesty: no fake DB claims; fastest honest iteration                         | Total state loss on restart                                             | First durability requirement — human decision                                        |
+| ADR-004 | HMAC self-signed session tokens over Supabase Auth                                                                                                                     | Zero external dependency; unforgeable without committed secret; documented key strategy     | No refresh/revocation; restart kills sessions (unless TOKEN_SECRET set) | Real IdP adoption approved                                                           |
+| ADR-005 | Zod contracts package as single validation source                                                                                                                      | Browser/tests/API share one schema truth                                                    | Flat 1.7k-line file                                                     | File split when contexts stabilize                                                   |
+| ADR-006 | Central DomainError→status→ErrorEnvelope handler                                                                                                                       | Uniform client handling, traceable failures                                                 | Mapping table must be extended deliberately                             | New error taxonomy (escalate)                                                        |
+| ADR-007 | Local-heuristic AI behind gateway-shaped domain API                                                                                                                    | Cost invariant for free users; deterministic tests; provider-swappable seam                 | Not real LLM quality                                                    | Approved provider adapter                                                            |
+| ADR-008 | Queue engine with retry/DLQ/idempotency built ahead of producers                                                                                                       | Contract-first async; engine is tested                                                      | Not durable, not connected                                              | Broker selection (human)                                                             |
+| ADR-009 | SQL migrations as text + honesty-guarded migrate script                                                                                                                | Prevents "documented=implemented" drift                                                     | Schema unexecuted/unverified against live DB                            | Persistence decision ADR-003 revisit                                                 |
+| ADR-010 | pnpm workspace, packages-before-apps build order                                                                                                                       | Explicit layering; frozen-lockfile CI                                                       | Requires dist builds before api dev/test runs                           | Toolchain change (escalate)                                                          |
+| ADR-011 | Reticle-based agent verification loop for UI changes                                                                                                                   | "Done" requires a driven verdict, not diff reading                                          | Extra tool-call cost per UI change                                      | Never (workflow invariant)                                                           |
+| ADR-015 | Persist the core loop to Postgres; Maps become a boot-hydrated read model; optimistic concurrency on updates (`docs/engineering/adr/ADR-015-core-loop-persistence.md`) | The product's promise needs durable records; full SQL reads would touch every route at once | Single API writer per database; boot hydration cost                     | Second replica needed, or data too large to hydrate — **pending owner ratification** |
 
 ---
 
@@ -642,7 +653,8 @@ Representative evidence anchors:
 - Persistence honesty: `persistence-honesty.test.ts`, `database-migrations.test.ts`, `migrate.mjs`, absence of pg/supabase deps (dependency manifests).
 - Frontend reality: `App.tsx` 9 routes, `LoginPage.tsx:39-58`, `CheckoutPage.tsx:105-124`, `Layout.tsx:285-286`, `vite.config.ts` (no proxy), `pwa.ts`.
 - CI/testing: `.github/workflows/ci.yml`, `vitest.config.ts`, `playwright.config.ts`, `start-e2e-api.mjs`, `test-secrets.mjs`.
-- Known gaps: `docs/reports/PRODUCTION_AUDIT_2026-10-03.md` (P0-01…P0-08, externally verified against this tree) and `docs/quality/SECURITY.md` §9 (unsigned webhook).
+- Known gaps: `docs/reports/PRODUCTION_AUDIT_2026-10-03.md` (P0-01…P0-08) and their 2026-10-10 status in `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
+- Persistence and concurrency: `apps/api/src/storage/core-store.ts`, `persist()` in `server.ts`, `apps/api/src/durability.ts`, `tests/pg/core-persistence.test.ts`, `tests/pg/concurrency.test.ts`.
 
 Explicitly UNKNOWN / requiring human decision: hosting & deployment model (U-1), API gateway/proxy intent for relative fetches (U-2), tenancy isolation policy depth (U-3), canonical tier-resolution owner (R-4), audit-sink consolidation (R-6), current CI status at HEAD (audit-era failure documented; not re-executed here).
 

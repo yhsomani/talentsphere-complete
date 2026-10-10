@@ -4,16 +4,14 @@
 
 - **Project:** TalentSphere
 - **Memory File:** `BRAIN/MEMORY.md`
-- **Memory Version:** 3.4
-- **Last Updated:** 2026-09-25 13:25
-- **Current Milestone:** M4/M5 — Career Trajectory, Learning Impact & Market Intelligence
-- **Current Phase:** Phase 0 through Phase 4/5 Core Loops
-- **Overall Implementation:** 51 / 173 (29.48%)
-- **Overall Verification:** 87 Vitest files (898 tests PASS: unit, integration, API and security), 38 Playwright E2E specs (160 tests PASS, including 17 accessibility and 3 performance baseline tests) — 1058/1058 automated tests PASS (100% GREEN). 41 Supabase SQL migrations. 10/10 packages composite build PASS (`tsc -b`). Prettier lint PASS. GitHub Actions CI defined in `.github/workflows/ci.yml`. In-app Reticle verification: **partially established** — a live app session connected and verified the checkout plan-selection keyboard flow (`verified: "yes"`); other routes remain unverified in-app.
-- **Current Release:** v0.4.0-intelligence
-- **Current Branch:** `main`
-- **Current Primary Task:** Web Shell User Flows & Reticle Verification (Completed)
-- **Next Action:** Feature F-163 (Credential Wallet & Portability) / Feature F-164 (Skills Evidence Narrative & Storytelling)
+- **Memory Version:** 3.5
+- **Last Updated:** 2026-10-10
+- **Current Branch:** `improvement/core-loop-durability` (not yet merged to `main`)
+- **Current Primary Task:** Improvement program — durable core loop, proof-based verification, authorization and honesty fixes. Report: `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
+- **Overall Verification (measured 2026-10-10):** Vitest 98 files / 1026 tests PASS (in-memory storage); `pnpm test:pg` 10/10 PASS on PostgreSQL 16; Playwright 190/190 PASS; `tsc -b`, Prettier and build clean; 43 migrations. In-app Reticle verdicts: **not produced** this cycle (no Reticle tools in the session) — UI verified by Playwright, including `tests/e2e/core-loop.spec.ts`.
+- **Production readiness:** NOT met — see §10.
+- **Next Action:** owner decisions in the improvement report §H (architecture of record, ADR-015 ratification, email provider, pricing, legal review, deletion semantics), then the P0/P1 roadmap there.
+- Sections 2–9 and 11–13 below are the 2026-09-25 snapshot and are partly superseded: the frontend has no TanStack Query; the billing webhook is now signed; the core loop is durable (ADR-015). Where they conflict with §1 and §10, §1 and §10 win.
 
 ---
 
@@ -21,13 +19,13 @@
 
 - **Implementation Status:** IN PROGRESS (100% verified test passes across 1058 automated tests)
 - **Backend:** Fastify 5 + Node.js + TypeScript (modular monolith architecture; active API routes with auth, evidence, jobs, applications, challenges, assessments, LMS courses, lessons, certificates, direct messaging, notifications, central AI gateway, career assistant, resume builder & exports, professional networking & connections, portfolio showcase, gamification XP & streaks, user privacy/GDPR erasure & export, billing & subscriptions, platform administration & governance, multi-entity search, trust/safety & moderation, application drafts, job templates, certificate verification, application feedback, technical interview assessment, alumni networks, activity contribution graph, candidate referral requests, warm introductions, skill decay freshness tracking, multi-dimensional reputation engine, instructor reputation, employer workplace reputation, salary intelligence, peer credibility networks, skill supply/demand forecasting, career trajectory benchmarks, learning impact tracking, talent pool intelligence, behavioral talent discovery, talent segmentation & classification, and verified work history network & structured references)
-- **Frontend:** React 19 + TypeScript + Vite + TanStack Query (active accessible shell, landing, cockpit dashboard, login flow, checkout & plan subscriptions flow). Accessibility is verified in real Chromium for keyboard, focus, semantics, names, reflow, zoom and reduced motion. **WCAG 2.2 AA conformance is NOT yet claimed**: contrast and screen-reader behaviour are not covered by automation and still need manual audit. Verified with Playwright.
-- **Database:** PostgreSQL / Supabase with strict SQL migrations, strict RLS policies (00001 through 00041)
+- **Frontend:** React 19 + TypeScript + Vite, plain React state + `fetch` helper (no TanStack Query). As of 2026-10-10: sign-up, candidate dashboard/jobs/apply/applications/profile, recruiter hiring pipeline, referee page, honest pricing. Accessibility is verified in real Chromium for keyboard, focus, semantics, names, reflow, zoom and reduced motion. **WCAG 2.2 AA conformance is NOT yet claimed**: contrast and screen-reader behaviour are not covered by automation and still need manual audit. Verified with Playwright.
+- **Database:** PostgreSQL, migrations 00001–00043 applied by `pnpm db:migrate`; core loop persisted (ADR-015), long-tail modules in memory
 - **Authentication:** HMAC-SHA256 session tokens with PBKDF2 salt hashing and purpose-based privacy filtering
 - **AI:** Central AI Gateway & Orchestrator with assessment session enforcement (`AI_PROHIBITED`), Free-User Cost Invariant daily token/request metering, prompt injection firewall, and provenance logging
 - **PWA:** Installable web app manifest only. **There is no service worker and no offline-first architecture** — the app is not offline-capable. The UI reports PWA capability truthfully from runtime detection (`apps/web/src/pwa.ts`).
 - **Testing:** 87 Vitest files (898/898 passing across unit, integration, API and security), 38 Playwright E2E specs (160/160 passing, including accessibility and performance) — 1058 total tests PASS
-- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts). **Open gap:** the billing webhook accepts unsigned requests (see `docs/quality/SECURITY.md` §9); self-service recruiter registration is unverified.
+- **Security:** Defense in depth, strict RLS, server-authoritative authorization, anti-self invariants, visibility-gated access control, dual-admin approval for account bans (BR-068, WIT-008), 14-day appeal window (WIT-013, BR-154), pre-publish abuse scanning (BR-125), differential privacy small cell thresholds ($k \ge 10$ default, $k \ge 20$ career benchmarks, $k \ge 30$ learning outcome cohorts). Billing webhook signed since 2026-10-10 (`docs/quality/SECURITY.md` §9); verification credentials hashed and delivered only to the third party.
 - **Deployment:** CI defined in `.github/workflows/ci.yml` (lint, typecheck, tests, build, E2E/a11y/perf). No CD pipeline, no staging or production deployment automation.
 - **Current Focus:** Sequential execution of Phase 4/5 intelligence systems under the Golden Workflow
 - **Major Blocker:** None
@@ -108,6 +106,14 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 ---
 
 ## 8. Recent Changes
+
+### 2026-10-10 — Improvement program (branch `improvement/core-loop-durability`)
+
+- **`1bb0f625` API:** core loop persisted to Postgres (ADR-015, migration 00043); verification requires proof (email code; referee token, hashed, single use); tenant-isolation, member/role validation and per-request account state; PBKDF2 210k + rate-limited credential endpoints; production config refusal; GDPR erasure in the database.
+- **`ae99e31c` Web:** sign-up; candidate, recruiter and referee journeys on real data; fabricated dashboard/jobs and card collection removed; signed billing webhook; unsupported compliance claims removed.
+- **`93dfe125` Adversarial review fixes:** email-code brute force via concurrency (pg), interview-assessment IDOR (incl. cross-tenant application moves), hire/withdraw lost update, one-time secrets left in job payloads, pg-only 500s on invalid input, 4xx logged as errors.
+- **Docs:** ADR-015 (`docs/engineering/adr/`), improvement report, ARCHITECTURE/README/SECURITY/OPERATIONS/FINAL_VALIDATION_REPORT revised.
+- **Verification:** see §1. Reticle verdicts not produced (tools unavailable).
 
 ### 2026-09-25
 
@@ -243,9 +249,12 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 
 ---
 
-## 10. Current Blockers
+## 10. Current Blockers (2026-10-10)
 
-*None.*
+- **No email provider** — corporate-email codes and referee links are delivered only in development; work-history verification cannot complete in any other environment. Owner decision (new infrastructure).
+- **Owner decisions pending** — architecture of record (this repo vs the Next.js/Supabase blueprint vs the Spring Boot plan in project docs); ratification of ADR-015 and migration 00043; pricing/payment processor (paid plans cannot be bought); legal review of the draft privacy policy and terms; account-deletion semantics (immediate vs 30-day grace).
+- **Not durable** — ~225 routes outside the core loop keep state in process memory (labelled `x-talentsphere-durability: ephemeral`).
+- **Single API writer per database** until core reads move to SQL (ADR-015).
 
 ---
 
@@ -293,4 +302,4 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
   - **Total Automated Tests:** 1058 / 1058 tests passing (100% PASS)
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite bundle)
 - **Lint & Code Style:** 100% Prettier compliant
-- **Critical Blockers:** None blocking the build. Open security gap: billing webhook is unauthenticated (unsigned) — see `docs/quality/SECURITY.md` §9
+- **Critical Blockers:** see §10 (2026-10-10). The billing webhook gap is closed (signed, `docs/quality/SECURITY.md` §9).

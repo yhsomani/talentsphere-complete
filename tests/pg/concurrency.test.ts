@@ -261,6 +261,19 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     ).rejects.toMatchObject({ name: 'DomainError', code: 'VALIDATION_FAILED' });
   });
 
+  it('labels exactly the routes whose data does not survive a restart', async () => {
+    const durable = await app.inject({ method: 'GET', url: '/api/v1/jobs' });
+    expect(durable.headers['x-talentsphere-durability']).toBeUndefined();
+    const cand = await register(app, 'labels@example.org');
+    const ephemeral = await app.inject({
+      method: 'GET',
+      url: '/api/v1/notifications',
+      headers: { authorization: `Bearer ${cand.token}` },
+    });
+    expect(ephemeral.statusCode).toBe(200);
+    expect(ephemeral.headers['x-talentsphere-durability']).toBe('ephemeral');
+  });
+
   it('strips one-time credentials from a job payload once the job is finished', async () => {
     const jobs = createPgJobStore((text, params) => pool.query(text, params as unknown[]));
     const payload = { to: 'referee@example.org', referenceId: 'r1', token: 'secret-token' };
