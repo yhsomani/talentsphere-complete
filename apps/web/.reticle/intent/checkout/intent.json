@@ -1,0 +1,105 @@
+{
+  "intents": {
+    "inline:a-keyboard-only-user-can-change-the-selected-sub-0f288e54": {
+      "binding": {
+        "contains": "Complete Purchase — $599",
+        "kind": "text"
+      },
+      "declaredAt": 1790372940417,
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-0f288e54",
+      "provenBy": {
+        "at": 1790372940548,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790372940548"
+      },
+      "state": "proved",
+      "statement": "A keyboard-only user can change the selected subscription plan on checkout, so choosing a plan never requires a pointer.",
+      "status": "proved",
+      "subject": "checkout",
+      "surface": {
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ],
+        "route": "/checkout"
+      }
+    },
+    "inline:complete-annual-subscription-checkout-and-verify-e3c08c5d": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "checkout-success"
+        }
+      },
+      "declaredAt": 1790367555544,
+      "id": "inline:complete-annual-subscription-checkout-and-verify-e3c08c5d",
+      "provenBy": {
+        "at": 1790367557958,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790367557958"
+      },
+      "state": "proved",
+      "statement": "Complete annual subscription checkout and verify confirmation receipt",
+      "status": "proved",
+      "subject": "checkout",
+      "surface": {
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ],
+        "route": "/checkout"
+      }
+    },
+    "inline:monkey-test-invalid-payment-details-trigger-vali-59c9eaa8": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "checkout-error"
+        }
+      },
+      "declaredAt": 1790367531765,
+      "id": "inline:monkey-test-invalid-payment-details-trigger-vali-59c9eaa8",
+      "provenBy": {
+        "at": 1790367533946,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790367533946"
+      },
+      "state": "proved",
+      "statement": "Monkey test: invalid payment details trigger validation error alert",
+      "status": "proved",
+      "subject": "checkout",
+      "surface": {
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ],
+        "route": "/checkout"
+      }
+    },
+    "inline:switch-billing-cycle-to-annual-3fbbf626": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Complete Purchase — $279",
+          "role": "button"
+        }
+      },
+      "declaredAt": 1790367540731,
+      "id": "inline:switch-billing-cycle-to-annual-3fbbf626",
+      "provenBy": {
+        "at": 1790367542965,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790367542965"
+      },
+      "state": "proved",
+      "statement": "Switch billing cycle to Annual",
+      "status": "proved",
+      "subject": "checkout",
+      "surface": {
+        "files": [
+          "src/pages/CheckoutPage.tsx"
+        ],
+        "route": "/checkout"
+      }
+    }
+  },
+  "subject": "checkout",
+  "version": 1
+}

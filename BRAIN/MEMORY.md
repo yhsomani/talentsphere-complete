@@ -8,7 +8,7 @@
 - **Last Updated:** 2026-10-10
 - **Current Branch:** `improvement/core-loop-durability` (not yet merged to `main`)
 - **Current Primary Task:** Improvement program — durable core loop, proof-based verification, authorization and honesty fixes. Report: `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
-- **Overall Verification (measured 2026-10-10):** Vitest 98 files / 1026 tests PASS (in-memory storage); `pnpm test:pg` 10/10 PASS on PostgreSQL 16; Playwright 190/190 PASS; `tsc -b`, Prettier and build clean; 43 migrations. In-app Reticle verdicts: **not produced** this cycle (no Reticle tools in the session) — UI verified by Playwright, including `tests/e2e/core-loop.spec.ts`.
+- **Overall Verification (measured 2026-10-10):** Vitest 99 files / 1033 tests PASS (in-memory storage); `pnpm test:pg` 10/10 PASS on PostgreSQL 16; Playwright 191/191 PASS; `tsc -b`, Prettier and build clean; 43 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
 - **Production readiness:** NOT met — see §10.
 - **Next Action:** owner decisions in the improvement report §H (architecture of record, ADR-015 ratification, email provider, pricing, legal review, deletion semantics), then the P0/P1 roadmap there.
 - Sections 2–9 and 11–13 below are the 2026-09-25 snapshot and are partly superseded: the frontend has no TanStack Query; the billing webhook is now signed; the core loop is durable (ADR-015). Where they conflict with §1 and §10, §1 and §10 win.
@@ -113,7 +113,8 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **`ae99e31c` Web:** sign-up; candidate, recruiter and referee journeys on real data; fabricated dashboard/jobs and card collection removed; signed billing webhook; unsupported compliance claims removed.
 - **`93dfe125` Adversarial review fixes:** email-code brute force via concurrency (pg), interview-assessment IDOR (incl. cross-tenant application moves), hire/withdraw lost update, one-time secrets left in job payloads, pg-only 500s on invalid input, 4xx logged as errors.
 - **Docs:** ADR-015 (`docs/engineering/adr/`), improvement report, ARCHITECTURE/README/SECURITY/OPERATIONS/FINAL_VALIDATION_REPORT revised.
-- **Verification:** see §1. Reticle verdicts not produced (tools unavailable).
+- **Verification:** see §1.
+- **Follow-up (same day):** Reticle verification in the running app; P1 fix — global rate limit (was 100 per 15 min per address) now 300/min per account, `TRUST_PROXY`, health exempt, clear 429 UX with Try again.
 
 ### 2026-09-25
 

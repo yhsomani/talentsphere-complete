@@ -1,0 +1,19 @@
+{
+  "intents": {
+    "inline:a-keyboard-only-user-can-change-the-selected-sub-08cffbb8": {
+      "binding": {
+        "kind": "state",
+        "path": "ariaCheckedRecruiterStarter",
+        "store": "__checkout_probe__"
+      },
+      "declaredAt": 1790372906921,
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-08cffbb8",
+      "state": "bound",
+      "statement": "A keyboard-only user can change the selected subscription plan on checkout, so plan choice does not require a pointer.",
+      "status": "agreed",
+      "subject": "ariacheckedrecruiterstarter"
+    }
+  },
+  "subject": "ariacheckedrecruiterstarter",
+  "version": 1
+}

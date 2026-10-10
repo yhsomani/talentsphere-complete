@@ -441,10 +441,32 @@ import {
   ErrorEnvelope,
 } from '@talentsphere/contracts';
 
+/**
+ * TRUST_PROXY → Fastify's trustProxy: unset/"false" (socket address is the
+ * client), "true" (trust every X-Forwarded-For hop), a hop count ("1"), or a
+ * comma-separated list of proxy addresses/CIDRs.
+ */
+export function parseTrustProxy(
+  value: string | undefined
+): boolean | string[] | ((address: string, hop: number) => boolean) {
+  const v = value?.trim() ?? '';
+  if (v === '' || v === 'false') return false;
+  if (v === 'true') return true;
+  if (/^\d+$/.test(v)) {
+    const hops = Number(v);
+    return (_address: string, hop: number) => hop < hops;
+  }
+  return v
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyInstance> {
   const env = validateServerEnv(customEnv as Record<string, string | undefined>);
 
   const app = Fastify({
+    trustProxy: parseTrustProxy(env.TRUST_PROXY),
     logger: {
       level: env.LOG_LEVEL,
       redact: [
@@ -543,6 +565,17 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   await app.register(rateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS,
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
+    // One bucket per signed-in account, so colleagues behind one office NAT
+    // do not throttle each other; anonymous traffic is keyed by address. An
+    // invalid token falls back to the address, so forging tokens buys nothing.
+    keyGenerator: (req) => {
+      const auth = req.headers.authorization;
+      if (typeof auth === 'string' && auth.startsWith('Bearer ')) {
+        const session = verifySessionToken(auth.substring(7).trim());
+        if (session) return `user:${session.userId}`;
+      }
+      return `ip:${req.ip}`;
+    },
   });
 
   // 404 Handler - Canonical Error Envelope
@@ -628,8 +661,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const pluginBody: ErrorEnvelope = {
         error: {
           code: pluginStatus === 429 ? 'RATE_LIMIT_EXCEEDED' : 'REQUEST_FAILED',
+          // A throttle is the client's to act on, so it gets a plain answer
+          // in every environment (the Retry-After header says how long).
           message:
-            env.NODE_ENV === 'production' ? 'The request could not be completed.' : error.message,
+            pluginStatus === 429
+              ? 'Too many requests. Wait a moment, then try again.'
+              : env.NODE_ENV === 'production'
+                ? 'The request could not be completed.'
+                : error.message,
           request_id: req.id,
         },
       };
@@ -650,7 +689,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   // Base Health Checks
-  app.get('/health', async () => {
+  // Health checks are exempt from the limiter: a load balancer polling them
+  // must never be able to throttle the API into looking dead.
+  app.get('/health', { config: { rateLimit: false } }, async () => {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -658,7 +699,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     };
   });
 
-  app.get('/api/v1/health', async () => {
+  app.get('/api/v1/health', { config: { rateLimit: false } }, async () => {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),

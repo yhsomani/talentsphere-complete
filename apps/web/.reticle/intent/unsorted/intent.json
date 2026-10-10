@@ -1,0 +1,478 @@
+{
+  "intents": {
+    "inline:a-candidate-can-apply-to-a-published-job-once-th-459dcdbf": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 201,
+            "urlContains": "/api/v1/jobs/736b4410-e0ae-40fd-9efb-3ccc24c748eb/apply"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "apply-done"
+            }
+          },
+          {
+            "absent": true,
+            "kind": "console",
+            "level": "error"
+          }
+        ]
+      },
+      "declaredAt": 1791643167104,
+      "id": "inline:a-candidate-can-apply-to-a-published-job-once-th-459dcdbf",
+      "provenBy": {
+        "at": 1791643168254,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643168254"
+      },
+      "state": "proved",
+      "statement": "A candidate can apply to a published job once; the server records exactly one application and the page confirms it",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/jobs/736b4410-e0ae-40fd-9efb-3ccc24c748eb"
+      },
+      "updatedAt": 1791643168266
+    },
+    "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/jobs/736b4410-e0ae-40fd-9efb-3ccc24c748eb"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "status": 200,
+            "urlContains": "/api/v1/jobs/736b4410-e0ae-40fd-9efb-3ccc24c748eb"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Platform Engineer",
+              "role": "heading"
+            }
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "apply-form"
+            }
+          }
+        ]
+      },
+      "declaredAt": 1791643141796,
+      "id": "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5",
+      "provenBy": {
+        "at": 1791643141972,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643141972"
+      },
+      "state": "proved",
+      "statement": "A job's detail page shows the posting and, for a signed-in candidate who has not applied, an application form",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/pages/JobsPage.tsx"
+        ],
+        "route": "/jobs/736b4410-e0ae-40fd-9efb-3ccc24c748eb"
+      },
+      "updatedAt": 1791643141984
+    },
+    "inline:a-new-candidate-who-signs-up-lands-on-a-dashboar-82da9e40": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 201,
+            "urlContains": "/api/v1/auth/register"
+          },
+          {
+            "kind": "route",
+            "pathname": "/dashboard"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Asha Rao",
+              "role": "heading"
+            }
+          },
+          {
+            "absent": true,
+            "contains": "Sarah Chen",
+            "kind": "text"
+          }
+        ]
+      },
+      "declaredAt": 1791643087914,
+      "id": "inline:a-new-candidate-who-signs-up-lands-on-a-dashboar-82da9e40",
+      "provenBy": {
+        "at": 1791643090719,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643090719"
+      },
+      "state": "proved",
+      "statement": "A new candidate who signs up lands on a dashboard about themselves (their own name, no demo person), and stays signed in across a reload",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/dashboard"
+      },
+      "updatedAt": 1791643090737
+    },
+    "inline:a-signed-in-user-browsing-at-a-normal-pace-is-ne-67998f57": {
+      "binding": {
+        "kind": "not",
+        "predicate": {
+          "kind": "net",
+          "status": 429
+        }
+      },
+      "declaredAt": 1791643911804,
+      "id": "inline:a-signed-in-user-browsing-at-a-normal-pace-is-ne-67998f57",
+      "provenBy": {
+        "at": 1791643911856,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1791643911856"
+      },
+      "state": "proved",
+      "statement": "A signed-in user browsing at a normal pace is never throttled by the API",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/jobs"
+      },
+      "updatedAt": 1791643911870
+    },
+    "inline:a-submitted-application-is-listed-under-the-cand-d3820074": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/applications"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "status": 200,
+            "urlContains": "/api/v1/applications/my"
+          },
+          {
+            "contains": "Platform Engineer",
+            "kind": "text",
+            "scope": "[data-testid=applications-active]"
+          },
+          {
+            "contains": "Submitted",
+            "kind": "text",
+            "scope": "[data-testid=applications-active]"
+          }
+        ]
+      },
+      "declaredAt": 1791643198635,
+      "id": "inline:a-submitted-application-is-listed-under-the-cand-d3820074",
+      "provenBy": {
+        "at": 1791643199125,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643199125"
+      },
+      "state": "proved",
+      "statement": "A submitted application is listed under the candidate's active applications with its status, and is still there after a reload",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/applications"
+      },
+      "updatedAt": 1791643199150
+    },
+    "inline:an-existing-candidate-can-sign-in-with-email-and-cf2c5c73": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/auth/login"
+          },
+          {
+            "kind": "route",
+            "pathname": "/dashboard"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Asha Rao",
+              "role": "heading"
+            }
+          }
+        ]
+      },
+      "declaredAt": 1791643352017,
+      "id": "inline:an-existing-candidate-can-sign-in-with-email-and-cf2c5c73",
+      "provenBy": {
+        "at": 1791643353032,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643353032"
+      },
+      "state": "proved",
+      "statement": "An existing candidate can sign in with email and password and reaches their own dashboard",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ],
+        "route": "/dashboard"
+      },
+      "updatedAt": 1791643353061
+    },
+    "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2": {
+      "binding": {
+        "kind": "route",
+        "pathname": "/"
+      },
+      "declaredAt": 1790365750566,
+      "id": "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2",
+      "state": "bound",
+      "statement": "Click header logo to return to landing page",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:landing-page-heading-element-exists-df4611ba": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "The Career Operating System Built on Verified Evidence",
+          "role": "heading"
+        }
+      },
+      "declaredAt": 1790365694213,
+      "id": "inline:landing-page-heading-element-exists-df4611ba",
+      "provenBy": {
+        "at": 1790365694232,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1790365694232"
+      },
+      "state": "proved",
+      "statement": "Landing page heading element exists",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ]
+      }
+    },
+    "inline:landing-page-heading-is-visible-after-returning-2dd1bb56": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "The Career Operating System Built on Verified Evidence",
+          "role": "heading"
+        }
+      },
+      "declaredAt": 1790365754566,
+      "id": "inline:landing-page-heading-is-visible-after-returning-2dd1bb56",
+      "provenBy": {
+        "at": 1790365754582,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1790365754582"
+      },
+      "state": "proved",
+      "statement": "Landing page heading is visible after returning home",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ]
+      }
+    },
+    "inline:landing-page-headline-contains-the-expected-titl-d191dc84": {
+      "binding": {
+        "contains": "The Career Operating System Built on Verified Evidence",
+        "kind": "text"
+      },
+      "declaredAt": 1790365689826,
+      "id": "inline:landing-page-headline-contains-the-expected-titl-d191dc84",
+      "state": "bound",
+      "statement": "Landing page headline contains the expected title",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:landing-page-headline-is-visible-after-navigatio-b0905421": {
+      "binding": {
+        "contains": "The Career Operating System Built on Verified Evidence",
+        "kind": "text"
+      },
+      "declaredAt": 1790365686297,
+      "id": "inline:landing-page-headline-is-visible-after-navigatio-b0905421",
+      "state": "bound",
+      "statement": "Landing page headline is visible after navigation",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:monkey-test-empty-checkout-submission-4630fef2": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Complete Purchase — $29",
+          "role": "button"
+        }
+      },
+      "declaredAt": 1790367496979,
+      "id": "inline:monkey-test-empty-checkout-submission-4630fef2",
+      "state": "bound",
+      "statement": "Monkey-test empty checkout submission",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:monkey-test-empty-checkout-submission-with-dange-a24a3e2a": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Complete Purchase — $29",
+          "role": "button"
+        }
+      },
+      "declaredAt": 1790367504983,
+      "id": "inline:monkey-test-empty-checkout-submission-with-dange-a24a3e2a",
+      "state": "bound",
+      "statement": "Monkey-test empty checkout submission with dangerous action confirmation",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:navigate-back-to-landing-page-from-dashboard-via-87e05137": {
+      "binding": {
+        "kind": "route",
+        "pathname": "/"
+      },
+      "declaredAt": 1790365682315,
+      "id": "inline:navigate-back-to-landing-page-from-dashboard-via-87e05137",
+      "state": "bound",
+      "statement": "Navigate back to Landing Page from Dashboard via header logo",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:prefill-login-credentials-for-test-authenticatio-6272c6a0": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Sign In",
+          "role": "button"
+        }
+      },
+      "declaredAt": 1790367444566,
+      "id": "inline:prefill-login-credentials-for-test-authenticatio-6272c6a0",
+      "state": "bound",
+      "statement": "Prefill login credentials for test authentication",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:prefill-valid-test-card-data-4b7daca1": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "testid": "card-name"
+        }
+      },
+      "declaredAt": 1790367546370,
+      "id": "inline:prefill-valid-test-card-data-4b7daca1",
+      "state": "bound",
+      "statement": "Prefill valid test card data",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    "inline:the-jobs-page-lists-real-published-postings-from-54cf04f5": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/jobs"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "status": 200,
+            "urlContains": "/api/v1/jobs"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Platform Engineer",
+              "role": "link"
+            }
+          },
+          {
+            "contains": "Northwind Labs",
+            "kind": "text"
+          }
+        ]
+      },
+      "declaredAt": 1791643131225,
+      "id": "inline:the-jobs-page-lists-real-published-postings-from-54cf04f5",
+      "provenBy": {
+        "at": 1791643131413,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791643131413"
+      },
+      "state": "proved",
+      "statement": "The jobs page lists real published postings from the API, with the company name",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/jobs"
+      },
+      "updatedAt": 1791643131439
+    },
+    "inline:verify-user-login-form-is-displayed-on-login-67244a71": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "role": "button",
+          "text": "Sign In"
+        }
+      },
+      "declaredAt": 1790366296749,
+      "id": "inline:verify-user-login-form-is-displayed-on-login-67244a71",
+      "state": "bound",
+      "statement": "Verify user login form is displayed on /login",
+      "status": "agreed",
+      "subject": "unsorted"
+    }
+  },
+  "subject": "unsorted",
+  "version": 1
+}

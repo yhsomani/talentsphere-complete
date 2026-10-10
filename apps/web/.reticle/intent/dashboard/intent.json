@@ -1,0 +1,128 @@
+{
+  "intents": {
+    "inline:candidate-career-cockpit-heading-is-visible-326bafcb": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Candidate Career Cockpit",
+          "role": "heading"
+        }
+      },
+      "declaredAt": 1790365740484,
+      "id": "inline:candidate-career-cockpit-heading-is-visible-326bafcb",
+      "provenBy": {
+        "at": 1790365740512,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1790365740512"
+      },
+      "state": "proved",
+      "statement": "Candidate Career Cockpit heading is visible",
+      "status": "proved",
+      "subject": "dashboard",
+      "surface": {
+        "files": [
+          "src/pages/LandingPage.tsx"
+        ],
+        "route": "/dashboard"
+      }
+    },
+    "inline:career-cockpit-dashboard-header-and-metrics-are-19091b3d": {
+      "binding": {
+        "contains": "Candidate Career Cockpit",
+        "kind": "text"
+      },
+      "declaredAt": 1790365672188,
+      "id": "inline:career-cockpit-dashboard-header-and-metrics-are-19091b3d",
+      "provenBy": {
+        "at": 1790365672218,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1790365672218"
+      },
+      "state": "proved",
+      "statement": "Career Cockpit dashboard header and metrics are rendered",
+      "status": "proved",
+      "subject": "dashboard",
+      "surface": {
+        "files": [
+          "src/pages/LandingPage.tsx"
+        ],
+        "route": "/dashboard"
+      }
+    },
+    "inline:click-launch-dashboard-link-to-navigate-to-dashb-26deb73f": {
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      },
+      "declaredAt": 1790365737272,
+      "id": "inline:click-launch-dashboard-link-to-navigate-to-dashb-26deb73f",
+      "state": "bound",
+      "statement": "Click Launch Dashboard link to navigate to dashboard",
+      "status": "agreed",
+      "subject": "dashboard"
+    },
+    "inline:dashboard-heading-is-visible-after-login-2dd66386": {
+      "binding": {
+        "kind": "element",
+        "query": {
+          "name": "Candidate Career Cockpit",
+          "role": "heading"
+        }
+      },
+      "declaredAt": 1790367460308,
+      "id": "inline:dashboard-heading-is-visible-after-login-2dd66386",
+      "provenBy": {
+        "at": 1790367460330,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1790367460330"
+      },
+      "state": "proved",
+      "statement": "Dashboard heading is visible after login",
+      "status": "proved",
+      "subject": "dashboard",
+      "surface": {
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ],
+        "route": "/dashboard"
+      }
+    },
+    "inline:navigate-from-landing-page-to-career-cockpit-das-7a90b4fd": {
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      },
+      "declaredAt": 1790365656854,
+      "id": "inline:navigate-from-landing-page-to-career-cockpit-das-7a90b4fd",
+      "state": "bound",
+      "statement": "Navigate from landing page to Career Cockpit Dashboard",
+      "status": "agreed",
+      "subject": "dashboard"
+    },
+    "inline:sign-in-with-credentials-and-transition-to-caree-71bc5dc7": {
+      "binding": {
+        "kind": "route",
+        "pathname": "/dashboard"
+      },
+      "declaredAt": 1790367452344,
+      "id": "inline:sign-in-with-credentials-and-transition-to-caree-71bc5dc7",
+      "provenBy": {
+        "at": 1790367453981,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1790367453981"
+      },
+      "state": "proved",
+      "statement": "Sign in with credentials and transition to Career Cockpit Dashboard",
+      "status": "proved",
+      "subject": "dashboard",
+      "surface": {
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ],
+        "route": "/dashboard"
+      }
+    }
+  },
+  "subject": "dashboard",
+  "version": 1
+}

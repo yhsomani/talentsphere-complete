@@ -1,0 +1,203 @@
+{
+  "entries": [
+    {
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-08cffbb8",
+      "statement": "A keyboard-only user can change the selected subscription plan on check…",
+      "status": "agreed",
+      "subject": "ariacheckedrecruiterstarter"
+    },
+    {
+      "id": "flow:candidate-navigation",
+      "statement": "A signed-in candidate can move between Jobs and their dashboard from th…",
+      "status": "proved",
+      "subject": "candidate-navigation"
+    },
+    {
+      "id": "inline:a-keyboard-only-user-can-change-the-selected-sub-0f288e54",
+      "statement": "A keyboard-only user can change the selected subscription plan on check…",
+      "status": "proved",
+      "subject": "checkout"
+    },
+    {
+      "id": "inline:complete-annual-subscription-checkout-and-verify-e3c08c5d",
+      "statement": "Complete annual subscription checkout and verify confirmation receipt",
+      "status": "proved",
+      "subject": "checkout"
+    },
+    {
+      "id": "inline:monkey-test-invalid-payment-details-trigger-vali-59c9eaa8",
+      "statement": "Monkey test: invalid payment details trigger validation error alert",
+      "status": "proved",
+      "subject": "checkout"
+    },
+    {
+      "id": "inline:switch-billing-cycle-to-annual-3fbbf626",
+      "statement": "Switch billing cycle to Annual",
+      "status": "proved",
+      "subject": "checkout"
+    },
+    {
+      "id": "inline:candidate-career-cockpit-heading-is-visible-326bafcb",
+      "statement": "Candidate Career Cockpit heading is visible",
+      "status": "proved",
+      "subject": "dashboard"
+    },
+    {
+      "id": "inline:career-cockpit-dashboard-header-and-metrics-are-19091b3d",
+      "statement": "Career Cockpit dashboard header and metrics are rendered",
+      "status": "proved",
+      "subject": "dashboard"
+    },
+    {
+      "id": "inline:click-launch-dashboard-link-to-navigate-to-dashb-26deb73f",
+      "statement": "Click Launch Dashboard link to navigate to dashboard",
+      "status": "agreed",
+      "subject": "dashboard"
+    },
+    {
+      "id": "inline:dashboard-heading-is-visible-after-login-2dd66386",
+      "statement": "Dashboard heading is visible after login",
+      "status": "proved",
+      "subject": "dashboard"
+    },
+    {
+      "id": "inline:navigate-from-landing-page-to-career-cockpit-das-7a90b4fd",
+      "statement": "Navigate from landing page to Career Cockpit Dashboard",
+      "status": "agreed",
+      "subject": "dashboard"
+    },
+    {
+      "id": "inline:sign-in-with-credentials-and-transition-to-caree-71bc5dc7",
+      "statement": "Sign in with credentials and transition to Career Cockpit Dashboard",
+      "status": "proved",
+      "subject": "dashboard"
+    },
+    {
+      "id": "flow:drive-a-new-candidate-who-signs-up-lands-on-a-dashboar",
+      "statement": "A new candidate who signs up lands on a dashboard about themselves (the…",
+      "status": "proposed",
+      "subject": "drive-a-new-candidate-who-signs-up-lands"
+    },
+    {
+      "id": "flow:drive-a-submitted-application-is-listed-under-the-cand",
+      "statement": "A submitted application is listed under the candidate's active applicat…",
+      "status": "proved",
+      "subject": "drive-a-submitted-application-is-listed"
+    },
+    {
+      "id": "flow:drive-an-existing-candidate-can-sign-in-with-email-and",
+      "statement": "An existing candidate can sign in with email and password and reaches t…",
+      "status": "proposed",
+      "subject": "drive-an-existing-candidate-can-sign-in"
+    },
+    {
+      "id": "inline:a-candidate-can-apply-to-a-published-job-once-th-459dcdbf",
+      "statement": "A candidate can apply to a published job once; the server records exact…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5",
+      "statement": "A job's detail page shows the posting and, for a signed-in candidate wh…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-new-candidate-who-signs-up-lands-on-a-dashboar-82da9e40",
+      "statement": "A new candidate who signs up lands on a dashboard about themselves (the…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-signed-in-user-browsing-at-a-normal-pace-is-ne-67998f57",
+      "statement": "A signed-in user browsing at a normal pace is never throttled by the API",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-submitted-application-is-listed-under-the-cand-d3820074",
+      "statement": "A submitted application is listed under the candidate's active applicat…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:an-existing-candidate-can-sign-in-with-email-and-cf2c5c73",
+      "statement": "An existing candidate can sign in with email and password and reaches t…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2",
+      "statement": "Click header logo to return to landing page",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:landing-page-heading-element-exists-df4611ba",
+      "statement": "Landing page heading element exists",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:landing-page-heading-is-visible-after-returning-2dd1bb56",
+      "statement": "Landing page heading is visible after returning home",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:landing-page-headline-contains-the-expected-titl-d191dc84",
+      "statement": "Landing page headline contains the expected title",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:landing-page-headline-is-visible-after-navigatio-b0905421",
+      "statement": "Landing page headline is visible after navigation",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:monkey-test-empty-checkout-submission-4630fef2",
+      "statement": "Monkey-test empty checkout submission",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:monkey-test-empty-checkout-submission-with-dange-a24a3e2a",
+      "statement": "Monkey-test empty checkout submission with dangerous action confirmation",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:navigate-back-to-landing-page-from-dashboard-via-87e05137",
+      "statement": "Navigate back to Landing Page from Dashboard via header logo",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:prefill-login-credentials-for-test-authenticatio-6272c6a0",
+      "statement": "Prefill login credentials for test authentication",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:prefill-valid-test-card-data-4b7daca1",
+      "statement": "Prefill valid test card data",
+      "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:the-jobs-page-lists-real-published-postings-from-54cf04f5",
+      "statement": "The jobs page lists real published postings from the API, with the comp…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:verify-user-login-form-is-displayed-on-login-67244a71",
+      "statement": "Verify user login form is displayed on /login",
+      "status": "agreed",
+      "subject": "unsorted"
+    }
+  ],
+  "version": 1
+}

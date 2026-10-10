@@ -62,6 +62,24 @@ export async function apiJson<T = unknown>(input: string, init: RequestInit = {}
   }
   const body = await res.json().catch(() => null);
   if (!res.ok) {
+    if (res.status === 429) {
+      // Refreshing would only spend more of the budget. When the server says
+      // how long to wait (Retry-After), say exactly that; otherwise show the
+      // server's own explanation.
+      const retryAfter = Number(res.headers.get('retry-after'));
+      const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+      const wait =
+        retryAfter <= 60
+          ? plural(Math.ceil(retryAfter), 'second')
+          : plural(Math.ceil(retryAfter / 60), 'minute');
+      throw new ApiError(
+        429,
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? `Too many requests right now. Try again in ${wait}.`
+          : (body?.error?.message ?? 'Too many requests right now. Wait a moment, then try again.'),
+        body?.error?.code ?? 'RATE_LIMIT_EXCEEDED'
+      );
+    }
     throw new ApiError(
       res.status,
       body?.error?.message ?? `The request failed (HTTP ${res.status}).`,

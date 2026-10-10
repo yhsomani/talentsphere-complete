@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "origin": "failed-assert",
+  "expected": "GET /api/v1/applications/my → 200",
+  "observed": "no request to /api/v1/applications/my",
+  "steps": [
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "nav-dashboard",
+        "source": {
+          "file": "src/components/Layout.tsx",
+          "line": 243,
+          "column": 10
+        }
+      },
+      "action": "click"
+    }
+  ],
+  "id": "1791643408621-nav-dashboard-7e6c4850",
+  "createdAt": 1791643408621,
+  "seen": 1,
+  "lastSeenAt": 1791643408621
+}

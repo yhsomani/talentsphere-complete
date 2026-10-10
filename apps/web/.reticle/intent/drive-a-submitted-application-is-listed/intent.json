@@ -1,0 +1,26 @@
+{
+  "intents": {
+    "flow:drive-a-submitted-application-is-listed-under-the-cand": {
+      "binding": {
+        "flow": "drive-a-submitted-application-is-listed-under-the-cand"
+      },
+      "declaredAt": 1791643239357,
+      "id": "flow:drive-a-submitted-application-is-listed-under-the-cand",
+      "provenBy": {
+        "at": 1791643304507,
+        "grade": "asserted",
+        "verdictId": "flow_replay:drive-a-submitted-application-is-listed-under-the-cand:1791643304507"
+      },
+      "state": "proved",
+      "statement": "A submitted application is listed under the candidate's active applications with its status, and is still there after a reload",
+      "status": "proved",
+      "subject": "drive-a-submitted-application-is-listed",
+      "surface": {
+        "flow": "drive-a-submitted-application-is-listed-under-the-cand"
+      },
+      "updatedAt": 1791643304519
+    }
+  },
+  "subject": "drive-a-submitted-application-is-listed",
+  "version": 1
+}

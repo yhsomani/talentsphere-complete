@@ -126,7 +126,14 @@ keep their signed claims, so the signing key is still a full privilege boundary.
   successful login. Unknown-email logins run a decoy hash so response time does not
   reveal whether an account exists.
 - Login is rate-limited per client IP + email and sign-up per client IP
-  (`AUTH_RATE_LIMIT_MAX_REQUESTS`, default 10 per window), on top of the global limiter.
+  (`AUTH_RATE_LIMIT_MAX_REQUESTS`, default 10 per 15 minutes), on top of the global limiter.
+- Global limiter: 300 requests per minute per signed-in account (keyed by the verified
+  token's user id), or per client address for anonymous and invalid-token callers, so a
+  forged token buys no budget. Health checks are exempt. Behind a proxy set `TRUST_PROXY`,
+  or every anonymous caller shares the proxy's bucket. A throttle answers 429
+  `RATE_LIMIT_EXCEEDED` with a plain message and `Retry-After` in every environment.
+  (The former default — 100 per 15 minutes per address — locked a normal user out after
+  about 20 page views; found by driving the running app with Reticle on 2026-10-10.)
 
 ### Verification credentials (the product's trust boundary)
 

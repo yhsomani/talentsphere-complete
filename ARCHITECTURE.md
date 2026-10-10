@@ -408,7 +408,7 @@ Also STOP when:
 - **Response conventions:** resource objects serialized from domain types; errors exclusively `ErrorEnvelope {error:{code,message,request_id,details?}}`; `x-request-id` on every response; pagination schemas exist in contracts (`PaginationQuerySchema`, `PaginatedMetaSchema`) though not every list endpoint uses them (INFERRED partial adoption).
 - **Validation:** contracts at boundary (400 VALIDATION_FAILED) + domain semantic invariants (422).
 - **AuthN/AuthZ:** Bearer HMAC token; role/ownership predicates per §12.
-- **Rate limiting:** global `@fastify/rate-limit` (default 100 req/15 min window, env-tunable; E2E raises to 100000). 429 mapped to `RATE_LIMIT_EXCEEDED` envelope.
+- **Rate limiting:** global `@fastify/rate-limit`, 300 requests/minute per signed-in account (per address when anonymous), health checks exempt, `TRUST_PROXY` for deployments behind a proxy; credential endpoints have their own stricter limits. 429 → `RATE_LIMIT_EXCEEDED` with a plain message and `Retry-After`. (E2E raises the limits to 100000, so throttling behaviour is covered by `tests/security/api-security.test.ts` and `tests/e2e/session-resilience.spec.ts`, not by the journey specs.)
 - **Idempotency:** implemented for billing webhook (`billingEventsByIdempotency`) and accepted on subscribe (`idempotencyKey` passthrough); not generalized elsewhere.
 - **Retries/timeouts:** none server-side; browser checkout imposes an 800 ms AbortController timeout (and swallows the result — gap).
 - **Contract owner:** `@talentsphere/contracts` is the sole definition of request shapes; `docs/engineering/API_CONTRACTS.md` describes them but the Zod package is executable truth.

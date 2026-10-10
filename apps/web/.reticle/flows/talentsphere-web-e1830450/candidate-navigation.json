@@ -1,48 +1,142 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "candidate-navigation",
-  "intent": "Candidate can launch the Career Cockpit Dashboard from the landing page and return home using the logo",
+  "intent": "A signed-in candidate can move between Jobs and their dashboard from the main navigation, and the TalentSphere logo always brings them back to their dashboard (their home once signed in). Requires a signed-in candidate session.",
   "intentId": "flow:candidate-navigation",
   "projectId": "talentsphere-web-e1830450",
-  "startPath": "/",
-  "createdAt": 1790365762983,
+  "startPath": "/jobs",
+  "requires": [
+    {
+      "kind": "route",
+      "pathname": "/jobs"
+    }
+  ],
+  "ensures": [
+    {
+      "kind": "route",
+      "pathname": "/dashboard"
+    }
+  ],
+  "author": {
+    "agent": "claude-http-client"
+  },
+  "createdAt": 1791643287896,
   "steps": [
     {
       "tool": "reticle_act",
       "anchor": {
-        "kind": "role",
-        "role": "link",
-        "name": "Launch Dashboard"
+        "kind": "testid",
+        "value": "nav-dashboard",
+        "source": {
+          "file": "src/components/Layout.tsx",
+          "line": 243,
+          "column": 10
+        }
+      },
+      "source": {
+        "file": "src/components/Layout.tsx",
+        "line": 243
       },
       "action": "click",
       "args": {},
       "expect": {
-        "route": {
-          "pathname": "/dashboard"
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/dashboard"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "urlContains": "/api/v1/applications/my",
+            "status": 200
+          },
+          {
+            "kind": "element",
+            "query": {
+              "role": "region",
+              "name": "Next steps"
+            }
+          }
+        ]
+      },
+      "page": "/jobs",
+      "endPage": "/dashboard"
+    },
+    {
+      "tool": "reticle_act",
+      "anchor": {
+        "kind": "testid",
+        "value": "nav-jobs",
+        "source": {
+          "file": "src/components/Layout.tsx",
+          "line": 243,
+          "column": 10
         }
-      }
+      },
+      "source": {
+        "file": "src/components/Layout.tsx",
+        "line": 243
+      },
+      "action": "click",
+      "args": {},
+      "expect": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/jobs"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "urlContains": "/api/v1/jobs",
+            "status": 200
+          },
+          {
+            "kind": "element",
+            "query": {
+              "role": "heading",
+              "name": "Jobs"
+            }
+          }
+        ]
+      },
+      "page": "/dashboard",
+      "endPage": "/jobs"
     },
     {
       "tool": "reticle_act",
       "anchor": {
         "kind": "role",
         "role": "link",
-        "name": "TalentSphere"
+        "name": "TalentSphere home"
+      },
+      "source": {
+        "file": "src/components/Layout.tsx",
+        "line": 201
       },
       "action": "click",
       "args": {},
       "expect": {
-        "route": {
-          "pathname": "/"
-        }
-      }
-    }
-  ],
-  "learned": [
-    {
-      "kind": "route-rendered-nothing",
-      "step": 0,
-      "state": "open"
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/dashboard"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "role": "region",
+              "name": "Next steps"
+            }
+          }
+        ]
+      },
+      "page": "/jobs",
+      "endPage": "/dashboard"
     }
   ]
 }

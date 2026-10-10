@@ -4,6 +4,7 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession, type SessionProfile } from '../lib/SessionContext.js';
+import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import {
   Button,
   Card,
@@ -104,10 +105,12 @@ export const ProfilePage: React.FC = () => {
   };
 
   if (!profile) {
-    return (
-      <p style={{ color: colors.neutral[600] }}>
-        {session.status === 'error' ? 'Could not load your profile.' : 'Loading…'}
-      </p>
+    return session.status === 'error' ? (
+      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+        <SessionErrorNotice />
+      </div>
+    ) : (
+      <p style={{ color: colors.neutral[600] }}>Loading…</p>
     );
   }
 

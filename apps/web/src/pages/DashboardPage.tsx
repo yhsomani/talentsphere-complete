@@ -12,6 +12,7 @@ import {
   type Job,
 } from '../lib/types.js';
 import { ButtonLink, CheckIcon, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
+import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 
 interface WorkHistorySummary {
   id: string;
@@ -437,7 +438,7 @@ export const DashboardPage: React.FC = () => {
         }
       />
       {session.status === 'error' ? (
-        <Notice tone="error">We could not confirm your session. Refresh to try again.</Notice>
+        <SessionErrorNotice />
       ) : session.status !== 'ready' ? (
         <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
           Loading your dashboard…

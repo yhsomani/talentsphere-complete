@@ -46,18 +46,22 @@
 Measured on branch `improvement/core-loop-durability` (2026-10-10). Counts are machine-reported,
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Vitest (unit, integration, security; in-memory storage):** 98 files / **1026 tests PASS** (`pnpm test`).
+- **Vitest (unit, integration, security; in-memory storage):** 99 files / **1033 tests PASS** (`pnpm test`).
 - **Real PostgreSQL 16 (`pnpm test:pg`):** 2 files / **10 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
   job-payload credential stripping. Mutation-checked (see the improvement report §G).
-- **Playwright (Chromium; E2E, accessibility, performance):** **190 tests PASS**, including
+- **Playwright (Chromium; E2E, accessibility, performance):** **191 tests PASS**, including
   `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only).
 - **Database migrations:** **43** sequential SQL migrations (`00001`–`00043`); CI applies them
   to an empty database and re-runs the runner as an idempotency check.
 - **Typecheck / lint / build:** `tsc -b` clean, Prettier clean, `pnpm build` clean.
-- **Not produced:** Reticle in-app verdicts (no Reticle tools in the verifying session);
-  load, soak, backup/restore and deployment tests (no deployment target exists).
+- **Reticle (in-app):** sign-up → job → apply → applications driven on the Postgres-backed dev
+  server, every step `verified: "yes"` (two steps also held after a reload); saved flow
+  `candidate-navigation` re-recorded after intentional UI drift and passing. Driving surfaced a
+  P1 bug — the global rate limit locked normal users out — fixed and re-verified (improvement
+  report finding 24, §G).
+- **Not produced:** load, soak, backup/restore and deployment tests (no deployment target exists).
 - **Per-feature verification:** tracked in `BRAIN/MEMORY.md`; not re-asserted here.
 
 ## Current Operational Status

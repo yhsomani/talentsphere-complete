@@ -32,9 +32,19 @@ export const ServerEnvSchema = z.object({
   // 32 characters. Production deployments should always set it.
   TOKEN_SECRET: z.string().min(32).optional(),
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:5173'),
-  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
+  // Global limiter: requests per window per signed-in account (or per client
+  // address for anonymous callers). The former default (100 per 15 minutes)
+  // locked a normal user out after ~20 page views — one dashboard load makes
+  // five API calls — and behind a load balancer every user shared one bucket.
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(300),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(10),
+  // Client address behind a reverse proxy / load balancer. Unset: the socket
+  // address is the client (direct exposure). Set to the number of trusted
+  // proxy hops (e.g. "1"), "true" to trust every X-Forwarded-For hop, or a
+  // comma-separated list of proxy IPs/CIDRs. Without it, rate limits behind a
+  // proxy key everyone to the proxy's address.
+  TRUST_PROXY: z.string().optional(),
 
   // Storage
   SUPABASE_BUCKET_AVATARS: z.string().default('avatars'),

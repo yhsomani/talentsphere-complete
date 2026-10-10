@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { apiJson } from './api.js';
+import { apiJson, errorMessage } from './api.js';
 import { SESSION_EVENT, TOKEN_KEY, clearSession, getToken } from './session.js';
 
 export interface SessionUser {
@@ -30,6 +30,8 @@ export interface SessionMembership {
 export interface Session {
   /** anonymous: no token. loading: token present, server not asked yet. */
   status: 'anonymous' | 'loading' | 'ready' | 'error';
+  /** Why the session could not be confirmed (status 'error'), in plain words. */
+  error: string | null;
   user: SessionUser | null;
   profile: SessionProfile | null;
   memberships: SessionMembership[];
@@ -57,6 +59,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [user, setUser] = useState<SessionUser | null>(null);
   const [profile, setProfile] = useState<SessionProfile | null>(null);
   const [memberships, setMemberships] = useState<SessionMembership[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!getToken()) {
@@ -76,10 +79,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setUser(data.user);
       setProfile(data.profile);
       setMemberships(data.memberships ?? []);
+      setError(null);
       setStatus('ready');
-    } catch {
+    } catch (err) {
       // A 401 already cleared the token and redirected (lib/api.ts); any
-      // other failure leaves the session unknown rather than guessed.
+      // other failure leaves the session unknown rather than guessed, and
+      // keeps the reason (offline, throttled, server fault) to show the user.
+      setError(errorMessage(err));
       setStatus(getToken() ? 'error' : 'anonymous');
     }
   }, []);
@@ -105,6 +111,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const value = useMemo<Session>(
     () => ({
       status,
+      error,
       user,
       profile,
       memberships,
@@ -113,7 +120,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       refresh,
       signOut: clearSession,
     }),
-    [status, user, profile, memberships, refresh]
+    [status, error, user, profile, memberships, refresh]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

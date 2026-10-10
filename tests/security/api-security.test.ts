@@ -590,6 +590,8 @@ describe('SEC: Webhook authenticity, replay and billing idempotency (SECURITY.md
 
 describe('SEC: Rate limiting (SECURITY.md §8, threat: rate-limit bypass)', () => {
   let app: FastifyInstance;
+  // Any cheap, public, non-exempt route will do.
+  const LIMITED = '/api/v1/billing/plans';
 
   beforeAll(async () => {
     app = await buildApp({
@@ -609,7 +611,7 @@ describe('SEC: Rate limiting (SECURITY.md §8, threat: rate-limit bypass)', () =
   it('returns 429 once the configured window budget is exhausted', async () => {
     const statuses: number[] = [];
     for (let i = 0; i < 5; i++) {
-      const res = await app.inject({ method: 'GET', url: '/health' });
+      const res = await app.inject({ method: 'GET', url: LIMITED });
       statuses.push(res.statusCode);
     }
 
@@ -617,19 +619,63 @@ describe('SEC: Rate limiting (SECURITY.md §8, threat: rate-limit bypass)', () =
     expect(statuses).toContain(429);
   });
 
-  it('reports a throttle as a canonical RATE_LIMIT_EXCEEDED envelope, not a server fault', async () => {
-    const res = await app.inject({ method: 'GET', url: '/health' });
+  it('reports a throttle as a canonical RATE_LIMIT_EXCEEDED envelope with a plain message', async () => {
+    const res = await app.inject({ method: 'GET', url: LIMITED });
 
     expect(res.statusCode).toBe(429);
     expect(res.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+    expect(res.json().error.message).toBe('Too many requests. Wait a moment, then try again.');
     expect(res.headers['x-ratelimit-limit']).toBeDefined();
     expect(res.headers['retry-after']).toBeDefined();
   });
 
   it('never leaks a stack trace through the throttle path', async () => {
-    const res = await app.inject({ method: 'GET', url: '/health' });
+    const res = await app.inject({ method: 'GET', url: LIMITED });
 
     expect(res.statusCode).toBe(429);
     expect(res.body).not.toContain('"stack"');
+  });
+
+  it('never throttles health checks, so a load balancer cannot make the API look dead', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 10; i++) {
+      statuses.push((await app.inject({ method: 'GET', url: '/health' })).statusCode);
+      statuses.push((await app.inject({ method: 'GET', url: '/api/v1/health' })).statusCode);
+    }
+    expect(new Set(statuses)).toEqual(new Set([200]));
+  });
+
+  it('gives each signed-in account its own budget, so one user cannot throttle another on the same network', async () => {
+    // The anonymous budget for this address is already spent above.
+    const alice = token(['candidate'], crypto.randomUUID(), 'alice@example.com');
+    const bob = token(['candidate'], crypto.randomUUID(), 'bob@example.com');
+    const asAlice = [];
+    for (let i = 0; i < 4; i++) {
+      asAlice.push(
+        (
+          await app.inject({
+            method: 'GET',
+            url: LIMITED,
+            headers: { authorization: `Bearer ${alice}` },
+          })
+        ).statusCode
+      );
+    }
+    expect(asAlice).toEqual([200, 200, 200, 429]);
+    const asBob = await app.inject({
+      method: 'GET',
+      url: LIMITED,
+      headers: { authorization: `Bearer ${bob}` },
+    });
+    expect(asBob.statusCode).toBe(200);
+  });
+
+  it('keys a forged or expired token to the caller address, so inventing tokens buys no budget', async () => {
+    const forged = await app.inject({
+      method: 'GET',
+      url: LIMITED,
+      headers: { authorization: `Bearer ${crypto.randomBytes(24).toString('base64url')}.x` },
+    });
+    expect(forged.statusCode).toBe(429);
   });
 });

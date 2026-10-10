@@ -50,6 +50,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 | 21 | P2  | _(review)_ Impossible dates (2023-02-30), 300-character emails, 1e20 salaries → **500** in Postgres; duplicate ids → misleading 409.                                                                              | **Fixed** — contract validation; SQLSTATE class 22 → 422                                     | `core-authz`, `tests/pg/concurrency.test.ts`                     |
 | 22 | P2  | Every 4xx logged at **error** level with a stack — error-level alerting would be noise.                                                                                                                            | **Fixed** — 4xx at info, 5xx at error                                                        | (behaviour visible in test output)                               |
 | 23 | P2  | Several write paths updated a record's `byId` Map but left per-org/per-subject lists stale.                                                                                                                       | **Fixed** — one `applyToReadModel` per entity                                                | covered by integration suite                                     |
+| 24 | P1  | _(Reticle)_ The global rate limit was **100 requests per 15 minutes per address**. A dashboard view makes ~5 API calls, so a normal user was locked out after ~20 page views and shown "Refresh to try again" (which spent more budget); behind a load balancer every user would share one bucket, and health checks counted against it. The E2E suite raises the limit to 100,000, so it never saw this. | **Fixed** — 300/min per signed-in account (per address when anonymous), `TRUST_PROXY`, health exempt, plain 429 message with the wait time, session error offers *Try again* | `api-security` "Rate limiting" (mutation-checked), `tests/unit/rate-limit-config.test.ts`, e2e `session-resilience` |
 
 **Open findings** are in section H.
 
@@ -107,7 +108,8 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 1. **`1bb0f625` — API.** Core-loop persistence (ADR-015, migration 00043); proof-based verification (email code, referee token); tenant isolation fixes; per-request account state; password hardening and rate limiting; production config refusal; GDPR erasure in the database; secondary-index consistency; Postgres error mapping; ephemeral labelling. CI gains a Postgres service, a migration-idempotency step and the pg suite.
 2. **`ae99e31c` — Web.** Sign-up; server-backed session (`GET /auth/session`); candidate dashboard, jobs, job detail and apply, applications with withdraw, profile with privacy and account deletion; recruiter company setup, job posting and lifecycle, applicant pipeline with verification summary and state-machine-limited stage moves; referee landing page; role-based navigation. Honest pricing (no card collection), signed webhook, removal of unsupported claims, legal pages marked draft.
 3. **`93dfe125` — Adversarial review fixes.** Findings 8, 9, 18, 19, 21, 22 above.
-4. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
+4. **Reticle verification (follow-up session).** Drove the running app (Postgres-backed dev server) through Reticle's HTTP MCP transport and found finding 24; see G.
+5. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
 
 ## G. Validation evidence
 
@@ -117,10 +119,10 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 | -------------------------------------------------- | ---------------------------------------- |
 | `pnpm lint` (Prettier)                              | clean                                    |
 | `pnpm typecheck` (`tsc -b`, 10 projects)            | clean                                    |
-| `pnpm test` (Vitest: unit, integration, security)   | **1026 / 1026** passed, 98 files         |
+| `pnpm test` (Vitest: unit, integration, security)   | **1033 / 1033** passed, 99 files         |
 | `pnpm test:pg` (real PostgreSQL 16)                 | **10 / 10** passed, 2 files              |
 | `pnpm build`                                        | clean                                    |
-| Playwright (Chromium; e2e, a11y, performance)       | **190 / 190** passed                     |
+| Playwright (Chromium; e2e, a11y, performance)       | **191 / 191** passed                     |
 
 **Mutation checks (the tests catch the bug they claim to):**
 
@@ -128,12 +130,19 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 - Removing the optimistic-concurrency guards: the email burst records 40 evaluated guesses (limit 5) and the hire/withdraw race acknowledges both — both pg tests fail.
 - Removing only the in-process guard (simulating a second API writer): the pg tests still pass — the database guard holds alone.
 - Letting a scorecard move any application: the "never resurrects a rejected application" test fails.
+- Removing per-account rate-limit keys, or the health-check exemption: the matching `api-security` tests fail.
 
 **Adversarial review.** An independent reviewer agent probed the diff and wrote reproduction scripts; its run ended early (rate limit) without a written report. Its probes were run here against the pre-fix code: they reproduced findings 8, 18, 19 and 21, and the cross-tenant application linking in 9 (its scorecard step used an invalid payload, so the pipeline move was confirmed by reading the code); the rest of 9 came from reading every interview route after that lead. All are fixed and covered above. The memory-mode email race did _not_ reproduce (requests happened to serialise); only the Postgres test discriminates — which is why that test lives in the pg suite.
 
 **Not verified:**
 
-- **Reticle**, the in-app verification layer `CLAUDE.md` requires for UI changes, has no MCP tools in this session, so no Reticle verdicts were produced. UI behaviour is verified by the Playwright suite (including `core-loop.spec.ts`, three people driving the whole loop through the UI) and a Postgres-backed visual journey with screenshots (no console errors, no horizontal overflow at mobile width).
+**Reticle (in-app verification, follow-up session).** The `reticle_*` tools were not loaded in the agent's tool list, so the session drove the daemon through Reticle's documented HTTP MCP transport — the same tools, verdicts from `reticle_act_and_wait`/`reticle_assert` only. Against the Postgres-backed dev server:
+
+- **Sign-up → job → apply → applications: every step `verified: "yes"`.** Registration (one `POST /auth/register`, 201) lands on a dashboard headed with the new user's name, no demo person, and holds after a reload; the jobs page renders the real posting from `GET /api/v1/jobs`; the job page shows the apply form; applying sends exactly one `POST …/apply` (201) and confirms; the application is listed as Submitted and holds after a reload. The recruiter sees the candidate's note (checked through the API). Zero network or console errors in any step.
+- **Saved flow `candidate-navigation`** (from an earlier session) failed with _drift_: it clicked a landing-page "Launch Dashboard" link that the web rewrite removed on purpose. Re-recorded against the current navigation for a signed-in candidate, with consequence assertions on every step; replay passes.
+- **Finding 24** surfaced while replaying: after a few minutes of driving, the dashboard showed "We could not confirm your session" — the API was answering 429 to everything. Fixed, then re-verified in the running app: 20 navigations at a human pace, every step `yes`, and an assertion that no request was throttled `yes`. Driving ~10× faster than a person still trips the new limit, which is the limiter working.
+- **Not verified / limits:** not every Reticle verdict in the session was "yes" (its end-of-session summary for the last tab: 84 of 96 claims held). The ones that were not fall into four groups: the saved flow's drift above; real throttling (finding 24); throttling I caused by driving ~10× faster than a person after the fix; and checks where my expectation was wrong — a miscounted note length, a logo click on the dashboard (for signed-in users the logo leads to the dashboard by design), and navigation checks whose target link also existed on the previous page. None of the last group is an app defect. Reticle also reported a layout shift of 0.24–0.46 across navigations; its relation to the user-facing CLS metric (which excludes shifts right after input) was not measured, so it is recorded here, not claimed as a defect. Response-body capture was left off on purpose (login/register bodies carry session tokens).
+- The Playwright suite (including `core-loop.spec.ts`, three people driving the whole loop through the UI) remains the CI-level UI verification.
 - No load, soak, backup/restore or deployment testing — there is no deployment target.
 - Email delivery, payments and notifications are not integrated, so they are not verified.
 

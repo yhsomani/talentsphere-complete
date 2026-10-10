@@ -1,0 +1,32 @@
+{
+  "intents": {
+    "flow:candidate-navigation": {
+      "amended": [
+        {
+          "at": 1790365762986,
+          "statement": "Candidate can launch the Career Cockpit Dashboard from the landing page and return home using the logo"
+        }
+      ],
+      "binding": {
+        "flow": "candidate-navigation"
+      },
+      "declaredAt": 1790365762986,
+      "id": "flow:candidate-navigation",
+      "provenBy": {
+        "at": 1791643715783,
+        "grade": "asserted",
+        "verdictId": "flow_replay:candidate-navigation:1791643715783"
+      },
+      "state": "proved",
+      "statement": "A signed-in candidate can move between Jobs and their dashboard from the main navigation, and the TalentSphere logo always brings them back to their dashboard (their home once signed in). Requires a signed-in candidate session.",
+      "status": "proved",
+      "subject": "candidate-navigation",
+      "surface": {
+        "flow": "candidate-navigation"
+      },
+      "updatedAt": 1791643715786
+    }
+  },
+  "subject": "candidate-navigation",
+  "version": 1
+}

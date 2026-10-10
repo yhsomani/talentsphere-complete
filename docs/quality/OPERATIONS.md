@@ -107,6 +107,8 @@ repository actually requires today.
 | `BILLING_MODE`                 | `disabled` (default). `simulated` activates paid plans without payment and is refused in production. |
 | `BILLING_WEBHOOK_SECRET`       | Unset ⇒ the billing webhook answers 503 to everything.                        |
 | `AUTH_RATE_LIMIT_MAX_REQUESTS` | Login attempts per IP+email and sign-ups per IP per window (default 10).      |
+| `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | Global limiter per signed-in account (per address when anonymous); default 300 per minute. |
+| `TRUST_PROXY`                  | **Required behind a load balancer** (e.g. `1`): otherwise every anonymous client shares the proxy's address and one rate-limit bucket. |
 
 `apps/api/src/index.ts` refuses to start in production when any rule above is broken and
 prints which ones (`productionConfigProblems()`).
@@ -153,7 +155,7 @@ cannot be completed there. Integrating a provider is an owner decision (new infr
 
 ### Health
 
-- `/health` — liveness. `/api/v1/health` — adds environment.
+- `/health` — liveness. `/api/v1/health` — adds environment. Both are exempt from the rate limiter, so a load balancer's polling can never throttle the API into looking dead.
 - `GET /api/v1/admin/health-diagnostics` (platform admin) — storage mode, database
   reachability (a live round-trip), queue status and active job count, and how many routes
   are durable. **Worker liveness is not measured** (no heartbeat): a dead worker over a live

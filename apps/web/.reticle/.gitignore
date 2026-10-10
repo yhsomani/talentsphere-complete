@@ -24,3 +24,7 @@ cloud-state.json
 issues.json
 *.log
 *.tmp
+
+# Per-session request text and platform state (added 2026-10-10).
+request.json
+platform-moments.json

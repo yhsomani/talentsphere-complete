@@ -1,0 +1,21 @@
+{
+  "intents": {
+    "flow:drive-an-existing-candidate-can-sign-in-with-email-and": {
+      "binding": {
+        "flow": "drive-an-existing-candidate-can-sign-in-with-email-and"
+      },
+      "declaredAt": 1791643363364,
+      "id": "flow:drive-an-existing-candidate-can-sign-in-with-email-and",
+      "state": "bound",
+      "statement": "An existing candidate can sign in with email and password and reaches their own dashboard",
+      "status": "proposed",
+      "subject": "drive-an-existing-candidate-can-sign-in",
+      "surface": {
+        "flow": "drive-an-existing-candidate-can-sign-in-with-email-and"
+      },
+      "updatedAt": 1791643363458
+    }
+  },
+  "subject": "drive-an-existing-candidate-can-sign-in",
+  "version": 1
+}
