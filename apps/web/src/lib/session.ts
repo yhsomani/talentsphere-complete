@@ -37,9 +37,21 @@ export const getStoredUser = (): StoredUser | null => {
   }
 };
 
+/** Fired on this window whenever the stored session changes (sign-in/out). */
+export const SESSION_EVENT = 'talentsphere:session';
+
+const announce = () => {
+  try {
+    window.dispatchEvent(new Event(SESSION_EVENT));
+  } catch {
+    // Non-browser environment: nothing listens.
+  }
+};
+
 export const storeSession = (token: string, user: StoredUser): void => {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  announce();
 };
 
 export const clearSession = (): void => {
@@ -49,4 +61,5 @@ export const clearSession = (): void => {
   } catch {
     // Storage unavailable (private mode): nothing durable to clear.
   }
+  announce();
 };

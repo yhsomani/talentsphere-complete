@@ -298,15 +298,21 @@ describe('Integration: Job Templates & Requisition Instantiation (F-37, F-05, BR
 
     createdJobId = body.job.id;
 
-    // Verify requisition exists in job repository
+    // Verify requisition exists in job repository (visible to its own org)
     const jobRes = await app.inject({
       method: 'GET',
       url: `/api/v1/jobs/${createdJobId}`,
+      headers: { authorization: `Bearer ${recruiterToken}` },
     });
     expect(jobRes.statusCode).toBe(200);
     const jobBody = JSON.parse(jobRes.payload);
     expect(jobBody.job.id).toBe(createdJobId);
     expect(jobBody.job.title).toBe('Lead Systems Architect - Core Engine');
+
+    // A draft requisition is not public: anonymous callers get the same 404
+    // as for a job that does not exist.
+    const anonymous = await app.inject({ method: 'GET', url: `/api/v1/jobs/${createdJobId}` });
+    expect(anonymous.statusCode).toBe(404);
   });
 
   it('saves an existing job requisition as a reusable template (save-as-template)', async () => {

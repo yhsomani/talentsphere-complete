@@ -1,5 +1,8 @@
 import pg from 'pg';
 import { MemoryJobStore, createPgJobStore, type JobStore } from '@talentsphere/domain';
+import { MemoryCoreStore, PgCoreStore, type CoreStore } from './core-store.js';
+
+export * from './core-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
@@ -24,6 +27,11 @@ export interface Storage {
    * in memory mode — same honesty rule as entity data.
    */
   readonly jobs: JobStore;
+  /**
+   * Core-loop entities (users, profiles, organizations, jobs, applications,
+   * evidence, work history) — ADR-015. Durable in pg mode only.
+   */
+  readonly core: CoreStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   close(): Promise<void>;
@@ -37,6 +45,7 @@ function redactDsn(dsn: string): string {
 class PgStorage implements Storage {
   readonly mode = 'pg' as const;
   readonly jobs: JobStore;
+  readonly core: CoreStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
 
@@ -55,6 +64,7 @@ class PgStorage implements Storage {
     });
     // One pool, one boundary: dispatch enqueues and health checks share it.
     this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
+    this.core = new PgCoreStore(this.pool);
   }
 
   async health(): Promise<StorageHealth> {
@@ -77,6 +87,7 @@ class PgStorage implements Storage {
 class MemoryStorage implements Storage {
   readonly mode = 'memory' as const;
   readonly jobs: JobStore = new MemoryJobStore();
+  readonly core: CoreStore = new MemoryCoreStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

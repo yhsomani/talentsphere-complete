@@ -145,6 +145,18 @@ describe('Integration: Technical Interview Assessment Platform (F-88, S-06, BR-1
     });
     expect(appRes.statusCode).toBe(201);
     applicationId = JSON.parse(appRes.payload).application.id;
+
+    // Advance through the ATS state machine (BR-03/BR-40) to the stage where
+    // an interview scorecard may move it to 'interviewing'.
+    for (const targetState of ['in_review', 'shortlisted']) {
+      const t = await app.inject({
+        method: 'POST',
+        url: `/api/v1/applications/${applicationId}/transition`,
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        payload: { applicationId, targetState },
+      });
+      expect(t.statusCode).toBe(200);
+    }
   });
 
   it('recruiter creates company-scoped question bank question and candidate is forbidden from accessing it (BR-173)', async () => {

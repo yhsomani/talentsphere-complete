@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §31, BR-06)', () => {
   let app: FastifyInstance;
   let candidateToken: string;
   let candidateUserId: string;
+  let candidateProfileId: string;
 
   beforeAll(async () => {
     app = await buildApp({
@@ -32,6 +34,7 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     const body = JSON.parse(res.body);
     candidateToken = body.token;
     candidateUserId = body.user.id;
+    candidateProfileId = body.profile.id;
   });
 
   afterAll(async () => {
@@ -204,14 +207,36 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(execBody.anonymizedHash).toBeDefined();
     expect(execBody.anonymizedHash.length).toBe(64);
 
-    // Verify profile is now anonymized and private
-    const profileRes = await app.inject({
+    // Erasure closes the account: the session that requested it is dead
+    // immediately, not when the token expires.
+    const deadSession = await app.inject({
       method: 'GET',
       url: '/api/v1/profile/me',
       headers: { authorization: `Bearer ${candidateToken}` },
     });
-    expect(profileRes.statusCode).toBe(200);
-    const profileBody = JSON.parse(profileRes.body);
+    expect(deadSession.statusCode).toBe(401);
+
+    // ...and the credential is destroyed: the old password no longer works.
+    const relogin = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/login',
+      payload: { email: 'maya.privacy@example.com', password: 'Password123!Secure' },
+    });
+    expect(relogin.statusCode).toBe(401);
+
+    // Verify (as a platform admin) that the profile is anonymized and private
+    const adminToken = createSessionToken(
+      '00000000-0000-4000-a000-00000000ad01',
+      'admin.privacy@talentsphere.internal',
+      ['platform_admin']
+    );
+    const adminView = await app.inject({
+      method: 'GET',
+      url: `/api/v1/profile/${candidateProfileId}`,
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    expect(adminView.statusCode).toBe(200);
+    const profileBody = JSON.parse(adminView.body);
     expect(profileBody.profile.fullName).toBe('Anonymized User');
     expect(profileBody.profile.privacy).toBe('private');
 

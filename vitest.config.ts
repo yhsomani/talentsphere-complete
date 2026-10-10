@@ -11,6 +11,9 @@ export default defineConfig({
       // Phase 1: the suite runs on the explicit non-durable backend; pg-backed
       // tests opt in with STORAGE:'pg' (see tests/integration/storage-boot.test.ts).
       STORAGE: 'memory',
+      // Speed only: production hashes at 210k PBKDF2 iterations (OWASP); the
+      // suite registers hundreds of users. Stored hashes carry their own count.
+      PASSWORD_PBKDF2_ITERATIONS: '10000',
     },
     include: [
       'tests/unit/**/*.test.ts',

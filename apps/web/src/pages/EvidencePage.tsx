@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { apiFetch } from '../lib/api.js';
+import { apiJson, errorMessage } from '../lib/api.js';
 import { createStableKeyer } from '../lib/idempotency.js';
+import { formatDate } from '../lib/format.js';
+import { useSession } from '../lib/SessionContext.js';
 import {
   Button,
   Badge,
@@ -14,12 +15,23 @@ import {
   CardContent,
   Input,
   Modal,
+  Notice,
+  Select,
   CheckIcon,
   AlertCircleIcon,
 } from '../components/ui/index.js';
 
-// Mirrors VerifiedWorkHistory in packages/domain/src/work-history-graph.ts —
-// every field shown on this page comes from the API, never from client state.
+// Mirrors the owner view of VerifiedWorkHistory (GET /candidates/:id/work-history):
+// every value on this page comes from the API, never from client state.
+interface ReferenceSummary {
+  id: string;
+  refereeName: string;
+  relationship: string;
+  status: 'requested' | 'submitted' | 'declined' | 'flagged';
+  requestedAt: string;
+  submittedAt?: string;
+}
+
 interface WorkHistoryEntry {
   id: string;
   companyName: string;
@@ -29,11 +41,14 @@ interface WorkHistoryEntry {
   isCurrent: boolean;
   corporateEmail?: string;
   emailVerifiedAt?: string;
+  emailVerificationPending?: { email: string; expiresAt: string };
   verificationStatus: string;
   verificationScore: number;
   badgeTier: 'none' | 'bronze' | 'silver' | 'gold';
+  references?: ReferenceSummary[];
 }
 
+// Instant feedback only — the server enforces the real policy.
 const DISPOSABLE_DOMAINS = [
   'mailinator.com',
   'tempmail.com',
@@ -42,18 +57,197 @@ const DISPOSABLE_DOMAINS = [
   'throwaway.com',
 ];
 
+const RELATIONSHIP_OPTIONS = [
+  { value: 'manager', label: 'Manager' },
+  { value: 'peer', label: 'Peer / colleague' },
+  { value: 'mentor', label: 'Mentor' },
+  { value: 'direct_report', label: 'Someone who reported to me' },
+  { value: 'client', label: 'Client' },
+];
+
+const microLabel: React.CSSProperties = {
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  color: colors.neutral[600],
+  display: 'block',
+  marginBottom: spacing.xs,
+};
+
+/** Per-record email verification: start a challenge, then confirm the code. */
+const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Promise<void> }> = ({
+  item,
+  onChanged,
+}) => {
+  const [email, setEmail] = useState(
+    item.emailVerificationPending?.email ?? item.corporateEmail ?? ''
+  );
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pending = item.emailVerificationPending;
+
+  if (item.emailVerifiedAt) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          flexWrap: 'wrap',
+          color: colors.semantic.successText,
+        }}
+      >
+        <CheckIcon size={16} />
+        <strong style={{ overflowWrap: 'anywhere' }}>{item.corporateEmail}</strong>
+        <Badge variant="verified">Email Verified</Badge>
+      </div>
+    );
+  }
+
+  const send = async (address: string) => {
+    if (busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await apiJson(`/api/v1/candidates/work-history/${item.id}/verify-email`, {
+        method: 'POST',
+        body: JSON.stringify({ corporateEmail: address }),
+      });
+      await onChanged();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy || !pending) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await apiJson(`/api/v1/candidates/work-history/${item.id}/verify-email`, {
+        method: 'POST',
+        body: JSON.stringify({ corporateEmail: pending.email, verificationCode: code.trim() }),
+      });
+      setCode('');
+      await onChanged();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div>
+      {error && (
+        <Notice tone="error" style={{ marginBottom: spacing.sm }}>
+          {error}
+        </Notice>
+      )}
+      {pending ? (
+        <form onSubmit={confirm} data-testid={`verify-code-form-${item.id}`}>
+          <p
+            style={{ fontSize: '0.8125rem', color: colors.neutral[700], marginBottom: spacing.sm }}
+          >
+            We sent a 6-digit code to <strong>{pending.email}</strong>. It expires{' '}
+            {new Date(pending.expiresAt).toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit',
+            })}
+            .
+          </p>
+          <Input
+            id={`verify-code-${item.id}`}
+            label="Verification code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            data-testid={`verify-code-input-${item.id}`}
+          />
+          <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
+            <Button
+              type="submit"
+              size="sm"
+              loading={busy}
+              data-testid={`verify-code-submit-${item.id}`}
+            >
+              Confirm email
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              onClick={() => void send(pending.email)}
+            >
+              Send a new code
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send(email.trim());
+          }}
+        >
+          <p
+            style={{ fontSize: '0.8125rem', color: colors.neutral[600], marginBottom: spacing.sm }}
+          >
+            <AlertCircleIcon size={14} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+            Not verified yet. Confirm an email address at this employer.
+          </p>
+          <Input
+            id={`verify-email-${item.id}`}
+            label="Work email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            data-testid={`verify-email-input-${item.id}`}
+          />
+          <Button
+            type="submit"
+            size="sm"
+            variant="outline"
+            loading={busy}
+            data-testid={`verify-email-send-${item.id}`}
+          >
+            Send code
+          </Button>
+        </form>
+      )}
+    </div>
+  );
+};
+
+const REFERENCE_STATUS: Record<ReferenceSummary['status'], string> = {
+  requested: 'Waiting for response',
+  submitted: 'Received',
+  declined: 'Declined',
+  flagged: 'Under review',
+};
+
 export const EvidencePage: React.FC = () => {
   usePageMeta(
-    'Evidence Graph',
-    'Attest work history, request verified supervisor references, and manage your immutable cryptographic evidence graph.'
+    'Work History',
+    'Add your work history, confirm your work email, and ask managers or colleagues to vouch for you.'
   );
+  const session = useSession();
+  const userId = session.user?.id;
 
   const [entries, setEntries] = useState<WorkHistoryEntry[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
-  const [signedIn] = useState(() =>
-    Boolean(localStorage.getItem('talentsphere_token') && localStorage.getItem('talentsphere_user'))
-  );
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
@@ -66,7 +260,6 @@ export const EvidencePage: React.FC = () => {
   const addKeyer = useRef(createStableKeyer());
   const refKeyer = useRef(createStableKeyer());
 
-  // Form states for Add Work History
   const [company, setCompany] = useState('');
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -75,7 +268,6 @@ export const EvidencePage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [addError, setAddError] = useState<string | null>(null);
 
-  // Form states for Request Reference
   const [refName, setRefName] = useState('');
   const [refEmail, setRefEmail] = useState('');
   const [refRole, setRefRole] = useState('manager');
@@ -83,129 +275,95 @@ export const EvidencePage: React.FC = () => {
   const [refSuccess, setRefSuccess] = useState<string | null>(null);
 
   const loadEntries = useCallback(async () => {
-    const token = localStorage.getItem('talentsphere_token');
-    const rawUser = localStorage.getItem('talentsphere_user');
-    let userId: string | undefined;
+    if (!userId) return;
     try {
-      userId = rawUser ? (JSON.parse(rawUser) as { id?: string }).id : undefined;
-    } catch {
-      userId = undefined;
-    }
-    if (!token || !userId) {
-      setEntries([]);
-      setLoadingList(false);
-      return;
-    }
-    try {
-      // apiFetch attaches the session token and handles 401 (lib/api.ts).
-      const res = await apiFetch(`/api/v1/candidates/${userId}/work-history`);
-      if (!res.ok) {
-        throw new Error('load failed');
-      }
-      const data = await res.json();
+      const data = await apiJson<{ workHistories: WorkHistoryEntry[] }>(
+        `/api/v1/candidates/${userId}/work-history`
+      );
       setEntries(data.workHistories ?? []);
       setNotice(null);
     } catch {
       // Never render an empty state for data we failed to fetch — say so.
-      setNotice('Could not load your attestations. Please try again.');
+      setNotice('Could not load your work history. Please try again.');
     } finally {
       setLoadingList(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     void loadEntries();
   }, [loadEntries]);
+
+  const resetAddForm = () => {
+    setCompany('');
+    setTitle('');
+    setStartDate('');
+    setEndDate('');
+    setIsCurrent(false);
+    setEmail('');
+  };
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError(null);
 
     if (!company.trim() || !title.trim() || !startDate) {
-      setAddError('Please fill in all required employment fields.');
+      setAddError('Please fill in the company, job title and start date.');
       return;
     }
-
     if (!isCurrent && endDate && new Date(endDate) < new Date(startDate)) {
       setAddError('End date cannot precede employment start date (Anti-fraud BR-084).');
       return;
     }
-
     const domain = email.includes('@') ? email.split('@')[1].toLowerCase() : '';
     if (domain && DISPOSABLE_DOMAINS.includes(domain)) {
-      setAddError(
-        'Disposable and temporary email addresses are rejected for corporate attestation.'
-      );
+      setAddError('Disposable and temporary email addresses cannot verify employment.');
       return;
     }
-
-    const token = localStorage.getItem('talentsphere_token');
-    if (!token) {
-      setAddError('Please sign in before attesting work history.');
-      return;
-    }
-
     // Re-entry guard in the handler itself — don't rely solely on the
     // disabled attribute for duplicate-request protection.
     if (addSubmitting) return;
 
     const payload = {
-      companyName: company,
-      title,
+      companyName: company.trim(),
+      title: title.trim(),
       startDate,
       isCurrent,
       ...(isCurrent || !endDate ? {} : { endDate }),
-      ...(email ? { corporateEmail: email } : {}),
     };
 
     setAddSubmitting(true);
     try {
-      const res = await apiFetch('/api/v1/candidates/work-history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, clientRequestId: addKeyer.current(payload) }),
-      });
+      const created = await apiJson<{ workHistory: WorkHistoryEntry }>(
+        '/api/v1/candidates/work-history',
+        {
+          method: 'POST',
+          body: JSON.stringify({ ...payload, clientRequestId: addKeyer.current(payload) }),
+        }
+      );
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setAddError(body?.error?.message ?? 'Attestation could not be saved. Please try again.');
-        return;
-      }
-
-      const created = await res.json();
-      const createdId = created?.workHistory?.id as string | undefined;
-
-      // Email attestation runs server-side (disposable/webmail checks, scoring, tier).
+      // A work email starts a verification: a code goes to that mailbox and
+      // the record shows "verify" until the code is entered.
       let verifyNotice: string | null = null;
-      if (createdId && email) {
-        const verifyRes = await apiFetch(
-          `/api/v1/candidates/work-history/${createdId}/verify-email`,
-          {
+      if (email.trim()) {
+        try {
+          await apiJson(`/api/v1/candidates/work-history/${created.workHistory.id}/verify-email`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ corporateEmail: email }),
-          }
-        );
-        if (!verifyRes.ok) {
-          const body = await verifyRes.json().catch(() => null);
-          verifyNotice = `Record saved, but the email attestation was rejected: ${
-            body?.error?.message ?? 'verification failed.'
-          }`;
+            body: JSON.stringify({ corporateEmail: email.trim() }),
+          });
+        } catch (err) {
+          verifyNotice = `Saved, but we could not start email verification: ${errorMessage(err)}`;
         }
       }
 
       setIsAddModalOpen(false);
-      setCompany('');
-      setTitle('');
-      setStartDate('');
-      setEndDate('');
-      setEmail('');
+      resetAddForm();
       await loadEntries();
       // Set after the refetch, never before: loadEntries clears stale notices
-      // on success and would otherwise wipe this rejection unseen.
+      // on success and would otherwise wipe this message unseen.
       if (verifyNotice) setNotice(verifyNotice);
-    } catch {
-      setAddError('Attestation could not be saved. Please try again.');
+    } catch (err) {
+      setAddError(errorMessage(err));
     } finally {
       setAddSubmitting(false);
     }
@@ -217,81 +375,63 @@ export const EvidencePage: React.FC = () => {
     setRefSuccess(null);
 
     if (!refName.trim() || !refEmail.trim()) {
-      setRefError('Please provide referee name and corporate email address.');
+      setRefError("Please provide the person's name and email address.");
       return;
     }
-
     const domain = refEmail.split('@')[1]?.toLowerCase();
     if (domain && DISPOSABLE_DOMAINS.includes(domain)) {
-      setRefError(
-        'Disposable email addresses are strictly prohibited for manager references (BR-084).'
-      );
-      return;
-    }
-
-    const token = localStorage.getItem('talentsphere_token');
-    if (!token) {
-      setRefError('Please sign in before requesting references.');
+      setRefError('Disposable email addresses are not accepted for references (BR-084).');
       return;
     }
     if (!selectedEntryId) {
       setRefError('No employment record selected.');
       return;
     }
-
-    // Re-entry guard in the handler itself — don't rely solely on the
-    // disabled attribute for duplicate-request protection.
     if (refSubmitting) return;
 
     const payload = {
       workHistoryId: selectedEntryId,
-      refereeName: refName,
-      refereeEmail: refEmail,
+      refereeName: refName.trim(),
+      refereeEmail: refEmail.trim(),
       relationship: refRole,
     };
 
     setRefSubmitting(true);
     try {
-      const res = await apiFetch(
+      const created = await apiJson<{ reference: { status: ReferenceSummary['status'] } }>(
         `/api/v1/candidates/work-history/${selectedEntryId}/references/request`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...payload,
+            refereeName: payload.refereeName,
+            refereeEmail: payload.refereeEmail,
+            relationship: payload.relationship,
             clientRequestId: refKeyer.current(payload),
           }),
         }
       );
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setRefError(body?.error?.message ?? 'Reference request could not be created.');
-        return;
-      }
-
-      const data = await res.json();
-      // Server-confirmed state only — the tier and score update when the
-      // referee actually submits, not when we ask.
+      // Server-confirmed state only — the score changes when the referee
+      // actually responds, not when we ask.
+      const status = REFERENCE_STATUS[created.reference?.status] ?? created.reference?.status;
       setRefSuccess(
-        `Reference request created for ${refEmail} (status: ${data?.reference?.status ?? 'requested'}).`
+        `Request sent to ${payload.refereeEmail} (status: ${status}). They will get a private link to respond.`
       );
+      await loadEntries();
       setTimeout(() => {
         setIsRefModalOpen(false);
         setRefSuccess(null);
         setRefName('');
         setRefEmail('');
-      }, 1200);
-    } catch {
-      setRefError('Reference request could not be created.');
+      }, 1500);
+    } catch (err) {
+      setRefError(errorMessage(err));
     } finally {
       setRefSubmitting(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '1160px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
-      {/* Header with Title and Add Action */}
+    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
       <div
         style={{
           display: 'flex',
@@ -304,99 +444,29 @@ export const EvidencePage: React.FC = () => {
           gap: spacing.md,
         }}
       >
-        <div>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: spacing.xs,
-            }}
-          >
-            <Badge variant="verified">VERIFIED EVIDENCE GRAPH</Badge>
-            <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-              RFC-0041 Cryptographic Credentials
-            </span>
-          </div>
-          <h1
-            style={{
-              fontSize: '2rem',
-              fontWeight: 800,
-              color: colors.neutral[900],
-              margin: 0,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Verified Work History &amp; References
-          </h1>
-          <p
-            style={{
-              color: colors.neutral[600],
-              fontSize: '0.9375rem',
-              margin: `${spacing.xs} 0 0`,
-            }}
-          >
-            Immutable employment attestations with domain checks and structured supervisor ratings.
+        <div style={{ maxWidth: '640px' }}>
+          <h1 style={{ fontSize: '2rem', color: colors.neutral[900] }}>Work history</h1>
+          <p style={{ color: colors.neutral[600], marginTop: spacing.xs }}>
+            Each role you add gets stronger as you prove it: confirm a work email at that employer,
+            then ask a manager or colleague to vouch for you. Recruiters see how a role was verified
+            — never your private email address.
           </p>
         </div>
-
-        <Button
-          data-testid="add-work-history-btn"
-          onClick={() => setIsAddModalOpen(true)}
-          size="md"
-        >
-          + Attest Employment Record
+        <Button data-testid="add-work-history-btn" onClick={() => setIsAddModalOpen(true)}>
+          + Add a role
         </Button>
       </div>
 
-      {/* Page-level notice: never claim emptiness when the fetch itself failed */}
       {notice && (
-        <div
-          role="alert"
-          data-testid="evidence-notice"
-          style={{
-            backgroundColor: '#fef2f2',
-            color: colors.semantic.errorText,
-            border: `1px solid ${colors.semantic.error}`,
-            padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: '6px',
-            marginBottom: spacing.lg,
-            fontSize: '0.875rem',
-          }}
-        >
+        <Notice tone="error" data-testid="evidence-notice" style={{ marginBottom: spacing.lg }}>
           {notice}
-        </div>
+        </Notice>
       )}
 
-      {/* Work History Entries List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-        {!signedIn ? (
-          <div
-            data-testid="evidence-signin-required"
-            style={{
-              border: `1px dashed ${colors.neutral[300]}`,
-              borderRadius: '8px',
-              padding: `${spacing.xl} ${spacing.lg}`,
-              textAlign: 'center',
-              color: colors.neutral[600],
-              fontSize: '0.9375rem',
-            }}
-          >
-            {/* Actionable: the sign-in prompt links to sign-in with the
-                intended destination preserved. */}
-            <Link
-              to="/login?return=%2Fevidence"
-              style={{ color: colors.primary[700], fontWeight: 600 }}
-            >
-              Sign in to attest and verify your employment records.
-            </Link>
-          </div>
-        ) : loadingList ? (
-          <div
-            data-testid="evidence-loading"
-            style={{ color: colors.neutral[600], fontSize: '0.9375rem' }}
-          >
-            Loading attestations…
+        {loadingList ? (
+          <div data-testid="evidence-loading" style={{ color: colors.neutral[600] }}>
+            Loading your work history…
           </div>
         ) : entries.length === 0 && !notice ? (
           <div
@@ -407,10 +477,9 @@ export const EvidencePage: React.FC = () => {
               padding: `${spacing.xl} ${spacing.lg}`,
               textAlign: 'center',
               color: colors.neutral[600],
-              fontSize: '0.9375rem',
             }}
           >
-            No employment attestations yet. Add your first record above.
+            No roles yet. Add your current or most recent job to start building verified history.
           </div>
         ) : (
           entries.map((item) => (
@@ -424,139 +493,104 @@ export const EvidencePage: React.FC = () => {
                   gap: spacing.sm,
                 }}
               >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                    <CardTitle>{item.title}</CardTitle>
-                    <span style={{ color: colors.neutral[400] }}>&bull;</span>
-                    <strong style={{ fontSize: '1rem', color: colors.neutral[700] }}>
-                      {item.companyName}
-                    </strong>
-                  </div>
+                <div style={{ minWidth: 0 }}>
+                  <CardTitle>
+                    {item.title}{' '}
+                    <span style={{ color: colors.neutral[600], fontWeight: 600 }}>
+                      · {item.companyName}
+                    </span>
+                  </CardTitle>
                   <CardDescription>
-                    {item.startDate} &mdash; {item.isCurrent ? 'Present' : (item.endDate ?? '—')}{' '}
-                    &bull; {item.verificationStatus}
+                    {formatDate(item.startDate)} —{' '}
+                    {item.isCurrent ? 'Present' : formatDate(item.endDate)}
                   </CardDescription>
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                  <Badge variant={item.badgeTier === 'none' ? 'neutral' : item.badgeTier} mono>
-                    {item.badgeTier === 'none'
-                      ? 'UNVERIFIED'
-                      : `${item.badgeTier.toUpperCase()} TIER`}
-                    &bull; {item.verificationScore}/100
-                  </Badge>
-                </div>
+                <Badge variant={item.badgeTier === 'none' ? 'neutral' : item.badgeTier} mono>
+                  {item.badgeTier === 'none'
+                    ? 'UNVERIFIED'
+                    : `${item.badgeTier.toUpperCase()} TIER`}{' '}
+                  · {item.verificationScore}/100
+                </Badge>
               </CardHeader>
 
               <CardContent>
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
                     gap: spacing.lg,
                     fontSize: '0.875rem',
                   }}
                 >
                   <div>
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: colors.neutral[600],
-                        display: 'block',
-                        marginBottom: spacing.xs,
-                      }}
-                    >
-                      DOMAIN ATTESTATION
-                    </span>
-                    {item.emailVerifiedAt ? (
-                      <div
+                    <span style={microLabel}>Work email</span>
+                    <EmailVerification item={item} onChanged={loadEntries} />
+                  </div>
+
+                  <div>
+                    <span style={microLabel}>References</span>
+                    {(item.references ?? []).length > 0 && (
+                      <ul
                         style={{
+                          listStyle: 'none',
+                          padding: 0,
+                          margin: `0 0 ${spacing.sm}`,
                           display: 'flex',
-                          alignItems: 'center',
+                          flexDirection: 'column',
                           gap: '6px',
-                          color: colors.semantic.successText,
                         }}
                       >
-                        <CheckIcon size={16} />
-                        <strong>{item.corporateEmail}</strong>
-                        <Badge variant="verified">Email Verified</Badge>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          color: colors.neutral[600],
-                        }}
-                      >
-                        <AlertCircleIcon size={16} />
-                        <span>No corporate email attested</span>
-                      </div>
+                        {(item.references ?? []).map((ref) => (
+                          <li
+                            key={ref.id}
+                            data-testid={`reference-${ref.id}`}
+                            style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}
+                          >
+                            <span>
+                              {ref.refereeName}{' '}
+                              <span style={{ color: colors.neutral[600] }}>
+                                ({ref.relationship.replace('_', ' ')})
+                              </span>
+                            </span>
+                            <span
+                              style={{
+                                color:
+                                  ref.status === 'submitted'
+                                    ? colors.semantic.successText
+                                    : colors.neutral[600],
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {REFERENCE_STATUS[ref.status]}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid={`request-ref-${item.id}`}
+                      aria-label={`Request a reference — ${item.companyName}`}
+                      onClick={() => {
+                        setSelectedEntryId(item.id);
+                        setIsRefModalOpen(true);
+                      }}
+                    >
+                      Request a reference
+                    </Button>
                   </div>
 
                   <div>
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: colors.neutral[600],
-                        display: 'block',
-                        marginBottom: spacing.xs,
-                      }}
-                    >
-                      STRUCTURED REFERENCE
-                    </span>
-                    {/* Reference state is not readable back from the API yet, so
-                      this column offers the action instead of asserting state. */}
-                    <div>
-                      <span
-                        style={{
-                          color: colors.neutral[600],
-                          display: 'block',
-                          marginBottom: spacing.xs,
-                        }}
-                      >
-                        Request a structured reference from a supervisor.
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid={`request-ref-${item.id}`}
-                        aria-label={`Request Reference — ${item.companyName}`}
-                        onClick={() => {
-                          setSelectedEntryId(item.id);
-                          setIsRefModalOpen(true);
-                        }}
-                      >
-                        Request Reference
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: colors.neutral[600],
-                        display: 'block',
-                        marginBottom: spacing.xs,
-                      }}
-                    >
-                      CONFIDENCE INTEGRITY
-                    </span>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: spacing.sm,
-                        marginTop: '4px',
-                      }}
-                    >
+                    <span style={microLabel}>Verification score</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
                       <div
+                        role="progressbar"
+                        aria-valuenow={item.verificationScore}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Verification score for ${item.companyName}`}
                         style={{
                           flex: 1,
                           height: '8px',
@@ -572,16 +606,20 @@ export const EvidencePage: React.FC = () => {
                             backgroundColor:
                               item.verificationScore >= 85
                                 ? colors.semantic.success
-                                : item.verificationScore >= 70
+                                : item.verificationScore >= 40
                                   ? colors.primary[600]
                                   : colors.semantic.warning,
                           }}
                         />
                       </div>
-                      <strong style={{ fontSize: '0.8125rem', color: colors.neutral[700] }}>
-                        {item.verificationScore}%
-                      </strong>
+                      <strong style={{ fontSize: '0.8125rem' }}>{item.verificationScore}%</strong>
                     </div>
+                    <p
+                      style={{ fontSize: '0.75rem', color: colors.neutral[600], marginTop: '6px' }}
+                    >
+                      Work email +40 · manager reference +30 (peer +20) · second reference +15 ·
+                      strong ratings +10.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -590,58 +628,48 @@ export const EvidencePage: React.FC = () => {
         )}
       </div>
 
-      {/* Add Employment Modal */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         busy={addSubmitting}
-        title="Attest Employment Record"
-        description="Submit employment history with start/end date invariants and corporate email verification."
+        title="Add a role"
+        description="Dates are checked for consistency. A work email is optional — we will send it a code."
       >
         {addError && (
-          <div
-            role="alert"
-            data-testid="add-error"
-            style={{
-              backgroundColor: '#fef2f2',
-              color: colors.semantic.errorText,
-              border: `1px solid ${colors.semantic.error}`,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: '6px',
-              marginBottom: spacing.md,
-              fontSize: '0.875rem',
-            }}
-          >
+          <Notice tone="error" data-testid="add-error" style={{ marginBottom: spacing.md }}>
             {addError}
-          </div>
+          </Notice>
         )}
-
-        <form onSubmit={handleAddSubmit} data-testid="add-employment-form">
+        <form onSubmit={handleAddSubmit} data-testid="add-employment-form" noValidate>
           <Input
             id="company-name"
-            label="Company Name"
-            placeholder="e.g. Stripe, Acme Corp"
+            label="Company"
+            placeholder="e.g. Acme Corp"
             required
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             data-testid="input-company"
           />
-
           <Input
             id="job-title"
-            label="Job Title"
-            placeholder="e.g. Senior Backend Engineer"
+            label="Job title"
+            placeholder="e.g. Backend Engineer"
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             data-testid="input-title"
           />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))',
+              gap: spacing.md,
+            }}
+          >
             <Input
               id="start-date"
               type="date"
-              label="Start Date"
+              label="Start date"
               required
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -650,53 +678,41 @@ export const EvidencePage: React.FC = () => {
             <Input
               id="end-date"
               type="date"
-              label="End Date"
+              label="End date"
               disabled={isCurrent}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               data-testid="input-end-date"
             />
           </div>
-
-          <div style={{ marginBottom: spacing.md }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '0.875rem',
-                cursor: 'pointer',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={isCurrent}
-                onChange={(e) => setIsCurrent(e.target.checked)}
-                data-testid="input-is-current"
-              />
-              <span>I currently work in this role</span>
-            </label>
-          </div>
-
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.875rem',
+              marginBottom: spacing.md,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={isCurrent}
+              onChange={(e) => setIsCurrent(e.target.checked)}
+              data-testid="input-is-current"
+            />
+            I currently work here
+          </label>
           <Input
             id="corporate-email"
             type="email"
-            label="Corporate Email (for domain attestation)"
+            label="Work email (optional)"
             placeholder="you@company.com"
-            helperText="Checked server-side against disposable and generic webmail domains."
+            helperText="We send a one-time code to confirm you can receive mail there. Personal webmail is not accepted."
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             data-testid="input-corporate-email"
           />
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: spacing.sm,
-              marginTop: spacing.lg,
-            }}
-          >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
             <Button
               variant="secondary"
               type="button"
@@ -705,120 +721,57 @@ export const EvidencePage: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              data-testid="submit-employment-btn"
-              loading={addSubmitting}
-            >
-              {addSubmitting ? 'Attesting…' : 'Attest Record'}
+            <Button type="submit" data-testid="submit-employment-btn" loading={addSubmitting}>
+              {addSubmitting ? 'Saving…' : 'Save role'}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Request Reference Modal */}
       <Modal
         isOpen={isRefModalOpen}
         onClose={() => setIsRefModalOpen(false)}
         busy={refSubmitting}
-        title="Request Structured Reference"
-        description="Create a structured reference request for a supervisor on this record."
+        title="Request a reference"
+        description="They receive a private link to confirm your role and dates and rate your work. You never see their answers before they are submitted."
       >
         {refError && (
-          <div
-            role="alert"
-            data-testid="ref-error"
-            style={{
-              backgroundColor: '#fef2f2',
-              color: colors.semantic.errorText,
-              border: `1px solid ${colors.semantic.error}`,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: '6px',
-              marginBottom: spacing.md,
-              fontSize: '0.875rem',
-            }}
-          >
+          <Notice tone="error" data-testid="ref-error" style={{ marginBottom: spacing.md }}>
             {refError}
-          </div>
+          </Notice>
         )}
-
         {refSuccess && (
-          <div
-            role="status"
-            data-testid="ref-success"
-            style={{
-              backgroundColor: '#ecfdf5',
-              color: colors.semantic.successText,
-              border: `1px solid ${colors.semantic.success}`,
-              padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: '6px',
-              marginBottom: spacing.md,
-              fontSize: '0.875rem',
-              fontWeight: 600,
-            }}
-          >
+          <Notice tone="success" data-testid="ref-success" style={{ marginBottom: spacing.md }}>
             {refSuccess}
-          </div>
+          </Notice>
         )}
-
-        <form onSubmit={handleReferenceSubmit} data-testid="request-reference-form">
+        <form onSubmit={handleReferenceSubmit} data-testid="request-reference-form" noValidate>
           <Input
             id="ref-name"
-            label="Referee Full Name"
-            placeholder="e.g. Alex Morgan"
+            label="Their full name"
             required
             value={refName}
             onChange={(e) => setRefName(e.target.value)}
             data-testid="input-ref-name"
           />
-
           <Input
             id="ref-email"
             type="email"
-            label="Referee Corporate Email"
-            placeholder="alex.morgan@company.com"
-            helperText="Must match the employer domain. Disposable emails are blocked."
+            label="Their email"
+            placeholder="name@company.com"
             required
             value={refEmail}
             onChange={(e) => setRefEmail(e.target.value)}
             data-testid="input-ref-email"
           />
-
-          <div style={{ marginBottom: spacing.lg }}>
-            <label
-              htmlFor="ref-role"
-              style={{
-                display: 'block',
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: colors.neutral[800],
-                marginBottom: spacing.xs,
-              }}
-            >
-              Working Relationship
-            </label>
-            <select
-              id="ref-role"
-              value={refRole}
-              onChange={(e) => setRefRole(e.target.value)}
-              data-testid="select-ref-role"
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: `1px solid ${colors.neutral[300]}`,
-                fontSize: '0.875rem',
-                color: colors.neutral[900],
-                backgroundColor: '#ffffff',
-              }}
-            >
-              <option value="manager">Direct Manager / Engineering Director</option>
-              <option value="mentor">Mentor / Staff Tech Lead</option>
-              <option value="peer">Cross-functional Peer (Senior / Principal)</option>
-            </select>
-          </div>
-
+          <Select
+            id="ref-role"
+            label="How do you know them?"
+            value={refRole}
+            onChange={(e) => setRefRole(e.target.value)}
+            data-testid="select-ref-role"
+            options={RELATIONSHIP_OPTIONS}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
             <Button
               variant="secondary"
@@ -828,13 +781,8 @@ export const EvidencePage: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              data-testid="submit-reference-btn"
-              loading={refSubmitting}
-            >
-              {refSubmitting ? 'Sending…' : 'Create Reference Request'}
+            <Button type="submit" data-testid="submit-reference-btn" loading={refSubmitting}>
+              {refSubmitting ? 'Sending…' : 'Send request'}
             </Button>
           </div>
         </form>

@@ -55,7 +55,7 @@ test.describe('NAV: deep links and session transitions', () => {
     await page.getByTestId('login-submit').click();
 
     await expect(page).toHaveURL(/\/evidence$/);
-    await expect(page.locator('h1')).toContainText('Verified Work History');
+    await expect(page.locator('h1')).toContainText('Work history');
   });
 
   test('sign-out clears the session and parks the user on /login', async ({ page, request }) => {

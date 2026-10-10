@@ -136,7 +136,7 @@ test.describe('MUT: pending feedback precedes the server response', () => {
     await submitBtn.click();
 
     // Pending feedback while the response is still held by the test.
-    await expect(submitBtn).toHaveText('Attesting…');
+    await expect(submitBtn).toHaveText('Saving…');
     await expect(submitBtn).toBeDisabled();
 
     // The form must not be dismissable mid-flight: its result would be lost.
@@ -336,7 +336,7 @@ test.describe('MUT: reconciliation, idempotency keys and session truthfulness', 
     // The record was saved and the refetch ran — the rejection must survive it.
     await expect(page.getByTestId(`work-history-${sampleEntry.id}`)).toBeVisible();
     await expect(page.getByTestId('evidence-notice')).toContainText(
-      'Record saved, but the email attestation was rejected'
+      'Saved, but we could not start email verification'
     );
     await expect(page.getByTestId('evidence-notice')).toContainText(
       'Disposable email addresses are not permitted'
@@ -372,9 +372,9 @@ test.describe('MUT: reconciliation, idempotency keys and session truthfulness', 
       json({ reference: { id: 'ref-1', status: 'requested' }, message: 'Created.' }, 201)
     );
     await expect(page.getByTestId('ref-success')).toHaveText(
-      /Reference request created for alex\.morgan@company\.test \(status: requested\)/
+      /Request sent to alex\.morgan@company\.test \(status: Waiting for response\)/
     );
-    await expect(submitBtn).toHaveText('Create Reference Request');
+    await expect(submitBtn).toHaveText('Send request');
   });
 
   test('checkout retry reuses the same idempotency key and never claims unconfirmed success', async ({

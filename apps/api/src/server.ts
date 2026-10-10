@@ -5,7 +5,17 @@ import rateLimit from '@fastify/rate-limit';
 import crypto from 'node:crypto';
 import { ZodError } from 'zod';
 import { validateServerEnv, ServerEnv } from '@talentsphere/config';
-import { createStorage } from './storage/index.js';
+import { DURABLE_ROUTES, isEphemeralRoute } from './durability.js';
+import {
+  createStorage,
+  type CoreOp,
+  type EmailChallenge,
+  type StoredOrganization,
+  type StoredOrgMembership,
+  type StoredReference,
+  type StoredUser,
+  type StoredWorkHistory,
+} from './storage/index.js';
 import {
   DomainError,
   Role,
@@ -14,8 +24,10 @@ import {
   SkillRelationship,
   hashPassword,
   verifyPassword,
+  passwordNeedsRehash,
   createSessionToken,
   verifySessionToken,
+  type AuthPayload,
   createProfileEntity,
   updateProfileEntity,
   canViewProfile,
@@ -289,6 +301,8 @@ import {
   EmploymentReference,
   createWorkHistory,
   verifyCorporateEmail,
+  assertCorporateEmailEligible,
+  canTransitionApplication,
   requestEmploymentReference,
   submitEmploymentReference,
   calculateVerificationScoreAndBadge,
@@ -305,6 +319,7 @@ import {
   CreateSkillInputSchema,
   CreateSkillRelationshipInputSchema,
   CreateOrganizationInputSchema,
+  AddOrganizationMemberInputSchema,
   CreateJobInputSchema,
   UpdateJobStatusInputSchema,
   SubmitApplicationInputSchema,
@@ -503,9 +518,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   };
 
-  // Attach x-request-id header to all outgoing responses for tracing
+  // Attach x-request-id header to all outgoing responses for tracing, and
+  // say so when a route's data does not survive a restart (ADR-015,
+  // apps/api/src/durability.ts) — clients and operators should not have to
+  // discover that by losing data.
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-request-id', req.id);
+    if (storage.core.durable === false || isEphemeralRoute(req.method, req.routeOptions?.url)) {
+      reply.header('x-talentsphere-durability', 'ephemeral');
+    }
   });
 
   // Security Plugins
@@ -624,15 +645,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     };
   });
 
-  // In-memory repositories for modular monolith runtime state
-  interface StoredUser {
-    id: string;
-    email: string;
-    roles: Role[];
-    passwordHash: string;
-    createdAt: string;
-    status?: string;
-  }
+  // Read model (ADR-015). Core-loop Maps below are hydrated from Postgres at
+  // boot and change only through persist(), after the write has committed.
+  // Every other Map in this file is still process memory — see
+  // EPHEMERAL_MODULES — and is reported as such by the health diagnostics.
   const usersByEmail = new Map<string, StoredUser>();
   const usersById = new Map<string, StoredUser>();
   const profilesByUserId = new Map<string, any>();
@@ -724,8 +740,56 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     };
   });
 
+  /**
+   * A signed token proves who the caller WAS when it was issued. For an
+   * account the API knows, the account's current state wins: a suspended or
+   * erased account loses access immediately, and role changes take effect on
+   * the next request instead of when the 24h token expires. Tokens for
+   * identities with no account row (service/ops identities minted with
+   * TOKEN_SECRET, which is itself the trust root) keep their signed claims.
+   */
+  //
+  // Restricted accounts (suspended or banned by moderation) keep exactly the
+  // access the SSOT guarantees them — "consequential restrictions require
+  // governed review and appeal" (SSOT §Trust) plus their GDPR rights — and
+  // nothing else. Erased accounts have no credential and no access at all.
+  const RESTRICTED_SESSION_ROUTES = new Set([
+    'GET /api/v1/profile/me',
+    'GET /api/v1/moderation/reports/my',
+    'POST /api/v1/moderation/reports/:id/appeal',
+    'POST /api/v1/settings/export',
+    'GET /api/v1/settings/export/latest',
+    'POST /api/v1/settings/erasure/request',
+    'GET /api/v1/settings/erasure/status',
+    'POST /api/v1/settings/erasure/cancel',
+    'POST /api/v1/settings/erasure/execute',
+  ]);
+  const accountAccess = (account: StoredUser): 'full' | 'restricted' | 'none' => {
+    if (account.passwordHash === ERASED_CREDENTIAL) return 'none';
+    return (account.status ?? 'active') === 'active' ? 'full' : 'restricted';
+  };
+  const resolveSession = (session: AuthPayload, req?: FastifyRequest): AuthPayload => {
+    const account = usersById.get(session.userId);
+    if (!account) return session;
+    const access = accountAccess(account);
+    if (access === 'none') {
+      throw new DomainError('UNAUTHENTICATED', 'This account has been closed.');
+    }
+    if (access === 'restricted') {
+      const route = req ? `${req.method} ${req.routeOptions?.url ?? ''}` : '';
+      if (!RESTRICTED_SESSION_ROUTES.has(route)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'This account is restricted. You can still view your reports, appeal a decision, and export or delete your data.',
+          { accountStatus: account.status }
+        );
+      }
+    }
+    return { ...session, email: account.email, roles: account.roles };
+  };
+
   // Authentication Helper
-  const extractUser = (req: FastifyRequest) => {
+  const extractUser = (req: FastifyRequest): AuthPayload => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new DomainError('UNAUTHENTICATED', 'Missing or malformed Authorization header.');
@@ -735,86 +799,189 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     if (!session) {
       throw new DomainError('UNAUTHENTICATED', 'Invalid or expired session token.');
     }
-    return session;
+    return resolveSession(session, req);
   };
 
-  const maybeExtractUser = (req: FastifyRequest) => {
+  const maybeExtractUser = (req: FastifyRequest): AuthPayload | null => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return null;
     }
     const token = authHeader.substring(7).trim();
     try {
-      return verifySessionToken(token);
+      const session = verifySessionToken(token);
+      return session ? resolveSession(session, req) : null;
     } catch {
       return null;
     }
   };
 
+  const sha256Hex = (value: string): string =>
+    crypto.createHash('sha256').update(value).digest('hex');
+  /** Constant-time comparison of two hex digests. */
+  const safeEqualHex = (a: string, b: string): boolean =>
+    a.length === b.length &&
+    /^[0-9a-f]+$/i.test(a) &&
+    /^[0-9a-f]+$/i.test(b) &&
+    crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+  /**
+   * Replaces the password hash of an erased account. Not a valid
+   * `salt:hash` pair, so verifyPassword can never succeed against it.
+   */
+  const ERASED_CREDENTIAL = '!erased';
+
+  /** May this session manage the given organization's jobs and pipeline? (BR-12) */
+  const canManageJobs = (
+    session: { userId: string; roles: Role[] } | null | undefined,
+    orgId: string
+  ): boolean => {
+    if (!session) return false;
+    if (session.roles.includes('platform_admin')) return true;
+    return (orgMembershipsByUserId.get(session.userId) || []).some((m) => m.orgId === orgId);
+  };
+
   // Auth Routes
-  app.post('/api/v1/auth/register', async (req: FastifyRequest, reply: FastifyReply) => {
-    const input = RegisterInputSchema.parse(req.body);
-    const existing = usersByEmail.get(input.email.toLowerCase());
-    if (existing) {
-      throw new DomainError('CONFLICT', 'An account with this email address already exists.');
-    }
+  // Credential endpoints get their own, much tighter budget than the global
+  // limiter (AUTH_RATE_LIMIT_MAX_REQUESTS was configured but never applied).
+  // Login is keyed by client AND target account, so guessing one account's
+  // password from one address is throttled without one noisy NAT locking out
+  // everyone behind it. 15-minute window.
+  const AUTH_WINDOW_MS = 15 * 60 * 1000;
+  const loginRateLimit = {
+    rateLimit: {
+      // preHandler, not the default onRequest: the key needs the parsed body.
+      hook: 'preHandler' as const,
+      max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+      timeWindow: AUTH_WINDOW_MS,
+      keyGenerator: (req: FastifyRequest) => {
+        const email = (req.body as { email?: unknown } | undefined)?.email;
+        return `login:${req.ip}:${typeof email === 'string' ? email.trim().toLowerCase() : ''}`;
+      },
+    },
+  };
+  const registerRateLimit = {
+    rateLimit: {
+      max: env.AUTH_RATE_LIMIT_MAX_REQUESTS * 2,
+      timeWindow: AUTH_WINDOW_MS,
+      keyGenerator: (req: FastifyRequest) => `register:${req.ip}`,
+    },
+  };
+  // Verified against when the email is unknown, so "no such account" costs the
+  // same time as "wrong password" and response timing does not reveal which
+  // addresses are registered.
+  const timingDecoyHash = hashPassword(crypto.randomBytes(16).toString('hex'));
 
-    const passwordHash = await hashPassword(input.password);
-    const userId = crypto.randomUUID();
+  app.post(
+    '/api/v1/auth/register',
+    { config: registerRateLimit },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const input = RegisterInputSchema.parse(req.body);
+      const existing = usersByEmail.get(input.email.toLowerCase());
+      if (existing) {
+        throw new DomainError('CONFLICT', 'An account with this email address already exists.');
+      }
 
-    const storedUser: StoredUser = {
-      id: userId,
-      email: input.email.toLowerCase(),
-      roles: [input.role],
-      passwordHash,
-      createdAt: new Date().toISOString(),
-    };
+      const passwordHash = await hashPassword(input.password);
+      const userId = crypto.randomUUID();
 
-    usersByEmail.set(storedUser.email, storedUser);
-    usersById.set(storedUser.id, storedUser);
-
-    const profile = createProfileEntity(userId, input.fullName);
-    profilesByUserId.set(userId, profile);
-    profilesById.set(profile.id, profile);
-
-    const token = createSessionToken(userId, storedUser.email, storedUser.roles);
-
-    return reply.status(201).send({
-      message: 'Registration successful',
-      token,
-      user: {
+      const storedUser: StoredUser = {
         id: userId,
-        email: storedUser.email,
-        roles: storedUser.roles,
-      },
-      profile,
-    });
-  });
+        email: input.email.toLowerCase(),
+        roles: [input.role],
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      };
 
-  app.post('/api/v1/auth/login', async (req: FastifyRequest, reply: FastifyReply) => {
-    const input = LoginInputSchema.parse(req.body);
-    const user = usersByEmail.get(input.email.toLowerCase());
-    if (!user) {
-      throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
+      const profile = createProfileEntity(userId, input.fullName);
+      // One transaction: an account never exists without its profile.
+      await persist({ kind: 'user', value: storedUser }, { kind: 'profile', value: profile });
+
+      const token = createSessionToken(userId, storedUser.email, storedUser.roles);
+
+      return reply.status(201).send({
+        message: 'Registration successful',
+        token,
+        user: {
+          id: userId,
+          email: storedUser.email,
+          roles: storedUser.roles,
+        },
+        profile,
+      });
     }
+  );
 
-    const isValid = await verifyPassword(input.password, user.passwordHash);
-    if (!isValid) {
-      throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
+  app.post(
+    '/api/v1/auth/login',
+    { config: loginRateLimit },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const input = LoginInputSchema.parse(req.body);
+      const user = usersByEmail.get(input.email.toLowerCase());
+      if (!user) {
+        await verifyPassword(input.password, await timingDecoyHash);
+        throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
+      }
+
+      const isValid = await verifyPassword(input.password, user.passwordHash);
+      if (!isValid) {
+        throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
+      }
+
+      // Transparent upgrade: hashes written at the old work factor (10k
+      // iterations) are re-hashed at the current one while the plaintext is in
+      // hand. A failed upgrade never blocks a correct sign-in.
+      if (passwordNeedsRehash(user.passwordHash)) {
+        try {
+          await persist({
+            kind: 'user',
+            value: { ...user, passwordHash: await hashPassword(input.password) },
+          });
+        } catch (err) {
+          req.log.warn({ err, userId: user.id }, 'password re-hash on login failed');
+        }
+      }
+      // A restricted (suspended/banned) account may still sign in: it needs a
+      // session to see its reports, appeal, and exercise its data rights.
+      // resolveSession() confines that session to those routes, and the status
+      // is returned so the client can say so instead of failing mysteriously.
+
+      const profile = profilesByUserId.get(user.id);
+      const token = createSessionToken(user.id, user.email, user.roles);
+
+      return reply.status(200).send({
+        message: 'Login successful',
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          roles: user.roles,
+          status: user.status ?? 'active',
+        },
+        profile,
+      });
     }
+  );
 
-    const profile = profilesByUserId.get(user.id);
-    const token = createSessionToken(user.id, user.email, user.roles);
-
+  // Who am I, according to the server? The web app calls this on load so its
+  // idea of the session (roles, account status, profile) comes from the API,
+  // not from whatever was left in localStorage.
+  app.get('/api/v1/auth/session', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const account = usersById.get(session.userId);
+    const memberships = (orgMembershipsByUserId.get(session.userId) || []).map((m) => ({
+      orgId: m.orgId,
+      role: m.role,
+      organizationName: organizationsById.get(m.orgId)?.name,
+    }));
     return reply.status(200).send({
-      message: 'Login successful',
-      token,
       user: {
-        id: user.id,
-        email: user.email,
-        roles: user.roles,
+        id: session.userId,
+        email: session.email,
+        roles: session.roles,
+        status: account?.status ?? 'active',
       },
-      profile,
+      profile: profilesByUserId.get(session.userId) ?? null,
+      memberships,
     });
   });
 
@@ -838,9 +1005,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
 
     const updated = updateProfileEntity(currentProfile, updates as any);
-
-    profilesByUserId.set(session.userId, updated);
-    profilesById.set(updated.id, updated);
+    await persist({ kind: 'profile', value: updated });
 
     return reply.status(200).send({ profile: updated });
   });
@@ -854,21 +1019,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Profile with ID ${id} not found.`);
       }
 
-      let viewerId: string | undefined;
-      let viewerRoles: Role[] = [];
-
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        try {
-          const session = verifySessionToken(authHeader.substring(7).trim());
-          if (session) {
-            viewerId = session.userId;
-            viewerRoles = session.roles;
-          }
-        } catch {
-          // anonymous
-        }
-      }
+      const viewer = maybeExtractUser(req);
+      const viewerId: string | undefined = viewer?.userId;
+      const viewerRoles: Role[] = viewer?.roles ?? [];
 
       const allowed = canViewProfile(profile, viewerId, viewerRoles);
       if (!allowed) {
@@ -994,19 +1147,20 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       recencyDate: input.recencyDate,
     });
 
-    evidenceById.set(evidence.id, evidence);
-    const existingList = evidenceBySubjectId.get(profile.id) || [];
-    existingList.push(evidence);
-    evidenceBySubjectId.set(profile.id, existingList);
-
-    if (input.skillIds && input.skillIds.length > 0) {
-      for (const skillId of input.skillIds) {
-        if (!skillsById.has(skillId)) {
-          throw new DomainError('NOT_FOUND', `Canonical skill ${skillId} does not exist (BR-144).`);
-        }
+    // Validate every referenced skill BEFORE writing: an unknown skill used to
+    // fail the request after the evidence had already been stored.
+    const skillIds = Array.from(new Set(input.skillIds ?? []));
+    for (const skillId of skillIds) {
+      if (!skillsById.has(skillId)) {
+        throw new DomainError('NOT_FOUND', `Canonical skill ${skillId} does not exist (BR-144).`);
       }
-      evidenceSkills.set(evidence.id, new Set(input.skillIds));
     }
+
+    await persist({
+      kind: 'evidence',
+      value: evidence,
+      skillIds: skillIds.length > 0 ? skillIds : undefined,
+    });
 
     auditLogs.push({
       event: 'evidence.created',
@@ -1028,21 +1182,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       const profile = profilesById.get(evidence.subjectId);
-      let viewerId: string | undefined;
-      let viewerRoles: Role[] = [];
-
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        try {
-          const session = verifySessionToken(authHeader.substring(7).trim());
-          if (session) {
-            viewerId = session.userId;
-            viewerRoles = session.roles;
-          }
-        } catch {
-          // anonymous
-        }
-      }
+      const viewer = maybeExtractUser(req);
+      const viewerId: string | undefined = viewer?.userId;
+      const viewerRoles: Role[] = viewer?.roles ?? [];
 
       if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
         throw new DomainError(
@@ -1062,6 +1204,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
+  // The signed-in candidate's own evidence, newest first.
+  app.get('/api/v1/evidence/mine', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    const list = profile ? evidenceBySubjectId.get(profile.id) || [] : [];
+    const evidence = [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return reply.status(200).send({ evidence });
+  });
+
   app.get(
     '/api/v1/evidence/subject/:subjectId',
     async (req: FastifyRequest<{ Params: { subjectId: string } }>, reply: FastifyReply) => {
@@ -1071,21 +1222,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Profile with ID ${subjectId} not found.`);
       }
 
-      let viewerId: string | undefined;
-      let viewerRoles: Role[] = [];
-
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        try {
-          const session = verifySessionToken(authHeader.substring(7).trim());
-          if (session) {
-            viewerId = session.userId;
-            viewerRoles = session.roles;
-          }
-        } catch {
-          // anonymous
-        }
-      }
+      const viewer = maybeExtractUser(req);
+      const viewerId: string | undefined = viewer?.userId;
+      const viewerRoles: Role[] = viewer?.roles ?? [];
 
       if (!canViewProfile(profile, viewerId, viewerRoles)) {
         throw new DomainError(
@@ -1120,10 +1259,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         subjectProfile?.userId
       );
 
-      evidenceById.set(updated.id, updated);
-      const list = evidenceBySubjectId.get(updated.subjectId) || [];
-      const index = list.findIndex((e) => e.id === updated.id);
-      if (index >= 0) list[index] = updated;
+      await persist({ kind: 'evidence', value: updated });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1167,10 +1303,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      evidenceById.set(updated.id, updated);
-      const list = evidenceBySubjectId.get(updated.subjectId) || [];
-      const index = list.findIndex((e) => e.id === updated.id);
-      if (index >= 0) list[index] = updated;
+      await persist({ kind: 'evidence', value: updated });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1203,10 +1336,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      evidenceById.set(updated.id, updated);
-      const list = evidenceBySubjectId.get(updated.subjectId) || [];
-      const index = list.findIndex((e) => e.id === updated.id);
-      if (index >= 0) list[index] = updated;
+      await persist({ kind: 'evidence', value: updated });
 
       await dispatchJob({
         type: 'evidence.propagate',
@@ -1265,8 +1395,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       updatedAt: now,
     };
 
-    skillsById.set(skill.id, skill);
-    skillsBySlug.set(skill.slug, skill);
+    await persist({ kind: 'skill', value: skill });
 
     return reply.status(201).send({ skill });
   });
@@ -1315,22 +1444,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   );
 
   // Organization, Job & Application Repositories (F-04, F-05, F-06)
-  interface StoredOrganization {
-    id: string;
-    name: string;
-    slug: string;
-    website?: string;
-    description?: string;
-    createdAt: string;
-  }
-  interface StoredOrgMembership {
-    id: string;
-    orgId: string;
-    userId: string;
-    role: string;
-    createdAt: string;
-  }
-
   const organizationsById = new Map<string, StoredOrganization>();
   const organizationsBySlug = new Map<string, StoredOrganization>();
   const orgMembershipsByOrgId = new Map<string, StoredOrgMembership[]>();
@@ -1378,9 +1491,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       createdAt: now,
     };
 
-    organizationsById.set(orgId, org);
-    organizationsBySlug.set(input.slug, org);
-
     const membership: StoredOrgMembership = {
       id: crypto.randomUUID(),
       orgId,
@@ -1389,16 +1499,49 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       createdAt: now,
     };
 
-    const orgMembers = orgMembershipsByOrgId.get(orgId) || [];
-    orgMembers.push(membership);
-    orgMembershipsByOrgId.set(orgId, orgMembers);
+    // One transaction: an organization never exists without its owner.
+    await persist({ kind: 'organization', value: org }, { kind: 'membership', value: membership });
 
-    const userMembers = orgMembershipsByUserId.get(session.userId) || [];
-    userMembers.push(membership);
-    orgMembershipsByUserId.set(session.userId, userMembers);
-
-    return reply.status(201).send({ organization: org });
+    return reply.status(201).send({ organization: org, membership });
   });
+
+  // Organizations the signed-in user belongs to, with their role in each.
+  app.get('/api/v1/organizations/mine', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const organizations = (orgMembershipsByUserId.get(session.userId) || [])
+      .map((m) => {
+        const org = organizationsById.get(m.orgId);
+        return org ? { ...org, membershipRole: m.role } : null;
+      })
+      .filter(Boolean);
+    return reply.status(200).send({ organizations });
+  });
+
+  // Every posting of an organization, in any status — the hiring team's view.
+  // Includes per-job application counts by status for the pipeline overview.
+  app.get(
+    '/api/v1/organizations/:id/jobs',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      if (!organizationsById.has(id)) {
+        throw new DomainError('NOT_FOUND', `Organization with ID ${id} not found.`);
+      }
+      if (!canManageJobs(session, id)) {
+        throw new DomainError('FORBIDDEN', 'Only members of this organization can see its jobs.');
+      }
+      const jobs = [...(jobsByOrgId.get(id) || [])]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .map((job) => {
+          const counts: Record<string, number> = {};
+          for (const application of applicationsByJobId.get(job.id) || []) {
+            counts[application.status] = (counts[application.status] ?? 0) + 1;
+          }
+          return { ...job, applicationCounts: counts };
+        });
+      return reply.status(200).send({ jobs });
+    }
+  );
 
   app.get(
     '/api/v1/organizations/:id',
@@ -1431,27 +1574,28 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('FORBIDDEN', 'Only organization owner or admin can add members.');
       }
 
-      const body = (req.body as any) || {};
+      const body = AddOrganizationMemberInputSchema.parse(req.body ?? {});
       const targetUserId = body.userId;
-      if (!targetUserId) {
-        throw new DomainError('VALIDATION_FAILED', 'userId is required.');
+      if (!usersById.has(targetUserId)) {
+        throw new DomainError('NOT_FOUND', 'No account exists for that user id.');
+      }
+      // Ownership is not grantable through this endpoint: an admin could
+      // otherwise mint co-owners and an owner could not be told apart from
+      // someone who merely added themselves (privilege escalation).
+      const existing = (orgMembershipsByOrgId.get(id) || []).find((m) => m.userId === targetUserId);
+      if (existing) {
+        throw new DomainError('CONFLICT', 'That user is already a member of this organization.');
       }
 
       const membership: StoredOrgMembership = {
         id: crypto.randomUUID(),
         orgId: id,
         userId: targetUserId,
-        role: body.role || 'recruiter',
+        role: body.role,
         createdAt: new Date().toISOString(),
       };
 
-      const orgMembers = orgMembershipsByOrgId.get(id) || [];
-      orgMembers.push(membership);
-      orgMembershipsByOrgId.set(id, orgMembers);
-
-      const targetUserMembers = orgMembershipsByUserId.get(targetUserId) || [];
-      targetUserMembers.push(membership);
-      orgMembershipsByUserId.set(targetUserId, targetUserMembers);
+      await persist({ kind: 'membership', value: membership });
 
       return reply.status(201).send({ membership });
     }
@@ -1504,10 +1648,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       },
     });
 
-    jobsById.set(job.id, job);
-    const list = jobsByOrgId.get(input.orgId) || [];
-    list.push(job);
-    jobsByOrgId.set(input.orgId, list);
+    await persist({ kind: 'job', value: job });
 
     if (job.status === 'published') {
       const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
@@ -1528,7 +1669,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   });
 
   app.get('/api/v1/jobs', async () => {
-    const published = Array.from(jobsById.values()).filter((j) => j.status === 'published');
+    const published = Array.from(jobsById.values())
+      .filter((j) => j.status === 'published')
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .map((job) => ({
+        ...job,
+        organization: (() => {
+          const org = organizationsById.get(job.orgId);
+          return org ? { id: org.id, name: org.name, slug: org.slug } : undefined;
+        })(),
+      }));
     return { jobs: published };
   });
 
@@ -1537,7 +1687,11 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const { id } = req.params;
       const job = jobsById.get(id);
-      if (!job) {
+      // Unpublished postings (drafts, paused, closed) are visible only to the
+      // hiring organization; to everyone else they do not exist (same 404),
+      // so a draft's existence is not disclosed either.
+      const viewer = maybeExtractUser(req);
+      if (!job || (job.status !== 'published' && !canManageJobs(viewer, job.orgId))) {
         throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
       }
 
@@ -1560,16 +1714,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Job with ID ${id} not found.`);
       }
 
+      // BR-12 tenant isolation: the actor's organization comes from their
+      // memberships, never from the job being edited. (Previously the job's
+      // own orgId was passed as the actor's, so any recruiter could pause,
+      // close or archive any other company's postings.)
+      const actorOrgId = canManageJobs(session, job.orgId) ? job.orgId : undefined;
       const updated = transitionJobStatus(job, input.status, {
         userId: session.userId,
         roles: session.roles,
-        orgId: job.orgId,
+        orgId: actorOrgId,
       });
 
-      jobsById.set(updated.id, updated);
-      const list = jobsByOrgId.get(job.orgId) || [];
-      const idx = list.findIndex((j) => j.id === updated.id);
-      if (idx >= 0) list[idx] = updated;
+      await persist({ kind: 'job', value: updated });
 
       if (updated.status === 'published' && job.status !== 'published') {
         const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
@@ -1913,10 +2069,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
       );
 
-      jobsById.set(job.id, job);
-      const list = jobsByOrgId.get(job.orgId) || [];
-      list.push(job);
-      jobsByOrgId.set(job.orgId, list);
+      await persist({ kind: 'job', value: job });
 
       auditLogs.push({
         event: 'job.instantiated_from_template',
@@ -2172,14 +2325,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         attachedEvidenceIds: input.attachedEvidenceIds,
       });
 
-      applicationsById.set(application.id, application);
-      const jobList = applicationsByJobId.get(jobId) || [];
-      jobList.push(application);
-      applicationsByJobId.set(jobId, jobList);
-
-      const candList = applicationsByCandidateId.get(profile.id) || [];
-      candList.push(application);
-      applicationsByCandidateId.set(profile.id, candList);
+      await persist({ kind: 'application', value: application });
 
       // Mark candidate draft as submitted if exists (F-36)
       const draftKey = `${profile.id}:${jobId}`;
@@ -2317,17 +2463,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      applicationsById.set(updated.id, updated);
-
-      // Update candidate list
-      const candList = applicationsByCandidateId.get(application.candidateId) || [];
-      const candIdx = candList.findIndex((a) => a.id === updated.id);
-      if (candIdx >= 0) candList[candIdx] = updated;
-
-      // Update job list
-      const jobList = applicationsByJobId.get(application.jobId) || [];
-      const jobIdx = jobList.findIndex((a) => a.id === updated.id);
-      if (jobIdx >= 0) jobList[jobIdx] = updated;
+      await persist({ kind: 'application', value: updated });
 
       await dispatchJob({
         type: 'application.status_changed',
@@ -3091,11 +3227,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       interviewScorecardsByAssessmentId.set(id, cards);
 
       // If linked to job application, update application notes/evaluation
+      // Only along the ATS state machine: a scorecard must not resurrect a
+      // rejected, withdrawn or hired application (it used to set the status
+      // directly, bypassing BR-03/BR-40 and the persisted record).
       if (assessment.applicationId) {
-        const app = applicationsById.get(assessment.applicationId);
-        if (app) {
-          app.status = 'interviewing';
-          app.updatedAt = new Date().toISOString();
+        const linked = applicationsById.get(assessment.applicationId);
+        if (linked && canTransitionApplication(linked.status, 'interviewing')) {
+          await persist({
+            kind: 'application',
+            value: { ...linked, status: 'interviewing', updatedAt: new Date().toISOString() },
+          });
         }
       }
 
@@ -4011,10 +4152,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       if (evalResult.status === 'passed') {
         // 1. Store auto-minted verified evidence
         if (evalResult.evidence) {
-          evidenceById.set(evalResult.evidence.id, evalResult.evidence);
-          const evList = evidenceBySubjectId.get(profile.id) || [];
-          evList.push(evalResult.evidence);
-          evidenceBySubjectId.set(profile.id, evList);
+          await persist({ kind: 'evidence', value: evalResult.evidence });
 
           await dispatchJob({
             type: 'evidence.propagate',
@@ -4612,10 +4750,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         evidence.status = 'verified';
         evidence.verificationLevel = 'authority_verified';
 
-        evidenceById.set(evidence.id, evidence);
-        const evList = evidenceBySubjectId.get(profile.id) || [];
-        evList.push(evidence);
-        evidenceBySubjectId.set(profile.id, evList);
+        await persist({ kind: 'evidence', value: evidence });
 
         await dispatchJob({
           type: 'evidence.propagate',
@@ -6253,9 +6388,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
             a.jobId === result.outcome!.jobId && a.status !== 'withdrawn' && a.status !== 'rejected'
         );
         if (matchingApp) {
-          matchingApp.isReferred = true;
-          matchingApp.referralId = result.outcome.id;
-          applicationsById.set(matchingApp.id, matchingApp);
+          await persist({
+            kind: 'application',
+            value: {
+              ...matchingApp,
+              isReferred: true,
+              referralId: result.outcome.id,
+              updatedAt: new Date().toISOString(),
+            },
+          });
         }
 
         await sendNotification({
@@ -8740,17 +8881,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('NOT_FOUND', `Portfolio project with ID "${id}" not found.`);
       }
 
-      let viewerUserId: string | undefined;
-      let viewerRoles: Role[] | undefined;
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7).trim();
-        const session = verifySessionToken(token);
-        if (session) {
-          viewerUserId = session.userId;
-          viewerRoles = session.roles;
-        }
-      }
+      const viewer = maybeExtractUser(req);
+      const viewerUserId: string | undefined = viewer?.userId;
+      const viewerRoles: Role[] | undefined = viewer?.roles;
 
       const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
       const isConnected = viewerUserId
@@ -8854,17 +8987,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         targetUserId = targetProfile.userId;
       }
 
-      let viewerUserId: string | undefined;
-      let viewerRoles: Role[] | undefined;
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7).trim();
-        const session = verifySessionToken(token);
-        if (session) {
-          viewerUserId = session.userId;
-          viewerRoles = session.roles;
-        }
-      }
+      const viewer = maybeExtractUser(req);
+      const viewerUserId: string | undefined = viewer?.userId;
+      const viewerRoles: Role[] | undefined = viewer?.roles;
 
       const userConnections = viewerUserId ? connectionsByUserId.get(viewerUserId) || [] : [];
       const isConnected = viewerUserId
@@ -9171,9 +9296,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     if (input.profileVisibility) {
       const profile = profilesByUserId.get(session.userId);
       if (profile) {
-        profile.privacy = input.profileVisibility;
-        profilesByUserId.set(session.userId, profile);
-        if (profile.id) profilesById.set(profile.id, profile);
+        await persist({
+          kind: 'profile',
+          value: { ...profile, privacy: input.profileVisibility, updatedAt: updated.updatedAt },
+        });
       }
     }
 
@@ -9403,17 +9529,48 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       profile
     );
 
-    // Persist anonymized state
-    user.email = result.anonymizedUser.email;
-    user.status = 'deactivated';
-    usersById.set(user.id, user);
-    usersByEmail.delete(session.email.toLowerCase());
-    usersByEmail.set(user.email.toLowerCase(), user);
-
-    profilesByUserId.set(session.userId, result.anonymizedProfile);
-    if (profile.id) {
-      profilesById.set(profile.id, result.anonymizedProfile);
+    // Persist the anonymized state in ONE transaction. Now that this data is
+    // durable, erasure has to remove personal data rather than rely on a
+    // restart to forget it:
+    //  - the account can never sign in again (credential destroyed);
+    //  - work history, references and evidence (employer names, titles,
+    //    corporate emails, referee contacts, free text) are deleted;
+    //  - open applications are withdrawn and cover letters blanked, keeping
+    //    only the minimal record an employer's pipeline still points at.
+    const erasedAt = result.completedAt;
+    const erasureOps: CoreOp[] = [
+      {
+        kind: 'user',
+        value: {
+          ...user,
+          email: result.anonymizedUser.email,
+          status: 'deactivated',
+          passwordHash: ERASED_CREDENTIAL,
+        },
+      },
+      { kind: 'profile', value: result.anonymizedProfile },
+    ];
+    for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+      erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
     }
+    for (const item of evidenceBySubjectId.get(profile.id) || []) {
+      erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+    }
+    for (const application of applicationsByCandidateId.get(profile.id) || []) {
+      const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
+      erasureOps.push({
+        kind: 'application',
+        value: {
+          ...application,
+          status: terminal ? application.status : 'withdrawn',
+          withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
+          coverLetter: undefined,
+          attachedEvidenceIds: [],
+          updatedAt: erasedAt,
+        },
+      });
+    }
+    await persist(...erasureOps);
 
     // Mark any active erasure request as completed
     const list = erasureRequestsByUserId.get(session.userId) || [];
@@ -9696,8 +9853,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       validateUserStatusTransition(oldStatus, input.status, session.userId, targetUser.id);
 
-      targetUser.status = input.status;
-      usersById.set(targetUser.id, targetUser);
+      const savedUser: StoredUser = { ...targetUser, status: input.status };
+      await persist({ kind: 'user', value: savedUser });
 
       const auditLog = createAdminAuditLog({
         eventName: 'USER_STATUS_UPDATED',
@@ -9725,10 +9882,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       return reply.status(200).send({
         message: 'User status updated successfully.',
         user: {
-          id: targetUser.id,
-          email: targetUser.email,
-          roles: targetUser.roles,
-          status: targetUser.status,
+          id: savedUser.id,
+          email: savedUser.email,
+          roles: savedUser.roles,
+          status: savedUser.status,
         },
         auditLog,
       });
@@ -9749,9 +9906,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       const input = AdminUpdateUserRolesInputSchema.parse(req.body);
+      // Same anti-lockout rule as status changes (BR-29): an administrator
+      // cannot strip their own administrative role.
+      if (
+        targetUser.id === session.userId &&
+        targetUser.roles.includes('platform_admin') &&
+        !input.roles.includes('platform_admin')
+      ) {
+        throw new DomainError(
+          'POLICY_VIOLATION',
+          'Administrators cannot remove their own platform_admin role (governance lockout).'
+        );
+      }
       const oldRoles = [...targetUser.roles];
-      targetUser.roles = input.roles as Role[];
-      usersById.set(targetUser.id, targetUser);
+      const savedUser: StoredUser = { ...targetUser, roles: input.roles as Role[] };
+      await persist({ kind: 'user', value: savedUser });
 
       const auditLog = createAdminAuditLog({
         eventName: 'USER_ROLES_UPDATED',
@@ -9768,10 +9937,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       return reply.status(200).send({
         message: 'User roles updated successfully.',
         user: {
-          id: targetUser.id,
-          email: targetUser.email,
-          roles: targetUser.roles,
-          status: targetUser.status || 'active',
+          id: savedUser.id,
+          email: savedUser.email,
+          roles: savedUser.roles,
+          status: savedUser.status || 'active',
         },
         auditLog,
       });
@@ -9900,6 +10069,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     return reply.status(200).send({
       diagnostics,
+      // ADR-015: what survives a restart, stated rather than implied.
+      persistence: {
+        coreLoop: storage.core.durable ? 'postgres' : 'memory (not durable)',
+        durableRouteCount: storage.core.durable ? DURABLE_ROUTES.size : 0,
+        note: storage.core.durable
+          ? 'Identity, organizations, jobs, applications, evidence and work history are durable. ' +
+            'All other modules keep state in process memory and lose it on restart; their ' +
+            'responses carry x-talentsphere-durability: ephemeral.'
+          : 'STORAGE=memory: nothing is durable.',
+      },
     });
   });
 
@@ -10447,13 +10626,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // Apply side effects of enforcement
       if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
         const user = usersById.get(resolved.targetId);
-        if (user) user.status = 'suspended';
+        if (user) await persist({ kind: 'user', value: { ...user, status: 'suspended' } });
       } else if (resolved.actionTaken === 'user_banned' && resolved.targetType === 'user') {
         const user = usersById.get(resolved.targetId);
-        if (user) user.status = 'deactivated';
+        if (user) await persist({ kind: 'user', value: { ...user, status: 'deactivated' } });
       } else if (resolved.actionTaken === 'content_removed' && resolved.targetType === 'job') {
         const job = jobsById.get(resolved.targetId);
-        if (job) job.status = 'closed';
+        if (job && job.status !== 'closed' && job.status !== 'archived') {
+          await persist({
+            kind: 'job',
+            value: { ...job, status: 'closed', updatedAt: new Date().toISOString() },
+          });
+        }
       }
 
       await dispatchJob({
@@ -10534,7 +10718,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           origReport.status = 'dismissed';
           if (origReport.targetType === 'user') {
             const user = usersById.get(origReport.targetId);
-            if (user) user.status = 'active';
+            if (user) await persist({ kind: 'user', value: { ...user, status: 'active' } });
           }
         }
       }
@@ -11011,15 +11195,31 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   // =========================================================================
   // Verified Work History Network & References Repositories & Endpoints (F-162, F-94, F-84)
   // =========================================================================
-  const verifiedWorkHistoriesById = new Map<string, VerifiedWorkHistory>();
-  const verifiedWorkHistoriesByCandidateId = new Map<string, VerifiedWorkHistory[]>();
-  const employmentReferencesById = new Map<string, EmploymentReference>();
-  const employmentReferencesByHistoryId = new Map<string, EmploymentReference[]>();
+  const verifiedWorkHistoriesById = new Map<string, StoredWorkHistory>();
+  const verifiedWorkHistoriesByCandidateId = new Map<string, StoredWorkHistory[]>();
+  const employmentReferencesById = new Map<string, StoredReference>();
+  const employmentReferencesByHistoryId = new Map<string, StoredReference[]>();
   // Replay guards (WF-10 idiom, same as messagesByClientMessageId): a retried
   // create with the same clientRequestId returns the original record instead
-  // of creating a duplicate or re-emailing a referee.
-  const workHistoriesByClientRequest = new Map<string, VerifiedWorkHistory>(); // key: `${candidateId}:${clientRequestId}`
-  const referencesByClientRequest = new Map<string, EmploymentReference>(); // key: `${candidateId}:${clientRequestId}`
+  // of creating a duplicate or re-emailing a referee. Rebuilt from the
+  // persisted client_request_id columns at boot.
+  const workHistoriesByClientRequest = new Map<string, StoredWorkHistory>(); // key: `${candidateId}:${clientRequestId}`
+  const referencesByClientRequest = new Map<string, StoredReference>(); // key: `${candidateId}:${clientRequestId}`
+  // Open corporate-email ownership challenges, one per work-history record.
+  const emailChallengesByHistoryId = new Map<string, EmailChallenge>();
+
+  const EMAIL_CHALLENGE_TTL_MS = 15 * 60 * 1000;
+  const EMAIL_CHALLENGE_MAX_ATTEMPTS = 5;
+
+  // Response projections: replay keys and token hashes never leave the API.
+  const publicWorkHistory = (h: StoredWorkHistory): VerifiedWorkHistory => {
+    const { clientRequestId: _replayKey, ...rest } = h;
+    return rest;
+  };
+  const publicReference = (r: StoredReference): Omit<EmploymentReference, 'token'> => {
+    const { tokenHash: _tokenHash, clientRequestId: _replayKey, ...rest } = r;
+    return rest;
+  };
 
   // 1. Add Work History Entry (F-94)
   app.post('/api/v1/candidates/work-history', async (req: FastifyRequest, reply: FastifyReply) => {
@@ -11035,11 +11235,15 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const existing = workHistoriesByClientRequest.get(dedupeKey);
       if (existing) {
         return reply.status(200).send({
-          workHistory: existing,
+          workHistory: publicWorkHistory(existing),
           message: 'Attestation already recorded for this submission.',
           deduplicated: true,
         });
       }
+    }
+
+    if (body.companyId && !organizationsById.has(body.companyId)) {
+      throw new DomainError('VALIDATION_FAILED', 'companyId does not match a known organization.');
     }
 
     const candidateId = session.userId;
@@ -11058,21 +11262,22 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       skills: body.skills,
     });
 
-    verifiedWorkHistoriesById.set(history.id, history);
-    const list = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
-    list.push(history);
-    verifiedWorkHistoriesByCandidateId.set(candidateId, list);
-    if (dedupeKey) {
-      workHistoriesByClientRequest.set(dedupeKey, history);
-    }
+    const stored: StoredWorkHistory = { ...history, clientRequestId: body.clientRequestId };
+    await persist({ kind: 'workHistory', value: stored });
 
     return reply.status(201).send({
-      workHistory: history,
+      workHistory: publicWorkHistory(stored),
       message: 'Work history record created successfully.',
     });
   });
 
-  // 2. Verify Corporate Email for Work History (F-94)
+  // 2. Verify Corporate Email for Work History (F-94) — two steps.
+  //
+  // Step 1 (no verificationCode): policy check, then a single-use 6-digit code
+  // is sent to the address. Step 2 (with verificationCode): the code proves the
+  // candidate controls the mailbox, and only then is the record marked
+  // email-verified. Previously step 1 alone marked the record verified, so
+  // anyone could claim any corporate address they could type.
   app.post(
     '/api/v1/candidates/work-history/:id/verify-email',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
@@ -11097,25 +11302,80 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
       }
 
+      const email = body.corporateEmail.trim().toLowerCase();
+
+      if (!body.verificationCode) {
+        assertCorporateEmailEligible(email, companyDomain);
+        const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+        const now = new Date();
+        const challenge: EmailChallenge = {
+          workHistoryId: id,
+          email,
+          codeHash: sha256Hex(`${id}:${code}`),
+          attempts: 0,
+          expiresAt: new Date(now.getTime() + EMAIL_CHALLENGE_TTL_MS).toISOString(),
+          createdAt: now.toISOString(),
+        };
+        await persist({ kind: 'emailChallenge', value: challenge });
+        // The worker delivers this (email provider) — the code is never
+        // returned to the browser that asked for it.
+        await dispatchJob({
+          type: 'work_history.email_verification_requested',
+          payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
+        });
+        return reply.status(202).send({
+          status: 'verification_pending',
+          email,
+          expiresAt: challenge.expiresAt,
+          message: `We sent a 6-digit code to ${email}. Enter it to confirm you control this mailbox.`,
+        });
+      }
+
+      const challenge = emailChallengesByHistoryId.get(id);
+      if (!challenge || challenge.email !== email) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          'No verification is pending for this address. Request a new code.'
+        );
+      }
+      if (Date.parse(challenge.expiresAt) <= Date.now()) {
+        await persist({ kind: 'emailChallengeDelete', workHistoryId: id });
+        throw new DomainError('VALIDATION_FAILED', 'This code has expired. Request a new code.');
+      }
+      if (challenge.attempts >= EMAIL_CHALLENGE_MAX_ATTEMPTS) {
+        throw new DomainError(
+          'RATE_LIMIT_EXCEEDED',
+          'Too many incorrect codes. Request a new code.'
+        );
+      }
+      if (!safeEqualHex(sha256Hex(`${id}:${body.verificationCode.trim()}`), challenge.codeHash)) {
+        await persist({
+          kind: 'emailChallenge',
+          value: { ...challenge, attempts: challenge.attempts + 1 },
+        });
+        throw new DomainError('VALIDATION_FAILED', 'That code is not correct.');
+      }
+
       const existingRefs = employmentReferencesByHistoryId.get(id) || [];
 
       const updatedHistory = verifyCorporateEmail({
         workHistory,
-        corporateEmail: body.corporateEmail,
+        corporateEmail: email,
         companyDomain,
         references: existingRefs,
       });
 
-      verifiedWorkHistoriesById.set(id, updatedHistory);
-      const list = verifiedWorkHistoriesByCandidateId.get(workHistory.candidateId) || [];
-      const idx = list.findIndex((h) => h.id === id);
-      if (idx !== -1) {
-        list[idx] = updatedHistory;
-      }
-      verifiedWorkHistoriesByCandidateId.set(workHistory.candidateId, list);
+      const saved: StoredWorkHistory = {
+        ...updatedHistory,
+        clientRequestId: workHistory.clientRequestId,
+      };
+      await persist(
+        { kind: 'workHistory', value: saved },
+        { kind: 'emailChallengeDelete', workHistoryId: id }
+      );
 
       return reply.status(200).send({
-        workHistory: updatedHistory,
+        workHistory: publicWorkHistory(saved),
         message: 'Corporate email verified successfully.',
       });
     }
@@ -11138,7 +11398,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         const existing = referencesByClientRequest.get(dedupeKey);
         if (existing) {
           return reply.status(200).send({
-            reference: existing,
+            reference: publicReference(existing),
             message: 'Reference request already created for this submission.',
             deduplicated: true,
           });
@@ -11154,15 +11414,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('FORBIDDEN', 'Access denied to request reference for this record.');
       }
 
-      let refereeUserId: string | undefined;
-      for (const [uid, user] of usersById.entries()) {
-        if (user.email.toLowerCase() === body.refereeEmail.toLowerCase()) {
-          refereeUserId = uid;
-          break;
-        }
-      }
+      const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
-      const reference = requestEmploymentReference({
+      const requested = requestEmploymentReference({
         workHistoryId: id,
         candidateId: workHistory.candidateId,
         candidateUserId: session.userId,
@@ -11173,17 +11427,70 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         relationship: body.relationship,
       });
 
-      employmentReferencesById.set(reference.id, reference);
-      const refs = employmentReferencesByHistoryId.get(id) || [];
-      refs.push(reference);
-      employmentReferencesByHistoryId.set(id, refs);
-      if (dedupeKey) {
-        referencesByClientRequest.set(dedupeKey, reference);
-      }
+      // The one-time token is the referee's credential. It is emailed to the
+      // referee (worker) and stored only as a hash; the candidate never sees
+      // it, so the candidate cannot submit their own reference.
+      const { token, ...rest } = requested;
+      const stored: StoredReference = {
+        ...rest,
+        tokenHash: token ? sha256Hex(token) : undefined,
+        clientRequestId: body.clientRequestId,
+      };
+      await persist({ kind: 'reference', value: stored });
+
+      const candidateName = profilesByUserId.get(workHistory.candidateId)?.fullName;
+      await dispatchJob({
+        type: 'reference.requested',
+        payload: {
+          referenceId: stored.id,
+          to: stored.refereeEmail,
+          refereeName: stored.refereeName,
+          candidateName,
+          companyName: workHistory.companyName,
+          title: workHistory.title,
+          token,
+        },
+      });
 
       return reply.status(201).send({
-        reference,
+        reference: publicReference(stored),
         message: 'Employment reference request created successfully.',
+      });
+    }
+  );
+
+  // Referee-facing: what am I being asked to vouch for? Requires the emailed
+  // token (sent as a header so it stays out of URLs and access logs).
+  app.get(
+    '/api/v1/references/:refId',
+    async (req: FastifyRequest<{ Params: { refId: string } }>, reply: FastifyReply) => {
+      const reference = employmentReferencesById.get(req.params.refId);
+      const presented = req.headers['x-reference-token'];
+      const token = typeof presented === 'string' ? presented.trim() : '';
+      if (
+        !reference ||
+        !reference.tokenHash ||
+        !token ||
+        !safeEqualHex(sha256Hex(token), reference.tokenHash)
+      ) {
+        // One answer for "no such reference" and "wrong token": the endpoint
+        // must not confirm which reference ids exist.
+        throw new DomainError('NOT_FOUND', 'This reference link is invalid or has been used.');
+      }
+      const history = verifiedWorkHistoriesById.get(reference.workHistoryId);
+      return reply.status(200).send({
+        reference: {
+          id: reference.id,
+          status: reference.status,
+          relationship: reference.relationship,
+          refereeName: reference.refereeName,
+          candidateName: profilesByUserId.get(reference.candidateId)?.fullName ?? 'The candidate',
+          companyName: history?.companyName,
+          title: history?.title,
+          startDate: history?.startDate,
+          endDate: history?.endDate,
+          isCurrent: history?.isCurrent,
+        },
       });
     }
   );
@@ -11192,13 +11499,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   app.post(
     '/api/v1/candidates/work-history/references/:refId/submit',
     async (req: FastifyRequest<{ Params: { refId: string } }>, reply: FastifyReply) => {
-      let session: { userId: string; email: string; roles: string[] } | null = null;
-      try {
-        session = extractUser(req);
-      } catch {
-        // Referee can submit via email link token without session
-      }
-
+      const session = maybeExtractUser(req);
       const { refId } = req.params;
       const body = SubmitEmploymentReferenceInputSchema.parse(req.body);
 
@@ -11211,9 +11512,26 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         throw new DomainError('FORBIDDEN', 'Candidate cannot submit their own reference.');
       }
 
-      const updatedRef = submitEmploymentReference({
+      // Proof that the submitter received the referee's email. The token is
+      // REQUIRED: an omitted token used to skip the check entirely, so anyone
+      // holding the reference id (the candidate gets it in the request
+      // response) could submit a glowing reference for themselves.
+      // Sign-in alone is not accepted as proof: account emails are not
+      // verified, so an account named after the referee's address proves
+      // nothing about who controls that mailbox.
+      if (
+        !body.token ||
+        !reference.tokenHash ||
+        !safeEqualHex(sha256Hex(body.token.trim()), reference.tokenHash)
+      ) {
+        throw new DomainError(
+          'UNAUTHORIZED',
+          'This reference can only be submitted from the link sent to the referee.'
+        );
+      }
+
+      const submitted = submitEmploymentReference({
         reference,
-        token: body.token,
         confirmDates: body.confirmDates,
         confirmTitle: body.confirmTitle,
         ratings: {
@@ -11225,18 +11543,20 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         endorsedSkills: body.endorsedSkills,
         summaryNotes: body.summaryNotes,
       });
+      // Single use: the token dies with the submission.
+      const updatedRef: StoredReference = {
+        ...submitted,
+        tokenHash: undefined,
+        clientRequestId: reference.clientRequestId,
+      };
 
-      employmentReferencesById.set(refId, updatedRef);
-      const refs = employmentReferencesByHistoryId.get(reference.workHistoryId) || [];
-      const refIdx = refs.findIndex((r) => r.id === refId);
-      if (refIdx !== -1) {
-        refs[refIdx] = updatedRef;
-      }
-      employmentReferencesByHistoryId.set(reference.workHistoryId, refs);
-
+      const ops: CoreOp[] = [{ kind: 'reference', value: updatedRef }];
       const workHistory = verifiedWorkHistoriesById.get(reference.workHistoryId);
-      let updatedHistory = workHistory;
+      let updatedHistory: StoredWorkHistory | undefined;
       if (workHistory) {
+        const refs = (employmentReferencesByHistoryId.get(reference.workHistoryId) || []).map(
+          (r) => (r.id === refId ? updatedRef : r)
+        );
         const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs);
         updatedHistory = {
           ...workHistory,
@@ -11245,18 +11565,22 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           verificationStatus: status,
           updatedAt: new Date().toISOString(),
         };
-        verifiedWorkHistoriesById.set(workHistory.id, updatedHistory);
-        const list = verifiedWorkHistoriesByCandidateId.get(workHistory.candidateId) || [];
-        const hIdx = list.findIndex((h) => h.id === workHistory.id);
-        if (hIdx !== -1) {
-          list[hIdx] = updatedHistory;
-        }
-        verifiedWorkHistoriesByCandidateId.set(workHistory.candidateId, list);
+        ops.push({ kind: 'workHistory', value: updatedHistory });
       }
+      await persist(...ops);
 
       return reply.status(200).send({
-        reference: updatedRef,
-        workHistory: updatedHistory,
+        reference: publicReference(updatedRef),
+        // The referee sees the outcome of their own submission, not the
+        // candidate's record (no corporate email or description).
+        workHistory: updatedHistory
+          ? {
+              id: updatedHistory.id,
+              verificationScore: updatedHistory.verificationScore,
+              badgeTier: updatedHistory.badgeTier,
+              verificationStatus: updatedHistory.verificationStatus,
+            }
+          : undefined,
         message: 'Employment reference submitted successfully.',
       });
     }
@@ -11287,8 +11611,38 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         ? allHistories
         : allHistories.filter((h) => h.verificationStatus === 'verified' || h.badgeTier !== 'none');
 
+      // A recruiter browsing a candidate sees where they worked and how it
+      // was verified — not the private mailbox used to verify it.
+      const isOwnerOrAdmin =
+        session && (session.userId === candidateId || session.roles.includes('platform_admin'));
+      const projected = filtered.map((h) => {
+        const view = publicWorkHistory(h);
+        if (isOwnerOrAdmin) {
+          // The owner also sees where each verification stands, so the page
+          // can resume an open email challenge and show reference progress.
+          const challenge = emailChallengesByHistoryId.get(h.id);
+          return {
+            ...view,
+            emailVerificationPending:
+              challenge && Date.parse(challenge.expiresAt) > Date.now()
+                ? { email: challenge.email, expiresAt: challenge.expiresAt }
+                : undefined,
+            references: (employmentReferencesByHistoryId.get(h.id) || []).map((r) => ({
+              id: r.id,
+              refereeName: r.refereeName,
+              relationship: r.relationship,
+              status: r.status,
+              requestedAt: r.requestedAt,
+              submittedAt: r.submittedAt,
+            })),
+          };
+        }
+        const { corporateEmail: _mailbox, ...withoutMailbox } = view;
+        return withoutMailbox;
+      });
+
       return reply.status(200).send({
-        workHistories: filtered,
+        workHistories: projected,
         total: filtered.length,
       });
     }
@@ -11347,11 +11701,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
-  // Internal helper for inspecting async job dispatch (tests + ops).
-  // Hidden in production (least privilege): job payloads carry user ids, and
-  // production state is observable through the admin health diagnostics.
+  // Internal helper for inspecting async job dispatch (tests + local dev).
+  // Unauthenticated, so it exists ONLY in development and test: payloads
+  // carry user ids and, for email jobs, one-time codes and reference links.
+  // Staging and production observe the queue through the admin diagnostics.
   app.get('/api/v1/internal/worker-jobs', async (_req, reply) => {
-    if (env.NODE_ENV === 'production') {
+    if (env.NODE_ENV !== 'development' && env.NODE_ENV !== 'test') {
       return reply.callNotFound();
     }
     const records = await storage.jobs.list({ limit: 1000 });
@@ -11366,6 +11721,187 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       })),
     };
   });
+
+  // ===========================================================================
+  // Core read model & persistence (ADR-015)
+  //
+  // persist() is the ONLY way a core-loop entity changes: the ops commit to
+  // Postgres in one transaction first (STORAGE=pg), and only then is the
+  // in-process read model updated. A failed commit throws before the read
+  // model is touched, so the API never serves state it could not save.
+  // applyToReadModel() also keeps every secondary index in step with its
+  // primary Map — previously several write paths updated `byId` and left the
+  // per-subject/per-org lists holding stale copies.
+  // ===========================================================================
+  function replaceOrAppend<T extends { id: string }>(
+    index: Map<string, T[]>,
+    key: string,
+    value: T
+  ): void {
+    const list = index.get(key) || [];
+    const at = list.findIndex((item) => item.id === value.id);
+    if (at >= 0) list[at] = value;
+    else list.push(value);
+    index.set(key, list);
+  }
+
+  function removeFrom<T extends { id: string }>(index: Map<string, T[]>, key: string, id: string) {
+    const list = index.get(key);
+    if (!list) return;
+    const kept = list.filter((item) => item.id !== id);
+    if (kept.length > 0) index.set(key, kept);
+    else index.delete(key);
+  }
+
+  function applyToReadModel(op: CoreOp): void {
+    switch (op.kind) {
+      case 'user': {
+        const previous = usersById.get(op.value.id);
+        if (previous && usersByEmail.get(previous.email.toLowerCase())?.id === previous.id) {
+          usersByEmail.delete(previous.email.toLowerCase());
+        }
+        usersById.set(op.value.id, op.value);
+        usersByEmail.set(op.value.email.toLowerCase(), op.value);
+        return;
+      }
+      case 'profile':
+        profilesById.set(op.value.id, op.value);
+        profilesByUserId.set(op.value.userId, op.value);
+        return;
+      case 'organization': {
+        const previous = organizationsById.get(op.value.id);
+        if (previous && previous.slug !== op.value.slug) organizationsBySlug.delete(previous.slug);
+        organizationsById.set(op.value.id, op.value);
+        organizationsBySlug.set(op.value.slug, op.value);
+        return;
+      }
+      case 'membership':
+        replaceOrAppend(orgMembershipsByOrgId, op.value.orgId, op.value);
+        replaceOrAppend(orgMembershipsByUserId, op.value.userId, op.value);
+        return;
+      case 'skill':
+        skillsById.set(op.value.id, op.value);
+        skillsBySlug.set(op.value.slug, op.value);
+        return;
+      case 'job':
+        jobsById.set(op.value.id, op.value);
+        replaceOrAppend(jobsByOrgId, op.value.orgId, op.value);
+        return;
+      case 'application':
+        applicationsById.set(op.value.id, op.value);
+        replaceOrAppend(applicationsByJobId, op.value.jobId, op.value);
+        replaceOrAppend(applicationsByCandidateId, op.value.candidateId, op.value);
+        return;
+      case 'evidence':
+        evidenceById.set(op.value.id, op.value);
+        replaceOrAppend(evidenceBySubjectId, op.value.subjectId, op.value);
+        if (op.skillIds !== undefined) {
+          if (op.skillIds.length > 0) evidenceSkills.set(op.value.id, new Set(op.skillIds));
+          else evidenceSkills.delete(op.value.id);
+        }
+        return;
+      case 'workHistory':
+        verifiedWorkHistoriesById.set(op.value.id, op.value);
+        replaceOrAppend(verifiedWorkHistoriesByCandidateId, op.value.candidateId, op.value);
+        if (op.value.clientRequestId) {
+          workHistoriesByClientRequest.set(
+            `${op.value.candidateId}:${op.value.clientRequestId}`,
+            op.value
+          );
+        }
+        return;
+      case 'reference':
+        employmentReferencesById.set(op.value.id, op.value);
+        replaceOrAppend(employmentReferencesByHistoryId, op.value.workHistoryId, op.value);
+        if (op.value.clientRequestId) {
+          referencesByClientRequest.set(
+            `${op.value.candidateId}:${op.value.clientRequestId}`,
+            op.value
+          );
+        }
+        return;
+      case 'emailChallenge':
+        emailChallengesByHistoryId.set(op.value.workHistoryId, op.value);
+        return;
+      case 'emailChallengeDelete':
+        emailChallengesByHistoryId.delete(op.workHistoryId);
+        return;
+      case 'workHistoryDelete': {
+        const history = verifiedWorkHistoriesById.get(op.id);
+        if (!history) return;
+        verifiedWorkHistoriesById.delete(op.id);
+        removeFrom(verifiedWorkHistoriesByCandidateId, history.candidateId, op.id);
+        if (history.clientRequestId) {
+          workHistoriesByClientRequest.delete(`${history.candidateId}:${history.clientRequestId}`);
+        }
+        for (const ref of employmentReferencesByHistoryId.get(op.id) || []) {
+          employmentReferencesById.delete(ref.id);
+          if (ref.clientRequestId) {
+            referencesByClientRequest.delete(`${ref.candidateId}:${ref.clientRequestId}`);
+          }
+        }
+        employmentReferencesByHistoryId.delete(op.id);
+        emailChallengesByHistoryId.delete(op.id);
+        return;
+      }
+      case 'evidenceDelete': {
+        const item = evidenceById.get(op.id);
+        if (!item) return;
+        evidenceById.delete(op.id);
+        removeFrom(evidenceBySubjectId, item.subjectId, op.id);
+        evidenceSkills.delete(op.id);
+        return;
+      }
+    }
+  }
+
+  async function persist(...ops: CoreOp[]): Promise<void> {
+    await storage.core.commit(ops);
+    for (const op of ops) applyToReadModel(op);
+  }
+
+  // Boot hydration: rebuild the read model from the database. Runs before the
+  // server accepts traffic (buildApp resolves before listen/inject).
+  {
+    const snapshot = await storage.core.load();
+    if (storage.core.durable) {
+      // The canonical seed taxonomy must exist as rows: jobs and evidence
+      // reference skills by foreign key.
+      const persistedSkillIds = new Set(snapshot.skills.map((skill) => skill.id));
+      const missing = seedSkills.filter((skill) => !persistedSkillIds.has(skill.id));
+      if (missing.length > 0) {
+        await storage.core.commit(missing.map((value) => ({ kind: 'skill' as const, value })));
+      }
+    }
+    for (const value of snapshot.skills) applyToReadModel({ kind: 'skill', value });
+    for (const value of snapshot.users) applyToReadModel({ kind: 'user', value });
+    for (const value of snapshot.profiles) applyToReadModel({ kind: 'profile', value });
+    for (const value of snapshot.organizations) applyToReadModel({ kind: 'organization', value });
+    for (const value of snapshot.memberships) applyToReadModel({ kind: 'membership', value });
+    for (const value of snapshot.jobs) applyToReadModel({ kind: 'job', value });
+    for (const { value, skillIds } of snapshot.evidence) {
+      applyToReadModel({ kind: 'evidence', value, skillIds });
+    }
+    for (const value of snapshot.applications) applyToReadModel({ kind: 'application', value });
+    for (const value of snapshot.workHistories) applyToReadModel({ kind: 'workHistory', value });
+    for (const value of snapshot.references) applyToReadModel({ kind: 'reference', value });
+    for (const value of snapshot.emailChallenges) {
+      applyToReadModel({ kind: 'emailChallenge', value });
+    }
+    if (storage.core.durable) {
+      app.log.info(
+        {
+          users: snapshot.users.length,
+          organizations: snapshot.organizations.length,
+          jobs: snapshot.jobs.length,
+          applications: snapshot.applications.length,
+          evidence: snapshot.evidence.length,
+          workHistories: snapshot.workHistories.length,
+        },
+        'core read model hydrated from postgres'
+      );
+    }
+  }
 
   return app;
 }

@@ -30,3 +30,48 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   }
   return res;
 }
+
+/** A non-2xx API response, carrying the server's own explanation. */
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+    public readonly code?: string,
+    public readonly details?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/**
+ * apiFetch + JSON in one step. Resolves with the parsed body on 2xx; throws
+ * ApiError with the API's error-envelope message otherwise (or a plain,
+ * honest fallback when the server sent none). Callers render `err.message`.
+ */
+export async function apiJson<T = unknown>(input: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (init.body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  let res: Response;
+  try {
+    res = await apiFetch(input, { ...init, headers });
+  } catch {
+    throw new ApiError(0, 'Could not reach TalentSphere. Check your connection and try again.');
+  }
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new ApiError(
+      res.status,
+      body?.error?.message ?? `The request failed (HTTP ${res.status}).`,
+      body?.error?.code,
+      body?.error?.details
+    );
+  }
+  return body as T;
+}
+
+/** Message to show for any thrown value from apiJson. */
+export const errorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : 'Something went wrong. Please try again.';

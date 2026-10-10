@@ -51,6 +51,35 @@ export const ServerEnvSchema = z.object({
 
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
+/**
+ * Settings that are optional for local development but mandatory in
+ * production, where a missing value would silently weaken security:
+ * - TOKEN_SECRET: without it every process invents its own signing key, so
+ *   sessions die on each restart and two replicas reject each other's tokens.
+ * - STORAGE=memory: would run production on non-durable state.
+ * - default database credentials: the schema default is a local dev DSN.
+ *
+ * Enforced by the process entry point (apps/api/src/index.ts), which refuses
+ * to start; buildApp() itself stays a composable factory for tests.
+ */
+export function productionConfigProblems(env: ServerEnv): string[] {
+  if (env.NODE_ENV !== 'production') return [];
+  const problems: string[] = [];
+  if (!env.TOKEN_SECRET) {
+    problems.push('TOKEN_SECRET is required in production (>= 32 random characters)');
+  }
+  if (env.STORAGE === 'memory') {
+    problems.push('STORAGE=memory is not allowed in production (data would be lost on restart)');
+  }
+  if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
+    problems.push('DATABASE_URL still points at the local development default');
+  }
+  if (/localhost/.test(env.CORS_ALLOWED_ORIGINS)) {
+    problems.push('CORS_ALLOWED_ORIGINS still allows localhost in production');
+  }
+  return problems;
+}
+
 export function validateServerEnv(
   env: Record<string, string | undefined> = process.env
 ): ServerEnv {

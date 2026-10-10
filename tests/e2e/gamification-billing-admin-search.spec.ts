@@ -27,11 +27,32 @@ test.describe('E2E: Gamification, Billing, Admin Governance & Search (F-16, F-18
     userId = regData.user.id;
     userProfileId = regData.profile.id;
 
-    // 2. Generate platform_admin token for registered user
-    adminId = userId;
-    adminToken = createSessionToken(adminId, 'admin.root@talentsphere.internal', [
-      'platform_admin',
-    ]);
+    // 2. A real administrator ACCOUNT. Roles come from the account on every
+    // request, so a token merely claiming platform_admin for a candidate's id
+    // no longer works; an ops identity (minted with TOKEN_SECRET, no account
+    // row) bootstraps the grant, as an operator would for the first admin.
+    const adminReg = await request.post(`${API_BASE}/auth/register`, {
+      data: {
+        email: `admin.root.${Date.now()}@talentsphere.internal`,
+        password: 'Admin-Bootstrap-Passphrase-1',
+        fullName: 'Root Administrator',
+        role: 'candidate',
+      },
+    });
+    expect(adminReg.status()).toBe(201);
+    const adminData = await adminReg.json();
+    adminId = adminData.user.id;
+    const bootstrapToken = createSessionToken(
+      '00000000-0000-4000-a000-00000000b007',
+      'ops.bootstrap@talentsphere.internal',
+      ['platform_admin']
+    );
+    const grant = await request.patch(`${API_BASE}/admin/users/${adminId}/roles`, {
+      headers: { authorization: `Bearer ${bootstrapToken}` },
+      data: { roles: ['platform_admin'] },
+    });
+    expect(grant.status()).toBe(200);
+    adminToken = adminData.token;
   });
 
   test('tracks gamification XP, enforces daily cap (200 XP/day BR-25), and views leaderboard (F-22, F-23)', async ({

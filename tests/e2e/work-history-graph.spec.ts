@@ -1,6 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
+/** The message the worker would email (test outbox): codes and referee links never go to the requester. */
+async function outbox(request: APIRequestContext, kind: string) {
+  const res = await request.get(`${API_BASE}/internal/worker-jobs`);
+  const body = await res.json();
+  return body.jobs.filter((j: any) => j.type === kind).map((j: any) => j.payload);
+}
 
 test.describe('E2E: Verified Work History Network & References (F-162, F-94, F-84)', () => {
   let candidateToken: string;
@@ -82,14 +89,25 @@ test.describe('E2E: Verified Work History Network & References (F-162, F-94, F-8
     workHistoryId = data.workHistory.id;
   });
 
-  test('Step 2: Candidate attests corporate email for work history', async ({ request }) => {
+  test('Step 2: Candidate proves control of the corporate mailbox', async ({ request }) => {
+    const ask = await request.post(
+      `${API_BASE}/candidates/work-history/${workHistoryId}/verify-email`,
+      {
+        headers: { authorization: `Bearer ${candidateToken}` },
+        data: { corporateEmail: 'alex.mercer@stripe.com' },
+      }
+    );
+    // Asking is not proving: a code goes to the mailbox, nothing is verified yet.
+    expect(ask.status()).toBe(202);
+    const [message] = (await outbox(request, 'work_history.email_verification_requested')).filter(
+      (m: any) => m.workHistoryId === workHistoryId
+    );
+
     const res = await request.post(
       `${API_BASE}/candidates/work-history/${workHistoryId}/verify-email`,
       {
         headers: { authorization: `Bearer ${candidateToken}` },
-        data: {
-          corporateEmail: 'alex.mercer@stripe.com',
-        },
+        data: { corporateEmail: 'alex.mercer@stripe.com', verificationCode: message.code },
       }
     );
 
@@ -120,10 +138,14 @@ test.describe('E2E: Verified Work History Network & References (F-162, F-94, F-8
     const data = await res.json();
     expect(data.reference).toBeDefined();
     expect(data.reference.status).toBe('requested');
-    expect(data.reference.token).toBeDefined();
+    // The referee's credential goes to the referee's inbox, never to the candidate.
+    expect(data.reference.token).toBeUndefined();
 
     referenceId = data.reference.id;
-    referenceToken = data.reference.token;
+    const [message] = (await outbox(request, 'reference.requested')).filter(
+      (m: any) => m.referenceId === referenceId
+    );
+    referenceToken = message.token;
   });
 
   test('Step 4: Referee submits ratings and upgrades candidate work history to gold badge', async ({

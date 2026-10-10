@@ -1,45 +1,93 @@
 import crypto from 'node:crypto';
 import { Role } from './core.js';
 
-const ITERATIONS = 10000;
 const KEY_LEN = 64;
 const DIGEST = 'sha512';
+/**
+ * OWASP Password Storage Cheat Sheet (2023): PBKDF2-HMAC-SHA512 needs at
+ * least 210,000 iterations. The original 10,000 is ~20x too cheap to resist
+ * offline guessing of a leaked hash table.
+ */
+export const PBKDF2_DEFAULT_ITERATIONS = 210_000;
+/** Iteration count of hashes written before the versioned format existed. */
+const LEGACY_ITERATIONS = 10_000;
+const FORMAT = 'pbkdf2-sha512';
 
 /**
- * Hashes a plaintext password using PBKDF2 with a cryptographically secure random salt.
- * Stored in format: salt:hash
+ * Work factor for NEW hashes. Read at call time (not module load) so a test
+ * run can lower it for speed via PASSWORD_PBKDF2_ITERATIONS; anything below
+ * 1,000 is ignored. Stored hashes record their own count, so verification is
+ * independent of this setting.
+ */
+export function configuredPasswordIterations(): number {
+  const raw = Number(process.env.PASSWORD_PBKDF2_ITERATIONS);
+  return Number.isInteger(raw) && raw >= 1000 ? raw : PBKDF2_DEFAULT_ITERATIONS;
+}
+
+interface ParsedHash {
+  iterations: number;
+  salt: string;
+  hash: string;
+}
+
+/** `pbkdf2-sha512$<iterations>$<salt>$<hash>`, or legacy `<salt>:<hash>`. */
+function parseStoredHash(stored: string): ParsedHash | null {
+  if (stored.startsWith(`${FORMAT}$`)) {
+    const [, iterations, salt, hash] = stored.split('$');
+    const n = Number(iterations);
+    if (!Number.isInteger(n) || n < 1 || !salt || !hash) return null;
+    return { iterations: n, salt, hash };
+  }
+  const [salt, hash] = stored.split(':');
+  if (!salt || !hash) return null;
+  return { iterations: LEGACY_ITERATIONS, salt, hash };
+}
+
+const derive = (password: string, salt: string, iterations: number): Promise<Buffer> =>
+  new Promise((resolve, reject) => {
+    crypto.pbkdf2(password, salt, iterations, KEY_LEN, DIGEST, (err, key) =>
+      err ? reject(err) : resolve(key)
+    );
+  });
+
+/**
+ * Hashes a plaintext password with PBKDF2-HMAC-SHA512 and a random salt.
+ * Stored as `pbkdf2-sha512$<iterations>$<salt>$<hash>` so the work factor can
+ * be raised later without breaking existing accounts.
  */
 export async function hashPassword(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(16).toString('hex');
-    crypto.pbkdf2(password, salt, ITERATIONS, KEY_LEN, DIGEST, (err, derivedKey) => {
-      if (err) return reject(err);
-      resolve(`${salt}:${derivedKey.toString('hex')}`);
-    });
-  });
+  const salt = crypto.randomBytes(16).toString('hex');
+  const iterations = configuredPasswordIterations();
+  const key = await derive(password, salt, iterations);
+  return `${FORMAT}$${iterations}$${salt}$${key.toString('hex')}`;
 }
 
 /**
- * Verifies a plaintext password against a stored salt:hash string using constant-time comparison.
+ * Verifies a password against a stored hash (current or legacy format) using
+ * a constant-time comparison. Any malformed stored value verifies as false.
  */
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    const [salt, hash] = storedHash.split(':');
-    if (!salt || !hash) return resolve(false);
+  const parsed = parseStoredHash(storedHash);
+  if (!parsed) return false;
+  try {
+    const derived = await derive(password, parsed.salt, parsed.iterations);
+    const expected = Buffer.from(parsed.hash, 'hex');
+    if (expected.length !== derived.length) return false;
+    return crypto.timingSafeEqual(expected, derived);
+  } catch {
+    return false;
+  }
+}
 
-    crypto.pbkdf2(password, salt, ITERATIONS, KEY_LEN, DIGEST, (err, derivedKey) => {
-      if (err) return resolve(false);
-      const derivedHex = derivedKey.toString('hex');
-      try {
-        const hashBuf = Buffer.from(hash, 'hex');
-        const derivedBuf = Buffer.from(derivedHex, 'hex');
-        if (hashBuf.length !== derivedBuf.length) return resolve(false);
-        resolve(crypto.timingSafeEqual(hashBuf, derivedBuf));
-      } catch {
-        resolve(false);
-      }
-    });
-  });
+/**
+ * True when a stored hash is weaker than what hashPassword would write today
+ * (legacy format or fewer iterations). Callers re-hash on the next successful
+ * sign-in, when the plaintext is briefly available.
+ */
+export function passwordNeedsRehash(storedHash: string): boolean {
+  const parsed = parseStoredHash(storedHash);
+  if (!parsed) return false;
+  return !storedHash.startsWith(`${FORMAT}$`) || parsed.iterations < configuredPasswordIterations();
 }
 
 /**

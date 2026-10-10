@@ -238,12 +238,30 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(alert).toBeVisible();
     await expect(alert).toContainText('Disposable');
 
-    // Submit valid attestation — persisted by the API, email attested server-side.
+    // Submit a valid record with a work email: saved, but NOT verified — a
+    // code goes to that mailbox and the record asks for it.
     await page.getByTestId('input-corporate-email').fill('jordan@verified-domain.com');
     await page.getByTestId('submit-employment-btn').click();
 
-    // Record appears from the API with SERVER-computed tier and score.
     await expect(page.getByText('Fraudulent Corp')).toBeVisible();
+    await expect(page.getByText('UNVERIFIED')).toBeVisible();
+    await expect(page.getByText('Email Verified')).toHaveCount(0);
+    const codeInput = page.locator('[data-testid^="verify-code-input-"]');
+    await expect(codeInput).toBeVisible();
+
+    // The code reaches the mailbox (test outbox), never the page that asked.
+    const jobs = await (await request.get(`${API_BASE}/internal/worker-jobs`)).json();
+    const message = jobs.jobs
+      .filter((j: any) => j.type === 'work_history.email_verification_requested')
+      .map((j: any) => j.payload)
+      .find((p: any) => p.to === 'jordan@verified-domain.com');
+    expect(message?.code).toMatch(/^\d{6}$/);
+    expect(await page.content()).not.toContain(message.code);
+
+    await codeInput.fill(message.code);
+    await page.locator('[data-testid^="verify-code-submit-"]').click();
+
+    // Record now shows the SERVER-computed tier and score.
     await expect(page.getByText('BRONZE TIER')).toBeVisible();
     await expect(page.getByText('Email Verified')).toBeVisible();
   });

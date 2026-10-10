@@ -40,8 +40,15 @@ export type PaginatedMeta = z.infer<typeof PaginatedMetaSchema>;
  */
 export const RegisterInputSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(256, 'Password must be at most 256 characters'),
+  fullName: z
+    .string()
+    .trim()
+    .min(2, 'Full name must be at least 2 characters')
+    .max(120, 'Full name must be at most 120 characters'),
   role: z.enum(['candidate', 'recruiter']).default('candidate'),
 });
 
@@ -49,7 +56,7 @@ export type RegisterInput = z.infer<typeof RegisterInputSchema>;
 
 export const LoginInputSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(1, 'Password is required').max(1024),
 });
 
 export type LoginInput = z.infer<typeof LoginInputSchema>;
@@ -163,6 +170,17 @@ export const CreateOrganizationInputSchema = z.object({
 });
 
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationInputSchema>;
+
+/**
+ * Adding a member grants access to the organization's jobs and candidate
+ * pipeline. Ownership is deliberately not grantable here.
+ */
+export const AddOrganizationMemberInputSchema = z.object({
+  userId: z.string().uuid(),
+  role: z.enum(['admin', 'recruiter', 'hiring_manager', 'member']).default('recruiter'),
+});
+
+export type AddOrganizationMemberInput = z.infer<typeof AddOrganizationMemberInputSchema>;
 
 /**
  * Job Marketplace Contracts (F-04, F-05, BR-01..BR-12)
@@ -600,8 +618,26 @@ export const AdminUpdateUserStatusInputSchema = z.object({
 
 export type AdminUpdateUserStatusInput = z.infer<typeof AdminUpdateUserStatusInputSchema>;
 
+/** Every role the domain recognizes (packages/domain/src/core.ts `Role`). */
+export const ROLE_VALUES = [
+  'candidate',
+  'recruiter',
+  'hiring_manager',
+  'course_author',
+  'instructor',
+  'institution_admin',
+  'platform_admin',
+  'moderator',
+  'verification_staff',
+  'service_account',
+] as const;
+
 export const AdminUpdateUserRolesInputSchema = z.object({
-  roles: z.array(z.string()).min(1),
+  // Previously any string was accepted and stored as a role.
+  roles: z
+    .array(z.enum(ROLE_VALUES))
+    .min(1)
+    .transform((roles) => Array.from(new Set(roles))),
 });
 
 export type AdminUpdateUserRolesInput = z.infer<typeof AdminUpdateUserRolesInputSchema>;

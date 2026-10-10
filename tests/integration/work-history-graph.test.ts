@@ -2,6 +2,18 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 
+/**
+ * The email the worker would deliver (dev/test outbox). Codes and referee
+ * links are never returned to the browser that asked for them, so tests read
+ * them where the real recipient would: the outbound message.
+ */
+async function outbox(app: FastifyInstance, kind: string): Promise<Record<string, any>[]> {
+  const res = await app.inject({ method: 'GET', url: '/api/v1/internal/worker-jobs' });
+  return JSON.parse(res.body)
+    .jobs.filter((j: any) => j.type === kind)
+    .map((j: any) => j.payload);
+}
+
 describe('Verified Work History Network & References Integration (F-162, F-94, F-84)', () => {
   let app: FastifyInstance;
   let candidateToken: string;
@@ -176,14 +188,53 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
   });
 
   describe('2. Verify Corporate Email (POST /api/v1/candidates/work-history/:id/verify-email)', () => {
-    it('verifies corporate email and promotes verification score & badge tier', async () => {
+    it('does not mark an address verified until a code sent to it is confirmed', async () => {
       const res = await app.inject({
         method: 'POST',
         url: `/api/v1/candidates/work-history/${createdWorkHistoryId}/verify-email`,
         headers: { authorization: `Bearer ${candidateToken}` },
-        payload: {
-          corporateEmail: 'alex.mercer@acmecloud.io',
-        },
+        payload: { corporateEmail: 'alex.mercer@acmecloud.io' },
+      });
+
+      expect(res.statusCode).toBe(202);
+      const pending = JSON.parse(res.body);
+      expect(pending.status).toBe('verification_pending');
+      expect(JSON.stringify(pending)).not.toMatch(/\b\d{6}\b/); // the code is not echoed back
+
+      const list = await app.inject({
+        method: 'GET',
+        url: `/api/v1/candidates/${candidateId}/work-history`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+      });
+      const record = JSON.parse(list.body).workHistories.find(
+        (h: any) => h.id === createdWorkHistoryId
+      );
+      expect(record.emailVerifiedAt).toBeUndefined();
+      expect(record.verificationScore).toBe(0);
+    });
+
+    it('rejects a wrong code and counts the attempt', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${createdWorkHistoryId}/verify-email`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { corporateEmail: 'alex.mercer@acmecloud.io', verificationCode: '000000x' },
+      });
+      expect(res.statusCode).toBe(422);
+      expect(JSON.parse(res.body).error.message).toContain('not correct');
+    });
+
+    it('verifies corporate email with the emailed code and promotes score & badge tier', async () => {
+      const [message] = (await outbox(app, 'work_history.email_verification_requested')).filter(
+        (m) => m.workHistoryId === createdWorkHistoryId
+      );
+      expect(message.to).toBe('alex.mercer@acmecloud.io');
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${createdWorkHistoryId}/verify-email`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { corporateEmail: 'alex.mercer@acmecloud.io', verificationCode: message.code },
       });
 
       expect(res.statusCode).toBe(200);
@@ -273,11 +324,45 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.reference).toBeDefined();
       expect(data.reference.workHistoryId).toBe(createdWorkHistoryId);
       expect(data.reference.status).toBe('requested');
-      expect(data.reference.token).toBeDefined();
+      // The referee's one-time token is their credential: it goes to the
+      // referee's inbox only, never to the candidate who asked.
+      expect(data.reference.token).toBeUndefined();
+      expect(data.reference.tokenHash).toBeUndefined();
       expect(data.reference.refereeId).toBe(refereeId);
 
       createdReferenceId = data.reference.id;
-      referenceToken = data.reference.token;
+      const [message] = (await outbox(app, 'reference.requested')).filter(
+        (m) => m.referenceId === createdReferenceId
+      );
+      expect(message.to).toBe(refereeEmail);
+      referenceToken = message.token;
+      expect(referenceToken).toMatch(/^[0-9a-f]{32}$/);
+    });
+
+    it('shows the referee what they are vouching for, only with the token', async () => {
+      const withToken = await app.inject({
+        method: 'GET',
+        url: `/api/v1/references/${createdReferenceId}`,
+        headers: { 'x-reference-token': referenceToken },
+      });
+      expect(withToken.statusCode).toBe(200);
+      const details = JSON.parse(withToken.body).reference;
+      expect(details.companyName).toBeDefined();
+      expect(details.relationship).toBe('manager');
+      expect(JSON.stringify(details)).not.toContain('acmecloud.io'); // no candidate mailbox
+
+      const withoutToken = await app.inject({
+        method: 'GET',
+        url: `/api/v1/references/${createdReferenceId}`,
+      });
+      expect(withoutToken.statusCode).toBe(404);
+
+      const wrongToken = await app.inject({
+        method: 'GET',
+        url: `/api/v1/references/${createdReferenceId}`,
+        headers: { 'x-reference-token': '0'.repeat(32) },
+      });
+      expect(wrongToken.statusCode).toBe(404);
     });
 
     it('rejects candidate attempting to request a reference using their own email', async () => {
@@ -346,6 +431,69 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.workHistory.verificationScore).toBe(85);
       expect(data.workHistory.badgeTier).toBe('gold');
       expect(data.workHistory.verificationStatus).toBe('verified');
+      // The referee sees the outcome, not the candidate's private record.
+      expect(data.workHistory.corporateEmail).toBeUndefined();
+    });
+
+    it('treats the token as single-use', async () => {
+      const replay = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/references/${createdReferenceId}/submit`,
+        payload: {
+          token: referenceToken,
+          confirmDates: true,
+          confirmTitle: true,
+          technicalProficiency: 1,
+          collaborationRating: 1,
+          deliveryReliability: 1,
+        },
+      });
+      expect(replay.statusCode).toBe(403);
+    });
+
+    it('refuses an anonymous submission without the referee token (self-endorsement)', async () => {
+      // Regression: an omitted token used to skip the check, so a candidate
+      // could sign out and vouch for themselves with the id from the request
+      // response.
+      const reqRes = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${createdWorkHistoryId}/references/request`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: {
+          refereeName: 'Dana Peer',
+          refereeEmail: 'dana.peer@example.com',
+          relationship: 'peer',
+        },
+      });
+      const refId = JSON.parse(reqRes.body).reference.id;
+
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/references/${refId}/submit`,
+        payload: {
+          confirmDates: true,
+          confirmTitle: true,
+          technicalProficiency: 5,
+          collaborationRating: 5,
+          deliveryReliability: 5,
+        },
+      });
+      expect(res.statusCode).toBe(403);
+
+      const signedInReferee = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/references/${refId}/submit`,
+        headers: { authorization: `Bearer ${refereeToken}` },
+        payload: {
+          confirmDates: true,
+          confirmTitle: true,
+          technicalProficiency: 5,
+          collaborationRating: 5,
+          deliveryReliability: 5,
+        },
+      });
+      // Being signed in is not proof of controlling the referee's mailbox.
+      expect(signedInReferee.statusCode).toBe(403);
     });
 
     it('prevents candidate from submitting reference on themselves', async () => {

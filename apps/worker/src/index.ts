@@ -2,7 +2,7 @@ import pg from 'pg';
 import { createLogger } from '@talentsphere/observability';
 import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsphere/domain';
 import { JobQueueEngine } from './queue.js';
-import { runClaimCycle, type ClaimHandler } from './claim.js';
+import { PermanentJobError, runClaimCycle, type ClaimHandler } from './claim.js';
 
 // Load .env natively (Node process.loadEnvFile) exactly like the API entry
 // (apps/api/src/index.ts): found from the repo root, or two levels up when
@@ -48,6 +48,56 @@ for (const kind of DISPATCH_EVENT_KINDS) {
 claimHandlers.set('evidence.propagate', async (payload) => {
   logger.info({ payload }, 'Propagating evidence to Career Graph');
 });
+
+// Transactional email. No email provider is wired yet (docs/quality/
+// OPERATIONS.md). These two messages carry a credential the recipient needs —
+// a mailbox-ownership code, a referee's one-time link — so pretending they
+// were delivered would strand the user. In development the message goes to
+// the log (a "dev outbox") so the flow can be completed locally; everywhere
+// else the job fails permanently and visibly instead of acking a delivery
+// that never happened.
+const APP_URL = (process.env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '');
+const deliverEmail = (
+  render: (payload: Record<string, unknown>) => {
+    to: string;
+    subject: string;
+    text: string;
+  }
+): ClaimHandler => {
+  return async (payload, record) => {
+    const message = render(payload);
+    if ((process.env.NODE_ENV ?? 'development') === 'development') {
+      logger.warn(
+        { jobId: record.id, to: message.to, subject: message.subject, text: message.text },
+        'DEV OUTBOX: email NOT sent (no provider configured)'
+      );
+      return;
+    }
+    throw new PermanentJobError(
+      `No email provider configured: "${message.subject}" to ${message.to} was not delivered`
+    );
+  };
+};
+
+claimHandlers.set(
+  'work_history.email_verification_requested',
+  deliverEmail((p) => ({
+    to: String(p.to),
+    subject: 'Your TalentSphere verification code',
+    text: `Your code is ${String(p.code)}. It expires at ${String(p.expiresAt)}.`,
+  }))
+);
+claimHandlers.set(
+  'reference.requested',
+  deliverEmail((p) => ({
+    to: String(p.to),
+    subject: `${String(p.candidateName ?? 'A candidate')} asked you for a reference`,
+    text:
+      `${String(p.candidateName ?? 'A candidate')} listed you as a reference for ` +
+      `${String(p.title)} at ${String(p.companyName)}. Respond here: ` +
+      `${APP_URL}/reference/${String(p.referenceId)}#token=${String(p.token)}`,
+  }))
+);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

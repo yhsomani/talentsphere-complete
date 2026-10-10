@@ -158,12 +158,14 @@ export const DISPATCH_EVENT_KINDS = [
   'portfolio.project.created',
   'portfolio.project.removed',
   'portfolio.project.updated',
+  'reference.requested',
   'resume.exported',
   'search.queried',
   'skill.endorsed',
   'skill.forecast_generated',
   'skill.market_signal_recorded',
   'user.settings.updated',
+  'work_history.email_verification_requested',
 ] as const;
 
 export type DispatchEventKind = (typeof DISPATCH_EVENT_KINDS)[number];

@@ -400,11 +400,14 @@ export interface VerifyCorporateEmailParams {
 /**
  * Verifies corporate email domain and updates work history verification status and score.
  */
-export function verifyCorporateEmail(params: VerifyCorporateEmailParams): VerifiedWorkHistory {
-  const { workHistory, corporateEmail, companyDomain } = params;
-  const now = params.nowIso ?? new Date().toISOString();
-
-  // If companyDomain is provided, verify matching
+/**
+ * Policy check only: may this address be used to attest employment at all?
+ * (Matches the company's domain when known; never disposable or consumer
+ * webmail.) Passing it proves nothing about mailbox control — callers must
+ * still confirm ownership (a code sent to the address) before calling
+ * verifyCorporateEmail.
+ */
+export function assertCorporateEmailEligible(corporateEmail: string, companyDomain?: string): void {
   if (companyDomain) {
     const isDomainMatch = verifyCorporateEmailDomain(corporateEmail, companyDomain);
     if (!isDomainMatch) {
@@ -413,21 +416,27 @@ export function verifyCorporateEmail(params: VerifyCorporateEmailParams): Verifi
         `Corporate email domain does not match company domain "${companyDomain}".`
       );
     }
-  } else {
-    // If no domain provided, still check anti-fraud list
-    const emailParts = corporateEmail.toLowerCase().split('@');
-    if (emailParts.length === 2) {
-      if (DISPOSABLE_EMAIL_DOMAINS.has(emailParts[1])) {
-        throw new DomainError('VALIDATION_FAILED', 'Disposable email addresses are not permitted.');
-      }
-      if (CONSUMER_WEBMAIL_DOMAINS.has(emailParts[1])) {
-        throw new DomainError(
-          'VALIDATION_FAILED',
-          'Generic webmail addresses cannot be used for corporate domain attestation.'
-        );
-      }
+    return;
+  }
+  const emailParts = corporateEmail.toLowerCase().split('@');
+  if (emailParts.length === 2) {
+    if (DISPOSABLE_EMAIL_DOMAINS.has(emailParts[1])) {
+      throw new DomainError('VALIDATION_FAILED', 'Disposable email addresses are not permitted.');
+    }
+    if (CONSUMER_WEBMAIL_DOMAINS.has(emailParts[1])) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Generic webmail addresses cannot be used for corporate domain attestation.'
+      );
     }
   }
+}
+
+export function verifyCorporateEmail(params: VerifyCorporateEmailParams): VerifiedWorkHistory {
+  const { workHistory, corporateEmail, companyDomain } = params;
+  const now = params.nowIso ?? new Date().toISOString();
+
+  assertCorporateEmailEligible(corporateEmail, companyDomain);
 
   const updatedHistory: VerifiedWorkHistory = {
     ...workHistory,

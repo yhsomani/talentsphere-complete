@@ -6,3 +6,5 @@ export * from './Modal.js';
 export * from './Icons.js';
 export * from './Heading.js';
 export * from './EmptyState.js';
+export * from './Notice.js';
+export * from './Field.js';

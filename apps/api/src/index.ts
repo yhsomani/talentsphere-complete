@@ -1,5 +1,5 @@
 import { buildApp } from './server.js';
-import { validateServerEnv } from '@talentsphere/config';
+import { productionConfigProblems, validateServerEnv } from '@talentsphere/config';
 
 // Load .env natively (Node process.loadEnvFile): found from the repo root, or
 // two levels up when started from apps/api (pnpm --filter dev). A missing file
@@ -16,6 +16,12 @@ for (const candidate of ['.env', '../../.env']) {
 
 async function main() {
   const env = validateServerEnv();
+  const problems = productionConfigProblems(env);
+  if (problems.length > 0) {
+    console.error('Refusing to start with an unsafe production configuration:');
+    for (const problem of problems) console.error(`  - ${problem}`);
+    process.exit(1);
+  }
   const app = await buildApp();
 
   try {

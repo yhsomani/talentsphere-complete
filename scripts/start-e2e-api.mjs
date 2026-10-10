@@ -13,6 +13,9 @@ async function start() {
     DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
     CORS_ALLOWED_ORIGINS: 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173',
     RATE_LIMIT_MAX_REQUESTS: '100000',
+    // One API process serves every E2E spec from 127.0.0.1; the production
+    // credential-endpoint budget (10 per 15 min) would throttle the suite.
+    AUTH_RATE_LIMIT_MAX_REQUESTS: '100000',
   });
 
   const address = await app.listen({ port: 4000, host: '127.0.0.1' });
