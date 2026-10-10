@@ -29,6 +29,15 @@ Never trust client role/tenant IDs.
 
 RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. citeturn123371search0turn123371search4
 
+### Known RLS defect (not exploitable through the API)
+
+The API connects with the service role and authorizes in code, so RLS does not
+gate it. The policies matter for any direct (PostgREST/Supabase client) access,
+and some compare the wrong ids: `notifications` / `notification_preferences`
+(00007) compare a profile id to `auth.uid()` (a user id), so they match nothing.
+Review every policy against the ids the API actually writes before enabling
+direct database access.
+
 ## 5. Threat Model
 
 Primary threats:

@@ -81,6 +81,7 @@ import {
   createDefaultNotificationPreferences,
   shouldDeliverNotification,
   createNotificationEntity,
+  candidateApplicationUpdate,
   markNotificationsAsRead,
   AIConversation,
   AIMessage,
@@ -1112,43 +1113,64 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const notificationsByRecipientId = new Map<string, Notification[]>();
   const notificationPreferencesByUserId = new Map<string, NotificationPreferences>();
 
-  const sendNotification = async (params: {
+  type NotificationParams = {
     recipientId: string;
     type: NotificationType;
     title: string;
     body: string;
     referenceType?: string;
     referenceId?: string;
-  }): Promise<Notification | null> => {
-    let prefs = notificationPreferencesByUserId.get(params.recipientId);
-    if (!prefs) {
-      prefs = createDefaultNotificationPreferences(params.recipientId);
-      notificationPreferencesByUserId.set(params.recipientId, prefs);
-    }
+  };
 
-    if (!shouldDeliverNotification(prefs, params.type)) {
+  // A notification for a recipient who has not opted out of its kind, or
+  // null. Recipients are profile ids; one with no profile cannot hold one.
+  const notificationFor = (params: NotificationParams): Notification | null => {
+    if (!profilesById.has(params.recipientId)) return null;
+    if (
+      !shouldDeliverNotification(
+        notificationPreferencesByUserId.get(params.recipientId),
+        params.type
+      )
+    ) {
       return null;
     }
+    return createNotificationEntity(params);
+  };
 
-    const notif = createNotificationEntity(params);
-    notificationsById.set(notif.id, notif);
+  // Push dispatch happens only after the notification is durable.
+  const announceNotifications = async (notifications: Notification[]) => {
+    for (const notif of notifications) {
+      await dispatchJob({
+        type: 'notification.push',
+        payload: { notificationId: notif.id, recipientId: notif.recipientId, type: notif.type },
+        enqueuedAt: notif.createdAt,
+      });
+    }
+  };
 
-    const list = notificationsByRecipientId.get(params.recipientId) || [];
-    list.unshift(notif);
-    notificationsByRecipientId.set(params.recipientId, list);
-
-    await dispatchJob({
-      type: 'notification.push',
-      payload: {
-        notificationId: notif.id,
-        recipientId: notif.recipientId,
-        type: notif.type,
-      },
-      enqueuedAt: notif.createdAt,
-    });
-
+  // Core-loop routes put notifications in the same transaction as the event
+  // that causes them (persist(eventOp, ...notificationOps)). Everything else
+  // calls this: the notification is stored on its own, and a failure to store
+  // it is logged rather than failing the action that triggered it.
+  const sendNotification = async (params: NotificationParams): Promise<Notification | null> => {
+    const notif = notificationFor(params);
+    if (!notif) return null;
+    try {
+      await persist({ kind: 'notification', value: notif });
+    } catch (err) {
+      app.log.error({ err, type: params.type }, 'notification could not be stored');
+      return null;
+    }
+    await announceNotifications([notif]);
     return notif;
   };
+
+  // The members of an organization, as notification recipients (profile ids).
+  const orgMemberProfileIds = (orgId: string, exceptUserId?: string): string[] =>
+    (orgMembershipsByOrgId.get(orgId) || [])
+      .filter((m) => m.userId !== exceptUserId)
+      .map((m) => profilesByUserId.get(m.userId)?.id)
+      .filter((id): id is string => Boolean(id));
 
   // Seed canonical baseline skills (BR-141)
   const seedSkills: Skill[] = [
@@ -2388,7 +2410,25 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         attachedEvidenceIds: input.attachedEvidenceIds,
       });
 
-      await persist({ kind: 'application', value: application });
+      // The hiring team hears about it in the same transaction. No candidate
+      // name in the text: notifications outlive a candidate's erasure.
+      const hiringNotices = orgMemberProfileIds(job.orgId, session.userId)
+        .map((recipientId) =>
+          notificationFor({
+            recipientId,
+            type: 'application_received',
+            title: `New application: ${job.title}`,
+            body: `A candidate applied to ${job.title}. Review them in your pipeline.`,
+            referenceType: 'job',
+            referenceId: job.id,
+          })
+        )
+        .filter((n): n is Notification => n !== null);
+      await persist(
+        { kind: 'application', value: application },
+        ...hiringNotices.map((value) => ({ kind: 'notification' as const, value }))
+      );
+      await announceNotifications(hiringNotices);
 
       // Mark candidate draft as submitted if exists (F-36)
       const draftKey = `${profile.id}:${jobId}`;
@@ -2552,7 +2592,43 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.reason
       );
 
-      await persist({ kind: 'application', value: updated, base: application });
+      // Whoever did not make the move hears about it: the candidate when the
+      // hiring team moves them, the hiring team when the candidate withdraws.
+      const notices: Notification[] = [];
+      if (job && isCandidateOwner && updated.status === 'withdrawn') {
+        for (const recipientId of orgMemberProfileIds(job.orgId, session.userId)) {
+          const notice = notificationFor({
+            recipientId,
+            type: 'application_status',
+            title: `Application withdrawn: ${job.title}`,
+            body: `A candidate withdrew their application to ${job.title}.`,
+            referenceType: 'job',
+            referenceId: job.id,
+          });
+          if (notice) notices.push(notice);
+        }
+      } else if (job && !isCandidateOwner && candidateProfile) {
+        const message = candidateApplicationUpdate(
+          updated.status,
+          job.title,
+          organizationsById.get(job.orgId)?.name ?? 'the company'
+        );
+        const notice = message
+          ? notificationFor({
+              recipientId: candidateProfile.id,
+              type: 'application_status',
+              ...message,
+              referenceType: 'job_application',
+              referenceId: updated.id,
+            })
+          : null;
+        if (notice) notices.push(notice);
+      }
+      await persist(
+        { kind: 'application', value: updated, base: application },
+        ...notices.map((value) => ({ kind: 'notification' as const, value }))
+      );
+      await announceNotifications(notices);
 
       await dispatchJob({
         type: 'application.status_changed',
@@ -5403,6 +5479,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
+  // The header badge: one small read on every page, instead of the list.
+  app.get('/api/v1/notifications/summary', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const profile = profilesByUserId.get(session.userId);
+    const unreadCount = profile
+      ? (notificationsByRecipientId.get(profile.id) || []).filter((n) => !n.isRead).length
+      : 0;
+    return reply.status(200).send({ unreadCount });
+  });
+
   app.post('/api/v1/notifications/mark-read', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const profile = profilesByUserId.get(session.userId);
@@ -5414,11 +5500,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const userNotifs = notificationsByRecipientId.get(profile.id) || [];
     const targetIds = input.all ? undefined : input.notificationIds;
 
-    const markedCount = markNotificationsAsRead(userNotifs, targetIds);
-    const remainingUnread = userNotifs.filter((n) => !n.isRead).length;
+    // Mark copies, never the stored objects, and persist them: the read state
+    // survives a restart, and only the recipient's own notifications move.
+    const copies = userNotifs.map((n) => ({ ...n }));
+    markNotificationsAsRead(copies, targetIds);
+    const ops: CoreOp[] = copies
+      .map((copy, index) => ({ copy, base: userNotifs[index] }))
+      .filter(({ copy, base }) => copy.isRead && !base.isRead)
+      .map(({ copy, base }) => ({ kind: 'notification' as const, value: copy, base }));
+    if (ops.length > 0) await persist(...ops);
 
+    const remainingUnread = (notificationsByRecipientId.get(profile.id) || []).filter(
+      (n) => !n.isRead
+    ).length;
     return reply.status(200).send({
-      markedCount,
+      markedCount: ops.length,
       unreadCount: remainingUnread,
     });
   });
@@ -5449,11 +5545,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       const input = UpdateNotificationPreferencesInputSchema.parse(req.body);
-      let prefs = notificationPreferencesByUserId.get(profile.id);
-      if (!prefs) {
-        prefs = createDefaultNotificationPreferences(profile.id);
-        notificationPreferencesByUserId.set(profile.id, prefs);
-      }
+      const prefs = {
+        ...(notificationPreferencesByUserId.get(profile.id) ??
+          createDefaultNotificationPreferences(profile.id)),
+      };
 
       if (input.allowMessages !== undefined) prefs.allowMessages = input.allowMessages;
       if (input.allowMentions !== undefined) prefs.allowMentions = input.allowMentions;
@@ -5463,6 +5558,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       if (input.emailDigestFrequency !== undefined)
         prefs.emailDigestFrequency = input.emailDigestFrequency;
       prefs.updatedAt = new Date().toISOString();
+      await persist({ kind: 'notificationPreferences', value: prefs });
 
       return reply.status(200).send({
         message: 'Preferences updated successfully',
@@ -9721,6 +9817,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
       },
       { kind: 'profile', value: result.anonymizedProfile },
+      // Notifications addressed to the person name their applications,
+      // employers and referees.
+      { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
     ];
     for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
       erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
@@ -11798,7 +11897,25 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         };
         ops.push({ kind: 'workHistory', value: updatedHistory, base: workHistory });
       }
+      const candidateProfileId = profilesByUserId.get(reference.candidateId)?.id;
+      const referenceNotice = candidateProfileId
+        ? notificationFor({
+            recipientId: candidateProfileId,
+            type: 'reference_received',
+            title: `${reference.refereeName} responded to your reference request`,
+            body: workHistory
+              ? `For ${workHistory.title} at ${workHistory.companyName}.` +
+                (updatedHistory && updatedHistory.badgeTier !== 'none'
+                  ? ` That role is now ${updatedHistory.badgeTier} tier.`
+                  : '')
+              : 'Their response is now part of your work history.',
+            referenceType: 'work_history',
+            referenceId: reference.workHistoryId,
+          })
+        : null;
+      if (referenceNotice) ops.push({ kind: 'notification', value: referenceNotice });
       await persist(...ops);
+      if (referenceNotice) await announceNotifications([referenceNotice]);
 
       return reply.status(200).send({
         reference: publicReference(updatedRef),
@@ -12057,6 +12174,25 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       case 'emailChallengeDelete':
         emailChallengesByHistoryId.delete(op.workHistoryId);
         return;
+      case 'notification': {
+        notificationsById.set(op.value.id, op.value);
+        const list = notificationsByRecipientId.get(op.value.recipientId) || [];
+        const at = list.findIndex((n) => n.id === op.value.id);
+        if (at >= 0) list[at] = op.value;
+        else list.unshift(op.value); // newest first
+        notificationsByRecipientId.set(op.value.recipientId, list);
+        return;
+      }
+      case 'notificationPreferences':
+        notificationPreferencesByUserId.set(op.value.userId, op.value);
+        return;
+      case 'notificationsDeleteForRecipient': {
+        for (const n of notificationsByRecipientId.get(op.recipientId) || []) {
+          notificationsById.delete(n.id);
+        }
+        notificationsByRecipientId.delete(op.recipientId);
+        return;
+      }
       case 'workHistoryDelete': {
         const history = verifiedWorkHistoriesById.get(op.id);
         if (!history) return;
@@ -12116,6 +12252,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         return `emailChallenge:${op.value.workHistoryId}`;
       case 'emailChallengeDelete':
         return `emailChallenge:${op.workHistoryId}`;
+      case 'notification':
+        return op.base ? `notification:${op.value.id}` : undefined;
       default:
         return undefined;
     }
@@ -12137,6 +12275,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         return emailChallengesByHistoryId.get(op.value.workHistoryId);
       case 'emailChallengeDelete':
         return emailChallengesByHistoryId.get(op.workHistoryId);
+      case 'notification':
+        return notificationsById.get(op.value.id);
       default:
         return undefined;
     }
@@ -12189,6 +12329,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     for (const value of snapshot.references) applyToReadModel({ kind: 'reference', value });
     for (const value of snapshot.emailChallenges) {
       applyToReadModel({ kind: 'emailChallenge', value });
+    }
+    for (const value of snapshot.notificationPreferences) {
+      applyToReadModel({ kind: 'notificationPreferences', value });
+    }
+    for (const value of snapshot.notifications) {
+      applyToReadModel({ kind: 'notification', value });
     }
     if (storage.core.durable) {
       app.log.info(

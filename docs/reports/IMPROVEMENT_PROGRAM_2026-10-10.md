@@ -51,6 +51,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 | 22 | P2  | Every 4xx logged at **error** level with a stack — error-level alerting would be noise.                                                                                                                            | **Fixed** — 4xx at info, 5xx at error                                                        | (behaviour visible in test output)                               |
 | 23 | P2  | Several write paths updated a record's `byId` Map but left per-org/per-subject lists stale.                                                                                                                       | **Fixed** — one `applyToReadModel` per entity                                                | covered by integration suite                                     |
 | 24 | P1  | _(Reticle)_ The global rate limit was **100 requests per 15 minutes per address**. A dashboard view makes ~5 API calls, so a normal user was locked out after ~20 page views and shown "Refresh to try again" (which spent more budget); behind a load balancer every user would share one bucket, and health checks counted against it. The E2E suite raises the limit to 100,000, so it never saw this. | **Fixed** — 300/min per signed-in account (per address when anonymous), `TRUST_PROXY`, health exempt, plain 429 message with the wait time, session error offers *Try again* | `api-security` "Rate limiting" (mutation-checked), `tests/unit/rate-limit-config.test.ts`, e2e `session-resilience` |
+| 25 | P1  | Nothing in the core loop sent a notification: a candidate was never told their application moved or that a referee had responded, and a hiring team never heard of a new applicant. Notifications that other modules did send lived only in memory, and the `notifications` table would have rejected 10 of the domain's 16 types. | **Fixed** — durable notifications in the same transaction as their event (migration 00044); hiring team told of applications and withdrawals, candidate of every move and of referee responses, no candidate names or private rejection reasons in the text; bell with unread count and a notifications page; erasure deletes the person's notifications | `tests/integration/core-notifications.test.ts`, `tests/pg/notifications.test.ts`, e2e `notifications`, Reticle (§G) |
 
 **Open findings** are in section H.
 
@@ -87,7 +88,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 
 **P1 — before a public beta**
 
-5. Persist the next modules users will expect to survive a restart: notifications (and wire them to application status changes), messaging, saved searches/drafts, erasure requests (30-day grace flow).
+5. Persist the next modules users will expect to survive a restart: messaging, saved searches/drafts, erasure requests (30-day grace flow). Notifications are done (finding 25).
 6. Recruiter account erasure semantics (owned organizations, posted jobs) — not handled today.
 7. Interview code execution is **simulated** (results do not depend on the code). Either integrate a sandbox or remove the feature from any user-visible surface.
 8. Session hardening: server-side revocation on sign-out; consider httpOnly cookies over localStorage.
@@ -109,7 +110,8 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 2. **`ae99e31c` — Web.** Sign-up; server-backed session (`GET /auth/session`); candidate dashboard, jobs, job detail and apply, applications with withdraw, profile with privacy and account deletion; recruiter company setup, job posting and lifecycle, applicant pipeline with verification summary and state-machine-limited stage moves; referee landing page; role-based navigation. Honest pricing (no card collection), signed webhook, removal of unsupported claims, legal pages marked draft.
 3. **`93dfe125` — Adversarial review fixes.** Findings 8, 9, 18, 19, 21, 22 above.
 4. **Reticle verification (follow-up session).** Drove the running app (Postgres-backed dev server) through Reticle's HTTP MCP transport and found finding 24; see G.
-5. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
+5. **Core-loop notifications (2026-10-11).** Finding 25; verified with Reticle in the running app (§G).
+6. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
 
 ## G. Validation evidence
 
@@ -119,10 +121,10 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 | -------------------------------------------------- | ---------------------------------------- |
 | `pnpm lint` (Prettier)                              | clean                                    |
 | `pnpm typecheck` (`tsc -b`, 10 projects)            | clean                                    |
-| `pnpm test` (Vitest: unit, integration, security)   | **1033 / 1033** passed, 99 files         |
-| `pnpm test:pg` (real PostgreSQL 16)                 | **10 / 10** passed, 2 files              |
+| `pnpm test` (Vitest: unit, integration, security)   | **1044 / 1044** passed, 100 files        |
+| `pnpm test:pg` (real PostgreSQL 16)                 | **14 / 14** passed, 3 files              |
 | `pnpm build`                                        | clean                                    |
-| Playwright (Chromium; e2e, a11y, performance)       | **191 / 191** passed                     |
+| Playwright (Chromium; e2e, a11y, performance)       | **194 / 194** passed                     |
 
 **Mutation checks (the tests catch the bug they claim to):**
 
@@ -142,6 +144,7 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 - **Saved flow `candidate-navigation`** (from an earlier session) failed with _drift_: it clicked a landing-page "Launch Dashboard" link that the web rewrite removed on purpose. Re-recorded against the current navigation for a signed-in candidate, with consequence assertions on every step; replay passes.
 - **Finding 24** surfaced while replaying: after a few minutes of driving, the dashboard showed "We could not confirm your session" — the API was answering 429 to everything. Fixed, then re-verified in the running app: 20 navigations at a human pace, every step `yes`, and an assertion that no request was throttled `yes`. Driving ~10× faster than a person still trips the new limit, which is the limiter working.
 - **Not verified / limits:** not every Reticle verdict in the session was "yes" (its end-of-session summary for the last tab: 84 of 96 claims held). The ones that were not fall into four groups: the saved flow's drift above; real throttling (finding 24); throttling I caused by driving ~10× faster than a person after the fix; and checks where my expectation was wrong — a miscounted note length, a logo click on the dashboard (for signed-in users the logo leads to the dashboard by design), and navigation checks whose target link also existed on the previous page. None of the last group is an app defect. Reticle also reported a layout shift of 0.24–0.46 across navigations; its relation to the user-facing CLS metric (which excludes shifts right after input) was not measured, so it is recorded here, not claimed as a defect. Response-body capture was left off on purpose (login/register bodies carry session tokens).
+- **Notifications (2026-10-11):** signed in as the candidate after the recruiter moved her application — the header's accessible count "Notifications, 1 unread" `yes`; opening notifications shows "Platform Engineer: in review" and the plain-words message `yes`; *Mark all as read* sends one request, clears the count, and holds after a reload `yes`. One `unknown` on the way: the badge digit is `aria-hidden` (its count is in the link's accessible name), so Reticle would not call it on screen; the browser test asserts its visual visibility instead.
 - The Playwright suite (including `core-loop.spec.ts`, three people driving the whole loop through the UI) remains the CI-level UI verification.
 - No load, soak, backup/restore or deployment testing — there is no deployment target.
 - Email delivery, payments and notifications are not integrated, so they are not verified.
@@ -162,7 +165,7 @@ Measured on this branch (2026-10-10). Baseline at `32a3abc7`: Vitest 976 tests /
 
 | Risk                                                                                         | Likelihood | Impact | Mitigation in place                                         |
 | -------------------------------------------------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------- |
-| ~225 routes (messaging, notifications, learning, gamification, interviews, billing records, …) lose state on restart | Certain    | High   | Labelled `ephemeral`; core loop durable                      |
+| ~220 routes (messaging, learning, gamification, interviews, saved searches, billing records, …) lose state on restart | Certain    | High   | Labelled `ephemeral`; core loop durable                      |
 | A second API replica is started against the same database (ADR-015 single writer)            | Medium     | High   | Documented in OPERATIONS and ADR; database guards stop lost updates on guarded records, not stale reads |
 | Verification loop unusable outside development (no email provider)                          | Certain    | High   | Worker fails such jobs permanently and visibly              |
 | Interview "code execution" is simulated                                                      | Certain    | Medium | API only — no screen in the web app exposes interviews      |

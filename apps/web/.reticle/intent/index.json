@@ -79,6 +79,12 @@
       "subject": "drive-a-new-candidate-who-signs-up-lands"
     },
     {
+      "id": "flow:drive-a-signed-in-candidate-sees-how-many-unread-notif",
+      "statement": "A signed-in candidate sees how many unread notifications they have in t…",
+      "status": "proposed",
+      "subject": "drive-a-signed-in-candidate-sees-how-man"
+    },
+    {
       "id": "flow:drive-a-submitted-application-is-listed-under-the-cand",
       "statement": "A submitted application is listed under the candidate's active applicat…",
       "status": "proved",
@@ -97,6 +103,12 @@
       "subject": "unsorted"
     },
     {
+      "id": "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0",
+      "statement": "A candidate is told, in plain words, when the hiring team moves their a…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
       "id": "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5",
       "statement": "A job's detail page shows the posting and, for a signed-in candidate wh…",
       "status": "proved",
@@ -105,6 +117,12 @@
     {
       "id": "inline:a-new-candidate-who-signs-up-lands-on-a-dashboar-82da9e40",
       "statement": "A new candidate who signs up lands on a dashboard about themselves (the…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-signed-in-candidate-sees-how-many-unread-notif-e3886bde",
+      "statement": "A signed-in candidate sees how many unread notifications they have in t…",
       "status": "proved",
       "subject": "unsorted"
     },
@@ -154,6 +172,12 @@
       "id": "inline:landing-page-headline-is-visible-after-navigatio-b0905421",
       "statement": "Landing page headline is visible after navigation",
       "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:marking-notifications-read-is-saved-by-the-serve-75d7f796",
+      "statement": "Marking notifications read is saved by the server: the badge clears and…",
+      "status": "proved",
       "subject": "unsorted"
     },
     {

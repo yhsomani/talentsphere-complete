@@ -5,6 +5,8 @@ import {
   type Evidence,
   type Job,
   type JobApplication,
+  type Notification,
+  type NotificationPreferences,
   type Profile,
   type Role,
   type Skill,
@@ -96,6 +98,11 @@ export type CoreOp =
   | { kind: 'reference'; value: StoredReference; base?: StoredReference }
   | { kind: 'emailChallenge'; value: EmailChallenge; base?: EmailChallenge }
   | { kind: 'emailChallengeDelete'; workHistoryId: string; base?: EmailChallenge }
+  /** Insert a notification, or (with base) record that it was read. */
+  | { kind: 'notification'; value: Notification; base?: Notification }
+  | { kind: 'notificationPreferences'; value: NotificationPreferences }
+  /** Erasure: every notification addressed to this profile. */
+  | { kind: 'notificationsDeleteForRecipient'; recipientId: string }
   /** Cascades to its references and email challenge (erasure). */
   | { kind: 'workHistoryDelete'; id: string }
   /** Cascades to evidence_skills and application_evidence (erasure). */
@@ -113,6 +120,8 @@ export interface CoreSnapshot {
   workHistories: StoredWorkHistory[];
   references: StoredReference[];
   emailChallenges: EmailChallenge[];
+  notifications: Notification[];
+  notificationPreferences: NotificationPreferences[];
 }
 
 export interface CoreStore {
@@ -136,6 +145,8 @@ export const emptySnapshot = (): CoreSnapshot => ({
   workHistories: [],
   references: [],
   emailChallenges: [],
+  notifications: [],
+  notificationPreferences: [],
 });
 
 /** STORAGE=memory: the Maps are the store. Explicitly not durable. */
@@ -551,6 +562,69 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       );
       return;
     }
+    case 'notification': {
+      const n = op.value;
+      if (op.base) {
+        // Marking read: a plain UPDATE that only matches the state it was
+        // derived from — never an upsert that could resurrect an erased row.
+        const result = await db.query(
+          `UPDATE public.notifications SET is_read = $2, read_at = $3
+           WHERE id = $1 AND is_read = $4`,
+          [n.id, n.isRead, nullable(n.readAt ?? undefined), op.base.isRead]
+        );
+        assertGuardHeld(true, result);
+        return;
+      }
+      await db.query(
+        `INSERT INTO public.notifications
+           (id, recipient_id, type, title, body, reference_type, reference_id, is_read, read_at, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          n.id,
+          n.recipientId,
+          n.type,
+          n.title,
+          n.body,
+          nullable(n.referenceType ?? undefined),
+          nullable(n.referenceId ?? undefined),
+          n.isRead,
+          nullable(n.readAt ?? undefined),
+          n.createdAt,
+        ]
+      );
+      return;
+    }
+    case 'notificationPreferences': {
+      const p = op.value;
+      await db.query(
+        `INSERT INTO public.notification_preferences
+           (id, user_id, allow_messages, allow_mentions, allow_applications, allow_course_updates,
+            email_digest_frequency, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT (user_id) DO UPDATE SET
+           allow_messages = EXCLUDED.allow_messages, allow_mentions = EXCLUDED.allow_mentions,
+           allow_applications = EXCLUDED.allow_applications,
+           allow_course_updates = EXCLUDED.allow_course_updates,
+           email_digest_frequency = EXCLUDED.email_digest_frequency,
+           updated_at = EXCLUDED.updated_at`,
+        [
+          p.id,
+          p.userId,
+          p.allowMessages,
+          p.allowMentions,
+          p.allowApplications,
+          p.allowCourseUpdates,
+          p.emailDigestFrequency,
+          p.createdAt,
+          p.updatedAt,
+        ]
+      );
+      return;
+    }
+    case 'notificationsDeleteForRecipient': {
+      await db.query('DELETE FROM public.notifications WHERE recipient_id = $1', [op.recipientId]);
+      return;
+    }
     case 'workHistoryDelete': {
       await db.query('DELETE FROM public.verified_work_histories WHERE id = $1', [op.id]);
       return;
@@ -579,9 +653,12 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   reference: 9,
   emailChallenge: 10,
   emailChallengeDelete: 10,
+  notification: 10,
+  notificationPreferences: 10,
   // Deletes run last so an upsert in the same batch cannot re-reference them.
   workHistoryDelete: 11,
   evidenceDelete: 11,
+  notificationsDeleteForRecipient: 11,
 };
 
 export class PgCoreStore implements CoreStore {
@@ -624,6 +701,8 @@ export class PgCoreStore implements CoreStore {
       workHistories,
       references,
       emailChallenges,
+      notifications,
+      notificationPreferences,
     ] = await Promise.all([
       q('SELECT * FROM public.users ORDER BY created_at, id'),
       q('SELECT * FROM public.profiles ORDER BY created_at, id'),
@@ -646,6 +725,8 @@ export class PgCoreStore implements CoreStore {
       ),
       q('SELECT * FROM public.employment_references ORDER BY created_at, id'),
       q('SELECT * FROM public.work_history_email_challenges'),
+      q('SELECT * FROM public.notifications ORDER BY created_at, id'),
+      q('SELECT * FROM public.notification_preferences ORDER BY created_at, id'),
     ]);
 
     const group = (rows: Record<string, any>[], key: string, value: string) => {
@@ -814,6 +895,29 @@ export class PgCoreStore implements CoreStore {
         attempts: Number(r.attempts),
         expiresAt: isoRequired(r.expires_at),
         createdAt: isoRequired(r.created_at),
+      })),
+      notifications: notifications.map((r) => ({
+        id: r.id,
+        recipientId: r.recipient_id,
+        type: r.type,
+        title: r.title,
+        body: r.body,
+        referenceType: r.reference_type ?? null,
+        referenceId: r.reference_id ?? null,
+        isRead: r.is_read,
+        readAt: iso(r.read_at) ?? null,
+        createdAt: isoRequired(r.created_at),
+      })),
+      notificationPreferences: notificationPreferences.map((r) => ({
+        id: r.id,
+        userId: r.user_id,
+        allowMessages: r.allow_messages,
+        allowMentions: r.allow_mentions,
+        allowApplications: r.allow_applications,
+        allowCourseUpdates: r.allow_course_updates,
+        emailDigestFrequency: r.email_digest_frequency,
+        createdAt: isoRequired(r.created_at),
+        updatedAt: isoRequired(r.updated_at),
       })),
     };
   }

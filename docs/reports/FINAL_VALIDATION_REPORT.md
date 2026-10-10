@@ -46,14 +46,14 @@
 Measured on branch `improvement/core-loop-durability` (2026-10-10). Counts are machine-reported,
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Vitest (unit, integration, security; in-memory storage):** 99 files / **1033 tests PASS** (`pnpm test`).
-- **Real PostgreSQL 16 (`pnpm test:pg`):** 2 files / **10 tests PASS** — restart round-trip of the
+- **Vitest (unit, integration, security; in-memory storage):** 100 files / **1044 tests PASS** (`pnpm test`).
+- **Real PostgreSQL 16 (`pnpm test:pg`):** 3 files / **14 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
-  job-payload credential stripping. Mutation-checked (see the improvement report §G).
-- **Playwright (Chromium; E2E, accessibility, performance):** **191 tests PASS**, including
+  job-payload credential stripping, notifications across a restart and erasure. Mutation-checked (see the improvement report §G).
+- **Playwright (Chromium; E2E, accessibility, performance):** **194 tests PASS**, including
   `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only).
-- **Database migrations:** **43** sequential SQL migrations (`00001`–`00043`); CI applies them
+- **Database migrations:** **44** sequential SQL migrations (`00001`–`00044`); CI applies them
   to an empty database and re-runs the runner as an idempotency check.
 - **Typecheck / lint / build:** `tsc -b` clean, Prettier clean, `pnpm build` clean.
 - **Reticle (in-app):** sign-up → job → apply → applications driven on the Postgres-backed dev
@@ -76,10 +76,11 @@ not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976
 - **Open:**
   - no email provider — verification codes and referee links are delivered only in development;
   - no payment processor — paid plans cannot be bought (`BILLING_MODE=disabled`);
-  - ~225 routes outside the core loop keep state in process memory (labelled
+  - ~220 routes outside the core loop keep state in process memory (labelled
     `x-talentsphere-durability: ephemeral`);
   - single API writer per database (ADR-015) until core reads move to SQL;
-  - no notification or AI provider; interview code execution is simulated;
+  - in-app notifications only (no email/push provider); no AI provider; interview code
+    execution is simulated;
   - owner decisions pending: architecture of record, ADR-015/migration 00043 ratification,
     pricing, legal review, deletion semantics (see the improvement report §H).
 - **Production Gate:** open. Readiness is an executable evidence gate, not an assertion.

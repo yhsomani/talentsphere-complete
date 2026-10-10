@@ -265,13 +265,23 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     const durable = await app.inject({ method: 'GET', url: '/api/v1/jobs' });
     expect(durable.headers['x-talentsphere-durability']).toBeUndefined();
     const cand = await register(app, 'labels@example.org');
+    const auth = { authorization: `Bearer ${cand.token}` };
+    // Billing records are still kept in process memory.
     const ephemeral = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
-      headers: { authorization: `Bearer ${cand.token}` },
+      url: '/api/v1/billing/subscription',
+      headers: auth,
     });
     expect(ephemeral.statusCode).toBe(200);
     expect(ephemeral.headers['x-talentsphere-durability']).toBe('ephemeral');
+    // Notifications are durable since migration 00044.
+    const notifications = await app.inject({
+      method: 'GET',
+      url: '/api/v1/notifications',
+      headers: auth,
+    });
+    expect(notifications.statusCode).toBe(200);
+    expect(notifications.headers['x-talentsphere-durability']).toBeUndefined();
   });
 
   it('strips one-time credentials from a job payload once the job is finished', async () => {

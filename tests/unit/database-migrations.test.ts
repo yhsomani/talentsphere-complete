@@ -447,3 +447,17 @@ describe('Schema content authority (E-04, E-05) — SQL text assertions, does NO
     expect(sql).not.toContain('CREATE POLICY');
   });
 });
+
+describe('Notification types: database and domain agree (migration 00044)', () => {
+  it('the CHECK constraint lists exactly the domain NotificationType values', async () => {
+    const { NOTIFICATION_TYPES } = await import('../../packages/domain/src/notifications.js');
+    const sql = fs.readFileSync(
+      path.resolve('supabase/migrations/00044_notifications_persistence.sql'),
+      'utf8'
+    );
+    const check = /CHECK \(type IN \(([\s\S]*?)\)\)/.exec(sql);
+    expect(check).not.toBeNull();
+    const inDatabase = [...check![1].matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort();
+    expect(inDatabase).toEqual([...NOTIFICATION_TYPES].sort());
+  });
+});

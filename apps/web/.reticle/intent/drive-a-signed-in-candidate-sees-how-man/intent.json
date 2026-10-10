@@ -1,0 +1,21 @@
+{
+  "intents": {
+    "flow:drive-a-signed-in-candidate-sees-how-many-unread-notif": {
+      "binding": {
+        "flow": "drive-a-signed-in-candidate-sees-how-many-unread-notif"
+      },
+      "declaredAt": 1791670857473,
+      "id": "flow:drive-a-signed-in-candidate-sees-how-many-unread-notif",
+      "state": "bound",
+      "statement": "A signed-in candidate sees how many unread notifications they have in the header",
+      "status": "proposed",
+      "subject": "drive-a-signed-in-candidate-sees-how-man",
+      "surface": {
+        "flow": "drive-a-signed-in-candidate-sees-how-many-unread-notif"
+      },
+      "updatedAt": 1791670857492
+    }
+  },
+  "subject": "drive-a-signed-in-candidate-sees-how-man",
+  "version": 1
+}

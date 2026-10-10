@@ -125,3 +125,24 @@ describe('Notification Center Domain Model (F-14, BR-120)', () => {
     expect(n2.isRead).toBe(true);
   });
 });
+
+describe('candidateApplicationUpdate', () => {
+  it('describes each hiring-team move in plain words', async () => {
+    const { candidateApplicationUpdate } =
+      await import('../../packages/domain/src/notifications.js');
+    expect(candidateApplicationUpdate('shortlisted', 'Platform Engineer', 'Acme')).toEqual({
+      title: 'Platform Engineer: shortlisted',
+      body: 'You were shortlisted for Platform Engineer at Acme.',
+    });
+    expect(candidateApplicationUpdate('offered', 'Platform Engineer', 'Acme')?.body).toBe(
+      'You have an offer for Platform Engineer at Acme.'
+    );
+  });
+
+  it('says nothing for moves the candidate made or that need no message', async () => {
+    const { candidateApplicationUpdate } =
+      await import('../../packages/domain/src/notifications.js');
+    expect(candidateApplicationUpdate('withdrawn', 'X', 'Y')).toBeNull();
+    expect(candidateApplicationUpdate('submitted', 'X', 'Y')).toBeNull();
+  });
+});

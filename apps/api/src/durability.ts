@@ -57,6 +57,12 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'GET /api/v1/references/:refId',
   'GET /api/v1/candidates/:candidateId/work-history',
   'GET /api/v1/candidates/:candidateId/work-history-graph',
+  // Notifications (migration 00044)
+  'GET /api/v1/notifications',
+  'GET /api/v1/notifications/summary',
+  'POST /api/v1/notifications/mark-read',
+  'GET /api/v1/notifications/preferences',
+  'PATCH /api/v1/notifications/preferences',
 ]);
 
 /** Routes that hold no entity state at all (health, static catalogs). */

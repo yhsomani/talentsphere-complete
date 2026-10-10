@@ -8,10 +8,12 @@ import {
   useNavigationType,
 } from 'react-router-dom';
 import { colors, spacing, motion } from '@talentsphere/ui';
-import { MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
+import { BellIcon, MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
 import { getStoredUser } from '../lib/session.js';
 import { useSession } from '../lib/SessionContext.js';
+import { apiJson } from '../lib/api.js';
+import { NOTIFICATIONS_EVENT } from '../lib/notifications.js';
 
 /**
  * Support contact is configuration, not copy: an address that nobody reads
@@ -74,6 +76,30 @@ export const Layout: React.FC = () => {
       ? HIRING_NAV
       : CANDIDATE_NAV;
   const accountLabel = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  // The badge: one small read per page change, on focus, and right after the
+  // user reads notifications. A failure leaves the last known count.
+  useEffect(() => {
+    if (session.status !== 'ready') {
+      setUnreadNotifications(0);
+      return;
+    }
+    let cancelled = false;
+    const refresh = () => {
+      apiJson<{ unreadCount: number }>('/api/v1/notifications/summary')
+        .then((res) => !cancelled && setUnreadNotifications(res.unreadCount))
+        .catch(() => undefined);
+    };
+    refresh();
+    window.addEventListener('focus', refresh);
+    window.addEventListener(NOTIFICATIONS_EVENT, refresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener(NOTIFICATIONS_EVENT, refresh);
+    };
+  }, [session.status, location.pathname]);
 
   // Close the mobile menu whenever the route changes.
   useEffect(() => {
@@ -350,6 +376,56 @@ export const Layout: React.FC = () => {
 
           {signedIn ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0 }}>
+              <Link
+                to="/notifications"
+                data-testid="nav-notifications"
+                aria-label={
+                  unreadNotifications > 0
+                    ? `Notifications, ${unreadNotifications} unread`
+                    : 'Notifications'
+                }
+                aria-current={
+                  isActivePath(location.pathname, '/notifications') ? 'page' : undefined
+                }
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  color: colors.neutral[700],
+                  backgroundColor: isActivePath(location.pathname, '/notifications')
+                    ? colors.primary[50]
+                    : 'transparent',
+                }}
+              >
+                <BellIcon size={20} />
+                {unreadNotifications > 0 && (
+                  <span
+                    data-testid="notifications-badge"
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '2px',
+                      minWidth: '18px',
+                      height: '18px',
+                      padding: '0 5px',
+                      borderRadius: '9px',
+                      backgroundColor: colors.semantic.error,
+                      color: '#ffffff',
+                      fontSize: '0.6875rem',
+                      fontWeight: 700,
+                      lineHeight: '18px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                  </span>
+                )}
+              </Link>
               <span
                 data-testid="account-label"
                 style={{

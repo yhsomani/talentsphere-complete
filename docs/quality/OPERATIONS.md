@@ -132,8 +132,8 @@ prints which ones (`productionConfigProblems()`).
 ### What survives a restart
 
 The core loop — accounts, profiles, organizations and members, skills, jobs,
-applications, evidence, work history, references and open email challenges — and
-background jobs. Every other route keeps its state in process memory and says so with
+applications, evidence, work history, references, open email challenges,
+notifications and notification preferences — and background jobs. Every other route keeps its state in process memory and says so with
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 

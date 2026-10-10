@@ -43,6 +43,57 @@
       },
       "updatedAt": 1791643168266
     },
+    "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/notifications"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "status": 200,
+            "urlContains": "/api/v1/notifications"
+          },
+          {
+            "contains": "Platform Engineer: in review",
+            "kind": "text",
+            "scope": "[data-testid=notifications-list]",
+            "visible": true
+          },
+          {
+            "contains": "The hiring team is reviewing your application for Platform Engineer at Northwind Labs.",
+            "kind": "text",
+            "visible": true
+          },
+          {
+            "contains": "1 unread.",
+            "kind": "text",
+            "visible": true
+          }
+        ]
+      },
+      "declaredAt": 1791670847428,
+      "id": "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0",
+      "provenBy": {
+        "at": 1791670847780,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791670847780"
+      },
+      "state": "proved",
+      "statement": "A candidate is told, in plain words, when the hiring team moves their application",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/notifications"
+      },
+      "updatedAt": 1791670847800
+    },
     "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5": {
       "binding": {
         "kind": "allOf",
@@ -138,6 +189,43 @@
         "route": "/dashboard"
       },
       "updatedAt": 1791643090737
+    },
+    "inline:a-signed-in-candidate-sees-how-many-unread-notif-e3886bde": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/dashboard"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Notifications, 1 unread",
+              "role": "link"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791670808644,
+      "id": "inline:a-signed-in-candidate-sees-how-many-unread-notif-e3886bde",
+      "provenBy": {
+        "at": 1791670837831,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1791670837831"
+      },
+      "state": "proved",
+      "statement": "A signed-in candidate sees how many unread notifications they have in the header",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/pages/LoginPage.tsx"
+        ],
+        "route": "/dashboard"
+      },
+      "updatedAt": 1791670837858
     },
     "inline:a-signed-in-user-browsing-at-a-normal-pace-is-ne-67998f57": {
       "binding": {
@@ -339,6 +427,58 @@
       "statement": "Landing page headline is visible after navigation",
       "status": "agreed",
       "subject": "unsorted"
+    },
+    "inline:marking-notifications-read-is-saved-by-the-serve-75d7f796": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/notifications/mark-read"
+          },
+          {
+            "contains": "You are all caught up.",
+            "kind": "text",
+            "visible": true
+          },
+          {
+            "absent": true,
+            "kind": "element",
+            "query": {
+              "testid": "notifications-badge"
+            }
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Notifications",
+              "role": "link"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791670855868,
+      "id": "inline:marking-notifications-read-is-saved-by-the-serve-75d7f796",
+      "provenBy": {
+        "at": 1791670858649,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791670858649"
+      },
+      "state": "proved",
+      "statement": "Marking notifications read is saved by the server: the badge clears and stays cleared after a reload",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/notifications"
+      },
+      "updatedAt": 1791670858673
     },
     "inline:monkey-test-empty-checkout-submission-4630fef2": {
       "binding": {

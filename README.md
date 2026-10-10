@@ -12,7 +12,8 @@ What works end to end, in the browser, on durable data: sign-up (candidate or re
 profile, work history with proof (corporate-email code, referee link), job posting and
 lifecycle, applying, application tracking and withdrawal, the recruiter's applicant
 pipeline, and GDPR erasure. What does not exist yet: email delivery outside development,
-payments (paid plans cannot be bought), notifications, and durable storage for modules
+payments (paid plans cannot be bought), email or push delivery of notifications (in-app
+notifications exist), and durable storage for modules
 outside the core loop (their responses carry `x-talentsphere-durability: ephemeral`).
 
 Test suites (counts as measured on 2026-10-10; re-run rather than trust them):
@@ -22,7 +23,7 @@ Test suites (counts as measured on 2026-10-10; re-run rather than trust them):
 - `pnpm test:e2e` — Playwright: end-to-end journeys, accessibility, performance (~190 tests)
 - CI (`.github/workflows/ci.yml`) runs lint, typecheck, all three suites (with a Postgres
   service container), a migration-idempotency check and the build on every push and PR.
-- 43 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
+- 44 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
 
 ## Core loop
 

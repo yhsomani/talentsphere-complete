@@ -17,6 +17,7 @@ import { ProfilePage } from './pages/ProfilePage.js';
 import { HiringPage } from './pages/HiringPage.js';
 import { HiringJobPage } from './pages/HiringJobPage.js';
 import { ReferencePage } from './pages/ReferencePage.js';
+import { NotificationsPage } from './pages/NotificationsPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
@@ -55,6 +56,7 @@ export const App: React.FC = () => {
             <Route path="applications" element={guarded(<ApplicationsPage />)} />
             <Route path="evidence" element={guarded(<EvidencePage />)} />
             <Route path="profile" element={guarded(<ProfilePage />)} />
+            <Route path="notifications" element={guarded(<NotificationsPage />)} />
             <Route path="hiring" element={guarded(<HiringPage />)} />
             <Route path="hiring/jobs/:id" element={guarded(<HiringJobPage />)} />
             <Route path="assessments" element={guarded(<AssessmentsPage />)} />
