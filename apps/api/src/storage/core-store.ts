@@ -5,11 +5,14 @@ import {
   type Evidence,
   type Job,
   type JobApplication,
+  type Message,
+  type MessageThread,
   type Notification,
   type NotificationPreferences,
   type Profile,
   type Role,
   type Skill,
+  type ThreadParticipant,
   type VerifiedWorkHistory,
 } from '@talentsphere/domain';
 
@@ -117,7 +120,14 @@ export type CoreOp =
   /** Cascades to evidence_skills and application_evidence (erasure). */
   | { kind: 'evidenceDelete'; id: string }
   /** Sign-out: refuse this token from now on. Prunes expired rows. */
-  | { kind: 'sessionRevocation'; value: RevokedSession };
+  | { kind: 'sessionRevocation'; value: RevokedSession }
+  /** Create or update a conversation; with participants on creation. */
+  | { kind: 'messageThread'; value: MessageThread; participants?: ThreadParticipant[] }
+  | { kind: 'message'; value: Message }
+  /** A participant read the conversation up to value.lastReadAt (never moves back). */
+  | { kind: 'threadRead'; value: ThreadParticipant }
+  /** Erasure: the person's messages and their place in every conversation. */
+  | { kind: 'messagesDeleteForProfile'; profileId: string };
 
 export interface CoreSnapshot {
   users: StoredUser[];
@@ -135,6 +145,9 @@ export interface CoreSnapshot {
   notificationPreferences: NotificationPreferences[];
   /** Only sessions whose token has not yet expired. */
   revokedSessions: RevokedSession[];
+  messageThreads: MessageThread[];
+  threadParticipants: ThreadParticipant[];
+  messages: Message[];
 }
 
 export interface CoreStore {
@@ -161,6 +174,9 @@ export const emptySnapshot = (): CoreSnapshot => ({
   notifications: [],
   notificationPreferences: [],
   revokedSessions: [],
+  messageThreads: [],
+  threadParticipants: [],
+  messages: [],
 });
 
 /** STORAGE=memory: the Maps are the store. Explicitly not durable. */
@@ -674,6 +690,59 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       await db.query('DELETE FROM public.revoked_sessions WHERE expires_at <= now()');
       return;
     }
+    case 'messageThread': {
+      const t = op.value;
+      await db.query(
+        `INSERT INTO public.message_threads (id, subject, last_message_at, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (id) DO UPDATE SET
+           subject = EXCLUDED.subject,
+           last_message_at = GREATEST(message_threads.last_message_at, EXCLUDED.last_message_at),
+           updated_at = GREATEST(message_threads.updated_at, EXCLUDED.updated_at)`,
+        [t.id, t.subject ?? null, t.lastMessageAt, t.createdAt, t.updatedAt]
+      );
+      for (const p of op.participants ?? []) {
+        await db.query(
+          `INSERT INTO public.thread_participants (id, thread_id, user_id, last_read_at, created_at)
+           VALUES ($1, $2, $3, $4, $5) ON CONFLICT (thread_id, user_id) DO NOTHING`,
+          [p.id, p.threadId, p.userId, p.lastReadAt, p.createdAt]
+        );
+      }
+      return;
+    }
+    case 'message': {
+      const m = op.value;
+      await db.query(
+        `INSERT INTO public.messages
+           (id, thread_id, sender_id, content, client_message_id, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          m.id,
+          m.threadId,
+          m.senderId,
+          m.content,
+          m.clientMessageId ?? null,
+          m.status,
+          m.createdAt,
+          m.updatedAt,
+        ]
+      );
+      return;
+    }
+    case 'threadRead': {
+      const p = op.value;
+      await db.query(
+        `UPDATE public.thread_participants SET last_read_at = $3
+         WHERE thread_id = $1 AND user_id = $2 AND last_read_at < $3`,
+        [p.threadId, p.userId, p.lastReadAt]
+      );
+      return;
+    }
+    case 'messagesDeleteForProfile': {
+      await db.query('DELETE FROM public.messages WHERE sender_id = $1', [op.profileId]);
+      await db.query('DELETE FROM public.thread_participants WHERE user_id = $1', [op.profileId]);
+      return;
+    }
   }
 }
 
@@ -697,10 +766,15 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   notification: 10,
   notificationPreferences: 10,
   sessionRevocation: 10,
+  // Conversations reference profiles; messages and read state their thread.
+  messageThread: 8,
+  message: 9,
+  threadRead: 9,
   // Deletes run last so an upsert in the same batch cannot re-reference them.
   workHistoryDelete: 11,
   evidenceDelete: 11,
   notificationsDeleteForRecipient: 11,
+  messagesDeleteForProfile: 11,
 };
 
 export class PgCoreStore implements CoreStore {
@@ -746,6 +820,9 @@ export class PgCoreStore implements CoreStore {
       notifications,
       notificationPreferences,
       revokedSessions,
+      messageThreads,
+      threadParticipants,
+      messages,
     ] = await Promise.all([
       q('SELECT * FROM public.users ORDER BY created_at, id'),
       q('SELECT * FROM public.profiles ORDER BY created_at, id'),
@@ -771,6 +848,9 @@ export class PgCoreStore implements CoreStore {
       q('SELECT * FROM public.notifications ORDER BY created_at, id'),
       q('SELECT * FROM public.notification_preferences ORDER BY created_at, id'),
       q('SELECT * FROM public.revoked_sessions WHERE expires_at > now()'),
+      q('SELECT * FROM public.message_threads ORDER BY created_at, id'),
+      q('SELECT * FROM public.thread_participants ORDER BY created_at, id'),
+      q('SELECT * FROM public.messages ORDER BY created_at, id'),
     ]);
 
     const group = (rows: Record<string, any>[], key: string, value: string) => {
@@ -968,6 +1048,30 @@ export class PgCoreStore implements CoreStore {
         sessionId: r.session_id,
         userId: r.user_id,
         expiresAt: isoRequired(r.expires_at),
+      })),
+      messageThreads: messageThreads.map((r) => ({
+        id: r.id,
+        subject: r.subject ?? null,
+        lastMessageAt: isoRequired(r.last_message_at),
+        createdAt: isoRequired(r.created_at),
+        updatedAt: isoRequired(r.updated_at),
+      })),
+      threadParticipants: threadParticipants.map((r) => ({
+        id: r.id,
+        threadId: r.thread_id,
+        userId: r.user_id,
+        lastReadAt: isoRequired(r.last_read_at),
+        createdAt: isoRequired(r.created_at),
+      })),
+      messages: messages.map((r) => ({
+        id: r.id,
+        threadId: r.thread_id,
+        senderId: r.sender_id,
+        content: r.content,
+        clientMessageId: r.client_message_id ?? null,
+        status: r.status,
+        createdAt: isoRequired(r.created_at),
+        updatedAt: isoRequired(r.updated_at),
       })),
     };
   }

@@ -29,6 +29,7 @@ import {
   createSessionToken,
   verifySessionToken,
   type AuthPayload,
+  type Profile,
   createProfileEntity,
   updateProfileEntity,
   canViewProfile,
@@ -5363,12 +5364,99 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
-  // Direct Messaging Repositories (F-10, WF-10, BR-214)
+  // Direct Messaging (F-10, WF-10). Durable since 2026-10-11 (ADR-015):
+  // conversations, messages and read state change only through persist(), and
+  // a message's notification is written in the same transaction.
+  //
+  // Who may START a conversation follows the product blueprint (§9.6
+  // Networking): people who are connected, or a candidate and a member of the
+  // hiring team of a job they applied to — either side may start it. Before,
+  // any signed-in user could message any profile. Once a conversation exists,
+  // its participants may reply. Two people share one conversation: starting
+  // again adds to it rather than opening a second.
   const threadsById = new Map<string, MessageThread>();
   const threadParticipantsByThreadId = new Map<string, ThreadParticipant[]>();
   const messagesById = new Map<string, Message>();
   const messagesByThreadId = new Map<string, Message[]>();
   const messagesByClientMessageId = new Map<string, Message>(); // key: `${threadId}:${clientMessageId}`
+
+  const isConnected = (a: Profile, b: Profile): boolean =>
+    (connectionsByUserId.get(a.userId) || []).some(
+      (c) =>
+        c.status === 'accepted' &&
+        ((c.senderId === a.userId && c.recipientId === b.userId) ||
+          (c.senderId === b.userId && c.recipientId === a.userId))
+    );
+  const appliedToTeamOf = (candidate: Profile, member: Profile): boolean => {
+    const orgIds = new Set((orgMembershipsByUserId.get(member.userId) || []).map((m) => m.orgId));
+    if (orgIds.size === 0) return false;
+    return (applicationsByCandidateId.get(candidate.id) || []).some((application) => {
+      const job = jobsById.get(application.jobId);
+      return job !== undefined && orgIds.has(job.orgId);
+    });
+  };
+  const mayStartConversation = (a: Profile, b: Profile): boolean =>
+    isConnected(a, b) || appliedToTeamOf(a, b) || appliedToTeamOf(b, a);
+
+  const directThreadBetween = (a: string, b: string): MessageThread | undefined => {
+    for (const [threadId, participants] of threadParticipantsByThreadId) {
+      if (
+        participants.length === 2 &&
+        participants.some((p) => p.userId === a) &&
+        participants.some((p) => p.userId === b)
+      ) {
+        return threadsById.get(threadId);
+      }
+    }
+    return undefined;
+  };
+
+  // Participants as the client shows them: with a name (a closed account has
+  // none to show).
+  const participantView = (p: ThreadParticipant) => ({
+    ...p,
+    fullName: profilesById.get(p.userId)?.fullName ?? 'Deleted account',
+  });
+
+  // The ops that record a new message: the message, the conversation's
+  // last-activity time, the sender's read position, and a notification for
+  // each other participant (their preferences permitting).
+  const messageOps = (
+    thread: MessageThread,
+    sender: Profile,
+    message: Message,
+    recipientIds: string[]
+  ): { ops: CoreOp[]; notices: Notification[] } => {
+    const ops: CoreOp[] = [
+      { kind: 'message', value: message },
+      {
+        kind: 'threadRead',
+        value: {
+          id: '',
+          threadId: thread.id,
+          userId: sender.id,
+          lastReadAt: message.createdAt,
+          createdAt: message.createdAt,
+        },
+      },
+    ];
+    const notices: Notification[] = [];
+    for (const recipientId of recipientIds) {
+      const notice = notificationFor({
+        recipientId,
+        type: 'message',
+        title: `New message from ${sender.fullName}`,
+        body: message.content.slice(0, 100),
+        referenceType: 'thread',
+        referenceId: thread.id,
+      });
+      if (notice) {
+        ops.push({ kind: 'notification', value: notice });
+        notices.push(notice);
+      }
+    }
+    return { ops, notices };
+  };
 
   // Messaging Endpoints (F-10)
   app.get('/api/v1/threads', async (req: FastifyRequest) => {
@@ -5378,7 +5466,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('NOT_FOUND', 'Profile not found.');
     }
 
-    // Find all threads where the profile is a participant
     const userThreads: any[] = [];
     for (const [threadId, participants] of threadParticipantsByThreadId.entries()) {
       const currentParticipant = participants.find((p) => p.userId === profile.id);
@@ -5390,7 +5477,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           const unreadCount = calculateUnreadCount(msgs, currentParticipant);
           userThreads.push({
             ...thread,
-            participants,
+            participants: participants.map(participantView),
             lastMessage,
             unreadCount,
           });
@@ -5416,17 +5503,46 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     if (!recipientProfile) {
       throw new DomainError('NOT_FOUND', 'Recipient profile not found.');
     }
+    if (recipientProfile.id === profile.id) {
+      throw new DomainError(
+        'VALIDATION_FAILED',
+        'Cannot start a direct message thread solely with yourself.'
+      );
+    }
+    if (!mayStartConversation(profile, recipientProfile)) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'You can message people you are connected with. A hiring team and a candidate who applied to one of its jobs can message each other.'
+      );
+    }
 
-    const { thread, participants } = createThreadEntities(
-      profile.id,
-      [input.recipientId],
-      input.subject
-    );
-    threadsById.set(thread.id, thread);
-    threadParticipantsByThreadId.set(thread.id, participants);
-    messagesByThreadId.set(thread.id, []);
+    const existing = directThreadBetween(profile.id, recipientProfile.id);
+    let thread: MessageThread;
+    let newParticipants: ThreadParticipant[] | undefined;
+    if (existing) {
+      thread = existing;
+    } else {
+      const created = createThreadEntities(profile.id, [recipientProfile.id], input.subject);
+      thread = created.thread;
+      newParticipants = created.participants;
+    }
 
+    if (input.initialMessage && input.clientMessageId) {
+      const replay = messagesByClientMessageId.get(`${thread.id}:${input.clientMessageId}`);
+      if (replay) {
+        return reply.status(200).send({
+          thread,
+          participants: (threadParticipantsByThreadId.get(thread.id) || []).map(participantView),
+          message: replay,
+          existing: true,
+          deduplicated: true,
+        });
+      }
+    }
+
+    const ops: CoreOp[] = [];
     let initialMessage: Message | undefined;
+    let notices: Notification[] = [];
     if (input.initialMessage) {
       initialMessage = createMessageEntity(
         thread.id,
@@ -5434,38 +5550,39 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.initialMessage,
         input.clientMessageId
       );
-      messagesById.set(initialMessage.id, initialMessage);
-      messagesByThreadId.set(thread.id, [initialMessage]);
-      if (input.clientMessageId) {
-        messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, initialMessage);
-      }
-      thread.lastMessageAt = initialMessage.createdAt;
+      thread = {
+        ...thread,
+        lastMessageAt: initialMessage.createdAt,
+        updatedAt: initialMessage.createdAt,
+      };
+      ops.push({ kind: 'messageThread', value: thread, participants: newParticipants });
+      const recorded = messageOps(thread, profile, initialMessage, [recipientProfile.id]);
+      ops.push(...recorded.ops);
+      notices = recorded.notices;
+    } else if (newParticipants) {
+      ops.push({ kind: 'messageThread', value: thread, participants: newParticipants });
+    }
+    if (ops.length > 0) await persist(...ops);
 
+    if (initialMessage) {
       await dispatchJob({
         type: 'messaging.message.sent',
         payload: {
           threadId: thread.id,
           messageId: initialMessage.id,
           senderId: profile.id,
-          recipientIds: [input.recipientId],
+          recipientIds: [recipientProfile.id],
         },
         enqueuedAt: initialMessage.createdAt,
       });
-
-      await sendNotification({
-        recipientId: input.recipientId,
-        type: 'message',
-        title: `New message from ${profile.fullName}`,
-        body: initialMessage.content.slice(0, 100),
-        referenceType: 'thread',
-        referenceId: thread.id,
-      });
+      await announceNotifications(notices);
     }
 
-    return reply.status(201).send({
-      thread,
-      participants,
+    return reply.status(existing ? 200 : 201).send({
+      thread: threadsById.get(thread.id) ?? thread,
+      participants: (threadParticipantsByThreadId.get(thread.id) || []).map(participantView),
       message: initialMessage,
+      existing: Boolean(existing),
     });
   });
 
@@ -5486,14 +5603,20 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       const participants = threadParticipantsByThreadId.get(id) || [];
       const currentParticipant = assertThreadParticipant(participants, profile.id);
-
-      // Automatically mark read up to now
-      currentParticipant.lastReadAt = new Date().toISOString();
-
       const messages = messagesByThreadId.get(id) || [];
+
+      // Opening a conversation reads it — recorded only when there is
+      // something new, so reading does not write on every view.
+      if (calculateUnreadCount(messages, currentParticipant) > 0) {
+        await persist({
+          kind: 'threadRead',
+          value: { ...currentParticipant, lastReadAt: new Date().toISOString() },
+        });
+      }
+
       return reply.status(200).send({
         thread,
-        participants,
+        participants: (threadParticipantsByThreadId.get(id) || []).map(participantView),
         messages,
       });
     }
@@ -5515,14 +5638,13 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       }
 
       const participants = threadParticipantsByThreadId.get(id) || [];
-      const currentParticipant = assertThreadParticipant(participants, profile.id);
+      assertThreadParticipant(participants, profile.id);
 
       const input = SendMessageInputSchema.parse(req.body);
 
       // ClientMessageId Deduplication (WF-10, WIT-010)
       if (input.clientMessageId) {
-        const dedupeKey = `${thread.id}:${input.clientMessageId}`;
-        const existing = messagesByClientMessageId.get(dedupeKey);
+        const existing = messagesByClientMessageId.get(`${thread.id}:${input.clientMessageId}`);
         if (existing) {
           return reply.status(200).send({
             message: existing,
@@ -5537,21 +5659,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.content,
         input.clientMessageId
       );
-      messagesById.set(message.id, message);
-
-      const threadMsgs = messagesByThreadId.get(thread.id) || [];
-      threadMsgs.push(message);
-      messagesByThreadId.set(thread.id, threadMsgs);
-
-      if (input.clientMessageId) {
-        messagesByClientMessageId.set(`${thread.id}:${input.clientMessageId}`, message);
-      }
-
-      thread.lastMessageAt = message.createdAt;
-      thread.updatedAt = message.createdAt;
-      currentParticipant.lastReadAt = message.createdAt;
-
       const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
+      const recorded = messageOps(thread, profile, message, recipientIds);
+      await persist(
+        {
+          kind: 'messageThread',
+          value: { ...thread, lastMessageAt: message.createdAt, updatedAt: message.createdAt },
+        },
+        ...recorded.ops
+      );
+
       await dispatchJob({
         type: 'messaging.message.sent',
         payload: {
@@ -5562,17 +5679,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
         enqueuedAt: message.createdAt,
       });
-
-      for (const recipientId of recipientIds) {
-        await sendNotification({
-          recipientId,
-          type: 'message',
-          title: `New message from ${profile.fullName}`,
-          body: message.content.slice(0, 100),
-          referenceType: 'thread',
-          referenceId: thread.id,
-        });
-      }
+      await announceNotifications(recorded.notices);
 
       return reply.status(201).send({ message });
     }
@@ -5595,11 +5702,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
       const participants = threadParticipantsByThreadId.get(id) || [];
       const currentParticipant = assertThreadParticipant(participants, profile.id);
-      currentParticipant.lastReadAt = new Date().toISOString();
+      const lastReadAt = new Date().toISOString();
+      await persist({ kind: 'threadRead', value: { ...currentParticipant, lastReadAt } });
 
       return reply.status(200).send({
         message: 'Thread marked as read',
-        lastReadAt: currentParticipant.lastReadAt,
+        lastReadAt,
       });
     }
   );
@@ -9977,6 +10085,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // Notifications addressed to the person name their applications,
       // employers and referees.
       { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
+      // What they wrote, and their place in every conversation.
+      { kind: 'messagesDeleteForProfile', profileId: profile.id },
     ];
     const erasedHistoryIds: string[] = [];
     const erasedReferenceIds: string[] = [];
@@ -12461,6 +12571,69 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         revokedSessions.set(op.value.sessionId, Date.parse(op.value.expiresAt));
         return;
       }
+      case 'messageThread': {
+        const previous = threadsById.get(op.value.id);
+        // Last activity never moves back (two replies committing out of order).
+        threadsById.set(
+          op.value.id,
+          previous && previous.lastMessageAt > op.value.lastMessageAt
+            ? { ...op.value, lastMessageAt: previous.lastMessageAt }
+            : op.value
+        );
+        if (op.participants) {
+          const list = threadParticipantsByThreadId.get(op.value.id) || [];
+          for (const p of op.participants) {
+            if (!list.some((x) => x.userId === p.userId)) list.push(p);
+          }
+          threadParticipantsByThreadId.set(op.value.id, list);
+        }
+        if (!messagesByThreadId.has(op.value.id)) messagesByThreadId.set(op.value.id, []);
+        return;
+      }
+      case 'message': {
+        if (messagesById.has(op.value.id)) return;
+        messagesById.set(op.value.id, op.value);
+        const list = messagesByThreadId.get(op.value.threadId) || [];
+        list.push(op.value);
+        messagesByThreadId.set(op.value.threadId, list);
+        if (op.value.clientMessageId) {
+          messagesByClientMessageId.set(
+            `${op.value.threadId}:${op.value.clientMessageId}`,
+            op.value
+          );
+        }
+        return;
+      }
+      case 'threadRead': {
+        const list = threadParticipantsByThreadId.get(op.value.threadId);
+        const at = list ? list.findIndex((p) => p.userId === op.value.userId) : -1;
+        if (!list || at < 0 || list[at].lastReadAt >= op.value.lastReadAt) return;
+        list[at] = { ...list[at], lastReadAt: op.value.lastReadAt };
+        return;
+      }
+      case 'messagesDeleteForProfile': {
+        for (const [threadId, messages] of messagesByThreadId) {
+          const kept: Message[] = [];
+          for (const m of messages) {
+            if (m.senderId !== op.profileId) {
+              kept.push(m);
+              continue;
+            }
+            messagesById.delete(m.id);
+            if (m.clientMessageId) {
+              messagesByClientMessageId.delete(`${threadId}:${m.clientMessageId}`);
+            }
+          }
+          messagesByThreadId.set(threadId, kept);
+        }
+        for (const [threadId, participants] of threadParticipantsByThreadId) {
+          threadParticipantsByThreadId.set(
+            threadId,
+            participants.filter((p) => p.userId !== op.profileId)
+          );
+        }
+        return;
+      }
     }
   }
 
@@ -12498,6 +12671,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         return `emailChallenge:${op.workHistoryId}`;
       case 'notification':
         return op.base ? `notification:${op.value.id}` : undefined;
+      case 'messageThread':
+        // Creating: one conversation per pair, so two simultaneous starts
+        // between the same people cannot open two. Updates take no lock —
+        // concurrent replies must not refuse each other.
+        return op.participants
+          ? `threadPair:${op.participants
+              .map((p) => p.userId)
+              .sort()
+              .join(':')}`
+          : undefined;
+      case 'message':
+        // A retried send (same clientMessageId) racing the original.
+        return op.value.clientMessageId
+          ? `message:${op.value.threadId}:${op.value.clientMessageId}`
+          : undefined;
       default:
         return undefined;
     }
@@ -12585,6 +12773,20 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     for (const value of snapshot.revokedSessions) {
       applyToReadModel({ kind: 'sessionRevocation', value });
     }
+    const participantsByThread = new Map<string, ThreadParticipant[]>();
+    for (const p of snapshot.threadParticipants) {
+      const list = participantsByThread.get(p.threadId) || [];
+      list.push(p);
+      participantsByThread.set(p.threadId, list);
+    }
+    for (const value of snapshot.messageThreads) {
+      applyToReadModel({
+        kind: 'messageThread',
+        value,
+        participants: participantsByThread.get(value.id) || [],
+      });
+    }
+    for (const value of snapshot.messages) applyToReadModel({ kind: 'message', value });
     if (storage.core.durable) {
       app.log.info(
         {

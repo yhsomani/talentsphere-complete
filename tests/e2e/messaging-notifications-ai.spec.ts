@@ -43,6 +43,19 @@ test.describe('E2E: Direct Messaging, Notification Center & AI Career Copilot (F
     recipientToken = recipientData.token;
     recipientId = recipientData.user.id;
     recipientProfileId = recipientData.profile.id;
+
+    // 3. Connect them: messaging is only between connected people (or a
+    // hiring team and someone who applied to it).
+    const requested = await request.post(`${API_BASE}/connections/request`, {
+      headers: { authorization: `Bearer ${senderToken}` },
+      data: { recipientId: recipientProfileId },
+    });
+    expect(requested.status()).toBe(201);
+    const accepted = await request.post(
+      `${API_BASE}/connections/${(await requested.json()).connection.id}/respond`,
+      { headers: { authorization: `Bearer ${recipientToken}` }, data: { action: 'accept' } }
+    );
+    expect(accepted.status()).toBe(200);
   });
 
   test('creates thread, sends messages with deduplication, and triggers recipient notification (F-12, F-14)', async ({

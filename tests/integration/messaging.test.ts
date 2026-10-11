@@ -63,6 +63,39 @@ describe('Direct Messaging Integration (F-10, WF-10)', () => {
     const charlieJson = charlieRes.json();
     charlieToken = charlieJson.token;
     charlieProfileId = charlieJson.profile.id;
+
+    // 4. Alice and Bob connect. Charlie stays a stranger to both.
+    const requested = await app.inject({
+      method: 'POST',
+      url: '/api/v1/connections/request',
+      headers: { authorization: `Bearer ${aliceToken}` },
+      payload: { recipientId: bobProfileId },
+    });
+    expect(requested.statusCode).toBe(201);
+    const accepted = await app.inject({
+      method: 'POST',
+      url: `/api/v1/connections/${requested.json().connection.id}/respond`,
+      headers: { authorization: `Bearer ${bobToken}` },
+      payload: { action: 'accept' },
+    });
+    expect(accepted.statusCode).toBe(200);
+  });
+
+  it('refuses a conversation with someone you are not connected to and never applied with', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/threads',
+      headers: { authorization: `Bearer ${charlieToken}` },
+      payload: { recipientId: aliceProfileId, initialMessage: 'Unsolicited hello' },
+    });
+    expect(res.statusCode).toBe(403);
+    expect(res.json().error.message).toContain('connected with');
+    const aliceThreads = await app.inject({
+      method: 'GET',
+      url: '/api/v1/threads',
+      headers: { authorization: `Bearer ${aliceToken}` },
+    });
+    expect(aliceThreads.json().threads).toHaveLength(0);
   });
 
   afterAll(async () => {

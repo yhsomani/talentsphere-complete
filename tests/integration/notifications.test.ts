@@ -63,6 +63,32 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     const charlieJson = charlieRes.json();
     charlieToken = charlieJson.token;
     charlieProfileId = charlieJson.profile.id;
+
+    // 4. Alice and Bob connect: messaging is only between connected people
+    // (or a hiring team and an applicant). The connection's own notifications
+    // are read here, so the tests below see only message notifications.
+    const requested = await app.inject({
+      method: 'POST',
+      url: '/api/v1/connections/request',
+      headers: { authorization: `Bearer ${aliceToken}` },
+      payload: { recipientId: bobProfileId },
+    });
+    expect(requested.statusCode).toBe(201);
+    const accepted = await app.inject({
+      method: 'POST',
+      url: `/api/v1/connections/${requested.json().connection.id}/respond`,
+      headers: { authorization: `Bearer ${bobToken}` },
+      payload: { action: 'accept' },
+    });
+    expect(accepted.statusCode).toBe(200);
+    for (const token of [aliceToken, bobToken]) {
+      await app.inject({
+        method: 'POST',
+        url: '/api/v1/notifications/mark-read',
+        headers: { authorization: `Bearer ${token}` },
+        payload: { all: true },
+      });
+    }
   });
 
   afterAll(async () => {
@@ -117,7 +143,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // 3. Bob checks notifications -> should have 0 notifications because allowMessages was false
     const bobNotifsMuted = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     expect(bobNotifsMuted.statusCode).toBe(200);
@@ -151,7 +177,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // 6. Bob checks notifications -> should have 1 notification
     const bobNotifsActive = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     expect(bobNotifsActive.statusCode).toBe(200);
@@ -169,7 +195,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // 1. Send one more message from Alice to Bob to generate a second notification
     const bobNotifsBefore = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     const firstNotifId = bobNotifsBefore.json().notifications[0].id;
@@ -193,7 +219,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
 
     const bobNotifsTwo = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     expect(bobNotifsTwo.json().notifications).toHaveLength(2);
@@ -215,7 +241,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // Filter unread only
     const unreadOnlyRes = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications?unreadOnly=true',
+      url: '/api/v1/notifications?unreadOnly=true&type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     expect(unreadOnlyRes.statusCode).toBe(200);
@@ -237,7 +263,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // Verify unread count is 0
     const bobNotifsAfterAll = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${bobToken}` },
     });
     expect(bobNotifsAfterAll.json().unreadCount).toBe(0);
@@ -258,7 +284,7 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     // Alice should also have 0 notifications (she only sent messages)
     const aliceNotifs = await app.inject({
       method: 'GET',
-      url: '/api/v1/notifications',
+      url: '/api/v1/notifications?type=message',
       headers: { authorization: `Bearer ${aliceToken}` },
     });
     expect(aliceNotifs.statusCode).toBe(200);

@@ -61,6 +61,12 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'GET /api/v1/references/:refId',
   'GET /api/v1/candidates/:candidateId/work-history',
   'GET /api/v1/candidates/:candidateId/work-history-graph',
+  // Messaging (2026-10-11; tables from migration 00006)
+  'GET /api/v1/threads',
+  'POST /api/v1/threads',
+  'GET /api/v1/threads/:id',
+  'POST /api/v1/threads/:id/messages',
+  'POST /api/v1/threads/:id/read',
   // Notifications (migration 00044)
   'GET /api/v1/notifications',
   'GET /api/v1/notifications/summary',
