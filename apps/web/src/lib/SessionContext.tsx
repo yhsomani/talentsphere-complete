@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiJson, errorMessage } from './api.js';
-import { SESSION_EVENT, TOKEN_KEY, clearSession, getToken } from './session.js';
+import { SESSION_EVENT, TOKEN_KEY, getToken, signOut } from './session.js';
 
 export interface SessionUser {
   id: string;
@@ -118,7 +118,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isRecruiter: Boolean(user?.roles.some((r) => RECRUITER_ROLES.includes(r))),
       isRestricted: Boolean(user && user.status !== 'active'),
       refresh,
-      signOut: clearSession,
+      signOut,
     }),
     [status, error, user, profile, memberships, refresh]
   );

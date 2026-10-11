@@ -63,3 +63,24 @@ export const clearSession = (): void => {
   }
   announce();
 };
+
+/**
+ * Sign out: forget the session on this device at once, then ask the API to
+ * end it there too, so a copied token stops working (before 2026-10-11 it
+ * stayed valid for up to 24 hours). Fire-and-forget with keepalive: leaving
+ * the page, or being offline, must never keep someone signed in here.
+ */
+export const signOut = (): void => {
+  const token = getToken();
+  clearSession();
+  if (!token) return;
+  try {
+    void fetch('/api/v1/auth/sign-out', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      keepalive: true,
+    }).catch(() => undefined);
+  } catch {
+    // No fetch (non-browser environment): nothing to tell the server.
+  }
+};

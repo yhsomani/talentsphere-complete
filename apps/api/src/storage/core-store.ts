@@ -41,6 +41,13 @@ export interface StoredUser {
   sessionsValidAfter?: string;
 }
 
+/** A signed-out session: its token is refused until it would have expired. */
+export interface RevokedSession {
+  sessionId: string;
+  userId: string;
+  expiresAt: string;
+}
+
 export interface StoredOrganization {
   id: string;
   name: string;
@@ -108,7 +115,9 @@ export type CoreOp =
   /** Cascades to its references and email challenge (erasure). */
   | { kind: 'workHistoryDelete'; id: string }
   /** Cascades to evidence_skills and application_evidence (erasure). */
-  | { kind: 'evidenceDelete'; id: string };
+  | { kind: 'evidenceDelete'; id: string }
+  /** Sign-out: refuse this token from now on. Prunes expired rows. */
+  | { kind: 'sessionRevocation'; value: RevokedSession };
 
 export interface CoreSnapshot {
   users: StoredUser[];
@@ -124,6 +133,8 @@ export interface CoreSnapshot {
   emailChallenges: EmailChallenge[];
   notifications: Notification[];
   notificationPreferences: NotificationPreferences[];
+  /** Only sessions whose token has not yet expired. */
+  revokedSessions: RevokedSession[];
 }
 
 export interface CoreStore {
@@ -149,6 +160,7 @@ export const emptySnapshot = (): CoreSnapshot => ({
   emailChallenges: [],
   notifications: [],
   notificationPreferences: [],
+  revokedSessions: [],
 });
 
 /** STORAGE=memory: the Maps are the store. Explicitly not durable. */
@@ -651,6 +663,17 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       await db.query('DELETE FROM public.evidence WHERE id = $1', [op.id]);
       return;
     }
+    case 'sessionRevocation': {
+      const r = op.value;
+      await db.query(
+        `INSERT INTO public.revoked_sessions (session_id, user_id, expires_at)
+         VALUES ($1, $2, $3) ON CONFLICT (session_id) DO NOTHING`,
+        [r.sessionId, r.userId, r.expiresAt]
+      );
+      // A row whose token has expired protects nothing.
+      await db.query('DELETE FROM public.revoked_sessions WHERE expires_at <= now()');
+      return;
+    }
   }
 }
 
@@ -673,6 +696,7 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   emailChallengeDelete: 10,
   notification: 10,
   notificationPreferences: 10,
+  sessionRevocation: 10,
   // Deletes run last so an upsert in the same batch cannot re-reference them.
   workHistoryDelete: 11,
   evidenceDelete: 11,
@@ -721,6 +745,7 @@ export class PgCoreStore implements CoreStore {
       emailChallenges,
       notifications,
       notificationPreferences,
+      revokedSessions,
     ] = await Promise.all([
       q('SELECT * FROM public.users ORDER BY created_at, id'),
       q('SELECT * FROM public.profiles ORDER BY created_at, id'),
@@ -745,6 +770,7 @@ export class PgCoreStore implements CoreStore {
       q('SELECT * FROM public.work_history_email_challenges'),
       q('SELECT * FROM public.notifications ORDER BY created_at, id'),
       q('SELECT * FROM public.notification_preferences ORDER BY created_at, id'),
+      q('SELECT * FROM public.revoked_sessions WHERE expires_at > now()'),
     ]);
 
     const group = (rows: Record<string, any>[], key: string, value: string) => {
@@ -937,6 +963,11 @@ export class PgCoreStore implements CoreStore {
         emailDigestFrequency: r.email_digest_frequency,
         createdAt: isoRequired(r.created_at),
         updatedAt: isoRequired(r.updated_at),
+      })),
+      revokedSessions: revokedSessions.map((r) => ({
+        sessionId: r.session_id,
+        userId: r.user_id,
+        expiresAt: isoRequired(r.expires_at),
       })),
     };
   }

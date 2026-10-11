@@ -53,3 +53,65 @@ test('changing the password signs out the other device and keeps this one', asyn
   await elsewhere.getByTestId('login-submit').click();
   await elsewhere.waitForURL('**/dashboard');
 });
+
+test('signing out ends the session on the server, not only in this browser', async ({
+  page,
+  request,
+}) => {
+  const account = await registerAccount(request, 'sign-out-server');
+  const otherLogin = await request.post(`${API_BASE}/auth/login`, {
+    data: { email: account.email, password: PASSWORD },
+  });
+  const otherToken = (await otherLogin.json()).token as string;
+
+  await useSession(page, account);
+  await page.goto('/dashboard');
+  await expect(page.locator('h1')).toHaveText(account.profile.fullName);
+  await page.getByRole('button', { name: 'Sign Out' }).click();
+  await expect(page).toHaveURL(/\/login$/);
+
+  // The token this browser held is now refused by the API (before
+  // 2026-10-11 it kept working for up to 24 hours)...
+  const sessionWith = (token: string) =>
+    request.get(`${API_BASE}/auth/session`, { headers: { authorization: `Bearer ${token}` } });
+  await expect.poll(async () => (await sessionWith(account.token)).status()).toBe(401);
+  // ...while the person's session on another device is untouched.
+  expect((await sessionWith(otherToken)).status()).toBe(200);
+});
+
+test('signing out of other devices ends the other session and keeps this one', async ({
+  browser,
+  request,
+}) => {
+  const account = await registerAccount(request, 'other-devices');
+  const otherLogin = await request.post(`${API_BASE}/auth/login`, {
+    data: { email: account.email, password: PASSWORD },
+  });
+  const other = { ...account, token: (await otherLogin.json()).token };
+
+  const here = await (await browser.newContext()).newPage();
+  const elsewhere = await (await browser.newContext()).newPage();
+  await useSession(here, account);
+  await useSession(elsewhere, other);
+  await elsewhere.goto('/dashboard');
+  await expect(elsewhere.locator('h1')).toHaveText(account.profile.fullName);
+
+  await here.goto('/profile');
+  await here.getByRole('button', { name: 'Sign out of other devices' }).click();
+  await expect(here.getByTestId('sign-out-others-done')).toHaveText(
+    'Signed out of every other device. This one stays signed in.'
+  );
+
+  // This device stays signed in across a reload...
+  await here.reload();
+  await expect(here.getByTestId('sign-out-others')).toBeVisible();
+  await expect(here).toHaveURL(/\/profile$/);
+  // ...the other one is sent to sign in on its next request, and the
+  // unchanged password still works there.
+  await elsewhere.goto('/dashboard');
+  await elsewhere.waitForURL('**/login**');
+  await elsewhere.getByTestId('login-email').fill(account.email);
+  await elsewhere.getByTestId('login-password').fill(PASSWORD);
+  await elsewhere.getByTestId('login-submit').click();
+  await elsewhere.waitForURL('**/dashboard');
+});

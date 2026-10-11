@@ -821,6 +821,8 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
   const RESTRICTED_SESSION_ROUTES = new Set([
     'GET /api/v1/profile/me',
     'POST /api/v1/auth/password',
+    'POST /api/v1/auth/sign-out',
+    'POST /api/v1/auth/sign-out-others',
     'GET /api/v1/moderation/reports/my',
     'POST /api/v1/moderation/reports/:id/appeal',
     'POST /api/v1/settings/export',
@@ -834,23 +836,30 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     if (account.passwordHash === ERASED_CREDENTIAL) return 'none';
     return (account.status ?? 'active') === 'active' ? 'full' : 'restricted';
   };
+  // Signed-out sessions (POST /api/v1/auth/sign-out): session id -> the
+  // token's expiry in ms. Refused on every request until then (ASVS V3.3.1);
+  // durable in revoked_sessions (migration 00046).
+  const revokedSessions = new Map<string, number>();
   const resolveSession = (session: AuthPayload, req?: FastifyRequest): AuthPayload => {
+    if (session.sessionId && revokedSessions.has(session.sessionId)) {
+      throw new DomainError('UNAUTHENTICATED', 'You signed out of this session. Sign in again.');
+    }
     const account = usersById.get(session.userId);
     if (!account) return session;
     const access = accountAccess(account);
     if (access === 'none') {
       throw new DomainError('UNAUTHENTICATED', 'This account has been closed.');
     }
-    // A password change ends every session issued before it (see
-    // POST /api/v1/auth/password for how the cut-off meets second-precision
-    // issuedAt).
+    // A password change, or "sign out other devices", ends every session
+    // issued before it (see POST /api/v1/auth/password for how the cut-off
+    // meets second-precision issuedAt).
     if (
       account.sessionsValidAfter &&
       session.issuedAt * 1000 < Date.parse(account.sessionsValidAfter)
     ) {
       throw new DomainError(
         'UNAUTHENTICATED',
-        'This session ended because the password was changed. Sign in again.'
+        'This session was ended from another device. Sign in again.'
       );
     }
     if (access === 'restricted') {
@@ -1113,6 +1122,62 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       });
     }
   );
+
+  // Sign out: end THIS session on the server, not only in the browser. Before
+  // 2026-10-11 sign-out deleted the browser's copy and nothing else, so a
+  // copied token kept working for up to 24 hours. Tokens minted before
+  // session ids existed cannot be singled out; they are reported as such
+  // and end at expiry (or with a password change).
+  app.post('/api/v1/auth/sign-out', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    if (!session.sessionId) {
+      return reply.status(200).send({
+        ended: false,
+        message:
+          'Signed out on this device. This older session cannot be ended on the server; it expires within 24 hours.',
+      });
+    }
+    await persist({
+      kind: 'sessionRevocation',
+      value: {
+        sessionId: session.sessionId,
+        userId: session.userId,
+        expiresAt: new Date(session.expiresAt * 1000).toISOString(),
+      },
+    });
+    return reply.status(200).send({ ended: true, message: 'Signed out.' });
+  });
+
+  // Sign out of every other device, without changing the password: for a
+  // phone left behind or a shared computer someone forgot to sign out of.
+  // Same mechanism as a password change (sessions_valid_after, migration
+  // 00045): every token issued so far is refused and this device gets a
+  // fresh one minted at the cut-off. Allowed for suspended accounts, like a
+  // password change: securing an account is not something to withhold.
+  app.post('/api/v1/auth/sign-out-others', async (req: FastifyRequest, reply: FastifyReply) => {
+    const session = extractUser(req);
+    const user = usersById.get(session.userId);
+    if (!user) {
+      throw new DomainError('UNAUTHENTICATED', 'Sign in again to manage your sessions.');
+    }
+    const cutoffMs = (Math.floor(Date.now() / 1000) + 1) * 1000;
+    await persist({
+      kind: 'user',
+      base: user,
+      value: { ...user, sessionsValidAfter: new Date(cutoffMs).toISOString() },
+    });
+    auditLogs.push({
+      event: 'auth.signed_out_other_sessions',
+      actorId: user.id,
+      targetId: user.id,
+      timestamp: new Date().toISOString(),
+    });
+    const token = createSessionToken(user.id, user.email, user.roles, undefined, cutoffMs);
+    return reply.status(200).send({
+      message: 'Signed out of every other device. This one stays signed in.',
+      token,
+    });
+  });
 
   // Who am I, according to the server? The web app calls this on load so its
   // idea of the session (roles, account status, profile) comes from the API,
@@ -12383,6 +12448,16 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         evidenceSkills.delete(op.id);
         return;
       }
+      case 'sessionRevocation': {
+        const now = Date.now();
+        // An entry whose token has expired protects nothing (the database
+        // prunes the same rows in the same transaction).
+        for (const [id, expiresAtMs] of revokedSessions) {
+          if (expiresAtMs <= now) revokedSessions.delete(id);
+        }
+        revokedSessions.set(op.value.sessionId, Date.parse(op.value.expiresAt));
+        return;
+      }
     }
   }
 
@@ -12503,6 +12578,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
     for (const value of snapshot.notifications) {
       applyToReadModel({ kind: 'notification', value });
+    }
+    for (const value of snapshot.revokedSessions) {
+      applyToReadModel({ kind: 'sessionRevocation', value });
     }
     if (storage.core.durable) {
       app.log.info(

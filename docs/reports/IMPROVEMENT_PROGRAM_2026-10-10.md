@@ -56,6 +56,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 | 27 | P1  | There was no way to change a password, and no session could be ended before its 24-hour expiry — someone who suspected their password was known could do nothing. Adding it exposed a latent race: the login re-hash and moderation/admin status changes rewrite the whole user record, so one computed from a stale read could restore an old password. | **Fixed** — change password on the profile page (current password required, throttled per account); every earlier session refused from the next second (migration 00045), this device kept signed in; user-record writes carry `base` with a database re-check | `core-authz` "changing a password ends every other session" (mutation-checked; 10/10 repeat runs), `tests/pg/concurrency.test.ts`, e2e `account-security` (two devices), Reticle (§G) |
 | 28 | P1  | A mistaken role could not be removed: recruiters see every role a candidate lists, and the only way to take one back was to delete the whole account. Separately, erasing an account left that person's reference emails in the queue — a referee could still be emailed on behalf of someone who was gone (with a link that no longer worked). | **Fixed** — *Remove role* on the Work history page (owner only), with a dialog that names what goes with it (references received, by referee; pending requests whose links stop working; the confirmed email); references and the open email check are deleted in the same transaction; the role's still-queued emails are canceled and their token/code stripped, on removal and on erasure (best effort — an email already picked up by the worker still goes out); a replayed "add role" submission creates a new role rather than returning the removed one | `tests/integration/work-history-removal.test.ts` (owner-only check mutation-checked), `tests/pg/work-history-removal.test.ts` (rows, restart, queue, removal racing a referee's submission), e2e `work-history-removal` (phone width, focus), Reticle (§G) |
 | 29 | P3  | `pnpm test:pg` could fail after every test passed: `pg-pool`'s `end()` resolves before its sockets finish closing, and the teardown's `DROP DATABASE … WITH (FORCE)` could terminate one mid-close, raising an unhandled error from the test's pool. Seen twice in a row, then not again. | **Fixed** — teardown waits for the database's connections to close before dropping it (`tests/pg/test-db.ts`) | Diagnosed from the `pg-pool` source and the error (FATAL 57P01 on a client already ending). Not reproduced on demand, with or without the fix, so the fix is not proven by a before/after; 7 later runs were clean, 3 of them under load |
+| 30 | P1  | Signing out deleted only the browser's copy of the session token: anyone who had copied it kept a working session for up to 24 hours (OWASP ASVS V3.3.1 asks logout to invalidate the session). And the only way to end a session on a lost phone or a shared computer was to change the password. | **Fixed** — every token carries a random session id; sign-out records it (migration 00046) and the API refuses it on every route until it would have expired; *Sign out of other devices* on the profile page ends every other session without changing the password, this device stays signed in. Tokens minted before this change have no id: sign-out says so (`ended: false`) and they expire within 24 h | `tests/security/session-sign-out.test.ts` (both mutation-checked), `tests/pg/concurrency.test.ts` (survives a restart, expired rows pruned), e2e `account-security` (browser's token refused after *Sign Out*; two devices), Reticle (§G) |
 
 **Open findings** are in section H.
 
@@ -95,7 +96,7 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 5. Persist the next modules users will expect to survive a restart: messaging, saved searches/drafts, erasure requests (30-day grace flow). Notifications are done (finding 25).
 6. Recruiter account erasure semantics (owned organizations, posted jobs) — not handled today.
 7. Interview code execution is **simulated** (results do not depend on the code). Either integrate a sandbox or remove the feature from any user-visible surface.
-8. Session hardening: revocation on sign-out (a password change now ends every other session — finding 27); consider httpOnly cookies over localStorage.
+8. Session hardening: httpOnly cookies over localStorage (sign-out now ends the session on the server and other devices can be signed out — finding 30).
 9. Deployment: one documented target (single API replica per ADR-015), backups with a tested restore, alerting on error-level logs.
 
 **P2 — scale and maintainability**
@@ -117,7 +118,8 @@ Severity: **P0** breaks the product's promise or allows abuse; **P1** serious de
 5. **Core-loop notifications (2026-10-11).** Finding 25; verified with Reticle in the running app (§G).
 6. **Layout stability and password change (2026-10-11).** Findings 26 and 27.
 7. **Remove a role (2026-10-11).** Finding 28, plus the pg-suite teardown race (29).
-8. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
+8. **Sign-out that ends the session, and sign out of other devices (2026-10-11).** Finding 30.
+9. **Documentation.** ADR-015; this report; `ARCHITECTURE.md`, `README.md`, `SECURITY.md`, `OPERATIONS.md`, `FINAL_VALIDATION_REPORT.md`, `BRAIN/MEMORY.md` and `.env.example` brought in line with the code.
 
 ## G. Validation evidence
 
@@ -127,10 +129,10 @@ Measured on this branch (gates last re-run 2026-10-11). Baseline at `32a3abc7`: 
 | -------------------------------------------------- | ---------------------------------------- |
 | `pnpm lint` (Prettier)                              | clean                                    |
 | `pnpm typecheck` (`tsc -b`, 10 projects)            | clean                                    |
-| `pnpm test` (Vitest: unit, integration, security)   | **1054 / 1054** passed, 101 files        |
-| `pnpm test:pg` (real PostgreSQL 16)                 | **17 / 17** passed, 4 files              |
+| `pnpm test` (Vitest: unit, integration, security)   | **1061 / 1061** passed, 102 files        |
+| `pnpm test:pg` (real PostgreSQL 16)                 | **18 / 18** passed, 4 files              |
 | `pnpm build`                                        | clean                                    |
-| Playwright (Chromium; e2e, a11y, performance)       | **197 / 197** passed                     |
+| Playwright (Chromium; e2e, a11y, performance)       | **199 / 199** passed                     |
 
 **Mutation checks (the tests catch the bug they claim to):**
 
@@ -140,6 +142,7 @@ Measured on this branch (gates last re-run 2026-10-11). Baseline at `32a3abc7`: 
 - Letting a scorecard move any application: the "never resurrects a rejected application" test fails.
 - Removing per-account rate-limit keys, or the health-check exemption: the matching `api-security` tests fail.
 - Letting a platform administrator remove someone else's role: the owner-only removal test fails.
+- Skipping the signed-out check in `resolveSession`, or not setting the cut-off on *sign out of other devices*: the matching `session-sign-out` tests fail.
 
 **Adversarial review.** An independent reviewer agent probed the diff and wrote reproduction scripts; its run ended early (rate limit) without a written report. Its probes were run here against the pre-fix code: they reproduced findings 8, 18, 19 and 21, and the cross-tenant application linking in 9 (its scorecard step used an invalid payload, so the pipeline move was confirmed by reading the code); the rest of 9 came from reading every interview route after that lead. All are fixed and covered above. The memory-mode email race did _not_ reproduce (requests happened to serialise); only the Postgres test discriminates — which is why that test lives in the pg suite.
 
@@ -154,6 +157,7 @@ Measured on this branch (gates last re-run 2026-10-11). Baseline at `32a3abc7`: 
 - **Notifications (2026-10-11):** signed in as the candidate after the recruiter moved her application — the header's accessible count "Notifications, 1 unread" `yes`; opening notifications shows "Platform Engineer: in review" and the plain-words message `yes`; *Mark all as read* sends one request, clears the count, and holds after a reload `yes`. One `unknown` on the way: the badge digit is `aria-hidden` (its count is in the link's accessible name), so Reticle would not call it on screen; the browser test asserts its visual visibility instead.
 - **Password change (2026-10-11):** on a fresh account — sign in `yes`, profile shows the password form `yes`, changing it sends one request and shows the confirmation `yes`, and after a reload this device is still signed in (`reticle_assert` wait: pass). The session from before the change gets 401 from the API. One `no` on the way was my condition: I first required the one-off confirmation to survive a reload.
 - **Remove a role (2026-10-11):** Asha with two roles, one carrying a received reference (Morgan) and a pending one (Priya). Both cards and the *Remove role* control render `yes`; the dialog names the role and lists "1 reference you received (Morgan Manager)" and "1 reference request still waiting. The link we sent will stop working." `yes`; confirming sends exactly one `DELETE` (200), shows the confirmation, removes that card, closes the dialog and keeps the other role `yes`; leaving the page and coming back re-fetches from the server with the role still gone `yes`; Priya's emailed link now shows "This link is invalid or has already been used" with the API answering 404 (`reticle_assert` wait: pass). The database holds no row for the role or its references. Reticle blocks clicks on controls labelled "Remove" until the call says it means it (`confirmDangerous`) — a guard, not a defect.
+- **Sign-out and other devices (2026-10-11):** signed in as Asha, *Sign Out* sends exactly one `POST /auth/sign-out` (200) and lands on sign-in `yes`; the browser no longer holds a token (Reticle storage read), and the database records her ended session for its remaining 24 hours. Reticle redacts tokens, so it cannot show that the browser's own token is refused; the browser test does (`account-security`). With a second session for Asha made through the API, *Sign out of other devices* on her profile sends one request (200), shows the confirmation and re-reads the session with the new token `yes`; that second session then gets 401 "This session was ended from another device"; after a reload this device is still signed in (`reticle_assert` wait: pass).
 - The Playwright suite (including `core-loop.spec.ts`, three people driving the whole loop through the UI) remains the CI-level UI verification.
 - No load, soak, backup/restore or deployment testing — there is no deployment target.
 - Email delivery and payments are not integrated, so they are not verified (in-app notifications are; email notifications are not).
@@ -178,7 +182,7 @@ Measured on this branch (gates last re-run 2026-10-11). Baseline at `32a3abc7`: 
 | A second API replica is started against the same database (ADR-015 single writer)            | Medium     | High   | Documented in OPERATIONS and ADR; database guards stop lost updates on guarded records, not stale reads |
 | Verification loop unusable outside development (no email provider)                          | Certain    | High   | Worker fails such jobs permanently and visibly              |
 | Interview "code execution" is simulated                                                      | Certain    | Medium | API only — no screen in the web app exposes interviews      |
-| Session tokens in localStorage; sign-out does not revoke server-side                          | Medium     | Medium | 24 h expiry; a password change ends every other session; suspension/erasure take effect per request |
+| Session tokens in localStorage (readable by injected script)                                 | Medium     | Medium | 24 h expiry; sign-out ends the session server-side; sign out of other devices; a password change ends every other session; suspension/erasure take effect per request |
 | Migration 00043's case-insensitive email index fails on a database with case-duplicate emails | Low        | Medium | Noted in ADR-015; no populated database exists              |
 | `server.ts` size slows change and review                                                     | Certain    | Medium | Roadmap P2                                                  |
 

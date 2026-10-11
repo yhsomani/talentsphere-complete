@@ -99,6 +99,12 @@ export interface AuthPayload {
   roles: Role[];
   issuedAt: number;
   expiresAt: number;
+  /**
+   * Random per-token id, so one session can be ended without ending the
+   * others (sign-out). Absent on tokens minted before 2026-10-11; those can
+   * only be ended by a password change or expiry.
+   */
+  sessionId?: string;
 }
 
 /**
@@ -129,7 +135,8 @@ export function createSessionToken(
 ): string {
   const issuedAt = Math.floor(issuedAtMs / 1000);
   const expiresAt = issuedAt + ttlSeconds;
-  const payload: AuthPayload = { userId, email, roles, issuedAt, expiresAt };
+  const sessionId = crypto.randomBytes(16).toString('base64url');
+  const payload: AuthPayload = { userId, email, roles, issuedAt, expiresAt, sessionId };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
     .createHmac('sha256', TOKEN_SECRET)

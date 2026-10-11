@@ -130,8 +130,21 @@ device stays signed in. Tokens record their issue time in whole seconds, so the 
 is the start of the next second — a token minted earlier in the same second is refused
 too. Suspended accounts may change their password. User-record writes carry `base`, so a
 concurrent login re-hash or moderation action computed from the old record cannot
-restore the old password (`tests/pg/concurrency.test.ts`). Sign-out alone does not
-revoke server-side (G-6).
+restore the old password (`tests/pg/concurrency.test.ts`).
+
+- **Sign out of other devices** (`POST /api/v1/auth/sign-out-others`, profile page) uses
+  the same cut-off without changing the password; this device gets a fresh token.
+  Allowed for suspended accounts.
+- **Sign-out** ends this session on the server, not only in the browser (OWASP ASVS
+  V3.3.1). Every token carries a random `sessionId`; `POST /api/v1/auth/sign-out` records
+  it in `revoked_sessions` (migration 00046) until the token would have expired, and
+  `resolveSession` refuses it on every route. Expired rows are pruned on each new
+  sign-out. The web app clears its copy first and sends the request with `keepalive`,
+  so being offline never keeps anyone signed in locally — but then the server copy
+  lives until expiry. Tokens minted before session ids existed (before 2026-10-11)
+  cannot be singled out; sign-out reports `ended: false` for them and they expire
+  within 24 hours. Coverage: `tests/security/session-sign-out.test.ts`,
+  `tests/pg/concurrency.test.ts` (survives a restart), e2e `account-security`.
 
 ### Account state
 

@@ -6,6 +6,7 @@ import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession, type SessionProfile } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
+import { SignOutOtherDevices } from '../components/SignOutOtherDevices.js';
 import {
   Button,
   Card,
@@ -209,6 +210,12 @@ export const ProfilePage: React.FC = () => {
             Changing it signs you out on every other device.
           </p>
           <ChangePasswordForm />
+          <h3 style={{ fontSize: '1rem', marginTop: spacing.xl }}>Other devices</h3>
+          <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
+            Signed in somewhere you no longer use, or on a computer you share? End every other
+            session. This device stays signed in, and your password does not change.
+          </p>
+          <SignOutOtherDevices />
           <h3 style={{ fontSize: '1rem', marginTop: spacing.xl }}>Delete your account</h3>
           <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
             Removes your name, work history, references and evidence, and withdraws open

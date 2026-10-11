@@ -254,6 +254,59 @@
       },
       "updatedAt": 1791643090737
     },
+    "inline:a-person-can-sign-out-of-every-other-device-with-8057d535": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/auth/sign-out-others"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "sign-out-others-done"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "Signed out of every other device. This one stays signed in.",
+            "kind": "text"
+          },
+          {
+            "kind": "route",
+            "pathname": "/profile"
+          },
+          {
+            "kind": "net",
+            "method": "GET",
+            "status": 200,
+            "urlContains": "/api/v1/auth/session"
+          }
+        ]
+      },
+      "declaredAt": 1791701482708,
+      "id": "inline:a-person-can-sign-out-of-every-other-device-with-8057d535",
+      "provenBy": {
+        "at": 1791701483306,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791701483306"
+      },
+      "state": "proved",
+      "statement": "A person can sign out of every other device without changing their password; this device stays signed in.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/profile"
+      },
+      "updatedAt": 1791701483343
+    },
     "inline:a-signed-in-candidate-sees-how-many-unread-notif-e3886bde": {
       "binding": {
         "kind": "allOf",
@@ -779,6 +832,49 @@
       "statement": "Prefill valid test card data",
       "status": "agreed",
       "subject": "unsorted"
+    },
+    "inline:signing-out-ends-the-session-on-the-server-not-o-2e136135": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/login"
+          },
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 200,
+            "urlContains": "/api/v1/auth/sign-out"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "login-form"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791701259438,
+      "id": "inline:signing-out-ends-the-session-on-the-server-not-o-2e136135",
+      "provenBy": {
+        "at": 1791701259981,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791701259981"
+      },
+      "state": "proved",
+      "statement": "Signing out ends the session on the server, not only in the browser: the token the browser held stops working.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/login"
+      },
+      "updatedAt": 1791701260111
     },
     "inline:the-jobs-page-lists-real-published-postings-from-54cf04f5": {
       "binding": {

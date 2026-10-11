@@ -299,6 +299,39 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     expect((await call(app, 'GET', '/api/v1/auth/session', changed.body.token)).status).toBe(200);
   });
 
+  it('a signed-out session stays refused after a restart, and expired entries are pruned', async () => {
+    const acct = await register(app, 'sign-out@example.org');
+    const other = (
+      await call(app, 'POST', '/api/v1/auth/login', undefined, {
+        email: 'sign-out@example.org',
+        password: 'a-long-enough-passphrase',
+      })
+    ).body.token as string;
+    // An entry whose token expired yesterday protects nothing.
+    await sql(
+      `INSERT INTO public.revoked_sessions (session_id, user_id, expires_at)
+       VALUES ('expired-entry', $1, now() - interval '1 day')`,
+      [acct.user.id]
+    );
+
+    expect((await call(app, 'POST', '/api/v1/auth/sign-out', acct.token)).body.ended).toBe(true);
+    const rows = await sql<{ session_id: string; expires_at: Date }>(
+      'SELECT session_id, expires_at FROM public.revoked_sessions WHERE user_id = $1',
+      [acct.user.id]
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0].session_id).not.toBe('expired-entry');
+    // Kept exactly as long as the token could have been used.
+    const remainingMs = rows[0].expires_at.getTime() - Date.now();
+    expect(remainingMs).toBeGreaterThan(23 * 3600_000);
+    expect(remainingMs).toBeLessThanOrEqual(24 * 3600_000);
+
+    await app.close();
+    app = await boot();
+    expect((await call(app, 'GET', '/api/v1/auth/session', acct.token)).status).toBe(401);
+    expect((await call(app, 'GET', '/api/v1/auth/session', other)).status).toBe(200);
+  });
+
   it('labels exactly the routes whose data does not survive a restart', async () => {
     const durable = await app.inject({ method: 'GET', url: '/api/v1/jobs' });
     expect(durable.headers['x-talentsphere-durability']).toBeUndefined();

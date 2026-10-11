@@ -730,7 +730,9 @@ describe('SEC: changing a password ends every other session', () => {
     for (const stale of [acct.token, other]) {
       const res = await call(app, 'GET', '/api/v1/auth/session', stale);
       expect(res.status).toBe(401);
-      expect(res.body.error.message).toContain('password was changed');
+      expect(res.body.error.message).toBe(
+        'This session was ended from another device. Sign in again.'
+      );
     }
     expect((await call(app, 'GET', '/api/v1/auth/session', changed.body.token)).status).toBe(200);
 

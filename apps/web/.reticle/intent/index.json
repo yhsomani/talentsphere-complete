@@ -139,6 +139,12 @@
       "subject": "unsorted"
     },
     {
+      "id": "inline:a-person-can-sign-out-of-every-other-device-with-8057d535",
+      "statement": "A person can sign out of every other device without changing their pass…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
       "id": "inline:a-signed-in-candidate-sees-how-many-unread-notif-e3886bde",
       "statement": "A signed-in candidate sees how many unread notifications they have in t…",
       "status": "proved",
@@ -250,6 +256,12 @@
       "id": "inline:prefill-valid-test-card-data-4b7daca1",
       "statement": "Prefill valid test card data",
       "status": "agreed",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:signing-out-ends-the-session-on-the-server-not-o-2e136135",
+      "statement": "Signing out ends the session on the server, not only in the browser: th…",
+      "status": "proved",
       "subject": "unsorted"
     },
     {
