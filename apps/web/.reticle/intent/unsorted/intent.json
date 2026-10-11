@@ -936,6 +936,53 @@
       "statement": "Verify user login form is displayed on /login",
       "status": "agreed",
       "subject": "unsorted"
+    },
+    "inline:when-a-session-is-ended-from-another-device-the-8b9b4432": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/login"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "login-session-ended"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "This session was ended from another device. Sign in again.",
+            "kind": "text"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "login-form"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791705024509,
+      "id": "inline:when-a-session-is-ended-from-another-device-the-8b9b4432",
+      "provenBy": {
+        "at": 1791705437065,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1791705437065"
+      },
+      "state": "bound",
+      "statement": "When a session is ended from another device, the person lands on sign-in told why, not unexplained.",
+      "status": "agreed",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/login"
+      },
+      "updatedAt": 1791705448090
     }
   },
   "subject": "unsorted",

@@ -884,7 +884,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const token = authHeader.substring(7).trim();
     const session = verifySessionToken(token);
     if (!session) {
-      throw new DomainError('UNAUTHENTICATED', 'Invalid or expired session token.');
+      throw new DomainError(
+        'UNAUTHENTICATED',
+        'Your session has expired or is no longer valid. Sign in again.'
+      );
     }
     return resolveSession(session, req);
   };

@@ -145,6 +145,8 @@ restore the old password (`tests/pg/concurrency.test.ts`).
   cannot be singled out; sign-out reports `ended: false` for them and they expire
   within 24 hours. Coverage: `tests/security/session-sign-out.test.ts`,
   `tests/pg/concurrency.test.ts` (survives a restart), e2e `account-security`.
+- **Telling the person:** when a session ends on its own, the web app shows the API's
+  reason once on the sign-in page (tab-scoped `sessionStorage`, rendered as text).
 
 ### Account state
 

@@ -46,7 +46,7 @@
 Measured on branch `improvement/core-loop-durability` (2026-10-11). Counts are machine-reported,
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Vitest (unit, integration, security; in-memory storage):** 102 files / **1061 tests PASS** (`pnpm test`).
+- **Vitest (unit, integration, security; in-memory storage):** 103 files / **1064 tests PASS** (`pnpm test`).
 - **Real PostgreSQL 16 (`pnpm test:pg`):** 4 files / **18 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,

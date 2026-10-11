@@ -1,4 +1,4 @@
-import { clearSession, getToken } from './session.js';
+import { clearSession, getToken, peekSessionEnded, rememberSessionEnded } from './session.js';
 
 /**
  * fetch for authenticated API calls: attaches the session token and gives
@@ -24,6 +24,18 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   const res = await fetch(input, { ...init, headers });
 
   if (res.status === 401 && token) {
+    // Say why on the sign-in page (another device ended it, it expired, the
+    // account was closed) instead of dropping the person there unexplained.
+    let reason: string | undefined;
+    try {
+      reason = (await res.clone().json())?.error?.message;
+    } catch {
+      // No JSON body: fall back to the generic wording.
+    }
+    // Several requests can fail together (an in-app navigation fires a few);
+    // one whose body cannot be read must not overwrite another's reason.
+    if (typeof reason === 'string' && reason) rememberSessionEnded(reason);
+    else if (!peekSessionEnded()) rememberSessionEnded('Your session ended. Sign in again.');
     clearSession();
     const returnTo = `${window.location.pathname}${window.location.search}`;
     window.location.replace(`/login?return=${encodeURIComponent(returnTo)}`);

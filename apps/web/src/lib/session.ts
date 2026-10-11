@@ -37,6 +37,39 @@ export const getStoredUser = (): StoredUser | null => {
   }
 };
 
+/**
+ * Why the last session ended without the person signing out (ended from
+ * another device, expired, account closed): the API's own explanation, kept
+ * for the sign-in page to show once. sessionStorage, so it belongs to this
+ * tab and does not outlive it.
+ */
+const ENDED_KEY = 'talentsphere_session_ended';
+
+export const rememberSessionEnded = (reason: string): void => {
+  try {
+    sessionStorage.setItem(ENDED_KEY, reason);
+  } catch {
+    // Storage unavailable: the sign-in page simply shows no reason.
+  }
+};
+
+/** Read without consuming (safe to call twice, e.g. from a state initializer). */
+export const peekSessionEnded = (): string | null => {
+  try {
+    return sessionStorage.getItem(ENDED_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const forgetSessionEnded = (): void => {
+  try {
+    sessionStorage.removeItem(ENDED_KEY);
+  } catch {
+    // Nothing stored.
+  }
+};
+
 /** Fired on this window whenever the stored session changes (sign-in/out). */
 export const SESSION_EVENT = 'talentsphere:session';
 

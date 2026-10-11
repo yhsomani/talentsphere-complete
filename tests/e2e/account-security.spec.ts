@@ -43,6 +43,15 @@ test('changing the password signs out the other device and keeps this one', asyn
   // ...the other one is sent to sign in on its next request...
   await elsewhere.goto('/dashboard');
   await elsewhere.waitForURL('**/login**');
+  // ...and told why, not dropped there unexplained.
+  await expect(elsewhere.getByTestId('login-session-ended')).toHaveText(
+    'This session was ended from another device. Sign in again.'
+  );
+
+  // The reason is shown once, not on every later visit to sign-in.
+  await elsewhere.reload();
+  await expect(elsewhere.getByTestId('login-form')).toBeVisible();
+  await expect(elsewhere.getByTestId('login-session-ended')).toHaveCount(0);
 
   // ...where only the new password works.
   await elsewhere.getByTestId('login-email').fill(account.email);
@@ -69,6 +78,9 @@ test('signing out ends the session on the server, not only in this browser', asy
   await expect(page.locator('h1')).toHaveText(account.profile.fullName);
   await page.getByRole('button', { name: 'Sign Out' }).click();
   await expect(page).toHaveURL(/\/login$/);
+  // Signing out on purpose needs no explanation.
+  await expect(page.getByTestId('login-form')).toBeVisible();
+  await expect(page.getByTestId('login-session-ended')).toHaveCount(0);
 
   // The token this browser held is now refused by the API (before
   // 2026-10-11 it kept working for up to 24 hours)...
@@ -107,11 +119,17 @@ test('signing out of other devices ends the other session and keeps this one', a
   await expect(here.getByTestId('sign-out-others')).toBeVisible();
   await expect(here).toHaveURL(/\/profile$/);
   // ...the other one is sent to sign in on its next request, and the
-  // unchanged password still works there.
-  await elsewhere.goto('/dashboard');
+  // unchanged password still works there. An in-app navigation, not a page
+  // load: it fires several requests at once, and every one of them gets 401.
+  await elsewhere.getByTestId('nav-evidence').click();
   await elsewhere.waitForURL('**/login**');
+  // ...and told why, not dropped there unexplained.
+  await expect(elsewhere.getByTestId('login-session-ended')).toHaveText(
+    'This session was ended from another device. Sign in again.'
+  );
   await elsewhere.getByTestId('login-email').fill(account.email);
   await elsewhere.getByTestId('login-password').fill(PASSWORD);
   await elsewhere.getByTestId('login-submit').click();
-  await elsewhere.waitForURL('**/dashboard');
+  // Back where it was heading (?return=).
+  await elsewhere.waitForURL('**/evidence');
 });

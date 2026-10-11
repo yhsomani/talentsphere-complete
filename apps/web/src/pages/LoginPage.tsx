@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { storeSession } from '../lib/session.js';
+import { forgetSessionEnded, peekSessionEnded, storeSession } from '../lib/session.js';
+import { Notice } from '../components/ui/index.js';
 
 // Resume only same-origin in-app paths from ?return=. This rejects absolute
 // URLs (https://evil.example) and protocol-relative ones (//evil.example),
@@ -25,10 +26,17 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<LoginError | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // Why the previous session ended, if it ended on its own (lib/api.ts).
+  // Shown once: read here, forgotten after mount so a reload does not repeat it.
+  const [sessionEnded, setSessionEnded] = useState<string | null>(peekSessionEnded);
+  useEffect(() => {
+    forgetSessionEnded();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSessionEnded(null);
 
     // Validation
     if (!email.trim() || !email.includes('@')) {
@@ -106,6 +114,12 @@ export const LoginPage: React.FC = () => {
           Pick up where you left off: your work history, applications and hiring.
         </p>
       </div>
+
+      {sessionEnded && (
+        <Notice tone="info" data-testid="login-session-ended" style={{ marginBottom: spacing.md }}>
+          {sessionEnded}
+        </Notice>
+      )}
 
       {error && (
         <div

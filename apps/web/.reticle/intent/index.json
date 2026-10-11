@@ -275,6 +275,12 @@
       "statement": "Verify user login form is displayed on /login",
       "status": "agreed",
       "subject": "unsorted"
+    },
+    {
+      "id": "inline:when-a-session-is-ended-from-another-device-the-8b9b4432",
+      "statement": "When a session is ended from another device, the person lands on sign-i…",
+      "status": "agreed",
+      "subject": "unsorted"
     }
   ],
   "version": 1
