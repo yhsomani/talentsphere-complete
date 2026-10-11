@@ -16,6 +16,7 @@ import crypto from 'node:crypto';
 import pg from 'pg';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { dropTestDatabase } from './test-db.js';
 
 const baseUrl = process.env.TEST_DATABASE_URL;
 if (!baseUrl) {
@@ -82,10 +83,7 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
 
   afterAll(async () => {
     await app?.close();
-    const admin = new pg.Client({ connectionString: withDb(baseUrl, 'postgres') });
-    await admin.connect();
-    await admin.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`);
-    await admin.end();
+    await dropTestDatabase(withDb(baseUrl, 'postgres'), dbName);
   });
 
   it('writes the whole career loop as real rows', async () => {

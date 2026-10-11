@@ -55,6 +55,7 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/candidates/work-history/:id/verify-email',
   'POST /api/v1/candidates/work-history/:id/references/request',
   'POST /api/v1/candidates/work-history/references/:refId/submit',
+  'DELETE /api/v1/candidates/work-history/:id',
   'GET /api/v1/references/:refId',
   'GET /api/v1/candidates/:candidateId/work-history',
   'GET /api/v1/candidates/:candidateId/work-history-graph',

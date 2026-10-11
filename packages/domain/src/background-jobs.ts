@@ -64,6 +64,13 @@ export interface JobStore {
   countActive(): Promise<number>;
   /** queued → canceled, or running → canceled (cooperative, post-completion). */
   cancel(id: string): Promise<BackgroundJobRecord | null>;
+  /**
+   * Cancels every QUEUED job of `kind` whose `payload[payloadField]` is one of
+   * `values` — work about something that no longer exists (a deleted role's
+   * reference emails). Secrets are stripped like any terminal transition.
+   * Running jobs are left alone: delivery may already be under way.
+   */
+  cancelQueued(match: { kind: string; payloadField: string; values: string[] }): Promise<number>;
   /** Claims due jobs (queued & run_after elapsed, or running with an expired lease). */
   claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]>;
   /** running → succeeded; guarded so double-completion is a no-op. */
@@ -244,6 +251,25 @@ export class MemoryJobStore implements JobStore {
     return { ...job };
   }
 
+  async cancelQueued(match: {
+    kind: string;
+    payloadField: string;
+    values: string[];
+  }): Promise<number> {
+    const values = new Set(match.values);
+    let canceled = 0;
+    for (const job of this.jobs) {
+      if (job.status !== 'queued' || job.kind !== match.kind) continue;
+      const value = job.payload[match.payloadField];
+      if (typeof value !== 'string' || !values.has(value)) continue;
+      job.status = 'canceled';
+      job.payload = withoutSecrets(job.payload);
+      job.updatedAt = new Date().toISOString();
+      canceled += 1;
+    }
+    return canceled;
+  }
+
   async claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]> {
     const now = Date.now();
     const claimed: BackgroundJobRecord[] = [];
@@ -395,6 +421,22 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
         [id, SECRET_PAYLOAD_KEYS]
       );
       return result.rows.length > 0 ? mapRow(result.rows[0]) : null;
+    },
+
+    async cancelQueued(match: {
+      kind: string;
+      payloadField: string;
+      values: string[];
+    }): Promise<number> {
+      if (match.values.length === 0) return 0;
+      const result = await query(
+        `UPDATE public.background_jobs
+         SET status = 'canceled', lock_expires_at = NULL, updated_at = NOW(),
+             payload = payload - $4::text[]
+         WHERE status = 'queued' AND kind = $1 AND payload ->> $2 = ANY($3::text[])`,
+        [match.kind, match.payloadField, match.values, SECRET_PAYLOAD_KEYS]
+      );
+      return result.rowCount ?? 0;
     },
 
     async claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]> {

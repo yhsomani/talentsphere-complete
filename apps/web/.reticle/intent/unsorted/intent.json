@@ -43,6 +43,70 @@
       },
       "updatedAt": 1791643168266
     },
+    "inline:a-candidate-can-remove-a-mistaken-role-from-thei-4016564a": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "DELETE",
+            "status": 200,
+            "urlContains": "/api/v1/candidates/work-history/9b5a3e88-a936-4161-9270-32e960bd6925"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "work-history-removed"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "Removed Data Analyst at Contoso from your work history.",
+            "kind": "text"
+          },
+          {
+            "absent": true,
+            "kind": "element",
+            "query": {
+              "testid": "work-history-9b5a3e88-a936-4161-9270-32e960bd6925"
+            }
+          },
+          {
+            "absent": true,
+            "kind": "element",
+            "query": {
+              "role": "dialog"
+            }
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "work-history-fca58f10-8c17-4ce0-82c0-a2871385ee3b"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791699940229,
+      "id": "inline:a-candidate-can-remove-a-mistaken-role-from-thei-4016564a",
+      "provenBy": {
+        "at": 1791699941677,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791699941677"
+      },
+      "state": "proved",
+      "statement": "A candidate can remove a mistaken role from their work history without deleting their account; the other roles stay.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/evidence"
+      },
+      "updatedAt": 1791699941693
+    },
     "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0": {
       "binding": {
         "kind": "allOf",
@@ -413,6 +477,99 @@
         "route": "/dashboard"
       },
       "updatedAt": 1791643353061
+    },
+    "inline:before-a-role-is-removed-the-person-is-told-exac-3862e415": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "element",
+            "query": {
+              "name": "Remove this role?",
+              "role": "dialog"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "Data Analyst at Contoso will be removed from your work history",
+            "kind": "text"
+          },
+          {
+            "contains": "1 reference you received (Morgan Manager)",
+            "kind": "text"
+          },
+          {
+            "contains": "1 reference request still waiting. The link we sent will stop working.",
+            "kind": "text"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "remove-role-confirm"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791699931254,
+      "id": "inline:before-a-role-is-removed-the-person-is-told-exac-3862e415",
+      "provenBy": {
+        "at": 1791699931528,
+        "grade": "presence",
+        "verdictId": "reticle_act_and_wait:1791699931528"
+      },
+      "state": "proved",
+      "statement": "Before a role is removed, the person is told exactly what goes with it: references they received (by name) and pending requests whose links will stop working.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/evidence"
+      },
+      "updatedAt": 1791699931564
+    },
+    "inline:before-a-role-is-removed-the-person-is-told-exac-4a189048": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "element",
+            "query": {
+              "name": "Remove this role?",
+              "role": "dialog"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "Data Analyst at Contoso will be removed from your work history",
+            "kind": "text"
+          },
+          {
+            "contains": "1 reference you received (Morgan Manager)",
+            "kind": "text"
+          },
+          {
+            "contains": "1 reference request still waiting. The link we sent will stop working.",
+            "kind": "text"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "remove-role-confirm"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791699916412,
+      "id": "inline:before-a-role-is-removed-the-person-is-told-exac-4a189048",
+      "state": "bound",
+      "statement": "Before a role is removed, the person is told exactly what goes with it: references they received (by name), pending requests whose links will stop working.",
+      "status": "proposed",
+      "subject": "unsorted",
+      "updatedAt": 1791699916434
     },
     "inline:click-header-logo-to-return-to-landing-page-9ba2f9a2": {
       "binding": {

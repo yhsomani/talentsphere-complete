@@ -18,6 +18,7 @@ import crypto from 'node:crypto';
 import pg from 'pg';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { dropTestDatabase } from './test-db.js';
 import { PgCoreStore } from '../../apps/api/src/storage/core-store.js';
 import { createPgJobStore } from '../../packages/domain/src/index.js';
 
@@ -91,10 +92,7 @@ describe('Concurrency and integrity on PostgreSQL', () => {
   afterAll(async () => {
     await app?.close();
     await pool?.end();
-    const admin = new pg.Client({ connectionString: withDb(baseUrl, 'postgres') });
-    await admin.connect();
-    await admin.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`);
-    await admin.end();
+    await dropTestDatabase(withDb(baseUrl, 'postgres'), dbName);
   });
 
   it('counts every evaluated wrong email code even when 40 arrive at once', async () => {

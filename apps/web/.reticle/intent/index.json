@@ -115,6 +115,12 @@
       "subject": "unsorted"
     },
     {
+      "id": "inline:a-candidate-can-remove-a-mistaken-role-from-thei-4016564a",
+      "statement": "A candidate can remove a mistaken role from their work history without…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
       "id": "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0",
       "statement": "A candidate is told, in plain words, when the hiring team moves their a…",
       "status": "proved",
@@ -166,6 +172,18 @@
       "id": "inline:an-existing-candidate-can-sign-in-with-email-and-cf2c5c73",
       "statement": "An existing candidate can sign in with email and password and reaches t…",
       "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:before-a-role-is-removed-the-person-is-told-exac-3862e415",
+      "statement": "Before a role is removed, the person is told exactly what goes with it:…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:before-a-role-is-removed-the-person-is-told-exac-4a189048",
+      "statement": "Before a role is removed, the person is told exactly what goes with it:…",
+      "status": "proposed",
       "subject": "unsorted"
     },
     {

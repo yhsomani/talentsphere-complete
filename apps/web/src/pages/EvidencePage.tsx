@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { apiJson, errorMessage } from '../lib/api.js';
+import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { createStableKeyer } from '../lib/idempotency.js';
 import { formatDate } from '../lib/format.js';
 import { useSession } from '../lib/SessionContext.js';
@@ -238,6 +238,35 @@ const REFERENCE_STATUS: Record<ReferenceSummary['status'], string> = {
   flagged: 'Under review',
 };
 
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** Everything that goes with a role when it is removed, in plain words. */
+function removalConsequences(item: WorkHistoryEntry): string[] {
+  const refs = item.references ?? [];
+  const received = refs.filter((r) => r.status === 'submitted');
+  const waiting = refs.filter((r) => r.status === 'requested');
+  const lines: string[] = [];
+  if (received.length > 0) {
+    lines.push(
+      `${plural(received.length, 'reference', 'references')} you received (${received
+        .map((r) => r.refereeName)
+        .join(', ')}). They cannot be restored; the referee would have to respond again.`
+    );
+  }
+  if (waiting.length > 0) {
+    lines.push(
+      `${plural(waiting.length, 'reference request', 'reference requests')} still waiting. The ${
+        waiting.length === 1 ? 'link' : 'links'
+      } we sent will stop working.`
+    );
+  }
+  if (item.emailVerifiedAt) lines.push('Your confirmed work email for this role.');
+  else if (item.emailVerificationPending) {
+    lines.push('The verification code we sent to your work email will stop working.');
+  }
+  return lines;
+}
+
 export const EvidencePage: React.FC = () => {
   usePageMeta(
     'Work History',
@@ -274,6 +303,17 @@ export const EvidencePage: React.FC = () => {
   const [refRole, setRefRole] = useState('manager');
   const [refError, setRefError] = useState<string | null>(null);
   const [refSuccess, setRefSuccess] = useState<string | null>(null);
+
+  const [removeTarget, setRemoveTarget] = useState<WorkHistoryEntry | null>(null);
+  const [removeBusy, setRemoveBusy] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [removed, setRemoved] = useState<string | null>(null);
+  // The removed role's card (and the button that opened the dialog) is gone,
+  // so focus goes to the confirmation instead of falling to the page body.
+  const removedRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (removed) removedRef.current?.focus();
+  }, [removed]);
 
   const loadEntries = useCallback(async () => {
     if (!userId) return;
@@ -431,13 +471,49 @@ export const EvidencePage: React.FC = () => {
     }
   };
 
+  const openRemove = (item: WorkHistoryEntry) => {
+    setRemoveError(null);
+    setRemoved(null);
+    setRemoveTarget(item);
+  };
+
+  const handleRemove = async () => {
+    if (!removeTarget || removeBusy) return;
+    const target = removeTarget;
+    setRemoveBusy(true);
+    setRemoveError(null);
+    try {
+      await apiJson(`/api/v1/candidates/work-history/${target.id}`, { method: 'DELETE' });
+      setRemoveTarget(null);
+      await loadEntries();
+      setRemoved(`Removed ${target.title} at ${target.companyName} from your work history.`);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        // Removed already (another tab, a retry): the outcome the person wanted.
+        setRemoveTarget(null);
+        await loadEntries();
+        setRemoved(`${target.title} at ${target.companyName} was already removed.`);
+      } else {
+        setRemoveError(errorMessage(err));
+      }
+    } finally {
+      setRemoveBusy(false);
+    }
+  };
+
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
       <PageHeader
         title="Work history"
         intro="Each role you add gets stronger as you prove it: confirm a work email at that employer, then ask a manager or colleague to vouch for you. Recruiters see how a role was verified — never your private email address."
         actions={
-          <Button data-testid="add-work-history-btn" onClick={() => setIsAddModalOpen(true)}>
+          <Button
+            data-testid="add-work-history-btn"
+            onClick={() => {
+              setRemoved(null);
+              setIsAddModalOpen(true);
+            }}
+          >
             + Add a role
           </Button>
         }
@@ -447,6 +523,13 @@ export const EvidencePage: React.FC = () => {
         <Notice tone="error" data-testid="evidence-notice" style={{ marginBottom: spacing.lg }}>
           {notice}
         </Notice>
+      )}
+      {removed && (
+        <div ref={removedRef} tabIndex={-1} style={{ outline: 'none', marginBottom: spacing.lg }}>
+          <Notice tone="success" data-testid="work-history-removed">
+            {removed}
+          </Notice>
+        </div>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
@@ -560,6 +643,7 @@ export const EvidencePage: React.FC = () => {
                       data-testid={`request-ref-${item.id}`}
                       aria-label={`Request a reference — ${item.companyName}`}
                       onClick={() => {
+                        setRemoved(null);
                         setSelectedEntryId(item.id);
                         setIsRefModalOpen(true);
                       }}
@@ -607,6 +691,25 @@ export const EvidencePage: React.FC = () => {
                       strong ratings +10.
                     </p>
                   </div>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginTop: spacing.md,
+                    paddingTop: spacing.sm,
+                    borderTop: `1px solid ${colors.neutral[200]}`,
+                  }}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-testid={`remove-role-${item.id}`}
+                    aria-label={`Remove role — ${item.title} at ${item.companyName}`}
+                    onClick={() => openRemove(item)}
+                  >
+                    Remove role
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -772,6 +875,69 @@ export const EvidencePage: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={removeTarget !== null}
+        onClose={() => setRemoveTarget(null)}
+        busy={removeBusy}
+        title="Remove this role?"
+        description={
+          removeTarget
+            ? `${removeTarget.title} at ${removeTarget.companyName} will be removed from your work history. This cannot be undone.`
+            : undefined
+        }
+      >
+        {removeError && (
+          <Notice tone="error" data-testid="remove-role-error" style={{ marginBottom: spacing.md }}>
+            {removeError}
+          </Notice>
+        )}
+        {removeTarget && (
+          <div data-testid="remove-role-consequences" style={{ marginBottom: spacing.lg }}>
+            {removalConsequences(removeTarget).length > 0 && (
+              <>
+                <p style={{ margin: `0 0 ${spacing.xs}`, fontWeight: 600 }}>This also removes:</p>
+                <ul
+                  style={{
+                    margin: `0 0 ${spacing.sm}`,
+                    paddingLeft: spacing.lg,
+                    color: colors.neutral[700],
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                  }}
+                >
+                  {removalConsequences(removeTarget).map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <p style={{ margin: 0, color: colors.neutral[700], fontSize: '0.875rem' }}>
+              Recruiters will no longer see this role.
+            </p>
+          </div>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
+          <Button
+            variant="secondary"
+            type="button"
+            disabled={removeBusy}
+            onClick={() => setRemoveTarget(null)}
+          >
+            Keep it
+          </Button>
+          <Button
+            type="button"
+            data-testid="remove-role-confirm"
+            loading={removeBusy}
+            onClick={() => void handleRemove()}
+          >
+            {removeBusy ? 'Removing…' : 'Remove role'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

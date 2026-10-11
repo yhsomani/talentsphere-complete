@@ -8,7 +8,7 @@
 - **Last Updated:** 2026-10-10
 - **Current Branch:** `improvement/core-loop-durability` (not yet merged to `main`)
 - **Current Primary Task:** Improvement program — durable core loop, proof-based verification, authorization and honesty fixes. Report: `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
-- **Overall Verification (measured 2026-10-10):** Vitest 100 files / 1049 tests PASS (in-memory storage); `pnpm test:pg` 15/15 PASS on PostgreSQL 16; Playwright 196/196 PASS; `tsc -b`, Prettier and build clean; 45 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
+- **Overall Verification (measured 2026-10-11):** Vitest 101 files / 1054 tests PASS (in-memory storage); `pnpm test:pg` 17/17 PASS on PostgreSQL 16; Playwright 197/197 PASS; `tsc -b`, Prettier and build clean; 45 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
 - **Production readiness:** NOT met — see §10.
 - **Next Action:** owner decisions in the improvement report §H (architecture of record, ADR-015 ratification, email provider, pricing, legal review, deletion semantics), then the P0/P1 roadmap there.
 - Sections 2–9 and 11–13 below are the 2026-09-25 snapshot and are partly superseded: the frontend has no TanStack Query; the billing webhook is now signed; the core loop is durable (ADR-015). Where they conflict with §1 and §10, §1 and §10 win.

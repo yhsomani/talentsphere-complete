@@ -9910,8 +9910,14 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       // employers and referees.
       { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
     ];
+    const erasedHistoryIds: string[] = [];
+    const erasedReferenceIds: string[] = [];
     for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
       erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
+      erasedHistoryIds.push(history.id);
+      for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
+        erasedReferenceIds.push(ref.id);
+      }
     }
     for (const item of evidenceBySubjectId.get(profile.id) || []) {
       erasureOps.push({ kind: 'evidenceDelete', id: item.id });
@@ -9932,6 +9938,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       });
     }
     await persist(...erasureOps);
+    // No reference email or verification code goes out on an erased person's
+    // behalf after they are gone.
+    await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
 
     // Mark any active erasure request as completed
     const list = erasureRequestsByUserId.get(session.userId) || [];
@@ -12144,6 +12153,62 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     }
   );
 
+  // 7. Remove a role from your own work history. Before this, a mistaken
+  // entry could only be removed by deleting the whole account. Its references
+  // and any open email verification go with it (FK cascade in Postgres,
+  // applyToReadModel here); a referee's link stops working. Owner only: an
+  // administrator removing someone's record is a moderation decision with its
+  // own trail, not this route.
+  app.delete(
+    '/api/v1/candidates/work-history/:id',
+    async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const { id } = req.params;
+      const history = verifiedWorkHistoriesById.get(id);
+      if (!history) {
+        throw new DomainError('NOT_FOUND', `Work history record "${id}" not found.`);
+      }
+      if (history.candidateId !== session.userId) {
+        throw new DomainError('FORBIDDEN', 'Only the person this role belongs to can remove it.');
+      }
+      const references = employmentReferencesByHistoryId.get(id) || [];
+      await persist({ kind: 'workHistoryDelete', id });
+      await cancelQueuedWorkHistoryEmails(
+        [id],
+        references.map((r) => r.id)
+      );
+      return reply.status(200).send({
+        message: `Removed ${history.title} at ${history.companyName} from your work history.`,
+        removed: { id, references: references.length },
+      });
+    }
+  );
+
+  // Emails still queued for a role that no longer exists would send a referee
+  // a dead link, and their payloads hold the link token / verification code.
+  // Best effort: the deletion has already committed, so a failure here is
+  // logged rather than failing the request.
+  async function cancelQueuedWorkHistoryEmails(historyIds: string[], referenceIds: string[]) {
+    try {
+      const canceled =
+        (await storage.jobs.cancelQueued({
+          kind: 'reference.requested',
+          payloadField: 'referenceId',
+          values: referenceIds,
+        })) +
+        (await storage.jobs.cancelQueued({
+          kind: 'work_history.email_verification_requested',
+          payloadField: 'workHistoryId',
+          values: historyIds,
+        }));
+      if (canceled > 0) {
+        app.log.info({ canceled }, 'canceled queued emails for removed work history');
+      }
+    } catch (err) {
+      app.log.error({ err }, 'could not cancel queued emails for removed work history');
+    }
+  }
+
   // Internal helper for inspecting async job dispatch (tests + local dev).
   // Unauthenticated, so it exists ONLY in development and test: payloads
   // carry user ids and, for email jobs, one-time codes and reference links.
@@ -12254,6 +12319,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
         return;
       case 'reference':
+        // No child without its parent: a reference created while its role
+        // was being removed was cascade-deleted (Postgres) or never belongs.
+        if (!verifiedWorkHistoriesById.has(op.value.workHistoryId)) return;
         employmentReferencesById.set(op.value.id, op.value);
         replaceOrAppend(employmentReferencesByHistoryId, op.value.workHistoryId, op.value);
         if (op.value.clientRequestId) {
@@ -12264,6 +12332,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         }
         return;
       case 'emailChallenge':
+        if (!verifiedWorkHistoriesById.has(op.value.workHistoryId)) return;
         emailChallengesByHistoryId.set(op.value.workHistoryId, op.value);
         return;
       case 'emailChallengeDelete':

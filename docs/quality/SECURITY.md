@@ -174,6 +174,12 @@ verified must never hold the proof.
   (`tests/pg/concurrency.test.ts`).
 - **At rest in the job queue:** the email job carries the code/token until delivered;
   every terminal job transition strips `token` and `code` from the payload.
+- **When the role goes away:** removing a role (`DELETE /api/v1/candidates/work-history/:id`,
+  owner only) or erasing the account deletes its references and open email check and
+  cancels their still-queued emails (credentials stripped), so a referee is not emailed
+  a dead link on behalf of someone who withdrew the request. Best effort: an email the
+  worker has already picked up still goes out (`tests/integration/work-history-removal.test.ts`,
+  `tests/pg/work-history-removal.test.ts`).
 - **Delivery:** no email provider is integrated. In development the worker prints these
   messages ("DEV OUTBOX"); in any other environment it fails them permanently, so the
   verification loop does not work outside development until a provider is chosen.
