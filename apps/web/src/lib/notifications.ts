@@ -22,6 +22,8 @@ export function notificationTarget(n: AppNotification): string | null {
       return n.referenceId ? `/hiring/jobs/${n.referenceId}` : '/hiring';
     case 'work_history':
       return '/evidence';
+    case 'thread':
+      return n.referenceId ? `/messages/${n.referenceId}` : '/messages';
     default:
       return null;
   }

@@ -8,7 +8,7 @@
 - **Last Updated:** 2026-10-10
 - **Current Branch:** `improvement/core-loop-durability` (not yet merged to `main`)
 - **Current Primary Task:** Improvement program — durable core loop, proof-based verification, authorization and honesty fixes. Report: `docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`.
-- **Overall Verification (measured 2026-10-11):** Vitest 103 files / 1064 tests PASS (in-memory storage); `pnpm test:pg` 18/18 PASS on PostgreSQL 16; Playwright 199/199 PASS; `tsc -b`, Prettier and build clean; 46 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
+- **Overall Verification (measured 2026-10-11):** Vitest 104 files / 1071 tests PASS (in-memory storage); `pnpm test:pg` 22/22 PASS on PostgreSQL 16; Playwright 200/200 PASS; `tsc -b`, Prettier and build clean; 46 migrations. Reticle: sign-up → apply → applications verified `yes` in the running app; saved flow `candidate-navigation` re-recorded and passing; rate-limit lockout found by Reticle, fixed, re-verified.
 - **Production readiness:** NOT met — see §10.
 - **Next Action:** owner decisions in the improvement report §H (architecture of record, ADR-015 ratification, email provider, pricing, legal review, deletion semantics), then the P0/P1 roadmap there.
 - Sections 2–9 and 11–13 below are the 2026-09-25 snapshot and are partly superseded: the frontend has no TanStack Query; the billing webhook is now signed; the core loop is durable (ADR-015). Where they conflict with §1 and §10, §1 and §10 win.
@@ -116,6 +116,7 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **Verification:** see §1.
 - **Password change (2026-10-11):** profile page; ends every other session (migration 00045, `sessions_valid_after`); user-record writes base-guarded so a stale write cannot restore an old password.
 - **Sessions (2026-10-11):** sign-out ends the session server-side (token `sessionId` → `revoked_sessions`, migration 00046); *Sign out of other devices* on the profile page (same cut-off as a password change, password unchanged). Pre-2026-10-11 tokens have no session id and just expire. The sign-in page shows why a session ended (once; a specific reason is never overwritten by the generic one).
+- **Messaging (2026-10-11):** start rule enforced (connected, or hiring team ↔ applicant); one conversation per pair; durable (00006 tables) with notifications in the same transaction; erasure deletes the person's messages; web: Message on applicant card, /messages and /messages/:id, header link.
 - **Remove a role (2026-10-11):** owner-only `DELETE /api/v1/candidates/work-history/:id` + Work history page dialog; references/email check deleted with it; queued reference/code emails canceled (also on erasure).
 - **Layout stability (2026-10-11):** page-load CLS was up to 0.82 at phone width (PWA pill, account label, footer); fixed to ≤ 0.008 and guarded by an e2e CLS budget.
 - **Core-loop notifications (2026-10-11):** hiring team told of new applications/withdrawals, candidate told of every move and of referee responses; durable (migration 00044), same transaction as the event; bell + page in the web app; verified with Reticle.
@@ -259,7 +260,7 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 
 - **No email provider** — corporate-email codes and referee links are delivered only in development; work-history verification cannot complete in any other environment. Owner decision (new infrastructure).
 - **Owner decisions pending** — architecture of record (this repo vs the Next.js/Supabase blueprint vs the Spring Boot plan in project docs); ratification of ADR-015 and migration 00043; pricing/payment processor (paid plans cannot be bought); legal review of the draft privacy policy and terms; account-deletion semantics (immediate vs 30-day grace).
-- **Not durable** — ~220 routes outside the core loop keep state in process memory (labelled `x-talentsphere-durability: ephemeral`).
+- **Not durable** — ~220 routes outside the core loop and messaging keep state in process memory (labelled `x-talentsphere-durability: ephemeral`).
 - **Single API writer per database** until core reads move to SQL (ADR-015).
 
 ---

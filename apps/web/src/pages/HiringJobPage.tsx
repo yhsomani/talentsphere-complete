@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { applicationStatusLabel, formatDate } from '../lib/format.js';
+import { createStableKeyer } from '../lib/idempotency.js';
 import {
   APPLICATION_TRANSITIONS,
   JOB_TRANSITIONS,
@@ -56,6 +57,12 @@ export const HiringJobPage: React.FC = () => {
   const [rejecting, setRejecting] = useState<Applicant | null>(null);
   const [reason, setReason] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [messaging, setMessaging] = useState<Applicant | null>(null);
+  const [firstMessage, setFirstMessage] = useState('');
+  const [messageBusy, setMessageBusy] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
+  const messageKeyer = React.useRef(createStableKeyer());
 
   usePageMeta(
     job ? `Applicants — ${job.title}` : 'Applicants',
@@ -108,6 +115,31 @@ export const HiringJobPage: React.FC = () => {
       return false;
     } finally {
       setBusyId(null);
+    }
+  };
+
+  // Starts the conversation with this applicant (or adds to the one that
+  // exists — two people share one) and opens it.
+  const sendFirstMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const content = firstMessage.trim();
+    if (!messaging || !content || messageBusy) return;
+    setMessageBusy(true);
+    setMessageError(null);
+    try {
+      const res = await apiJson<{ thread: { id: string } }>('/api/v1/threads', {
+        method: 'POST',
+        body: JSON.stringify({
+          recipientId: messaging.candidateId,
+          subject: job?.title,
+          initialMessage: content,
+          clientMessageId: messageKeyer.current({ to: messaging.candidateId, content }),
+        }),
+      });
+      navigate(`/messages/${res.thread.id}`);
+    } catch (err) {
+      setMessageError(errorMessage(err));
+      setMessageBusy(false);
     }
   };
 
@@ -313,6 +345,19 @@ export const HiringJobPage: React.FC = () => {
                         {stage.label}
                       </Button>
                     ))}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setFirstMessage('');
+                        setMessageError(null);
+                        setMessaging(applicant);
+                      }}
+                      aria-label={`Message ${applicant.candidate?.fullName ?? 'this applicant'}`}
+                      data-testid={`message-${applicant.id}`}
+                    >
+                      Message
+                    </Button>
                     {canReject && (
                       <Button
                         size="sm"
@@ -427,6 +472,53 @@ export const HiringJobPage: React.FC = () => {
             Confirm
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={messaging !== null}
+        onClose={() => setMessaging(null)}
+        busy={messageBusy}
+        title={`Message ${messaging?.candidate?.fullName ?? 'this applicant'}`}
+        description={`About ${job?.title ?? 'this job'}. They are notified and can reply from Messages.`}
+      >
+        <form onSubmit={sendFirstMessage} data-testid="first-message-form" noValidate>
+          {messageError && (
+            <Notice
+              tone="error"
+              style={{ marginBottom: spacing.md }}
+              data-testid="first-message-error"
+            >
+              {messageError}
+            </Notice>
+          )}
+          <TextArea
+            id="first-message"
+            label="Message"
+            rows={4}
+            maxLength={5000}
+            value={firstMessage}
+            onChange={(e) => setFirstMessage(e.target.value)}
+            data-testid="first-message-input"
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={messageBusy}
+              onClick={() => setMessaging(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              loading={messageBusy}
+              disabled={firstMessage.trim().length === 0}
+              data-testid="first-message-send"
+            >
+              {messageBusy ? 'Sending…' : 'Send'}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

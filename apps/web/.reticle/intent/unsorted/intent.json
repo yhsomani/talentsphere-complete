@@ -107,6 +107,49 @@
       },
       "updatedAt": 1791699941693
     },
+    "inline:a-candidate-can-reply-to-a-hiring-team-from-the-fd01c757": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "status": 201,
+            "urlContains": "/messages"
+          },
+          {
+            "contains": "Thursday at 3pm works for me.",
+            "kind": "text"
+          },
+          {
+            "absent": true,
+            "kind": "element",
+            "query": {
+              "testid": "message-send-error"
+            }
+          }
+        ]
+      },
+      "declaredAt": 1791707322494,
+      "id": "inline:a-candidate-can-reply-to-a-hiring-team-from-the-fd01c757",
+      "provenBy": {
+        "at": 1791707323710,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791707323710"
+      },
+      "state": "proved",
+      "statement": "A candidate can reply to a hiring team from the conversation, and the reply is stored once.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/messages/eebd815a-a315-4bea-bb12-06c50c6a00c7"
+      },
+      "updatedAt": 1791707323729
+    },
     "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0": {
       "binding": {
         "kind": "allOf",
@@ -157,6 +200,93 @@
         "route": "/notifications"
       },
       "updatedAt": 1791670847800
+    },
+    "inline:a-candidate-sees-a-new-message-from-a-hiring-tea-5587b22d": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "kind": "route",
+            "pathname": "/messages"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Rita Recruiter , 1 unread message Oct 11, 1:27 AM Platform Engineer Hi Asha — thanks for applying. Could you do a call on Thursday?",
+              "role": "link"
+            },
+            "state": "visible"
+          }
+        ]
+      },
+      "declaredAt": 1791707305453,
+      "id": "inline:a-candidate-sees-a-new-message-from-a-hiring-tea-5587b22d",
+      "provenBy": {
+        "at": 1791707305521,
+        "grade": "presence",
+        "verdictId": "reticle_assert:1791707305521"
+      },
+      "state": "proved",
+      "statement": "A candidate sees a new message from a hiring team in Messages, marked unread.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/Layout.tsx"
+        ],
+        "route": "/messages"
+      },
+      "updatedAt": 1791707305546
+    },
+    "inline:a-hiring-team-can-message-someone-who-applied-to-05f1a057": {
+      "binding": {
+        "kind": "allOf",
+        "predicates": [
+          {
+            "count": 1,
+            "kind": "net",
+            "method": "POST",
+            "urlContains": "/api/v1/threads"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "name": "Asha Rao",
+              "role": "heading"
+            },
+            "state": "visible"
+          },
+          {
+            "kind": "element",
+            "query": {
+              "testid": "conversation-messages"
+            },
+            "state": "visible"
+          },
+          {
+            "contains": "Could you do a call on Thursday?",
+            "kind": "text"
+          }
+        ]
+      },
+      "declaredAt": 1791707248611,
+      "id": "inline:a-hiring-team-can-message-someone-who-applied-to-05f1a057",
+      "provenBy": {
+        "at": 1791707249300,
+        "grade": "net",
+        "verdictId": "reticle_act_and_wait:1791707249300"
+      },
+      "state": "proved",
+      "statement": "A hiring team can message someone who applied to its job, from the applicant's card, and land in the conversation.",
+      "status": "proved",
+      "subject": "unsorted",
+      "surface": {
+        "files": [
+          "src/components/ui/Button.tsx"
+        ],
+        "route": "/messages/eebd815a-a315-4bea-bb12-06c50c6a00c7"
+      },
+      "updatedAt": 1791707249316
     },
     "inline:a-job-s-detail-page-shows-the-posting-and-for-a-eb27e4b5": {
       "binding": {

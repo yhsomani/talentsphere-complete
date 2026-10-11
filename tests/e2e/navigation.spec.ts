@@ -238,6 +238,7 @@ test.describe('NAV: the header follows the account, not a fixed list', () => {
       'nav-jobs',
       'nav-applications',
       'nav-evidence',
+      'nav-messages',
       'nav-profile',
     ]) {
       await expect(candidate.getByTestId(id)).toBeVisible();
@@ -265,6 +266,7 @@ test.describe('NAV: the header follows the account, not a fixed list', () => {
     );
     await recruiter.goto('/dashboard');
     await expect(recruiter.getByTestId('nav-hiring')).toBeVisible();
+    await expect(recruiter.getByTestId('nav-messages')).toBeVisible();
     await expect(recruiter.getByTestId('nav-applications')).toHaveCount(0);
     await recruiter.close();
   });

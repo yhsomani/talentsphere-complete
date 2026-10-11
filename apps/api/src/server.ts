@@ -5605,14 +5605,21 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       const currentParticipant = assertThreadParticipant(participants, profile.id);
       const messages = messagesByThreadId.get(id) || [];
 
-      // Opening a conversation reads it — recorded only when there is
-      // something new, so reading does not write on every view.
+      // Opening a conversation reads it, and the notifications about it —
+      // recorded only when there is something new, so reading does not write
+      // on every view.
+      const now = new Date().toISOString();
+      const ops: CoreOp[] = (notificationsByRecipientId.get(profile.id) || [])
+        .filter((n) => !n.isRead && n.type === 'message' && n.referenceId === id)
+        .map((n) => ({
+          kind: 'notification' as const,
+          value: { ...n, isRead: true, readAt: now },
+          base: n,
+        }));
       if (calculateUnreadCount(messages, currentParticipant) > 0) {
-        await persist({
-          kind: 'threadRead',
-          value: { ...currentParticipant, lastReadAt: new Date().toISOString() },
-        });
+        ops.push({ kind: 'threadRead', value: { ...currentParticipant, lastReadAt: now } });
       }
+      if (ops.length > 0) await persist(...ops);
 
       return reply.status(200).send({
         thread,

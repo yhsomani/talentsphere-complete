@@ -121,8 +121,26 @@
       "subject": "unsorted"
     },
     {
+      "id": "inline:a-candidate-can-reply-to-a-hiring-team-from-the-fd01c757",
+      "statement": "A candidate can reply to a hiring team from the conversation, and the r…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
       "id": "inline:a-candidate-is-told-in-plain-words-when-the-hiri-695040f0",
       "statement": "A candidate is told, in plain words, when the hiring team moves their a…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-candidate-sees-a-new-message-from-a-hiring-tea-5587b22d",
+      "statement": "A candidate sees a new message from a hiring team in Messages, marked u…",
+      "status": "proved",
+      "subject": "unsorted"
+    },
+    {
+      "id": "inline:a-hiring-team-can-message-someone-who-applied-to-05f1a057",
+      "statement": "A hiring team can message someone who applied to its job, from the appl…",
       "status": "proved",
       "subject": "unsorted"
     },

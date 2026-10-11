@@ -17,6 +17,20 @@ export function formatDate(value: string | undefined | null): string {
   return Number.isNaN(parsed.getTime()) ? value : dateFormatter.format(parsed);
 }
 
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
+/** ISO timestamp → "Oct 11, 1:45 PM" (when a message was sent). */
+export function formatDateTime(value: string | undefined | null): string {
+  if (!value) return '—';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : dateTimeFormatter.format(parsed);
+}
+
 /** Integer minor units → "$90,000" (SSOT money rule: integers on the wire). */
 export function formatMoney(minor: number, currency: string): string {
   try {

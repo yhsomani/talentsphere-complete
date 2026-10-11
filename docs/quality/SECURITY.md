@@ -34,7 +34,8 @@ RLS is required on exposed tables and should be tested with allow/deny assertion
 The API connects with the service role and authorizes in code, so RLS does not
 gate it. The policies matter for any direct (PostgREST/Supabase client) access,
 and some compare the wrong ids: `notifications` / `notification_preferences`
-(00007) compare a profile id to `auth.uid()` (a user id), so they match nothing.
+(00007) and the messaging tables (00006: `thread_participants.user_id`) compare a
+profile id to `auth.uid()` (a user id), so they match nothing.
 Review every policy against the ids the API actually writes before enabling
 direct database access.
 
@@ -207,6 +208,13 @@ adversarial review of 2026-10-10 found the interview-assessment routes acting fo
 signed-in user (including moving another company's job application through a
 scorecard); they are now scoped to the hiring team and the assessed candidate
 (`tests/security/core-authz.test.ts`, "interview assessments are scoped…").
+
+Messaging follows the product rule (blueprint §9.6): a conversation can be started
+only between connected people, or between a candidate and a member of the hiring
+team of a job they applied to (`mayStartConversation`); before 2026-10-11 any
+signed-in user could message any profile. Only participants can read or post, and
+erasing an account deletes the person's messages
+(`tests/integration/messaging-rules.test.ts`, `tests/pg/messaging.test.ts`).
 
 ## 9. Webhooks
 

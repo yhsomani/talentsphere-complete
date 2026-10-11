@@ -160,10 +160,20 @@ describe('Messaging: who may start a conversation, and what one is', () => {
     });
     const before = (await call(app, 'GET', '/api/v1/threads', rita.token)).body.threads[0];
     expect(before.unreadCount).toBe(1);
+    const bellBefore = (await call(app, 'GET', '/api/v1/notifications/summary', rita.token)).body
+      .unreadCount;
     await call(app, 'GET', `/api/v1/threads/${threadId}`, rita.token);
     expect(
       (await call(app, 'GET', '/api/v1/threads', rita.token)).body.threads[0].unreadCount
     ).toBe(0);
+    // ...and the bell stops counting messages already read in the conversation.
+    const unreadAboutThread = (
+      await call(app, 'GET', '/api/v1/notifications?type=message&unreadOnly=true', rita.token)
+    ).body.notifications.filter((n: Json) => n.referenceId === threadId);
+    expect(unreadAboutThread).toHaveLength(0);
+    expect(
+      (await call(app, 'GET', '/api/v1/notifications/summary', rita.token)).body.unreadCount
+    ).toBeLessThan(bellBefore);
     // Reading is per person: Casey has nothing unread — the last word was hers.
     const caseysView = (await call(app, 'GET', '/api/v1/threads', casey.token)).body.threads.find(
       (t: Json) => t.id === threadId

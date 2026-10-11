@@ -40,6 +40,7 @@ const CANDIDATE_NAV: NavItem[] = [
   { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
   { label: 'Applications', path: '/applications', testId: 'nav-applications' },
   { label: 'Work history', path: '/evidence', testId: 'nav-evidence' },
+  { label: 'Messages', path: '/messages', testId: 'nav-messages' },
   { label: 'Profile', path: '/profile', testId: 'nav-profile' },
 ];
 
@@ -47,6 +48,7 @@ const HIRING_NAV: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
   { label: 'Hiring', path: '/hiring', testId: 'nav-hiring' },
   { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
+  { label: 'Messages', path: '/messages', testId: 'nav-messages' },
   { label: 'Profile', path: '/profile', testId: 'nav-profile' },
 ];
 
