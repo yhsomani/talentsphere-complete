@@ -846,7 +846,18 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       throw new DomainError('UNAUTHENTICATED', 'You signed out of this session. Sign in again.');
     }
     const account = usersById.get(session.userId);
-    if (!account) return session;
+    if (!account) {
+      // With durable storage the database is the authority: a validly signed
+      // token for an account it does not hold (a row removed out of band) is
+      // refused, rather than trusting the token's own claims (external audit
+      // TS-005). Memory storage — development and tests only, refused in
+      // production — still accepts it: the test suites mint platform-admin
+      // tokens for ids that were never registered.
+      if (storage.core.durable) {
+        throw new DomainError('UNAUTHENTICATED', 'This account no longer exists.');
+      }
+      return session;
+    }
     const access = accountAccess(account);
     if (access === 'none') {
       throw new DomainError('UNAUTHENTICATED', 'This account has been closed.');
@@ -1294,16 +1305,10 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     return createNotificationEntity(params);
   };
 
-  // Push dispatch happens only after the notification is durable.
-  const announceNotifications = async (notifications: Notification[]) => {
-    for (const notif of notifications) {
-      await dispatchJob({
-        type: 'notification.push',
-        payload: { notificationId: notif.id, recipientId: notif.recipientId, type: notif.type },
-        enqueuedAt: notif.createdAt,
-      });
-    }
-  };
+  // Notifications are delivered in the app only: there is no push or email
+  // channel for them, so no delivery job is queued (a job recorded as
+  // "succeeded" for a push that was never sent would misstate delivery —
+  // external audit TS-006). Add a channel here with a real worker handler.
 
   // Core-loop routes put notifications in the same transaction as the event
   // that causes them (persist(eventOp, ...notificationOps)). Everything else
@@ -1318,7 +1323,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
       app.log.error({ err, type: params.type }, 'notification could not be stored');
       return null;
     }
-    await announceNotifications([notif]);
     return notif;
   };
 
@@ -2585,7 +2589,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         { kind: 'application', value: application },
         ...hiringNotices.map((value) => ({ kind: 'notification' as const, value }))
       );
-      await announceNotifications(hiringNotices);
 
       // Mark candidate draft as submitted if exists (F-36)
       const draftKey = `${profile.id}:${jobId}`;
@@ -2785,7 +2788,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         { kind: 'application', value: updated, base: application },
         ...notices.map((value) => ({ kind: 'notification' as const, value }))
       );
-      await announceNotifications(notices);
 
       await dispatchJob({
         type: 'application.status_changed',
@@ -5426,7 +5428,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     sender: Profile,
     message: Message,
     recipientIds: string[]
-  ): { ops: CoreOp[]; notices: Notification[] } => {
+  ): CoreOp[] => {
     const ops: CoreOp[] = [
       { kind: 'message', value: message },
       {
@@ -5440,7 +5442,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
       },
     ];
-    const notices: Notification[] = [];
     for (const recipientId of recipientIds) {
       const notice = notificationFor({
         recipientId,
@@ -5450,12 +5451,9 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         referenceType: 'thread',
         referenceId: thread.id,
       });
-      if (notice) {
-        ops.push({ kind: 'notification', value: notice });
-        notices.push(notice);
-      }
+      if (notice) ops.push({ kind: 'notification', value: notice });
     }
-    return { ops, notices };
+    return ops;
   };
 
   // Messaging Endpoints (F-10)
@@ -5542,7 +5540,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
     const ops: CoreOp[] = [];
     let initialMessage: Message | undefined;
-    let notices: Notification[] = [];
     if (input.initialMessage) {
       initialMessage = createMessageEntity(
         thread.id,
@@ -5556,9 +5553,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         updatedAt: initialMessage.createdAt,
       };
       ops.push({ kind: 'messageThread', value: thread, participants: newParticipants });
-      const recorded = messageOps(thread, profile, initialMessage, [recipientProfile.id]);
-      ops.push(...recorded.ops);
-      notices = recorded.notices;
+      ops.push(...messageOps(thread, profile, initialMessage, [recipientProfile.id]));
     } else if (newParticipants) {
       ops.push({ kind: 'messageThread', value: thread, participants: newParticipants });
     }
@@ -5575,7 +5570,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
         enqueuedAt: initialMessage.createdAt,
       });
-      await announceNotifications(notices);
     }
 
     return reply.status(existing ? 200 : 201).send({
@@ -5667,13 +5661,12 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         input.clientMessageId
       );
       const recipientIds = participants.filter((p) => p.userId !== profile.id).map((p) => p.userId);
-      const recorded = messageOps(thread, profile, message, recipientIds);
       await persist(
         {
           kind: 'messageThread',
           value: { ...thread, lastMessageAt: message.createdAt, updatedAt: message.createdAt },
         },
-        ...recorded.ops
+        ...messageOps(thread, profile, message, recipientIds)
       );
 
       await dispatchJob({
@@ -5686,7 +5679,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         },
         enqueuedAt: message.createdAt,
       });
-      await announceNotifications(recorded.notices);
 
       return reply.status(201).send({ message });
     }
@@ -12204,7 +12196,6 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
         : null;
       if (referenceNotice) ops.push({ kind: 'notification', value: referenceNotice });
       await persist(...ops);
-      if (referenceNotice) await announceNotifications([referenceNotice]);
 
       return reply.status(200).send({
         reference: publicReference(updatedRef),

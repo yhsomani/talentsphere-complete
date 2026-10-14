@@ -47,12 +47,12 @@ Measured on branch `improvement/core-loop-durability` (2026-10-14). Counts are m
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
 - **Vitest (unit, integration, security; in-memory storage):** 104 files / **1071 tests PASS** (`pnpm test`).
-- **Real PostgreSQL 16 (`pnpm test:pg`):** 5 files / **22 tests PASS** — restart round-trip of the
+- **Real PostgreSQL 16 (`pnpm test:pg`):** 5 files / **23 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
   job-payload credential stripping, notifications across a restart and erasure, removing a
   role (rows, queued emails, a removal racing a referee's submission), a signed-out session
-  staying refused across a restart, messaging (restart, read state, retried send, simultaneous
+  staying refused across a restart, a token for an account removed out of band refused, messaging (restart, read state, retried send, simultaneous
   starts, erasure). Mutation-checked (see the improvement report §G).
 - **Playwright (Chromium; E2E, accessibility, performance):** **205 tests PASS**, including
   `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only) and
