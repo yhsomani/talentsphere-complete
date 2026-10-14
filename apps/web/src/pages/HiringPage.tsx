@@ -474,7 +474,7 @@ export const HiringPage: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div>
       <PageHeader
         title={selectedOrg ? `Hiring at ${selectedOrg.name}` : 'Hiring'}
         intro={
@@ -601,6 +601,7 @@ export const HiringPage: React.FC = () => {
                     </Button>
                   ))}
                   <Link
+                    className="action-link"
                     to={`/hiring/jobs/${job.id}`}
                     style={{
                       alignSelf: 'center',

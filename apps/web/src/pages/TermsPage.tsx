@@ -17,7 +17,7 @@ export const TermsPage: React.FC = () => {
   );
 
   return (
-    <div style={{ maxWidth: '840px', margin: '0 auto', paddingBottom: spacing['2xl'] }}>
+    <div style={{ maxWidth: '68ch', margin: '0 auto', paddingBottom: spacing['2xl'] }}>
       {/* Header */}
       <div style={{ marginBottom: spacing.xl }}>
         <div

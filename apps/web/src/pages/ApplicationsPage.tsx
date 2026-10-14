@@ -144,7 +144,7 @@ export const ApplicationsPage: React.FC = () => {
   );
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div>
       <PageHeader
         title="Your applications"
         intro="Every job you applied to and where it stands. Statuses change when the hiring team moves your application."

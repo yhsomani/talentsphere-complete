@@ -1,0 +1,558 @@
+/*
+ * Layout system: one container, fluid gutters, and a header that stays one
+ * row from a 320 px phone to a 2560 px display.
+ *
+ * Breakpoints (min-width): 480 small phone → large phone, 640 large phone →
+ * small tablet, 768 tablet, 1024 laptop / tablet landscape, 1280 desktop.
+ * Header, page and footer share --container so their edges line up at every
+ * width (they used to be full-bleed, 1200 and 1100 px respectively).
+ */
+:root {
+  --container: 1200px;
+  --gutter: 16px;
+  --header-height: 64px;
+  --surface: #ffffff;
+  --page: #f8fafc;
+  --line: #e2e8f0;
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --ink-muted: #475569;
+  --brand: #0358a1;
+  --brand-strong: #074b85;
+  --brand-wash: #f0f7ff;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+/* WCAG 2.4.11: a control reached by keyboard or an in-page link is never left
+   hidden under the sticky header. */
+html {
+  scroll-padding-top: calc(var(--header-height) + 8px);
+}
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ------------------------------------------------------------------ Header */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__bar {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-right: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.brand__mark {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.site-nav {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav__link[aria-current='page'] {
+  color: var(--brand-strong);
+  background: var(--brand-wash);
+  font-weight: 700;
+}
+
+.site-header__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.icon-button[aria-current='page'],
+.icon-button[aria-expanded='true'] {
+  background: var(--brand-wash);
+  color: var(--brand-strong);
+}
+
+.icon-button--outlined {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.count-badge {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--brand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-cta {
+  display: none;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Signed out: two destinations fit beside the brand from 640 px. */
+@media (min-width: 640px) {
+  .site-header--anonymous .site-nav {
+    display: flex;
+  }
+  .site-header--anonymous .menu-toggle {
+    display: none;
+  }
+}
+
+@media (min-width: 480px) {
+  .site-header--anonymous .header-cta {
+    display: inline-flex;
+  }
+}
+
+/* Signed in: six destinations need a laptop-width row. */
+@media (min-width: 1024px) {
+  .site-header--signed-in .site-nav {
+    display: flex;
+  }
+  .site-header--signed-in .menu-toggle {
+    display: none;
+  }
+}
+
+.account-menu {
+  position: relative;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .account-menu {
+    display: block;
+  }
+}
+
+.account-menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px 0 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-menu__toggle[aria-expanded='true'] {
+  background: var(--brand-wash);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e0effe;
+  color: var(--brand-strong);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* The name only where there is room; a fixed width so the label changing
+   from the stored email to the profile name does not move the header (CLS). */
+.account-menu__name {
+  display: none;
+  width: 132px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+@media (min-width: 1280px) {
+  .account-menu__name {
+    display: inline;
+  }
+}
+
+.account-menu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 260px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.account-menu__who {
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+
+.account-menu__who strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+/* One line, ellipsis; the full address is in the title attribute. */
+.account-menu__who span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-item[aria-current='page'] {
+  background: var(--brand-wash);
+  color: var(--brand-strong);
+  font-weight: 700;
+}
+
+/* Small-screen panel: overlays the page under the sticky header instead of
+   pushing it down, and scrolls on its own on short (landscape) screens. */
+.mobile-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: calc(100vh - var(--header-height));
+  max-height: calc(100dvh - var(--header-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+}
+
+.mobile-panel__inner {
+  padding-block: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-panel__section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-panel .menu-item {
+  font-size: 1rem;
+}
+
+/* -------------------------------------------------------------------- Main */
+
+.site-main {
+  flex: 1;
+  width: 100%;
+  /* At least a screen tall so the footer starts below the fold and does not
+     jump down when a page's data arrives (CLS). */
+  min-height: 100vh;
+  padding-top: 32px;
+  padding-bottom: 48px;
+  outline: none;
+}
+
+@media (max-width: 639px) {
+  .site-main {
+    padding-top: 24px;
+  }
+}
+
+/* ------------------------------------------------------------------ Footer */
+
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+
+.site-footer__grid {
+  display: grid;
+  gap: 16px 32px;
+  padding-block: 32px;
+}
+
+@media (min-width: 768px) {
+  .site-footer__grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+}
+
+.site-footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-block: 16px 24px;
+  border-top: 1px solid var(--line);
+  font-size: 0.75rem;
+}
+
+/* ---------------------------------------------------------- Touch targets */
+
+/* WCAG 2.5.8: every control at least 24 px; touch screens get 44 px. */
+/* Text links and text buttons that stand alone (not inside a sentence). */
+.footer-link,
+.back-link,
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+@media (pointer: coarse) {
+  .footer-link,
+  .back-link,
+  .action-link {
+    min-height: 44px;
+  }
+}
+
+/* A radio or checkbox with its label beside it: the label is the target. */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .choice {
+    min-height: 44px;
+  }
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: #0358a1;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------- Dialogs */
+
+@media (max-width: 639px) {
+  /* Phones: dialogs rise from the bottom edge, within thumb reach. */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .modal-panel {
+    max-width: none !important;
+    border-radius: 14px 14px 0 0 !important;
+    border-bottom: 0 !important;
+    max-height: 92vh !important;
+    max-height: 92dvh !important;
+  }
+}
+
+/* ----------------------------------------------------------------- Prose */
+
+.prose {
+  max-width: 68ch;
+}
+
+/* Hover only where a pointer can hover (no sticky hover on touch). */
+@media (hover: hover) {
+  .site-nav__link:not([aria-current='page']):hover,
+  .menu-item:not([aria-current='page']):hover,
+  .icon-button:not([aria-current='page']):not([aria-expanded='true']):hover,
+  .account-menu__toggle:hover {
+    background: #f1f5f9;
+  }
+  .header-cta:hover {
+    background: var(--brand-strong);
+  }
+}
+
+/* -------------------------------------------------------------- Stat tiles */
+
+/* Four figures: 2 × 2 on phones and tablets, one row from laptop width —
+   never three and an orphan (auto-fit did that at 768 px). */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .stat-grid {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat-tile {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .stat-tile {
+    padding: 16px 24px;
+  }
+}
+
+.stat-tile__value {
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}

@@ -198,17 +198,9 @@ export const ReferencePage: React.FC = () => {
                       {rating.label}
                       {rating.optional ? ' (optional)' : ''}
                     </legend>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.md }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: spacing.md }}>
                       {SCALE.map((n) => (
-                        <label
-                          key={n}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            fontSize: '0.875rem',
-                          }}
-                        >
+                        <label key={n} className="choice" style={{ fontSize: '0.875rem' }}>
                           <input
                             type="radio"
                             name={rating.key}

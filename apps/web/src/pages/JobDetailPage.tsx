@@ -165,8 +165,6 @@ export const JobDetailPage: React.FC = () => {
   return (
     <div
       style={{
-        maxWidth: '1000px',
-        margin: '0 auto',
         display: 'flex',
         flexWrap: 'wrap',
         gap: spacing.xl,
@@ -174,7 +172,11 @@ export const JobDetailPage: React.FC = () => {
       }}
     >
       <article style={{ flex: '2 1 460px', minWidth: 0 }}>
-        <Link to="/jobs" style={{ color: colors.primary[700], fontSize: '0.875rem' }}>
+        <Link
+          className="back-link"
+          to="/jobs"
+          style={{ color: colors.primary[700], fontSize: '0.875rem' }}
+        >
           ← All jobs
         </Link>
         <h1
@@ -199,6 +201,7 @@ export const JobDetailPage: React.FC = () => {
 
         <h2 style={{ fontSize: '1.125rem', marginTop: spacing.xl }}>About the role</h2>
         <p
+          className="prose"
           style={{
             whiteSpace: 'pre-wrap',
             lineHeight: 1.7,
@@ -272,7 +275,11 @@ export const JobDetailPage: React.FC = () => {
                   data-testid={`apply-status-${job.id}`}
                 />
                 <p style={{ marginTop: spacing.md }}>
-                  <Link to="/applications" style={{ color: colors.primary[700], fontWeight: 600 }}>
+                  <Link
+                    className="action-link"
+                    to="/applications"
+                    style={{ color: colors.primary[700], fontWeight: 600 }}
+                  >
                     Track all your applications
                   </Link>
                 </p>

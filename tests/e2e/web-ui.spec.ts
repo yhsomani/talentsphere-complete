@@ -65,7 +65,7 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await page.goto('/');
     await page.getByTestId('cta-signup').click();
     await expect(page).toHaveURL(/\/signup$/);
-    await page.getByRole('link', { name: 'Sign in', exact: true }).click();
+    await page.locator('#main-content').getByRole('link', { name: 'Sign in', exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
 
     // Real credentials grant access to the dashboard.

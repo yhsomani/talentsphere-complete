@@ -64,7 +64,8 @@ test.describe('NAV: deep links and session transitions', () => {
     await page.goto('/dashboard');
     await expect(page.locator('h1')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Sign Out' }).click();
+    await page.getByTestId('account-menu-toggle').click();
+    await page.getByTestId('account-menu').getByRole('button', { name: 'Sign out' }).click();
     await expect(page).toHaveURL(/\/login$/);
     expect(await page.evaluate(() => localStorage.getItem('talentsphere_token'))).toBeNull();
     expect(await page.evaluate(() => localStorage.getItem('talentsphere_user'))).toBeNull();
@@ -239,10 +240,18 @@ test.describe('NAV: the header follows the account, not a fixed list', () => {
       'nav-applications',
       'nav-evidence',
       'nav-messages',
-      'nav-profile',
     ]) {
       await expect(candidate.getByTestId(id)).toBeVisible();
     }
+    // Profile and sign-out live in the account menu, named after the person.
+    const accountToggle = candidate.getByTestId('account-menu-toggle');
+    await expect(accountToggle).toHaveAttribute('aria-expanded', 'false');
+    await accountToggle.click();
+    await expect(accountToggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(candidate.getByTestId('nav-profile')).toBeVisible();
+    await candidate.keyboard.press('Escape');
+    await expect(candidate.getByTestId('account-menu')).toHaveCount(0);
+    await expect(accountToggle).toBeFocused();
     await expect(candidate.getByTestId('nav-hiring')).toHaveCount(0);
     await candidate.close();
 

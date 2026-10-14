@@ -76,7 +76,9 @@ test('signing out ends the session on the server, not only in this browser', asy
   await useSession(page, account);
   await page.goto('/dashboard');
   await expect(page.locator('h1')).toHaveText(account.profile.fullName);
-  await page.getByRole('button', { name: 'Sign Out' }).click();
+  // Sign out lives in the account menu.
+  await page.getByTestId('account-menu-toggle').click();
+  await page.getByTestId('account-menu').getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/);
   // Signing out on purpose needs no explanation.
   await expect(page.getByTestId('login-form')).toBeVisible();

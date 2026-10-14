@@ -180,8 +180,12 @@ export const HiringJobPage: React.FC = () => {
   const jobActions = JOB_ACTIONS.filter((a) => JOB_TRANSITIONS[job.status]?.includes(a.to));
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <Link to="/hiring" style={{ color: colors.primary[700], fontSize: '0.875rem' }}>
+    <div>
+      <Link
+        className="back-link"
+        to="/hiring"
+        style={{ color: colors.primary[700], fontSize: '0.875rem' }}
+      >
         ← All jobs
       </Link>
       <PageHeader
@@ -380,6 +384,7 @@ export const HiringJobPage: React.FC = () => {
                       type="button"
                       aria-expanded={isOpen}
                       onClick={() => setExpanded(isOpen ? null : applicant.id)}
+                      className="action-link"
                       style={{
                         background: 'none',
                         border: 'none',

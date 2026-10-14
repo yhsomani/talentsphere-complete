@@ -138,31 +138,9 @@ pre {
 }
 
 /*
- * Responsive navigation: desktop links vs. mobile hamburger menu.
- * Inline styles set the desktop defaults; these media-query rules override
- * them on small screens (plain CSS wins over inline styles only when marked
- * !important, which is why the toggles below use it).
+ * Header, page container and footer layout live in layout.css (one
+ * container and one set of breakpoints for the whole site).
  */
-@media (max-width: 767px) {
-  .desktop-nav {
-    display: none !important;
-  }
-
-  .mobile-menu-button {
-    display: flex !important;
-  }
-
-  /* The name is on the dashboard; phones keep the header to one row. */
-  .account-label {
-    display: none !important;
-  }
-
-  /* Tighter page padding on phones so content never touches the edges. */
-  #main-content {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-}
 
 /*
  * Centralised keyframes.
