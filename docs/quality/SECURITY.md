@@ -120,9 +120,11 @@ so the signing key remains a full privilege boundary there.
   with the former hardcoded literal and with other guessed secrets is rejected.
 - Any component that mints tokens out of band (test harnesses, scripts) must set
   `TOKEN_SECRET` for the API process as well; see `test-secrets.mjs`.
-- In `NODE_ENV=production` the API refuses to start without `TOKEN_SECRET` (and with
-  `STORAGE=memory`, the local default `DATABASE_URL`, localhost CORS, or
-  `BILLING_MODE=simulated`) — `productionConfigProblems()` in `packages/config`.
+- Deployed (`NODE_ENV=production` or `staging`), the API refuses to start without
+  `TOKEN_SECRET`, with `STORAGE=memory` or with the local default `DATABASE_URL`;
+  production also refuses localhost CORS and `BILLING_MODE=simulated` —
+  `productionConfigProblems()` in `packages/config`. Both deployed environments send a
+  Content-Security-Policy and hide internal error messages from clients (`isDeployed()`).
 
 ### Ending sessions
 

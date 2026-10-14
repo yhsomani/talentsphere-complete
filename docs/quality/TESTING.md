@@ -148,7 +148,7 @@ Enforced by `.github/workflows/ci.yml` on every push and pull request, in order:
 
 1. `pnpm install --frozen-lockfile`
 2. `pnpm lint` — Prettier
-3. `pnpm typecheck` — `tsc -b`
+3. `pnpm typecheck` — `tsc -b`, then `tsc -p tests` (the suites themselves; Vitest and Playwright strip types without checking them)
 4. `pnpm test` — unit, integration, API and security
 5. `pnpm build` — all packages and apps
 6. `pnpm test:e2e` — E2E, accessibility and performance

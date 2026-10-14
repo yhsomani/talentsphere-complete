@@ -20,7 +20,6 @@ describe('Integration: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232)'
       SUPABASE_URL: 'http://localhost:54321',
       SUPABASE_ANON_KEY: 'test-anon-key',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
-      SESSION_SECRET: 'test-session-secret-at-least-32-characters-long',
     });
     await app.ready();
 

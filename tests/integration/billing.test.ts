@@ -14,7 +14,6 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
       NODE_ENV: 'test',
       PORT: '0',
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
-      JWT_SECRET: 'test_jwt_secret_min_32_characters_long_12345',
       // No payment processor exists: paid plans activate only in the explicit
       // simulated mode (see the 'disabled' suite below for the default).
       BILLING_MODE: 'simulated',

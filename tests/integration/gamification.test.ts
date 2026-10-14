@@ -11,7 +11,6 @@ describe('Gamification & XP Ledger Integration (F-22, F-23, BR-25)', () => {
     app = await buildApp({
       NODE_ENV: 'test',
       PORT: 3000,
-      SESSION_SECRET: 'test_jwt_secret_at_least_32_characters_long_for_security',
     });
     await app.ready();
 

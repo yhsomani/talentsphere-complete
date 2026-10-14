@@ -27,7 +27,6 @@ describe('Portfolio Showcase Integration (F-26)', () => {
     app = await buildApp({
       NODE_ENV: 'test',
       PORT: 3000,
-      SESSION_SECRET: 'test_jwt_secret_at_least_32_characters_long_for_security',
     });
     await app.ready();
 

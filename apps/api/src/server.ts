@@ -4,7 +4,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import crypto from 'node:crypto';
 import { ZodError } from 'zod';
-import { validateServerEnv, ServerEnv } from '@talentsphere/config';
+import { isDeployed, validateServerEnv, ServerEnv } from '@talentsphere/config';
 import { DURABLE_ROUTES, isEphemeralRoute } from './durability.js';
 import {
   concurrentModification,
@@ -465,7 +465,14 @@ export function parseTrustProxy(
     .filter(Boolean);
 }
 
-export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyInstance> {
+/**
+ * Settings as an environment holds them, by name; `validateServerEnv` checks
+ * and coerces them exactly as it does `process.env`. Unknown names are a type
+ * error, so a test cannot configure a setting the API does not have.
+ */
+export type BuildAppEnv = Partial<Record<keyof ServerEnv, string | number | boolean>>;
+
+export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance> {
   const env = validateServerEnv(customEnv as Record<string, string | undefined>);
 
   const app = Fastify({
@@ -557,7 +564,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
 
   // Security Plugins
   await app.register(helmet, {
-    contentSecurityPolicy: env.NODE_ENV === 'production',
+    contentSecurityPolicy: isDeployed(env),
   });
 
   await app.register(cors, {
@@ -669,7 +676,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
           message:
             pluginStatus === 429
               ? 'Too many requests. Wait a moment, then try again.'
-              : env.NODE_ENV === 'production'
+              : isDeployed(env)
                 ? 'The request could not be completed.'
                 : error.message,
           request_id: req.id,
@@ -683,8 +690,7 @@ export async function buildApp(customEnv?: Partial<ServerEnv>): Promise<FastifyI
     const errorBody: ErrorEnvelope = {
       error: {
         code: 'INTERNAL_SERVER_ERROR',
-        message:
-          env.NODE_ENV === 'production' ? 'An unexpected internal error occurred.' : error.message,
+        message: isDeployed(env) ? 'An unexpected internal error occurred.' : error.message,
         request_id: req.id,
       },
     };

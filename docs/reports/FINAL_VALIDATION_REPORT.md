@@ -46,7 +46,7 @@
 Measured on branch `improvement/core-loop-durability` (2026-10-14). Counts are machine-reported,
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Vitest (unit, integration, security; in-memory storage):** 104 files / **1071 tests PASS** (`pnpm test`).
+- **Vitest (unit, integration, security; in-memory storage):** 104 files / **1072 tests PASS** (`pnpm test`).
 - **Real PostgreSQL 16 (`pnpm test:pg`):** 5 files / **23 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
@@ -60,7 +60,7 @@ not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976
   scroll, nothing cut off, a one-row header, WCAG 2.5.8 target size, text ≥ 12 px).
 - **Database migrations:** **46** sequential SQL migrations (`00001`–`00046`); CI applies them
   to an empty database and re-runs the runner as an idempotency check.
-- **Typecheck / lint / build:** `tsc -b` clean, Prettier clean, `pnpm build` clean.
+- **Typecheck / lint / build:** `tsc -b` and `tsc -p tests` (the suites themselves) clean, Prettier clean, `pnpm build` clean.
 - **Reticle (in-app):** sign-up → job → apply → applications driven on the Postgres-backed dev
   server, every step `verified: "yes"` (two steps also held after a reload); saved flow
   `candidate-navigation` re-recorded after intentional UI drift and passing. Driving surfaced a

@@ -238,6 +238,8 @@ describe('Skill Supply/Demand Forecasting Domain (F-151, F-84, F-86, F-97)', () 
             demandPostingsCount: 100,
             activeCandidatesCount: 100,
             recordedAt: '2025-01-01T00:00:00.000Z',
+            geographicRegion: 'Global',
+            industry: 'Technology',
           },
           {
             id: 'h2',
@@ -245,6 +247,8 @@ describe('Skill Supply/Demand Forecasting Domain (F-151, F-84, F-86, F-97)', () 
             demandPostingsCount: 400,
             activeCandidatesCount: 120,
             recordedAt: '2025-07-01T00:00:00.000Z',
+            geographicRegion: 'Global',
+            industry: 'Technology',
           },
         ],
       });
@@ -258,6 +262,8 @@ describe('Skill Supply/Demand Forecasting Domain (F-151, F-84, F-86, F-97)', () 
             demandPostingsCount: 500,
             activeCandidatesCount: 500,
             recordedAt: '2025-01-01T00:00:00.000Z',
+            geographicRegion: 'Global',
+            industry: 'Technology',
           },
           {
             id: 'l2',
@@ -265,6 +271,8 @@ describe('Skill Supply/Demand Forecasting Domain (F-151, F-84, F-86, F-97)', () 
             demandPostingsCount: 510,
             activeCandidatesCount: 530,
             recordedAt: '2025-07-01T00:00:00.000Z',
+            geographicRegion: 'Global',
+            industry: 'Technology',
           },
         ],
       });
@@ -293,6 +301,8 @@ describe('Skill Supply/Demand Forecasting Domain (F-151, F-84, F-86, F-97)', () 
             demandPostingsCount: 100,
             activeCandidatesCount: 100,
             recordedAt: '2025-01-01T00:00:00.000Z',
+            geographicRegion: 'Global',
+            industry: 'Technology',
           },
         ],
       });
