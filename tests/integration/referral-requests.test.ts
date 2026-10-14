@@ -24,7 +24,6 @@ describe('Integration: Referral Request System (F-142, S-11, BR-233..BR-240)', (
       SUPABASE_URL: 'http://localhost:54321',
       SUPABASE_ANON_KEY: 'test-anon-key',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
-      SESSION_SECRET: 'test-session-secret-at-least-32-characters-long',
     });
     await app.ready();
 

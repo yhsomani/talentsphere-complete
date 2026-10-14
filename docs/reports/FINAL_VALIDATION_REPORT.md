@@ -43,22 +43,24 @@
 
 ## Executable Evidence & Implementation Verification
 
-Measured on branch `improvement/core-loop-durability` (2026-10-11). Counts are machine-reported,
+Measured on branch `improvement/core-loop-durability` (2026-10-14). Counts are machine-reported,
 not estimated. Previous measurement: HEAD `aad8b54d` (2026-10-08) — Vitest 976, Playwright 183.
 
-- **Vitest (unit, integration, security; in-memory storage):** 104 files / **1071 tests PASS** (`pnpm test`).
-- **Real PostgreSQL 16 (`pnpm test:pg`):** 5 files / **22 tests PASS** — restart round-trip of the
+- **Vitest (unit, integration, security; in-memory storage):** 104 files / **1072 tests PASS** (`pnpm test`).
+- **Real PostgreSQL 16 (`pnpm test:pg`):** 5 files / **23 tests PASS** — restart round-trip of the
   whole core loop, race arbitration, BR-15 re-apply, erasure in the database, concurrent
   email-code guessing, concurrent hire/withdraw, data-exception mapping, durability labelling,
   job-payload credential stripping, notifications across a restart and erasure, removing a
   role (rows, queued emails, a removal racing a referee's submission), a signed-out session
-  staying refused across a restart, messaging (restart, read state, retried send, simultaneous
+  staying refused across a restart, a token for an account removed out of band refused, messaging (restart, read state, retried send, simultaneous
   starts, erasure). Mutation-checked (see the improvement report §G).
-- **Playwright (Chromium; E2E, accessibility, performance):** **200 tests PASS**, including
-  `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only).
+- **Playwright (Chromium; E2E, accessibility, performance):** **205 tests PASS**, including
+  `core-loop.spec.ts` (recruiter, candidate and referee drive the loop through the UI only) and
+  `responsive.spec.ts` (23 pages at 7 viewports from 320 × 568 to 2560 × 1440: no sideways
+  scroll, nothing cut off, a one-row header, WCAG 2.5.8 target size, text ≥ 12 px).
 - **Database migrations:** **46** sequential SQL migrations (`00001`–`00046`); CI applies them
   to an empty database and re-runs the runner as an idempotency check.
-- **Typecheck / lint / build:** `tsc -b` clean, Prettier clean, `pnpm build` clean.
+- **Typecheck / lint / build:** `tsc -b` and `tsc -p tests` (the suites themselves) clean, Prettier clean, `pnpm build` clean.
 - **Reticle (in-app):** sign-up → job → apply → applications driven on the Postgres-backed dev
   server, every step `verified: "yes"` (two steps also held after a reload); saved flow
   `candidate-navigation` re-recorded after intentional UI drift and passing. Driving surfaced a

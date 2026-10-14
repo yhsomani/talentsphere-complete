@@ -1,7 +1,6 @@
 import pg from 'pg';
 import { createLogger } from '@talentsphere/observability';
 import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsphere/domain';
-import { JobQueueEngine } from './queue.js';
 import { PermanentJobError, runClaimCycle, type ClaimHandler } from './claim.js';
 
 // Load .env natively (Node process.loadEnvFile) exactly like the API entry
@@ -19,35 +18,24 @@ for (const candidate of ['.env', '../../.env']) {
 }
 
 const logger = createLogger({ name: 'talentsphere-worker' });
-export const queueEngine = new JobQueueEngine();
 
-// Register background task handlers (Section 22 engine surface, unit-tested
-// in tests/unit/worker-queue.test.ts).
-queueEngine.registerHandler('evidence.propagate', async (job) => {
-  logger.info({ payload: job.payload }, 'Propagating evidence to Career Graph');
-});
-
-queueEngine.registerHandler('notifications.send', async (job) => {
-  logger.info({ payload: job.payload }, 'Delivering queued notification');
-});
-
-queueEngine.registerHandler('analytics.aggregate', async (job) => {
-  logger.info({ payload: job.payload }, 'Aggregating daily platform metrics');
-});
-
-// Durable claim registry: one handler per dispatch kind the API emits. The
-// side effects for these events already happened inline in the route — the
-// handler's job is the durable acknowledgment (queued → running → succeeded),
-// with specific behavior overriding the default ack where it exists.
+// Durable claim registry: one handler per kind the API dispatches.
+//
+// Every kind except the two emails below is an EVENT RECORD: the API commits
+// the event's effect before it dispatches (in-app notifications in the same
+// transaction as their event, ADR-015; evidence status is read by id wherever
+// it is shown, so a change needs no propagation; exports are compiled in the
+// request). Completing such a job means "recorded", not "delivered", and the
+// handler does nothing else on purpose. A kind that needs work done here —
+// a delivery, a recomputation — gets its own handler that does that work and
+// fails when it cannot, like the emails (external audit TS-006).
+const recordEvent: ClaimHandler = async (_payload, record) => {
+  logger.debug({ jobId: record.id, kind: record.kind }, 'event recorded');
+};
 const claimHandlers = new Map<string, ClaimHandler>();
 for (const kind of DISPATCH_EVENT_KINDS) {
-  claimHandlers.set(kind, async (_payload, record) => {
-    logger.debug({ jobId: record.id, kind: record.kind }, 'dispatch event acknowledged');
-  });
+  claimHandlers.set(kind, recordEvent);
 }
-claimHandlers.set('evidence.propagate', async (payload) => {
-  logger.info({ payload }, 'Propagating evidence to Career Graph');
-});
 
 // Transactional email. No email provider is wired yet (docs/quality/
 // OPERATIONS.md). These two messages carry a credential the recipient needs —

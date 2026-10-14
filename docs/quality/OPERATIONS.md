@@ -102,7 +102,7 @@ repository actually requires today.
 | ------------------------------ | ----------------------------------------------------------------------------- |
 | `TOKEN_SECRET`                 | Required, ≥ 32 random characters. Rotating it signs everyone out.            |
 | `DATABASE_URL`                 | Required; not the local default.                                              |
-| `STORAGE`                      | `pg` (default). `memory` is refused in production.                            |
+| `STORAGE`                      | `pg` (default). `memory` is refused in production and staging.                |
 | `CORS_ALLOWED_ORIGINS`         | The web origin(s); localhost is refused in production.                        |
 | `BILLING_MODE`                 | `disabled` (default). `simulated` activates paid plans without payment and is refused in production. |
 | `BILLING_WEBHOOK_SECRET`       | Unset ⇒ the billing webhook answers 503 to everything.                        |
@@ -111,7 +111,9 @@ repository actually requires today.
 | `TRUST_PROXY`                  | **Required behind a load balancer** (e.g. `1`): otherwise every anonymous client shares the proxy's address and one rate-limit bucket. |
 
 `apps/api/src/index.ts` refuses to start in production when any rule above is broken and
-prints which ones (`productionConfigProblems()`).
+prints which ones (`productionConfigProblems()`). Staging (`NODE_ENV=staging`) gets the
+`TOKEN_SECRET`, `DATABASE_URL` and `STORAGE` rules too, but may simulate billing and allow a
+localhost origin for testing.
 
 ### Database
 

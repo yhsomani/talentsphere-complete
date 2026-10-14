@@ -95,6 +95,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div
       role="dialog"
+      className="modal-backdrop"
       aria-modal="true"
       aria-labelledby="modal-title"
       aria-describedby={description ? 'modal-description' : undefined}
@@ -116,6 +117,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         ref={panelRef}
         tabIndex={-1}
+        className="modal-panel"
         style={{
           width: '100%',
           maxWidth,
@@ -177,9 +179,12 @@ export const Modal: React.FC<ModalProps> = ({
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: colors.neutral[400],
-              padding: '8px',
-              borderRadius: '4px',
+              color: colors.neutral[600],
+              width: '44px',
+              height: '44px',
+              margin: '-10px -12px -10px 8px',
+              flex: 'none',
+              borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

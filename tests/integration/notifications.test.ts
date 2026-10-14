@@ -291,15 +291,22 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     expect(aliceNotifs.json().notifications).toHaveLength(0);
   });
 
-  it('dispatches async worker jobs for notification push delivery', async () => {
-    const jobsRes = await app.inject({
+  it('queues no push delivery: notifications are in-app only (TS-006)', async () => {
+    // Bob has in-app notifications from the earlier tests…
+    const bobNotifs = await app.inject({
       method: 'GET',
-      url: '/api/v1/internal/worker-jobs',
+      url: '/api/v1/notifications',
+      headers: { authorization: `Bearer ${bobToken}` },
     });
+    expect(bobNotifs.statusCode).toBe(200);
+    expect(bobNotifs.json().notifications.length).toBeGreaterThan(0);
+
+    // …and no job claims to push them anywhere: there is no push channel, so
+    // a job recorded as succeeded would misstate delivery.
+    const jobsRes = await app.inject({ method: 'GET', url: '/api/v1/internal/worker-jobs' });
     expect(jobsRes.statusCode).toBe(200);
-    const jobs = jobsRes.json().jobs;
-    const notifJobs = jobs.filter((j: any) => j.type === 'notification.push');
-    expect(notifJobs.length).toBeGreaterThan(0);
-    expect(notifJobs[0].payload.recipientId).toBe(bobProfileId);
+    const kinds = new Set(jobsRes.json().jobs.map((j: { type: string }) => j.type));
+    expect(kinds.size).toBeGreaterThan(0);
+    expect([...kinds].filter((k) => /push|notification/.test(String(k)))).toEqual([]);
   });
 });

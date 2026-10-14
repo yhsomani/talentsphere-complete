@@ -19,7 +19,6 @@ describe('Integration: Product Analytics & KPI Rollups (F-19, F-31, BR-27)', () 
       SUPABASE_URL: 'http://localhost:54321',
       SUPABASE_ANON_KEY: 'test-anon-key',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
-      SESSION_SECRET: 'test-session-secret-at-least-32-characters-long',
     });
     await app.ready();
 

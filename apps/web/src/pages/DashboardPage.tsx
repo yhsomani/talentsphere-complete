@@ -104,18 +104,8 @@ const Figure: React.FC<{ value: React.ReactNode; label: string; testId: string }
   label,
   testId,
 }) => (
-  <div
-    style={{
-      padding: `${spacing.md} ${spacing.lg}`,
-      backgroundColor: '#ffffff',
-      border: `1px solid ${colors.neutral[200]}`,
-      borderRadius: '10px',
-    }}
-  >
-    <div
-      data-testid={testId}
-      style={{ fontSize: '2rem', fontWeight: 700, color: colors.neutral[900], lineHeight: 1.1 }}
-    >
+  <div className="stat-tile">
+    <div data-testid={testId} className="stat-tile__value">
       {value}
     </div>
     <div style={{ color: colors.neutral[600], fontSize: '0.875rem', marginTop: 4 }}>{label}</div>
@@ -209,15 +199,7 @@ const CandidateDashboard: React.FC = () => {
     <>
       <NextSteps steps={steps} />
 
-      <section
-        aria-label="Summary"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
-          gap: spacing.md,
-          marginBottom: spacing['2xl'],
-        }}
-      >
+      <section aria-label="Summary" className="stat-grid" style={{ marginBottom: spacing['2xl'] }}>
         <Figure
           value={active.length}
           label="Applications in progress"
@@ -275,7 +257,9 @@ const CandidateDashboard: React.FC = () => {
           )}
           {applications.length > 0 && (
             <p style={{ marginTop: spacing.md }}>
-              <Link to="/applications">All applications</Link>
+              <Link className="action-link" to="/applications">
+                All applications
+              </Link>
             </p>
           )}
         </section>
@@ -303,7 +287,9 @@ const CandidateDashboard: React.FC = () => {
             </ul>
           )}
           <p style={{ marginTop: spacing.md }}>
-            <Link to="/jobs">All jobs</Link>
+            <Link className="action-link" to="/jobs">
+              All jobs
+            </Link>
           </p>
         </section>
       </div>
@@ -388,14 +374,7 @@ const RecruiterDashboard: React.FC = () => {
   return (
     <>
       <NextSteps steps={steps} />
-      <section
-        aria-label="Summary"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
-          gap: spacing.md,
-        }}
-      >
+      <section aria-label="Summary" className="stat-grid">
         <Figure value={published} label="Published jobs" testId="figure-published-jobs" />
         <Figure
           value={activeApplicants}
@@ -419,7 +398,7 @@ export const DashboardPage: React.FC = () => {
 
   const name = session.profile?.fullName;
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+    <div>
       <PageHeader
         title={name ?? 'Dashboard'}
         intro={

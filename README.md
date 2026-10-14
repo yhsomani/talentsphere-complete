@@ -89,7 +89,7 @@ pnpm test:pg            # Real-PostgreSQL durability/concurrency suite (TEST_DAT
 pnpm test:e2e           # Runs Playwright E2E browser and API tests
 
 # Typecheck and lint
-pnpm typecheck          # Compiles all packages with tsc -b
+pnpm typecheck          # tsc -b for every package and app, then the test suites
 pnpm lint               # Verifies Prettier code style
 ```
 

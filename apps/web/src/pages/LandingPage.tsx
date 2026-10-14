@@ -48,7 +48,7 @@ export const LandingPage: React.FC = () => {
   const signedIn = session.status !== 'anonymous';
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
+    <div style={{ paddingBottom: spacing['3xl'] }}>
       <section
         style={{
           display: 'flex',

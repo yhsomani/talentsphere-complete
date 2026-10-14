@@ -119,7 +119,7 @@ export const ConversationPage: React.FC = () => {
   return (
     <div style={{ maxWidth: '760px', margin: '0 auto' }}>
       <p style={{ margin: `0 0 ${spacing.sm}` }}>
-        <Link to="/messages" data-testid="conversation-back">
+        <Link className="back-link" to="/messages" data-testid="conversation-back">
           ← All messages
         </Link>
       </p>

@@ -101,8 +101,11 @@ Session tokens are `base64url(payload).base64url(HMAC-SHA256(payload))`, where t
 payload carries `userId`, `email`, and `roles`. The signature proves who the caller was
 when the token was issued; for any account the API knows, `resolveSession`
 (`apps/api/src/server.ts`) then applies the account's **current** roles and status on
-every request (see "Account state" below). Tokens for identities with no account row
-keep their signed claims, so the signing key is still a full privilege boundary.
+every request (see "Account state" below). With durable storage (`STORAGE=pg`, required
+in production) a token for an identity with no account row is refused ("This account no
+longer exists."). Memory storage, used only in development and tests, still lets such
+tokens keep their signed claims — the test suites mint platform-admin tokens that way —
+so the signing key remains a full privilege boundary there.
 
 - The key is `process.env.TOKEN_SECRET` and **must be at least 32 characters** in any
   deployed environment. `validateServerEnv()` enforces the length when it is set.
@@ -117,9 +120,11 @@ keep their signed claims, so the signing key is still a full privilege boundary.
   with the former hardcoded literal and with other guessed secrets is rejected.
 - Any component that mints tokens out of band (test harnesses, scripts) must set
   `TOKEN_SECRET` for the API process as well; see `test-secrets.mjs`.
-- In `NODE_ENV=production` the API refuses to start without `TOKEN_SECRET` (and with
-  `STORAGE=memory`, the local default `DATABASE_URL`, localhost CORS, or
-  `BILLING_MODE=simulated`) — `productionConfigProblems()` in `packages/config`.
+- Deployed (`NODE_ENV=production` or `staging`), the API refuses to start without
+  `TOKEN_SECRET`, with `STORAGE=memory` or with the local default `DATABASE_URL`;
+  production also refuses localhost CORS and `BILLING_MODE=simulated` —
+  `productionConfigProblems()` in `packages/config`. Both deployed environments send a
+  Content-Security-Policy and hide internal error messages from clients (`isDeployed()`).
 
 ### Ending sessions
 

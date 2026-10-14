@@ -52,7 +52,7 @@ export const CheckoutPage: React.FC = () => {
   const signedIn = session.status !== 'anonymous';
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div>
       <PageHeader
         title="Pricing"
         intro="TalentSphere is free while we finish setting up payments. Everything in the product today is included, and nothing here asks for a card."

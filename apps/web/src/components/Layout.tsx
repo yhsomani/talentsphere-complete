@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Link,
-  NavLink,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useNavigationType,
-} from 'react-router-dom';
-import { colors, spacing, motion } from '@talentsphere/ui';
-import { BellIcon, MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
+import { Link, Outlet, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
+import { colors } from '@talentsphere/ui';
+import { BellIcon, ChevronDownIcon, MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
 import { getStoredUser } from '../lib/session.js';
 import { useSession } from '../lib/SessionContext.js';
@@ -41,7 +34,6 @@ const CANDIDATE_NAV: NavItem[] = [
   { label: 'Applications', path: '/applications', testId: 'nav-applications' },
   { label: 'Work history', path: '/evidence', testId: 'nav-evidence' },
   { label: 'Messages', path: '/messages', testId: 'nav-messages' },
-  { label: 'Profile', path: '/profile', testId: 'nav-profile' },
 ];
 
 const HIRING_NAV: NavItem[] = [
@@ -49,12 +41,32 @@ const HIRING_NAV: NavItem[] = [
   { label: 'Hiring', path: '/hiring', testId: 'nav-hiring' },
   { label: 'Jobs', path: '/jobs', testId: 'nav-jobs' },
   { label: 'Messages', path: '/messages', testId: 'nav-messages' },
-  { label: 'Profile', path: '/profile', testId: 'nav-profile' },
 ];
 
 const isActivePath = (pathname: string, path: string) =>
   pathname === path || pathname.startsWith(`${path}/`);
 
+/** "Casey Candidate" → "CC"; "casey@example.org" → "C". */
+const initialsOf = (label?: string) => {
+  if (!label) return '?';
+  const words = label.includes('@') ? [label] : label.trim().split(/\s+/);
+  return words
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+};
+
+/**
+ * Site chrome: a one-row header at every width (64 px), the page, and the
+ * footer, all on one container so their edges line up from a 320 px phone to
+ * a 2560 px display (styles/layout.css).
+ *
+ * - Laptop and up (≥1024 px): brand, destinations, notifications, and an
+ *   account menu (profile, sign out).
+ * - Below that: brand, notifications, and a menu button whose panel overlays
+ *   the page. Signed-out visitors have only two destinations, which fit
+ *   inline from 640 px.
+ */
 export const Layout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -62,10 +74,12 @@ export const Layout: React.FC = () => {
   const session = useSession();
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState<boolean>(false);
   const [routeAnnouncement, setRouteAnnouncement] = useState<string>('');
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const pwaStatus = describePwaCapability(usePwaCapability());
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const isFirstRouteChange = useRef(true);
 
   // Until the server answers, the roles saved at sign-in decide which
@@ -77,7 +91,8 @@ export const Layout: React.FC = () => {
     : roles.some((r) => HIRING_ROLES.includes(r))
       ? HIRING_NAV
       : CANDIDATE_NAV;
-  const accountLabel = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
+  const accountName = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
+  const accountEmail = session.user?.email ?? getStoredUser()?.email;
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   // The badge: one small read per page change, on focus, and right after the
@@ -103,9 +118,10 @@ export const Layout: React.FC = () => {
     };
   }, [session.status, location.pathname]);
 
-  // Close the mobile menu whenever the route changes.
+  // Menus close whenever the route changes.
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsAccountMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -133,31 +149,69 @@ export const Layout: React.FC = () => {
     // parent effect, so the title already names the new destination.
     setRouteAnnouncement(document.title);
     // Focus strands on <body> when navigation unmounts the active element
-    // (e.g. a link inside the closing mobile menu): recover to <main>.
+    // (e.g. a link inside a closing menu): recover to <main>.
     const active = document.activeElement;
-    if (active === document.body || active?.closest('[data-testid="mobile-menu"]')) {
+    if (
+      active === document.body ||
+      active?.closest('[data-testid="mobile-menu"]') ||
+      active?.closest('.account-menu__panel')
+    ) {
       document.getElementById('main-content')?.focus({ preventScroll: true });
     }
   }, [location.pathname, navigationType]);
 
-  // The mobile menu is a disclosure: Escape closes it and returns focus to the toggle.
+  // Both menus are disclosures: Escape closes and returns focus to the toggle.
   useEffect(() => {
-    if (!isMobileMenuOpen) return;
+    if (!isMobileMenuOpen && !isAccountMenuOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key !== 'Escape') return;
+      if (isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
         menuButtonRef.current?.focus();
+      }
+      if (isAccountMenuOpen) {
+        setIsAccountMenuOpen(false);
+        accountButtonRef.current?.focus();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isAccountMenuOpen]);
+
+  // A press outside the account menu closes it.
+  useEffect(() => {
+    if (!isAccountMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(e.target as Node)) setIsAccountMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [isAccountMenuOpen]);
 
   const signOut = () => {
     session.signOut();
     // Replace, so Back does not return to protected UI.
     navigate('/login', { replace: true });
   };
+
+  const bell = signedIn && (
+    <Link
+      to="/notifications"
+      className="icon-button"
+      data-testid="nav-notifications"
+      aria-label={
+        unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'
+      }
+      aria-current={isActivePath(location.pathname, '/notifications') ? 'page' : undefined}
+    >
+      <BellIcon size={20} />
+      {unreadNotifications > 0 && (
+        <span data-testid="notifications-badge" aria-hidden="true" className="count-badge">
+          {unreadNotifications > 99 ? '99+' : unreadNotifications}
+        </span>
+      )}
+    </Link>
+  );
 
   return (
     <div
@@ -177,7 +231,7 @@ export const Layout: React.FC = () => {
           zIndex: 9999,
           background: colors.primary[700],
           color: '#ffffff',
-          padding: `${spacing.sm} ${spacing.md}`,
+          padding: '8px 16px',
           fontWeight: 600,
           borderRadius: '4px',
           textDecoration: 'none',
@@ -199,7 +253,7 @@ export const Layout: React.FC = () => {
             backgroundColor: colors.semantic.warning,
             color: '#000000',
             textAlign: 'center',
-            padding: `${spacing.xs} ${spacing.md}`,
+            padding: '4px 16px',
             fontSize: '0.8125rem',
             fontWeight: 600,
           }}
@@ -210,426 +264,242 @@ export const Layout: React.FC = () => {
       )}
 
       <header
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.96)',
-          borderBottom: `1px solid ${colors.neutral[200]}`,
-          padding: `${spacing.sm} ${spacing.lg}`,
-          minHeight: '64px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          columnGap: spacing.md,
-          rowGap: spacing.sm,
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
-        }}
+        className={`site-header ${signedIn ? 'site-header--signed-in' : 'site-header--anonymous'}`}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: spacing.md,
-            minWidth: 0,
-          }}
-        >
-          <Link
-            to={signedIn ? '/dashboard' : '/'}
-            aria-label="TalentSphere home"
-            style={{
-              textDecoration: 'none',
-              fontSize: '1.125rem',
-              letterSpacing: '-0.02em',
-              color: colors.neutral[900],
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                width: '26px',
-                height: '26px',
-                backgroundColor: colors.primary[700],
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-              }}
-            >
+        <div className="container site-header__bar">
+          <Link to={signedIn ? '/dashboard' : '/'} aria-label="TalentSphere home" className="brand">
+            <span aria-hidden="true" className="brand__mark">
               <ShieldCheckIcon size={16} />
             </span>
-            <span style={{ fontWeight: 800 }}>
+            <span>
               <span className="wordmark-serif">Talent</span>Sphere
             </span>
           </Link>
 
-          <nav
-            aria-label="Main Navigation"
-            className="desktop-nav"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.xs, alignItems: 'center' }}
-          >
-            {navLinks.map((item) => {
-              const isActive = isActivePath(location.pathname, item.path);
-              const isHovered = hoveredNav === item.path && !isActive;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  data-testid={item.testId}
-                  aria-current={isActive ? 'page' : undefined}
-                  onMouseEnter={() => setHoveredNav(item.path)}
-                  onMouseLeave={() => setHoveredNav(null)}
-                  style={{
-                    textDecoration: 'none',
-                    color: isActive ? colors.primary[800] : colors.neutral[700],
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: '0.875rem',
-                    padding: `${spacing.sm} ${spacing.md}`,
-                    borderRadius: '6px',
-                    backgroundColor: isActive
-                      ? colors.primary[50]
-                      : isHovered
-                        ? colors.neutral[100]
-                        : 'transparent',
-                    transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, color ${motion.duration.fast} ${motion.easing.easeOut}`,
-                  }}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <button
-            type="button"
-            ref={menuButtonRef}
-            data-testid="mobile-menu-toggle"
-            aria-expanded={isMobileMenuOpen}
-            aria-controls={isMobileMenuOpen ? 'mobile-navigation' : undefined}
-            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            onClick={() => setIsMobileMenuOpen((open) => !open)}
-            className="mobile-menu-button"
-            style={{
-              display: 'none',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '44px',
-              height: '44px',
-              padding: 0,
-              border: `1px solid ${colors.neutral[300]}`,
-              borderRadius: '8px',
-              backgroundColor: isMobileMenuOpen ? colors.primary[50] : '#ffffff',
-              color: isMobileMenuOpen ? colors.primary[800] : colors.neutral[800],
-              cursor: 'pointer',
-            }}
-          >
-            {isMobileMenuOpen ? <XIcon size={20} /> : <MenuIcon size={20} />}
-          </button>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: spacing.md,
-            minWidth: 0,
-          }}
-        >
-          <div
-            data-testid="pwa-status"
-            title={pwaStatus.detail}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.75rem',
-              color: colors.neutral[700],
-              backgroundColor: colors.neutral[100],
-              border: `1px solid ${colors.neutral[300]}`,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontWeight: 600,
-            }}
-          >
-            <span
-              aria-hidden="true"
-              data-testid={`pwa-status-tone-${pwaStatus.tone}`}
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor:
-                  pwaStatus.tone === 'active'
-                    ? colors.semantic.success
-                    : pwaStatus.tone === 'pending'
-                      ? colors.semantic.warning
-                      : colors.neutral[400],
-                display: 'inline-block',
-              }}
-            />
-            <span>PWA {pwaStatus.label}</span>
-          </div>
-
-          {signedIn ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, minWidth: 0 }}>
+          <nav aria-label="Main Navigation" className="site-nav">
+            {navLinks.map((item) => (
               <Link
-                to="/notifications"
-                data-testid="nav-notifications"
-                aria-label={
-                  unreadNotifications > 0
-                    ? `Notifications, ${unreadNotifications} unread`
-                    : 'Notifications'
-                }
-                aria-current={
-                  isActivePath(location.pathname, '/notifications') ? 'page' : undefined
-                }
-                style={{
-                  position: 'relative',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '8px',
-                  color: colors.neutral[700],
-                  backgroundColor: isActivePath(location.pathname, '/notifications')
-                    ? colors.primary[50]
-                    : 'transparent',
-                }}
-              >
-                <BellIcon size={20} />
-                {unreadNotifications > 0 && (
-                  <span
-                    data-testid="notifications-badge"
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      top: '4px',
-                      right: '2px',
-                      minWidth: '18px',
-                      height: '18px',
-                      padding: '0 5px',
-                      borderRadius: '9px',
-                      backgroundColor: colors.semantic.error,
-                      color: '#ffffff',
-                      fontSize: '0.6875rem',
-                      fontWeight: 700,
-                      lineHeight: '18px',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {unreadNotifications > 99 ? '99+' : unreadNotifications}
-                  </span>
-                )}
-              </Link>
-              <span
-                data-testid="account-label"
-                className="account-label"
-                style={{
-                  fontSize: '0.8125rem',
-                  color: colors.neutral[600],
-                  // Fixed width: the label starts as the stored email and becomes
-                  // the profile name once the session loads; a width change here
-                  // shifted the header (CLS).
-                  width: '160px',
-                  textAlign: 'right',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-                title={accountLabel}
-              >
-                {accountLabel}
-              </span>
-              <button
-                type="button"
-                onClick={signOut}
-                style={{
-                  fontSize: '0.8125rem',
-                  color: colors.neutral[700],
-                  background: 'none',
-                  border: `1px solid ${colors.neutral[300]}`,
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  padding: `${spacing.xs} ${spacing.sm}`,
-                  minHeight: '36px',
-                  fontWeight: 600,
-                }}
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-              <Link
-                to="/login"
-                data-testid="nav-login"
-                style={{
-                  textDecoration: 'none',
-                  color: colors.primary[700],
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  padding: '8px 12px',
-                  minHeight: '40px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/signup"
-                data-testid="nav-signup"
-                style={{
-                  textDecoration: 'none',
-                  color: '#ffffff',
-                  backgroundColor: colors.primary[700],
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  padding: '8px 16px',
-                  minHeight: '40px',
-                  borderRadius: '6px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                Create account
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {isMobileMenuOpen && (
-        <nav
-          id="mobile-navigation"
-          aria-label="Mobile Navigation"
-          data-testid="mobile-menu"
-          style={{
-            backgroundColor: '#ffffff',
-            borderBottom: `1px solid ${colors.neutral[200]}`,
-            padding: spacing.md,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: spacing.xs,
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
-          }}
-        >
-          {navLinks.map((item) => {
-            const isActive = isActivePath(location.pathname, item.path);
-            return (
-              <NavLink
                 key={item.path}
                 to={item.path}
-                data-testid={`mobile-nav-${item.path.replace('/', '')}`}
-                style={{
-                  textDecoration: 'none',
-                  color: isActive ? colors.primary[800] : colors.neutral[800],
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: '1rem',
-                  padding: `${spacing.sm} ${spacing.md}`,
-                  borderRadius: '8px',
-                  backgroundColor: isActive ? colors.primary[50] : 'transparent',
-                  minHeight: '44px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                className="site-nav__link"
+                data-testid={item.testId}
+                aria-current={isActivePath(location.pathname, item.path) ? 'page' : undefined}
               >
                 {item.label}
-              </NavLink>
-            );
-          })}
-        </nav>
-      )}
+              </Link>
+            ))}
+          </nav>
 
-      <main
-        id="main-content"
-        tabIndex={-1}
-        style={{
-          flex: 1,
-          // At least a screen tall, so the footer starts below the fold and
-          // does not jump down when a page's data arrives (CLS).
-          minHeight: '100vh',
-          padding: `${spacing.xl} ${spacing.lg} ${spacing['2xl']}`,
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
-          boxSizing: 'border-box',
-          outline: 'none',
-        }}
-      >
+          <div className="site-header__actions">
+            {signedIn ? (
+              <>
+                {bell}
+                <div className="account-menu" ref={accountMenuRef}>
+                  <button
+                    type="button"
+                    ref={accountButtonRef}
+                    className="account-menu__toggle"
+                    data-testid="account-menu-toggle"
+                    aria-expanded={isAccountMenuOpen}
+                    aria-controls={isAccountMenuOpen ? 'account-menu-panel' : undefined}
+                    aria-label={`Account: ${accountName ?? 'signed in'}`}
+                    onClick={() => setIsAccountMenuOpen((open) => !open)}
+                  >
+                    <span className="avatar" aria-hidden="true">
+                      {initialsOf(session.profile?.fullName ?? accountName)}
+                    </span>
+                    <span
+                      className="account-menu__name"
+                      data-testid="account-label"
+                      title={accountName}
+                    >
+                      {accountName}
+                    </span>
+                    <ChevronDownIcon size={16} />
+                  </button>
+                  {isAccountMenuOpen && (
+                    <div
+                      id="account-menu-panel"
+                      className="account-menu__panel"
+                      data-testid="account-menu"
+                    >
+                      <div className="account-menu__who">
+                        <strong>{session.profile?.fullName ?? 'Your account'}</strong>
+                        {accountEmail && <span title={accountEmail}>{accountEmail}</span>}
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="menu-item"
+                        data-testid="nav-profile"
+                        aria-current={
+                          isActivePath(location.pathname, '/profile') ? 'page' : undefined
+                        }
+                      >
+                        Profile and settings
+                      </Link>
+                      <button type="button" className="menu-item" onClick={signOut}>
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/login" data-testid="nav-login" className="header-link">
+                  Sign in
+                </Link>
+                <Link to="/signup" data-testid="nav-signup" className="header-cta">
+                  Create account
+                </Link>
+              </>
+            )}
+            <button
+              type="button"
+              ref={menuButtonRef}
+              data-testid="mobile-menu-toggle"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls={isMobileMenuOpen ? 'mobile-navigation' : undefined}
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="icon-button icon-button--outlined menu-toggle"
+            >
+              {isMobileMenuOpen ? <XIcon size={20} /> : <MenuIcon size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {isMobileMenuOpen && (
+          <div className="mobile-panel" id="mobile-navigation">
+            <div className="container mobile-panel__inner">
+              <nav
+                aria-label="Mobile Navigation"
+                data-testid="mobile-menu"
+                style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+              >
+                {navLinks.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="menu-item"
+                    data-testid={`mobile-nav-${item.path.replace('/', '')}`}
+                    aria-current={isActivePath(location.pathname, item.path) ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                {signedIn && (
+                  <Link
+                    to="/profile"
+                    className="menu-item"
+                    data-testid="mobile-nav-profile"
+                    aria-current={isActivePath(location.pathname, '/profile') ? 'page' : undefined}
+                  >
+                    Profile and settings
+                  </Link>
+                )}
+              </nav>
+              <div className="mobile-panel__section">
+                {signedIn ? (
+                  <>
+                    <div className="account-menu__who" style={{ borderBottom: 0, margin: 0 }}>
+                      <strong>{session.profile?.fullName ?? 'Your account'}</strong>
+                      {accountEmail && <span title={accountEmail}>{accountEmail}</span>}
+                    </div>
+                    <button type="button" className="menu-item" onClick={signOut}>
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/signup" className="menu-item" data-testid="mobile-nav-signup">
+                      Create account
+                    </Link>
+                    <Link to="/login" className="menu-item" data-testid="mobile-nav-login">
+                      Sign in
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <main id="main-content" tabIndex={-1} className="site-main container">
         <Outlet />
       </main>
 
-      <footer
-        style={{
-          borderTop: `1px solid ${colors.neutral[200]}`,
-          backgroundColor: '#ffffff',
-          padding: `${spacing.xl} ${spacing.lg}`,
-          marginTop: 'auto',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            flexWrap: 'wrap',
-            gap: spacing.lg,
-            fontSize: '0.875rem',
-            color: colors.neutral[600],
-          }}
-        >
-          <div style={{ maxWidth: '360px' }}>
-            <div style={{ fontWeight: 800, color: colors.neutral[900], marginBottom: spacing.xs }}>
-              <span className="wordmark-serif">Talent</span>Sphere
+      <footer className="site-footer">
+        <div className="container">
+          <div className="site-footer__grid">
+            <div style={{ maxWidth: '360px' }}>
+              <div style={{ fontWeight: 800, color: colors.neutral[900], marginBottom: 4 }}>
+                <span className="wordmark-serif">Talent</span>Sphere
+              </div>
+              <p style={{ margin: 0, lineHeight: 1.6 }}>
+                Work history that is checked, not just claimed — and the jobs to use it on.
+              </p>
             </div>
-            <p style={{ margin: 0, lineHeight: 1.6 }}>
-              Work history that is checked, not just claimed — and the jobs to use it on.
-            </p>
+            <nav aria-label="Footer" className="site-footer__nav">
+              <Link to="/jobs" className="footer-link" style={{ color: colors.neutral[600] }}>
+                Jobs
+              </Link>
+              <Link to="/checkout" className="footer-link" style={{ color: colors.neutral[600] }}>
+                Pricing
+              </Link>
+              <Link to="/privacy" className="footer-link" style={{ color: colors.neutral[600] }}>
+                Privacy
+              </Link>
+              <Link to="/terms" className="footer-link" style={{ color: colors.neutral[600] }}>
+                Terms
+              </Link>
+              {SUPPORT_EMAIL && (
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  data-testid="footer-email"
+                  className="footer-link"
+                  style={{ color: colors.neutral[600] }}
+                >
+                  Contact support
+                </a>
+              )}
+            </nav>
           </div>
-          <nav aria-label="Footer" style={{ display: 'flex', gap: spacing.lg, flexWrap: 'wrap' }}>
-            <Link to="/jobs" className="footer-link" style={{ color: colors.neutral[600] }}>
-              Jobs
-            </Link>
-            <Link to="/checkout" className="footer-link" style={{ color: colors.neutral[600] }}>
-              Pricing
-            </Link>
-            <Link to="/privacy" className="footer-link" style={{ color: colors.neutral[600] }}>
-              Privacy
-            </Link>
-            <Link to="/terms" className="footer-link" style={{ color: colors.neutral[600] }}>
-              Terms
-            </Link>
-            {SUPPORT_EMAIL && (
-              <a
-                href={`mailto:${SUPPORT_EMAIL}`}
-                data-testid="footer-email"
-                className="footer-link"
-                style={{ color: colors.neutral[600] }}
-              >
-                Contact support
-              </a>
-            )}
-          </nav>
-        </div>
-        <div
-          style={{
-            maxWidth: '1200px',
-            margin: `${spacing.lg} auto 0`,
-            fontSize: '0.75rem',
-            color: colors.neutral[600],
-          }}
-        >
-          © 2026 TalentSphere
+          <div className="site-footer__meta">
+            <span>© 2026 TalentSphere</span>
+            {/* Measured, not claimed (manifest present; offline support is
+                not shipped, so this never says "active"). */}
+            <span
+              data-testid="pwa-status"
+              title={pwaStatus.detail}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: colors.neutral[600],
+                fontWeight: 600,
+              }}
+            >
+              <span
+                aria-hidden="true"
+                data-testid={`pwa-status-tone-${pwaStatus.tone}`}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor:
+                    pwaStatus.tone === 'active'
+                      ? colors.semantic.success
+                      : pwaStatus.tone === 'pending'
+                        ? colors.semantic.warning
+                        : colors.neutral[400],
+                  display: 'inline-block',
+                }}
+              />
+              <span>PWA {pwaStatus.label}</span>
+            </span>
+          </div>
         </div>
       </footer>
     </div>

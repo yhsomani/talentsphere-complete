@@ -71,33 +71,47 @@ export const ServerEnvSchema = z.object({
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
 /**
- * Settings that are optional for local development but mandatory in
- * production, where a missing value would silently weaken security:
+ * Staging and production are deployed: reachable by people other than the
+ * developer, so they get the same hardening (configuration refusals below,
+ * Content-Security-Policy, internal error messages hidden from clients).
+ */
+export function isDeployed(env: Pick<ServerEnv, 'NODE_ENV'>): boolean {
+  return env.NODE_ENV === 'production' || env.NODE_ENV === 'staging';
+}
+
+/**
+ * Settings that are optional for local development but mandatory once
+ * deployed, where a missing value would silently weaken security:
  * - TOKEN_SECRET: without it every process invents its own signing key, so
  *   sessions die on each restart and two replicas reject each other's tokens.
- * - STORAGE=memory: would run production on non-durable state.
+ * - STORAGE=memory: would run on non-durable state.
  * - default database credentials: the schema default is a local dev DSN.
+ * Production only (staging may need them for demos and testing):
+ * - BILLING_MODE=simulated, and a localhost CORS origin.
  *
  * Enforced by the process entry point (apps/api/src/index.ts), which refuses
  * to start; buildApp() itself stays a composable factory for tests.
  */
 export function productionConfigProblems(env: ServerEnv): string[] {
-  if (env.NODE_ENV !== 'production') return [];
+  if (!isDeployed(env)) return [];
+  const where = env.NODE_ENV;
   const problems: string[] = [];
   if (!env.TOKEN_SECRET) {
-    problems.push('TOKEN_SECRET is required in production (>= 32 random characters)');
+    problems.push(`TOKEN_SECRET is required in ${where} (>= 32 random characters)`);
   }
   if (env.STORAGE === 'memory') {
-    problems.push('STORAGE=memory is not allowed in production (data would be lost on restart)');
+    problems.push(`STORAGE=memory is not allowed in ${where} (data would be lost on restart)`);
   }
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');
   }
-  if (env.BILLING_MODE === 'simulated') {
-    problems.push('BILLING_MODE=simulated activates paid plans without payment');
-  }
-  if (/localhost/.test(env.CORS_ALLOWED_ORIGINS)) {
-    problems.push('CORS_ALLOWED_ORIGINS still allows localhost in production');
+  if (env.NODE_ENV === 'production') {
+    if (env.BILLING_MODE === 'simulated') {
+      problems.push('BILLING_MODE=simulated activates paid plans without payment');
+    }
+    if (/localhost/.test(env.CORS_ALLOWED_ORIGINS)) {
+      problems.push('CORS_ALLOWED_ORIGINS still allows localhost in production');
+    }
   }
   return problems;
 }

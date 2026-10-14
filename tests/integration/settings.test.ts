@@ -14,7 +14,6 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
       NODE_ENV: 'test',
       PORT: '0',
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
-      JWT_SECRET: 'test_jwt_secret_min_32_characters_long_12345',
     });
     await app.ready();
 

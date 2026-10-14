@@ -332,6 +332,21 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     expect((await call(app, 'GET', '/api/v1/auth/session', other)).status).toBe(200);
   });
 
+  it('refuses a signed token for an account the database no longer holds', async () => {
+    const acct = await register(app, 'removed-out-of-band@example.org');
+    expect((await call(app, 'GET', '/api/v1/auth/session', acct.token)).status).toBe(200);
+    // Removed directly in SQL (ADR-015: seen after the next restart).
+    await sql('DELETE FROM public.profiles WHERE user_id = $1', [acct.user.id]);
+    await sql('DELETE FROM public.users WHERE id = $1', [acct.user.id]);
+    await app.close();
+    app = await boot();
+    // Not a ghost session carrying the token's own email and roles.
+    const session = await call(app, 'GET', '/api/v1/auth/session', acct.token);
+    expect(session.status).toBe(401);
+    expect(session.body.error.message).toBe('This account no longer exists.');
+    expect((await call(app, 'GET', '/api/v1/settings', acct.token)).status).toBe(401);
+  });
+
   it('labels exactly the routes whose data does not survive a restart', async () => {
     const durable = await app.inject({ method: 'GET', url: '/api/v1/jobs' });
     expect(durable.headers['x-talentsphere-durability']).toBeUndefined();

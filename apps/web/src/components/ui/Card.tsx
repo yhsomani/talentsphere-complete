@@ -92,24 +92,3 @@ export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
     {children}
   </div>
 );
-
-export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
-  children,
-  style,
-  ...props
-}) => (
-  <div
-    style={{
-      padding: `${spacing.sm} ${spacing.lg}`,
-      backgroundColor: colors.neutral[50],
-      borderTop: `1px solid ${colors.neutral[200]}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      ...style,
-    }}
-    {...props}
-  >
-    {children}
-  </div>
-);

@@ -176,7 +176,6 @@ export const DISPATCH_EVENT_KINDS = [
   'moderation.appeal_submitted',
   'moderation.report_created',
   'moderation.report_resolved',
-  'notification.push',
   'portfolio.project.created',
   'portfolio.project.removed',
   'portfolio.project.updated',

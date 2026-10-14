@@ -502,7 +502,7 @@ export const EvidencePage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
+    <div style={{ paddingBottom: spacing['3xl'] }}>
       <PageHeader
         title="Work history"
         intro="Each role you add gets stronger as you prove it: confirm a work email at that employer, then ask a manager or colleague to vouch for you. Recruiters see how a role was verified — never your private email address."

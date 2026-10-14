@@ -1,0 +1,20 @@
+{
+  // Type-checks the test suites (`pnpm typecheck`). Vitest and Playwright
+  // strip types without checking them, so without this a test can pass while
+  // configuring settings the API does not have or building invalid fixtures.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": true,
+    // Many suites keep ids from setup they never read (108 at the time of
+    // writing). Harmless, so not enforced here; correctness errors are.
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts", "../test-secrets.d.mts"]
+}

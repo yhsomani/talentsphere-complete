@@ -114,7 +114,7 @@ export const AssessmentsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1160px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
+    <div style={{ paddingBottom: spacing['3xl'] }}>
       <div
         style={{
           borderBottom: `1px solid ${colors.neutral[200]}`,

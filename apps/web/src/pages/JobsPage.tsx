@@ -77,7 +77,7 @@ export const JobsPage: React.FC = () => {
   }, [jobs, query, workMode]);
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div>
       <PageHeader
         title="Jobs"
         intro="Open roles from companies hiring on TalentSphere. Open a role to read the full description and apply."
