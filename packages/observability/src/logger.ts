@@ -25,5 +25,3 @@ export function createLogger(options: CreateLoggerOptions = {}): Logger {
 
   return pino(pinoOptions);
 }
-
-export const logger = createLogger();

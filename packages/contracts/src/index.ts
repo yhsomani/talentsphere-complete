@@ -113,18 +113,6 @@ export const ChangePasswordInputSchema = z.object({
 
 export type ChangePasswordInput = z.infer<typeof ChangePasswordInputSchema>;
 
-export const UserSessionSchema = z.object({
-  user: z.object({
-    id: z.string().uuid(),
-    email: z.string().email(),
-    roles: z.array(z.string()),
-  }),
-  accessToken: z.string(),
-  expiresAt: z.number(),
-});
-
-export type UserSession = z.infer<typeof UserSessionSchema>;
-
 /**
  * Profile Contracts
  */
@@ -383,18 +371,6 @@ export const CreateLessonInputSchema = z.object({
 });
 
 export type CreateLessonInput = z.infer<typeof CreateLessonInputSchema>;
-
-export const EnrollCourseInputSchema = z.object({
-  courseId: z.string().uuid(),
-});
-
-export type EnrollCourseInput = z.infer<typeof EnrollCourseInputSchema>;
-
-export const CompleteLessonInputSchema = z.object({
-  lessonId: z.string().uuid(),
-});
-
-export type CompleteLessonInput = z.infer<typeof CompleteLessonInputSchema>;
 
 /**
  * Direct Messaging Contracts (F-10, WF-10, BR-214)
@@ -890,12 +866,6 @@ export const RecordAnalyticsEventBatchInputSchema = z.object({
 
 export type RecordAnalyticsEventBatchInput = z.infer<typeof RecordAnalyticsEventBatchInputSchema>;
 
-export const QueryAnalyticsKPIsInputSchema = z.object({
-  eventType: z.string().optional(),
-});
-
-export type QueryAnalyticsKPIsInput = z.infer<typeof QueryAnalyticsKPIsInputSchema>;
-
 /**
  * Certificate Verification & Revocation Contracts (F-52, S-02)
  */
@@ -1192,15 +1162,6 @@ export const AddReputationSignalInputSchema = z.object({
 
 export type AddReputationSignalInput = z.infer<typeof AddReputationSignalInputSchema>;
 
-export const QueryReputationInputSchema = z.object({
-  context: z
-    .enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor'])
-    .optional(),
-  domain: z.string().max(100).optional(),
-});
-
-export type QueryReputationInput = z.infer<typeof QueryReputationInputSchema>;
-
 export const StartRecoveryPlanInputSchema = z.object({
   context: z.enum(['candidate', 'instructor', 'employer', 'peer', 'community', 'mentor']),
   penaltySignalId: z.string().uuid(),
@@ -1216,12 +1177,6 @@ export const StartRecoveryPlanInputSchema = z.object({
 });
 
 export type StartRecoveryPlanInput = z.infer<typeof StartRecoveryPlanInputSchema>;
-
-export const CompleteRecoveryTaskInputSchema = z.object({
-  taskId: z.string().uuid(),
-});
-
-export type CompleteRecoveryTaskInput = z.infer<typeof CompleteRecoveryTaskInputSchema>;
 
 /**
  * Warm Introduction Paths Contracts (F-121, S-11, BR-209..BR-216)
@@ -1283,13 +1238,6 @@ export const RecordActivityEventInputSchema = z.object({
 
 export type RecordActivityEventInput = z.infer<typeof RecordActivityEventInputSchema>;
 
-export const QueryActivityEventsInputSchema = z.object({
-  category: z.enum(['learning', 'creation', 'collaboration', 'social']).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-
-export type QueryActivityEventsInput = z.infer<typeof QueryActivityEventsInputSchema>;
-
 /**
  * Instructor Reputation System Contracts (F-148, F-72, F-144)
  */
@@ -1340,18 +1288,6 @@ export const CreateSkillEndorsementInputSchema = z.object({
 });
 
 export type CreateSkillEndorsementInput = z.infer<typeof CreateSkillEndorsementInputSchema>;
-
-export const RevokeSkillEndorsementInputSchema = z.object({
-  reason: z.string().max(500).optional(),
-});
-
-export type RevokeSkillEndorsementInput = z.infer<typeof RevokeSkillEndorsementInputSchema>;
-
-export const QuerySkillEndorsementsInputSchema = z.object({
-  skillId: z.string().optional(),
-});
-
-export type QuerySkillEndorsementsInput = z.infer<typeof QuerySkillEndorsementsInputSchema>;
 
 /**
  * Alumni Networks Contracts (F-125, F-12, F-09, F-40)
