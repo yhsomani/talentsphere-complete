@@ -59,6 +59,14 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       # TESTING.md §1: code style is enforced, not advisory.
+      # TEMPORARY diagnostic for this draft PR: reveal the expected formatter
+      # output so the formatting failure can be corrected without weakening lint.
+      - name: Show expected formatting for new erasure store
+        run: |
+          echo 'BEGIN_FORMATTED_ERASURE'
+          pnpm exec prettier apps/api/src/storage/erasure-store.ts
+          echo 'END_FORMATTED_ERASURE'
+
       - name: Lint (Prettier)
         run: pnpm lint
 
