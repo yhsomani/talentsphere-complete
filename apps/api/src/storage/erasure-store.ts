@@ -42,11 +42,7 @@ export class MemoryErasureRequestStore implements ErasureRequestStore {
     return next;
   }
 
-  async completeActive(
-    userId: string,
-    completedAt: string,
-    anonymizedHash: string
-  ): Promise<void> {
+  async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
     for (const request of await this.list(userId)) {
       if (isActive(request)) {
         this.requests.set(request.id, {
@@ -169,11 +165,7 @@ export class PgErasureRequestStore implements ErasureRequestStore {
     }
   }
 
-  async completeActive(
-    userId: string,
-    completedAt: string,
-    anonymizedHash: string
-  ): Promise<void> {
+  async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
     await this.pool.query(
       "UPDATE public.data_erasure_requests SET status = 'completed', completed_at = $2, updated_at = $2, anonymized_hash = $3 WHERE user_id = $1 AND status IN ('pending', 'grace_period')",
       [userId, completedAt, anonymizedHash]
