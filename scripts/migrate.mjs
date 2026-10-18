@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { assertMigrationHistory } from './lib/migration-integrity.mjs';
 import {
   loadDotEnv,
   requireDatabaseUrl,
@@ -96,15 +97,11 @@ async function runMigrations() {
     const applied = new Map(appliedRows.rows.map(r => [r.filename, r.checksum]));
     const pending = files.filter(f => !applied.has(f));
 
-    // ponytail: modified-after-apply is reported, not failed; add a hard
-    // checksum gate once migrations start changing in anger.
-    for (const file of files) {
-      if (!applied.has(file)) continue;
-      const current = checksum(fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8'));
-      if (current !== applied.get(file)) {
-        console.warn(`  WARNING: ${file} changed after being applied (not re-run).`);
-      }
-    }
+    // Applied SQL is immutable. Warn-only drift can silently corrupt live data:
+    // refuse this release before executing any pending migrations.
+    assertMigrationHistory(files, appliedRows.rows, (file) =>
+      checksum(fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8'))
+    );
 
     const results = [];
     for (const file of pending) {
