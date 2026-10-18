@@ -320,6 +320,37 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(result.body.message).toMatch(/not yet a complete statutory/);
   });
 
+  it('retains settings and data export history across API restarts', async () => {
+    const updated = await call(app, 'PATCH', '/api/v1/settings', ids.candidateToken, {
+      theme: 'dark',
+      digestFrequency: 'weekly',
+      showEmail: true,
+    });
+    expect(updated.status).toBe(200);
+    expect(updated.body.settings.theme).toBe('dark');
+    expect(updated.body.settings.digestFrequency).toBe('weekly');
+
+    const exported = await call(app, 'POST', '/api/v1/settings/export', ids.candidateToken, {
+      format: 'json',
+    });
+    expect(exported.status).toBe(200);
+    const requestId = exported.body.exportRequest.id;
+    expect(await sql('SELECT id FROM public.data_export_requests WHERE id = $1', [requestId]))
+      .toHaveLength(1);
+
+    await app.close();
+    app = await boot();
+    const settings = await call(app, 'GET', '/api/v1/settings', ids.candidateToken);
+    expect(settings.status).toBe(200);
+    expect(settings.body.settings.theme).toBe('dark');
+    expect(settings.body.settings.digestFrequency).toBe('weekly');
+    expect(settings.body.settings.showEmail).toBe(true);
+
+    const latest = await call(app, 'GET', '/api/v1/settings/export/latest', ids.candidateToken);
+    expect(latest.status).toBe(200);
+    expect(latest.body.latestExport.id).toBe(requestId);
+  });
+
   it('lets the database arbitrate a race the read model cannot see', async () => {
     const attempts = await Promise.all(
       [1, 2, 3].map(() =>
@@ -460,6 +491,13 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(user.email).toMatch(/^anonymized_/);
     expect(user.status).toBe('deactivated');
     expect(user.password_hash).toBe('!erased');
+    expect(await sql('SELECT 1 FROM public.user_settings WHERE user_id = $1', [ids.candidateUserId]))
+      .toHaveLength(0);
+    expect(
+      await sql('SELECT 1 FROM public.data_export_requests WHERE user_id = $1', [
+        ids.candidateUserId,
+      ])
+    ).toHaveLength(0);
     expect(
       await sql(`SELECT 1 FROM verified_work_histories WHERE candidate_id = $1`, [
         ids.candidateUserId,
