@@ -122,12 +122,10 @@ import {
   LeaderboardUserRecord,
   computeLeaderboard,
   UserSettings,
-  DataErasureRequest,
   DataExportRequest,
   createDefaultUserSettings,
   updateUserSettings,
   requestAccountErasure,
-  cancelAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
   Subscription,
@@ -726,8 +724,6 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const profilesByUserId = new Map<string, any>();
   const profilesById = new Map<string, any>();
   const userSettingsByUserId = new Map<string, UserSettings>();
-  const erasureRequestsByUserId = new Map<string, DataErasureRequest[]>();
-  const erasureRequestsById = new Map<string, DataErasureRequest>();
   const exportRequestsByUserId = new Map<string, DataExportRequest[]>();
   const subscriptionsByUserId = new Map<string, Subscription>();
   const entitlementsByUserId = new Map<string, Entitlements>();
@@ -9969,19 +9965,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = RequestErasureInputSchema.parse(req.body);
 
-    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
-    const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
-    if (active) {
-      throw new DomainError(
-        'CONFLICT',
-        'An active account erasure request is already pending. You can cancel it before the grace period ends.'
-      );
-    }
-
     const erasureRequest = requestAccountErasure(session.userId, input.reason);
-    userRequests.unshift(erasureRequest);
-    erasureRequestsByUserId.set(session.userId, userRequests);
-    erasureRequestsById.set(erasureRequest.id, erasureRequest);
+    // Postgres serializes same-user requests via the owner row lock.
+    await storage.erasureRequests.create(erasureRequest);
 
     await dispatchJob({
       type: 'gdpr.erasure.requested',
@@ -10002,7 +9988,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // 6. Get Account Erasure Request Status
   app.get('/api/v1/settings/erasure/status', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
+    const userRequests = await storage.erasureRequests.list(session.userId);
     const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
 
     return reply.status(200).send({
@@ -10017,24 +10003,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = CancelErasureInputSchema.parse(req.body);
 
-    const erasureRequest = erasureRequestsById.get(input.requestId);
-    if (!erasureRequest) {
-      throw new DomainError('NOT_FOUND', `Erasure request ${input.requestId} not found.`);
-    }
-
-    if (erasureRequest.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'You are not authorized to cancel this erasure request.');
-    }
-
-    const cancelled = cancelAccountErasure(erasureRequest);
-    erasureRequestsById.set(cancelled.id, cancelled);
-
-    const list = erasureRequestsByUserId.get(session.userId) || [];
-    const idx = list.findIndex((r) => r.id === cancelled.id);
-    if (idx !== -1) {
-      list[idx] = cancelled;
-      erasureRequestsByUserId.set(session.userId, list);
-    }
+    const cancelled = await storage.erasureRequests.cancel(session.userId, input.requestId);
 
     await dispatchJob({
       type: 'gdpr.erasure.cancelled',
@@ -10133,16 +10102,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     // behalf after they are gone.
     await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
 
-    // Mark any active erasure request as completed
-    const list = erasureRequestsByUserId.get(session.userId) || [];
-    const active = list.find((r) => r.status === 'grace_period' || r.status === 'pending');
-    if (active) {
-      active.status = 'completed';
-      active.completedAt = result.completedAt;
-      active.anonymizedHash = result.anonymizedHash;
-      active.updatedAt = result.completedAt;
-      erasureRequestsById.set(active.id, active);
-    }
+    // Mark the durable request history only after core erasure commits.
+    // If this write fails, do not claim the lifecycle was updated.
+    await storage.erasureRequests.completeActive(
+      session.userId,
+      result.completedAt,
+      result.anonymizedHash
+    );
 
     await dispatchJob({
       type: 'gdpr.erasure.completed',
