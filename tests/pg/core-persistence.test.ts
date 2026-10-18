@@ -16,6 +16,7 @@ import crypto from 'node:crypto';
 import pg from 'pg';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createStorage } from '../../apps/api/src/storage/index.js';
 import { dropTestDatabase } from './test-db.js';
 
 const baseUrl = process.env.TEST_DATABASE_URL;
@@ -399,6 +400,37 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     const finalStatus = await call(app, 'GET', '/api/v1/settings/erasure/status', token);
     expect(finalStatus.body.hasPendingErasure).toBe(false);
     expect(finalStatus.body.history[0].status).toBe('cancelled');
+  });
+
+  it('rejects concurrent API writers instead of serving divergent read models', async () => {
+    await expect(boot()).rejects.toThrow(/second API writer/);
+    // The existing server keeps its lock after rejecting another boot.
+    expect((await call(app, 'GET', '/api/v1/health')).status).toBe(200);
+    // Releasing the first instance makes a replacement boot possible.
+    await app.close();
+    app = await boot();
+    expect((await call(app, 'GET', '/api/v1/health')).status).toBe(200);
+  });
+
+  it('reports stale, missing and current worker heartbeats from real PostgreSQL', async () => {
+    const store = createStorage({ STORAGE: 'pg', NODE_ENV: 'test', DATABASE_URL: databaseUrl });
+    try {
+      expect(await store.workerHeartbeat()).toEqual({ alive: false, lastSeenAt: null });
+
+      await sql(
+        "INSERT INTO public.worker_health (id, last_seen_at) VALUES (1, now() - INTERVAL '90 seconds')"
+      );
+      const stale = await store.workerHeartbeat();
+      expect(stale.alive).toBe(false);
+      expect(stale.lastSeenAt).not.toBeNull();
+
+      await sql('UPDATE public.worker_health SET last_seen_at = now() WHERE id = 1');
+      const fresh = await store.workerHeartbeat();
+      expect(fresh.alive).toBe(true);
+      expect(fresh.lastSeenAt).not.toBeNull();
+    } finally {
+      await store.close();
+    }
   });
 
   it('erasure removes personal data from the database, not just from memory', async () => {

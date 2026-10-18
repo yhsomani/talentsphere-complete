@@ -117,6 +117,16 @@ localhost origin for testing.
 
 ### Database
 
+- The API now holds a PostgreSQL session advisory lock for its entire
+  lifetime (`pg_try_advisory_lock(718201, 1)`). A second API process against
+  the same database refuses to boot, rather than serving a stale read model.
+  Losing the lock session makes API traffic return 503 until restarted.
+  This is a **single-writer enforcement**, not horizontal scaling support.
+- The worker writes `public.worker_health.last_seen_at` every ten seconds.
+  Admin health diagnostics now mark the queue degraded if the last heartbeat
+  is more than 45 seconds old, missing, or unavailable. Monitor stale
+  heartbeats and `background_jobs` retry/dead records. An API health liveness
+  response alone does not establish worker processing.
 - Apply migrations with `pnpm db:migrate` (`scripts/migrate.mjs`: one transaction per
   file, `schema_migrations` ledger, re-running is a no-op). CI applies all migrations to
   an empty database and re-runs the runner on every push.
@@ -175,5 +185,5 @@ cannot be completed there. Integrating a provider is an owner decision (new infr
 - `/health` — liveness. `/api/v1/health` — adds environment. Both are exempt from the rate limiter, so a load balancer's polling can never throttle the API into looking dead.
 - `GET /api/v1/admin/health-diagnostics` (platform admin) — storage mode, database
   reachability (a live round-trip), queue status and active job count, and how many routes
-  are durable. **Worker liveness is not measured** (no heartbeat): a dead worker over a live
+  are durable. Worker liveness is measured with the database heartbeat: a dead worker over a live
   database still reports the queue as operational — watch for `queued` jobs that age.
