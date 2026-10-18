@@ -219,6 +219,20 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(String(refRow.token_hash).trim()).toMatch(/^[0-9a-f]{64}$/); // a hash, never the token
   });
 
+  it('stores apostrophes and SQL-like input as literal profile data', async () => {
+    const headline = "O'Connor's experience: ' OR 1=1 --";
+    const changed = await call(app, 'PATCH', '/api/v1/profile/me', ids.candidateToken, {
+      headline,
+    });
+    expect(changed.status).toBe(200);
+
+    const [profile] = await sql<{ headline: string }>(
+      'SELECT headline FROM public.profiles WHERE id = $1',
+      [ids.candidateProfileId]
+    );
+    expect(profile.headline).toBe(headline);
+  });
+
   it('serves the same state from a brand-new process after a restart', async () => {
     await app.close();
     app = await boot();

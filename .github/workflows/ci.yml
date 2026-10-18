@@ -85,8 +85,18 @@ jobs:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
         run: pnpm test:pg
 
-      - name: Build
-        run: pnpm build
+      # Synthetic values only: verify server-side configuration cannot appear
+      # in the shipped Vite bundle. Do not inject real CI secrets into builds.
+      - name: Build and scan browser bundle for server-only values
+        env:
+          TOKEN_SECRET: ci-only-session-signing-sentinel-8a70c1b6a67f
+          DATABASE_URL: postgresql://ci-sentinel:dummy@localhost:5432/ci_build
+          SUPABASE_SERVICE_ROLE_KEY: ci-only-supabase-service-role-sentinel-52cb9d8a
+          API_AUTH_TOKEN: ci-only-api-auth-token-sentinel-974e15b3
+          BILLING_WEBHOOK_SECRET: ci-only-billing-webhook-sentinel-731ae08d
+        run: |
+          pnpm build
+          node scripts/check-client-secrets.mjs
 
       # Playwright boots the API and the built web app itself (webServer).
       # Retries stay at 0: per TESTING.md a flaky test is a defect, not

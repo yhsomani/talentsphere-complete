@@ -31,10 +31,22 @@ describe('SEC: private data RLS hardening migration', () => {
 
   it('re-enables RLS on all five private tables', () => {
     for (const table of [
-      'message_threads', 'thread_participants', 'messages',
-      'notifications', 'notification_preferences',
+      'message_threads',
+      'thread_participants',
+      'messages',
+      'notifications',
+      'notification_preferences',
     ]) {
       expect(sql).toContain(`ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;`);
     }
+  });
+
+  it('qualifies the outer preference owner in the follow-up migration', () => {
+    const fix = fs.readFileSync(
+      path.resolve('supabase/migrations/00048_notification_preferences_rls_scope.sql'),
+      'utf8'
+    );
+    expect(fix).toContain('p.id = notification_preferences.user_id');
+    expect(fix).not.toMatch(/p\.id\s*=\s*user_id\b/);
   });
 });
