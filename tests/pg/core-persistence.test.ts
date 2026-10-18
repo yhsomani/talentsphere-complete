@@ -37,6 +37,7 @@ const boot = () =>
     DATABASE_URL: databaseUrl,
     LOG_LEVEL: 'error',
     RATE_LIMIT_MAX_REQUESTS: '100000',
+    BYO_AI_KEY_ENCRYPTION_KEY: 'a'.repeat(64),
   } as never);
 
 type Json = Record<string, any>;
@@ -325,10 +326,17 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
       theme: 'dark',
       digestFrequency: 'weekly',
       showEmail: true,
+      byoAiKey: 'sk-fake-test-only-never-use',
     });
     expect(updated.status).toBe(200);
     expect(updated.body.settings.theme).toBe('dark');
     expect(updated.body.settings.digestFrequency).toBe('weekly');
+    expect(updated.body.settings.byoAiKey).toBe('••••••••');
+    const [encrypted] = await sql('SELECT byo_ai_key FROM public.user_settings WHERE user_id = $1', [
+      ids.candidateUserId,
+    ]);
+    expect(encrypted.byo_ai_key).toMatch(/^enc:v1:/);
+    expect(encrypted.byo_ai_key).not.toContain('sk-fake-test-only');
 
     const exported = await call(app, 'POST', '/api/v1/settings/export', ids.candidateToken, {
       format: 'json',
@@ -345,6 +353,7 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(settings.body.settings.theme).toBe('dark');
     expect(settings.body.settings.digestFrequency).toBe('weekly');
     expect(settings.body.settings.showEmail).toBe(true);
+    expect(settings.body.settings.byoAiKey).toBe('••••••••');
 
     const latest = await call(app, 'GET', '/api/v1/settings/export/latest', ids.candidateToken);
     expect(latest.status).toBe(200);
