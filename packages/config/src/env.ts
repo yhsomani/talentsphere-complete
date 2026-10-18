@@ -25,6 +25,11 @@ export const ServerEnvSchema = z.object({
   // memory when NODE_ENV=test, pg otherwise — see apps/api/src/storage.
   STORAGE: z.enum(['pg', 'memory']).optional(),
 
+  // Separate 256-bit key for AES-GCM encryption of user-supplied BYO API keys.
+  // Rotation requires re-encryption of existing ciphertext; do not silently
+  // reuse TOKEN_SECRET for this purpose.
+  BYO_AI_KEY_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/).optional(),
+
   // Security & Rate Limiting
   // TOKEN_SECRET signs session tokens. It is optional so local development works
   // without it (the domain layer then generates a random per-process key, so tokens
