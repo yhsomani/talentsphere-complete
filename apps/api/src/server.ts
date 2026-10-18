@@ -162,7 +162,6 @@ import {
   resolveModerationReport,
   createModerationAppeal,
   reviewModerationAppeal,
-  SavedSearch,
   JobAlert,
   SavedJob,
   createSavedSearch,
