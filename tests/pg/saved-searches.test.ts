@@ -14,7 +14,11 @@ const baseUrl = process.env.TEST_DATABASE_URL;
 if (!baseUrl) throw new Error('TEST_DATABASE_URL is required for PostgreSQL saved-search tests.');
 
 const dbName = `ts_pgsaved_${crypto.randomBytes(4).toString('hex')}`;
-const withDb = (url: string, name: string) => url.replace(/\\/[^/?]*(\\?|$)/, `/${name}$1`);
+const withDb = (url: string, name: string) => {
+  const target = new URL(url);
+  target.pathname = `/${name}`;
+  return target.toString();
+};
 const databaseUrl = withDb(baseUrl, dbName);
 const boot = () =>
   buildApp({
