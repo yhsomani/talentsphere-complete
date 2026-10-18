@@ -18,11 +18,7 @@ import {
   PgSavedSearchStore,
   type SavedSearchStore,
 } from './saved-search-store.js';
-import {
-  MemorySavedJobStore,
-  PgSavedJobStore,
-  type SavedJobStore,
-} from './saved-job-store.js';
+import { MemorySavedJobStore, PgSavedJobStore, type SavedJobStore } from './saved-job-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
