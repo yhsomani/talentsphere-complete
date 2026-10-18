@@ -13,6 +13,11 @@ import {
 } from './erasure-store.js';
 
 export * from './core-store.js';
+import {
+  MemorySavedSearchStore,
+  PgSavedSearchStore,
+  type SavedSearchStore,
+} from './saved-search-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
@@ -44,6 +49,7 @@ export interface Storage {
   readonly core: CoreStore;
   readonly erasureRequests: ErasureRequestStore;
   readonly accountMetadata: AccountMetadataStore;
+  readonly savedSearches: SavedSearchStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -66,6 +72,7 @@ class PgStorage implements Storage {
   readonly core: CoreStore;
   readonly erasureRequests: ErasureRequestStore;
   readonly accountMetadata: AccountMetadataStore;
+  readonly savedSearches: SavedSearchStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -90,6 +97,7 @@ class PgStorage implements Storage {
     this.core = new PgCoreStore(this.pool);
     this.erasureRequests = new PgErasureRequestStore(this.pool);
     this.accountMetadata = new PgAccountMetadataStore(this.pool, encryptionKey);
+    this.savedSearches = new PgSavedSearchStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -188,6 +196,7 @@ class MemoryStorage implements Storage {
   readonly core: CoreStore = new MemoryCoreStore();
   readonly erasureRequests: ErasureRequestStore = new MemoryErasureRequestStore();
   readonly accountMetadata: AccountMetadataStore = new MemoryAccountMetadataStore();
+  readonly savedSearches: SavedSearchStore = new MemorySavedSearchStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

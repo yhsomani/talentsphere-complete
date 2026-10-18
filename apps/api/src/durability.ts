@@ -73,6 +73,13 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/notifications/mark-read',
   'GET /api/v1/notifications/preferences',
   'PATCH /api/v1/notifications/preferences',
+  // Saved searches (existing migration 00018; SQL is source of truth).
+  'POST /api/v1/jobs/saved-searches',
+  'GET /api/v1/jobs/saved-searches',
+  'GET /api/v1/jobs/saved-searches/:id',
+  'PATCH /api/v1/jobs/saved-searches/:id',
+  'DELETE /api/v1/jobs/saved-searches/:id',
+  'POST /api/v1/jobs/saved-searches/:id/run',
   // Account metadata already has typed PostgreSQL tables (migration 00013).
   'GET /api/v1/settings',
   'PATCH /api/v1/settings',
