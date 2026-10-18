@@ -142,7 +142,11 @@ class PgStorage implements Storage {
   async health(): Promise<StorageHealth> {
     const started = Date.now();
     if (this.writerLeaseStarted && !this.writerLeaseHealthy()) {
-      return { ok: false, latencyMs: null, detail: 'Exclusive API writer lease lost; restart required.' };
+      return {
+        ok: false,
+        latencyMs: null,
+        detail: 'Exclusive API writer lease lost; restart required.',
+      };
     }
     try {
       await this.pool.query('SELECT 1');
