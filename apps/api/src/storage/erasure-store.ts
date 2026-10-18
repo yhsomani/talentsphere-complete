@@ -4,11 +4,7 @@
  * An automatic retention/deletion scheduler is NOT implemented here.
  */
 import pg from 'pg';
-import {
-  DomainError,
-  cancelAccountErasure,
-  type DataErasureRequest,
-} from '@talentsphere/domain';
+import { DomainError, cancelAccountErasure, type DataErasureRequest } from '@talentsphere/domain';
 
 export interface ErasureRequestStore {
   list(userId: string): Promise<DataErasureRequest[]>;
@@ -17,8 +13,7 @@ export interface ErasureRequestStore {
   completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void>;
 }
 
-const isActive = (r: DataErasureRequest) =>
-  r.status === 'pending' || r.status === 'grace_period';
+const isActive = (r: DataErasureRequest) => r.status === 'pending' || r.status === 'grace_period';
 
 export class MemoryErasureRequestStore implements ErasureRequestStore {
   private readonly requests = new Map<string, DataErasureRequest>();
@@ -47,7 +42,11 @@ export class MemoryErasureRequestStore implements ErasureRequestStore {
     return next;
   }
 
-  async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
+  async completeActive(
+    userId: string,
+    completedAt: string,
+    anonymizedHash: string
+  ): Promise<void> {
     for (const request of await this.list(userId)) {
       if (isActive(request)) {
         this.requests.set(request.id, {
@@ -123,7 +122,15 @@ export class PgErasureRequestStore implements ErasureRequestStore {
       }
       await client.query(
         'INSERT INTO public.data_erasure_requests (id, user_id, status, reason, grace_period_ends_at, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-        [request.id, request.userId, request.status, request.reason ?? null, request.gracePeriodEndsAt, request.createdAt, request.updatedAt]
+        [
+          request.id,
+          request.userId,
+          request.status,
+          request.reason ?? null,
+          request.gracePeriodEndsAt,
+          request.createdAt,
+          request.updatedAt,
+        ]
       );
       await client.query('COMMIT');
     } catch (err) {
@@ -162,7 +169,11 @@ export class PgErasureRequestStore implements ErasureRequestStore {
     }
   }
 
-  async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
+  async completeActive(
+    userId: string,
+    completedAt: string,
+    anonymizedHash: string
+  ): Promise<void> {
     await this.pool.query(
       "UPDATE public.data_erasure_requests SET status = 'completed', completed_at = $2, updated_at = $2, anonymized_hash = $3 WHERE user_id = $1 AND status IN ('pending', 'grace_period')",
       [userId, completedAt, anonymizedHash]
