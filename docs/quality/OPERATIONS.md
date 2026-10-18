@@ -150,6 +150,12 @@ the response header `x-talentsphere-durability: ephemeral` (registry:
 
 ### Email
 
+The API now fails creation of mailbox-verification codes and referee
+invitations closed with `SERVICE_UNAVAILABLE` in staging and production,
+before it would queue an undeliverable message. Development/test mock delivery
+is unchanged. This is a safety fallback, **not** email provider integration.
+
+
 No email provider is integrated. The worker's email handlers print messages to the log
 in development ("DEV OUTBOX") and **fail them permanently in every other environment**
 — visible as `failed` rows in `background_jobs`. Consequence: corporate-email codes
