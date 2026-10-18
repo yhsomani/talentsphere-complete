@@ -55,17 +55,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # TEMPORARY: diagnostics only. Remove once exact formatted files are committed.
-      - name: Emit exact Prettier formatting for patch review
-        run: |
-          pnpm exec prettier --write apps/api/src/storage/saved-search-store.ts tests/pg/saved-searches.test.ts
-          echo "BEGIN_STORE_FORMAT"
-          base64 -w 76 apps/api/src/storage/saved-search-store.ts
-          echo "END_STORE_FORMAT"
-          echo "BEGIN_TEST_FORMAT"
-          base64 -w 76 tests/pg/saved-searches.test.ts
-          echo "END_TEST_FORMAT"
-
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
