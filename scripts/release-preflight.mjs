@@ -63,7 +63,7 @@ async function run(query) {
   }
 
   const dir = path.resolve('supabase/migrations');
-  const files = fs.readdirSync(dir).filter((f) => /^\\d{5}_.+\\.sql$/.test(f)).sort();
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql') && /^[0-9]{5}_/.test(f)).sort();
   const ledger = await query('SELECT filename, checksum FROM public.schema_migrations');
   try {
     assertMigrationHistory(files, ledger.rows, (file) =>
