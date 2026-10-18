@@ -59,21 +59,6 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       # TESTING.md §1: code style is enforced, not advisory.
-      - name: Format diagnostic (temporary; removed before merge)
-        run: |
-          pnpm exec prettier --write \
-            apps/api/src/storage/account-store.ts \
-            apps/api/src/storage/index.ts \
-            apps/api/src/server.ts \
-            apps/worker/src/index.ts \
-            apps/worker/src/mail-provider.ts \
-            packages/config/src/env.ts \
-            tests/pg/core-persistence.test.ts \
-            tests/unit/transactional-mail.test.ts
-          echo BEGIN_FORMAT_DIFF
-          git diff --no-color --unified=3
-          echo END_FORMAT_DIFF
-
       - name: Lint (Prettier)
         run: pnpm lint
 
