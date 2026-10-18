@@ -9831,11 +9831,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const accountSettings = async (userId: string): Promise<UserSettings> => {
     const cached = userSettingsByUserId.get(userId);
     if (cached) return cached;
-    const settings =
-      (await storage.accountMetadata.getSettings(userId)) ?? createDefaultUserSettings(userId);
-    if (!(await storage.accountMetadata.getSettings(userId))) {
-      await storage.accountMetadata.saveSettings(settings);
-    }
+    const previous = await storage.accountMetadata.getSettings(userId);
+    const settings = previous ?? createDefaultUserSettings(userId);
+    if (!previous) await storage.accountMetadata.saveSettings(settings);
     userSettingsByUserId.set(userId, settings);
     return settings;
   };
@@ -9857,6 +9855,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     const current = await accountSettings(session.userId);
     const updated = updateUserSettings(current, input);
+    if (storage.mode === 'pg' && updated.byoAiKey && !env.BYO_AI_KEY_ENCRYPTION_KEY) {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'Saving a BYO AI key requires encrypted secret storage configuration.'
+      );
+    }
 
     // If profile visibility was changed, synchronize with profile entity
     if (input.profileVisibility) {
