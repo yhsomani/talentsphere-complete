@@ -9827,14 +9827,23 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     };
   };
 
+  // Settings are read from PostgreSQL on first access, not reset on restart.
+  const accountSettings = async (userId: string): Promise<UserSettings> => {
+    const cached = userSettingsByUserId.get(userId);
+    if (cached) return cached;
+    const settings =
+      (await storage.accountMetadata.getSettings(userId)) ?? createDefaultUserSettings(userId);
+    if (!(await storage.accountMetadata.getSettings(userId))) {
+      await storage.accountMetadata.saveSettings(settings);
+    }
+    userSettingsByUserId.set(userId, settings);
+    return settings;
+  };
+
   // 1. Get current user settings (creates defaults if not yet initialized)
   app.get('/api/v1/settings', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    let settings = userSettingsByUserId.get(session.userId);
-    if (!settings) {
-      settings = createDefaultUserSettings(session.userId);
-      userSettingsByUserId.set(session.userId, settings);
-    }
+    const settings = await accountSettings(session.userId);
 
     return reply.status(200).send({
       settings: sanitizeSettings(settings),
@@ -9846,13 +9855,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = UpdateUserSettingsInputSchema.parse(req.body);
 
-    let current = userSettingsByUserId.get(session.userId);
-    if (!current) {
-      current = createDefaultUserSettings(session.userId);
-    }
-
+    const current = await accountSettings(session.userId);
     const updated = updateUserSettings(current, input);
-    userSettingsByUserId.set(session.userId, updated);
 
     // If profile visibility was changed, synchronize with profile entity
     if (input.profileVisibility) {
@@ -9864,6 +9868,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         });
       }
     }
+
+    await storage.accountMetadata.saveSettings(updated);
+    userSettingsByUserId.set(session.userId, updated);
 
     await dispatchJob({
       type: 'user.settings.updated',
@@ -9898,11 +9905,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
     }
 
-    let settings = userSettingsByUserId.get(session.userId);
-    if (!settings) {
-      settings = createDefaultUserSettings(session.userId);
-      userSettingsByUserId.set(session.userId, settings);
-    }
+    const settings = await accountSettings(session.userId);
 
     // Evidence/application ownership is keyed by PROFILE id, not auth user id.
     const evidence = evidenceBySubjectId.get(profile.id) || [];
@@ -9947,9 +9950,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       updatedAt: now,
     };
 
-    const userExports = exportRequestsByUserId.get(session.userId) || [];
-    userExports.unshift(exportRequest);
-    exportRequestsByUserId.set(session.userId, userExports);
+    await storage.accountMetadata.recordExport(exportRequest);
 
     await dispatchJob({
       type: 'gdpr.data.exported',
@@ -9973,8 +9974,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // 4. Get Latest Data Export Request Status
   app.get('/api/v1/settings/export/latest', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const userExports = exportRequestsByUserId.get(session.userId) || [];
-    const latest = userExports[0] || null;
+    const latest = await storage.accountMetadata.latestExport(session.userId);
 
     return reply.status(200).send({
       latestExport: latest,
@@ -10122,6 +10122,69 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     // No reference email or verification code goes out on an erased person's
     // behalf after they are gone.
     await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
+    // Existing 00013 metadata tables are not deleted by core anonymization.
+    // Erase BYO keys and export history in the DB before acknowledging success.
+    await storage.accountMetadata.erase(session.userId);
+
+    // Remove the subject's remaining ephemeral private state while this process
+    // is still alive; database persistence for these preview modules remains
+    // an independent release gate.
+    userSettingsByUserId.delete(session.userId);
+    exportRequestsByUserId.delete(session.userId);
+    searchHistoryByUserId.delete(session.userId);
+    savedJobsByUserId.delete(session.userId);
+    subscriptionsByUserId.delete(session.userId);
+    entitlementsByUserId.delete(session.userId);
+    invoicesByUserId.delete(session.userId);
+    salaryReportsByUserId.delete(session.userId);
+    reputationSignalsByUserId.delete(session.userId);
+    xpTransactionsByUserId.delete(session.userId);
+    aiUsageMetersByUserAndDate.forEach((_meter, key) => {
+      if (key.startsWith(`${session.userId}:`)) aiUsageMetersByUserAndDate.delete(key);
+    });
+    const conversations = aiConversationsByUserId.get(session.userId) || [];
+    for (const conversation of conversations) {
+      aiConversationsById.delete(conversation.id);
+      aiMessagesByConversationId.delete(conversation.id);
+    }
+    aiConversationsByUserId.delete(session.userId);
+    const resumes = resumesByUserId.get(session.userId) || [];
+    for (const resume of resumes) {
+      resumesById.delete(resume.id);
+      for (const exported of resumeExportsByResumeId.get(resume.id) || []) {
+        resumeExportsById.delete(exported.id);
+      }
+      resumeExportsByResumeId.delete(resume.id);
+    }
+    resumesByUserId.delete(session.userId);
+    const projects = portfolioProjectsByUserId.get(session.userId) || [];
+    for (const project of projects) portfolioProjectsById.delete(project.id);
+    portfolioProjectsByUserId.delete(session.userId);
+    gamificationProfilesByUserId.delete(session.userId);
+    userBadgesByUserId.delete(session.userId);
+    activityEventsByUserId.delete(session.userId);
+    contributionScoresByUserId.delete(session.userId);
+    careerTransitionsByUserId.delete(session.userId);
+    careerMilestoneEvaluationsByUserId.delete(session.userId);
+    learningOutcomesByUserId.delete(session.userId);
+    alumniAffiliationsByUserId.delete(session.userId);
+    warmIntroPrefsByUserId.delete(session.userId);
+    warmIntroRequestsByRequesterId.delete(session.userId);
+    connectionsByUserId.delete(session.userId);
+    skillFreshnessByCandidateId.delete(profile.id);
+    behavioralProfilesByCandidateId.delete(profile.id);
+    interviewAssessmentsByCandidateId.delete(profile.id);
+    assessmentSessionsByCandidateId.delete(profile.id);
+    referralRequestsByCandidateId.delete(profile.id);
+    skillEndorsementsByRecipientId.delete(profile.id);
+    savedSearchesById.forEach((search, key) => {
+      if (search.userId === session.userId) savedSearchesById.delete(key);
+    });
+    jobAlertsById.forEach((alert, key) => {
+      if (alert.userId === session.userId) jobAlertsById.delete(key);
+    });
+    // Retained multi-party records (reviews, chat, organizational activity)
+    // need an approved per-domain redaction/retention policy before release.
 
     // Mark the durable request history only after core erasure commits.
     // If this write fails, do not claim the lifecycle was updated.
@@ -10142,7 +10205,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     return reply.status(200).send({
       message:
-        'Account logically anonymized and deactivated in compliance with GDPR Art 17 and §31.4.',
+        'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
+        'This does not certify full statutory erasure across all modules and backups.',
       anonymizedHash: result.anonymizedHash,
       completedAt: result.completedAt,
     });
