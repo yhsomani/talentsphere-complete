@@ -166,6 +166,8 @@ user/profile fallback is emitted. CSV is refused with 503 until genuinely
 implemented; no dead `downloadUrl` is returned. This is a partial snapshot:
 data in non-durable modules is not a complete statutory export. Full export
 coverage, retention and downloadable archive policy remain release gates.
+The JSON metadata deliberately makes **no statutory compliance claim** while
+the archive contains only a subset of personal data.
 
 ### Email
 

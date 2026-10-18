@@ -203,8 +203,7 @@ describe('Account Settings, Privacy & GDPR Erasure Domain (F-15, §31, BR-06)', 
       });
 
       expect(exportBundle.exportMetadata.subjectId).toBe(userId);
-      expect(exportBundle.exportMetadata.compliance).toContain('GDPR-Art-15');
-      expect(exportBundle.exportMetadata.compliance).toContain('GDPR-Art-20');
+      expect(exportBundle.exportMetadata.compliance).toEqual([]);
       expect(exportBundle.account.email).toBe(mockUser.email);
       expect(exportBundle.profile.fullName).toBe('Alex Chen');
       expect(exportBundle.settings.byoAiKey).toBeUndefined(); // Scrubbed
