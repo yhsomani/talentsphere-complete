@@ -36,11 +36,7 @@ export class MemorySavedSearchStore implements SavedSearchStore {
   }
   async update(search: SavedSearch, previousUpdatedAt: string): Promise<SavedSearch> {
     const current = this.records.get(search.id);
-    if (
-      !current ||
-      current.userId !== search.userId ||
-      current.updatedAt !== previousUpdatedAt
-    ) {
+    if (!current || current.userId !== search.userId || current.updatedAt !== previousUpdatedAt) {
       throw new DomainError('CONFLICT', 'Saved search changed; reload before editing.');
     }
     this.records.set(search.id, search);
@@ -116,10 +112,9 @@ export class PgSavedSearchStore implements SavedSearchStore {
   }
 
   async get(id: string): Promise<SavedSearch | null> {
-    const rows = await this.pool.query<Row>(
-      'SELECT * FROM public.saved_searches WHERE id = $1',
-      [id]
-    );
+    const rows = await this.pool.query<Row>('SELECT * FROM public.saved_searches WHERE id = $1', [
+      id,
+    ]);
     return rows.rows[0] ? fromRow(rows.rows[0]) : null;
   }
 
