@@ -135,8 +135,8 @@ describe('Saved-search persistence and isolation', () => {
     expect(patched.status).toBe(200);
     expect(patched.data.savedSearch.title).toBe('Remote developer roles');
     expect(
-      (await pool.query('SELECT title FROM public.saved_searches WHERE id = $1', [id]))
-        .rows[0].title
+      (await pool.query('SELECT title FROM public.saved_searches WHERE id = $1', [id])).rows[0]
+        .title
     ).toBe('Remote developer roles');
 
     const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token);
