@@ -754,7 +754,6 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
-  const savedSearchesById = new Map<string, SavedSearch>();
   const jobAlertsById = new Map<string, JobAlert>();
   const savedJobsByUserId = new Map<string, SavedJob[]>();
   const applicationDraftsById = new Map<string, ApplicationDraft>();
@@ -1920,7 +1919,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     await persist({ kind: 'job', value: job });
 
     if (job.status === 'published') {
-      const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
+      const activeSearches = (await storage.savedSearches.listAll()).filter((s) => s.isActive);
       const alerts = evaluateJobAlertsForPublishedJob(job, activeSearches);
       for (const alert of alerts) {
         jobAlertsById.set(alert.id, alert);
@@ -1997,7 +1996,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       await persist({ kind: 'job', value: updated, base: job });
 
       if (updated.status === 'published' && job.status !== 'published') {
-        const activeSearches = Array.from(savedSearchesById.values()).filter((s) => s.isActive);
+        const activeSearches = (await storage.savedSearches.listAll()).filter((s) => s.isActive);
         const alerts = evaluateJobAlertsForPublishedJob(updated, activeSearches);
         for (const alert of alerts) {
           jobAlertsById.set(alert.id, alert);
@@ -10181,9 +10180,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     assessmentSessionsByCandidateId.delete(profile.id);
     referralRequestsByCandidateId.delete(profile.id);
     skillEndorsementsByRecipientId.delete(profile.id);
-    savedSearchesById.forEach((search, key) => {
-      if (search.userId === session.userId) savedSearchesById.delete(key);
-    });
+    await storage.savedSearches.eraseUser(session.userId);
     jobAlertsById.forEach((alert, key) => {
       if (alert.userId === session.userId) jobAlertsById.delete(key);
     });
@@ -11418,7 +11415,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.post('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = CreateSavedSearchInputSchema.parse(req.body);
-    const existing = Array.from(savedSearchesById.values());
+    const existing = await storage.savedSearches.listByUser(session.userId);
 
     const savedSearch = createSavedSearch({
       userId: session.userId,
@@ -11428,16 +11425,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       existingSearches: existing,
     });
 
-    savedSearchesById.set(savedSearch.id, savedSearch);
+    await storage.savedSearches.create(savedSearch);
     return reply.status(201).send({ savedSearch });
   });
 
   // 2. List candidate's saved searches
   app.get('/api/v1/jobs/saved-searches', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const userSearches = Array.from(savedSearchesById.values()).filter(
-      (s) => s.userId === session.userId
-    );
+    const userSearches = await storage.savedSearches.listByUser(session.userId);
     return reply.status(200).send({ savedSearches: userSearches, total: userSearches.length });
   });
 
@@ -11447,7 +11442,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id } = req.params;
-      const search = savedSearchesById.get(id);
+      const search = await storage.savedSearches.get(id);
       if (!search) {
         throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
       }
@@ -11464,7 +11459,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id } = req.params;
-      const search = savedSearchesById.get(id);
+      const search = await storage.savedSearches.get(id);
       if (!search) {
         throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
       }
@@ -11473,8 +11468,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
       const input = UpdateSavedSearchInputSchema.parse(req.body);
       const updated = updateSavedSearch(search, input);
-      savedSearchesById.set(id, updated);
-      return reply.status(200).send({ savedSearch: updated });
+      const persisted = await storage.savedSearches.update(updated, search.updatedAt);
+      return reply.status(200).send({ savedSearch: persisted });
     }
   );
 
@@ -11484,14 +11479,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id } = req.params;
-      const search = savedSearchesById.get(id);
+      const search = await storage.savedSearches.get(id);
       if (!search) {
         throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
       }
       if (search.userId !== session.userId) {
         throw new DomainError('FORBIDDEN', 'Access denied to this saved search.');
       }
-      savedSearchesById.delete(id);
+      await storage.savedSearches.remove(id, session.userId);
       return reply.status(200).send({ message: 'Saved search deleted successfully.' });
     }
   );
@@ -11502,7 +11497,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id } = req.params;
-      const search = savedSearchesById.get(id);
+      const search = await storage.savedSearches.get(id);
       if (!search) {
         throw new DomainError('NOT_FOUND', `Saved search with ID "${id}" not found.`);
       }
