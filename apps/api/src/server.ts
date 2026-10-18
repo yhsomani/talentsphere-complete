@@ -9884,23 +9884,19 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.post('/api/v1/settings/export', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = RequestDataExportInputSchema.parse(req.body || {});
-
-    const user = usersById.get(session.userId) || {
-      id: session.userId,
-      email: session.email,
-      roles: session.roles as any,
-      status: 'active' as any,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    const profile = profilesByUserId.get(session.userId) || {
-      id: crypto.randomUUID(),
-      userId: session.userId,
-      fullName: 'TalentSphere User',
-      privacy: 'public' as const,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (input.format !== 'json') {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'CSV exports are not available. Request the supported JSON snapshot instead.'
+      );
+    }
+    // The verified session must map to actual persisted records. A synthetic
+    // user or randomly generated profile would be misleading in an export.
+    const user = usersById.get(session.userId);
+    const profile = profilesByUserId.get(session.userId);
+    if (!user || !profile) {
+      throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
+    }
 
     let settings = userSettingsByUserId.get(session.userId);
     if (!settings) {
@@ -9908,9 +9904,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       userSettingsByUserId.set(session.userId, settings);
     }
 
-    const evidence = evidenceBySubjectId.get(session.userId) || [];
+    // Evidence/application ownership is keyed by PROFILE id, not auth user id.
+    const evidence = evidenceBySubjectId.get(profile.id) || [];
     const applications = Array.from(applicationsById.values()).filter(
-      (a) => a.candidateId === session.userId
+      (a) => a.candidateId === profile.id
     );
     const resumes = resumesByUserId.get(session.userId) || [];
     const portfolio = portfolioProjectsByUserId.get(session.userId) || [];
@@ -9943,7 +9940,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       userId: session.userId,
       status: 'completed',
       format: input.format,
-      downloadUrl: `/api/v1/settings/export/download/${exportRequestId}`,
+      // No download route or durable archive store exists. Return the JSON
+      // directly rather than publishing a URL that always responds 404.
       expiresAt,
       createdAt: now,
       updatedAt: now,
@@ -9964,7 +9962,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     });
 
     return reply.status(200).send({
-      message: 'Data export compiled successfully in accordance with GDPR Articles 15 & 20.',
+      message:
+        'JSON snapshot compiled. Other non-durable features may be absent; ' +
+        'this is not yet a complete statutory data-export workflow.',
       exportRequest,
       data: exportBundle,
     });

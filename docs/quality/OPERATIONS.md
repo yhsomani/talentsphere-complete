@@ -158,6 +158,15 @@ notifications and notification preferences — and background jobs. Every other 
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 
+### Data export
+
+`POST /api/v1/settings/export` returns a JSON snapshot inline. Evidence
+and applications are selected by the candidate **profile** ID; no fabricated
+user/profile fallback is emitted. CSV is refused with 503 until genuinely
+implemented; no dead `downloadUrl` is returned. This is a partial snapshot:
+data in non-durable modules is not a complete statutory export. Full export
+coverage, retention and downloadable archive policy remain release gates.
+
 ### Email
 
 The API now fails creation of mailbox-verification codes and referee

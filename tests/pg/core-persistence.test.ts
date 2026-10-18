@@ -307,6 +307,19 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(applicants.body.applications[0].candidate.fullName).toBe('Casey Candidate');
   });
 
+  it('exports the real candidate evidence and applications by profile id', async () => {
+    const result = await call(app, 'POST', '/api/v1/settings/export', ids.candidateToken, {
+      format: 'json',
+    });
+    expect(result.status).toBe(200);
+    expect(result.body.data.evidence.map((value: Json) => value.id)).toContain(ids.evidenceId);
+    expect(result.body.data.applications.map((value: Json) => value.id)).toContain(
+      ids.applicationId
+    );
+    expect(result.body.exportRequest.downloadUrl).toBeUndefined();
+    expect(result.body.message).toMatch(/not yet a complete statutory/);
+  });
+
   it('lets the database arbitrate a race the read model cannot see', async () => {
     const attempts = await Promise.all(
       [1, 2, 3].map(() =>
