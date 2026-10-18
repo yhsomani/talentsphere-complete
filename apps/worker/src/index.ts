@@ -1,7 +1,8 @@
 import pg from 'pg';
 import { createLogger } from '@talentsphere/observability';
 import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsphere/domain';
-import { PermanentJobError, runClaimCycle, type ClaimHandler } from './claim.js';
+import { runClaimCycle, type ClaimHandler } from './claim.js';
+import { sendTransactionalEmail } from './mail-provider.js';
 
 // Load .env natively (Node process.loadEnvFile) exactly like the API entry
 // (apps/api/src/index.ts): found from the repo root, or two levels up when
@@ -37,13 +38,8 @@ for (const kind of DISPATCH_EVENT_KINDS) {
   claimHandlers.set(kind, recordEvent);
 }
 
-// Transactional email. No email provider is wired yet (docs/quality/
-// OPERATIONS.md). These two messages carry a credential the recipient needs —
-// a mailbox-ownership code, a referee's one-time link — so pretending they
-// were delivered would strand the user. In development the message goes to
-// the log (a "dev outbox") so the flow can be completed locally; everywhere
-// else the job fails permanently and visibly instead of acking a delivery
-// that never happened.
+// Transactional email is opt-in; deployed API routes fail closed until a
+// configured provider exists. Development retains its clearly labelled outbox.
 const APP_URL = (process.env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '');
 const deliverEmail = (
   render: (payload: Record<string, unknown>) => {
@@ -61,9 +57,11 @@ const deliverEmail = (
       );
       return;
     }
-    throw new PermanentJobError(
-      `No email provider configured: "${message.subject}" to ${message.to} was not delivered`
-    );
+    await sendTransactionalEmail(message, record.id, {
+      provider: process.env.EMAIL_PROVIDER === 'resend' ? 'resend' : 'none',
+      apiKey: process.env.RESEND_API_KEY,
+      from: process.env.EMAIL_FROM,
+    });
   };
 };
 
