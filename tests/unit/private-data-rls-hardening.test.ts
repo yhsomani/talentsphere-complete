@@ -18,9 +18,7 @@ describe('private data RLS hardening migration', () => {
   });
 
   it('avoids recursive participant-policy lookups via a fixed-search-path helper', () => {
-    expect(sql).toMatch(
-      /FUNCTION public\.is_message_thread_participant\(target_thread_id UUID\)/
-    );
+    expect(sql).toMatch(/FUNCTION public\.is_message_thread_participant\(target_thread_id UUID\)/);
     expect(sql).toMatch(/SECURITY DEFINER\s+SET search_path = ''/);
     expect(sql).toMatch(
       /thread_participants_select_policy[\s\S]*?public\.is_message_thread_participant\(thread_id\)/
@@ -40,9 +38,7 @@ describe('private data RLS hardening migration', () => {
   });
 
   it('restricts notification updates to read-status columns', () => {
-    expect(sql).toContain(
-      'REVOKE UPDATE ON public.notifications FROM PUBLIC, anon, authenticated'
-    );
+    expect(sql).toContain('REVOKE UPDATE ON public.notifications FROM PUBLIC, anon, authenticated');
     expect(sql).toContain(
       'GRANT UPDATE (is_read, read_at) ON public.notifications TO authenticated'
     );
