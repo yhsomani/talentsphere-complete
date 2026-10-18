@@ -111,10 +111,10 @@ export class PgAccountMetadataStore implements AccountMetadataStore {
     private readonly pool: pg.Pool,
     encryptionKey?: string
   ) {
-    this.encryptionKey = encryptionKey ? Buffer.from(encryptionKey, 'hex') : null;
-    if (this.encryptionKey && this.encryptionKey.length !== 32) {
-      throw new Error('BYO_AI_KEY_ENCRYPTION_KEY must be 64 hexadecimal characters.');
+    if (encryptionKey !== undefined && !/^[0-9a-fA-F]{64}$/.test(encryptionKey)) {
+      throw new Error('BYO_AI_KEY_ENCRYPTION_KEY must be exactly 64 hexadecimal characters.');
     }
+    this.encryptionKey = encryptionKey === undefined ? null : Buffer.from(encryptionKey, 'hex');
   }
 
   private encryptSecret(secret: string | null | undefined, userId: string): string | null {
