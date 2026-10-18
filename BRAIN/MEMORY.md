@@ -310,3 +310,14 @@ The implementation is a clean, modular monolith with 10 workspace packages and a
 - **Monorepo Build Status:** 10/10 packages & apps clean composite build (`tsc -b` + Vite bundle)
 - **Lint & Code Style:** 100% Prettier compliant
 - **Critical Blockers:** see §10 (2026-10-10). The billing webhook gap is closed (signed, `docs/quality/SECURITY.md` §9).
+
+---
+
+## 2026-10-18 — Proposed safety corrections (draft PR #43; not merged)
+
+- **Verification scoring:** proposal requires two independently endorsed skills to earn the +5 skills score. Two self-reported skills alone do not improve evidence badges; product approval is required before merging.
+- **Interview code:** staging/production API refuses simulated evaluation. A secure code-execution sandbox is not implemented.
+- **Transactional email:** staging/production refuse to create undeliverable mailbox-code and referee-link requests. A real email provider is still absent.
+- **Privacy contacts:** hard-coded unverified mailboxes and response-time claims are removed from the preview; verified `VITE_PRIVACY_EMAIL` and `VITE_SECURITY_EMAIL` are required for public contact details. Terms and policy remain legally unapproved drafts.
+- **Erasure requests:** draft PostgreSQL request/status/cancel history uses existing table and has restart test. Automatic due-date execution, recruiter erasure semantics, and policy alignment remain open.
+- **Release status:** blocked. GitHub issues #44–#50 track unresolved owner/deployment work. Runtime and CI status must always be checked at the PR's latest commit.
