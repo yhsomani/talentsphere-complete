@@ -62,14 +62,6 @@ jobs:
       - name: Lint (Prettier)
         run: pnpm lint
 
-      # Diagnostic only; removed before merge. Show the exact formatter patch
-      # in CI logs so it can be committed instead of masking lint failures.
-      - name: Show formatting patch
-        if: failure()
-        run: |
-          pnpm exec prettier --write tests/pg/private-data-rls.test.ts
-          git diff -- tests/pg/private-data-rls.test.ts
-
       - name: Typecheck
         run: pnpm typecheck
 
