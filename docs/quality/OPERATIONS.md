@@ -158,6 +158,27 @@ notifications and notification preferences — and background jobs. Every other 
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 
+### Transactional email (opt-in)
+
+Set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (server/worker secret),
+`EMAIL_FROM` (verified sender), and an HTTPS `APP_URL` in both the API and
+worker environments. **Configured does not mean delivered:** the API reports
+durable enqueue, and the worker submits with a provider idempotency key. The
+provider response can still be rejected, delayed or bounced. Validate sender
+DNS, delivery and bounce monitoring in staging before claiming issue #44 closed.
+With no configuration, deployed creation endpoints fail closed with 503.
+
+### Account metadata and secret handling
+
+User settings and export-request history now use existing `user_settings` and
+`data_export_requests` PostgreSQL tables. The BYO AI key uses AES-256-GCM with
+a separate `BYO_AI_KEY_ENCRYPTION_KEY` (64 hex chars); no key means storing a
+BYO secret is refused, not downgraded to plaintext. Rotate only with a tested
+re-encryption plan. Legacy plaintext keys, if any, must be remediated explicitly.
+Account erasure clears those tables and a defined set of in-process private
+maps, but other modules, shared records and backups still require the owner-
+approved full erasure/retention inventory.
+
 ### Data export
 
 `POST /api/v1/settings/export` returns a JSON snapshot inline. Evidence
