@@ -80,7 +80,7 @@ describe('Saved-job bookmark persistence', () => {
     await dropTestDatabase(withDb(baseUrl, 'postgres'), dbName);
   });
 
-  it('keeps owner-specific bookmarks across restart and erases them on account deletion', async () => {
+  it('persists owner bookmarks across restart and erasure', async () => {
     const register = async (email: string, role: 'candidate' | 'recruiter') => {
       const res = await call(app, 'POST', '/api/v1/auth/register', undefined, {
         email,
