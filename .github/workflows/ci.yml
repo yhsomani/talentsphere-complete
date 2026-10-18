@@ -71,6 +71,9 @@ jobs:
 
       # Every migration applies cleanly to an empty database, and re-running
       # the runner is a no-op (idempotent ledger).
+      - name: Verify migration history guard
+        run: node --test scripts/tests/migration-integrity.test.mjs
+
       - name: Migrations on a clean database
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/talentsphere_ci
@@ -80,6 +83,11 @@ jobs:
           grep -q "Already up to date" /tmp/second-run.log
 
       # Restart round-trip, race arbitration, BR-15 and erasure on real PG.
+      - name: Verify schema and migration ledger after upgrade
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/talentsphere_ci
+        run: node scripts/release-preflight.mjs --mode=schema
+
       - name: Persistence tests (real PostgreSQL)
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres

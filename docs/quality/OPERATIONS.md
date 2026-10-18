@@ -190,19 +190,47 @@ coverage, retention and downloadable archive policy remain release gates.
 The JSON metadata deliberately makes **no statutory compliance claim** while
 the archive contains only a subset of personal data.
 
-### Email
+### Transactional email operational gate
 
-The API now fails creation of mailbox-verification codes and referee
-invitations closed with `SERVICE_UNAVAILABLE` in staging and production,
-before it would queue an undeliverable message. Development/test mock delivery
-is unchanged. This is a safety fallback, **not** email provider integration.
+The Resend adapter is present and **opt-in**, not proof of mailbox delivery.
+Before enabling public verification, configure a verified sender domain, install
+`EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, and `APP_URL` in the
+API and worker secrets, send both code and referee-link emails to real staging
+mailboxes, and record delivery, bounce and failure evidence. Never put sample
+one-time tokens or provider credentials in GitHub evidence. Pending delivery is
+not successful delivery. Without approved provider configuration, deployed
+verification creation refuses requests; do not relabel that as delivered.
 
+### Target database preflight (read-only)
 
-No email provider is integrated. The worker's email handlers print messages to the log
-in development ("DEV OUTBOX") and **fail them permanently in every other environment**
-— visible as `failed` rows in `background_jobs`. Consequence: corporate-email codes
-and referee links cannot reach anyone outside development, so work-history verification
-cannot be completed there. Integrating a provider is an owner decision (new infrastructure).
+Run from the repository root with `DATABASE_URL` pointing **only** at the
+intended target. Output contains check identifiers and counts, not personal
+records or secrets; nonzero exit status blocks promotion.
+
+```sh
+# Before applying migration 00043 on an EXISTING populated database:
+node scripts/release-preflight.mjs --mode=pre-00043
+# After applying all migrations; also run in CI against clean Postgres:
+node scripts/release-preflight.mjs --mode=schema
+# On staging/production, from an external monitor after the worker is running:
+node scripts/release-preflight.mjs --mode=operational
+```
+
+The pre-00043 run detects case-folded email duplicates, active-application
+collisions and candidate IDs with no corresponding user record. Resolve conflicts
+under an approved backfill plan, **not by deleting rows automatically**. The
+schema run detects changed applied SQL, missing 00043/00049, required indexes,
+foreign-key targets, and sensitive-table RLS enablement. The operational run
+also fails on stale worker heartbeat (45 seconds), queued jobs overdue by five
+minutes, or terminal job failures within the past hour. Wire the nonzero exit
+status to an external monitoring/alerting service; running the script once
+creates no ongoing alerts. It checks RLS is enabled, **not** that hosted roles,
+grants and all policies prove cross-tenant isolation.
+
+These checks do **not** demonstrate an actual populated-database upgrade,
+backup/point-in-time restore, load or cold-boot performance, HTTPS reverse
+proxy, multi-replica admission, rolling deploy or incident response. Capture
+separate staging evidence and operator approval before closing #46 or #47.
 
 ### Logs and alerting
 
@@ -217,5 +245,5 @@ cannot be completed there. Integrating a provider is an owner decision (new infr
 - `/health` — liveness. `/api/v1/health` — adds environment. Both are exempt from the rate limiter, so a load balancer's polling can never throttle the API into looking dead.
 - `GET /api/v1/admin/health-diagnostics` (platform admin) — storage mode, database
   reachability (a live round-trip), queue status and active job count, and how many routes
-  are durable. Worker liveness is measured with the database heartbeat: a dead worker over a live
-  database still reports the queue as operational — watch for `queued` jobs that age.
+  are durable. Worker liveness uses the database heartbeat and flags an absent or stale worker.
+  Also monitor overdue queued and failed/dead jobs; health is not a delivery receipt.
