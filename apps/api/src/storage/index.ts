@@ -2,6 +2,11 @@ import pg from 'pg';
 import { MemoryJobStore, createPgJobStore, type JobStore } from '@talentsphere/domain';
 import { MemoryCoreStore, PgCoreStore, type CoreStore } from './core-store.js';
 import {
+  MemoryAccountMetadataStore,
+  PgAccountMetadataStore,
+  type AccountMetadataStore,
+} from './account-store.js';
+import {
   MemoryErasureRequestStore,
   PgErasureRequestStore,
   type ErasureRequestStore,
@@ -38,6 +43,7 @@ export interface Storage {
    */
   readonly core: CoreStore;
   readonly erasureRequests: ErasureRequestStore;
+  readonly accountMetadata: AccountMetadataStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -59,6 +65,7 @@ class PgStorage implements Storage {
   readonly jobs: JobStore;
   readonly core: CoreStore;
   readonly erasureRequests: ErasureRequestStore;
+  readonly accountMetadata: AccountMetadataStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -82,6 +89,7 @@ class PgStorage implements Storage {
     this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
     this.core = new PgCoreStore(this.pool);
     this.erasureRequests = new PgErasureRequestStore(this.pool);
+    this.accountMetadata = new PgAccountMetadataStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -179,6 +187,7 @@ class MemoryStorage implements Storage {
   readonly jobs: JobStore = new MemoryJobStore();
   readonly core: CoreStore = new MemoryCoreStore();
   readonly erasureRequests: ErasureRequestStore = new MemoryErasureRequestStore();
+  readonly accountMetadata: AccountMetadataStore = new MemoryAccountMetadataStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({
