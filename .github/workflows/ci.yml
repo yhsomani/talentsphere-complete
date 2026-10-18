@@ -55,17 +55,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Temporary branch-only formatting diagnostics; remove before review.
-      - name: Emit exact Prettier output for bookmark patch
-        run: |
-          pnpm exec prettier --write apps/api/src/storage/index.ts tests/pg/saved-jobs.test.ts
-          echo "BEGIN_BOOKMARK_STORE_INDEX"
-          base64 -w 76 apps/api/src/storage/index.ts
-          echo "END_BOOKMARK_STORE_INDEX"
-          echo "BEGIN_BOOKMARK_TEST"
-          base64 -w 76 tests/pg/saved-jobs.test.ts
-          echo "END_BOOKMARK_TEST"
-
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
