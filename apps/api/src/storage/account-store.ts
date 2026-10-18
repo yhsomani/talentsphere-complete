@@ -107,7 +107,10 @@ function fromExportRow(r: ExportRow): DataExportRequest {
 export class PgAccountMetadataStore implements AccountMetadataStore {
   private readonly encryptionKey: Buffer | null;
 
-  constructor(private readonly pool: pg.Pool, encryptionKey?: string) {
+  constructor(
+    private readonly pool: pg.Pool,
+    encryptionKey?: string
+  ) {
     this.encryptionKey = encryptionKey ? Buffer.from(encryptionKey, 'hex') : null;
     if (this.encryptionKey && this.encryptionKey.length !== 32) {
       throw new Error('BYO_AI_KEY_ENCRYPTION_KEY must be 64 hexadecimal characters.');
@@ -195,12 +198,25 @@ export class PgAccountMetadataStore implements AccountMetadataStore {
         ai_data_usage_consent = EXCLUDED.ai_data_usage_consent,
         updated_at = EXCLUDED.updated_at`,
       [
-        s.userId, s.theme, s.language, s.timezone, s.profileVisibility,
-        s.showEmail, s.showActivity, s.allowConnectionRequests, s.allowDirectMessages,
-        s.searchEngineIndexing, s.emailNotifications, s.pushNotifications,
-        s.marketingEmails, s.digestFrequency, s.twoFactorEnabled,
+        s.userId,
+        s.theme,
+        s.language,
+        s.timezone,
+        s.profileVisibility,
+        s.showEmail,
+        s.showActivity,
+        s.allowConnectionRequests,
+        s.allowDirectMessages,
+        s.searchEngineIndexing,
+        s.emailNotifications,
+        s.pushNotifications,
+        s.marketingEmails,
+        s.digestFrequency,
+        s.twoFactorEnabled,
         this.encryptSecret(s.byoAiKey, s.userId),
-        s.aiDataUsageConsent, s.createdAt, s.updatedAt,
+        s.aiDataUsageConsent,
+        s.createdAt,
+        s.updatedAt,
       ]
     );
   }
@@ -211,8 +227,14 @@ export class PgAccountMetadataStore implements AccountMetadataStore {
         id, user_id, status, format, download_url, expires_at, created_at, updated_at
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
       [
-        r.id, r.userId, r.status, r.format, r.downloadUrl ?? null,
-        r.expiresAt ?? null, r.createdAt, r.updatedAt,
+        r.id,
+        r.userId,
+        r.status,
+        r.format,
+        r.downloadUrl ?? null,
+        r.expiresAt ?? null,
+        r.createdAt,
+        r.updatedAt,
       ]
     );
   }

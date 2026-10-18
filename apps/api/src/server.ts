@@ -11985,7 +11985,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         // Without a mail provider queued work fails permanently; do not say a code was sent.
         if (
           (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
-          !(env.EMAIL_PROVIDER === 'resend' && !!env.RESEND_API_KEY && !!env.EMAIL_FROM && env.APP_URL.startsWith('https://'))
+          !(
+            env.EMAIL_PROVIDER === 'resend' &&
+            !!env.RESEND_API_KEY &&
+            !!env.EMAIL_FROM &&
+            env.APP_URL.startsWith('https://')
+          )
         ) {
           throw new DomainError(
             'SERVICE_UNAVAILABLE',
@@ -12112,7 +12117,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       if (
         (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
-        !(env.EMAIL_PROVIDER === 'resend' && !!env.RESEND_API_KEY && !!env.EMAIL_FROM && env.APP_URL.startsWith('https://'))
+        !(
+          env.EMAIL_PROVIDER === 'resend' &&
+          !!env.RESEND_API_KEY &&
+          !!env.EMAIL_FROM &&
+          env.APP_URL.startsWith('https://')
+        )
       ) {
         throw new DomainError(
           'SERVICE_UNAVAILABLE',

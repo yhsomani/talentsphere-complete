@@ -15,7 +15,9 @@ describe('Transactional mail adapter (provider transport mocked)', () => {
   };
 
   it('submits idempotently without logging the message secret', async () => {
-    const send = vi.fn(async () => new Response(JSON.stringify({ id: 'email_1' }), { status: 200 }));
+    const send = vi.fn(
+      async () => new Response(JSON.stringify({ id: 'email_1' }), { status: 200 })
+    );
     await sendTransactionalEmail(message, 'job_123', config, send as typeof fetch);
     expect(send).toHaveBeenCalledOnce();
     const [url, options] = send.mock.calls[0] as unknown as [string, RequestInit];
@@ -48,8 +50,11 @@ describe('Transactional mail adapter (provider transport mocked)', () => {
   });
 
   it('does not include secrets in network-error messages', async () => {
-    const send = vi.fn(async () => { throw new Error(message.text); });
-    await expect(sendTransactionalEmail(message, 'job_123', config, send as typeof fetch))
-      .rejects.toThrow('provider request failed');
+    const send = vi.fn(async () => {
+      throw new Error(message.text);
+    });
+    await expect(
+      sendTransactionalEmail(message, 'job_123', config, send as typeof fetch)
+    ).rejects.toThrow('provider request failed');
   });
 });

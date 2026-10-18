@@ -52,9 +52,15 @@ export async function sendTransactionalEmail(
     throw new Error('Transactional email provider request failed.');
   }
   if (response.ok) return;
-  if (response.status === 408 || response.status === 409 || response.status === 429 ||
-      response.status >= 500) {
+  if (
+    response.status === 408 ||
+    response.status === 409 ||
+    response.status === 429 ||
+    response.status >= 500
+  ) {
     throw new Error(`Transactional email provider temporarily unavailable (${response.status}).`);
   }
-  throw new PermanentJobError(`Transactional email provider rejected request (${response.status}).`);
+  throw new PermanentJobError(
+    `Transactional email provider rejected request (${response.status}).`
+  );
 }

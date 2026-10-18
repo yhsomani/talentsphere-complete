@@ -332,9 +332,10 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(updated.body.settings.theme).toBe('dark');
     expect(updated.body.settings.digestFrequency).toBe('weekly');
     expect(updated.body.settings.byoAiKey).toBe('••••••••');
-    const [encrypted] = await sql('SELECT byo_ai_key FROM public.user_settings WHERE user_id = $1', [
-      ids.candidateUserId,
-    ]);
+    const [encrypted] = await sql(
+      'SELECT byo_ai_key FROM public.user_settings WHERE user_id = $1',
+      [ids.candidateUserId]
+    );
     expect(encrypted.byo_ai_key).toMatch(/^enc:v1:/);
     expect(encrypted.byo_ai_key).not.toContain('sk-fake-test-only');
 
@@ -343,8 +344,9 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     });
     expect(exported.status).toBe(200);
     const requestId = exported.body.exportRequest.id;
-    expect(await sql('SELECT id FROM public.data_export_requests WHERE id = $1', [requestId]))
-      .toHaveLength(1);
+    expect(
+      await sql('SELECT id FROM public.data_export_requests WHERE id = $1', [requestId])
+    ).toHaveLength(1);
 
     await app.close();
     app = await boot();
@@ -500,8 +502,9 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(user.email).toMatch(/^anonymized_/);
     expect(user.status).toBe('deactivated');
     expect(user.password_hash).toBe('!erased');
-    expect(await sql('SELECT 1 FROM public.user_settings WHERE user_id = $1', [ids.candidateUserId]))
-      .toHaveLength(0);
+    expect(
+      await sql('SELECT 1 FROM public.user_settings WHERE user_id = $1', [ids.candidateUserId])
+    ).toHaveLength(0);
     expect(
       await sql('SELECT 1 FROM public.data_export_requests WHERE user_id = $1', [
         ids.candidateUserId,
