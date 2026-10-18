@@ -16,8 +16,16 @@ const dbName = `ts_pgrls_${crypto.randomBytes(4).toString('hex')}`;
 const withDb = (url: string, name: string) => url.replace(/\/[^/?]*(\?|$)/, `/${name}$1`);
 const databaseUrl = withDb(baseUrl, dbName);
 
-const alice = { user: crypto.randomUUID(), profile: crypto.randomUUID(), thread: crypto.randomUUID() };
-const ben = { user: crypto.randomUUID(), profile: crypto.randomUUID(), thread: crypto.randomUUID() };
+const alice = {
+  user: crypto.randomUUID(),
+  profile: crypto.randomUUID(),
+  thread: crypto.randomUUID(),
+};
+const ben = {
+  user: crypto.randomUUID(),
+  profile: crypto.randomUUID(),
+  thread: crypto.randomUUID(),
+};
 const notificationIds = { alice: crypto.randomUUID(), ben: crypto.randomUUID() };
 
 let pool: pg.Pool;
