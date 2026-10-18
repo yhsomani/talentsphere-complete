@@ -313,8 +313,20 @@ export function calculateVerificationScoreAndBadge(
     }
   }
 
-  // 3. Verified skills attached: +5 pts for at least 2 skills
-  if (workHistory.skills && workHistory.skills.length >= 2) {
+  // 3. Independently endorsed skills: self-declared skills alone prove nothing.
+  // Count distinct candidate skills confirmed by submitted references that
+  // validated the role; never promote a verification badge for typed claims.
+  const confirmedSkills = new Set(
+    validConfirmedRefs.flatMap((ref) =>
+      ref.endorsedSkills.map((skill) => skill.trim().toLocaleLowerCase())
+    )
+  );
+  const independentlyEndorsed = new Set(
+    (workHistory.skills ?? [])
+      .map((skill) => skill.trim().toLocaleLowerCase())
+      .filter((skill) => confirmedSkills.has(skill))
+  );
+  if (independentlyEndorsed.size >= 2) {
     score += 5;
   }
 

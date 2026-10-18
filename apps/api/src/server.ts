@@ -3567,6 +3567,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
       const { isCandidate } = requireInterviewParticipant(session, assessment);
 
+      // No sandbox executes submitted programs. Never publish simulated test
+      // results as real hiring-assessment evidence outside local development.
+      if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'Automated code execution is unavailable until a real isolated sandbox is configured.'
+        );
+      }
       const input = ExecuteInterviewCodeInputSchema.parse(req.body);
       let testCases = input.customTestCases || [];
       if (input.questionId) {

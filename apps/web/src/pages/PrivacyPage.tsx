@@ -3,7 +3,16 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { Card, CardHeader, CardTitle, CardContent, LockIcon } from '../components/ui/index.js';
 
+// Privacy/security inbox ownership must be verified by the deployer. A
+// fictional address or unsupported response-time promise is not a contact.
+const configuredEmail = (value: string | undefined): string | null => {
+  const email = value?.trim() ?? '';
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
+};
+
 export const PrivacyPage: React.FC = () => {
+  const privacyEmail = configuredEmail(import.meta.env.VITE_PRIVACY_EMAIL);
+  const securityEmail = configuredEmail(import.meta.env.VITE_SECURITY_EMAIL);
   usePageMeta(
     'Privacy Policy',
     'What TalentSphere collects, why, who can see it, and how to remove it.'
@@ -456,8 +465,7 @@ export const PrivacyPage: React.FC = () => {
             5. Data Protection Officer (DPO) & Contact
           </h2>
           <p style={{ fontSize: '0.9375rem', color: colors.neutral[700], lineHeight: 1.6 }}>
-            For privacy inquiries, cryptographic key rotations, or formal GDPR/CCPA requests,
-            contact our Data Protection Officer at:
+            Privacy and security inquiries require a verified, actively monitored contact channel.
           </p>
           <div
             style={{
@@ -469,24 +477,27 @@ export const PrivacyPage: React.FC = () => {
             }}
           >
             <strong>TalentSphere Privacy Operations</strong>
-            <br />
-            Email:{' '}
-            <a
-              href="mailto:privacy@talentsphere.dev"
-              style={{ color: colors.primary[700], fontWeight: 600 }}
-            >
-              <code>privacy@talentsphere.dev</code>
-            </a>
-            <br />
-            Security Incident Response:{' '}
-            <a
-              href="mailto:security@talentsphere.dev"
-              style={{ color: colors.primary[700], fontWeight: 600 }}
-            >
-              <code>security@talentsphere.dev</code>
-            </a>
-            <br />
-            Response SLA: Within 48 business hours.
+            {privacyEmail ? (
+              <p>
+                Privacy inquiries:{' '}
+                <a href={`mailto:${privacyEmail}`} style={{ color: colors.primary[700] }}>
+                  {privacyEmail}
+                </a>
+              </p>
+            ) : (
+              <p data-testid="privacy-contact-unconfigured">
+                A verified privacy contact has not been configured. This draft is not ready for a
+                public release.
+              </p>
+            )}
+            {securityEmail && (
+              <p>
+                Security incident reports:{' '}
+                <a href={`mailto:${securityEmail}`} style={{ color: colors.primary[700] }}>
+                  {securityEmail}
+                </a>
+              </p>
+            )}
           </div>
         </section>
       </div>
