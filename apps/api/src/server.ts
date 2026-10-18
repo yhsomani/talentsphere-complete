@@ -11979,7 +11979,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       if (!body.verificationCode) {
         // Without a mail provider queued work fails permanently; do not say a code was sent.
-        if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+        if (
+          (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
+          !(env.EMAIL_PROVIDER === 'resend' && !!env.RESEND_API_KEY && !!env.EMAIL_FROM && env.APP_URL.startsWith('https://'))
+        ) {
           throw new DomainError(
             'SERVICE_UNAVAILABLE',
             'Work-email verification is unavailable until email delivery is configured.'
@@ -12097,7 +12100,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         throw new DomainError('FORBIDDEN', 'Access denied to request reference for this record.');
       }
 
-      if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+      if (
+        (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
+        !(env.EMAIL_PROVIDER === 'resend' && !!env.RESEND_API_KEY && !!env.EMAIL_FROM && env.APP_URL.startsWith('https://'))
+      ) {
         throw new DomainError(
           'SERVICE_UNAVAILABLE',
           'Reference invitations are unavailable until email delivery is configured.'
