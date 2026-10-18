@@ -11,7 +11,9 @@ import { buildApp } from '../../apps/api/src/server.js';
 import { dropTestDatabase } from './test-db.js';
 
 const baseUrl = process.env.TEST_DATABASE_URL;
-if (!baseUrl) throw new Error('TEST_DATABASE_URL is required for PostgreSQL saved-search tests.');
+if (!baseUrl) {
+  throw new Error('TEST_DATABASE_URL is required for PostgreSQL saved-search tests.');
+}
 
 const dbName = `ts_pgsaved_${crypto.randomBytes(4).toString('hex')}`;
 const withDb = (url: string, name: string) => {
@@ -76,7 +78,7 @@ describe('Saved-search persistence and isolation', () => {
     await dropTestDatabase(withDb(baseUrl, 'postgres'), dbName);
   });
 
-  it('persists real CRUD after restart without exposing a different user\'s searches', async () => {
+  it("persists real CRUD after restart without exposing a different user's searches", async () => {
     const password = 'long-saved-search-test-passphrase';
     const register = async (email: string) => {
       const res = await call(app, 'POST', '/api/v1/auth/register', undefined, {
@@ -105,9 +107,15 @@ describe('Saved-search persistence and isolation', () => {
       [id, owner.user.id]
     );
     expect(persisted.rows).toMatchObject([{ title: 'Remote platform roles', work_mode: 'remote' }]);
-    expect((await call(app, 'GET', '/api/v1/jobs/saved-searches', stranger.token)).data.total).toBe(0);
-    expect((await call(app, 'GET', `/api/v1/jobs/saved-searches/${id}`, stranger.token)).status).toBe(403);
-    expect((await call(app, 'DELETE', `/api/v1/jobs/saved-searches/${id}`, stranger.token)).status).toBe(403);
+    expect((await call(app, 'GET', '/api/v1/jobs/saved-searches', stranger.token)).data.total).toBe(
+      0
+    );
+    expect(
+      (await call(app, 'GET', `/api/v1/jobs/saved-searches/${id}`, stranger.token)).status
+    ).toBe(403);
+    expect(
+      (await call(app, 'DELETE', `/api/v1/jobs/saved-searches/${id}`, stranger.token)).status
+    ).toBe(403);
 
     await app.close();
     app = await boot();
@@ -126,10 +134,20 @@ describe('Saved-search persistence and isolation', () => {
     });
     expect(patched.status).toBe(200);
     expect(patched.data.savedSearch.title).toBe('Remote developer roles');
-    expect((await pool.query('SELECT title FROM public.saved_searches WHERE id = $1', [id])).rows[0].title).toBe('Remote developer roles');
+    expect(
+      (await pool.query('SELECT title FROM public.saved_searches WHERE id = $1', [id]))
+        .rows[0].title
+    ).toBe('Remote developer roles');
 
     const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token);
     expect(erased.status).toBe(200);
-    expect((await pool.query('SELECT count(*)::int AS n FROM public.saved_searches WHERE user_id = $1', [owner.user.id])).rows[0].n).toBe(0);
+    expect(
+      (
+        await pool.query(
+          'SELECT count(*)::int AS n FROM public.saved_searches WHERE user_id = $1',
+          [owner.user.id]
+        )
+      ).rows[0].n
+    ).toBe(0);
   });
 });
