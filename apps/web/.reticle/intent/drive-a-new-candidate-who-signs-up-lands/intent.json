@@ -6,14 +6,15 @@
       },
       "declaredAt": 1791643198839,
       "id": "flow:drive-a-new-candidate-who-signs-up-lands-on-a-dashboar",
+      "source": "decided on the dashboard",
       "state": "bound",
       "statement": "A new candidate who signs up lands on a dashboard about themselves (their own name, no demo person), and stays signed in across a reload",
-      "status": "proposed",
+      "status": "proved",
       "subject": "drive-a-new-candidate-who-signs-up-lands",
       "surface": {
         "flow": "drive-a-new-candidate-who-signs-up-lands-on-a-dashboar"
       },
-      "updatedAt": 1791643198849
+      "updatedAt": 1792326357741
     }
   },
   "subject": "drive-a-new-candidate-who-signs-up-lands",

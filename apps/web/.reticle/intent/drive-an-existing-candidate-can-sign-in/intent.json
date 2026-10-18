@@ -6,14 +6,15 @@
       },
       "declaredAt": 1791643363364,
       "id": "flow:drive-an-existing-candidate-can-sign-in-with-email-and",
+      "source": "decided on the dashboard",
       "state": "bound",
       "statement": "An existing candidate can sign in with email and password and reaches their own dashboard",
-      "status": "proposed",
+      "status": "proved",
       "subject": "drive-an-existing-candidate-can-sign-in",
       "surface": {
         "flow": "drive-an-existing-candidate-can-sign-in-with-email-and"
       },
-      "updatedAt": 1791643363458
+      "updatedAt": 1792326357776
     }
   },
   "subject": "drive-an-existing-candidate-can-sign-in",
