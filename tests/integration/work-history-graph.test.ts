@@ -241,8 +241,8 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.workHistory.corporateEmail).toBe('alex.mercer@acmecloud.io');
       expect(data.workHistory.emailVerifiedAt).toBeDefined();
       expect(data.workHistory.verificationStatus).toBe('verified');
-      // 40 pts email + 5 pts skills = 45 pts -> bronze
-      expect(data.workHistory.verificationScore).toBe(45);
+      // 40 pts for mailbox proof; unendorsed self-reported skills earn no trust points
+      expect(data.workHistory.verificationScore).toBe(40);
       expect(data.workHistory.badgeTier).toBe('bronze');
     });
 
@@ -426,8 +426,8 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.reference.ratings.technicalProficiency).toBe(5);
 
       // Work history recalculation:
-      // Email (40) + Manager Ref (30) + High Rating Bonus (10) + Skills (5) = 85 -> Gold Tier!
-      expect(data.workHistory.verificationScore).toBe(85);
+      // Email (40) + Manager Ref (30) + High Rating Bonus (10) = 80 -> Gold Tier
+      expect(data.workHistory.verificationScore).toBe(80);
       expect(data.workHistory.badgeTier).toBe('gold');
       expect(data.workHistory.verificationStatus).toBe('verified');
       // The referee sees the outcome, not the candidate's private record.
@@ -620,7 +620,7 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.graph.summary.verifiedRoles).toBe(1);
       expect(data.graph.summary.totalReferences).toBe(1);
       expect(data.graph.summary.averageReferenceRating).toBe(5);
-      expect(data.graph.summary.aggregateTrustScore).toBe(85);
+      expect(data.graph.summary.aggregateTrustScore).toBe(80);
       expect(data.graph.summary.topVerifiedSkills.length).toBeGreaterThanOrEqual(1);
     });
   });
