@@ -40,6 +40,7 @@ describe('SEC: private data RLS hardening migration', () => {
       expect(sql).toContain(`ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;`);
     }
   });
+
   it('qualifies the outer preference owner in the follow-up migration', () => {
     const fix = fs.readFileSync(
       path.resolve('supabase/migrations/00048_notification_preferences_rls_scope.sql'),
@@ -48,5 +49,4 @@ describe('SEC: private data RLS hardening migration', () => {
     expect(fix).toContain('p.id = notification_preferences.user_id');
     expect(fix).not.toMatch(/p\.id\s*=\s*user_id\b/);
   });
-
 });
