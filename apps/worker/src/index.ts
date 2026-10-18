@@ -125,6 +125,17 @@ function resolveStore(): { store: JobStore; heartbeat: () => Promise<void> } | n
 }
 
 async function runWorker(): Promise<void> {
+  if (
+    (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') &&
+    process.env.EMAIL_PROVIDER === 'resend' &&
+    (!process.env.RESEND_API_KEY ||
+      !process.env.EMAIL_FROM ||
+      !process.env.APP_URL?.startsWith('https://'))
+  ) {
+    throw new Error(
+      'Email provider configuration invalid: use a verified sender, API key and HTTPS APP_URL.'
+    );
+  }
   const runner = resolveStore();
   if (!runner) {
     logger.warn(
