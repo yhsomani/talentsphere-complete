@@ -133,6 +133,15 @@ localhost origin for testing.
 
 ### What survives a restart
 
+Erasure request creation, status history and cancellation now use the existing
+`public.data_erasure_requests` PostgreSQL table through
+`apps/api/src/storage/erasure-store.ts`. A database account-row lock
+serializes concurrent erasure requests. The immediate erasure operation is
+still separate. **No scheduled deletion executor exists yet** and the
+30-day grace-period versus immediate-delete policy needs explicit owner/legal
+approval before a public release. Do not claim due-date deletion is automatic.
+
+
 The core loop — accounts, profiles, organizations and members, skills, jobs,
 applications, evidence, work history, references, open email challenges,
 notifications and notification preferences — and background jobs. Every other route keeps its state in process memory and says so with
