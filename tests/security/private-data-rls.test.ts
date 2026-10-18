@@ -31,8 +31,11 @@ describe('SEC: private data RLS hardening migration', () => {
 
   it('re-enables RLS on all five private tables', () => {
     for (const table of [
-      'message_threads', 'thread_participants', 'messages',
-      'notifications', 'notification_preferences',
+      'message_threads',
+      'thread_participants',
+      'messages',
+      'notifications',
+      'notification_preferences',
     ]) {
       expect(sql).toContain(`ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;`);
     }
