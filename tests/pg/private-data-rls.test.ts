@@ -126,7 +126,10 @@ describe('RLS: two-account isolation on real PostgreSQL', () => {
   });
 
   it('shows each account only its own threads, participants, messages and notifications', async () => {
-    for (const [actor, other] of [[alice, ben], [ben, alice]]) {
+    for (const [actor, other] of [
+      [alice, ben],
+      [ben, alice],
+    ]) {
       await asUser(actor.user, async (client) => {
         const threads = await client.query('SELECT id FROM public.message_threads');
         expect(threads.rows.map((row) => row.id)).toEqual([actor.thread]);
@@ -145,10 +148,9 @@ describe('RLS: two-account isolation on real PostgreSQL', () => {
         const prefs = await client.query('SELECT user_id FROM public.notification_preferences');
         expect(prefs.rows.map((row) => row.user_id)).toEqual([actor.profile]);
 
-        const swapped = await client.query(
-          'SELECT id FROM public.message_threads WHERE id = $1',
-          [other.thread]
-        );
+        const swapped = await client.query('SELECT id FROM public.message_threads WHERE id = $1', [
+          other.thread,
+        ]);
         expect(swapped.rowCount).toBe(0);
       });
     }
@@ -246,10 +248,9 @@ describe('RLS: two-account isolation on real PostgreSQL', () => {
 
     await asUser(ben.user, async (client) => {
       await expect(
-        client.query(
-          'INSERT INTO public.notification_preferences (user_id) VALUES ($1)',
-          [alice.profile]
-        )
+        client.query('INSERT INTO public.notification_preferences (user_id) VALUES ($1)', [
+          alice.profile,
+        ])
       ).rejects.toMatchObject({ code: '42501' });
     });
   });
