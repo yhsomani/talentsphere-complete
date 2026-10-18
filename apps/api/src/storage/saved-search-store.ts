@@ -1,9 +1,5 @@
 import type pg from 'pg';
-import {
-  DomainError,
-  MAX_ACTIVE_SAVED_SEARCHES,
-  type SavedSearch,
-} from '@talentsphere/domain';
+import { DomainError, MAX_ACTIVE_SAVED_SEARCHES, type SavedSearch } from '@talentsphere/domain';
 
 /** Saved-search CRUD is immediately authoritative in SQL in pg mode. */
 export interface SavedSearchStore {
@@ -40,7 +36,11 @@ export class MemorySavedSearchStore implements SavedSearchStore {
   }
   async update(search: SavedSearch, previousUpdatedAt: string): Promise<SavedSearch> {
     const current = this.records.get(search.id);
-    if (!current || current.userId !== search.userId || current.updatedAt !== previousUpdatedAt) {
+    if (
+      !current ||
+      current.userId !== search.userId ||
+      current.updatedAt !== previousUpdatedAt
+    ) {
       throw new DomainError('CONFLICT', 'Saved search changed; reload before editing.');
     }
     this.records.set(search.id, search);
@@ -101,7 +101,9 @@ export class PgSavedSearchStore implements SavedSearchStore {
   constructor(private readonly pool: pg.Pool) {}
 
   async listAll(): Promise<SavedSearch[]> {
-    const rows = await this.pool.query<Row>('SELECT * FROM public.saved_searches ORDER BY created_at, id');
+    const rows = await this.pool.query<Row>(
+      'SELECT * FROM public.saved_searches ORDER BY created_at, id'
+    );
     return rows.rows.map(fromRow);
   }
 
@@ -114,7 +116,10 @@ export class PgSavedSearchStore implements SavedSearchStore {
   }
 
   async get(id: string): Promise<SavedSearch | null> {
-    const rows = await this.pool.query<Row>('SELECT * FROM public.saved_searches WHERE id = $1', [id]);
+    const rows = await this.pool.query<Row>(
+      'SELECT * FROM public.saved_searches WHERE id = $1',
+      [id]
+    );
     return rows.rows[0] ? fromRow(rows.rows[0]) : null;
   }
 
@@ -142,10 +147,19 @@ export class PgSavedSearchStore implements SavedSearchStore {
           required_skill_ids, salary_min_minor, alert_frequency, is_active, created_at, updated_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
-          search.id, search.userId, search.title, c.query ?? null, c.location ?? null,
-          c.workMode ?? null, c.jobType ?? null, c.requiredSkillIds ?? [],
-          c.salaryMinMinor ?? null, search.alertFrequency, search.isActive,
-          search.createdAt, search.updatedAt,
+          search.id,
+          search.userId,
+          search.title,
+          c.query ?? null,
+          c.location ?? null,
+          c.workMode ?? null,
+          c.jobType ?? null,
+          c.requiredSkillIds ?? [],
+          c.salaryMinMinor ?? null,
+          search.alertFrequency,
+          search.isActive,
+          search.createdAt,
+          search.updatedAt,
         ]
       );
       await client.query('COMMIT');
@@ -168,10 +182,19 @@ export class PgSavedSearchStore implements SavedSearchStore {
        WHERE id = $1 AND user_id = $2 AND updated_at = $13::timestamptz
        RETURNING *`,
       [
-        search.id, search.userId, search.title, c.query ?? null, c.location ?? null,
-        c.workMode ?? null, c.jobType ?? null, c.requiredSkillIds ?? [],
-        c.salaryMinMinor ?? null, search.alertFrequency, search.isActive,
-        search.updatedAt, previousUpdatedAt,
+        search.id,
+        search.userId,
+        search.title,
+        c.query ?? null,
+        c.location ?? null,
+        c.workMode ?? null,
+        c.jobType ?? null,
+        c.requiredSkillIds ?? [],
+        c.salaryMinMinor ?? null,
+        search.alertFrequency,
+        search.isActive,
+        search.updatedAt,
+        previousUpdatedAt,
       ]
     );
     if (!rows.rowCount) {
