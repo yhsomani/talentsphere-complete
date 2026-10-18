@@ -113,13 +113,9 @@ describe('Saved-job bookmark persistence', () => {
 
     // A candidate must not discover or save an unpublished job.
     expect((await call(app, 'POST', route, owner.token)).status).toBe(404);
-    const published = await call(
-      app,
-      'PATCH',
-      `/api/v1/jobs/${jobId}/status`,
-      recruiter.token,
-      { status: 'published' }
-    );
+    const published = await call(app, 'PATCH', `/api/v1/jobs/${jobId}/status`, recruiter.token, {
+      status: 'published',
+    });
     expect(published.status).toBe(200);
 
     // Two concurrent requests may create only one bookmark.
