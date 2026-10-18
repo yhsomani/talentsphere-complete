@@ -354,6 +354,53 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(rows.map((r) => r.status)).toEqual(['withdrawn', 'submitted']);
   });
 
+  it('keeps erasure request and cancellation history durable across restarts', async () => {
+    const signup = await call(app, 'POST', '/api/v1/auth/register', undefined, {
+      email: 'pending-erasure@example.com',
+      password: 'pending-erasure-passphrase',
+      fullName: 'Erasure Request Tester',
+    });
+    expect(signup.status).toBe(201);
+    const token = signup.body.token;
+    const userId = signup.body.user.id;
+
+    const request = await call(app, 'POST', '/api/v1/settings/erasure/request', token, {
+      reason: 'Testing durable request',
+      confirm: true,
+    });
+    expect(request.status).toBe(201);
+    const requestId = request.body.erasureRequest.id;
+    const concurrent = await Promise.all(
+      Array.from({ length: 2 }, () =>
+        call(app, 'POST', '/api/v1/settings/erasure/request', token, { confirm: true })
+      )
+    );
+    expect(concurrent.every((result) => result.status === 409)).toBe(true);
+
+    expect(
+      await sql('SELECT id FROM public.data_erasure_requests WHERE user_id = $1', [userId])
+    ).toHaveLength(1);
+
+    await app.close();
+    app = await boot();
+    const status = await call(app, 'GET', '/api/v1/settings/erasure/status', token);
+    expect(status.status).toBe(200);
+    expect(status.body.hasPendingErasure).toBe(true);
+    expect(status.body.activeRequest.id).toBe(requestId);
+
+    const cancelled = await call(app, 'POST', '/api/v1/settings/erasure/cancel', token, {
+      requestId,
+    });
+    expect(cancelled.status).toBe(200);
+    expect(cancelled.body.erasureRequest.status).toBe('cancelled');
+
+    await app.close();
+    app = await boot();
+    const finalStatus = await call(app, 'GET', '/api/v1/settings/erasure/status', token);
+    expect(finalStatus.body.hasPendingErasure).toBe(false);
+    expect(finalStatus.body.history[0].status).toBe('cancelled');
+  });
+
   it('erasure removes personal data from the database, not just from memory', async () => {
     const login = await call(app, 'POST', '/api/v1/auth/login', undefined, {
       email: 'casey@example.com',
