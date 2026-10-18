@@ -368,6 +368,23 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     });
     expect(notifications.statusCode).toBe(200);
     expect(notifications.headers['x-talentsphere-durability']).toBeUndefined();
+    const settings = await app.inject({
+      method: 'GET',
+      url: '/api/v1/settings',
+      headers: auth,
+    });
+    expect(settings.statusCode).toBe(200);
+    expect(settings.headers['x-talentsphere-durability']).toBeUndefined();
+    // Data export includes non-durable preview modules, so the snapshot must
+    // continue reporting that caveat even though export metadata is durable.
+    const snapshot = await app.inject({
+      method: 'POST',
+      url: '/api/v1/settings/export',
+      headers: auth,
+      payload: { format: 'json' },
+    });
+    expect(snapshot.statusCode).toBe(200);
+    expect(snapshot.headers['x-talentsphere-durability']).toBe('ephemeral');
   });
 
   it('strips one-time credentials from a job payload once the job is finished', async () => {
