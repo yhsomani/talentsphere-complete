@@ -80,6 +80,10 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'PATCH /api/v1/jobs/saved-searches/:id',
   'DELETE /api/v1/jobs/saved-searches/:id',
   'POST /api/v1/jobs/saved-searches/:id/run',
+  // Bookmarks (migration 00018; database-enforced owner/job uniqueness).
+  'POST /api/v1/jobs/:id/save',
+  'DELETE /api/v1/jobs/:id/save',
+  'GET /api/v1/jobs/saved',
   // Account metadata already has typed PostgreSQL tables (migration 00013).
   'GET /api/v1/settings',
   'PATCH /api/v1/settings',

@@ -163,13 +163,10 @@ import {
   createModerationAppeal,
   reviewModerationAppeal,
   JobAlert,
-  SavedJob,
   createSavedSearch,
   updateSavedSearch,
   matchJobAgainstCriteria,
   evaluateJobAlertsForPublishedJob,
-  createSavedJob,
-  removeSavedJob,
   ApplicationDraft,
   ApplicationDraftVersion,
   saveApplicationDraft,
@@ -754,7 +751,6 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
   const jobAlertsById = new Map<string, JobAlert>();
-  const savedJobsByUserId = new Map<string, SavedJob[]>();
   const applicationDraftsById = new Map<string, ApplicationDraft>();
   const applicationDraftsByCandidateAndJob = new Map<string, string>(); // `${candidateId}:${jobId}` -> draftId
   const applicationDraftVersionsByDraftId = new Map<string, ApplicationDraftVersion[]>();
@@ -10134,7 +10130,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     userSettingsByUserId.delete(session.userId);
     exportRequestsByUserId.delete(session.userId);
     searchHistoryByUserId.delete(session.userId);
-    savedJobsByUserId.delete(session.userId);
+    await storage.savedJobs.eraseUser(session.userId);
     subscriptionsByUserId.delete(session.userId);
     entitlementsByUserId.delete(session.userId);
     invoicesByUserId.delete(session.userId);
@@ -11544,13 +11540,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const session = extractUser(req);
       const { id: jobId } = req.params;
       const job = jobsById.get(jobId);
-      if (!job) {
+      // Bookmarking must not bypass the same draft/private visibility policy
+      // enforced by GET /jobs/:id. Do not disclose an unpublished job's ID.
+      if (!job || (job.status !== 'published' && !canManageJobs(session, job.orgId))) {
         throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
       }
-      const currentSaved = savedJobsByUserId.get(session.userId) || [];
-      const savedJob = createSavedJob(session.userId, jobId, currentSaved);
-      currentSaved.push(savedJob);
-      savedJobsByUserId.set(session.userId, currentSaved);
+      const savedJob = await storage.savedJobs.add(session.userId, jobId);
       return reply.status(201).send({ savedJob });
     }
   );
@@ -11561,9 +11556,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
       const { id: jobId } = req.params;
-      const currentSaved = savedJobsByUserId.get(session.userId) || [];
-      const updated = removeSavedJob(session.userId, jobId, currentSaved);
-      savedJobsByUserId.set(session.userId, updated);
+      await storage.savedJobs.remove(session.userId, jobId);
       return reply.status(200).send({ message: 'Job removed from saved bookmarks.' });
     }
   );
@@ -11571,8 +11564,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // 11. List candidate's saved jobs
   app.get('/api/v1/jobs/saved', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const currentSaved = savedJobsByUserId.get(session.userId) || [];
-    const jobs = currentSaved.map((s) => jobsById.get(s.jobId)).filter(Boolean);
+    const currentSaved = await storage.savedJobs.list(session.userId);
+    const jobs = currentSaved
+      .map((s) => jobsById.get(s.jobId))
+      .filter(
+        (job): job is Job =>
+          job !== undefined && (job.status === 'published' || canManageJobs(session, job.orgId))
+      );
     return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
   });
 
