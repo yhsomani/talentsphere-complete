@@ -11540,7 +11540,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const session = extractUser(req);
       const { id: jobId } = req.params;
       const job = jobsById.get(jobId);
-      if (!job) {
+      // Bookmarking must not bypass the same draft/private visibility policy
+      // enforced by GET /jobs/:id. Do not disclose an unpublished job's ID.
+      if (!job || (job.status !== 'published' && !canManageJobs(session, job.orgId))) {
         throw new DomainError('NOT_FOUND', `Job with ID "${jobId}" not found.`);
       }
       const savedJob = await storage.savedJobs.add(session.userId, jobId);
@@ -11563,7 +11565,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.get('/api/v1/jobs/saved', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const currentSaved = await storage.savedJobs.list(session.userId);
-    const jobs = currentSaved.map((s) => jobsById.get(s.jobId)).filter(Boolean);
+    const jobs = currentSaved
+      .map((s) => jobsById.get(s.jobId))
+      .filter(
+        (job): job is Job =>
+          job !== undefined && (job.status === 'published' || canManageJobs(session, job.orgId))
+      );
     return reply.status(200).send({ savedJobs: currentSaved, jobs, total: currentSaved.length });
   });
 
