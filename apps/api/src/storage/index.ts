@@ -1,6 +1,11 @@
 import pg from 'pg';
 import { MemoryJobStore, createPgJobStore, type JobStore } from '@talentsphere/domain';
 import { MemoryCoreStore, PgCoreStore, type CoreStore } from './core-store.js';
+import {
+  MemoryErasureRequestStore,
+  PgErasureRequestStore,
+  type ErasureRequestStore,
+} from './erasure-store.js';
 
 export * from './core-store.js';
 
@@ -32,6 +37,7 @@ export interface Storage {
    * evidence, work history) — ADR-015. Durable in pg mode only.
    */
   readonly core: CoreStore;
+  readonly erasureRequests: ErasureRequestStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   close(): Promise<void>;
@@ -46,6 +52,7 @@ class PgStorage implements Storage {
   readonly mode = 'pg' as const;
   readonly jobs: JobStore;
   readonly core: CoreStore;
+  readonly erasureRequests: ErasureRequestStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
 
@@ -65,6 +72,7 @@ class PgStorage implements Storage {
     // One pool, one boundary: dispatch enqueues and health checks share it.
     this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
     this.core = new PgCoreStore(this.pool);
+    this.erasureRequests = new PgErasureRequestStore(this.pool);
   }
 
   async health(): Promise<StorageHealth> {
@@ -88,6 +96,7 @@ class MemoryStorage implements Storage {
   readonly mode = 'memory' as const;
   readonly jobs: JobStore = new MemoryJobStore();
   readonly core: CoreStore = new MemoryCoreStore();
+  readonly erasureRequests: ErasureRequestStore = new MemoryErasureRequestStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({
