@@ -231,9 +231,14 @@ describe('Shared retry brain', () => {
 
 describe('Dispatch kind drift guard (server.ts ↔ DISPATCH_EVENT_KINDS)', () => {
   const serverSource = fs.readFileSync(path.join(repoRoot, 'apps/api/src/server.ts'), 'utf8');
-  const emittedKinds = [...serverSource.matchAll(/await dispatchJob\(\{\s*type: '([^']+)'/g)].map(
-    (m) => m[1]
-  );
+  // Required delivery jobs now enqueue directly so an enqueue failure cannot
+  // be mistaken for successful email dispatch. Both paths must remain covered.
+  const emittedKinds = [
+    ...[...serverSource.matchAll(/await dispatchJob\(\{\s*type: '([^']+)'/g)].map((m) => m[1]),
+    ...[...serverSource.matchAll(/await storage\.jobs\.enqueue\(\{\s*kind: '([^']+)'/g)].map(
+      (m) => m[1]
+    ),
+  ];
 
   it('the legacy fire-and-forget array is fully replaced', () => {
     expect(serverSource).not.toContain('enqueuedWorkerJobs.push');

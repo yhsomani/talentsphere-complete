@@ -25,6 +25,14 @@ export const ServerEnvSchema = z.object({
   // memory when NODE_ENV=test, pg otherwise — see apps/api/src/storage.
   STORAGE: z.enum(['pg', 'memory']).optional(),
 
+  // Separate 256-bit key for AES-GCM encryption of user-supplied BYO API keys.
+  // Rotation requires re-encryption of existing ciphertext; do not silently
+  // reuse TOKEN_SECRET for this purpose.
+  BYO_AI_KEY_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64}$/)
+    .optional(),
+
   // Security & Rate Limiting
   // TOKEN_SECRET signs session tokens. It is optional so local development works
   // without it (the domain layer then generates a random per-process key, so tokens
@@ -51,6 +59,13 @@ export const ServerEnvSchema = z.object({
   SUPABASE_BUCKET_RESUMES: z.string().default('resumes'),
   SUPABASE_BUCKET_COURSE_CONTENT: z.string().default('course-content'),
   SUPABASE_BUCKET_PORTFOLIO: z.string().default('portfolio'),
+
+  // Optional, server-only transactional email. 'none' fails closed in deployed
+  // environments; enabling Resend still requires provider account, DNS and
+  // actual mailbox validation outside CI.
+  EMAIL_PROVIDER: z.enum(['none', 'resend']).default('none'),
+  RESEND_API_KEY: z.string().min(12).optional(),
+  EMAIL_FROM: z.string().email().optional(),
 
   // Billing. No payment processor is integrated yet, so paid plans cannot be
   // bought: 'disabled' (default) refuses paid subscriptions honestly;
@@ -104,6 +119,14 @@ export function productionConfigProblems(env: ServerEnv): string[] {
   }
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');
+  }
+  if (env.EMAIL_PROVIDER === 'resend') {
+    if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
+      problems.push('EMAIL_PROVIDER=resend requires RESEND_API_KEY and EMAIL_FROM');
+    }
+    if (!env.APP_URL.startsWith('https://')) {
+      problems.push('Email reference links require an HTTPS APP_URL in deployed environments');
+    }
   }
   if (env.NODE_ENV === 'production') {
     if (env.BILLING_MODE === 'simulated') {

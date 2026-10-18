@@ -73,6 +73,13 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/notifications/mark-read',
   'GET /api/v1/notifications/preferences',
   'PATCH /api/v1/notifications/preferences',
+  // Account metadata already has typed PostgreSQL tables (migration 00013).
+  'GET /api/v1/settings',
+  'PATCH /api/v1/settings',
+  'GET /api/v1/settings/export/latest',
+  'POST /api/v1/settings/erasure/request',
+  'GET /api/v1/settings/erasure/status',
+  'POST /api/v1/settings/erasure/cancel',
 ]);
 
 /** Routes that hold no entity state at all (health, static catalogs). */
