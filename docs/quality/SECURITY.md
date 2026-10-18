@@ -57,6 +57,20 @@ Do not enable direct database access solely because these tests pass. Verify
 production grants, all additional permissive policies, function ownership,
 and the actual identity mapping in the deployed Supabase project first.
 
+### Deployment safety boundaries (2026-10-18)
+
+- Automated interview code execution is a development/test **simulation**, not
+  a sandbox. The API refuses this endpoint with `SERVICE_UNAVAILABLE` in
+  staging/production until a real isolated executor and abuse controls exist.
+- Work-history badge scoring counts independently endorsed skills only, not
+  skills entered by a candidate; any change to this trust policy requires
+  owner review before merge.
+- Public privacy/security inboxes are configured via build-time
+  `VITE_PRIVACY_EMAIL`/`VITE_SECURITY_EMAIL` only after ownership and
+  monitoring have been verified. No unsupported response SLA is advertised.
+  The legal pages remain **unapproved drafts** and do not pass a launch gate
+  merely because addresses are configured.
+
 ## 5. Threat Model
 
 Primary threats:

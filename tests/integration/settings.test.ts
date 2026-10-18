@@ -121,6 +121,7 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(body.data.account.email).toBe('maya.privacy@example.com');
     expect(body.data.settings.theme).toBe('dark');
     expect(body.data.settings.byoAiKey).toBeUndefined(); // Sensitive key scrubbed
+    expect(body.exportRequest.downloadUrl).toBeUndefined(); // No nonexistent route advertised
 
     // Check latest export endpoint
     const latestRes = await app.inject({
@@ -131,6 +132,17 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(latestRes.statusCode).toBe(200);
     const latestBody = JSON.parse(latestRes.body);
     expect(latestBody.latestExport.id).toBe(body.exportRequest.id);
+  });
+
+  it('rejects unsupported CSV rather than labeling JSON as a CSV download', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/settings/export',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: { format: 'csv' },
+    });
+    expect(res.statusCode).toBe(503);
+    expect(JSON.parse(res.body).error.code).toBe('SERVICE_UNAVAILABLE');
   });
 
   it('manages GDPR Art 17 erasure request lifecycle: initiate, status, conflict, cancel', async () => {

@@ -16,6 +16,7 @@ import crypto from 'node:crypto';
 import pg from 'pg';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createStorage } from '../../apps/api/src/storage/index.js';
 import { dropTestDatabase } from './test-db.js';
 
 const baseUrl = process.env.TEST_DATABASE_URL;
@@ -306,6 +307,19 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
     expect(applicants.body.applications[0].candidate.fullName).toBe('Casey Candidate');
   });
 
+  it('exports the real candidate evidence and applications by profile id', async () => {
+    const result = await call(app, 'POST', '/api/v1/settings/export', ids.candidateToken, {
+      format: 'json',
+    });
+    expect(result.status).toBe(200);
+    expect(result.body.data.evidence.map((value: Json) => value.id)).toContain(ids.evidenceId);
+    expect(result.body.data.applications.map((value: Json) => value.id)).toContain(
+      ids.applicationId
+    );
+    expect(result.body.exportRequest.downloadUrl).toBeUndefined();
+    expect(result.body.message).toMatch(/not yet a complete statutory/);
+  });
+
   it('lets the database arbitrate a race the read model cannot see', async () => {
     const attempts = await Promise.all(
       [1, 2, 3].map(() =>
@@ -352,6 +366,84 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
       [ids.jobId]
     );
     expect(rows.map((r) => r.status)).toEqual(['withdrawn', 'submitted']);
+  });
+
+  it('keeps erasure request and cancellation history durable across restarts', async () => {
+    const signup = await call(app, 'POST', '/api/v1/auth/register', undefined, {
+      email: 'pending-erasure@example.com',
+      password: 'pending-erasure-passphrase',
+      fullName: 'Erasure Request Tester',
+    });
+    expect(signup.status).toBe(201);
+    const token = signup.body.token;
+    const userId = signup.body.user.id;
+
+    const request = await call(app, 'POST', '/api/v1/settings/erasure/request', token, {
+      reason: 'Testing durable request',
+      confirm: true,
+    });
+    expect(request.status).toBe(201);
+    const requestId = request.body.erasureRequest.id;
+    const concurrent = await Promise.all(
+      Array.from({ length: 2 }, () =>
+        call(app, 'POST', '/api/v1/settings/erasure/request', token, { confirm: true })
+      )
+    );
+    expect(concurrent.every((result) => result.status === 409)).toBe(true);
+
+    expect(
+      await sql('SELECT id FROM public.data_erasure_requests WHERE user_id = $1', [userId])
+    ).toHaveLength(1);
+
+    await app.close();
+    app = await boot();
+    const status = await call(app, 'GET', '/api/v1/settings/erasure/status', token);
+    expect(status.status).toBe(200);
+    expect(status.body.hasPendingErasure).toBe(true);
+    expect(status.body.activeRequest.id).toBe(requestId);
+
+    const cancelled = await call(app, 'POST', '/api/v1/settings/erasure/cancel', token, {
+      requestId,
+    });
+    expect(cancelled.status).toBe(200);
+    expect(cancelled.body.erasureRequest.status).toBe('cancelled');
+
+    await app.close();
+    app = await boot();
+    const finalStatus = await call(app, 'GET', '/api/v1/settings/erasure/status', token);
+    expect(finalStatus.body.hasPendingErasure).toBe(false);
+    expect(finalStatus.body.history[0].status).toBe('cancelled');
+  });
+
+  it('rejects concurrent API writers instead of serving divergent read models', async () => {
+    await expect(boot()).rejects.toThrow(/second API writer/);
+    // The existing server keeps its lock after rejecting another boot.
+    expect((await call(app, 'GET', '/api/v1/health')).status).toBe(200);
+    // Releasing the first instance makes a replacement boot possible.
+    await app.close();
+    app = await boot();
+    expect((await call(app, 'GET', '/api/v1/health')).status).toBe(200);
+  });
+
+  it('reports stale, missing and current worker heartbeats from real PostgreSQL', async () => {
+    const store = createStorage({ STORAGE: 'pg', NODE_ENV: 'test', DATABASE_URL: databaseUrl });
+    try {
+      expect(await store.workerHeartbeat()).toEqual({ alive: false, lastSeenAt: null });
+
+      await sql(
+        "INSERT INTO public.worker_health (id, last_seen_at) VALUES (1, now() - INTERVAL '90 seconds')"
+      );
+      const stale = await store.workerHeartbeat();
+      expect(stale.alive).toBe(false);
+      expect(stale.lastSeenAt).not.toBeNull();
+
+      await sql('UPDATE public.worker_health SET last_seen_at = now() WHERE id = 1');
+      const fresh = await store.workerHeartbeat();
+      expect(fresh.alive).toBe(true);
+      expect(fresh.lastSeenAt).not.toBeNull();
+    } finally {
+      await store.close();
+    }
   });
 
   it('erasure removes personal data from the database, not just from memory', async () => {

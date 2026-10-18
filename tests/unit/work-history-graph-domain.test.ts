@@ -161,8 +161,8 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       expect(verified.corporateEmail).toBe('eng@acme.com');
       expect(verified.emailVerifiedAt).toBe(fixedNow);
       expect(verified.verificationStatus).toBe('verified');
-      // 40 pts for email + 5 pts for 2 skills = 45 pts -> bronze
-      expect(verified.verificationScore).toBe(45);
+      // Only independent proof counts; two self-declared skills add nothing.
+      expect(verified.verificationScore).toBe(40);
       expect(verified.badgeTier).toBe('bronze');
     });
 
@@ -450,6 +450,21 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       expect(score).toBe(40);
       expect(badgeTier).toBe('bronze'); // 40 is bronze (< 50)
       expect(status).toBe('verified');
+    });
+
+    it('never upgrades a verification badge for self-declared skills without endorsements', () => {
+      const noEvidence = calculateVerificationScoreAndBadge(
+        { skills: ['TypeScript', 'React', 'Node.js'] },
+        []
+      );
+      expect(noEvidence).toEqual({ score: 0, badgeTier: 'none', status: 'unverified' });
+
+      const emailOnly = calculateVerificationScoreAndBadge(
+        { emailVerifiedAt: fixedNow, skills: ['TypeScript', 'React'] },
+        []
+      );
+      expect(emailOnly.score).toBe(40);
+      expect(emailOnly.badgeTier).toBe('bronze');
     });
   });
 

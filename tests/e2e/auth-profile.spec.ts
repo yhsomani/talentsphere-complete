@@ -120,7 +120,8 @@ test.describe('E2E: Authentication, Profile & Settings (F-01, F-12, F-15)', () =
     expect(exportRes.status()).toBe(200);
     const exportData = await exportRes.json();
     expect(exportData.exportRequest.status).toBe('completed');
-    expect(exportData.exportRequest.downloadUrl).toBeDefined();
+    expect(exportData.exportRequest.downloadUrl).toBeUndefined();
+    expect(exportData.data.account.email).toBeDefined();
 
     // 4. Request account erasure with 30-day grace period
     const eraseReqRes = await request.post(`${API_BASE}/settings/erasure/request`, {

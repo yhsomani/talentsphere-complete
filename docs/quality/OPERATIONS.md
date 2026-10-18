@@ -117,6 +117,16 @@ localhost origin for testing.
 
 ### Database
 
+- The API now holds a PostgreSQL session advisory lock for its entire
+  lifetime (`pg_try_advisory_lock(718201, 1)`). A second API process against
+  the same database refuses to boot, rather than serving a stale read model.
+  Losing the lock session makes API traffic return 503 until restarted.
+  This is a **single-writer enforcement**, not horizontal scaling support.
+- The worker writes `public.worker_health.last_seen_at` every ten seconds.
+  Admin health diagnostics now mark the queue degraded if the last heartbeat
+  is more than 45 seconds old, missing, or unavailable. Monitor stale
+  heartbeats and `background_jobs` retry/dead records. An API health liveness
+  response alone does not establish worker processing.
 - Apply migrations with `pnpm db:migrate` (`scripts/migrate.mjs`: one transaction per
   file, `schema_migrations` ledger, re-running is a no-op). CI applies all migrations to
   an empty database and re-runs the runner on every push.
@@ -133,13 +143,39 @@ localhost origin for testing.
 
 ### What survives a restart
 
+Erasure request creation, status history and cancellation now use the existing
+`public.data_erasure_requests` PostgreSQL table through
+`apps/api/src/storage/erasure-store.ts`. A database account-row lock
+serializes concurrent erasure requests. The immediate erasure operation is
+still separate. **No scheduled deletion executor exists yet** and the
+30-day grace-period versus immediate-delete policy needs explicit owner/legal
+approval before a public release. Do not claim due-date deletion is automatic.
+
+
 The core loop — accounts, profiles, organizations and members, skills, jobs,
 applications, evidence, work history, references, open email challenges,
 notifications and notification preferences — and background jobs. Every other route keeps its state in process memory and says so with
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 
+### Data export
+
+`POST /api/v1/settings/export` returns a JSON snapshot inline. Evidence
+and applications are selected by the candidate **profile** ID; no fabricated
+user/profile fallback is emitted. CSV is refused with 503 until genuinely
+implemented; no dead `downloadUrl` is returned. This is a partial snapshot:
+data in non-durable modules is not a complete statutory export. Full export
+coverage, retention and downloadable archive policy remain release gates.
+The JSON metadata deliberately makes **no statutory compliance claim** while
+the archive contains only a subset of personal data.
+
 ### Email
+
+The API now fails creation of mailbox-verification codes and referee
+invitations closed with `SERVICE_UNAVAILABLE` in staging and production,
+before it would queue an undeliverable message. Development/test mock delivery
+is unchanged. This is a safety fallback, **not** email provider integration.
+
 
 No email provider is integrated. The worker's email handlers print messages to the log
 in development ("DEV OUTBOX") and **fail them permanently in every other environment**
@@ -160,5 +196,5 @@ cannot be completed there. Integrating a provider is an owner decision (new infr
 - `/health` — liveness. `/api/v1/health` — adds environment. Both are exempt from the rate limiter, so a load balancer's polling can never throttle the API into looking dead.
 - `GET /api/v1/admin/health-diagnostics` (platform admin) — storage mode, database
   reachability (a live round-trip), queue status and active job count, and how many routes
-  are durable. **Worker liveness is not measured** (no heartbeat): a dead worker over a live
+  are durable. Worker liveness is measured with the database heartbeat: a dead worker over a live
   database still reports the queue as operational — watch for `queued` jobs that age.

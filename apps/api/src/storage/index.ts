@@ -1,6 +1,11 @@
 import pg from 'pg';
 import { MemoryJobStore, createPgJobStore, type JobStore } from '@talentsphere/domain';
 import { MemoryCoreStore, PgCoreStore, type CoreStore } from './core-store.js';
+import {
+  MemoryErasureRequestStore,
+  PgErasureRequestStore,
+  type ErasureRequestStore,
+} from './erasure-store.js';
 
 export * from './core-store.js';
 
@@ -32,8 +37,15 @@ export interface Storage {
    * evidence, work history) — ADR-015. Durable in pg mode only.
    */
   readonly core: CoreStore;
+  readonly erasureRequests: ErasureRequestStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
+  /** Claim a session-level advisory lease before hydrating the in-memory read model. */
+  acquireWriterLease(): Promise<void>;
+  /** A lost lease must make the API refuse further traffic. */
+  writerLeaseHealthy(): boolean;
+  /** Measured worker liveness, not merely queue/database reachability. */
+  workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }>;
   close(): Promise<void>;
 }
 
@@ -46,8 +58,12 @@ class PgStorage implements Storage {
   readonly mode = 'pg' as const;
   readonly jobs: JobStore;
   readonly core: CoreStore;
+  readonly erasureRequests: ErasureRequestStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
+  private writerLease: pg.PoolClient | null = null;
+  private writerLeaseLost = false;
+  private writerLeaseStarted = false;
 
   constructor(databaseUrl: string) {
     this.target = redactDsn(databaseUrl);
@@ -65,10 +81,73 @@ class PgStorage implements Storage {
     // One pool, one boundary: dispatch enqueues and health checks share it.
     this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
     this.core = new PgCoreStore(this.pool);
+    this.erasureRequests = new PgErasureRequestStore(this.pool);
+  }
+
+  async acquireWriterLease(): Promise<void> {
+    if (this.writerLeaseStarted) {
+      throw new Error('The exclusive API writer lease was already initialized.');
+    }
+    this.writerLeaseStarted = true;
+    const client = await this.pool.connect();
+    try {
+      // Advisory locks are scoped to THIS database and this retained session.
+      // Lock key pair is reserved for the TalentSphere API read-model writer.
+      const result = await client.query<{ acquired: boolean }>(
+        'SELECT pg_try_advisory_lock(718201, 1) AS acquired'
+      );
+      if (!result.rows[0]?.acquired) {
+        throw new Error(
+          'A second API writer is already connected to this database. ' +
+            'The hydrated read model supports one API instance only (ADR-015).'
+        );
+      }
+      client.on('error', () => {
+        this.writerLeaseLost = true;
+      });
+      client.on('end', () => {
+        this.writerLeaseLost = true;
+      });
+      this.writerLease = client;
+    } catch (error) {
+      client.release();
+      this.writerLeaseLost = true;
+      throw error;
+    }
+  }
+
+  writerLeaseHealthy(): boolean {
+    return this.writerLeaseStarted && this.writerLease !== null && !this.writerLeaseLost;
+  }
+
+  async workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }> {
+    try {
+      const result = await this.pool.query<{
+        last_seen_at: Date;
+        age_seconds: number;
+      }>(
+        'SELECT last_seen_at, EXTRACT(EPOCH FROM (now() - last_seen_at))::float8 AS age_seconds FROM public.worker_health WHERE id = 1'
+      );
+      const row = result.rows[0];
+      if (!row) return { alive: false, lastSeenAt: null };
+      return {
+        alive: row.age_seconds >= -5 && row.age_seconds <= 45,
+        lastSeenAt: new Date(row.last_seen_at).toISOString(),
+      };
+    } catch {
+      return { alive: false, lastSeenAt: null };
+    }
   }
 
   async health(): Promise<StorageHealth> {
     const started = Date.now();
+    if (this.writerLeaseStarted && !this.writerLeaseHealthy()) {
+      return {
+        ok: false,
+        latencyMs: null,
+        detail: 'Exclusive API writer lease lost; restart required.',
+      };
+    }
     try {
       await this.pool.query('SELECT 1');
       const latencyMs = Date.now() - started;
@@ -80,6 +159,17 @@ class PgStorage implements Storage {
   }
 
   async close(): Promise<void> {
+    const lease = this.writerLease;
+    this.writerLease = null;
+    if (lease) {
+      try {
+        if (!this.writerLeaseLost) {
+          await lease.query('SELECT pg_advisory_unlock(718201, 1)');
+        }
+      } finally {
+        lease.release();
+      }
+    }
     await this.pool.end();
   }
 }
@@ -88,6 +178,7 @@ class MemoryStorage implements Storage {
   readonly mode = 'memory' as const;
   readonly jobs: JobStore = new MemoryJobStore();
   readonly core: CoreStore = new MemoryCoreStore();
+  readonly erasureRequests: ErasureRequestStore = new MemoryErasureRequestStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({
@@ -95,6 +186,18 @@ class MemoryStorage implements Storage {
       latencyMs: null,
       detail: 'in-memory storage (STORAGE=memory): no database; data is lost on restart',
     });
+  }
+
+  async acquireWriterLease(): Promise<void> {
+    // Memory storage has no database and is only allowed in tests/development.
+  }
+
+  writerLeaseHealthy(): boolean {
+    return true;
+  }
+
+  async workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }> {
+    return { alive: false, lastSeenAt: null };
   }
 
   async close(): Promise<void> {

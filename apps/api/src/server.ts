@@ -122,12 +122,10 @@ import {
   LeaderboardUserRecord,
   computeLeaderboard,
   UserSettings,
-  DataErasureRequest,
   DataExportRequest,
   createDefaultUserSettings,
   updateUserSettings,
   requestAccountErasure,
-  cancelAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
   Subscription,
@@ -510,12 +508,33 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           'Fix DATABASE_URL or start PostgreSQL; set STORAGE=memory only for an explicitly non-durable server.'
       );
     }
-    app.log.info(`storage: pg — ${boot.detail}`);
+    try {
+      await storage.acquireWriterLease();
+    } catch (error) {
+      await storage.close();
+      throw error;
+    }
+    app.log.info(`storage: pg — ${boot.detail}; exclusive writer lease acquired`);
   } else {
     app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
   }
   app.addHook('onClose', async () => {
     await storage.close();
+  });
+  // A lost database session releases its advisory lock. Fail closed immediately
+  // rather than serving an unsynchronized in-memory read model.
+  app.addHook('onRequest', (request, reply, done) => {
+    if (storage.mode === 'pg' && !storage.writerLeaseHealthy()) {
+      reply.status(503).send({
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'API writer lease lost. Restart the service.',
+          request_id: request.id,
+        },
+      });
+      return;
+    }
+    done();
   });
 
   // Durable background-job dispatch (SSOT §27.1 ADR-009). Replaces the old
@@ -726,8 +745,6 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const profilesByUserId = new Map<string, any>();
   const profilesById = new Map<string, any>();
   const userSettingsByUserId = new Map<string, UserSettings>();
-  const erasureRequestsByUserId = new Map<string, DataErasureRequest[]>();
-  const erasureRequestsById = new Map<string, DataErasureRequest>();
   const exportRequestsByUserId = new Map<string, DataExportRequest[]>();
   const subscriptionsByUserId = new Map<string, Subscription>();
   const entitlementsByUserId = new Map<string, Entitlements>();
@@ -3567,6 +3584,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
       const { isCandidate } = requireInterviewParticipant(session, assessment);
 
+      // No sandbox executes submitted programs. Never publish simulated test
+      // results as real hiring-assessment evidence outside local development.
+      if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'Automated code execution is unavailable until a real isolated sandbox is configured.'
+        );
+      }
       const input = ExecuteInterviewCodeInputSchema.parse(req.body);
       let testCases = input.customTestCases || [];
       if (input.questionId) {
@@ -9859,23 +9884,19 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.post('/api/v1/settings/export', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = RequestDataExportInputSchema.parse(req.body || {});
-
-    const user = usersById.get(session.userId) || {
-      id: session.userId,
-      email: session.email,
-      roles: session.roles as any,
-      status: 'active' as any,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    const profile = profilesByUserId.get(session.userId) || {
-      id: crypto.randomUUID(),
-      userId: session.userId,
-      fullName: 'TalentSphere User',
-      privacy: 'public' as const,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    if (input.format !== 'json') {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'CSV exports are not available. Request the supported JSON snapshot instead.'
+      );
+    }
+    // The verified session must map to actual persisted records. A synthetic
+    // user or randomly generated profile would be misleading in an export.
+    const user = usersById.get(session.userId);
+    const profile = profilesByUserId.get(session.userId);
+    if (!user || !profile) {
+      throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
+    }
 
     let settings = userSettingsByUserId.get(session.userId);
     if (!settings) {
@@ -9883,9 +9904,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       userSettingsByUserId.set(session.userId, settings);
     }
 
-    const evidence = evidenceBySubjectId.get(session.userId) || [];
+    // Evidence/application ownership is keyed by PROFILE id, not auth user id.
+    const evidence = evidenceBySubjectId.get(profile.id) || [];
     const applications = Array.from(applicationsById.values()).filter(
-      (a) => a.candidateId === session.userId
+      (a) => a.candidateId === profile.id
     );
     const resumes = resumesByUserId.get(session.userId) || [];
     const portfolio = portfolioProjectsByUserId.get(session.userId) || [];
@@ -9918,7 +9940,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       userId: session.userId,
       status: 'completed',
       format: input.format,
-      downloadUrl: `/api/v1/settings/export/download/${exportRequestId}`,
+      // No download route or durable archive store exists. Return the JSON
+      // directly rather than publishing a URL that always responds 404.
       expiresAt,
       createdAt: now,
       updatedAt: now,
@@ -9939,7 +9962,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     });
 
     return reply.status(200).send({
-      message: 'Data export compiled successfully in accordance with GDPR Articles 15 & 20.',
+      message:
+        'JSON snapshot compiled. Other non-durable features may be absent; ' +
+        'this is not yet a complete statutory data-export workflow.',
       exportRequest,
       data: exportBundle,
     });
@@ -9961,19 +9986,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = RequestErasureInputSchema.parse(req.body);
 
-    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
-    const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
-    if (active) {
-      throw new DomainError(
-        'CONFLICT',
-        'An active account erasure request is already pending. You can cancel it before the grace period ends.'
-      );
-    }
-
     const erasureRequest = requestAccountErasure(session.userId, input.reason);
-    userRequests.unshift(erasureRequest);
-    erasureRequestsByUserId.set(session.userId, userRequests);
-    erasureRequestsById.set(erasureRequest.id, erasureRequest);
+    // Postgres serializes same-user requests via the owner row lock.
+    await storage.erasureRequests.create(erasureRequest);
 
     await dispatchJob({
       type: 'gdpr.erasure.requested',
@@ -9994,7 +10009,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // 6. Get Account Erasure Request Status
   app.get('/api/v1/settings/erasure/status', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const userRequests = erasureRequestsByUserId.get(session.userId) || [];
+    const userRequests = await storage.erasureRequests.list(session.userId);
     const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
 
     return reply.status(200).send({
@@ -10009,24 +10024,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = CancelErasureInputSchema.parse(req.body);
 
-    const erasureRequest = erasureRequestsById.get(input.requestId);
-    if (!erasureRequest) {
-      throw new DomainError('NOT_FOUND', `Erasure request ${input.requestId} not found.`);
-    }
-
-    if (erasureRequest.userId !== session.userId) {
-      throw new DomainError('FORBIDDEN', 'You are not authorized to cancel this erasure request.');
-    }
-
-    const cancelled = cancelAccountErasure(erasureRequest);
-    erasureRequestsById.set(cancelled.id, cancelled);
-
-    const list = erasureRequestsByUserId.get(session.userId) || [];
-    const idx = list.findIndex((r) => r.id === cancelled.id);
-    if (idx !== -1) {
-      list[idx] = cancelled;
-      erasureRequestsByUserId.set(session.userId, list);
-    }
+    const cancelled = await storage.erasureRequests.cancel(session.userId, input.requestId);
 
     await dispatchJob({
       type: 'gdpr.erasure.cancelled',
@@ -10125,16 +10123,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     // behalf after they are gone.
     await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
 
-    // Mark any active erasure request as completed
-    const list = erasureRequestsByUserId.get(session.userId) || [];
-    const active = list.find((r) => r.status === 'grace_period' || r.status === 'pending');
-    if (active) {
-      active.status = 'completed';
-      active.completedAt = result.completedAt;
-      active.anonymizedHash = result.anonymizedHash;
-      active.updatedAt = result.completedAt;
-      erasureRequestsById.set(active.id, active);
-    }
+    // Mark the durable request history only after core erasure commits.
+    // If this write fails, do not claim the lifecycle was updated.
+    await storage.erasureRequests.completeActive(
+      session.userId,
+      result.completedAt,
+      result.anonymizedHash
+    );
 
     await dispatchJob({
       type: 'gdpr.erasure.completed',
@@ -10645,14 +10640,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     // Measured, not assumed (Phase 1): one live storage round-trip per query.
     const dbHealth = await storage.health();
 
-    // Queue health is derived, never asserted: dispatch reaches a durable
-    // store only when STORAGE=pg is reachable right now. Memory mode reports
-    // degraded because there the queue neither persists nor processes.
-    // Measured: enqueue-path reachability. NOT measured: worker liveness —
-    // there is no heartbeat, so a dead worker over a live database still
-    // reports the queue as healthy. Jobs never report false completion, so
-    // this ceiling is one of reachability, not of job truth.
-    const queueOperational = storage.mode === 'pg' && dbHealth.ok;
+    // Database reachability alone cannot prove the queue is processed.
+    // The worker writes its heartbeat only from its actual claim loop.
+    const worker = await storage.workerHeartbeat();
+    const queueOperational = storage.mode === 'pg' && dbHealth.ok && worker.alive;
 
     const status = computeSystemHealth({
       dbConnected: dbHealth.ok,
@@ -10674,6 +10665,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     return reply.status(200).send({
       diagnostics,
+      worker: {
+        alive: worker.alive,
+        lastSeenAt: worker.lastSeenAt,
+        thresholdSeconds: 45,
+      },
+      writerLease: storage.mode === 'pg' ? storage.writerLeaseHealthy() : false,
       // ADR-015: what survives a restart, stated rather than implied.
       persistence: {
         coreLoop: storage.core.durable ? 'postgres' : 'memory (not durable)',
@@ -11917,6 +11914,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const email = body.corporateEmail.trim().toLowerCase();
 
       if (!body.verificationCode) {
+        // Without a mail provider queued work fails permanently; do not say a code was sent.
+        if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+          throw new DomainError(
+            'SERVICE_UNAVAILABLE',
+            'Work-email verification is unavailable until email delivery is configured.'
+          );
+        }
         assertCorporateEmailEligible(email, companyDomain);
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
@@ -12027,6 +12031,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       if (workHistory.candidateId !== session.userId && !session.roles.includes('platform_admin')) {
         throw new DomainError('FORBIDDEN', 'Access denied to request reference for this record.');
+      }
+
+      if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'Reference invitations are unavailable until email delivery is configured.'
+        );
       }
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;

@@ -512,7 +512,8 @@ export function generateAdvisoryAiFeedback(
 }
 
 /**
- * Reuses challenge code execution sandbox for live coding evaluation (BR-175).
+ * Local-development/test fixture only. This does NOT execute submitted code.
+ * The deployed API rejects this simulation until a real isolated runner exists.
  */
 export function executeInterviewCode(
   code: string,
@@ -526,7 +527,7 @@ export function executeInterviewCode(
     throw new DomainError('VALIDATION_FAILED', 'Source code cannot be empty.');
   }
 
-  // Simulated sandbox execution conforming to BR-175
+  // Deterministic simulation for local demos/tests ONLY — not an execution sandbox.
   const runs = testCases.map((tc) => {
     // If code has basic syntax error or empty, fail; otherwise assume deterministic test execution
     const isPassing = !code.includes('syntax_error_mock') && !code.includes('throw new Error');

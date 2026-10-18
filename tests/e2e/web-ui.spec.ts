@@ -326,7 +326,8 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByTestId('legal-draft-notice')).toBeVisible();
     await expect(page.getByText('GDPR & CCPA Compliant')).toHaveCount(0);
     await expect(page.getByText('Anti-LLM Scraping Clause')).toBeVisible();
-    await expect(page.getByText('privacy@talentsphere.dev')).toBeVisible();
+    await expect(page.getByTestId('privacy-contact-unconfigured')).toBeVisible();
+    await expect(page.locator('a[href="mailto:privacy@talentsphere.dev"]')).toHaveCount(0);
 
     // Terms Page
     await page.goto('/terms');

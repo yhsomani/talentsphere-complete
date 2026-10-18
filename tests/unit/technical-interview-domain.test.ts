@@ -285,7 +285,7 @@ describe('Domain: Technical Interview Assessment Platform (F-88, S-06, BR-169..B
   });
 
   describe('Code Execution Sandbox Integration (BR-175)', () => {
-    it('executes code test cases deterministically in sandbox', () => {
+    it('models demo-only simulated test results (not a sandbox)', () => {
       const testCases = [
         { input: '[1, 2, 3]', expectedOutput: '6', isHidden: false },
         { input: '[4, 5]', expectedOutput: '9', isHidden: true },

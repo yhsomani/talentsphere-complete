@@ -288,8 +288,9 @@ export function executeLogicalAnonymization(
 }
 
 /**
- * Compiles a GDPR Article 15 & 20 compliant Data Portability archive in structured JSON format.
- * Strips sensitive keys and credentials while preserving full subject portability.
+ * Compiles a partial JSON data snapshot, excluding authentication secrets.
+ * Full statutory portability needs durable coverage of every account module;
+ * this helper is not evidence of regulatory certification or completeness.
  */
 export function compileDataExportArchive(params: {
   user: User;
@@ -313,7 +314,8 @@ export function compileDataExportArchive(params: {
       version: '1.0.0',
       exportedAt: now,
       subjectId: params.user.id,
-      compliance: ['GDPR-Art-15', 'GDPR-Art-20', 'DPDP-2023', 'CCPA-Right-To-Know'],
+      // No compliance claims without actual end-to-end data coverage and legal review.
+      compliance: [],
     },
     account: {
       id: params.user.id,
