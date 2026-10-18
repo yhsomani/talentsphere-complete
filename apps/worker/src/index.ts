@@ -90,7 +90,7 @@ claimHandlers.set(
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** pg store from DATABASE_URL; null when this process must not claim (memory). */
-function resolveStore(): JobStore | null {
+function resolveStore(): { store: JobStore; heartbeat: () => Promise<void> } | null {
   const mode =
     process.env.STORAGE === 'pg' || process.env.STORAGE === 'memory'
       ? process.env.STORAGE
@@ -116,12 +116,19 @@ function resolveStore(): JobStore | null {
   pool.on('error', (err: Error) => {
     logger.error({ err }, 'idle postgres client error');
   });
-  return createPgJobStore((sql, params) => pool.query(sql, params));
+  return {
+    store: createPgJobStore((sql, params) => pool.query(sql, params)),
+    heartbeat: async () => {
+      await pool.query(
+        'INSERT INTO public.worker_health (id, last_seen_at) VALUES (1, now()) ON CONFLICT (id) DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at'
+      );
+    },
+  };
 }
 
 async function runWorker(): Promise<void> {
-  const store = resolveStore();
-  if (!store) {
+  const runner = resolveStore();
+  if (!runner) {
     logger.warn(
       'TalentSphere Async Worker started with STORAGE=memory: background jobs are NOT durable and are NOT processed; idling.'
     );
@@ -130,9 +137,17 @@ async function runWorker(): Promise<void> {
     }
   }
 
+  const { store, heartbeat } = runner;
   logger.info({ mode: store.mode }, 'TalentSphere Async Worker started (durable claim loop)');
+  let lastHeartbeatAt = 0;
   for (;;) {
     try {
+      // An idle worker is still alive. A stopped worker leaves a stale timestamp,
+      // and a database outage prevents the heartbeat from being refreshed.
+      if (Date.now() - lastHeartbeatAt >= 10_000) {
+        await heartbeat();
+        lastHeartbeatAt = Date.now();
+      }
       const result = await runClaimCycle({ store, handlers: claimHandlers });
       if (result.claimed === 0) {
         await sleep(1000);

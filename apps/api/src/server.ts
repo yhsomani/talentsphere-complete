@@ -508,12 +508,33 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           'Fix DATABASE_URL or start PostgreSQL; set STORAGE=memory only for an explicitly non-durable server.'
       );
     }
-    app.log.info(`storage: pg — ${boot.detail}`);
+    try {
+      await storage.acquireWriterLease();
+    } catch (error) {
+      await storage.close();
+      throw error;
+    }
+    app.log.info(`storage: pg — ${boot.detail}; exclusive writer lease acquired`);
   } else {
     app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
   }
   app.addHook('onClose', async () => {
     await storage.close();
+  });
+  // A lost database session releases its advisory lock. Fail closed immediately
+  // rather than serving an unsynchronized in-memory read model.
+  app.addHook('onRequest', (request, reply, done) => {
+    if (storage.mode === 'pg' && !storage.writerLeaseHealthy()) {
+      reply.status(503).send({
+        error: {
+          code: 'SERVICE_UNAVAILABLE',
+          message: 'API writer lease lost. Restart the service.',
+          request_id: request.id,
+        },
+      });
+      return;
+    }
+    done();
   });
 
   // Durable background-job dispatch (SSOT §27.1 ADR-009). Replaces the old
@@ -10619,14 +10640,10 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     // Measured, not assumed (Phase 1): one live storage round-trip per query.
     const dbHealth = await storage.health();
 
-    // Queue health is derived, never asserted: dispatch reaches a durable
-    // store only when STORAGE=pg is reachable right now. Memory mode reports
-    // degraded because there the queue neither persists nor processes.
-    // Measured: enqueue-path reachability. NOT measured: worker liveness —
-    // there is no heartbeat, so a dead worker over a live database still
-    // reports the queue as healthy. Jobs never report false completion, so
-    // this ceiling is one of reachability, not of job truth.
-    const queueOperational = storage.mode === 'pg' && dbHealth.ok;
+    // Database reachability alone cannot prove the queue is processed.
+    // The worker writes its heartbeat only from its actual claim loop.
+    const worker = await storage.workerHeartbeat();
+    const queueOperational = storage.mode === 'pg' && dbHealth.ok && worker.alive;
 
     const status = computeSystemHealth({
       dbConnected: dbHealth.ok,
@@ -10648,6 +10665,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     return reply.status(200).send({
       diagnostics,
+      worker: {
+        alive: worker.alive,
+        lastSeenAt: worker.lastSeenAt,
+        thresholdSeconds: 45,
+      },
+      writerLease: storage.mode === 'pg' ? storage.writerLeaseHealthy() : false,
       // ADR-015: what survives a restart, stated rather than implied.
       persistence: {
         coreLoop: storage.core.durable ? 'postgres' : 'memory (not durable)',
