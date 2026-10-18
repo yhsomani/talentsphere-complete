@@ -72,7 +72,7 @@ class PgStorage implements Storage {
   private writerLeaseLost = false;
   private writerLeaseStarted = false;
 
-  constructor(databaseUrl: string) {
+  constructor(databaseUrl: string, encryptionKey?: string) {
     this.target = redactDsn(databaseUrl);
     this.pool = new pg.Pool({
       connectionString: databaseUrl,
@@ -89,7 +89,7 @@ class PgStorage implements Storage {
     this.jobs = createPgJobStore((sql, params) => this.pool.query(sql, params));
     this.core = new PgCoreStore(this.pool);
     this.erasureRequests = new PgErasureRequestStore(this.pool);
-    this.accountMetadata = new PgAccountMetadataStore(this.pool);
+    this.accountMetadata = new PgAccountMetadataStore(this.pool, encryptionKey);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -223,6 +223,7 @@ export function createStorage(env: {
   STORAGE?: StorageMode;
   DATABASE_URL: string;
   NODE_ENV: string;
+  BYO_AI_KEY_ENCRYPTION_KEY?: string;
 }): Storage {
   const fromProcess =
     process.env.STORAGE === 'pg' || process.env.STORAGE === 'memory'
@@ -230,5 +231,7 @@ export function createStorage(env: {
       : undefined;
   const mode: StorageMode =
     env.STORAGE ?? fromProcess ?? (env.NODE_ENV === 'test' ? 'memory' : 'pg');
-  return mode === 'pg' ? new PgStorage(env.DATABASE_URL) : new MemoryStorage();
+  return mode === 'pg'
+    ? new PgStorage(env.DATABASE_URL, env.BYO_AI_KEY_ENCRYPTION_KEY)
+    : new MemoryStorage();
 }
