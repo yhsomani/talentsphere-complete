@@ -12006,15 +12006,21 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         await persist({ kind: 'emailChallenge', value: challenge });
         // The worker delivers this (email provider) — the code is never
         // returned to the browser that asked for it.
-        await dispatchJob({
-          type: 'work_history.email_verification_requested',
-          payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
-        });
+        // Credentials must be durably queued. Failure must not be swallowed
+        // or reported to the user as a successful delivery request.
+        try {
+          await storage.jobs.enqueue({
+            kind: 'work_history.email_verification_requested',
+            payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
+          });
+        } catch {
+          throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
+        }
         return reply.status(202).send({
           status: 'verification_pending',
           email,
           expiresAt: challenge.expiresAt,
-          message: `We sent a 6-digit code to ${email}. Enter it to confirm you control this mailbox.`,
+          message: `Verification email queued for ${email}. Delivery is pending; enter the code after it arrives.`,
         });
       }
 
@@ -12139,22 +12145,26 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       await persist({ kind: 'reference', value: stored });
 
       const candidateName = profilesByUserId.get(workHistory.candidateId)?.fullName;
-      await dispatchJob({
-        type: 'reference.requested',
-        payload: {
-          referenceId: stored.id,
-          to: stored.refereeEmail,
-          refereeName: stored.refereeName,
-          candidateName,
-          companyName: workHistory.companyName,
-          title: workHistory.title,
-          token,
-        },
-      });
+      try {
+        await storage.jobs.enqueue({
+          kind: 'reference.requested',
+          payload: {
+            referenceId: stored.id,
+            to: stored.refereeEmail,
+            refereeName: stored.refereeName,
+            candidateName,
+            companyName: workHistory.companyName,
+            title: workHistory.title,
+            token,
+          },
+        });
+      } catch {
+        throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
+      }
 
       return reply.status(201).send({
         reference: publicReference(stored),
-        message: 'Employment reference request created successfully.',
+        message: 'Employment reference request queued; email delivery is pending.',
       });
     }
   );
