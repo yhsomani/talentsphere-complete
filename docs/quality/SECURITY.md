@@ -29,15 +29,33 @@ Never trust client role/tenant IDs.
 
 RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. citeturn123371search0turn123371search4
 
-### Known RLS defect (not exploitable through the API)
+### Private-data RLS corrections (migrations 00047–00048)
 
-The API connects with the service role and authorizes in code, so RLS does not
-gate it. The policies matter for any direct (PostgREST/Supabase client) access,
-and some compare the wrong ids: `notifications` / `notification_preferences`
-(00007) and the messaging tables (00006: `thread_participants.user_id`) compare a
-profile id to `auth.uid()` (a user id), so they match nothing.
-Review every policy against the ids the API actually writes before enabling
-direct database access.
+The API currently uses its own Fastify sessions and authorizes in code; its
+privileged database connection bypasses RLS. Database policies are a
+defense-in-depth boundary for future direct JWT/PostgREST access, **not** a
+substitute for API authorization.
+
+- Migration 00047 corrects profile-id versus auth-user-id comparisons for
+  messaging and notifications. It removes direct participant insertion,
+  constrains message authorship and notification update columns, and replaces
+  a recursive thread participant policy with a fixed-search-path,
+  `SECURITY DEFINER` membership helper.
+- Real PostgreSQL two-account tests exposed a second defect: an unqualified
+  `user_id` in the notification-preference subquery bound to the inner
+  `profiles` table, denying legitimate owners. Forward-only migration 00048
+  explicitly uses `notification_preferences.user_id`.
+- `tests/pg/private-data-rls.test.ts` runs under transaction-local
+  `authenticated` role and JWT subject. It checks owner reads/writes,
+  cross-account denials, absent-claim denials, membership insertion,
+  sender impersonation, and notification field restrictions.
+- The CI build checks synthetic server-secret values are absent from the
+  shipped web bundle. This is **not** a substitute for scanning real
+  deployment assets, repository history, or rotating compromised credentials.
+
+Do not enable direct database access solely because these tests pass. Verify
+production grants, all additional permissive policies, function ownership,
+and the actual identity mapping in the deployed Supabase project first.
 
 ## 5. Threat Model
 
