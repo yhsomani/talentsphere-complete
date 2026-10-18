@@ -11891,6 +11891,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const email = body.corporateEmail.trim().toLowerCase();
 
       if (!body.verificationCode) {
+        // Without a mail provider queued work fails permanently; do not say a code was sent.
+        if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+          throw new DomainError(
+            'SERVICE_UNAVAILABLE',
+            'Work-email verification is unavailable until email delivery is configured.'
+          );
+        }
         assertCorporateEmailEligible(email, companyDomain);
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
@@ -12001,6 +12008,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       if (workHistory.candidateId !== session.userId && !session.roles.includes('platform_admin')) {
         throw new DomainError('FORBIDDEN', 'Access denied to request reference for this record.');
+      }
+
+      if (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'Reference invitations are unavailable until email delivery is configured.'
+        );
       }
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
