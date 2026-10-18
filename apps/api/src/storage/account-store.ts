@@ -1,4 +1,6 @@
 import type pg from 'pg';
+import crypto from 'node:crypto';
+import { DomainError } from '@talentsphere/domain';
 import type { DataExportRequest, UserSettings } from '@talentsphere/domain';
 
 /** Settings and export metadata are account data, not ephemeral feature state. */
@@ -103,14 +105,67 @@ function fromExportRow(r: ExportRow): DataExportRequest {
 }
 
 export class PgAccountMetadataStore implements AccountMetadataStore {
-  constructor(private readonly pool: pg.Pool) {}
+  private readonly encryptionKey: Buffer | null;
+
+  constructor(private readonly pool: pg.Pool, encryptionKey?: string) {
+    this.encryptionKey = encryptionKey ? Buffer.from(encryptionKey, 'hex') : null;
+    if (this.encryptionKey && this.encryptionKey.length !== 32) {
+      throw new Error('BYO_AI_KEY_ENCRYPTION_KEY must be 64 hexadecimal characters.');
+    }
+  }
+
+  private encryptSecret(secret: string | null | undefined, userId: string): string | null {
+    if (!secret) return null;
+    if (!this.encryptionKey) {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'BYO AI key storage requires a configured encryption key.'
+      );
+    }
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', this.encryptionKey, iv);
+    cipher.setAAD(Buffer.from(userId));
+    const encrypted = Buffer.concat([cipher.update(secret, 'utf8'), cipher.final()]);
+    return `enc:v1:${iv.toString('hex')}:${cipher.getAuthTag().toString('hex')}:${encrypted.toString('hex')}`;
+  }
+
+  private decryptSecret(secret: string | null, userId: string): string | null {
+    if (!secret) return null;
+    if (!this.encryptionKey || !secret.startsWith('enc:v1:')) {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'Saved BYO AI key is not accessible without the correct encryption configuration.'
+      );
+    }
+    try {
+      const [, , ivHex, tagHex, encryptedHex] = secret.split(':');
+      const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        this.encryptionKey,
+        Buffer.from(ivHex, 'hex')
+      );
+      decipher.setAAD(Buffer.from(userId));
+      decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+      return Buffer.concat([
+        decipher.update(Buffer.from(encryptedHex, 'hex')),
+        decipher.final(),
+      ]).toString('utf8');
+    } catch {
+      throw new DomainError('SERVICE_UNAVAILABLE', 'Unable to decrypt the stored BYO AI key.');
+    }
+  }
 
   async getSettings(userId: string): Promise<UserSettings | null> {
     const result = await this.pool.query<SettingsRow>(
       'SELECT * FROM public.user_settings WHERE user_id = $1',
       [userId]
     );
-    return result.rows[0] ? fromSettingsRow(result.rows[0]) : null;
+    if (!result.rows[0]) return null;
+    const settings = fromSettingsRow(result.rows[0]);
+    return {
+      ...settings,
+      byoAiKey: this.decryptSecret(result.rows[0].byo_ai_key, userId),
+    };
   }
 
   async saveSettings(s: UserSettings): Promise<void> {
@@ -143,7 +198,8 @@ export class PgAccountMetadataStore implements AccountMetadataStore {
         s.userId, s.theme, s.language, s.timezone, s.profileVisibility,
         s.showEmail, s.showActivity, s.allowConnectionRequests, s.allowDirectMessages,
         s.searchEngineIndexing, s.emailNotifications, s.pushNotifications,
-        s.marketingEmails, s.digestFrequency, s.twoFactorEnabled, s.byoAiKey ?? null,
+        s.marketingEmails, s.digestFrequency, s.twoFactorEnabled,
+        this.encryptSecret(s.byoAiKey, s.userId),
         s.aiDataUsageConsent, s.createdAt, s.updatedAt,
       ]
     );
