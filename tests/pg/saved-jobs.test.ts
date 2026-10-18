@@ -35,7 +35,7 @@ const boot = () =>
 type Json = Record<string, any>;
 async function call(
   app: FastifyInstance,
-  method: 'GET' | 'POST' | 'DELETE',
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   url: string,
   token?: string,
   payload?: unknown
@@ -111,6 +111,17 @@ describe('Saved-job bookmark persistence', () => {
     const jobId = job.data.job.id as string;
     const route = `/api/v1/jobs/${jobId}/save`;
 
+    // A candidate must not discover or save an unpublished job.
+    expect((await call(app, 'POST', route, owner.token)).status).toBe(404);
+    const published = await call(
+      app,
+      'PATCH',
+      `/api/v1/jobs/${jobId}/status`,
+      recruiter.token,
+      { status: 'published' }
+    );
+    expect(published.status).toBe(200);
+
     // Two concurrent requests may create only one bookmark.
     const responses = await Promise.all([
       call(app, 'POST', route, owner.token),
@@ -161,5 +172,15 @@ describe('Saved-job bookmark persistence', () => {
     expect((await call(app, 'POST', route, other.token)).status).toBe(201);
     const otherCount = await pool.query('SELECT count(*)::int AS n FROM public.saved_jobs');
     expect(otherCount.rows[0].n).toBe(1);
+
+    // A later status change must not leak hidden job metadata via bookmarks.
+    const paused = await call(app, 'PATCH', `/api/v1/jobs/${jobId}/status`, recruiter.token, {
+      status: 'paused',
+    });
+    expect(paused.status).toBe(200);
+    const hidden = await call(app, 'GET', '/api/v1/jobs/saved', other.token);
+    expect(hidden.status).toBe(200);
+    expect(hidden.data.savedJobs).toHaveLength(1);
+    expect(hidden.data.jobs).toHaveLength(0);
   });
 });
