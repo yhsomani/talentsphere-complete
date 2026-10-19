@@ -19,3 +19,5 @@ playwright-report/
 
 # Logs
 *.log
+# Database dumps contain personal data
+private-backups/
