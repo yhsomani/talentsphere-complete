@@ -40,7 +40,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    networks: [internal]
+    networks: [internal, egress]
 
   worker:
     build:
@@ -60,7 +60,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    networks: [internal]
+    networks: [internal, egress]
 
   web:
     build:
@@ -83,6 +83,7 @@ services:
 
 networks:
   public: {}
+  egress: {}
   internal:
     internal: true
 
