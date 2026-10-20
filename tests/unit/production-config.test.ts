@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { productionConfigProblems, validateServerEnv } from '../../packages/config/src/env.js';
+import { createHash } from 'node:crypto';
+import {
+  PUBLISHED_TEST_SECRET_SHA256,
+  productionConfigProblems,
+  validateServerEnv,
+} from '../../packages/config/src/env.js';
+import { TEST_TOKEN_SECRET, TEST_WEBHOOK_SECRET } from '../../test-secrets.mjs';
 
 const SAFE_PRODUCTION = {
   NODE_ENV: 'production',
@@ -57,5 +63,34 @@ describe('Production configuration guard (apps/api/src/index.ts refuses to start
       validateServerEnv({ ...SAFE_PRODUCTION, ...override } as Record<string, string | undefined>)
     );
     expect(problems.join(' | ')).toMatch(pattern);
+  });
+
+  it('refuses the test secrets published in this repository', () => {
+    // Anyone can read test-secrets.mjs: with its token secret anyone could
+    // mint a platform-admin session on a deployment that reused it.
+    for (const NODE_ENV of ['production', 'staging']) {
+      const problems = productionConfigProblems(
+        validateServerEnv({
+          ...SAFE_PRODUCTION,
+          NODE_ENV,
+          TOKEN_SECRET: TEST_TOKEN_SECRET,
+          BILLING_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
+        })
+      ).join(' | ');
+      expect(problems).toMatch(/TOKEN_SECRET is the test secret published/);
+      expect(problems).toMatch(/BILLING_WEBHOOK_SECRET is the test secret published/);
+    }
+    // A real secret passes.
+    expect(
+      productionConfigProblems(
+        validateServerEnv({ ...SAFE_PRODUCTION, BILLING_WEBHOOK_SECRET: 'w'.repeat(32) })
+      )
+    ).toEqual([]);
+  });
+
+  it('keeps the published-secret hashes in step with test-secrets.mjs', () => {
+    const sha = (v: string) => createHash('sha256').update(v).digest('hex');
+    expect(PUBLISHED_TEST_SECRET_SHA256.has(sha(TEST_TOKEN_SECRET))).toBe(true);
+    expect(PUBLISHED_TEST_SECRET_SHA256.has(sha(TEST_WEBHOOK_SECRET))).toBe(true);
   });
 });

@@ -63,9 +63,10 @@ export interface SalaryBenchmarkCohort {
   p50Minor: number; // Median
   p75Minor: number;
   p90Minor: number;
-  meanMinor: number;
-  minMinor: number;
-  maxMinor: number;
+  // No min, max or mean: the lowest and highest salaries in a cell are two
+  // people's exact figures, and a mean with its count lets anyone recover one
+  // report by comparing overlapping cells or before/after a withdrawal
+  // (review REV-05). Percentiles only, as specified.
   equityP50Minor: number;
   bonusP50Minor: number;
   updatedAt: string;
@@ -250,13 +251,17 @@ function calculatePercentile(sorted: number[], p: number): number {
   return Math.round(sorted[lower] * (1 - weight) + sorted[upper] * weight);
 }
 
+/** BR-178: an aggregated salary cell needs at least this many verified reports. */
+export const SALARY_BENCHMARK_MIN_COHORT = 5;
+
 /**
  * Aggregates verified, non-withdrawn salary reports into statistical cohorts (BR-178, BR-183).
  */
 export function computeSalaryAggregates(
   reports: SalaryReport[],
-  minCohortSize: number = 3
+  requestedMinCohortSize: number = SALARY_BENCHMARK_MIN_COHORT
 ): Map<string, SalaryBenchmarkCohort> {
+  const minCohortSize = Math.max(SALARY_BENCHMARK_MIN_COHORT, requestedMinCohortSize);
   const activeReports = reports.filter((r) => r.status === 'verified');
   const grouped = new Map<string, SalaryReport[]>();
 
@@ -280,22 +285,19 @@ export function computeSalaryAggregates(
     const bonuses = cohortReports.map((r) => r.bonusMinor).sort((a, b) => a - b);
 
     const first = cohortReports[0];
-    const mean = Math.round(baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length);
 
     aggregates.set(cohortKey, {
       cohortKey,
       standardizedRole: first.standardizedRole,
       seniorityLevel: first.seniorityLevel,
-      location: first.location,
+      // The cell spans every location; naming one report's would single it out.
+      location: 'all',
       currency: first.currency,
       sampleCount: cohortReports.length,
       p25Minor: calculatePercentile(baseSalaries, 0.25),
       p50Minor: calculatePercentile(baseSalaries, 0.5), // Median
       p75Minor: calculatePercentile(baseSalaries, 0.75),
       p90Minor: calculatePercentile(baseSalaries, 0.9),
-      meanMinor: mean,
-      minMinor: baseSalaries[0],
-      maxMinor: baseSalaries[baseSalaries.length - 1],
       equityP50Minor: calculatePercentile(equities, 0.5),
       bonusP50Minor: calculatePercentile(bonuses, 0.5),
       updatedAt: now,
@@ -308,20 +310,28 @@ export function computeSalaryAggregates(
 /**
  * Retrieves benchmark for role/level/currency with strict k-anonymity privacy check (BR-178).
  */
+/**
+ * `minCohortSize` can raise the threshold but never lower it below BR-178's
+ * floor: the query string is the caller's, the privacy rule is not (gap G-27).
+ */
 export function querySalaryBenchmark(
   reports: SalaryReport[],
   filter: SalaryQueryFilter,
-  minCohortSize: number = 3
+  requestedMinCohortSize: number = SALARY_BENCHMARK_MIN_COHORT
 ): BenchmarkQueryResult {
+  const minCohortSize = Math.max(SALARY_BENCHMARK_MIN_COHORT, requestedMinCohortSize);
   const currency = (filter.currency || 'USD').toUpperCase();
   const role = filter.role?.trim().toLowerCase();
   const level = filter.level;
+  // The location filter was echoed back but never applied (review REV-05).
+  const location = filter.location?.trim().toLowerCase();
 
   const matching = reports.filter((r) => {
     if (r.status !== 'verified') return false;
     if (r.currency !== currency) return false;
     if (role && r.standardizedRole !== role) return false;
     if (level && r.seniorityLevel !== level) return false;
+    if (location && r.location.trim().toLowerCase() !== location) return false;
     return true;
   });
 
@@ -338,9 +348,7 @@ export function querySalaryBenchmark(
   const equities = matching.map((r) => r.equityAnnualMinor).sort((a, b) => a - b);
   const bonuses = matching.map((r) => r.bonusMinor).sort((a, b) => a - b);
 
-  const mean = Math.round(baseSalaries.reduce((sum, val) => sum + val, 0) / baseSalaries.length);
-
-  const cohortKey = `${role || 'all'}:${level || 'all'}:${currency}`;
+  const cohortKey = `${role || 'all'}:${level || 'all'}:${location || 'all'}:${currency}`;
   return {
     status: 'available',
     benchmark: {
@@ -354,9 +362,6 @@ export function querySalaryBenchmark(
       p50Minor: calculatePercentile(baseSalaries, 0.5),
       p75Minor: calculatePercentile(baseSalaries, 0.75),
       p90Minor: calculatePercentile(baseSalaries, 0.9),
-      meanMinor: mean,
-      minMinor: baseSalaries[0],
-      maxMinor: baseSalaries[baseSalaries.length - 1],
       equityP50Minor: calculatePercentile(equities, 0.5),
       bonusP50Minor: calculatePercentile(bonuses, 0.5),
       updatedAt: new Date().toISOString(),

@@ -1,5 +1,8 @@
 import { DomainError } from './core.js';
 
+/** BR-189: outcome correlations are published only for cohorts of at least this size. */
+export const LEARNING_IMPACT_MIN_COHORT = 30;
+
 export interface LearningOutcome {
   id: string;
   userId: string;
@@ -158,9 +161,12 @@ export function computeLearningImpactMetrics(
   const cohortSize = Math.max(enrolledCount ?? sampleCount, sampleCount);
 
   // BR-189: Course outcome correlation requires >= 30 enrolled learners with measurable outcomes
-  const isPublishable = sampleCount >= 30;
+  const isPublishable = sampleCount >= LEARNING_IMPACT_MIN_COHORT;
 
-  if (sampleCount === 0) {
+  // Below the cohort floor no figure is computed at all, so no route — read,
+  // recompute or dashboard — can hand out a small group's rates (gap G-27,
+  // review REV-01): with a handful of learners an average is a person.
+  if (!isPublishable) {
     return {
       courseId,
       cohortSize,
@@ -173,7 +179,7 @@ export function computeLearningImpactMetrics(
       skillUtilizationPct: 0,
       pathEffectivenessScore: 0,
       correlationalClaimLabel: CORRELATION_DISCLAIMER_LABEL,
-      sampleCount: 0,
+      sampleCount,
       isPublishable: false,
       updatedAt: new Date().toISOString(),
     };

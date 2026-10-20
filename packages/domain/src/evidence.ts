@@ -68,21 +68,86 @@ export function createEvidence(params: CreateEvidenceParams): Evidence {
 }
 
 /**
+ * Who is acting on an evidence record. Pass every role the account holds
+ * (`roles`): authority comes from any of them, not only the first (gap
+ * G-25). `role` alone is still accepted for single-role callers.
+ */
+export interface EvidenceActor {
+  userId: string;
+  role?: Role;
+  roles?: Role[];
+}
+
+/**
+ * What the caller knows about the actor's relationship with the evidence's
+ * subject. Peer review and disputes need a recorded relationship — today, a
+ * reference the actor submitted for one of the subject's roles (gap G-01).
+ */
+export interface EvidenceRelationship {
+  /** The subject's account id (evidence.subjectId is a profile id). */
+  subjectUserId?: string;
+  /** The actor submitted a reference for one of the subject's roles. */
+  isConfirmedReferee?: boolean;
+}
+
+const rolesOf = (actor: EvidenceActor): Role[] => actor.roles ?? (actor.role ? [actor.role] : []);
+
+/** The first of `wanted` the actor holds, if any. */
+const heldRole = (actor: EvidenceActor, wanted: Role[]): Role | undefined =>
+  wanted.find((r) => rolesOf(actor).includes(r));
+
+/** Staff who may peer-review or dispute anyone's evidence. */
+const EVIDENCE_STAFF: Role[] = ['platform_admin', 'verification_staff'];
+
+/** Verification levels from least to most trusted. */
+const LEVEL_RANK: Record<VerificationLevel, number> = {
+  unverified: 0,
+  peer_reviewed: 1,
+  institution_verified: 2,
+  authority_verified: 3,
+};
+
+/**
  * Verifies and elevates an evidence item to a target verification level.
- * Invariant: Candidates cannot self-verify. Verifiers must hold appropriate roles.
+ * Invariant: Candidates cannot self-verify. Verifiers must hold appropriate roles;
+ * peer review additionally needs a recorded relationship with the subject.
  */
 export function verifyEvidence(
   evidence: Evidence,
-  verifier: { userId: string; role: Role },
+  verifier: EvidenceActor,
   targetLevel: VerificationLevel,
   notes?: string,
-  subjectUserId?: string
+  subjectUserId?: string,
+  relationship: EvidenceRelationship = {}
 ): Evidence {
   if (evidence.status === 'revoked') {
     throw new DomainError('INVALID_STATE_TRANSITION', 'Cannot verify a revoked evidence record.');
   }
   if (evidence.status === 'expired') {
     throw new DomainError('INVALID_STATE_TRANSITION', 'Cannot verify an expired evidence record.');
+  }
+  const isStaff = !!heldRole(verifier, EVIDENCE_STAFF);
+  // A dispute is settled by staff, not undone by another verification
+  // (review REV-02: a peer could re-verify a record staff had disputed).
+  if (evidence.status === 'disputed' && !isStaff) {
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      'This record is disputed; only verification staff can resolve it.'
+    );
+  }
+  // Verification only moves up. Lowering a record's level, or a peer
+  // replacing an existing verification (and with it `verifiedBy`), is refused.
+  if (evidence.status === 'verified') {
+    const current = LEVEL_RANK[evidence.verificationLevel];
+    if (LEVEL_RANK[targetLevel] < current) {
+      throw new DomainError(
+        'INVALID_STATE_TRANSITION',
+        `This record is already ${evidence.verificationLevel}; verification cannot lower it.`
+      );
+    }
+    if (LEVEL_RANK[targetLevel] === current && !isStaff) {
+      throw new DomainError('CONFLICT', `This record is already ${evidence.verificationLevel}.`);
+    }
   }
 
   // Self-verification check (subject cannot verify their own evidence)
@@ -97,16 +162,23 @@ export function verifyEvidence(
   }
 
   // Role authority checks per target level
+  let actingRole: Role | 'peer' | undefined;
   switch (targetLevel) {
     case 'peer_reviewed':
-      // Any verified user or peer can perform peer review
+      // A peer is someone with a recorded relationship to the subject, not any
+      // account (gap G-01: a second account could "peer review" its owner).
+      actingRole = heldRole(verifier, EVIDENCE_STAFF);
+      if (!actingRole && relationship.isConfirmedReferee) actingRole = 'peer';
+      if (!actingRole) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Peer review needs a recorded relationship with this person, such as a reference you gave them.'
+        );
+      }
       break;
     case 'institution_verified':
-      if (
-        verifier.role !== 'institution_admin' &&
-        verifier.role !== 'instructor' &&
-        verifier.role !== 'platform_admin'
-      ) {
+      actingRole = heldRole(verifier, ['institution_admin', 'instructor', 'platform_admin']);
+      if (!actingRole) {
         throw new DomainError(
           'UNAUTHORIZED',
           'Institution verification requires an institution admin, instructor, or platform admin.'
@@ -114,7 +186,8 @@ export function verifyEvidence(
       }
       break;
     case 'authority_verified':
-      if (verifier.role !== 'platform_admin' && verifier.role !== 'verification_staff') {
+      actingRole = heldRole(verifier, ['platform_admin', 'verification_staff']);
+      if (!actingRole) {
         throw new DomainError(
           'UNAUTHORIZED',
           'Authority verification requires platform admin or verification staff authority.'
@@ -135,7 +208,7 @@ export function verifyEvidence(
     metadata: {
       ...evidence.metadata,
       verificationNotes: notes || 'Verified according to platform standards.',
-      verifiedByRole: verifier.role,
+      verifiedByRole: actingRole,
     },
     updatedAt: now,
   };
@@ -147,8 +220,9 @@ export function verifyEvidence(
  */
 export function disputeEvidence(
   evidence: Evidence,
-  disputant: { userId: string; role: Role },
-  reason: string
+  disputant: EvidenceActor,
+  reason: string,
+  relationship: EvidenceRelationship = {}
 ): Evidence {
   if (!reason || reason.trim().length === 0) {
     throw new DomainError('VALIDATION_FAILED', 'Dispute reason is required.');
@@ -157,6 +231,19 @@ export function disputeEvidence(
     throw new DomainError(
       'INVALID_STATE_TRANSITION',
       'Cannot dispute an already revoked evidence record.'
+    );
+  }
+  // Who may challenge a record (gap G-01): staff and moderators, whoever
+  // verified it, or someone with a recorded relationship to the subject.
+  // Anyone else reports it through moderation instead.
+  const mayDispute =
+    !!heldRole(disputant, [...EVIDENCE_STAFF, 'moderator']) ||
+    (!!evidence.verifiedBy && evidence.verifiedBy === disputant.userId) ||
+    !!relationship.isConfirmedReferee;
+  if (!mayDispute) {
+    throw new DomainError(
+      'FORBIDDEN',
+      'Only staff, the verifier, or someone with a recorded relationship to this person may dispute it. Report it instead.'
     );
   }
 
@@ -179,16 +266,23 @@ export function disputeEvidence(
  */
 export function revokeEvidence(
   evidence: Evidence,
-  actor: { userId: string; role: Role },
-  reason: string
+  actor: EvidenceActor,
+  reason: string,
+  subjectUserId?: string
 ): Evidence {
   if (!reason || reason.trim().length === 0) {
     throw new DomainError('VALIDATION_FAILED', 'Revocation reason is required.');
   }
 
-  const isOwner = actor.userId === evidence.subjectId;
-  const isAuthority = actor.role === 'platform_admin' || actor.role === 'verification_staff';
-  const isOriginalVerifier = evidence.verifiedBy === actor.userId;
+  // evidence.subjectId is the owner's PROFILE id; the actor is an account
+  // (gap G-02: comparing the two meant owners could never revoke).
+  const isOwner =
+    (!!subjectUserId && actor.userId === subjectUserId) || actor.userId === evidence.subjectId;
+  const isAuthority = !!heldRole(actor, EVIDENCE_STAFF);
+  // The issuer who verified it (an institution, staff) may withdraw it; a
+  // peer reviewer may not revoke someone else's evidence (review REV-02).
+  const isOriginalVerifier =
+    evidence.verifiedBy === actor.userId && evidence.metadata?.verifiedByRole !== 'peer';
 
   if (!isOwner && !isAuthority && !isOriginalVerifier) {
     throw new DomainError(

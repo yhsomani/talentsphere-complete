@@ -161,13 +161,34 @@ describe('Domain: Application Feedback Loop (F-122, BR-217..BR-224, P-02)', () =
       feedbacks.push({ reasonCategory: 'experience_gap' } as any);
     }
 
+    // 10 in total, but each category is below k: neither is named (G-27).
+    const smallCells = computeFeedbackAggregateInsights(feedbacks, 10);
+    expect(smallCells.totalEvaluated).toBe(10);
+    expect(smallCells.categoryBreakdown).toEqual({});
+    expect(smallCells.suppressedCount).toBe(10);
+    expect(smallCells.isPrivacyProtected).toBe(true);
+
+    // 6 more skills_gap: that category reaches k and is shown; the other
+    // stays folded into the suppressed count.
+    for (let i = 0; i < 6; i++) {
+      feedbacks.push({ reasonCategory: 'skills_gap' } as any);
+    }
     const availableInsights = computeFeedbackAggregateInsights(feedbacks, 10);
-    expect(availableInsights.isPrivacyProtected).toBe(false);
-    expect(availableInsights.totalEvaluated).toBe(10);
-    expect(availableInsights.categoryBreakdown['skills_gap'].count).toBe(6);
-    expect(availableInsights.categoryBreakdown['skills_gap'].percentage).toBe(60);
-    expect(availableInsights.categoryBreakdown['experience_gap'].count).toBe(4);
-    expect(availableInsights.categoryBreakdown['experience_gap'].percentage).toBe(40);
+    expect(availableInsights.totalEvaluated).toBe(16);
+    expect(availableInsights.categoryBreakdown['skills_gap'].count).toBe(12);
+    expect(availableInsights.categoryBreakdown['skills_gap'].percentage).toBe(75);
+    expect(availableInsights.categoryBreakdown['experience_gap']).toBeUndefined();
+    expect(availableInsights.suppressedCount).toBe(4);
+    expect(availableInsights.isPrivacyProtected).toBe(true);
+
+    // Every category at k or more: nothing suppressed.
+    for (let i = 0; i < 6; i++) {
+      feedbacks.push({ reasonCategory: 'experience_gap' } as any);
+    }
+    const allShown = computeFeedbackAggregateInsights(feedbacks, 10);
+    expect(allShown.categoryBreakdown['experience_gap'].count).toBe(10);
+    expect(allShown.suppressedCount).toBe(0);
+    expect(allShown.isPrivacyProtected).toBe(false);
   });
 
   it('creates organization-configurable feedback templates (BR-224)', () => {

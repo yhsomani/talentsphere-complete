@@ -185,15 +185,34 @@ describe('Domain: Salary Intelligence & Compensation Benchmarks (F-86, BR-177..B
       }),
     ];
 
+    // Four reports: below BR-178's floor of 5, even when asked for 3 (G-27).
+    expect(computeSalaryAggregates(reports, 3).get('backend_engineer:senior:USD')).toBeUndefined();
+
+    reports.push(
+      createSalaryReport({
+        userId: 'u5',
+        jobTitle: 'Principal-track Backend Engineer',
+        standardizedRole: 'backend_engineer',
+        seniorityLevel: 'senior',
+        location: 'Austin, TX',
+        baseSalaryMinor: 22000000,
+        equityAnnualMinor: 10000000,
+        bonusMinor: 5000000,
+        yearsOfExperience: 10,
+      })
+    );
     const aggregates = computeSalaryAggregates(reports, 3);
     const cohort = aggregates.get('backend_engineer:senior:USD');
     expect(cohort).toBeDefined();
-    expect(cohort?.sampleCount).toBe(4);
-    expect(cohort?.p50Minor).toBe(17000000); // Median between 160k and 180k
-    expect(cohort?.equityP50Minor).toBe(5000000); // Median equity
-    expect(cohort?.bonusP50Minor).toBe(2500000); // Median bonus
-    expect(cohort?.minMinor).toBe(14000000);
-    expect(cohort?.maxMinor).toBe(20000000);
+    expect(cohort?.sampleCount).toBe(5);
+    expect(cohort?.p50Minor).toBe(18000000); // Median of 140k..220k
+    expect(cohort?.equityP50Minor).toBe(6000000); // Median equity
+    expect(cohort?.bonusP50Minor).toBe(3000000); // Median bonus
+    // No individual figure and no one person's location (REV-05).
+    expect(cohort).not.toHaveProperty('minMinor');
+    expect(cohort).not.toHaveProperty('maxMinor');
+    expect(cohort).not.toHaveProperty('meanMinor');
+    expect(cohort?.location).toBe('all');
   });
 
   it('enforces k-anonymity privacy protection on query benchmark (BR-178)', () => {
@@ -209,18 +228,20 @@ describe('Domain: Salary Intelligence & Compensation Benchmarks (F-86, BR-177..B
       }),
     ];
 
-    // Querying with minCohortSize = 3 should return insufficient_data to protect anonymity
-    const result = querySalaryBenchmark(
-      singleReport,
-      { role: 'quantum_cryptographer', level: 'principal' },
-      3
-    );
+    // Even a caller asking for a cohort of 1 gets BR-178's floor of 5 (G-27).
+    for (const requested of [1, 3, undefined]) {
+      const result = querySalaryBenchmark(
+        singleReport,
+        { role: 'quantum_cryptographer', level: 'principal' },
+        requested
+      );
 
-    expect(result.status).toBe('insufficient_data');
-    if (result.status === 'insufficient_data') {
-      expect(result.actualCount).toBe(1);
-      expect(result.minRequired).toBe(3);
-      expect(result.message).toContain('BR-178');
+      expect(result.status).toBe('insufficient_data');
+      if (result.status === 'insufficient_data') {
+        expect(result.actualCount).toBe(1);
+        expect(result.minRequired).toBe(5);
+        expect(result.message).toContain('BR-178');
+      }
     }
   });
 

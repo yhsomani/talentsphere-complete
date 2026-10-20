@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Integration: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232)', () => {
   let app: FastifyInstance;
@@ -190,10 +191,33 @@ describe('Integration: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232)'
     expect(challengeBody.freshness.verificationSource).toBe('challenge');
   });
 
+  it('refuses the platform-wide freshness recomputation to anyone but a platform admin (G-04)', async () => {
+    const anonymous = await app.inject({
+      method: 'POST',
+      url: '/api/v1/skills/freshness/refresh-all',
+    });
+    expect(anonymous.statusCode).toBe(401);
+
+    for (const token of [candidateToken, recruiterToken]) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/skills/freshness/refresh-all',
+        headers: { authorization: `Bearer ${token}` },
+      });
+      expect(res.statusCode).toBe(403);
+    }
+  });
+
   it('triggers freshness score re-calculation across active portfolios (BR-225)', async () => {
+    const adminToken = createSessionToken(
+      '00000000-0000-4000-a000-0000000000ad',
+      'admin.freshness@talentsphere.internal',
+      ['platform_admin']
+    );
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/skills/freshness/refresh-all',
+      headers: { authorization: `Bearer ${adminToken}` },
     });
 
     expect(res.statusCode).toBe(200);

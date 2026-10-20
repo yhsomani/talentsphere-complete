@@ -283,17 +283,26 @@ export function mintCourseCertificate(
 export function revokeCourseCertificate(
   certificate: CourseCertificate,
   reason: string,
-  actor: { userId: string; roles: Role[] }
+  actor: { userId: string; roles: Role[]; profileId?: string },
+  /** The certificate's course: its instructor may revoke it (gap G-30). */
+  course?: Pick<Course, 'id' | 'instructorId'>
 ): CourseCertificate {
   if (certificate.status === 'revoked') {
     throw new DomainError('INVALID_STATE_TRANSITION', 'Certificate has already been revoked.');
   }
 
-  const isAuthorized = actor.roles.includes('platform_admin') || actor.roles.includes('instructor');
+  // The instructor of THIS course, not any instructor (gap G-30). Courses
+  // name their instructor by profile id; the user id is accepted as well.
+  const teachesThisCourse =
+    actor.roles.includes('instructor') &&
+    !!course &&
+    course.id === certificate.courseId &&
+    (course.instructorId === actor.profileId || course.instructorId === actor.userId);
+  const isAuthorized = actor.roles.includes('platform_admin') || teachesThisCourse;
   if (!isAuthorized) {
     throw new DomainError(
       'FORBIDDEN',
-      'Only platform administrators or instructors may revoke a certificate.'
+      "Only a platform administrator or the course's instructor may revoke this certificate."
     );
   }
 

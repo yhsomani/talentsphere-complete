@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Behavioral Talent Discovery Integration (F-159, F-146, F-130, F-150)', () => {
   let app: FastifyInstance;
@@ -11,6 +12,11 @@ describe('Behavioral Talent Discovery Integration (F-159, F-146, F-130, F-150)',
   let candidate2Id: string;
   let regularCandidateToken: string;
   let regularCandidateId: string;
+  const adminToken = createSessionToken(
+    '00000000-0000-4000-a000-0000000000b1',
+    'admin.behavioral@talentsphere.internal',
+    ['platform_admin']
+  );
 
   beforeAll(async () => {
     app = await buildApp({
@@ -116,12 +122,42 @@ describe('Behavioral Talent Discovery Integration (F-159, F-146, F-130, F-150)',
     expect(body.error.code).toBe('FORBIDDEN');
   });
 
-  it('3. Recruiter can compute profile for any candidate with explicit raw signals and anti-gaming protection', async () => {
+  it('3a. A recruiter cannot write a profile from supplied numbers (G-28)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/recruiter/discovery/behavioral/compute',
+      headers: { authorization: `Bearer ${recruiterToken}` },
+      payload: {
+        candidateId: candidate1Id,
+        rawSignals: {
+          contributionsCount30d: 999,
+          challengesCompleted: 99,
+          reputationOverallScore: 100,
+          verifiedEndorsements: [],
+          coursesCompletedLast90d: 0,
+          emergingSkillsCount: 0,
+          highlightedSkills: ['typescript'],
+        },
+      },
+    });
+    expect(res.statusCode).toBe(403);
+
+    // From recorded activity, it may.
+    const recorded = await app.inject({
+      method: 'POST',
+      url: '/api/v1/recruiter/discovery/behavioral/compute',
+      headers: { authorization: `Bearer ${recruiterToken}` },
+      payload: { candidateId: candidate1Id },
+    });
+    expect(recorded.statusCode).toBe(200);
+  });
+
+  it('3. A platform admin can compute a profile from explicit raw signals, with anti-gaming protection', async () => {
     // Candidate 1: High organic contributions, organic peer endorsements
     const res1 = await app.inject({
       method: 'POST',
       url: '/api/v1/recruiter/discovery/behavioral/compute',
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${adminToken}` },
       payload: {
         candidateId: candidate1Id,
         rawSignals: {
@@ -150,7 +186,7 @@ describe('Behavioral Talent Discovery Integration (F-159, F-146, F-130, F-150)',
     const res2 = await app.inject({
       method: 'POST',
       url: '/api/v1/recruiter/discovery/behavioral/compute',
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${adminToken}` },
       payload: {
         candidateId: candidate2Id,
         rawSignals: {
@@ -301,5 +337,50 @@ describe('Behavioral Talent Discovery Integration (F-159, F-146, F-130, F-150)',
     expect(res.statusCode).toBe(404);
     const body = JSON.parse(res.body);
     expect(body.error.code).toBe('NOT_FOUND');
+  });
+
+  it('13. A candidate who makes their profile private leaves recruiter discovery (G-28)', async () => {
+    const hide = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/profile/me',
+      headers: { authorization: `Bearer ${candidate1Token}` },
+      payload: { privacy: 'private' },
+    });
+    expect(hide.statusCode).toBe(200);
+
+    const list = JSON.parse(
+      (
+        await app.inject({
+          method: 'GET',
+          url: '/api/v1/recruiter/discovery/behavioral',
+          headers: { authorization: `Bearer ${recruiterToken}` },
+        })
+      ).body
+    );
+    expect(list.profiles.some((p: any) => p.candidateId === candidate1Id)).toBe(false);
+    expect(list.profiles.some((p: any) => p.candidateId === candidate2Id)).toBe(true);
+
+    for (const req of [
+      { method: 'GET' as const, url: `/api/v1/recruiter/discovery/behavioral/${candidate1Id}` },
+      {
+        method: 'POST' as const,
+        url: '/api/v1/recruiter/discovery/behavioral/compute',
+        payload: { candidateId: candidate1Id },
+      },
+    ]) {
+      const res = await app.inject({
+        ...req,
+        headers: { authorization: `Bearer ${recruiterToken}` },
+      });
+      expect(res.statusCode).toBe(403);
+    }
+
+    // The candidate still sees their own.
+    const own = await app.inject({
+      method: 'GET',
+      url: `/api/v1/recruiter/discovery/behavioral/${candidate1Id}`,
+      headers: { authorization: `Bearer ${candidate1Token}` },
+    });
+    expect(own.statusCode).toBe(200);
   });
 });

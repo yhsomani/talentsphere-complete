@@ -130,11 +130,13 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     expect(submitBody.result.score).toBe(100);
     expect(submitBody.xpEarned).toBeGreaterThan(0);
 
-    // 2. Verify auto-minted Evidence
+    // 2. The submission is recorded as evidence, but not as verified: the
+    // evaluator does not execute code yet (SEC-02).
     expect(submitBody.evidence).toBeDefined();
     expect(submitBody.evidence.type).toBe('assessment');
-    expect(submitBody.evidence.verificationLevel).toBe('authority_verified');
-    expect(submitBody.evidence.status).toBe('verified');
+    expect(submitBody.evidence.verificationLevel).toBe('unverified');
+    expect(submitBody.evidence.status).toBe('pending');
+    expect(submitBody.evidence.description).toContain('not been verified');
 
     // 3. Verify evidence is retrievable via Evidence API
     const evRes = await app.inject({

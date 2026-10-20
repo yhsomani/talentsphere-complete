@@ -252,6 +252,46 @@ describe('Integration: Technical Interview Assessment Platform (F-88, S-06, BR-1
     expect(joinBody.assessment.candidateJoinedAt).toBeDefined();
   });
 
+  it("refuses another company's question ids when scheduling (SEC-03)", async () => {
+    const other = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: `other.co.${Date.now()}@example.com`,
+        password: 'Password123!Secure',
+        fullName: 'Other Recruiter',
+        role: 'recruiter',
+      },
+    });
+    const otherToken = JSON.parse(other.payload).token;
+    const otherUserId = JSON.parse(other.payload).user.id;
+    const otherOrg = JSON.parse(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/v1/organizations',
+          headers: { authorization: `Bearer ${otherToken}` },
+          payload: { name: 'Other Co', slug: `other-co-${Date.now()}` },
+        })
+      ).payload
+    ).organization;
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/interviews/assessments',
+      headers: { authorization: `Bearer ${otherToken}` },
+      payload: {
+        orgId: otherOrg.id,
+        candidateProfileId,
+        interviewerUserId: otherUserId,
+        title: 'Borrowed questions',
+        scheduledAt: new Date(Date.now() + 3600000).toISOString(),
+        durationMinutes: 30,
+        questionIds: [questionId],
+      },
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
   it('enforces dual consent for recording before recording becomes active (BR-169, BR-170)', async () => {
     // 1. Candidate consents
     const candConsentRes = await app.inject({

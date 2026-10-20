@@ -619,7 +619,11 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(data.graph.summary.totalRoles).toBe(1);
       expect(data.graph.summary.verifiedRoles).toBe(1);
       expect(data.graph.summary.totalReferences).toBe(1);
-      expect(data.graph.summary.averageReferenceRating).toBe(5);
+      // A recruiter sees no average of a single referee's ratings (REV-09).
+      expect(data.graph.summary.averageReferenceRating).toBeNull();
+      expect(JSON.stringify(data.graph)).not.toContain('technicalProficiency');
+      // Self-declared skills earn no points unless two references endorse them
+      // independently (#49). 85 included that unearned +5.
       expect(data.graph.summary.aggregateTrustScore).toBe(80);
       expect(data.graph.summary.topVerifiedSkills.length).toBeGreaterThanOrEqual(1);
     });

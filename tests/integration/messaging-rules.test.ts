@@ -153,8 +153,10 @@ describe('Messaging: who may start a conversation, and what one is', () => {
     const inbox = await call(app, 'GET', '/api/v1/notifications?type=message', rita.token);
     expect(inbox.body.notifications[0]).toMatchObject({
       type: 'message',
-      title: 'New message from Casey Candidate',
-      body: 'Shall I bring anything?',
+      // Neither the sender's name nor their words (G-26): the notification
+      // outlives an erasure of the sender.
+      title: 'New message',
+      body: 'You have a new message in a conversation.',
       referenceType: 'thread',
       referenceId: threadId,
     });

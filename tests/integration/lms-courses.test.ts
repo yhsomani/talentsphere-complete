@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('LMS Courses & Learning Management Integration (F-07)', () => {
   let app: FastifyInstance;
@@ -43,6 +44,35 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
       },
     });
     instructorToken = instructorRes.json().token;
+
+    // Authoring courses is a granted role (SEC-02): an admin makes them an instructor.
+    const adminToken = createSessionToken(
+      '00000000-0000-4000-a000-0000000000c2',
+      'admin.lms@talentsphere.internal',
+      ['platform_admin']
+    );
+    const promoted = await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/admin/users/${instructorRes.json().user.id}/roles`,
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { roles: ['candidate', 'instructor'] },
+    });
+    expect(promoted.statusCode).toBe(200);
+  });
+
+  it('refuses course authoring to accounts without an instructor role (SEC-02)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/courses',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: {
+        title: 'Self-certified Mastery',
+        slug: 'self-certified-mastery',
+        description: 'A course its author would take to certify themselves.',
+        level: 'beginner',
+      },
+    });
+    expect(res.statusCode).toBe(403);
   });
 
   afterAll(async () => {
@@ -177,6 +207,18 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
     });
     expect(publishRes.statusCode).toBe(200);
     expect(publishRes.json().course.status).toBe('published');
+  });
+
+  it('does not let an instructor enrol in, and so certify themselves through, their own course (SEC-02)', async () => {
+    const catalog = (await app.inject({ method: 'GET', url: '/api/v1/courses' })).json();
+    const own = catalog.courses.find((c: any) => c.slug === 'modern-go-systems');
+    expect(own).toBeDefined();
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/courses/${own.id}/enroll`,
+      headers: { authorization: `Bearer ${instructorToken}` },
+    });
+    expect(res.statusCode).toBe(403);
   });
 
   it('prevents duplicate active course enrollment (BR-46)', async () => {
