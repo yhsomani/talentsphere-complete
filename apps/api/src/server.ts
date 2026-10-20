@@ -273,6 +273,7 @@ import {
   LearningImpactMetrics,
   recordLearningOutcome,
   computeLearningImpactMetrics,
+  LEARNING_IMPACT_MIN_COHORT,
   aggregateLearningImpactDashboard,
   TalentPool,
   TalentPoolMember,
@@ -1501,6 +1502,25 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     }
   );
 
+  /**
+   * The evidence subject's account, and whether this account has a recorded
+   * relationship with them: a reference it submitted, signed in and holding
+   * the emailed token, for one of their roles. Peer review and disputes
+   * require it (gap G-01). Not matched by email: account addresses are not
+   * verified (review REV-03).
+   */
+  const evidenceRelationship = (evidence: Evidence, actorUserId: string) => {
+    const subjectUserId = profilesById.get(evidence.subjectId)?.userId;
+    const isConfirmedReferee =
+      !!subjectUserId &&
+      subjectUserId !== actorUserId &&
+      Array.from(employmentReferencesById.values()).some(
+        (r) =>
+          r.candidateId === subjectUserId && r.status === 'submitted' && r.refereeId === actorUserId
+      );
+    return { subjectUserId, isConfirmedReferee };
+  };
+
   app.post(
     '/api/v1/evidence/:id/verify',
     async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
@@ -1513,13 +1533,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         throw new DomainError('NOT_FOUND', `Evidence with ID ${id} not found.`);
       }
 
-      const subjectProfile = profilesById.get(evidence.subjectId);
+      const relationship = evidenceRelationship(evidence, session.userId);
       const updated = verifyEvidence(
         evidence,
-        { userId: session.userId, role: session.roles[0] },
+        { userId: session.userId, roles: session.roles },
         input.verificationLevel,
         input.notes,
-        subjectProfile?.userId
+        relationship.subjectUserId,
+        relationship
       );
 
       await persist({ kind: 'evidence', value: updated, base: evidence });
@@ -1562,8 +1583,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const updated = disputeEvidence(
         evidence,
-        { userId: session.userId, role: session.roles[0] },
-        input.reason
+        { userId: session.userId, roles: session.roles },
+        input.reason,
+        evidenceRelationship(evidence, session.userId)
       );
 
       await persist({ kind: 'evidence', value: updated, base: evidence });
@@ -1572,6 +1594,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         type: 'evidence.propagate',
         payload: { evidenceId: updated.id, status: updated.status },
         enqueuedAt: new Date().toISOString(),
+      });
+
+      auditLogs.push({
+        event: 'evidence.disputed',
+        actorId: session.userId,
+        targetId: updated.id,
+        timestamp: new Date().toISOString(),
       });
 
       return reply.status(200).send({
@@ -1595,8 +1624,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const updated = revokeEvidence(
         evidence,
-        { userId: session.userId, role: session.roles[0] },
-        input.reason
+        { userId: session.userId, roles: session.roles },
+        input.reason,
+        profilesById.get(evidence.subjectId)?.userId
       );
 
       await persist({ kind: 'evidence', value: updated, base: evidence });
@@ -1605,6 +1635,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         type: 'evidence.propagate',
         payload: { evidenceId: updated.id, status: updated.status },
         enqueuedAt: new Date().toISOString(),
+      });
+
+      auditLogs.push({
+        event: 'evidence.revoked',
+        actorId: session.userId,
+        targetId: updated.id,
+        timestamp: new Date().toISOString(),
       });
 
       return reply.status(200).send({
@@ -3228,7 +3265,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
   app.post(
     '/api/v1/skills/freshness/refresh-all',
-    async (_req: FastifyRequest, reply: FastifyReply) => {
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      // Recomputes every candidate's scores: an operator action, not an
+      // open endpoint (gap G-04).
+      const session = extractUser(req);
+      if (!session.roles.includes('platform_admin')) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only a platform admin can recompute every freshness score.'
+        );
+      }
       for (const userMap of skillFreshnessByCandidateId.values()) {
         for (const [skillId, record] of userMap.entries()) {
           const { score, band, isDemoted } = calculateFreshnessScore(
@@ -3420,6 +3466,18 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
     }
 
+    // Questions must be this organization's own: the panel reads each
+    // question's hidden test cases, so another company's question ids would
+    // open its private question bank (security audit SEC-03).
+    for (const qid of input.questionIds ?? []) {
+      if (interviewQuestionsById.get(qid)?.orgId !== input.orgId) {
+        throw new DomainError(
+          'VALIDATION_FAILED',
+          "questionIds must be questions from this organization's own question bank."
+        );
+      }
+    }
+
     const assessment = scheduleInterviewAssessment({
       orgId: input.orgId,
       applicationId: input.applicationId,
@@ -3467,7 +3525,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       // BR-173: Candidates receive questions with hidden test cases stripped
       const questions = assessment.questionIds
         .map((qid) => interviewQuestionsById.get(qid))
-        .filter((q): q is InterviewQuestion => q !== undefined)
+        // Never another organization's question, even on an assessment
+        // scheduled before that was checked (SEC-03).
+        .filter((q): q is InterviewQuestion => q !== undefined && q.orgId === assessment.orgId)
         .map((q) => {
           if (isCandidate) {
             return {
@@ -3595,7 +3655,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           throw new DomainError('NOT_FOUND', 'That question is not part of this interview.');
         }
         const q = interviewQuestionsById.get(input.questionId);
-        if (q) {
+        if (q && q.orgId === assessment.orgId) {
           testCases = q.testCases;
         }
       }
@@ -3833,6 +3893,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // Multi-Context Reputation Engine Endpoints (F-144, S-03, BR-247..BR-254)
   app.post('/api/v1/reputation/signals', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
+    // Reputation is what others and the system record about a person, with a
+    // weight and a sign the caller chooses: an operator or moderator action,
+    // never self-service (security audit SEC-01 — any account could raise its
+    // own score or penalise a rival's).
+    if (!session.roles.some((r) => r === 'platform_admin' || r === 'moderator')) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'Reputation signals are recorded by moderators and platform admins.'
+      );
+    }
     const input = AddReputationSignalInputSchema.parse(req.body);
 
     const targetUserId = input.targetUserId || session.userId;
@@ -3977,8 +4047,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         throw new DomainError('NOT_FOUND', `Recovery plan ${planId} not found.`);
       }
 
-      if (plan.userId !== session.userId && !session.roles.includes('platform_admin')) {
-        throw new DomainError('FORBIDDEN', 'Cannot complete tasks on another user recovery plan.');
+      // A task is confirmed by a moderator or admin, not ticked off by the
+      // person whose penalty it lifts (security audit SEC-01).
+      if (!session.roles.some((r) => r === 'platform_admin' || r === 'moderator')) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'A recovery task is confirmed by a moderator or platform admin.'
+        );
       }
 
       const {
@@ -4025,7 +4100,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
   app.post(
     '/api/v1/reputation/recalculate-all',
-    async (_req: FastifyRequest, reply: FastifyReply) => {
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      // Recomputes every person's reputation: an operator action, not an
+      // open endpoint (gap G-04).
+      const session = extractUser(req);
+      if (!session.roles.includes('platform_admin')) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only a platform admin can recompute every reputation score.'
+        );
+      }
       let updatedCount = 0;
       for (const [userId, signals] of reputationSignalsByUserId.entries()) {
         const distinctContextDomains = new Set(signals.map((s) => `${s.context}:${s.domain}`));
@@ -4563,7 +4647,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       let activeSession: AssessmentSession | undefined;
       if (input.sessionId) {
+        // Only the caller's own session for this challenge (SEC-11).
         activeSession = assessmentSessionsById.get(input.sessionId);
+        if (
+          !activeSession ||
+          activeSession.candidateId !== profile.id ||
+          activeSession.assessmentId !== challengeId
+        ) {
+          throw new DomainError('NOT_FOUND', 'Assessment session not found.');
+        }
       } else {
         const candidateSessions = assessmentSessionsByCandidateId.get(profile.id) || [];
         activeSession = candidateSessions.find(
@@ -4581,8 +4673,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       let awardedXp = 0;
       if (evalResult.status === 'passed') {
-        // 1. Store auto-minted verified evidence
-        if (evalResult.evidence) {
+        // 1. Store the submission as (unverified) evidence, once per challenge.
+        // A repeat pass returns the record already stored, not a fresh id that
+        // was never saved (review R2-8).
+        const existingEvidence = (evidenceBySubjectId.get(profile.id) || []).find(
+          (e) => e.metadata?.challengeId === challenge.id
+        );
+        if (existingEvidence) {
+          evalResult.evidence = existingEvidence;
+        }
+        if (evalResult.evidence && !existingEvidence) {
           await persist({ kind: 'evidence', value: evalResult.evidence });
 
           await dispatchJob({
@@ -4796,6 +4896,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
   app.post('/api/v1/courses', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
+    // Completing a course mints evidence at the platform's top trust level,
+    // so authoring one is a granted role, as for challenges (security audit
+    // SEC-02: any account could author, take and pass its own course).
+    if (!session.roles.some((r) => ['instructor', 'course_author', 'platform_admin'].includes(r))) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'Only instructors, course authors and platform admins can create courses.'
+      );
+    }
     const profile = profilesByUserId.get(session.userId);
     if (!profile) {
       throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
@@ -5025,6 +5134,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const profile = profilesByUserId.get(session.userId);
       if (!profile) {
         throw new DomainError('NOT_FOUND', 'Profile not found. Please create a profile first.');
+      }
+
+      // A course's own instructor cannot earn its certificate (SEC-02).
+      if (course.instructorId === profile.id) {
+        throw new DomainError('FORBIDDEN', 'You cannot enrol in a course you teach.');
       }
 
       const existingEnrollments = Array.from(enrollmentsById.values());
@@ -5368,10 +5482,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const input = RevokeCertificateInputSchema.parse(req.body);
 
-      const revoked = revokeCourseCertificate(cert, input.reason, {
-        userId: session.userId,
-        roles: session.roles,
-      });
+      const revoked = revokeCourseCertificate(
+        cert,
+        input.reason,
+        {
+          userId: session.userId,
+          roles: session.roles,
+          profileId: profilesByUserId.get(session.userId)?.id,
+        },
+        coursesById.get(cert.courseId)
+      );
 
       certificatesByNumber.set(revoked.certificateNumber, revoked);
       certificatesByProofHash.set(revoked.verificationProofHash, revoked);
@@ -5468,11 +5588,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       },
     ];
     for (const recipientId of recipientIds) {
+      // Neither the sender's name nor their words: a notification belongs to
+      // the recipient and outlives the sender's erasure, which removes what
+      // they wrote (gap G-26). The conversation it links to shows who wrote
+      // what for as long as that account exists.
       const notice = notificationFor({
         recipientId,
         type: 'message',
-        title: `New message from ${sender.fullName}`,
-        body: message.content.slice(0, 100),
+        title: 'New message',
+        body: 'You have a new message in a conversation.',
         referenceType: 'thread',
         referenceId: thread.id,
       });
@@ -7681,9 +7805,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   });
 
   // 3. Query Progression Benchmarks (BR-160: requires sample count >= 20 to publish)
+  /** BR-160: progression figures are published for at least this many people. */
+  const CAREER_BENCHMARK_MIN_SAMPLES = 20;
+
   app.get('/api/v1/career/benchmarks', async (req: FastifyRequest, reply: FastifyReply) => {
     const query = QueryCareerBenchmarksQuerySchema.parse(req.query);
-    const minSamples = query.minSamples ?? 20;
+    // The caller may ask for a stricter threshold, never a looser one: with
+    // ?minSamples=0 a rare role pair was one person's salary change (SEC-05).
+    const minSamples = Math.max(CAREER_BENCHMARK_MIN_SAMPLES, query.minSamples ?? 0);
 
     // Discover distinct pairs
     const pairs = new Set<string>();
@@ -7737,7 +7866,20 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         }
       );
 
-      return reply.status(200).send({ benchmark });
+      // BR-160: below the threshold no figure leaves the server — the medians
+      // of one or two transitions are those people's own (SEC-05).
+      if (!benchmark.isPublishable) {
+        return reply.status(200).send({
+          status: 'insufficient_data',
+          fromRole: input.fromRole,
+          toRole: input.toRole,
+          sampleCount: benchmark.sampleCount,
+          minRequired: CAREER_BENCHMARK_MIN_SAMPLES,
+          message: `Too few people have made this move to publish figures (at least ${CAREER_BENCHMARK_MIN_SAMPLES} required, BR-160).`,
+        });
+      }
+
+      return reply.status(200).send({ status: 'available', benchmark });
     }
   );
 
@@ -7747,7 +7889,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     const pathway = generateProgressionPathways(allCareerTransitions, query.originRole, {
       industry: query.industry,
-      enforceKAnonymity: query.enforceKAnonymity,
+      // Always on: suppression is the server's rule, not a query option
+      // (SEC-05). The parameter is still accepted and ignored.
+      enforceKAnonymity: true,
       baselineSalary: query.baselineSalary,
     });
 
@@ -7850,6 +7994,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     const input = RecordLearningOutcomeInputSchema.parse(req.body);
 
+    // An outcome is a learner's own, for a course they took, once per course
+    // (review REV-01): otherwise one account could fill a cohort past the
+    // publication threshold with figures it knows and subtract them out.
+    const enrollment = enrollmentsByUserAndCourse.get(`${profile.id}:${input.courseId}`);
+    if (!enrollment || (enrollment.status !== 'enrolled' && enrollment.status !== 'completed')) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'Only learners enrolled in this course can record an outcome for it.'
+      );
+    }
     const outcome = recordLearningOutcome({
       userId: profile.id,
       courseId: input.courseId,
@@ -7861,6 +8015,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       skillsUsedOnJob: input.skillsUsedOnJob,
       consentFlag: input.consentFlag,
     });
+    if (
+      (learningOutcomesByUserId.get(profile.id) || []).some((o) => o.courseId === input.courseId)
+    ) {
+      throw new DomainError('CONFLICT', 'You have already recorded an outcome for this course.');
+    }
 
     learningOutcomesById.set(outcome.id, outcome);
 
@@ -7909,7 +8068,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     async (req: FastifyRequest<{ Params: { courseId: string } }>, reply: FastifyReply) => {
       const { courseId } = req.params;
       const query = QueryLearningImpactInputSchema.parse(req.query);
-      const minCohortSize = query.minCohortSize ?? 30;
+      // The caller may ask for a stricter threshold, never a looser one (G-27).
+      const minCohortSize = Math.max(LEARNING_IMPACT_MIN_COHORT, query.minCohortSize ?? 0);
 
       let metrics = learningImpactMetricsByCourseId.get(courseId);
       if (!metrics) {
@@ -7946,6 +8106,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const course = coursesById.get(courseId);
       if (!course) {
         throw new DomainError('NOT_FOUND', `Course with ID "${courseId}" not found.`);
+      }
+      // BR-191: the course's instructor or a platform admin (review REV-01:
+      // the comment said so, nothing checked it).
+      const callerProfileId = profilesByUserId.get(session.userId)?.id;
+      if (!session.roles.includes('platform_admin') && course.instructorId !== callerProfileId) {
+        throw new DomainError(
+          'FORBIDDEN',
+          "Only the course's instructor or a platform admin can recompute its impact metrics."
+        );
       }
 
       const outcomes = learningOutcomesByCourseId.get(courseId) || [];
@@ -8422,6 +8591,49 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     };
   }
 
+  /**
+   * Behavioural and segmentation profiles of a candidate (gap G-28). The
+   * candidate and platform admins always may; a hiring account may when the
+   * candidate applied to one of its companies (as skill freshness, BR-230)
+   * or chose to be visible to recruiters (profile visibility public or
+   * recruiters-only, stealth mode off). `candidateId` is a user or profile id.
+   */
+  const HIRING_ROLES = ['recruiter', 'employer', 'hiring_manager'];
+  const candidateProfileFor = (candidateId: string) =>
+    profilesByUserId.get(candidateId) ?? profilesById.get(candidateId);
+  const mayProfileCandidate = (session: AuthPayload, candidateId: string): boolean => {
+    const profile = candidateProfileFor(candidateId);
+    if (session.userId === (profile?.userId ?? candidateId)) return true;
+    if (session.roles.includes('platform_admin')) return true;
+    if (!profile || !session.roles.some((r) => HIRING_ROLES.includes(r))) return false;
+    const orgIds = new Set((orgMembershipsByUserId.get(session.userId) || []).map((m) => m.orgId));
+    const appliedHere = (applicationsByCandidateId.get(profile.id) || []).some((a) => {
+      const job = jobsById.get(a.jobId);
+      return !!job && orgIds.has(job.orgId);
+    });
+    if (appliedHere) return true;
+    // Stealth is declared by the candidate when they classify themselves
+    // (segment "stealth"); the settings flag is read too, for when it exists.
+    // Nothing wrote the settings flag, so checking it alone hid no one (review R2-2).
+    const declared =
+      candidateSegmentationsById.get(profile.userId) ?? candidateSegmentationsById.get(profile.id);
+    const stealth =
+      (userSettingsByUserId.get(profile.userId) as any)?.stealthMode === true ||
+      declared?.engagementSegment === 'stealth';
+    return !stealth && canViewProfile(profile, session.userId, session.roles);
+  };
+  const assertMayProfileCandidate = (session: AuthPayload, candidateId: string) => {
+    if (!candidateProfileFor(candidateId) && candidateId !== session.userId) {
+      throw new DomainError('NOT_FOUND', `Candidate "${candidateId}" not found.`);
+    }
+    if (!mayProfileCandidate(session, candidateId)) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'This candidate has not applied to your company and is not visible to recruiters.'
+      );
+    }
+  };
+
   // 1. Compute or Update Behavioral Talent Profile (F-159)
   app.post(
     '/api/v1/recruiter/discovery/behavioral/compute',
@@ -8430,13 +8642,22 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const input = ComputeBehavioralProfileInputSchema.parse(req.body || {});
       const targetCandidateId = input.candidateId || session.userId;
 
-      const isPrivileged = session.roles.some((r) =>
-        ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
-      );
-      if (targetCandidateId !== session.userId && !isPrivileged) {
+      if (
+        targetCandidateId !== session.userId &&
+        !session.roles.some((r) => [...HIRING_ROLES, 'platform_admin'].includes(r))
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Insufficient permissions to compute behavioral profile for other candidates.'
+        );
+      }
+      assertMayProfileCandidate(session, targetCandidateId);
+      // Activity figures are measured, not declared: a profile built from
+      // supplied numbers could rank anyone anywhere (gap G-28).
+      if (input.rawSignals && !session.roles.includes('platform_admin')) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Behavioral profiles are computed from recorded activity; supplied signals are accepted from platform admins only.'
         );
       }
 
@@ -8498,7 +8719,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
             .filter(Boolean)
         : undefined;
 
-      const allProfiles = Array.from(behavioralProfilesByCandidateId.values());
+      const allProfiles = Array.from(behavioralProfilesByCandidateId.values()).filter((p) =>
+        mayProfileCandidate(session, p.candidateId)
+      );
       const result = filterAndRankBehavioralTalent(allProfiles, {
         requiredSkills,
         minCompositeScore: query.minCompositeScore,
@@ -8530,6 +8753,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       if (candidateId !== session.userId && !isPrivileged) {
         throw new DomainError('FORBIDDEN', 'Access denied to candidate behavioral profile.');
       }
+      assertMayProfileCandidate(session, candidateId);
 
       let profile = behavioralProfilesByCandidateId.get(candidateId);
       if (!profile) {
@@ -8655,6 +8879,40 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           'Insufficient permissions to classify other candidates.'
         );
       }
+      assertMayProfileCandidate(session, targetCandidateId);
+      // What may be supplied rather than read from records (gap G-28):
+      // - declared facts (skills, years, stealth) — the candidate about
+      //   themselves, or an admin;
+      // - measured figures (activity, verified evidence, assessments, skill
+      //   decay, readiness) — an admin only, as behavioural rawSignals: a
+      //   self-reported "3 verified evidence items" would put a candidate in
+      //   the "ready now" band recruiters filter on (review REV-04).
+      // A recruiter classifies only from what is recorded.
+      const supplied = (keys: string[]) =>
+        keys.filter((k) => (input as Record<string, unknown>)[k] !== undefined);
+      const declared = supplied(['skills', 'yearsOfExperience', 'isStealthMode']);
+      const measured = supplied([
+        'lastActiveDays',
+        'recentApplicationCount',
+        'verifiedEvidenceCount',
+        'assessmentsPassedCount',
+        'skillDecayRiskCount',
+        'milestoneReadinessScore',
+      ]);
+      const isAdmin = session.roles.includes('platform_admin');
+      const isSelf = targetCandidateId === session.userId;
+      if (measured.length > 0 && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          `${measured.join(', ')} are measured from the candidate's records; only a platform admin can supply them.`
+        );
+      }
+      if (declared.length > 0 && !isSelf && !isAdmin) {
+        throw new DomainError(
+          'FORBIDDEN',
+          `Only the candidate or a platform admin can supply ${declared.join(', ')}; recruiters classify from recorded data.`
+        );
+      }
 
       const defaultInput = synthesizeCandidateClassificationInput(targetCandidateId);
       const classificationParams: CandidateClassificationInput = {
@@ -8743,7 +9001,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         ? (query.readinessBand.split(',').map((s) => s.trim()) as ReadinessBand[])
         : undefined;
 
-      const segmentations = Array.from(candidateSegmentationsById.values());
+      const segmentations = Array.from(candidateSegmentationsById.values()).filter((s) =>
+        mayProfileCandidate(session, s.candidateId)
+      );
       const result = filterSegmentedTalent(segmentations, {
         specializations,
         seniorityTiers,
@@ -8776,6 +9036,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       if (candidateId !== session.userId && !isPrivileged) {
         throw new DomainError('FORBIDDEN', 'Access denied to candidate segmentation profile.');
       }
+      assertMayProfileCandidate(session, candidateId);
 
       let segmentation = candidateSegmentationsById.get(candidateId);
       if (!segmentation) {
@@ -8815,6 +9076,22 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   }
 
   // 1. Submit Alumni Affiliation
+  /**
+   * Institution authority (security audit SEC-04): a platform admin, or an
+   * account holding the institution_admin role that is an owner or admin of
+   * THIS institution's organization. The role alone used to open every
+   * institution's directory, groups and verifications.
+   */
+  const administersInstitution = (
+    session: { userId: string; roles: string[] },
+    institutionId: string
+  ): boolean =>
+    session.roles.includes('platform_admin') ||
+    (session.roles.includes('institution_admin') &&
+      (orgMembershipsByUserId.get(session.userId) || []).some(
+        (m) => m.orgId === institutionId && (m.role === 'owner' || m.role === 'admin')
+      ));
+
   app.post('/api/v1/alumni/affiliations', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = CreateAlumniAffiliationInputSchema.parse(req.body);
@@ -8898,8 +9175,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
 
       const isOwner = affiliation.userId === session.userId;
-      const isAdmin =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isAdmin = administersInstitution(session, affiliation.institutionId);
       if (!isOwner && !isAdmin) {
         throw new DomainError('FORBIDDEN', 'Access denied to verify this affiliation.');
       }
@@ -8917,7 +9193,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         const emailParts = userEmail.split('@');
         const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
 
-        if (!instDomain || (!userDomain.includes(instDomain) && !instDomain.includes(userDomain))) {
+        // Exact domain or a subdomain of it: substring matching accepted
+        // x@stanford.edu.evil.example (SEC-04). Account emails are still not
+        // verified at registration, so this path stays weaker than a seat.
+        if (
+          !instDomain ||
+          !userDomain ||
+          (userDomain !== instDomain && !userDomain.endsWith(`.${instDomain}`))
+        ) {
           throw new DomainError(
             'VALIDATION_FAILED',
             'User email domain does not match institution domain.'
@@ -8927,6 +9210,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         affiliation.verificationMethod = 'email_domain';
         affiliation.verifiedAt = new Date().toISOString();
       } else if (input.verificationMethod === 'institutional_seat') {
+        // Seat codes are not issued or checked by anything yet, so a seat is
+        // confirmed by the institution itself, not claimed by its holder with
+        // any four characters (gap G-31).
+        if (!administersInstitution(session, affiliation.institutionId)) {
+          throw new DomainError(
+            'FORBIDDEN',
+            'An institutional seat is confirmed by an administrator of that institution.'
+          );
+        }
         if (!input.seatCode || input.seatCode.trim().length === 0) {
           throw new DomainError(
             'VALIDATION_FAILED',
@@ -8988,8 +9280,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const query = QueryAlumniDirectoryInputSchema.parse(req.query || {});
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-      const isPrivileged =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isPrivileged = administersInstitution(session, institutionId);
 
       if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
         throw new DomainError(
@@ -9006,7 +9297,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           ...aff,
           user: {
             fullName: userProfile?.fullName || 'Alumni Member',
-            email: u?.email,
+            // Only for members who chose to show their address (SEC-04: the
+            // directory handed every member's email to every viewer).
+            email:
+              (userSettingsByUserId.get(aff.userId) as { showEmail?: boolean } | undefined)
+                ?.showEmail === true
+                ? u?.email
+                : undefined,
           },
         };
       });
@@ -9046,8 +9343,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const input = CreateAlumniGroupInputSchema.parse(req.body);
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-      const isPrivileged =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isPrivileged = administersInstitution(session, institutionId);
       const creatorInsts =
         isPrivileged && !userVerifiedInsts.includes(institutionId)
           ? [institutionId, ...userVerifiedInsts]
@@ -9091,8 +9387,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
 
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-      const isPrivileged =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isPrivileged = administersInstitution(session, institutionId);
 
       if (!userVerifiedInsts.includes(institutionId) && !isPrivileged) {
         throw new DomainError(
@@ -9124,8 +9419,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const input = JoinAlumniGroupInputSchema.parse(req.body || {});
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-      const isPrivileged =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isPrivileged = administersInstitution(session, group.institutionId);
       const userInsts =
         isPrivileged && !userVerifiedInsts.includes(group.institutionId)
           ? [group.institutionId, ...userVerifiedInsts]
@@ -9171,8 +9465,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }
 
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
-      const isPrivileged =
-        session.roles.includes('platform_admin') || session.roles.includes('institution_admin');
+      const isPrivileged = administersInstitution(session, group.institutionId);
       if (!userVerifiedInsts.includes(group.institutionId) && !isPrivileged) {
         throw new DomainError('TENANT_ISOLATION_VIOLATION', 'Access denied to group members.');
       }
@@ -9905,11 +10198,27 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     const settings = await accountSettings(session.userId);
 
-    // Evidence/application ownership is keyed by PROFILE id, not auth user id.
+    // Evidence and applications are keyed by PROFILE id; collecting them by
+    // user id exported nothing (gap G-20).
     const evidence = evidenceBySubjectId.get(profile.id) || [];
     const applications = Array.from(applicationsById.values()).filter(
       (a) => a.candidateId === profile.id
     );
+    const workHistory = (verifiedWorkHistoriesByCandidateId.get(session.userId) || []).map(
+      ({ clientRequestId: _key, ...rest }) => rest
+    );
+    // A reference's token hash is the referee's credential, not the person's data.
+    const withoutSecrets = ({ tokenHash: _t, clientRequestId: _k, ...rest }: StoredReference) =>
+      rest;
+    const allReferences = Array.from(employmentReferencesById.values());
+    const referencesRequested = allReferences
+      .filter((r) => r.candidateId === session.userId)
+      .map(withoutSecrets);
+    const referencesGiven = allReferences
+      .filter((r) => r.refereeId === session.userId && r.status === 'submitted')
+      .map(withoutSecrets);
+    const messagesSent = Array.from(messagesById.values()).filter((m) => m.senderId === profile.id);
+    const notifications = notificationsByRecipientId.get(profile.id) || [];
     const resumes = resumesByUserId.get(session.userId) || [];
     const portfolio = portfolioProjectsByUserId.get(session.userId) || [];
     const gamification = gamificationProfilesByUserId.get(session.userId);
@@ -9931,6 +10240,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       resumes: resumes as any,
       portfolio: portfolio as any,
       gamification: gamification as any,
+      workHistory: workHistory as any,
+      referencesRequested: referencesRequested as any,
+      referencesGiven: referencesGiven as any,
+      messagesSent: messagesSent as any,
+      notifications: notifications as any,
       nowIso: now,
     });
 
@@ -11181,12 +11495,65 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   });
 
   // 3. Get reporter's own submitted reports
+  /** Pending permanent bans: report id → the admin who proposed it (BR-068). */
+  const pendingBanProposals = new Map<
+    string,
+    { userId: string; roles: string[]; proposedAt: number }
+  >();
+  const BAN_PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
+
+  /**
+   * May this session appeal a decision on this report? The account it was
+   * about, the hiring team of a job it was about, or the author of the
+   * content it was about (SEC-07).
+   */
+  const mayAppealModerationDecision = (report: ModerationReport, session: AuthPayload): boolean => {
+    switch (report.targetType) {
+      case 'user':
+        return report.targetId === session.userId;
+      case 'job': {
+        const job = jobsById.get(report.targetId);
+        return !!job && canManageJobs(session, job.orgId);
+      }
+      case 'message': {
+        const message = messagesById.get(report.targetId);
+        return !!message && profilesById.get(message.senderId)?.userId === session.userId;
+      }
+      case 'evidence': {
+        const evidence = evidenceById.get(report.targetId);
+        return !!evidence && profilesById.get(evidence.subjectId)?.userId === session.userId;
+      }
+      case 'review':
+        return employerReviewsById.get(report.targetId)?.reviewerId === session.userId;
+      case 'portfolio_project':
+        return portfolioProjectsById.get(report.targetId)?.userId === session.userId;
+      default:
+        return false;
+    }
+  };
+
   app.get('/api/v1/moderation/reports/my', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const myReports = Array.from(moderationReportsById.values()).filter(
       (r) => r.reporterId === session.userId
     );
-    return reply.status(200).send({ reports: myReports, total: myReports.length });
+    // Enforcement decisions about this account or its content, so the person
+    // can find and appeal them (SEC-07). Only decided, appealable ones: a
+    // pending report shown to its subject tips them off and, with its
+    // timestamp, can identify the reporter (review R2-3). Neither the
+    // reporter nor the deciding moderator is named.
+    const aboutMe = Array.from(moderationReportsById.values())
+      .filter(
+        (r) =>
+          r.status === 'resolved' &&
+          r.actionTaken !== 'none' &&
+          r.actionTaken !== 'dismissed' &&
+          mayAppealModerationDecision(r, session)
+      )
+      .map(
+        ({ reporterId: _reporter, details: _details, resolvedBy: _resolvedBy, ...rest }) => rest
+      );
+    return reply.status(200).send({ reports: myReports, total: myReports.length, aboutMe });
   });
 
   // 4. Moderator Queue: List reports with optional filters
@@ -11268,10 +11635,80 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
       }
 
+      // Nobody decides a report they filed themselves (security audit SEC-06).
+      if (report.reporterId === session.userId) {
+        throw new DomainError('FORBIDDEN', 'You cannot resolve a report you filed.');
+      }
+      // Suspending or banning a platform admin is a platform admin's decision,
+      // never a moderator's (SEC-06: a moderator could lock every admin out).
+      if (
+        report.targetType === 'user' &&
+        (input.action === 'user_suspended' || input.action === 'user_banned') &&
+        usersById.get(report.targetId)?.roles.includes('platform_admin') &&
+        !session.roles.includes('platform_admin')
+      ) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only a platform admin can suspend or ban a platform admin.'
+        );
+      }
+
+      // A permanent ban takes two platform admins acting with their own
+      // sessions (BR-068). The second approver used to be an id the first
+      // admin typed into the request (SEC-06); now the first call proposes the
+      // ban and a different admin's call confirms it. secondApproverId in the
+      // body is ignored.
+      let secondApproverId: string | undefined;
       let secondApproverRoles: string[] | undefined;
-      if (input.secondApproverId) {
-        const secondUser = usersById.get(input.secondApproverId);
-        secondApproverRoles = secondUser?.roles;
+      if (input.action === 'user_banned') {
+        if (report.status === 'resolved' || report.status === 'dismissed') {
+          throw new DomainError(
+            'INVALID_STATE_TRANSITION',
+            `Report with ID "${report.id}" has already reached terminal status "${report.status}".`
+          );
+        }
+        let proposal = pendingBanProposals.get(report.id);
+        // A proposal lapses after a day, or when its proposer is no longer an
+        // active platform admin; otherwise it would block every later ban on
+        // this report (review R2-7).
+        if (proposal) {
+          const proposer = usersById.get(proposal.userId);
+          // Every real session has an account; test-mode tokens may not, and
+          // then the roles recorded with the proposal stand.
+          const stillAdmin = proposer
+            ? proposer.status === 'active' && proposer.roles.includes('platform_admin')
+            : proposal.roles.includes('platform_admin');
+          if (!stillAdmin || Date.now() - proposal.proposedAt > BAN_PROPOSAL_TTL_MS) {
+            pendingBanProposals.delete(report.id);
+            proposal = undefined;
+          }
+        }
+        if (!proposal || proposal.userId === session.userId) {
+          if (!session.roles.includes('platform_admin')) {
+            throw new DomainError(
+              'FORBIDDEN',
+              'Permanent account termination requires Platform Admin authority (BR-068).'
+            );
+          }
+          pendingBanProposals.set(report.id, {
+            userId: session.userId,
+            roles: session.roles,
+            proposedAt: Date.now(),
+          });
+          auditLogs.push({
+            event: 'moderation.ban_proposed',
+            actorId: session.userId,
+            targetId: report.id,
+            timestamp: new Date().toISOString(),
+          });
+          return reply.status(202).send({
+            report,
+            pendingApproval: true,
+            message: 'Ban proposed. A second platform admin must confirm it.',
+          });
+        }
+        secondApproverId = proposal.userId;
+        secondApproverRoles = usersById.get(proposal.userId)?.roles ?? proposal.roles;
       }
 
       const resolved = resolveModerationReport({
@@ -11279,11 +11716,12 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         action: input.action,
         resolutionNotes: input.resolutionNotes,
         resolver: { userId: session.userId, roles: session.roles },
-        secondApproverId: input.secondApproverId,
+        secondApproverId,
         secondApproverRoles,
       });
 
       moderationReportsById.set(id, resolved);
+      pendingBanProposals.delete(id);
 
       // Apply side effects of enforcement
       if (resolved.actionTaken === 'user_suspended' && resolved.targetType === 'user') {
@@ -11332,6 +11770,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const report = moderationReportsById.get(id);
       if (!report) {
         throw new DomainError('NOT_FOUND', `Moderation report with ID "${id}" not found.`);
+      }
+
+      // Only whoever the decision was about may appeal it (security audit
+      // SEC-07: anyone could, and a reporter could pre-empt the real appeal,
+      // since one pending appeal per report is allowed).
+      if (!mayAppealModerationDecision(report, session)) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only the person or team this decision was about can appeal it.'
+        );
       }
 
       const existingAppeals = Array.from(moderationAppealsById.values());
@@ -12255,9 +12703,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         endorsedSkills: body.endorsedSkills,
         summaryNotes: body.summaryNotes,
       });
-      // Single use: the token dies with the submission.
+      // Single use: the token dies with the submission. The referee is the
+      // account that presented the token while signed in, or nobody: the
+      // address-based guess made when the reference was requested proves
+      // nothing (account emails are not verified), and it is what peer
+      // review trusts (review REV-03).
       const updatedRef: StoredReference = {
         ...submitted,
+        refereeId: session?.userId,
         tokenHash: undefined,
         clientRequestId: reference.clientRequestId,
       };
@@ -12317,35 +12770,63 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     }
   );
 
+  /**
+   * Who is reading a candidate's work history, and may they? A work history
+   * is part of the profile, so it follows the profile's visibility exactly as
+   * GET /profile/:id does (gap G-03: it used to be readable by anyone).
+   * `candidateId` is the person's user id; the graph also accepts a profile id.
+   */
+  const workHistoryReader = (req: FastifyRequest, candidateId: string) => {
+    // A token that was sent but is expired or revoked is a 401, so the web
+    // app signs the person in again instead of showing a private profile's
+    // own owner a "forbidden" (review REV-12). No token: an anonymous read.
+    const session = req.headers.authorization ? extractUser(req) : null;
+    const profile = profilesByUserId.get(candidateId) ?? profilesById.get(candidateId);
+    if (!profile) {
+      throw new DomainError('NOT_FOUND', 'Candidate not found.');
+    }
+    // A hiring team the candidate applied to sees their work history whatever
+    // the profile's visibility, as the pipeline already shows their profile
+    // and evidence (review REV-08).
+    const viewerProfile = session ? profilesByUserId.get(session.userId) : undefined;
+    const appliedToViewer = !!viewerProfile && appliedToTeamOf(profile, viewerProfile);
+    if (
+      !appliedToViewer &&
+      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[])
+    ) {
+      throw new DomainError(
+        'FORBIDDEN',
+        'This profile is private or restricted to authorized roles.'
+      );
+    }
+    const isOwnerOrAdmin =
+      !!session && (session.userId === profile.userId || session.roles.includes('platform_admin'));
+    // Hiring accounts see every role a visible profile lists, with its status;
+    // everyone else sees only roles that were verified.
+    const seesUnverified =
+      isOwnerOrAdmin ||
+      appliedToViewer ||
+      (!!session &&
+        session.roles.some((r) => ['recruiter', 'employer', 'hiring_manager'].includes(r)));
+    return { profile, userId: profile.userId, isOwnerOrAdmin, seesUnverified };
+  };
+
   // 5. Get Candidate Work History Records (F-94)
   app.get(
     '/api/v1/candidates/:candidateId/work-history',
     async (req: FastifyRequest<{ Params: { candidateId: string } }>, reply: FastifyReply) => {
-      let session: { userId: string; roles: string[] } | null = null;
-      try {
-        session = extractUser(req);
-      } catch {
-        // Public request
-      }
+      const { userId, isOwnerOrAdmin, seesUnverified } = workHistoryReader(
+        req,
+        req.params.candidateId
+      );
+      const allHistories = verifiedWorkHistoriesByCandidateId.get(userId) || [];
 
-      const { candidateId } = req.params;
-      const allHistories = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
-
-      const isSelfOrPrivileged =
-        session &&
-        (session.userId === candidateId ||
-          session.roles.some((r) =>
-            ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
-          ));
-
-      const filtered = isSelfOrPrivileged
+      const filtered = seesUnverified
         ? allHistories
         : allHistories.filter((h) => h.verificationStatus === 'verified' || h.badgeTier !== 'none');
 
       // A recruiter browsing a candidate sees where they worked and how it
       // was verified — not the private mailbox used to verify it.
-      const isOwnerOrAdmin =
-        session && (session.userId === candidateId || session.roles.includes('platform_admin'));
       const projected = filtered.map((h) => {
         const view = publicWorkHistory(h);
         if (isOwnerOrAdmin) {
@@ -12389,43 +12870,29 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }>,
       reply: FastifyReply
     ) => {
-      const { candidateId } = req.params;
       const query = QueryWorkHistoryGraphSchema.parse(req.query);
+      const { profile, userId, isOwnerOrAdmin, seesUnverified } = workHistoryReader(
+        req,
+        req.params.candidateId
+      );
+      const candidateName =
+        profile.fullName || usersById.get(userId)?.email.split('@')[0] || 'Candidate';
 
-      let session: { userId: string; roles: string[] } | null = null;
-      try {
-        session = extractUser(req);
-      } catch {
-        // Public request
-      }
-
-      const isSelfOrPrivileged =
-        session &&
-        (session.userId === candidateId ||
-          session.roles.some((r) =>
-            ['recruiter', 'employer', 'hiring_manager', 'platform_admin'].includes(r)
-          ));
-
-      const user = usersById.get(candidateId);
-      const profile =
-        profilesByUserId.get(candidateId) ||
-        Array.from(profilesByUserId.values()).find((p) => p.id === candidateId);
-      const candidateName = profile?.fullName || user?.email.split('@')[0] || 'Candidate';
-
-      const histories = verifiedWorkHistoriesByCandidateId.get(candidateId) || [];
+      const histories = verifiedWorkHistoriesByCandidateId.get(userId) || [];
       const historyIds = new Set(histories.map((h) => h.id));
       const references = Array.from(employmentReferencesById.values()).filter((ref) =>
         historyIds.has(ref.workHistoryId)
       );
 
-      const includeUnverified = Boolean(isSelfOrPrivileged && query.includeUnverified);
-
       const graph = buildWorkHistoryGraph({
-        candidateId,
+        candidateId: userId,
         candidateName,
         workHistories: histories,
         references,
-        includeUnverified,
+        includeUnverified: Boolean(seesUnverified && query.includeUnverified),
+        // Referees are named, and their ratings shown, only to the candidate
+        // and platform admins.
+        redactReferees: !isOwnerOrAdmin,
       });
 
       return reply.status(200).send({ graph });

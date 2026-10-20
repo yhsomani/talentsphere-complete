@@ -155,6 +155,10 @@ describe('Learning Impact Domain Logic (F-153, F-114, BR-189..BR-193, OD-51)', (
       expect(metrics.sampleCount).toBe(20);
       expect(metrics.isPublishable).toBe(false);
       expect(metrics.correlationalClaimLabel).toBe(CORRELATION_DISCLAIMER_LABEL);
+      // No figure is computed for a small cohort, whoever asks (REV-01).
+      expect(metrics.hireRatePct).toBe(0);
+      expect(metrics.avgSalaryDeltaPct).toBe(0);
+      expect(metrics.pathEffectivenessScore).toBe(0);
     });
 
     it('returns empty zero-initialized metrics when sampleCount is 0', () => {

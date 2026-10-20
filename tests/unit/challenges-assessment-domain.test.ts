@@ -142,8 +142,9 @@ describe('Challenges Arena & Assessment Domain Model (F-08, BR-24, BR-25, BR-49.
     expect(result.xpEarned).toBe(25);
     expect(result.evidence).toBeDefined();
     expect(result.evidence?.type).toBe('assessment');
-    expect(result.evidence?.verificationLevel).toBe('authority_verified');
-    expect(result.evidence?.status).toBe('verified');
+    // A simulated check proves nothing: the evidence is recorded unverified (SEC-02).
+    expect(result.evidence?.verificationLevel).toBe('unverified');
+    expect(result.evidence?.status).toBe('pending');
   });
 
   it('enforces language allowlist (BR-24)', () => {

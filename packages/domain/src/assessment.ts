@@ -1,5 +1,5 @@
 import { DomainError, type AssessmentSession, type Evidence } from './core.js';
-import { createEvidence, verifyEvidence } from './evidence.js';
+import { createEvidence } from './evidence.js';
 import { type Challenge, type AllowedLanguage, ALLOWED_LANGUAGES } from './challenges.js';
 
 export interface SubmissionResult {
@@ -128,12 +128,17 @@ export function evaluateChallengeSubmission(params: {
     };
     xpEarned = xpByDifficulty[params.challenge.difficulty] || 25;
 
-    // 2. Mint verified evidence automatically
-    const baseEvidence = createEvidence({
+    // 2. Record the submission as evidence — unverified. The check above is
+    // a placeholder, not a sandbox: it never runs the code, so a pass proves
+    // nothing and must not carry the platform's top trust level (security
+    // audit SEC-02: any account could mint "authority verified" evidence by
+    // submitting any text). Raise the level once submissions really run
+    // against the test cases.
+    evidence = createEvidence({
       subjectId: params.candidateProfileId,
       type: 'assessment',
-      title: `${params.challenge.title} — Verified Completion`,
-      description: `Passed proctored challenge "${params.challenge.title}" with a 100% score across all test cases.`,
+      title: `${params.challenge.title} — solution submitted`,
+      description: `Submitted a solution to "${params.challenge.title}". Solutions are not executed yet, so it has not been verified.`,
       source: 'talentsphere_challenges_arena',
       provenance: `challenge_submission:${submissionId}`,
       recencyDate: new Date().toISOString().split('T')[0],
@@ -141,18 +146,9 @@ export function evaluateChallengeSubmission(params: {
         challengeId: params.challenge.id,
         challengeSlug: params.challenge.slug,
         language: params.language,
-        score: 100,
-        proctored: true,
+        executed: false,
       },
     });
-
-    // Elevated by platform authority engine
-    evidence = verifyEvidence(
-      baseEvidence,
-      { userId: '00000000-0000-0000-0000-000000000000', role: 'platform_admin' },
-      'authority_verified',
-      'Automated sandbox verification passed all public and hidden test cases.'
-    );
   }
 
   return {

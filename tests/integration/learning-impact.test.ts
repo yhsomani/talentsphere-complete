@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 import { CORRELATION_DISCLAIMER_LABEL } from '../../packages/domain/src/learning-impact.js';
 
 describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189..BR-193, OD-51)', () => {
@@ -33,12 +34,39 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     candidateToken = d.token;
   });
 
+  const outcomePayload = {
+    courseId: seedCourseId,
+    hiredWithin12m: true,
+    salaryGrowthPct: 24.5,
+    jobSatisfactionScore: 4.8,
+    retentionMonths: 12,
+    promotedWithin18m: true,
+    skillsUsedOnJob: ['TypeScript', 'Fastify'],
+    consentFlag: true,
+  };
+
   afterAll(async () => {
     await app.close();
   });
 
   describe('POST /api/v1/learning/impact/outcomes (BR-190)', () => {
+    it('refuses an outcome for a course the person is not enrolled in (REV-01)', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/learning/impact/outcomes',
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: outcomePayload,
+      });
+      expect(res.statusCode).toBe(403);
+    });
+
     it('records a learner career outcome with explicit consent (201)', async () => {
+      const enrolled = await app.inject({
+        method: 'POST',
+        url: `/api/v1/courses/${seedCourseId}/enroll`,
+        headers: { authorization: `Bearer ${candidateToken}` },
+      });
+      expect(enrolled.statusCode).toBe(201);
       const res = await app.inject({
         method: 'POST',
         url: '/api/v1/learning/impact/outcomes',
@@ -83,6 +111,16 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
       expect(data.error.message).toContain('BR-190');
     });
 
+    it('accepts one outcome per learner per course (REV-01)', async () => {
+      const again = await app.inject({
+        method: 'POST',
+        url: '/api/v1/learning/impact/outcomes',
+        headers: { authorization: `Bearer ${candidateToken}` },
+        payload: outcomePayload,
+      });
+      expect(again.statusCode).toBe(409);
+    });
+
     it('rejects unauthenticated outcome submissions (401)', async () => {
       const res = await app.inject({
         method: 'POST',
@@ -117,6 +155,18 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
       expect(data.metrics.correlationalClaimLabel).toBe(CORRELATION_DISCLAIMER_LABEL);
     });
 
+    it('never lets the caller lower the cohort floor (G-27)', async () => {
+      // A course with no outcomes, asked for with a floor of 0: still nothing.
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/learning/impact/courses/c0000000-0000-0000-0000-00000000beef?minCohortSize=0',
+      });
+      expect(res.statusCode).toBe(200);
+      const data = JSON.parse(res.body);
+      expect(data.isPublishable).toBe(false);
+      expect(data.metrics).toBeUndefined();
+    });
+
     it('suppresses publication when cohort size is below threshold', async () => {
       const res = await app.inject({
         method: 'GET',
@@ -132,11 +182,26 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
   });
 
   describe('POST /api/v1/learning/impact/courses/:courseId/compute (BR-191)', () => {
-    it('recomputes course impact metrics successfully (201)', async () => {
+    it("refuses a recompute by anyone but the course's instructor or an admin (REV-01)", async () => {
       const res = await app.inject({
         method: 'POST',
         url: `/api/v1/learning/impact/courses/${seedCourseId}/compute`,
         headers: { authorization: `Bearer ${candidateToken}` },
+        payload: { enrolledCount: 50 },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+
+    it('recomputes course impact metrics successfully (201)', async () => {
+      const adminToken = createSessionToken(
+        '00000000-0000-4000-a000-0000000000b3',
+        'admin.impact@talentsphere.internal',
+        ['platform_admin']
+      );
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/learning/impact/courses/${seedCourseId}/compute`,
+        headers: { authorization: `Bearer ${adminToken}` },
         payload: {
           enrolledCount: 50,
         },

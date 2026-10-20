@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -132,11 +133,24 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     expect(charlieData.affiliation.verificationStatus).toBe('unverified');
     charlieAffiliationId = charlieData.affiliation.id;
 
-    // 4. Charlie verifies his Stanford affiliation using valid seat code
-    const verifyRes = await request.post(
+    // 4. A seat is confirmed by the institution, not claimed by its holder (G-31)
+    const selfClaim = await request.post(
       `${API_BASE}/alumni/affiliations/${charlieAffiliationId}/verify`,
       {
         headers: { authorization: `Bearer ${user3Token}` },
+        data: { verificationMethod: 'institutional_seat', seatCode: 'ANYTHING' },
+      }
+    );
+    expect(selfClaim.status()).toBe(403);
+    const adminToken = createSessionToken(
+      `user_admin_alumni_${Date.now()}`,
+      `admin.alumni.${Date.now()}@talentsphere.internal`,
+      ['platform_admin']
+    );
+    const verifyRes = await request.post(
+      `${API_BASE}/alumni/affiliations/${charlieAffiliationId}/verify`,
+      {
+        headers: { authorization: `Bearer ${adminToken}` },
         data: {
           verificationMethod: 'institutional_seat',
           seatCode: 'STANFORD-SEAT-2023',

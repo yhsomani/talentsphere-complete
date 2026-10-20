@@ -73,17 +73,156 @@ describe('Evidence Graph & Verification Domain Model (F-96, BR-149..155)', () =>
       recencyDate: '2026-05-10',
     });
 
+    // A peer with a recorded relationship: they gave the subject a reference.
     const verified = verifyEvidence(
       evidence,
       peerVerifier,
       'peer_reviewed',
-      'Code review approved.'
+      'Code review approved.',
+      undefined,
+      { isConfirmedReferee: true }
     );
     expect(verified.verificationLevel).toBe('peer_reviewed');
     expect(verified.status).toBe('verified');
     expect(verified.verifiedBy).toBe(peerVerifier.userId);
     expect(verified.verifiedAt).toBeDefined();
     expect(verified.metadata?.verificationNotes).toBe('Code review approved.');
+    expect(verified.metadata?.verifiedByRole).toBe('peer');
+  });
+
+  it('refuses peer review from an account with no relationship to the subject (G-01)', () => {
+    const evidence = createEvidence({
+      subjectId,
+      type: 'project',
+      title: 'Full Stack App',
+      description: 'E-commerce platform',
+      source: 'github',
+      provenance: 'pr_merged',
+      recencyDate: '2026-05-10',
+    });
+
+    expect(() => verifyEvidence(evidence, peerVerifier, 'peer_reviewed')).toThrow(
+      /recorded relationship/
+    );
+    // Verification staff may peer-review anyone.
+    expect(
+      verifyEvidence(
+        evidence,
+        { userId: 'v0000000-0000-4000-a000-000000000009', role: 'verification_staff' },
+        'peer_reviewed'
+      ).verificationLevel
+    ).toBe('peer_reviewed');
+  });
+
+  it('never lets a peer undo a dispute, lower a level, or take over a verification (REV-02)', () => {
+    const base = createEvidence({
+      subjectId,
+      type: 'project',
+      title: 'Full Stack App',
+      description: 'E-commerce platform',
+      source: 'github',
+      provenance: 'pr_merged',
+      recencyDate: '2026-05-10',
+    });
+    const related = { isConfirmedReferee: true };
+
+    // A record staff verified at authority level cannot be lowered by a peer.
+    const authority = verifyEvidence(base, adminVerifier, 'authority_verified');
+    expect(() =>
+      verifyEvidence(authority, peerVerifier, 'peer_reviewed', undefined, undefined, related)
+    ).toThrow(/cannot lower/);
+
+    // A disputed record is resolved by staff only.
+    const disputed = disputeEvidence(authority, adminVerifier, 'Audit found no record');
+    expect(() =>
+      verifyEvidence(disputed, peerVerifier, 'peer_reviewed', undefined, undefined, related)
+    ).toThrow(/disputed/);
+    expect(
+      verifyEvidence(
+        disputed,
+        { userId: 'v0000000-0000-4000-a000-000000000009', role: 'verification_staff' },
+        'authority_verified'
+      ).status
+    ).toBe('verified');
+
+    // A second peer cannot replace the first peer's review (and its verifiedBy).
+    const peerReviewed = verifyEvidence(
+      base,
+      peerVerifier,
+      'peer_reviewed',
+      undefined,
+      undefined,
+      related
+    );
+    expect(() =>
+      verifyEvidence(
+        peerReviewed,
+        { userId: 'p0000000-0000-4000-a000-000000000099', role: 'candidate' },
+        'peer_reviewed',
+        undefined,
+        undefined,
+        related
+      )
+    ).toThrow(/already peer_reviewed/);
+
+    // A peer reviewer cannot revoke the subject's evidence.
+    expect(() => revokeEvidence(peerReviewed, peerVerifier, 'Changed my mind')).toThrow(/owner/);
+  });
+
+  it('uses every role an account holds, not only the first (G-25)', () => {
+    const evidence = createEvidence({
+      subjectId,
+      type: 'institution_credential',
+      title: 'AWS Solutions Architect',
+      description: 'Professional level',
+      source: 'aws',
+      provenance: 'credly',
+      recencyDate: '2026-04-01',
+    });
+    const verified = verifyEvidence(
+      evidence,
+      { userId: 'a0000000-0000-4000-a000-000000000044', roles: ['candidate', 'platform_admin'] },
+      'authority_verified'
+    );
+    expect(verified.verificationLevel).toBe('authority_verified');
+    expect(verified.metadata?.verifiedByRole).toBe('platform_admin');
+  });
+
+  it('lets only staff, the verifier or a related peer dispute; the owner may revoke (G-01, G-02)', () => {
+    const ownerUserId = 'u0000000-0000-4000-a000-000000000005';
+    const evidence = verifyEvidence(
+      createEvidence({
+        subjectId,
+        type: 'project',
+        title: 'Full Stack App',
+        description: 'E-commerce platform',
+        source: 'github',
+        provenance: 'pr_merged',
+        recencyDate: '2026-05-10',
+      }),
+      adminVerifier,
+      'authority_verified'
+    );
+    const stranger = { userId: 's0000000-0000-4000-a000-000000000006', role: 'candidate' as const };
+
+    expect(() => disputeEvidence(evidence, stranger, 'I do not believe it')).toThrow(
+      /recorded relationship/
+    );
+    expect(
+      disputeEvidence(evidence, stranger, 'Worked with them; the dates are wrong', {
+        isConfirmedReferee: true,
+      }).status
+    ).toBe('disputed');
+    expect(disputeEvidence(evidence, adminVerifier, 'Audit').status).toBe('disputed');
+    expect(
+      disputeEvidence(evidence, { userId: 'm0', role: 'moderator' }, 'Reported content').status
+    ).toBe('disputed');
+
+    expect(() => revokeEvidence(evidence, stranger, 'Not mine', ownerUserId)).toThrow(/owner/);
+    expect(
+      revokeEvidence(evidence, { userId: ownerUserId, role: 'candidate' }, 'Outdated', ownerUserId)
+        .status
+    ).toBe('revoked');
   });
 
   it('enforces role authorization on institution and authority verification', () => {

@@ -187,8 +187,11 @@ describe('Notification Center Integration (F-14, BR-120)', () => {
     const receivedNotif = bobNotifsActive.json().notifications[0];
     expect(receivedNotif.type).toBe('message');
     expect(receivedNotif.isRead).toBe(false);
-    expect(receivedNotif.title).toContain('Alice NotificationSender');
-    expect(receivedNotif.body).toContain('You should receive a notification now!');
+    // Neither the sender's name nor their words (G-26): notifications outlive
+    // an erasure of the sender.
+    expect(receivedNotif.title).toBe('New message');
+    expect(JSON.stringify(receivedNotif)).not.toContain('Alice NotificationSender');
+    expect(JSON.stringify(receivedNotif)).not.toContain('You should receive a notification now!');
   });
 
   it('marks specific notifications and all notifications as read', async () => {

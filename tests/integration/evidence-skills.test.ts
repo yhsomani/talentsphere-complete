@@ -175,7 +175,64 @@ describe('Evidence Graph & Skills Taxonomy Integration Suite (F-96, F-84)', () =
     });
     const evidence = JSON.parse(createRes.body).evidence;
 
-    // 2. Peer verifies the evidence
+    // 2. Peer review needs a recorded relationship (G-01): the peer gives the
+    // candidate a reference for a role first.
+    const strangerVerify = await app.inject({
+      method: 'POST',
+      url: `/api/v1/evidence/${evidence.id}/verify`,
+      headers: { authorization: `Bearer ${peerToken}` },
+      payload: { verificationLevel: 'peer_reviewed' },
+    });
+    expect(strangerVerify.statusCode).toBe(403);
+
+    const role = await app.inject({
+      method: 'POST',
+      url: '/api/v1/candidates/work-history',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: {
+        companyName: 'Mesh Co',
+        title: 'Platform Engineer',
+        employmentType: 'full_time',
+        startDate: '2022-01-01',
+        endDate: '2024-01-01',
+        isCurrent: false,
+      },
+    });
+    const roleId = JSON.parse(role.body).workHistory.id;
+    const requested = await app.inject({
+      method: 'POST',
+      url: `/api/v1/candidates/work-history/${roleId}/references/request`,
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: {
+        refereeName: 'Peer Reviewer',
+        refereeEmail: 'peer-verifier@example.com',
+        relationship: 'peer',
+      },
+    });
+    const referenceId = JSON.parse(requested.body).reference.id;
+    const jobs = JSON.parse(
+      (await app.inject({ method: 'GET', url: '/api/v1/internal/worker-jobs' })).body
+    ).jobs;
+    const refMessage = jobs.find(
+      (j: any) => j.type === 'reference.requested' && j.payload.referenceId === referenceId
+    ).payload;
+    const submitted = await app.inject({
+      method: 'POST',
+      url: `/api/v1/candidates/work-history/references/${referenceId}/submit`,
+      headers: { authorization: `Bearer ${peerToken}` },
+      payload: {
+        token: refMessage.token,
+        confirmDates: true,
+        confirmTitle: true,
+        technicalProficiency: 4,
+        collaborationRating: 4,
+        deliveryReliability: 4,
+        endorsedSkills: [],
+      },
+    });
+    expect(submitted.statusCode).toBe(200);
+
+    // 3. Now the peer may review the evidence
     const verifyRes = await app.inject({
       method: 'POST',
       url: `/api/v1/evidence/${evidence.id}/verify`,
@@ -192,7 +249,7 @@ describe('Evidence Graph & Skills Taxonomy Integration Suite (F-96, F-84)', () =
     expect(verifyBody.evidence.status).toBe('verified');
     expect(verifyBody.evidence.verifiedBy).toBe(peerUserId);
 
-    // 3. Inspect worker job queue to verify async propagation event
+    // 4. Inspect worker job queue to verify async propagation event
     const jobsRes = await app.inject({
       method: 'GET',
       url: '/api/v1/internal/worker-jobs',
@@ -203,6 +260,163 @@ describe('Evidence Graph & Skills Taxonomy Integration Suite (F-96, F-84)', () =
     );
     expect(propagationJob).toBeDefined();
     expect(propagationJob.payload.status).toBe('verified');
+  });
+
+  it('grants peer review only to the account that submitted the reference, not to an address match (REV-03)', async () => {
+    const evidence = JSON.parse(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/v1/evidence',
+          headers: { authorization: `Bearer ${candidateToken}` },
+          payload: {
+            type: 'project',
+            title: 'Search indexer',
+            description: 'Incremental indexer.',
+            source: 'github',
+            provenance: 'git_commit',
+            recencyDate: '2026-05-01',
+          },
+        })
+      ).body
+    ).evidence;
+
+    // An account exists for the referee's address, but the reference is
+    // submitted from the emailed link without signing in.
+    const addressHolder = JSON.parse(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/v1/auth/register',
+          payload: {
+            email: 'address-holder@example.com',
+            password: 'Password123!',
+            fullName: 'Address Holder',
+            role: 'candidate',
+          },
+        })
+      ).body
+    );
+    const role = JSON.parse(
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/v1/candidates/work-history',
+          headers: { authorization: `Bearer ${candidateToken}` },
+          payload: {
+            companyName: 'Index Co',
+            title: 'Engineer',
+            employmentType: 'full_time',
+            startDate: '2020-01-01',
+            endDate: '2021-01-01',
+            isCurrent: false,
+          },
+        })
+      ).body
+    ).workHistory;
+    const requested = JSON.parse(
+      (
+        await app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/${role.id}/references/request`,
+          headers: { authorization: `Bearer ${candidateToken}` },
+          payload: {
+            refereeName: 'Address Holder',
+            refereeEmail: 'address-holder@example.com',
+            relationship: 'peer',
+          },
+        })
+      ).body
+    ).reference;
+    const jobs = JSON.parse(
+      (await app.inject({ method: 'GET', url: '/api/v1/internal/worker-jobs' })).body
+    ).jobs;
+    const token = jobs.find(
+      (j: any) => j.type === 'reference.requested' && j.payload.referenceId === requested.id
+    ).payload.token;
+    const submitted = await app.inject({
+      method: 'POST',
+      url: `/api/v1/candidates/work-history/references/${requested.id}/submit`,
+      payload: {
+        token,
+        confirmDates: true,
+        confirmTitle: true,
+        technicalProficiency: 3,
+        collaborationRating: 3,
+        deliveryReliability: 3,
+        endorsedSkills: [],
+      },
+    });
+    expect(submitted.statusCode).toBe(200);
+
+    const review = await app.inject({
+      method: 'POST',
+      url: `/api/v1/evidence/${evidence.id}/verify`,
+      headers: { authorization: `Bearer ${addressHolder.token}` },
+      payload: { verificationLevel: 'peer_reviewed' },
+    });
+    expect(review.statusCode).toBe(403);
+  });
+
+  it('refuses disputes from unrelated accounts and lets the owner revoke (G-01, G-02, G-25)', async () => {
+    const createRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/evidence',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: {
+        type: 'project',
+        title: 'Rate limiter library',
+        description: 'Token-bucket limiter used in production.',
+        source: 'github',
+        provenance: 'git_commit',
+        recencyDate: '2026-06-01',
+      },
+    });
+    const evidence = JSON.parse(createRes.body).evidence;
+
+    // An admin whose first role is not platform_admin still has its authority (G-25).
+    const twoRoleAdmin = createSessionToken(
+      'a0000000-0000-4000-a000-000000000077',
+      'two.roles@talentsphere.io',
+      ['candidate', 'platform_admin']
+    );
+    const verified = await app.inject({
+      method: 'POST',
+      url: `/api/v1/evidence/${evidence.id}/verify`,
+      headers: { authorization: `Bearer ${twoRoleAdmin}` },
+      payload: { verificationLevel: 'authority_verified' },
+    });
+    expect(verified.statusCode).toBe(200);
+
+    const strangerRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'evidence-stranger@example.com',
+        password: 'Password123!',
+        fullName: 'Unrelated Account',
+        role: 'candidate',
+      },
+    });
+    const strangerToken = JSON.parse(strangerRes.body).token;
+    for (const action of ['dispute', 'revoke'] as const) {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/evidence/${evidence.id}/${action}`,
+        headers: { authorization: `Bearer ${strangerToken}` },
+        payload: { reason: 'Not convinced.' },
+      });
+      expect(res.statusCode).toBe(403);
+    }
+
+    const ownerRevoke = await app.inject({
+      method: 'POST',
+      url: `/api/v1/evidence/${evidence.id}/revoke`,
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: { reason: 'This project is no longer maintained.' },
+    });
+    expect(ownerRevoke.statusCode).toBe(200);
+    expect(JSON.parse(ownerRevoke.body).evidence.status).toBe('revoked');
   });
 
   it('supports dispute and revocation workflows with audit trails (BR-149, BR-154)', async () => {

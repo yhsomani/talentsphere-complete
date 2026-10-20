@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
+// Signals and recovery confirmations are moderator actions (SEC-01).
+const moderatorToken = createSessionToken(
+  `user_moderator_reputation_${Date.now()}`,
+  `moderator.reputation.${Date.now()}@talentsphere.internal`,
+  ['moderator']
+);
 
 test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254, P-02)', () => {
   let candidateToken: string;
@@ -62,9 +70,22 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     request,
   }) => {
     // 1. Add verified credential in cloud_architecture
-    const credRes = await request.post(`${API_BASE}/reputation/signals`, {
+    const selfRes = await request.post(`${API_BASE}/reputation/signals`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
+        context: 'candidate',
+        domain: 'cloud_architecture',
+        signalType: 'credential',
+        rawValue: 100,
+        weight: 5,
+      },
+    });
+    expect(selfRes.status()).toBe(403);
+
+    const credRes = await request.post(`${API_BASE}/reputation/signals`, {
+      headers: { authorization: `Bearer ${moderatorToken}` },
+      data: {
+        targetUserId: candidateUserId,
         context: 'candidate',
         domain: 'cloud_architecture',
         signalType: 'credential',
@@ -80,8 +101,9 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
 
     // 2. Add mentor context signal
     const mentorRes = await request.post(`${API_BASE}/reputation/signals`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
+      headers: { authorization: `Bearer ${moderatorToken}` },
       data: {
+        targetUserId: candidateUserId,
         context: 'mentor',
         domain: 'cloud_architecture',
         signalType: 'peer_feedback',
@@ -142,8 +164,9 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
   }) => {
     // 1. Add penalty signal
     const penRes = await request.post(`${API_BASE}/reputation/signals`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
+      headers: { authorization: `Bearer ${moderatorToken}` },
       data: {
+        targetUserId: candidateUserId,
         context: 'candidate',
         domain: 'cloud_architecture',
         signalType: 'penalty',
@@ -174,12 +197,17 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     recoveryPlanId = recovBody.plan.id;
     expect(recovBody.plan.status).toBe('in_progress');
 
-    // 3. Complete Task 1
+    // 3. A moderator confirms Task 1 (the penalised person cannot)
     const task1Id = recovBody.plan.reboundTasks[0].id;
+    const selfConfirm = await request.post(
+      `${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task1Id}/complete`,
+      { headers: { authorization: `Bearer ${candidateToken}` } }
+    );
+    expect(selfConfirm.status()).toBe(403);
     const step1Res = await request.post(
       `${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task1Id}/complete`,
       {
-        headers: { authorization: `Bearer ${candidateToken}` },
+        headers: { authorization: `Bearer ${moderatorToken}` },
       }
     );
     expect(step1Res.status()).toBe(200);
@@ -191,7 +219,7 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     const step2Res = await request.post(
       `${API_BASE}/reputation/recovery/${recoveryPlanId}/tasks/${task2Id}/complete`,
       {
-        headers: { authorization: `Bearer ${candidateToken}` },
+        headers: { authorization: `Bearer ${moderatorToken}` },
       }
     );
     expect(step2Res.status()).toBe(200);
@@ -200,9 +228,19 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     expect(step2Body.plan.status).toBe('completed');
     expect(step2Body.updatedScore.score).toBeGreaterThan(penalizedScore);
 
-    // 5. Nightly batch recalculation simulation
-    const recalcRes = await request.post(`${API_BASE}/reputation/recalculate-all`, {
+    // 5. Nightly batch recalculation simulation: an operator action (G-04) —
+    // a recruiter is refused, a platform admin may run it.
+    const refusedRes = await request.post(`${API_BASE}/reputation/recalculate-all`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
+    });
+    expect(refusedRes.status()).toBe(403);
+    const adminToken = createSessionToken(
+      `user_admin_reputation_${Date.now()}`,
+      `admin.reputation.${Date.now()}@talentsphere.internal`,
+      ['platform_admin']
+    );
+    const recalcRes = await request.post(`${API_BASE}/reputation/recalculate-all`, {
+      headers: { authorization: `Bearer ${adminToken}` },
     });
     expect(recalcRes.status()).toBe(200);
     const recalcBody = await recalcRes.json();

@@ -242,26 +242,28 @@ test.describe('E2E: Trust, Safety & Content Moderation (F-24, BR-34, BR-68, BR-1
     });
     expect(modBanRes.status()).toBe(403);
 
-    // 3. Platform Admin 1 attempts unilateral ban without second approver -> 422 Policy Violation
-    const unilatBanRes = await request.post(
+    // 3. Platform Admin 1's ban is only a proposal (202), even naming a second
+    // admin in the body: that admin must confirm with their own session (SEC-06).
+    const proposalRes = await request.post(
       `${API_BASE}/moderation/reports/${secReportId}/resolve`,
       {
         headers: { authorization: `Bearer ${admin1Token}` },
         data: {
           action: 'user_banned',
           resolutionNotes: 'Unilateral permanent ban request.',
+          secondApproverId: admin2Id,
         },
       }
     );
-    expect(unilatBanRes.status()).toBe(422);
+    expect(proposalRes.status()).toBe(202);
+    expect((await proposalRes.json()).pendingApproval).toBe(true);
 
-    // 4. Platform Admin 1 executes ban with Platform Admin 2 co-approval -> 200 OK
+    // 4. Platform Admin 2 confirms -> 200 OK
     const dualBanRes = await request.post(`${API_BASE}/moderation/reports/${secReportId}/resolve`, {
-      headers: { authorization: `Bearer ${admin1Token}` },
+      headers: { authorization: `Bearer ${admin2Token}` },
       data: {
         action: 'user_banned',
         resolutionNotes: 'Permanent ban approved by dual distinct platform admins.',
-        secondApproverId: admin2Id,
       },
     });
     expect(dualBanRes.status()).toBe(200);

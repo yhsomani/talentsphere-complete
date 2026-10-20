@@ -85,6 +85,15 @@ export interface DataExportPayload {
   resumes: Array<Record<string, unknown>>;
   portfolio: Array<Record<string, unknown>>;
   gamification?: Record<string, unknown>;
+  /** Roles the person listed, with how each was verified (gap G-20). */
+  workHistory: Array<Record<string, unknown>>;
+  /** References the person asked for, and the answers given. */
+  referencesRequested: Array<Record<string, unknown>>;
+  /** References the person gave others while signed in. */
+  referencesGiven: Array<Record<string, unknown>>;
+  /** Messages the person wrote. */
+  messagesSent: Array<Record<string, unknown>>;
+  notifications: Array<Record<string, unknown>>;
 }
 
 export const GDPR_GRACE_PERIOD_DAYS = 30;
@@ -301,6 +310,11 @@ export function compileDataExportArchive(params: {
   resumes?: Array<Record<string, unknown>>;
   portfolio?: Array<Record<string, unknown>>;
   gamification?: Record<string, unknown>;
+  workHistory?: Array<Record<string, unknown>>;
+  referencesRequested?: Array<Record<string, unknown>>;
+  referencesGiven?: Array<Record<string, unknown>>;
+  messagesSent?: Array<Record<string, unknown>>;
+  notifications?: Array<Record<string, unknown>>;
   nowIso?: string;
 }): DataExportPayload {
   const now = params.nowIso || new Date().toISOString();
@@ -341,5 +355,10 @@ export function compileDataExportArchive(params: {
     resumes: params.resumes || [],
     portfolio: params.portfolio || [],
     gamification: params.gamification,
+    workHistory: params.workHistory || [],
+    referencesRequested: params.referencesRequested || [],
+    referencesGiven: params.referencesGiven || [],
+    messagesSent: params.messagesSent || [],
+    notifications: params.notifications || [],
   };
 }

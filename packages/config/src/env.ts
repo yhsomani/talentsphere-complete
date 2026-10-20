@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
 export const ServerEnvSchema = z.object({
@@ -101,18 +102,44 @@ export function isDeployed(env: Pick<ServerEnv, 'NODE_ENV'>): boolean {
  *   sessions die on each restart and two replicas reject each other's tokens.
  * - STORAGE=memory: would run on non-durable state.
  * - default database credentials: the schema default is a local dev DSN.
+ * - the test secrets published in this repository (TOKEN_SECRET,
+ *   BILLING_WEBHOOK_SECRET).
  * Production only (staging may need them for demos and testing):
  * - BILLING_MODE=simulated, and a localhost CORS origin.
  *
  * Enforced by the process entry point (apps/api/src/index.ts), which refuses
  * to start; buildApp() itself stays a composable factory for tests.
  */
+/**
+ * SHA-256 of the secrets published in this repository for tests
+ * (test-secrets.mjs). Anyone can read them, so a deployment using one is as
+ * good as unsigned: with the token secret, anyone can mint a platform-admin
+ * session. Only the hashes live here; tests/unit/production-config.test.ts checks they
+ * still match the file.
+ */
+export const PUBLISHED_TEST_SECRET_SHA256: ReadonlySet<string> = new Set([
+  'd0df1b94a32a90941b5a75ce05c8e84b8f8c34e1064fc6431df64ed52ff430c3', // TEST_TOKEN_SECRET
+  'd042feab86b525c2db643c6e507e006cce35a51533fddb1801fe2b4391d34f62', // TEST_WEBHOOK_SECRET
+]);
+
+const isPublishedTestSecret = (value: string | undefined) =>
+  !!value && PUBLISHED_TEST_SECRET_SHA256.has(createHash('sha256').update(value).digest('hex'));
+
 export function productionConfigProblems(env: ServerEnv): string[] {
   if (!isDeployed(env)) return [];
   const where = env.NODE_ENV;
   const problems: string[] = [];
   if (!env.TOKEN_SECRET) {
     problems.push(`TOKEN_SECRET is required in ${where} (>= 32 random characters)`);
+  } else if (isPublishedTestSecret(env.TOKEN_SECRET)) {
+    problems.push(
+      `TOKEN_SECRET is the test secret published in this repository; generate a new one for ${where}`
+    );
+  }
+  if (isPublishedTestSecret(env.BILLING_WEBHOOK_SECRET)) {
+    problems.push(
+      `BILLING_WEBHOOK_SECRET is the test secret published in this repository; generate a new one for ${where}`
+    );
   }
   if (env.STORAGE === 'memory') {
     problems.push(`STORAGE=memory is not allowed in ${where} (data would be lost on restart)`);

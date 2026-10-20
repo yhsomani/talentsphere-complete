@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Talent Segmentation & Classification Integration (F-160, F-84, F-85, BR-200)', () => {
   let app: FastifyInstance;
@@ -11,6 +12,11 @@ describe('Talent Segmentation & Classification Integration (F-160, F-84, F-85, B
   let candidate2Id: string;
   let standardCandidateToken: string;
   let standardCandidateId: string;
+  const adminToken = createSessionToken(
+    '00000000-0000-4000-a000-0000000000b2',
+    'admin.segmentation@talentsphere.internal',
+    ['platform_admin']
+  );
 
   beforeAll(async () => {
     app = await buildApp({
@@ -92,9 +98,6 @@ describe('Talent Segmentation & Classification Integration (F-160, F-84, F-85, B
       payload: {
         skills: ['React', 'NextJS', 'Tailwind', 'CSS'],
         yearsOfExperience: 6.5,
-        lastActiveDays: 2,
-        verifiedEvidenceCount: 3,
-        assessmentsPassedCount: 1,
       },
     });
 
@@ -104,8 +107,21 @@ describe('Talent Segmentation & Classification Integration (F-160, F-84, F-85, B
     expect(body.segmentation.candidateId).toBe(candidate1Id);
     expect(body.segmentation.specialization).toBe('frontend');
     expect(body.segmentation.seniorityTier).toBe('senior');
-    expect(body.segmentation.engagementSegment).toBe('active');
-    expect(body.segmentation.readinessBand).toBe('ready_now');
+    // No recorded activity yet: recency defaults to 30 days, "open".
+    expect(body.segmentation.engagementSegment).toBe('open');
+    // Readiness comes from records, not from what the candidate says (REV-04):
+    // a new account has no verified evidence or assessments yet.
+    expect(body.segmentation.readinessBand).toBe('unassessed');
+  });
+
+  it('1a. A candidate cannot claim measured figures about themselves (REV-04)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/recruiter/talent-segmentation/classify',
+      headers: { authorization: `Bearer ${candidate1Token}` },
+      payload: { verifiedEvidenceCount: 3, assessmentsPassedCount: 1 },
+    });
+    expect(res.statusCode).toBe(403);
   });
 
   it('2. Candidate cannot classify another candidate profile (FORBIDDEN)', async () => {
@@ -123,11 +139,29 @@ describe('Talent Segmentation & Classification Integration (F-160, F-84, F-85, B
     expect(body.error.code).toBe('FORBIDDEN');
   });
 
-  it('3. Recruiter can classify candidate with multi-faceted parameters', async () => {
-    const res = await app.inject({
+  it('3a. A recruiter classifies only from recorded data, never supplied figures (G-28)', async () => {
+    const supplied = await app.inject({
       method: 'POST',
       url: '/api/v1/recruiter/talent-segmentation/classify',
       headers: { authorization: `Bearer ${recruiterToken}` },
+      payload: { candidateId: candidate2Id, yearsOfExperience: 25, isStealthMode: false },
+    });
+    expect(supplied.statusCode).toBe(403);
+
+    const recorded = await app.inject({
+      method: 'POST',
+      url: '/api/v1/recruiter/talent-segmentation/classify',
+      headers: { authorization: `Bearer ${recruiterToken}` },
+      payload: { candidateId: candidate2Id },
+    });
+    expect(recorded.statusCode).toBe(200);
+  });
+
+  it('3. A platform admin can classify a candidate with multi-faceted parameters', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/recruiter/talent-segmentation/classify',
+      headers: { authorization: `Bearer ${adminToken}` },
       payload: {
         candidateId: candidate2Id,
         skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS'],

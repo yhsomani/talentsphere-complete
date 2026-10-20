@@ -227,6 +227,29 @@ describe('Career Trajectory Analysis Integration (F-152, F-85, BR-157..BR-163)',
       expect(data.benchmark.medianTimeMonths).toBeGreaterThan(20);
       expect(data.benchmark.medianSalaryDelta).toBeGreaterThan(20000);
     });
+
+    it('publishes no figures for a move too few people have made (SEC-05)', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/career/transition-probability',
+        payload: { fromRole: 'Software Engineer', toRole: 'Product Manager' },
+      });
+      expect(res.statusCode).toBe(200);
+      const data = JSON.parse(res.body);
+      expect(data.status).toBe('insufficient_data');
+      expect(data.benchmark).toBeUndefined();
+      expect(JSON.stringify(data)).not.toMatch(/median|transitionProbability/);
+    });
+
+    it('never lets the caller lower the benchmark threshold (SEC-05)', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/career/benchmarks?minSamples=0',
+      });
+      const data = JSON.parse(res.body);
+      expect(data.kAnonymityThreshold).toBe(20);
+      for (const b of data.benchmarks) expect(b.sampleCount).toBeGreaterThanOrEqual(20);
+    });
   });
 
   describe('GET /api/v1/career/pathways (F-152, BR-160, BR-161)', () => {
@@ -256,7 +279,7 @@ describe('Career Trajectory Analysis Integration (F-152, F-85, BR-157..BR-163)',
       );
     });
 
-    it('returns under-threshold pathways when enforceKAnonymity is false', async () => {
+    it('cannot be asked to return under-threshold pathways (SEC-05)', async () => {
       const res = await app.inject({
         method: 'GET',
         url: '/api/v1/career/pathways?originRole=Software+Engineer&enforceKAnonymity=false',
@@ -265,7 +288,8 @@ describe('Career Trajectory Analysis Integration (F-152, F-85, BR-157..BR-163)',
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       const roles = data.pathway.pathways.map((p: any) => p.targetRole);
-      expect(roles).toContain('Product Manager');
+      expect(roles).not.toContain('Product Manager');
+      for (const p of data.pathway.pathways) expect(p.sampleCount).toBeGreaterThanOrEqual(20);
     });
   });
 

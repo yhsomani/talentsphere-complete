@@ -137,8 +137,8 @@ describe('Messaging on PostgreSQL', () => {
         `SELECT recipient_id, title FROM notifications WHERE type = 'message' ORDER BY created_at`
       )
     ).toEqual([
-      { recipient_id: ids.candProfile, title: 'New message from Message Tester' },
-      { recipient_id: ids.recProfile, title: 'New message from Message Tester' },
+      { recipient_id: ids.candProfile, title: 'New message' },
+      { recipient_id: ids.recProfile, title: 'New message' },
     ]);
 
     // The recruiter has not read the reply yet; the candidate has read everything.
@@ -212,6 +212,15 @@ describe('Messaging on PostgreSQL', () => {
     expect(
       await sql('SELECT 1 FROM thread_participants WHERE user_id = $1', [ids.candProfile])
     ).toHaveLength(0);
+    // Nothing the recruiter was notified about names the erased person or
+    // repeats their words (G-26).
+    const recNotices = await sql<{ title: string; body: string }>(
+      `SELECT title, body FROM notifications WHERE recipient_id = $1 AND type = 'message'`,
+      [ids.recProfile]
+    );
+    expect(recNotices.length).toBeGreaterThan(0);
+    for (const n of recNotices) expect(n.title).toBe('New message');
+    expect(JSON.stringify(recNotices)).not.toContain('Thursday works');
     // The recruiter's own messages remain, and it stays that way after a restart.
     await app.close();
     app = await boot();

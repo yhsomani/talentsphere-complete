@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
@@ -33,8 +33,13 @@ export const LoginPage: React.FC = () => {
     forgetSessionEnded();
   }, []);
 
+  // State updates land after React re-renders, so two submits in the same tick
+  // would both pass a `loading` check. A ref is set synchronously.
+  const inFlight = useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (inFlight.current) return;
     setError(null);
     setSessionEnded(null);
 
@@ -48,6 +53,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    inFlight.current = true;
     setLoading(true);
 
     try {
@@ -83,6 +89,7 @@ export const LoginPage: React.FC = () => {
     } catch {
       setError({ message: 'Failed to sign in. Please verify your credentials.' });
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };

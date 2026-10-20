@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
+// Supplied figures are accepted from platform admins only (gap G-28):
+// recruiters profile candidates from recorded activity.
+const adminToken = createSessionToken(
+  `user_admin_behavioral_${Date.now()}`,
+  `admin.behavioral.${Date.now()}@talentsphere.internal`,
+  ['platform_admin']
+);
 
 test.describe('E2E: Behavioral Talent Discovery & Anti-Gaming Engine (F-159, F-146, F-130, F-150)', () => {
   let recruiterToken: string;
@@ -83,11 +92,28 @@ test.describe('E2E: Behavioral Talent Discovery & Anti-Gaming Engine (F-159, F-1
     expect(body.profile.compositeBehavioralScore).toBeGreaterThanOrEqual(0);
   });
 
-  test('recruiter computes candidate profile with organic multi-dimensional signals', async ({
+  test('admin computes candidate profile with organic multi-dimensional signals', async ({
     request,
   }) => {
-    const res = await request.post(`${API_BASE}/recruiter/discovery/behavioral/compute`, {
+    const refused = await request.post(`${API_BASE}/recruiter/discovery/behavioral/compute`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
+      data: {
+        candidateId,
+        rawSignals: {
+          contributionsCount30d: 999,
+          challengesCompleted: 99,
+          reputationOverallScore: 100,
+          verifiedEndorsements: [],
+          coursesCompletedLast90d: 0,
+          emergingSkillsCount: 0,
+          highlightedSkills: ['typescript'],
+        },
+      },
+    });
+    expect(refused.status()).toBe(403);
+
+    const res = await request.post(`${API_BASE}/recruiter/discovery/behavioral/compute`, {
+      headers: { authorization: `Bearer ${adminToken}` },
       data: {
         candidateId,
         rawSignals: {
@@ -116,7 +142,7 @@ test.describe('E2E: Behavioral Talent Discovery & Anti-Gaming Engine (F-159, F-1
     request,
   }) => {
     const res = await request.post(`${API_BASE}/recruiter/discovery/behavioral/compute`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${adminToken}` },
       data: {
         candidateId: colludingCandidateId,
         rawSignals: {

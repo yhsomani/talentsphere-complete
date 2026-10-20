@@ -49,6 +49,11 @@ export const ProfilePage: React.FC = () => {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportStatus, setExportStatus] = useState<{
+    tone: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   // Seed the form from the server's profile (and again if it reloads).
   useEffect(() => {
@@ -103,6 +108,38 @@ export const ProfilePage: React.FC = () => {
     } catch (err) {
       setDeleteError(errorMessage(err));
       setDeleteBusy(false);
+    }
+  };
+
+  // Gap FE-02: the export existed only as an API call. The server compiles the
+  // archive synchronously, so the browser saves the returned JSON directly.
+  const exportData = async () => {
+    if (exportBusy) return;
+    setExportBusy(true);
+    setExportStatus(null);
+    try {
+      const res = await apiJson<{ data: unknown }>('/api/v1/settings/export', {
+        method: 'POST',
+        body: JSON.stringify({ format: 'json' }),
+      });
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'talentsphere-export.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      // Revoke after the click has been handled, or some browsers cancel the download.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      setExportStatus({
+        tone: 'success',
+        text: 'Your data has been downloaded as talentsphere-export.json.',
+      });
+    } catch (err) {
+      setExportStatus({ tone: 'error', text: errorMessage(err) });
+    } finally {
+      setExportBusy(false);
     }
   };
 
@@ -216,6 +253,28 @@ export const ProfilePage: React.FC = () => {
             session. This device stays signed in, and your password does not change.
           </p>
           <SignOutOtherDevices />
+          <h3 style={{ fontSize: '1rem', marginTop: spacing.xl }}>Download your data</h3>
+          <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
+            A copy of your profile, work history, references, evidence, applications, messages you
+            sent and notifications, as a JSON file.
+          </p>
+          {exportStatus && (
+            <Notice
+              tone={exportStatus.tone}
+              style={{ marginBottom: spacing.md }}
+              data-testid={exportStatus.tone === 'success' ? 'export-done' : 'export-error'}
+            >
+              {exportStatus.text}
+            </Notice>
+          )}
+          <Button
+            variant="outline"
+            loading={exportBusy}
+            onClick={() => void exportData()}
+            data-testid="export-data"
+          >
+            Download my data
+          </Button>
           <h3 style={{ fontSize: '1rem', marginTop: spacing.xl }}>Delete your account</h3>
           <p style={{ color: colors.neutral[700], margin: `${spacing.xs} 0 ${spacing.md}` }}>
             Removes your name, work history, references and evidence, and withdraws open

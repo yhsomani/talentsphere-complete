@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
   let app: FastifyInstance;
@@ -175,10 +176,25 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
   });
 
   it('verifies affiliation via institutional seat code', async () => {
-    const res = await app.inject({
+    // The holder cannot confirm their own seat with any code (G-31) ...
+    const selfClaim = await app.inject({
       method: 'POST',
       url: `/api/v1/alumni/affiliations/${charlieAffiliationId}/verify`,
       headers: { authorization: `Bearer ${user3Token}` },
+      payload: { verificationMethod: 'institutional_seat', seatCode: 'ANYTHING' },
+    });
+    expect(selfClaim.statusCode).toBe(403);
+
+    // ... an administrator confirms it.
+    const adminToken = createSessionToken(
+      '00000000-0000-4000-a000-0000000000c3',
+      'admin.alumni@talentsphere.internal',
+      ['platform_admin']
+    );
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/alumni/affiliations/${charlieAffiliationId}/verify`,
+      headers: { authorization: `Bearer ${adminToken}` },
       payload: {
         verificationMethod: 'institutional_seat',
         seatCode: 'STANFORD-SEAT-2022',
@@ -214,6 +230,8 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
     expect(stanfordDirRes.statusCode).toBe(200);
     const data = JSON.parse(stanfordDirRes.body);
     expect(data.directory.length).toBeGreaterThanOrEqual(2);
+    // No member's address unless they chose to show it (SEC-04).
+    expect(stanfordDirRes.body).not.toContain('@stanford.edu');
 
     // Filter by graduationYear
     const filteredRes = await app.inject({

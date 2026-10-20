@@ -143,8 +143,8 @@ export const HiringJobPage: React.FC = () => {
     }
   };
 
-  const changeJobStatus = async (to: string) => {
-    if (!job || busyId) return;
+  const changeJobStatus = async (to: string): Promise<boolean> => {
+    if (!job || busyId) return false;
     setBusyId(job.id);
     setActionError(null);
     try {
@@ -153,12 +153,17 @@ export const HiringJobPage: React.FC = () => {
         body: JSON.stringify({ status: to }),
       });
       await load();
+      return true;
     } catch (err) {
       setActionError(errorMessage(err));
+      return false;
     } finally {
       setBusyId(null);
     }
   };
+  // Closing is permanent (a closed job can only be archived), so it is
+  // confirmed first, like rejecting an applicant (audit FE-06).
+  const [confirmingClose, setConfirmingClose] = useState(false);
 
   if (error) {
     return (
@@ -205,7 +210,9 @@ export const HiringJobPage: React.FC = () => {
             size="sm"
             variant={a.to === 'published' ? 'primary' : 'outline'}
             loading={busyId === job.id}
-            onClick={() => void changeJobStatus(a.to)}
+            onClick={() =>
+              a.to === 'closed' ? setConfirmingClose(true) : void changeJobStatus(a.to)
+            }
             data-testid={`job-action-${a.to}`}
           >
             {a.label}
@@ -220,7 +227,9 @@ export const HiringJobPage: React.FC = () => {
       )}
 
       <div
-        role="tablist"
+        // A filter, not tabs: there is no tab panel and no arrow-key model, so
+        // toggle buttons in a labelled group describe it truthfully (FE-11).
+        role="group"
         aria-label="Filter applicants"
         style={{ display: 'flex', gap: spacing.xs, marginBottom: spacing.md, flexWrap: 'wrap' }}
       >
@@ -230,8 +239,8 @@ export const HiringJobPage: React.FC = () => {
           return (
             <button
               key={f.key}
-              role="tab"
-              aria-selected={selected}
+              type="button"
+              aria-pressed={selected}
               onClick={() => setFilter(f.key)}
               data-testid={`pipeline-filter-${f.key}`}
               style={{
@@ -454,6 +463,12 @@ export const HiringJobPage: React.FC = () => {
         title={`Don’t move forward with ${rejecting?.candidate?.fullName ?? 'this applicant'}?`}
         description={`Their status becomes “${applicationStatusLabel('rejected')}”. This cannot be undone.`}
       >
+        {/* A failure is shown here, not behind the dialog (audit FE-08). */}
+        {actionError && (
+          <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="reject-error">
+            {actionError}
+          </Notice>
+        )}
         <TextArea
           id="reject-reason"
           label="Reason (optional, kept with the application)"
@@ -475,6 +490,38 @@ export const HiringJobPage: React.FC = () => {
             }}
           >
             Confirm
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={confirmingClose}
+        onClose={() => setConfirmingClose(false)}
+        busy={busyId !== null}
+        title={`Close ${job?.title ?? 'this job'}?`}
+        description="A closed job stops taking applications and cannot be reopened. To stop applications for a while, pause it instead."
+      >
+        {actionError && (
+          <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="close-job-error">
+            {actionError}
+          </Notice>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
+          <Button
+            variant="secondary"
+            disabled={busyId !== null}
+            onClick={() => setConfirmingClose(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            loading={busyId !== null}
+            data-testid="confirm-close-job"
+            onClick={async () => {
+              if (await changeJobStatus('closed')) setConfirmingClose(false);
+            }}
+          >
+            Close job
           </Button>
         </div>
       </Modal>

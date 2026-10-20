@@ -975,7 +975,8 @@ export const SalaryBenchmarkQuerySchema = z.object({
     .optional(),
   location: z.string().optional(),
   currency: z.string().length(3).default('USD'),
-  minCohortSize: z.coerce.number().int().min(1).max(20).default(3),
+  // Can only raise BR-178's floor of 5; lower values are treated as 5 (G-27).
+  minCohortSize: z.coerce.number().int().min(1).max(20).default(5),
 });
 
 export type SalaryBenchmarkQuery = z.infer<typeof SalaryBenchmarkQuerySchema>;
@@ -1435,6 +1436,7 @@ export const QueryCareerBenchmarksQuerySchema = z.object({
   fromRole: z.string().min(1).max(100).optional(),
   toRole: z.string().min(1).max(100).optional(),
   industry: z.string().max(100).optional(),
+  // Can only raise BR-160's floor of 20; lower values are treated as 20 (SEC-05).
   minSamples: z.coerce.number().int().min(0).max(1000).default(20),
 });
 
@@ -1454,6 +1456,8 @@ export type CalculateTransitionProbabilityInput = z.infer<
 export const CareerProgressionPathwaysQuerySchema = z.object({
   originRole: z.string().min(1).max(100),
   industry: z.string().max(100).default('Technology'),
+  // Accepted for compatibility and ignored: the server always suppresses
+  // pathways below BR-160's threshold (SEC-05).
   enforceKAnonymity: z
     .preprocess((val) => {
       if (typeof val === 'string') return val.toLowerCase() === 'true';
@@ -1499,6 +1503,7 @@ export const RecordLearningOutcomeInputSchema = z.object({
 export type RecordLearningOutcomeInput = z.infer<typeof RecordLearningOutcomeInputSchema>;
 
 export const QueryLearningImpactInputSchema = z.object({
+  // Can only raise BR-189's floor of 30; lower values are treated as 30 (G-27).
   minCohortSize: z.coerce.number().int().min(0).max(1000).default(30),
 });
 

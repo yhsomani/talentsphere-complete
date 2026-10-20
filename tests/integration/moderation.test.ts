@@ -404,19 +404,26 @@ describe('Trust, Safety & Moderation Integration Tests (F-24, BR-34, BR-68, BR-1
         payload: { status: 'under_review' },
       });
 
-      // Admin 1 attempts unilateral ban
-      const res = await app.inject({
-        method: 'POST',
-        url: `/api/v1/moderation/reports/${rep.id}/resolve`,
-        headers: { authorization: `Bearer ${admin1Token}` },
-        payload: {
+      // Admin 1's ban is only a proposal, however often they repeat it, and
+      // naming a second admin in the body does not stand in for that admin (SEC-06).
+      for (const payload of [
+        { action: 'user_banned', resolutionNotes: 'Permanent ban requested.' },
+        {
           action: 'user_banned',
           resolutionNotes: 'Permanent ban requested.',
+          secondApproverId: admin2Id,
         },
-      });
-
-      expect(res.statusCode).toBe(422);
-      expect(JSON.parse(res.body).error.message).toContain('dual Platform Admin approval');
+      ]) {
+        const res = await app.inject({
+          method: 'POST',
+          url: `/api/v1/moderation/reports/${rep.id}/resolve`,
+          headers: { authorization: `Bearer ${admin1Token}` },
+          payload,
+        });
+        expect(res.statusCode).toBe(202);
+        expect(JSON.parse(res.body).pendingApproval).toBe(true);
+        expect(JSON.parse(res.body).report.status).not.toBe('resolved');
+      }
     });
 
     it('successfully bans account when dual distinct platform admins approve (BR-068, WIT-008)', async () => {
@@ -449,14 +456,73 @@ describe('Trust, Safety & Moderation Integration Tests (F-24, BR-34, BR-68, BR-1
         payload: {
           action: 'user_banned',
           resolutionNotes: 'Permanent ban approved by dual admins.',
-          secondApproverId: admin2Id,
         },
       });
+      expect(res.statusCode).toBe(202);
 
-      expect(res.statusCode).toBe(200);
-      const body = JSON.parse(res.body);
+      // The second admin confirms with their own session (BR-068, SEC-06).
+      const confirmed = await app.inject({
+        method: 'POST',
+        url: `/api/v1/moderation/reports/${rep.id}/resolve`,
+        headers: { authorization: `Bearer ${admin2Token}` },
+        payload: {
+          action: 'user_banned',
+          resolutionNotes: 'Second admin confirms the ban.',
+        },
+      });
+      expect(confirmed.statusCode).toBe(200);
+      const body = JSON.parse(confirmed.body);
       expect(body.report.status).toBe('resolved');
       expect(body.report.actionTaken).toBe('user_banned');
+    });
+
+    it('never lets a moderator resolve their own report or sanction a platform admin (SEC-06)', async () => {
+      const own = JSON.parse(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/v1/moderation/reports',
+            headers: { authorization: `Bearer ${moderatorToken}` },
+            payload: {
+              targetType: 'user',
+              targetId: admin2Id,
+              reason: 'harassment',
+              details: 'Filed by the moderator who would decide it.',
+            },
+          })
+        ).body
+      ).report;
+      const selfResolve = await app.inject({
+        method: 'POST',
+        url: `/api/v1/moderation/reports/${own.id}/resolve`,
+        headers: { authorization: `Bearer ${moderatorToken}` },
+        payload: { action: 'user_suspended', resolutionNotes: 'Suspending an admin.' },
+      });
+      expect(selfResolve.statusCode).toBe(403);
+
+      // Filed by someone else, a moderator still cannot suspend an admin.
+      const byBystander = JSON.parse(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/v1/moderation/reports',
+            headers: { authorization: `Bearer ${bystanderToken}` },
+            payload: {
+              targetType: 'user',
+              targetId: admin2Id,
+              reason: 'harassment',
+              details: 'Report against an administrator.',
+            },
+          })
+        ).body
+      ).report;
+      const modSuspend = await app.inject({
+        method: 'POST',
+        url: `/api/v1/moderation/reports/${byBystander.id}/resolve`,
+        headers: { authorization: `Bearer ${moderatorToken}` },
+        payload: { action: 'user_suspended', resolutionNotes: 'Suspending an admin.' },
+      });
+      expect(modSuspend.statusCode).toBe(403);
     });
   });
 
@@ -481,6 +547,30 @@ describe('Trust, Safety & Moderation Integration Tests (F-24, BR-34, BR-68, BR-1
       expect(body.appeal.id).toBeDefined();
       expect(body.appeal.status).toBe('pending');
       appealId = body.appeal.id;
+    });
+
+    it('refuses an appeal from anyone the decision was not about (SEC-07)', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/moderation/reports/${createdReportId}/appeal`,
+        headers: { authorization: `Bearer ${reporterToken}` },
+        payload: { reason: 'Appealing on behalf of someone else entirely.' },
+      });
+      expect(res.statusCode).toBe(403);
+
+      // The person it was about can find it without learning who reported them.
+      const mine = JSON.parse(
+        (
+          await app.inject({
+            method: 'GET',
+            url: '/api/v1/moderation/reports/my',
+            headers: { authorization: `Bearer ${targetCandidateToken}` },
+          })
+        ).body
+      );
+      const about = mine.aboutMe.find((r: any) => r.id === createdReportId);
+      expect(about).toBeDefined();
+      expect(about.reporterId).toBeUndefined();
     });
 
     it('rejects appeal with insufficient reasoning (< 10 chars)', async () => {

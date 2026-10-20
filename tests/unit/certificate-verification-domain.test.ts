@@ -27,8 +27,16 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
     roles: ['platform_admin'] as any,
   };
 
+  // The course's own instructor (courses name their instructor by profile id).
   const instructorActor = {
     userId: 'user_inst',
+    profileId: 'prof_inst_1',
+    roles: ['instructor'] as any,
+  };
+
+  const otherInstructorActor = {
+    userId: 'user_inst_2',
+    profileId: 'prof_inst_2',
     roles: ['instructor'] as any,
   };
 
@@ -95,23 +103,40 @@ describe('Domain: Certificate Verification & Revocation (F-52, S-02, BR-150, SSO
     expect(proof.revocationReason).toBe('Violation of academic integrity during final evaluation.');
   });
 
-  it('allows instructor to revoke a certificate', () => {
+  it("allows the course's instructor to revoke a certificate", () => {
     const cert = mintCourseCertificate('enroll_3', 'user_789', dummyCourse);
     const revoked = revokeCourseCertificate(
       cert,
       'Issued in error due to grading recalculation.',
-      instructorActor
+      instructorActor,
+      dummyCourse
     );
 
     expect(revoked.status).toBe('revoked');
     expect(revoked.revocationReason).toBe('Issued in error due to grading recalculation.');
   });
 
+  it('prohibits an instructor of another course from revoking it (G-30)', () => {
+    const cert = mintCourseCertificate('enroll_3b', 'user_789', dummyCourse);
+    expect(() =>
+      revokeCourseCertificate(
+        cert,
+        'Not my course, revoking anyway.',
+        otherInstructorActor,
+        dummyCourse
+      )
+    ).toThrowError(/course's instructor/);
+    // Without the course to check against, an instructor role alone is not enough.
+    expect(() =>
+      revokeCourseCertificate(cert, 'Course unknown to the caller.', instructorActor)
+    ).toThrowError(/course's instructor/);
+  });
+
   it('prohibits candidate from revoking a certificate', () => {
     const cert = mintCourseCertificate('enroll_4', 'user_999', dummyCourse);
     expect(() =>
       revokeCourseCertificate(cert, 'Self revocation attempt', candidateActor)
-    ).toThrowError(/Only platform administrators or instructors may revoke a certificate/);
+    ).toThrowError(/Only a platform administrator or the course's instructor/);
   });
 
   it('rejects revocation with reason shorter than 5 characters', () => {

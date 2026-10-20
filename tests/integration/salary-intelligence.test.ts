@@ -176,7 +176,7 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
   });
 
   it('enforces k-anonymity privacy protection before minimum cohort is reached (BR-178)', async () => {
-    // We currently have 2 backend_engineer:senior reports. Policy requires >= 3 reports.
+    // We currently have 2 backend_engineer:senior reports. BR-178 requires >= 5.
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
@@ -185,9 +185,20 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body.status).toBe('insufficient_data');
-    expect(body.minRequired).toBe(3);
+    expect(body.minRequired).toBe(5);
     expect(body.actualCount).toBe(2);
     expect(body.message).toContain('BR-178');
+  });
+
+  it('never lets the caller lower the cohort threshold (G-27)', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior&minCohortSize=1',
+    });
+    const body = JSON.parse(res.payload);
+    expect(body.status).toBe('insufficient_data');
+    expect(body.minRequired).toBe(5);
+    expect(body.benchmark).toBeUndefined();
   });
 
   it('returns comprehensive percentile distribution once cohort reaches k-anonymity (BR-178, BR-183)', async () => {
@@ -211,7 +222,44 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     });
     expect(res3.statusCode).toBe(201);
 
-    // Now cohort has 3 reports -> benchmark available!
+    // Two more reporters at another company (the company view below still
+    // has exactly 3 CloudScale reports).
+    for (const [n, base, bonus, equity] of [
+      [4, 16500000, 1500000, 3000000],
+      [5, 20500000, 3500000, 7000000],
+    ]) {
+      const reg = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `sal.user${n}.${Date.now()}@example.com`,
+          password: 'Password123!',
+          fullName: `Dev ${n}`,
+          role: 'candidate',
+        },
+      });
+      const token = JSON.parse(reg.payload).token;
+      const report = await app.inject({
+        method: 'POST',
+        url: '/api/v1/salaries/reports',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          jobTitle: 'Senior Backend Engineer',
+          standardizedRole: 'backend_engineer',
+          seniorityLevel: 'senior',
+          location: 'San Francisco, CA',
+          baseSalaryMinor: base,
+          bonusMinor: bonus,
+          equityAnnualMinor: equity,
+          yearsOfExperience: 8,
+          companyName: 'Northwind Systems',
+          verificationType: 'self_reported',
+        },
+      });
+      expect(report.statusCode).toBe(201);
+    }
+
+    // Now cohort has 5 reports (BR-178: k >= 5) -> benchmark available!
     const benchmarkRes = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
@@ -220,12 +268,38 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     expect(benchmarkRes.statusCode).toBe(200);
     const body = JSON.parse(benchmarkRes.payload);
     expect(body.status).toBe('available');
-    expect(body.benchmark.sampleCount).toBe(3);
-    expect(body.benchmark.p50Minor).toBe(18500000); // Median of 175k, 185k, 195k
-    expect(body.benchmark.minMinor).toBe(17500000);
-    expect(body.benchmark.maxMinor).toBe(19500000);
+    expect(body.benchmark.sampleCount).toBe(5);
+    expect(body.benchmark.p50Minor).toBe(18500000); // Median of 165k..205k
+    // No individual salaries in the answer (REV-05).
+    expect(body.benchmark).not.toHaveProperty('minMinor');
+    expect(body.benchmark).not.toHaveProperty('maxMinor');
+    expect(body.benchmark).not.toHaveProperty('meanMinor');
     expect(body.benchmark.equityP50Minor).toBe(5000000); // Median equity
     expect(body.benchmark.bonusP50Minor).toBe(2500000); // Median bonus
+  });
+
+  it('filters the benchmark by location (REV-05)', async () => {
+    // All five reports are in San Francisco: another city has no cohort.
+    const elsewhere = JSON.parse(
+      (
+        await app.inject({
+          method: 'GET',
+          url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior&location=Berlin',
+        })
+      ).payload
+    );
+    expect(elsewhere.status).toBe('insufficient_data');
+    expect(elsewhere.actualCount).toBe(0);
+    const here = JSON.parse(
+      (
+        await app.inject({
+          method: 'GET',
+          url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior&location=San%20Francisco,%20CA',
+        })
+      ).payload
+    );
+    expect(here.status).toBe('available');
+    expect(here.benchmark.sampleCount).toBe(5);
   });
 
   it('enforces company reporting threshold of >= 3 reports (BR-180)', async () => {
@@ -272,13 +346,13 @@ describe('Integration: Salary Intelligence & Compensation Benchmarks (F-86, BR-1
     const withdrawBody = JSON.parse(withdrawRes.payload);
     expect(withdrawBody.report.status).toBe('withdrawn');
 
-    // After withdrawal, cohort count drops from 3 to 2 -> drops below k-anonymity!
+    // After withdrawal, cohort count drops from 5 to 4 -> drops below k-anonymity!
     const benchmarkRes = await app.inject({
       method: 'GET',
       url: '/api/v1/salaries/benchmarks?role=backend_engineer&level=senior',
     });
     const benchBody = JSON.parse(benchmarkRes.payload);
     expect(benchBody.status).toBe('insufficient_data');
-    expect(benchBody.actualCount).toBe(2);
+    expect(benchBody.actualCount).toBe(4);
   });
 });

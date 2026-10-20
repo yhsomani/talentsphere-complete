@@ -90,7 +90,12 @@ export interface WorkHistoryGraphSummary {
   totalRoles: number;
   verifiedRoles: number;
   totalReferences: number;
-  averageReferenceRating: number;
+  /**
+   * Null when referees are redacted and there are fewer than
+   * REDACTED_RATING_MIN_REFERENCES ratings: an average of one or two ratings
+   * is those referees' own scores (review REV-09).
+   */
+  averageReferenceRating: number | null;
   aggregateTrustScore: number;
   topVerifiedSkills: { skill: string; endorsementsCount: number }[];
 }
@@ -589,13 +594,32 @@ export interface BuildWorkHistoryGraphParams {
   workHistories: VerifiedWorkHistory[];
   references: EmploymentReference[];
   includeUnverified?: boolean;
+  /**
+   * Leave out who each referee is and what they rated: references appear by
+   * relationship only. Referees agreed to vouch for the candidate, not to be
+   * named and scored to everyone who can see the profile (gap G-03).
+   */
+  redactReferees?: boolean;
 }
+
+/** Fewest ratings whose average is shown when referees are redacted. */
+export const REDACTED_RATING_MIN_REFERENCES = 3;
+
+const isShownRole = (wh: VerifiedWorkHistory) =>
+  wh.verificationStatus === 'verified' || wh.badgeTier !== 'none';
 
 /**
  * Constructs the multi-entity work history network & graph representation (F-162).
+ *
+ * Roles left out (unverified ones, unless `includeUnverified`) leave out
+ * everything about them: their references, endorsed skills and their share
+ * of the summary totals.
  */
 export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): WorkHistoryGraph {
-  const { candidateId, candidateName, includeUnverified = false } = params;
+  const { candidateId, candidateName, includeUnverified = false, redactReferees = false } = params;
+  const workHistories = includeUnverified
+    ? params.workHistories
+    : params.workHistories.filter(isShownRole);
 
   const nodes: WorkHistoryGraphNode[] = [];
   const edges: WorkHistoryGraphEdge[] = [];
@@ -621,73 +645,70 @@ export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): Work
   const skillEndorsementsMap = new Map<string, number>();
 
   // 2. Company Nodes & Employment Edges
-  for (const wh of params.workHistories) {
+  for (const wh of workHistories) {
     const tenureMonths = calculateTenureMonths(wh.startDate, wh.endDate, wh.isCurrent);
     totalTenureMonths += tenureMonths;
 
-    if (wh.verificationStatus === 'verified' || wh.badgeTier !== 'none') {
+    if (isShownRole(wh)) {
       verifiedTenureMonths += tenureMonths;
       verifiedRolesCount++;
       totalTrustScoreSum += wh.verificationScore;
     }
 
-    // Only render node/edge if included
-    if (includeUnverified || wh.verificationStatus === 'verified' || wh.badgeTier !== 'none') {
-      const companyNodeId = `company_${wh.companyId || wh.companyName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-      if (!existingNodeIds.has(companyNodeId)) {
+    const companyNodeId = `company_${wh.companyId || wh.companyName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    if (!existingNodeIds.has(companyNodeId)) {
+      nodes.push({
+        id: companyNodeId,
+        type: 'company',
+        label: wh.companyName,
+        metadata: { companyId: wh.companyId },
+      });
+      existingNodeIds.add(companyNodeId);
+    }
+
+    edges.push({
+      id: `edge_emp_${wh.id}`,
+      source: candidateNodeId,
+      target: companyNodeId,
+      type: 'employed_at',
+      label: `${wh.title} (${tenureMonths}m)`,
+      weight: wh.verificationScore / 100,
+      metadata: {
+        workHistoryId: wh.id,
+        title: wh.title,
+        tenureMonths,
+        badgeTier: wh.badgeTier,
+        verificationStatus: wh.verificationStatus,
+      },
+    });
+
+    // Add attached skills
+    for (const skill of wh.skills) {
+      const skillNodeId = `skill_${skill.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+      if (!existingNodeIds.has(skillNodeId)) {
         nodes.push({
-          id: companyNodeId,
-          type: 'company',
-          label: wh.companyName,
-          metadata: { companyId: wh.companyId },
+          id: skillNodeId,
+          type: 'skill',
+          label: skill,
         });
-        existingNodeIds.add(companyNodeId);
+        existingNodeIds.add(skillNodeId);
       }
 
       edges.push({
-        id: `edge_emp_${wh.id}`,
+        id: `edge_skill_${wh.id}_${skillNodeId}`,
         source: candidateNodeId,
-        target: companyNodeId,
-        type: 'employed_at',
-        label: `${wh.title} (${tenureMonths}m)`,
-        weight: wh.verificationScore / 100,
-        metadata: {
-          workHistoryId: wh.id,
-          title: wh.title,
-          tenureMonths,
-          badgeTier: wh.badgeTier,
-          verificationStatus: wh.verificationStatus,
-        },
+        target: skillNodeId,
+        type: 'endorsed_skill',
+        label: 'Attested Skill',
+        weight: 0.5,
       });
 
-      // Add attached skills
-      for (const skill of wh.skills) {
-        const skillNodeId = `skill_${skill.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-        if (!existingNodeIds.has(skillNodeId)) {
-          nodes.push({
-            id: skillNodeId,
-            type: 'skill',
-            label: skill,
-          });
-          existingNodeIds.add(skillNodeId);
-        }
-
-        edges.push({
-          id: `edge_skill_${wh.id}_${skillNodeId}`,
-          source: candidateNodeId,
-          target: skillNodeId,
-          type: 'endorsed_skill',
-          label: 'Attested Skill',
-          weight: 0.5,
-        });
-
-        skillEndorsementsMap.set(skill, (skillEndorsementsMap.get(skill) ?? 0) + 1);
-      }
+      skillEndorsementsMap.set(skill, (skillEndorsementsMap.get(skill) ?? 0) + 1);
     }
   }
 
   // 3. Reference Nodes & Referee Edges
-  const candidateHistoryIds = new Set(params.workHistories.map((wh) => wh.id));
+  const candidateHistoryIds = new Set(workHistories.map((wh) => wh.id));
   const candidateRefs = params.references.filter((ref) =>
     candidateHistoryIds.has(ref.workHistoryId)
   );
@@ -712,11 +733,12 @@ export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): Work
         nodes.push({
           id: refNodeId,
           type: 'reference',
-          label: `${ref.refereeName} (${ref.relationship})`,
-          metadata: {
-            refereeName: ref.refereeName,
-            relationship: ref.relationship,
-          },
+          label: redactReferees
+            ? `Reference (${ref.relationship})`
+            : `${ref.refereeName} (${ref.relationship})`,
+          metadata: redactReferees
+            ? { relationship: ref.relationship }
+            : { refereeName: ref.refereeName, relationship: ref.relationship },
         });
         existingNodeIds.add(refNodeId);
       }
@@ -729,10 +751,9 @@ export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): Work
         type: 'referred_by',
         label: `Referred by ${ref.relationship}`,
         weight: ref.confirmDates && ref.confirmTitle ? 1.0 : 0.5,
-        metadata: {
-          referenceId: ref.id,
-          ratings: ref.ratings,
-        },
+        metadata: redactReferees
+          ? { referenceId: ref.id }
+          : { referenceId: ref.id, ratings: ref.ratings },
       });
 
       // Manager relation edge
@@ -790,10 +811,11 @@ export function buildWorkHistoryGraph(params: BuildWorkHistoryGraphParams): Work
     summary: {
       totalTenureMonths,
       verifiedTenureMonths,
-      totalRoles: params.workHistories.length,
+      totalRoles: workHistories.length,
       verifiedRoles: verifiedRolesCount,
       totalReferences: submittedRefsCount,
-      averageReferenceRating: avgRating,
+      averageReferenceRating:
+        redactReferees && totalRatingCount < REDACTED_RATING_MIN_REFERENCES ? null : avgRating,
       aggregateTrustScore,
       topVerifiedSkills,
     },

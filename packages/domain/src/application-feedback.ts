@@ -240,6 +240,10 @@ export function markFeedbackViewed(
 
 /**
  * Computes anonymized aggregate insights on application rejections (BR-220: k >= 10).
+ *
+ * The threshold applies per category, not only to the total: a category
+ * reported fewer than k times is not named or counted on its own (gap
+ * G-27), only folded into `suppressedCount`.
  */
 export function computeFeedbackAggregateInsights(
   feedbacks: ApplicationFeedback[],
@@ -247,12 +251,15 @@ export function computeFeedbackAggregateInsights(
 ): {
   totalEvaluated: number;
   categoryBreakdown: Record<string, { count: number; percentage: number }>;
+  /** Feedback in categories too small to show on their own. */
+  suppressedCount: number;
   isPrivacyProtected: boolean;
 } {
   if (feedbacks.length < minCohortSize) {
     return {
       totalEvaluated: feedbacks.length,
       categoryBreakdown: {},
+      suppressedCount: feedbacks.length,
       isPrivacyProtected: true,
     };
   }
@@ -263,7 +270,12 @@ export function computeFeedbackAggregateInsights(
   }
 
   const categoryBreakdown: Record<string, { count: number; percentage: number }> = {};
+  let suppressedCount = 0;
   for (const [cat, count] of Object.entries(counts)) {
+    if (count < minCohortSize) {
+      suppressedCount += count;
+      continue;
+    }
     categoryBreakdown[cat] = {
       count,
       percentage: Math.round((count / feedbacks.length) * 100),
@@ -273,7 +285,8 @@ export function computeFeedbackAggregateInsights(
   return {
     totalEvaluated: feedbacks.length,
     categoryBreakdown,
-    isPrivacyProtected: false,
+    suppressedCount,
+    isPrivacyProtected: suppressedCount > 0,
   };
 }
 
