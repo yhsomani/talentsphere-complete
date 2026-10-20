@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import {
+  MIN_DEPLOYED_PBKDF2_ITERATIONS,
   PUBLISHED_TEST_SECRET_SHA256,
   productionConfigProblems,
   validateServerEnv,
 } from '../../packages/config/src/env.js';
+import { PBKDF2_DEFAULT_ITERATIONS } from '../../packages/domain/src/auth.js';
 import { TEST_TOKEN_SECRET, TEST_WEBHOOK_SECRET } from '../../test-secrets.mjs';
 
 const SAFE_PRODUCTION = {
@@ -63,6 +65,28 @@ describe('Production configuration guard (apps/api/src/index.ts refuses to start
       validateServerEnv({ ...SAFE_PRODUCTION, ...override } as Record<string, string | undefined>)
     );
     expect(problems.join(' | ')).toMatch(pattern);
+  });
+
+  it('refuses PBKDF2 work factors below the OWASP floor in deployed environments (audit F-04)', () => {
+    const weak = validateServerEnv({ ...SAFE_PRODUCTION, PASSWORD_PBKDF2_ITERATIONS: '1000' });
+    expect(productionConfigProblems(weak).join('\n')).toContain('PASSWORD_PBKDF2_ITERATIONS=1000');
+    const staging = validateServerEnv({
+      ...SAFE_PRODUCTION,
+      NODE_ENV: 'staging',
+      PASSWORD_PBKDF2_ITERATIONS: '209999',
+    });
+    expect(productionConfigProblems(staging).length).toBeGreaterThan(0);
+    const floor = validateServerEnv({
+      ...SAFE_PRODUCTION,
+      PASSWORD_PBKDF2_ITERATIONS: String(MIN_DEPLOYED_PBKDF2_ITERATIONS),
+    });
+    expect(productionConfigProblems(floor)).toEqual([]);
+    // Unset uses the domain default, which is itself above the floor.
+    expect(productionConfigProblems(validateServerEnv(SAFE_PRODUCTION))).toEqual([]);
+  });
+
+  it('keeps the deployed PBKDF2 floor equal to the domain default (audit F-04)', () => {
+    expect(MIN_DEPLOYED_PBKDF2_ITERATIONS).toBe(PBKDF2_DEFAULT_ITERATIONS);
   });
 
   it('refuses the test secrets published in this repository', () => {

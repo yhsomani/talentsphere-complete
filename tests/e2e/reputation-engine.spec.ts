@@ -54,7 +54,7 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     const res = await request.get(
       `${API_BASE}/reputation/users/${candidateUserId}?context=candidate&domain=general`,
       {
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: { authorization: `Bearer ${candidateToken}` },
       }
     );
 
@@ -117,7 +117,7 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     const candRes = await request.get(
       `${API_BASE}/reputation/users/${candidateUserId}?context=candidate`,
       {
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: { authorization: `Bearer ${candidateToken}` },
       }
     );
     expect(candRes.status()).toBe(200);
@@ -129,7 +129,7 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
     const mentorQueryRes = await request.get(
       `${API_BASE}/reputation/users/${candidateUserId}?context=mentor`,
       {
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: { authorization: `Bearer ${candidateToken}` },
       }
     );
     expect(mentorQueryRes.status()).toBe(200);
@@ -143,7 +143,7 @@ test.describe('E2E: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-254
   }) => {
     // Recruiter view: only aggregate scores
     const pubRes = await request.get(`${API_BASE}/reputation/users/${candidateUserId}`, {
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(pubRes.status()).toBe(200);
     const pubBody = await pubRes.json();
