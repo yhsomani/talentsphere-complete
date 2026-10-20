@@ -40,6 +40,9 @@ export const ServerEnvSchema = z.object({
   // are unforgeable but do not survive a restart). If provided it must be at least
   // 32 characters. Production deployments should always set it.
   TOKEN_SECRET: z.string().min(32).optional(),
+  // Password hashing work factor (PBKDF2-SHA512). Unset uses the domain default.
+  // Deployed environments must not go below MIN_DEPLOYED_PBKDF2_ITERATIONS.
+  PASSWORD_PBKDF2_ITERATIONS: z.coerce.number().int().min(1000).optional(),
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:5173'),
   // Global limiter: requests per window per signed-in account (or per client
   // address for anonymous callers). The former default (100 per 15 minutes)
@@ -122,6 +125,10 @@ export const PUBLISHED_TEST_SECRET_SHA256: ReadonlySet<string> = new Set([
   'd042feab86b525c2db643c6e507e006cce35a51533fddb1801fe2b4391d34f62', // TEST_WEBHOOK_SECRET
 ]);
 
+/** OWASP 2023 minimum for PBKDF2-HMAC-SHA512. Must equal the domain default
+ * (packages/domain/src/auth.ts PBKDF2_DEFAULT_ITERATIONS); tests/unit/production-config.test.ts checks that. */
+export const MIN_DEPLOYED_PBKDF2_ITERATIONS = 210_000;
+
 const isPublishedTestSecret = (value: string | undefined) =>
   !!value && PUBLISHED_TEST_SECRET_SHA256.has(createHash('sha256').update(value).digest('hex'));
 
@@ -143,6 +150,14 @@ export function productionConfigProblems(env: ServerEnv): string[] {
   }
   if (env.STORAGE === 'memory') {
     problems.push(`STORAGE=memory is not allowed in ${where} (data would be lost on restart)`);
+  }
+  if (
+    env.PASSWORD_PBKDF2_ITERATIONS !== undefined &&
+    env.PASSWORD_PBKDF2_ITERATIONS < MIN_DEPLOYED_PBKDF2_ITERATIONS
+  ) {
+    problems.push(
+      `PASSWORD_PBKDF2_ITERATIONS=${env.PASSWORD_PBKDF2_ITERATIONS} is below ${MIN_DEPLOYED_PBKDF2_ITERATIONS} in ${where}; weak password hashes`
+    );
   }
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');

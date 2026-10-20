@@ -60,7 +60,7 @@ describe('Integration: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-
     const res = await app.inject({
       method: 'GET',
       url: `/api/v1/reputation/users/${candidateUserId}?context=candidate&domain=general`,
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${candidateToken}` },
     });
 
     expect(res.statusCode).toBe(200);
@@ -148,7 +148,7 @@ describe('Integration: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-
     const candQuery = await app.inject({
       method: 'GET',
       url: `/api/v1/reputation/users/${candidateUserId}?context=candidate`,
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(candQuery.statusCode).toBe(200);
     const candQueryBody = JSON.parse(candQuery.payload);
@@ -160,7 +160,7 @@ describe('Integration: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-
     const instQuery = await app.inject({
       method: 'GET',
       url: `/api/v1/reputation/users/${candidateUserId}?context=instructor`,
-      headers: { authorization: `Bearer ${recruiterToken}` },
+      headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(instQuery.statusCode).toBe(200);
     const instQueryBody = JSON.parse(instQuery.payload);
@@ -169,17 +169,27 @@ describe('Integration: Multi-Context Reputation Engine (F-144, S-03, BR-247..BR-
     expect(instQueryBody.scores[0].signalCount).toBe(1);
   });
 
-  it('guarantees zero individual signal leakage to other users while allowing owner private inspection (BR-253)', async () => {
-    // Recruiter queries candidate reputation -> only aggregated scores, no raw signals
-    const publicRes = await app.inject({
+  it('refuses a recruiter with no application to the candidate, and never leaks signals (BR-167, BR-253)', async () => {
+    // BR-167: reputation is private by default. A recruiter whose organization
+    // has no application from this candidate is refused outright.
+    const refused = await app.inject({
       method: 'GET',
       url: `/api/v1/reputation/users/${candidateUserId}`,
       headers: { authorization: `Bearer ${recruiterToken}` },
     });
-    expect(publicRes.statusCode).toBe(200);
-    const publicBody = JSON.parse(publicRes.payload);
+    expect(refused.statusCode).toBe(403);
+    expect(JSON.parse(refused.payload).scores).toBeUndefined();
+
+    // The candidate reads their own aggregated scores, still without raw signals.
+    const ownRes = await app.inject({
+      method: 'GET',
+      url: `/api/v1/reputation/users/${candidateUserId}`,
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(ownRes.statusCode).toBe(200);
+    const publicBody = JSON.parse(ownRes.payload);
     expect(publicBody.scores).toBeDefined();
-    // Signals array must not exist on public endpoint
+    // Signals array must not exist on the aggregated endpoint
     expect(publicBody.signals).toBeUndefined();
 
     // Candidate queries their own private signals

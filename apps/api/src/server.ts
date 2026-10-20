@@ -3963,13 +3963,43 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       }>,
       reply: FastifyReply
     ) => {
-      extractUser(req); // must be authenticated
+      const session = extractUser(req); // must be authenticated
       const { userId } = req.params;
       const { context, domain } = req.query;
 
       const user = usersById.get(userId);
       if (!user) {
         throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      }
+
+      // BR-167: reputation is private by default. The candidate, a platform
+      // admin, or a hiring account whose organization the candidate applied to
+      // may read it. No reputation consent setting exists yet, so the consent
+      // route is not modelled and a recruiter without an application is refused
+      // (audit finding F-01).
+      const isSelf = session.userId === userId;
+      const isAdmin = session.roles.includes('platform_admin');
+      const hiringAccount = session.roles.some((r) =>
+        ['recruiter', 'employer', 'hiring_manager'].includes(r)
+      );
+      const candidateProfile = profilesByUserId.get(userId);
+      const appliedToMyOrg =
+        hiringAccount && candidateProfile
+          ? (() => {
+              const orgIds = new Set(
+                (orgMembershipsByUserId.get(session.userId) || []).map((m) => m.orgId)
+              );
+              return (applicationsByCandidateId.get(candidateProfile.id) || []).some((a) => {
+                const job = jobsById.get(a.jobId);
+                return !!job && orgIds.has(job.orgId);
+              });
+            })()
+          : false;
+      if (!isSelf && !isAdmin && !appliedToMyOrg) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Reputation is visible to the candidate and to hiring teams they applied to (BR-167).'
+        );
       }
 
       const userSignals = reputationSignalsByUserId.get(userId) || [];
