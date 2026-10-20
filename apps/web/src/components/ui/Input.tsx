@@ -61,7 +61,8 @@ export const Input: React.FC<InputProps> = ({
                 : colors.primary[600]
               : error
                 ? colors.semantic.error
-                : colors.neutral[300]
+                : // 4.76:1 against white (WCAG 1.4.11, audit FE-07).
+                  colors.neutral[500]
           }`,
           boxShadow: focused ? `0 0 0 3px ${error ? '#fee2e2' : colors.primary[100]}` : 'none',
           fontSize: '0.875rem',

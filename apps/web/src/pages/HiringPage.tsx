@@ -182,6 +182,10 @@ const JobForm: React.FC<{
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
+  // The job this form already created. If publishing failed after the create
+  // succeeded, a retry publishes that draft instead of creating a second job
+  // (audit FE-04).
+  const createdJobId = useRef<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,23 +212,28 @@ const JobForm: React.FC<{
     inFlight.current = true;
     setBusy(true);
     try {
-      const created = await apiJson<{ job: Job }>('/api/v1/jobs', {
-        method: 'POST',
-        body: JSON.stringify({
-          orgId,
-          title: title.trim(),
-          location: location.trim(),
-          workMode,
-          jobType,
-          description: description.trim(),
-          ...(skillIds.length ? { requiredSkillIds: skillIds } : {}),
-          ...(min !== undefined && max !== undefined
-            ? { salaryMinMinor: min, salaryMaxMinor: max, currency }
-            : {}),
-        }),
-      });
+      let jobId = createdJobId.current;
+      if (!jobId) {
+        const created = await apiJson<{ job: Job }>('/api/v1/jobs', {
+          method: 'POST',
+          body: JSON.stringify({
+            orgId,
+            title: title.trim(),
+            location: location.trim(),
+            workMode,
+            jobType,
+            description: description.trim(),
+            ...(skillIds.length ? { requiredSkillIds: skillIds } : {}),
+            ...(min !== undefined && max !== undefined
+              ? { salaryMinMinor: min, salaryMaxMinor: max, currency }
+              : {}),
+          }),
+        });
+        jobId = created.job.id;
+        createdJobId.current = jobId;
+      }
       if (publishNow) {
-        await apiJson(`/api/v1/jobs/${created.job.id}/status`, {
+        await apiJson(`/api/v1/jobs/${jobId}/status`, {
           method: 'PATCH',
           body: JSON.stringify({ status: 'published' }),
         }).catch((err) => {
@@ -444,8 +453,8 @@ export const HiringPage: React.FC = () => {
     void loadJobs();
   }, [loadJobs]);
 
-  const changeStatus = async (job: Job, to: string) => {
-    if (statusBusy) return;
+  const changeStatus = async (job: Job, to: string): Promise<boolean> => {
+    if (statusBusy) return false;
     setStatusBusy(job.id);
     setStatusError(null);
     try {
@@ -454,12 +463,16 @@ export const HiringPage: React.FC = () => {
         body: JSON.stringify({ status: to }),
       });
       await loadJobs();
+      return true;
     } catch (err) {
       setStatusError(`${job.title}: ${errorMessage(err)}`);
+      return false;
     } finally {
       setStatusBusy(null);
     }
   };
+  // Closing is permanent, so it is confirmed first (audit FE-06).
+  const [closing, setClosing] = useState<Job | null>(null);
 
   if (session.status === 'ready' && !session.isRecruiter) {
     return (
@@ -594,7 +607,9 @@ export const HiringPage: React.FC = () => {
                       size="sm"
                       variant={a.to === 'published' ? 'primary' : 'outline'}
                       loading={statusBusy === job.id}
-                      onClick={() => void changeStatus(job, a.to)}
+                      onClick={() =>
+                        a.to === 'closed' ? setClosing(job) : void changeStatus(job, a.to)
+                      }
                       data-testid={`job-action-${a.to}-${job.id}`}
                     >
                       {a.label}
@@ -627,6 +642,38 @@ export const HiringPage: React.FC = () => {
           onSaved={loadJobs}
         />
       )}
+
+      <Modal
+        isOpen={closing !== null}
+        onClose={() => setClosing(null)}
+        busy={statusBusy !== null}
+        title={`Close ${closing?.title ?? 'this job'}?`}
+        description="A closed job stops taking applications and cannot be reopened. To stop applications for a while, pause it instead."
+      >
+        {statusError && (
+          <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="close-job-error">
+            {statusError}
+          </Notice>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
+          <Button
+            variant="secondary"
+            disabled={statusBusy !== null}
+            onClick={() => setClosing(null)}
+          >
+            Cancel
+          </Button>
+          <Button
+            loading={statusBusy !== null}
+            data-testid="confirm-close-job"
+            onClick={async () => {
+              if (closing && (await changeStatus(closing, 'closed'))) setClosing(null);
+            }}
+          >
+            Close job
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

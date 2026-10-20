@@ -103,7 +103,15 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     const sparseData = await benchSparse.json();
     expect(sparseData.status).toBe('insufficient_data');
     expect(sparseData.actualCount).toBe(2);
-    expect(sparseData.minRequired).toBe(3);
+    expect(sparseData.minRequired).toBe(5);
+
+    // The caller cannot lower the threshold (G-27).
+    const benchLowered = await request.get(
+      `${API_BASE}/salaries/benchmarks?role=backend_engineer&level=principal&minCohortSize=1`
+    );
+    const loweredData = await benchLowered.json();
+    expect(loweredData.status).toBe('insufficient_data');
+    expect(loweredData.minRequired).toBe(5);
   });
 
   test('aggregates compensation benchmarks once cohort threshold is met (BR-178, BR-180, BR-183)', async ({
@@ -128,6 +136,40 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     });
     expect(sub3.status()).toBe(201);
 
+    // Two more reporters at another company, so the cohort reaches BR-178's
+    // k of 5 while Apex Cloud Systems keeps exactly 3 reports (BR-180).
+    for (const [n, base, equity] of [
+      [4, 17000000, 4000000],
+      [5, 23000000, 10000000],
+    ]) {
+      const reg = await request.post(`${API_BASE}/auth/register`, {
+        data: {
+          email: `e2e.salary.${n}.${Date.now()}@example.com`,
+          password: 'Password123!Secure',
+          fullName: `Salary Reporter ${n}`,
+          role: 'candidate',
+        },
+      });
+      expect(reg.status()).toBe(201);
+      const sub = await request.post(`${API_BASE}/salaries/reports`, {
+        headers: { authorization: `Bearer ${(await reg.json()).token}` },
+        data: {
+          jobTitle: 'Principal Engineer',
+          standardizedRole: 'backend_engineer',
+          seniorityLevel: 'principal',
+          location: 'San Francisco, CA',
+          currency: 'USD',
+          baseSalaryMinor: base,
+          bonusMinor: 3000000,
+          equityAnnualMinor: equity,
+          yearsOfExperience: 12,
+          companyName: 'Northwind Systems',
+          verificationType: 'self_reported',
+        },
+      });
+      expect(sub.status()).toBe(201);
+    }
+
     // 2. Query benchmark: now available!
     const benchRes = await request.get(
       `${API_BASE}/salaries/benchmarks?role=backend_engineer&level=principal`
@@ -135,10 +177,11 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     expect(benchRes.status()).toBe(200);
     const benchData = await benchRes.json();
     expect(benchData.status).toBe('available');
-    expect(benchData.benchmark.sampleCount).toBe(3);
+    expect(benchData.benchmark.sampleCount).toBe(5);
     expect(benchData.benchmark.p50Minor).toBe(20000000); // Median: $200,000
-    expect(benchData.benchmark.minMinor).toBe(18000000);
-    expect(benchData.benchmark.maxMinor).toBe(22000000);
+    // No individual salaries in the answer (REV-05).
+    expect(benchData.benchmark).not.toHaveProperty('minMinor');
+    expect(benchData.benchmark).not.toHaveProperty('maxMinor');
     expect(benchData.benchmark.equityP50Minor).toBe(7000000); // Median equity
 
     // 3. Query company compensation summary (Apex Cloud Systems >= 3 reports BR-180)
@@ -159,13 +202,13 @@ test.describe('E2E: Salary Intelligence & Compensation Benchmarks (F-86, BR-177.
     const delData = await delRes.json();
     expect(delData.report.status).toBe('withdrawn');
 
-    // 2. Query benchmark again: active cohort count is now 2, falls below k-anonymity!
+    // 2. Query benchmark again: active cohort count is now 4, falls below k-anonymity!
     const benchRes = await request.get(
       `${API_BASE}/salaries/benchmarks?role=backend_engineer&level=principal`
     );
     expect(benchRes.status()).toBe(200);
     const benchData = await benchRes.json();
     expect(benchData.status).toBe('insufficient_data');
-    expect(benchData.actualCount).toBe(2);
+    expect(benchData.actualCount).toBe(4);
   });
 });

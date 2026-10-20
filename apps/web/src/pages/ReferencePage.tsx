@@ -48,7 +48,13 @@ export const ReferencePage: React.FC = () => {
     []
   );
   const [request, setRequest] = useState<ReferenceRequest | null>(null);
-  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'invalid'>('loading');
+  // 'unavailable': the link may be fine but the service could not answer
+  // (offline, throttled, server fault) — a referee often has one chance to
+  // respond, so that is never reported as a dead link (audit FE-05).
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'invalid' | 'unavailable'>(
+    'loading'
+  );
+  const [attempt, setAttempt] = useState(0);
   const [confirmTitle, setConfirmTitle] = useState<boolean | null>(null);
   const [confirmDates, setConfirmDates] = useState<boolean | null>(null);
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -62,17 +68,26 @@ export const ReferencePage: React.FC = () => {
       setLoadState('invalid');
       return;
     }
+    setLoadState('loading');
     fetch(`/api/v1/references/${encodeURIComponent(id)}`, {
       headers: { 'x-reference-token': token },
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error('invalid');
+        // Only "not found / not yours / gone" means the link itself is dead.
+        if (res.status === 403 || res.status === 404 || res.status === 410) {
+          setLoadState('invalid');
+          return;
+        }
+        if (!res.ok) {
+          setLoadState('unavailable');
+          return;
+        }
         const body = await res.json();
         setRequest(body.reference);
         setLoadState(body.reference.status === 'requested' ? 'ready' : 'invalid');
       })
-      .catch(() => setLoadState('invalid'));
-  }, [id, token]);
+      .catch(() => setLoadState('unavailable'));
+  }, [id, token, attempt]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +163,23 @@ export const ReferencePage: React.FC = () => {
       {done && (
         <Notice tone="success" style={{ marginTop: spacing.md }} data-testid="reference-done">
           Thank you. Your reference for {request?.candidateName} has been recorded.
+        </Notice>
+      )}
+
+      {loadState === 'unavailable' && !done && (
+        <Notice tone="error" style={{ marginTop: spacing.md }} data-testid="reference-unavailable">
+          We could not load this reference request right now. Your link has not been used; check
+          your connection and try again.
+          <div style={{ marginTop: spacing.sm }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAttempt((n) => n + 1)}
+              data-testid="reference-retry"
+            >
+              Try again
+            </Button>
+          </div>
         </Notice>
       )}
 

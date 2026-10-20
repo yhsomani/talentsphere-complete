@@ -5,6 +5,7 @@ import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { createStableKeyer } from '../lib/idempotency.js';
 import { formatDate } from '../lib/format.js';
 import { useSession } from '../lib/SessionContext.js';
+import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import {
   Button,
   Badge,
@@ -533,7 +534,12 @@ export const EvidencePage: React.FC = () => {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-        {loadingList ? (
+        {session.status === 'error' ? (
+          // The list waits for the signed-in user; when the session cannot be
+          // confirmed (throttled, server fault) it would wait forever, so say
+          // so and offer a retry, as Dashboard and Profile do (audit FE-03).
+          <SessionErrorNotice />
+        ) : loadingList ? (
           <div data-testid="evidence-loading" style={{ color: colors.neutral[600] }}>
             Loading your work history…
           </div>

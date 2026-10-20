@@ -13,7 +13,10 @@ const controlStyle: React.CSSProperties = {
   width: '100%',
   padding: '8px 12px',
   borderRadius: '6px',
-  border: `1px solid ${colors.neutral[300]}`,
+  // The border is the field's only visible edge on a white card: neutral-500
+  // gives it 4.76:1 against white (WCAG 1.4.11 needs 3:1; neutral-300 was
+  // 1.48:1 — audit FE-07).
+  border: `1px solid ${colors.neutral[500]}`,
   fontSize: '0.875rem',
   color: colors.neutral[900],
   backgroundColor: '#ffffff',

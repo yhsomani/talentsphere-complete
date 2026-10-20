@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -26,6 +27,11 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
   });
 
   test('records an opt-in learner career outcome (F-114, BR-190)', async ({ request }) => {
+    // Only enrolled learners record an outcome for a course (REV-01).
+    const enrolled = await request.post(`${API_BASE}/courses/${seedCourseId}/enroll`, {
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(enrolled.status()).toBe(201);
     const res = await request.post(`${API_BASE}/learning/impact/outcomes`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
@@ -104,8 +110,19 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
   test('recomputes course impact metrics with updated cohort parameters (BR-191)', async ({
     request,
   }) => {
+    // BR-191: the course's instructor or a platform admin, not any learner.
+    const refused = await request.post(
+      `${API_BASE}/learning/impact/courses/${seedCourseId}/compute`,
+      { headers: { authorization: `Bearer ${candidateToken}` }, data: { enrolledCount: 60 } }
+    );
+    expect(refused.status()).toBe(403);
+    const adminToken = createSessionToken(
+      `user_admin_impact_${Date.now()}`,
+      `admin.impact.${Date.now()}@talentsphere.internal`,
+      ['platform_admin']
+    );
     const res = await request.post(`${API_BASE}/learning/impact/courses/${seedCourseId}/compute`, {
-      headers: { authorization: `Bearer ${candidateToken}` },
+      headers: { authorization: `Bearer ${adminToken}` },
       data: {
         enrolledCount: 60,
       },

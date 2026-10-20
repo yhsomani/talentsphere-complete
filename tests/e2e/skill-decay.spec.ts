@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -186,9 +187,19 @@ test.describe('E2E: Skill Decay & Freshness Tracking (F-123, BR-225..BR-232, P-0
     expect(chalBody.freshness.freshnessScore).toBe(100);
     expect(chalBody.freshness.freshnessBand).toBe('fresh');
 
-    // 3. Nightly batch recalculation simulation (BR-225)
-    const refreshRes = await request.post(`${API_BASE}/skills/freshness/refresh-all`, {
+    // 3. Nightly batch recalculation simulation (BR-225): an operator action
+    // (G-04) — a recruiter is refused, a platform admin may run it.
+    const refusedRes = await request.post(`${API_BASE}/skills/freshness/refresh-all`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
+    });
+    expect(refusedRes.status()).toBe(403);
+    const adminToken = createSessionToken(
+      `user_admin_freshness_${Date.now()}`,
+      `admin.freshness.${Date.now()}@talentsphere.internal`,
+      ['platform_admin']
+    );
+    const refreshRes = await request.post(`${API_BASE}/skills/freshness/refresh-all`, {
+      headers: { authorization: `Bearer ${adminToken}` },
     });
     expect(refreshRes.status()).toBe(200);
     const refreshBody = await refreshRes.json();

@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
+// Supplied figures are accepted from platform admins only (gap G-28):
+// recruiters profile candidates from recorded activity.
+const adminToken = createSessionToken(
+  `user_admin_segmentation_${Date.now()}`,
+  `admin.segmentation.${Date.now()}@talentsphere.internal`,
+  ['platform_admin']
+);
 
 test.describe('E2E: Talent Segmentation & Classification (F-160, F-84, F-85, BR-200, P-02)', () => {
   let recruiterToken: string;
@@ -74,9 +83,6 @@ test.describe('E2E: Talent Segmentation & Classification (F-160, F-84, F-85, BR-
       data: {
         skills: ['React', 'NextJS', 'TypeScript', 'Tailwind'],
         yearsOfExperience: 6.5,
-        lastActiveDays: 3,
-        verifiedEvidenceCount: 3,
-        assessmentsPassedCount: 1,
       },
     });
 
@@ -86,15 +92,24 @@ test.describe('E2E: Talent Segmentation & Classification (F-160, F-84, F-85, BR-
     expect(body.segmentation.candidateId).toBe(candidateId);
     expect(body.segmentation.specialization).toBe('frontend');
     expect(body.segmentation.seniorityTier).toBe('senior');
-    expect(body.segmentation.engagementSegment).toBe('active');
-    expect(body.segmentation.readinessBand).toBe('ready_now');
+    // No recorded activity yet: recency defaults to 30 days, "open".
+    expect(body.segmentation.engagementSegment).toBe('open');
+    // Readiness comes from records, not from what the candidate says (REV-04):
+    // a new account has no verified evidence or assessments yet.
+    expect(body.segmentation.readinessBand).toBe('unassessed');
   });
 
-  test('recruiter classifies cloud architect candidate into staff tier (F-160)', async ({
+  test('admin classifies cloud architect candidate into staff tier (F-160)', async ({
     request,
   }) => {
-    const res = await request.post(`${API_BASE}/recruiter/talent-segmentation/classify`, {
+    const refused = await request.post(`${API_BASE}/recruiter/talent-segmentation/classify`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
+      data: { candidateId: devopsCandidateId, yearsOfExperience: 10 },
+    });
+    expect(refused.status()).toBe(403);
+
+    const res = await request.post(`${API_BASE}/recruiter/talent-segmentation/classify`, {
+      headers: { authorization: `Bearer ${adminToken}` },
       data: {
         candidateId: devopsCandidateId,
         skills: ['Kubernetes', 'Docker', 'Terraform', 'AWS', 'GCP'],
