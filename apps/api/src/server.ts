@@ -6397,7 +6397,22 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         filtered = userConnections;
       }
 
-      return reply.status(200).send({ connections: filtered });
+      // Name the other person: the page used to print raw ids, and for the accepting
+      // side it printed their own.
+      const connections = filtered.map((c) => {
+        const otherId = c.senderId === session.userId ? c.recipientId : c.senderId;
+        const other = profilesByUserId.get(otherId);
+        return {
+          ...c,
+          counterpart: {
+            userId: otherId,
+            fullName: other?.fullName ?? 'TalentSphere member',
+            headline: other?.headline,
+          },
+        };
+      });
+
+      return reply.status(200).send({ connections });
     }
   );
 

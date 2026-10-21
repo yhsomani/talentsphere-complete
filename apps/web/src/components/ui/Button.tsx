@@ -25,12 +25,16 @@ const sizeStyles: Record<string, React.CSSProperties> = {
   lg: { padding: '13px 26px', fontSize: '1.0625rem', height: '52px' },
 };
 
+// Border longhands only: hover sets borderColor, and React warns (and can mis-style) when a
+// re-render mixes the border shorthand with a longhand.
 const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CSSProperties }> = {
   primary: {
     base: {
       backgroundColor: colors.primary[700],
       color: '#ffffff',
-      border: '1px solid transparent',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'transparent',
       fontWeight: 700,
       boxShadow: 'none',
     },
@@ -43,7 +47,9 @@ const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CS
     base: {
       backgroundColor: colors.neutral[100],
       color: colors.neutral[800],
-      border: `1px solid ${colors.neutral[300]}`,
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: colors.neutral[300],
       fontWeight: 600,
     },
     hover: {
@@ -55,7 +61,9 @@ const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CS
     base: {
       backgroundColor: '#ffffff',
       color: colors.primary[700],
-      border: `1.5px solid ${colors.primary[300]}`,
+      borderWidth: '1.5px',
+      borderStyle: 'solid',
+      borderColor: colors.primary[300],
       fontWeight: 600,
     },
     hover: {
@@ -67,7 +75,9 @@ const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CS
     base: {
       backgroundColor: 'transparent',
       color: colors.neutral[700],
-      border: '1px solid transparent',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'transparent',
       fontWeight: 600,
     },
     hover: {

@@ -31,6 +31,20 @@ export const calendarDate = (field: string) =>
 export const emailAddress = (message?: string) =>
   z.string().trim().max(254, 'Email must be at most 254 characters').email(message);
 
+/**
+ * A link a browser may follow. z.string().url() also accepts javascript:,
+ * data: and file: URLs, which become stored XSS when rendered as an anchor.
+ */
+export const httpUrl = (max = 2048) =>
+  z
+    .string()
+    .url()
+    .max(max)
+    .refine(
+      (value) => /^https?:\/\//i.test(value),
+      'Use a link that starts with http:// or https://'
+    );
+
 /** Minor units (cents); 1e12 is ten billion in the major unit — far above any salary. */
 export const MAX_SALARY_MINOR = 1_000_000_000_000;
 const salaryMinor = () => z.number().int().nonnegative().max(MAX_SALARY_MINOR);
@@ -205,7 +219,7 @@ export const CreateOrganizationInputSchema = z.object({
     .min(2)
     .max(50)
     .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
-  website: z.string().url().optional(),
+  website: httpUrl().optional(),
   description: z.string().max(1000).optional(),
 });
 
@@ -470,7 +484,7 @@ export const CreateResumeInputSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().max(64).optional(),
   location: z.string().max(255).optional(),
-  websiteUrl: z.string().url().max(500).optional(),
+  websiteUrl: httpUrl(500).optional(),
   experience: z.array(ResumeExperienceSchema).default([]),
   education: z.array(ResumeEducationSchema).default([]),
   skills: z.array(ResumeSkillItemSchema).default([]),
@@ -510,7 +524,7 @@ export type RespondConnectionInput = z.infer<typeof RespondConnectionInputSchema
  */
 export const PortfolioProjectMediaSchema = z.object({
   id: z.string().optional(),
-  mediaUrl: z.string().url(),
+  mediaUrl: httpUrl(),
   mediaType: z.enum(['image', 'video', 'document']).default('image'),
   caption: z.string().max(255).optional(),
   orderIndex: z.number().int().min(0).default(0),
@@ -521,8 +535,8 @@ export type PortfolioProjectMediaInput = z.infer<typeof PortfolioProjectMediaSch
 export const CreatePortfolioProjectInputSchema = z.object({
   title: z.string().min(2).max(200),
   description: z.string().min(10).max(10000),
-  projectUrl: z.string().url().max(500).optional(),
-  repoUrl: z.string().url().max(500).optional(),
+  projectUrl: httpUrl(500).optional(),
+  repoUrl: httpUrl(500).optional(),
   visibility: z
     .enum(['public', 'connections_only', 'recruiters_only', 'private'])
     .default('public'),
@@ -1078,7 +1092,7 @@ export const ScheduleInterviewAssessmentInputSchema = z.object({
   title: z.string().min(1).max(200),
   scheduledAt: z.string().datetime(),
   durationMinutes: z.number().int().min(15).max(240).default(60),
-  meetingUrl: z.string().url().optional(),
+  meetingUrl: httpUrl().optional(),
   questionIds: z.array(z.string().uuid()).default([]),
 });
 

@@ -4,6 +4,26 @@
 
 AI coding agents work under the TalentSphere SSOT. They are implementation agents, not product-authority agents.
 
+## Build files are read-only for AI agents
+
+This repository-wide rule applies to every AI agent, assistant, subagent, IDE integration, and automated coding tool, in every directory. Read these instructions before making changes. More specific agent instructions and tool/skill workflows must preserve this restriction.
+
+Do not create, edit, delete, rename, regenerate, or stage build files. This includes indirect changes made by dependency installation, formatters, code generators, setup tools (including Reticle init), or build/typecheck commands.
+
+Protected files include:
+
+- Dependency and workspace definitions: every `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, other package-manager lockfiles, and package-manager configuration such as `.npmrc`.
+- Compiler, bundler, and test-runner configuration: every `tsconfig*.json`, `vite*.config.*` (including audit variants), `vitest*.config.*`, `playwright.config.*`, and equivalent tooling configuration added later.
+- Build and release infrastructure: `.github/workflows/**`, `deploy/**`, Dockerfiles, Compose files, `.dockerignore`, and scripts that build, bundle, generate build assets, start test servers, or perform release checks (currently including `scripts/generate-icons.js`, `scripts/start-e2e-api.mjs`, and `scripts/release-preflight.mjs`).
+- Formatting and build-input controls: `.prettierrc*`, `.prettierignore`, `.gitignore`, and `.gitattributes`.
+- Generated build output and caches: `dist/**`, `build/**`, `coverage/**`, `node_modules/**`, `*.tsbuildinfo`, source maps, and generated JavaScript/declarations emitted by TypeScript. These patterns apply at any depth; handwritten source files are not generated output.
+
+Before running a command, check whether it writes protected files. Use an existing read-only check when available; otherwise report that check as blocked. Do not run repository-wide write-formatting, dependency updates, or emitting builds/typechecks under this rule. Reading build files and running checks that do not write protected files are allowed.
+
+Record the existing working-tree changes before working and compare afterwards. Preserve pre-existing edits, including untracked build files; do not revert, overwrite, or stage someone else's work. If a protected file changes unexpectedly, stop the command, report the exact path and cause, and do not reset it blindly.
+
+If a task needs a protected-file change, explain the blocker and proposed paths without modifying them. Only an explicit user instruction authorizing those build-file changes overrides this rule; a generic request to fix, build, test, install, or complete a task does not. Continue independent work that respects the restriction. Do not weaken this rule to unblock a task.
+
 ## Golden workflow
 
 ```text

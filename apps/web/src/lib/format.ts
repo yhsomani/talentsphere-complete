@@ -96,3 +96,7 @@ const JOB_TYPE_LABELS: Record<string, string> = {
 
 export const workModeLabel = (v?: string) => (v ? (WORK_MODE_LABELS[v] ?? v) : null);
 export const jobTypeLabel = (v?: string) => (v ? (JOB_TYPE_LABELS[v] ?? v) : null);
+
+/** A link safe to render as an anchor: http(s) only, so a stored javascript: URL stays inert. */
+export const safeHref = (url: string | undefined | null): string | undefined =>
+  url && /^https?:\/\//i.test(url) ? url : undefined;

@@ -21,6 +21,8 @@ interface Connection {
   status: 'pending' | 'accepted' | 'rejected' | 'withdrawn';
   note?: string;
   createdAt: string;
+  /** The other person in the connection, named by the API. */
+  counterpart?: { userId: string; fullName: string; headline?: string };
 }
 
 interface SearchHit {
@@ -312,11 +314,10 @@ export const NetworkPage: React.FC = () => {
                           : key === 'pending_sent'
                             ? 'To'
                             : 'With'}{' '}
-                        <code>
-                          {key === 'pending_received'
-                            ? connection.senderId
-                            : connection.recipientId}
-                        </code>
+                        <strong>{connection.counterpart?.fullName ?? 'TalentSphere member'}</strong>
+                        {connection.counterpart?.headline
+                          ? ` — ${connection.counterpart.headline}`
+                          : ''}
                       </p>
                       {connection.note && (
                         <p style={{ marginTop: spacing.xs }}>{connection.note}</p>

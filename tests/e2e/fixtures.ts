@@ -5,7 +5,7 @@
  */
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
 
-export const API_BASE = 'http://127.0.0.1:4000/api/v1';
+export const API_BASE = process.env.E2E_API_BASE ?? 'http://127.0.0.1:4000/api/v1';
 export const PASSWORD = 'Password123!Secure';
 
 export interface TestAccount {

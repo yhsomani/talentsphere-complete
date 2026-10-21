@@ -7,6 +7,7 @@ import { useSession, type SessionProfile } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
 import { SignOutOtherDevices } from '../components/SignOutOtherDevices.js';
+import { CredentialsSection } from '../components/CredentialsSection.js';
 import {
   Button,
   Card,
@@ -17,7 +18,6 @@ import {
   PageHeader,
   Select,
   TextArea,
-  LoadError,
 } from '../components/ui/index.js';
 
 const PRIVACY_OPTIONS: ReadonlyArray<{ value: SessionProfile['privacy']; label: string }> = [
@@ -162,11 +162,9 @@ export const ProfilePage: React.FC = () => {
       />
 
       {error && (
-        <LoadError
-          message={error}
-          style={{ marginBottom: spacing.md }}
-          data-testid="profile-error"
-        />
+        <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="profile-error">
+          {error}
+        </Notice>
       )}
       {saved && (
         <Notice tone="success" style={{ marginBottom: spacing.md }} data-testid="profile-saved">
@@ -238,6 +236,8 @@ export const ProfilePage: React.FC = () => {
           Save profile
         </Button>
       </form>
+
+      <CredentialsSection />
 
       <Card style={{ marginTop: spacing['2xl'] }}>
         <CardContent style={{ padding: spacing.lg }}>

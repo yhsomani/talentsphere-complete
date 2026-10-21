@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
+import { safeHref } from '../lib/format.js';
 import {
   Button,
   Card,
@@ -233,15 +234,23 @@ export const PortfolioPage: React.FC = () => {
                     Visible to:{' '}
                     {VISIBILITY_OPTIONS.find((o) => o.value === project.visibility)?.label}
                   </p>
-                  {(project.projectUrl || project.repoUrl) && (
+                  {(safeHref(project.projectUrl) || safeHref(project.repoUrl)) && (
                     <p style={{ marginTop: spacing.xs, display: 'flex', gap: spacing.md }}>
-                      {project.projectUrl && (
-                        <a href={project.projectUrl} target="_blank" rel="noopener noreferrer">
+                      {safeHref(project.projectUrl) && (
+                        <a
+                          href={safeHref(project.projectUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Live link
                         </a>
                       )}
-                      {project.repoUrl && (
-                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
+                      {safeHref(project.repoUrl) && (
+                        <a
+                          href={safeHref(project.repoUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           Repository
                         </a>
                       )}

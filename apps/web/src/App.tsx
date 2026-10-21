@@ -29,6 +29,7 @@ import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
 import { AdminPage } from './pages/AdminPage.js';
+import { VerifyPage } from './pages/VerifyPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session token;
 // anyone else is sent to /login with the requested destination preserved in
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
             <Route path="jobs/:id" element={<JobDetailPage />} />
             {/* A referee responds from an emailed link, without an account. */}
             <Route path="reference/:id" element={<ReferencePage />} />
+            <Route path="verify/:hash" element={<VerifyPage />} />
             <Route path="dashboard" element={guarded(<DashboardPage />)} />
             <Route path="applications" element={guarded(<ApplicationsPage />)} />
             <Route path="evidence" element={guarded(<EvidencePage />)} />

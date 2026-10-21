@@ -1,5 +1,7 @@
 # TalentSphere — Project Memory
 
+> **Historical log.** Status figures in §2 to §7 ("51 verified", "1058 tests pass", milestone dates) were written on 2026-10-10 and 2026-10-18. They are not re-measured and conflict with the code-checked status of record, `docs/reports/FEATURE_STATUS_2026-10-21.md` (16 implemented, 78 partial, 75 not started). See `docs/governance/GAP_ANALYSIS.md` conflicts C-2 and C-3.
+
 ## 1. Memory Control
 
 - **Project:** TalentSphere

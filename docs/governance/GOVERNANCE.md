@@ -7,7 +7,8 @@
 Supporting documents specialize:
 - PRD = product/business;
 - TRD = technical requirements;
-- ARCHITECTURE = architecture;
+- ARCHITECTURE (root `ARCHITECTURE.md`) = architecture as built, the enforceable current state;
+- TARGET_ARCHITECTURE (`docs/engineering/`) = intended architecture;
 - UI/UX = visual/interaction;
 - SECURITY = security/privacy/AI/assessment;
 - TESTING = verification;
@@ -17,7 +18,7 @@ Supporting documents specialize:
 - IMPLEMENTATION_PLAN = execution order;
 - AGENTS = coding-agent operation;
 - CODE_STYLE = engineering conventions;
-- DATABASE/API = infrastructure contracts;
+- DATABASE/API = infrastructure contracts (API contracts are target-state until built);
 - BRAIN = conceptual model.
 
 ## 2. No Duplication

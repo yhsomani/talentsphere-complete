@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import pg from 'pg';
-import type { AdminAuditLog } from '@talentsphere/domain';
+import type { AdminAuditLog } from '../../packages/domain/src/index.js';
 import { PgAdminAuditStore } from '../../apps/api/src/storage/admin-audit-store.js';
 import { dropTestDatabase } from './test-db.js';
 

@@ -3,6 +3,7 @@ import { spacing, textColors } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { formatDateTime } from '../lib/format.js';
+import { useSession } from '../lib/SessionContext.js';
 import {
   Button,
   Card,
@@ -65,6 +66,11 @@ const NEXT_STATUS: Record<UserStatus, { to: UserStatus; label: string }[]> = {
 
 export const AdminPage: React.FC = () => {
   usePageMeta('Admin console', 'Manage users, review the audit log and check system health.');
+  // The server enforces this on every route; the page also refuses to send admin requests
+  // (or draw the console) for anyone the session does not confirm as a platform admin.
+  const session = useSession();
+  const isAdmin =
+    session.status === 'ready' && Boolean(session.user?.roles.includes('platform_admin'));
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -117,13 +123,14 @@ export const AdminPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    void loadUsers();
-  }, [loadUsers]);
+    if (isAdmin) void loadUsers();
+  }, [isAdmin, loadUsers]);
 
   useEffect(() => {
+    if (!isAdmin) return;
     void loadLogs();
     void loadHealth();
-  }, [loadLogs, loadHealth]);
+  }, [isAdmin, loadLogs, loadHealth]);
 
   const changeStatus = async (user: AdminUser, to: UserStatus) => {
     setActionError(null);
@@ -162,6 +169,18 @@ export const AdminPage: React.FC = () => {
       setMaintenanceError(errorMessage(err));
     }
   };
+
+  if (session.status === 'loading') return <p role="status">Loading.</p>;
+  if (!isAdmin) {
+    return (
+      <div data-testid="admin-forbidden">
+        <PageHeader title="Admin console" />
+        <Notice tone="error">
+          The admin console is only available to platform administrators.
+        </Notice>
+      </div>
+    );
+  }
 
   const diag = health?.diagnostics;
 

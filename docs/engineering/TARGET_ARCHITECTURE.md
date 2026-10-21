@@ -1,4 +1,6 @@
-# TalentSphere — ARCHITECTURE.md v6.0
+# TalentSphere — TARGET_ARCHITECTURE.md v6.0
+
+**Scope:** the intended target architecture. It is not a description of the running code. For what is built today, and for the rules agents must follow before changing it, read the root [`ARCHITECTURE.md`](../../ARCHITECTURE.md). Where the two disagree about what exists, the root file governs.
 
 ## 1. Decision
 
@@ -172,6 +174,8 @@ Do not introduce microservices by default. Extraction requires:
 ---
 
 ## 11. Source-Derived Detailed Architecture Corpus
+
+> **Overlap warning (2026-10-21).** 118 of this section's 144 unique lines also appear in `SSOT.md` Part VI. The rest are older diagram labels (for example "Edge Middleware", "AI Router", "Web OS Layer") that SSOT has replaced. Its §21.3 ADR list conflicts with the root `ARCHITECTURE.md` decision register (for example, ADR-001 here is "Supabase Auth sole session authority"; the root file's ADR-001 is "modular monolith"). Not removed yet: the ADR list is not in SSOT, so it needs an owner decision first. See `docs/governance/GAP_ANALYSIS.md` C-13.
 
 ### 20.1 System Context
 

@@ -23,7 +23,7 @@ Test suites (counts as measured on 2026-10-10; re-run rather than trust them):
 - `pnpm test:e2e` — Playwright: end-to-end journeys, accessibility, performance (~190 tests)
 - CI (`.github/workflows/ci.yml`) runs lint, typecheck, all three suites (with a Postgres
   service container), a migration-idempotency check and the build on every push and PR.
-- 46 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
+- 51 SQL migration files (`supabase/migrations/`, counted 2026-10-21), applied by `pnpm db:migrate`.
 
 ## Core loop
 
@@ -50,10 +50,10 @@ what exists, `ARCHITECTURE.md` and the code win.
 
 1. [`SSOT.md`](SSOT.md) — Single Source of Truth
 2. [`BRAIN/MEMORY.md`](BRAIN/MEMORY.md) — Living project memory & execution history
-3. [`FINAL_DOCUMENT_INDEX.md`](FINAL_DOCUMENT_INDEX.md) — Master documentation index
-4. [`docs/INDEX.md`](docs/INDEX.md) — Intra-docs documentation navigation
-5. [`docs/product/PRD.md`](docs/product/PRD.md) — Product requirements
-6. [`docs/engineering/ARCHITECTURE.md`](docs/engineering/ARCHITECTURE.md) — System architecture
+3. [`docs/INDEX.md`](docs/INDEX.md) — Documentation index (single entry point)
+4. [`docs/product/PRD.md`](docs/product/PRD.md) — Product requirements
+5. [`ARCHITECTURE.md`](ARCHITECTURE.md) — Architecture as built (read before changing code)
+6. [`docs/engineering/TARGET_ARCHITECTURE.md`](docs/engineering/TARGET_ARCHITECTURE.md) — Target architecture (intent, not current state)
 7. [`docs/engineering/TRD.md`](docs/engineering/TRD.md) — Technical requirements
 8. [`docs/registries/FEATURE_REGISTRY.md`](docs/registries/FEATURE_REGISTRY.md) — 173-feature inventory
 9. [`docs/governance/IMPLEMENTATION_PLAN.md`](docs/governance/IMPLEMENTATION_PLAN.md) — Sequential execution roadmap
