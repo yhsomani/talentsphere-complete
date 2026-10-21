@@ -24,6 +24,7 @@ import {
   TIER_LABEL,
   VerificationSeal,
   sealStateFor,
+  LoadError,
 } from '../components/ui/index.js';
 
 // Mirrors the owner view of VerifiedWorkHistory (GET /candidates/:id/work-history):
@@ -147,11 +148,7 @@ const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Pro
 
   return (
     <div>
-      {error && (
-        <Notice tone="error" style={{ marginBottom: spacing.sm }}>
-          {error}
-        </Notice>
-      )}
+      {error && <LoadError message={error} style={{ marginBottom: spacing.sm }} />}
       {pending ? (
         <form onSubmit={confirm} data-testid={`verify-code-form-${item.id}`}>
           <p

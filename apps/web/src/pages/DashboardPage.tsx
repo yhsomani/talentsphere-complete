@@ -11,7 +11,7 @@ import {
   type EvidenceItem,
   type Job,
 } from '../lib/types.js';
-import { ButtonLink, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
+import { LoadError, ButtonLink, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 
 interface WorkHistorySummary {
@@ -145,8 +145,7 @@ const CandidateDashboard: React.FC = () => {
     };
   }, [session.user]);
 
-  if (failed)
-    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (failed) return <LoadError message="Could not load your dashboard." />;
   if (!applications || !history || !evidence || !jobs) {
     return (
       <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
@@ -323,8 +322,7 @@ const RecruiterDashboard: React.FC = () => {
     };
   }, []);
 
-  if (failed)
-    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (failed) return <LoadError message="Could not load your dashboard." />;
   if (!orgs || !jobs)
     return (
       <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">

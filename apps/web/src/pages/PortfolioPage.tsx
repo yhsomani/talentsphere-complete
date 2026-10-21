@@ -11,6 +11,7 @@ import {
   PageHeader,
   Select,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 type Visibility = 'public' | 'connections_only' | 'recruiters_only' | 'private';
@@ -195,7 +196,7 @@ export const PortfolioPage: React.FC = () => {
         <h2 id="portfolio-list-heading" style={{ fontSize: '1.125rem', marginBottom: spacing.md }}>
           Your projects
         </h2>
-        {loadError && <Notice tone="error">{loadError}</Notice>}
+        {loadError && <LoadError message={loadError} />}
         {!loadError && projects === null && <p role="status">Loading your projects.</p>}
         {projects?.length === 0 && (
           <p style={{ color: colors.neutral[700] }} data-testid="portfolio-empty">

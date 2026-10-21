@@ -11,6 +11,7 @@ import {
   PageHeader,
   Select,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 type Template = 'modern' | 'minimal' | 'executive' | 'technical';
@@ -175,7 +176,7 @@ export const ResumesPage: React.FC = () => {
         <h2 id="resume-list-heading" style={{ fontSize: '1.125rem', marginBottom: spacing.md }}>
           Your resumes
         </h2>
-        {loadError && <Notice tone="error">{loadError}</Notice>}
+        {loadError && <LoadError message={loadError} />}
         {!loadError && resumes === null && <p role="status">Loading your resumes.</p>}
         {resumes?.length === 0 && (
           <p style={{ color: colors.neutral[700] }} data-testid="resume-empty">

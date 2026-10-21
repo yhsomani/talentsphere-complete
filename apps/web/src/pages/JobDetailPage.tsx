@@ -14,6 +14,7 @@ import {
   Notice,
   StatusPill,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 interface JobResponse {
@@ -133,9 +134,11 @@ export const JobDetailPage: React.FC = () => {
         <h1 className="serif-display" style={{ fontSize: '2rem', fontWeight: 500 }}>
           Job not available
         </h1>
-        <Notice tone="error" style={{ margin: `${spacing.md} 0` }} data-testid="job-error">
-          {loadError}
-        </Notice>
+        <LoadError
+          message={loadError}
+          style={{ margin: `${spacing.md} 0` }}
+          data-testid="job-error"
+        />
         <ButtonLink to="/jobs" variant="outline">
           Back to jobs
         </ButtonLink>

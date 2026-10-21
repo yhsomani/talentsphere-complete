@@ -19,6 +19,7 @@ import {
   PageHeader,
   StatusPill,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 /** Pipeline moves offered to the hiring team, in the order they happen. */
@@ -169,9 +170,7 @@ export const HiringJobPage: React.FC = () => {
     return (
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         <PageHeader title="Applicants" />
-        <Notice tone="error" data-testid="hiring-job-error">
-          {error}
-        </Notice>
+        <LoadError message={error} data-testid="hiring-job-error" onRetry={() => void load()} />
         <p style={{ marginTop: spacing.md }}>
           <Link to="/hiring">Back to hiring</Link>
         </p>

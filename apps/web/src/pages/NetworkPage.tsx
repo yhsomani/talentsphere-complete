@@ -11,6 +11,7 @@ import {
   Notice,
   PageHeader,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 interface Connection {
@@ -171,9 +172,11 @@ export const NetworkPage: React.FC = () => {
         requests.
       </Notice>
       {loadError && (
-        <Notice tone="error" style={{ marginBottom: spacing.md }}>
-          {loadError}
-        </Notice>
+        <LoadError
+          message={loadError}
+          style={{ marginBottom: spacing.md }}
+          onRetry={() => void load()}
+        />
       )}
       {actionError && (
         <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="network-error">

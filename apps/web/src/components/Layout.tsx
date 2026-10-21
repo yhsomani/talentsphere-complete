@@ -9,6 +9,7 @@ import { useSession } from '../lib/SessionContext.js';
 import { apiJson } from '../lib/api.js';
 import { NOTIFICATIONS_EVENT } from '../lib/notifications.js';
 import { CommandPalette } from './CommandPalette.js';
+import { RouteErrorBoundary } from './RouteErrorBoundary.js';
 
 /**
  * Support contact is configuration, not copy: an address that nobody reads
@@ -88,11 +89,15 @@ export const Layout: React.FC = () => {
   // navigation to draw, so the header does not flicker on every load.
   const signedIn = session.status !== 'anonymous';
   const roles = session.user?.roles ?? (getStoredUser()?.roles as string[] | undefined) ?? [];
-  const navLinks = !signedIn
+  const baseNavLinks = !signedIn
     ? PUBLIC_NAV
     : roles.some((r) => HIRING_ROLES.includes(r))
       ? HIRING_NAV
       : CANDIDATE_NAV;
+  const navLinks =
+    signedIn && roles.includes('platform_admin')
+      ? [...baseNavLinks, { label: 'Admin', path: '/admin', testId: 'nav-admin' }]
+      : baseNavLinks;
   const accountName = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
   const accountEmail = session.user?.email ?? getStoredUser()?.email;
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -465,7 +470,9 @@ export const Layout: React.FC = () => {
         }
       />
       <main id="main-content" tabIndex={-1} className="site-main container">
-        <Outlet />
+        <RouteErrorBoundary resetKey={location.pathname}>
+          <Outlet />
+        </RouteErrorBoundary>
       </main>
 
       <footer className="site-footer">

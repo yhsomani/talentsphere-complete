@@ -10,6 +10,7 @@ import {
   Notice,
   PageHeader,
   Select,
+  LoadError,
 } from '../components/ui/index.js';
 
 type Level = 'beginner' | 'intermediate' | 'advanced';
@@ -115,11 +116,7 @@ export const LearningPage: React.FC = () => {
           {notice}
         </Notice>
       )}
-      {loadError && (
-        <Notice tone="error" style={{ marginBottom: spacing.md }}>
-          {loadError}
-        </Notice>
-      )}
+      {loadError && <LoadError message={loadError} style={{ marginBottom: spacing.md }} />}
       {!loadError && courses === null && <p role="status">Loading courses.</p>}
       {courses?.length === 0 && (
         <p style={{ color: colors.neutral[700] }} data-testid="learning-empty">

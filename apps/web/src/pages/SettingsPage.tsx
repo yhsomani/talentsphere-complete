@@ -3,7 +3,7 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession } from '../lib/SessionContext.js';
-import { Button, Input, Notice, PageHeader, Select } from '../components/ui/index.js';
+import { LoadError, Button, Input, Notice, PageHeader, Select } from '../components/ui/index.js';
 
 type Theme = 'light' | 'dark' | 'system';
 type Visibility = 'public' | 'connections_only' | 'recruiters_only' | 'private';
@@ -189,9 +189,7 @@ export const SettingsPage: React.FC = () => {
     return (
       <div>
         <PageHeader title="Settings" />
-        <Notice tone="error" data-testid="settings-load-error">
-          {loadError}
-        </Notice>
+        <LoadError message={loadError} data-testid="settings-load-error" />
       </div>
     );
   }

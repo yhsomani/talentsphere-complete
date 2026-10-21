@@ -28,6 +28,7 @@ import { ConversationPage } from './pages/ConversationPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
+import { AdminPage } from './pages/AdminPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session token;
 // anyone else is sent to /login with the requested destination preserved in
@@ -74,6 +75,7 @@ export const App: React.FC = () => {
             <Route path="hiring" element={guarded(<HiringPage />)} />
             <Route path="hiring/jobs/:id" element={guarded(<HiringJobPage />)} />
             <Route path="assessments" element={guarded(<AssessmentsPage />)} />
+            <Route path="admin" element={guarded(<AdminPage />)} />
             {/* Catch-all: friendly 404 page for any unknown route */}
             <Route path="*" element={<NotFoundPage />} />
           </Route>

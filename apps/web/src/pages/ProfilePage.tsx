@@ -17,6 +17,7 @@ import {
   PageHeader,
   Select,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 const PRIVACY_OPTIONS: ReadonlyArray<{ value: SessionProfile['privacy']; label: string }> = [
@@ -161,9 +162,11 @@ export const ProfilePage: React.FC = () => {
       />
 
       {error && (
-        <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="profile-error">
-          {error}
-        </Notice>
+        <LoadError
+          message={error}
+          style={{ marginBottom: spacing.md }}
+          data-testid="profile-error"
+        />
       )}
       {saved && (
         <Notice tone="success" style={{ marginBottom: spacing.md }} data-testid="profile-saved">

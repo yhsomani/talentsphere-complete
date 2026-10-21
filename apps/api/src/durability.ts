@@ -90,6 +90,11 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'GET /api/v1/settings/export/latest',
   'POST /api/v1/settings/erasure/request',
   'GET /api/v1/settings/erasure/status',
+  // Admin audit trail (migration 00050) and feature flags (migration 00051).
+  'GET /api/v1/feature-flags',
+  'GET /api/v1/admin/feature-flags',
+  'PUT /api/v1/admin/feature-flags/:key',
+  'GET /api/v1/admin/audit-logs',
   'POST /api/v1/settings/erasure/cancel',
 ]);
 

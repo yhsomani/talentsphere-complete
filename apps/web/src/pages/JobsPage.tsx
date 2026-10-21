@@ -10,10 +10,10 @@ import {
   ButtonLink,
   EmptyState,
   Input,
-  Notice,
   PageHeader,
   Select,
   StatusPill,
+  LoadError,
 } from '../components/ui/index.js';
 
 const WORK_MODE_FILTERS = [
@@ -117,11 +117,7 @@ export const JobsPage: React.FC = () => {
         />
       </div>
 
-      {error && (
-        <Notice tone="error" data-testid="jobs-error">
-          Could not load jobs: {error}
-        </Notice>
-      )}
+      {error && <LoadError message={`Could not load jobs: ${error}`} data-testid="jobs-error" />}
 
       {!error && jobs === null && (
         <p data-testid="jobs-loading" style={{ color: colors.neutral[600] }}>

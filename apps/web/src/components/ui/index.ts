@@ -6,6 +6,7 @@ export * from './Modal.js';
 export * from './Icons.js';
 export * from './EmptyState.js';
 export * from './Notice.js';
+export * from './LoadError.js';
 export * from './Field.js';
 export * from './PageHeader.js';
 export * from './StatusPill.js';

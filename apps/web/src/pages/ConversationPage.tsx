@@ -12,7 +12,7 @@ import {
 } from '../lib/messages.js';
 import { NOTIFICATIONS_EVENT } from '../lib/notifications.js';
 import { useSession } from '../lib/SessionContext.js';
-import { Button, Notice, PageHeader, TextArea } from '../components/ui/index.js';
+import { LoadError, Button, Notice, PageHeader, TextArea } from '../components/ui/index.js';
 
 interface Conversation {
   thread: { id: string; subject?: string | null };
@@ -126,9 +126,11 @@ export const ConversationPage: React.FC = () => {
       <PageHeader title={title} intro={conversation?.thread.subject ?? undefined} />
 
       {loadError && (
-        <Notice tone="error" data-testid="conversation-error">
-          {loadError}
-        </Notice>
+        <LoadError
+          message={loadError}
+          data-testid="conversation-error"
+          onRetry={() => void load()}
+        />
       )}
 
       {!loadError && conversation === null && (

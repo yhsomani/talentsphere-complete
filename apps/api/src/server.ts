@@ -141,8 +141,6 @@ import {
   validateUserStatusTransition,
   updateFeatureFlagState,
   createAdminAuditLog,
-  AdminAuditLog,
-  FeatureFlag,
   SystemDiagnostics,
   scoreSearchMatch,
   rankSearchResults,
@@ -757,67 +755,14 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const applicationDraftVersionsByDraftId = new Map<string, ApplicationDraftVersion[]>();
   const analyticsEvents: AnalyticsEvent[] = [];
 
-  // Feature Flags & Admin Repositories (F-17, F-35)
-  const adminAuditLogs: AdminAuditLog[] = [];
-  const featureFlags = new Map<string, FeatureFlag>([
-    [
-      'FEATURE_LMS',
-      {
-        key: 'FEATURE_LMS',
-        enabled: true,
-        description: 'Learning management system and interactive course modules',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-    [
-      'FEATURE_CODE_ARENA',
-      {
-        key: 'FEATURE_CODE_ARENA',
-        enabled: true,
-        description: 'Competitive coding challenges and assessments',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-    [
-      'FEATURE_MESSAGING',
-      {
-        key: 'FEATURE_MESSAGING',
-        enabled: true,
-        description: 'Direct messaging and networking channels',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-    [
-      'FEATURE_NOTIFICATIONS',
-      {
-        key: 'FEATURE_NOTIFICATIONS',
-        enabled: true,
-        description: 'Real-time and batch notification delivery',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-    [
-      'FEATURE_AI_MATCHING',
-      {
-        key: 'FEATURE_AI_MATCHING',
-        enabled: false,
-        description: 'AI-assisted recruiter candidate matching',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-  ]);
+  // Feature flags live in storage.featureFlags (F-35).
   let systemInMaintenance = false;
 
   // Public Feature Flags Route
   app.get('/api/v1/feature-flags', async () => {
     const flagsObj: Record<string, boolean> = {};
-    for (const [k, v] of featureFlags.entries()) {
-      flagsObj[k] = v.enabled;
+    for (const flag of await storage.featureFlags.list()) {
+      flagsObj[flag.key] = flag.enabled;
     }
     return {
       flags: flagsObj,
@@ -10871,7 +10816,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           reason: input.reason,
         },
       });
-      adminAuditLogs.unshift(auditLog);
+      await storage.adminAudit.append(auditLog);
 
       await dispatchJob({
         type: 'admin.user.status_updated',
@@ -10936,7 +10881,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           newRoles: input.roles,
         },
       });
-      adminAuditLogs.unshift(auditLog);
+      await storage.adminAudit.append(auditLog);
 
       return reply.status(200).send({
         message: 'User roles updated successfully.',
@@ -10956,7 +10901,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     assertPlatformAdmin(session.roles);
 
-    const flags = Array.from(featureFlags.values());
+    const flags = await storage.featureFlags.list();
     return reply.status(200).send({
       flags,
       total: flags.length,
@@ -10973,7 +10918,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const { key } = req.params;
       const input = AdminToggleFeatureFlagInputSchema.parse(req.body);
 
-      const existingFlag = featureFlags.get(key) || {
+      const existingFlag = (await storage.featureFlags.get(key)) || {
         key,
         enabled: false,
         description: input.description,
@@ -10982,7 +10927,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       };
 
       const updated = updateFeatureFlagState(existingFlag, input.enabled, input.description);
-      featureFlags.set(key, updated);
+      await storage.featureFlags.upsert(updated);
 
       const auditLog = createAdminAuditLog({
         eventName: 'FEATURE_FLAG_UPDATED',
@@ -10995,7 +10940,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
           description: updated.description,
         },
       });
-      adminAuditLogs.unshift(auditLog);
+      await storage.adminAudit.append(auditLog);
 
       return reply.status(200).send({
         message: 'Feature flag updated successfully.',
@@ -11018,16 +10963,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       assertPlatformAdmin(session.roles);
 
       const query = AdminQueryAuditLogsSchema.parse(req.query);
-      let logs = [...adminAuditLogs];
-
-      if (query.actorId) {
-        logs = logs.filter((l) => l.actorId === query.actorId);
-      }
-      if (query.eventName) {
-        logs = logs.filter((l) => l.eventName === query.eventName);
-      }
-
-      const limited = logs.slice(0, query.limit);
+      const limited = await storage.adminAudit.list(query);
 
       return reply.status(200).send({
         logs: limited,
@@ -11104,7 +11040,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         reason: input.reason,
       },
     });
-    adminAuditLogs.unshift(auditLog);
+    await storage.adminAudit.append(auditLog);
 
     return reply.status(200).send({
       message: `System maintenance mode ${input.inMaintenance ? 'enabled' : 'disabled'}.`,

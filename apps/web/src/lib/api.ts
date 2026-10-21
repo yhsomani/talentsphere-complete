@@ -68,8 +68,16 @@ export async function apiJson<T = unknown>(input: string, init: RequestInit = {}
   }
   let res: Response;
   try {
-    res = await apiFetch(input, { ...init, headers });
-  } catch {
+    // A hung request must end: without a deadline a page sits on its spinner forever.
+    res = await apiFetch(input, {
+      ...init,
+      headers,
+      signal: init.signal ?? AbortSignal.timeout(20_000),
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new ApiError(0, 'The request timed out. Check your connection and try again.');
+    }
     throw new ApiError(0, 'Could not reach TalentSphere. Check your connection and try again.');
   }
   const body = await res.json().catch(() => null);
@@ -94,7 +102,10 @@ export async function apiJson<T = unknown>(input: string, init: RequestInit = {}
     }
     throw new ApiError(
       res.status,
-      body?.error?.message ?? `The request failed (HTTP ${res.status}).`,
+      body?.error?.message ??
+        (res.status >= 500
+          ? 'TalentSphere had a problem on its side. Try again in a moment.'
+          : `The request failed (HTTP ${res.status}).`),
       body?.error?.code,
       body?.error?.details
     );
