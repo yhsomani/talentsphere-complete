@@ -28,43 +28,23 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     style={{
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
+      alignItems: 'flex-start',
       gap: spacing.sm,
-      padding: `${spacing['3xl']} ${spacing.lg}`,
-      border: `1px dashed ${colors.neutral[300]}`,
-      borderRadius: '12px',
-      backgroundColor: '#ffffff',
-      maxWidth: '560px',
-      margin: '0 auto',
+      padding: `${spacing.xl} 0`,
+      borderTop: `1px solid ${colors.neutral[300]}`,
       ...style,
     }}
   >
     {icon && (
-      <div
-        aria-hidden="true"
-        style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '50%',
-          backgroundColor: colors.neutral[100],
-          color: colors.neutral[500],
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: spacing.xs,
-        }}
-      >
+      <div aria-hidden="true" style={{ color: colors.neutral[600] }}>
         {icon}
       </div>
     )}
     <h2
+      className="serif-display"
       style={{
-        fontSize: typography.fontSize.xl,
-        fontWeight: typography.fontWeight.bold,
+        fontSize: '1.5rem',
         color: colors.neutral[900],
-        letterSpacing: typography.letterSpacing.tight,
       }}
     >
       {title}

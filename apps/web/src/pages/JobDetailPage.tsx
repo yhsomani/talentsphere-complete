@@ -177,7 +177,7 @@ export const JobDetailPage: React.FC = () => {
           to="/jobs"
           style={{ color: colors.primary[700], fontSize: '0.875rem' }}
         >
-          ← All jobs
+          All jobs
         </Link>
         <h1
           className="serif-display"

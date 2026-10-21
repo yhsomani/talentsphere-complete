@@ -100,10 +100,10 @@ export const LoginPage: React.FC = () => {
         maxWidth: '440px',
         margin: `${spacing['2xl']} auto`,
         backgroundColor: colors.surface.card,
-        borderRadius: '12px',
+        borderRadius: '4px',
         border: `1px solid ${colors.neutral[200]}`,
         padding: spacing['2xl'],
-        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
+        boxShadow: 'none',
       }}
     >
       <div style={{ textAlign: 'center', marginBottom: spacing.lg }}>
@@ -138,7 +138,7 @@ export const LoginPage: React.FC = () => {
             color: colors.semantic.errorText,
             border: `1px solid ${colors.semantic.error}`,
             padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: '6px',
+            borderRadius: '4px',
             marginBottom: spacing.md,
             fontSize: '0.875rem',
             fontWeight: 500,
@@ -157,7 +157,7 @@ export const LoginPage: React.FC = () => {
             color: colors.semantic.successText,
             border: `1px solid ${colors.semantic.success}`,
             padding: `${spacing.sm} ${spacing.md}`,
-            borderRadius: '6px',
+            borderRadius: '4px',
             marginBottom: spacing.md,
             fontSize: '0.875rem',
             fontWeight: 600,
@@ -197,7 +197,7 @@ export const LoginPage: React.FC = () => {
             style={{
               width: '100%',
               padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: '6px',
+              borderRadius: '4px',
               border: `1px solid ${error?.field === 'email' ? colors.semantic.error : colors.neutral[300]}`,
               fontSize: '0.875rem',
               boxSizing: 'border-box',
@@ -240,7 +240,7 @@ export const LoginPage: React.FC = () => {
             style={{
               width: '100%',
               padding: `${spacing.sm} ${spacing.md}`,
-              borderRadius: '6px',
+              borderRadius: '4px',
               border: `1px solid ${error?.field === 'password' ? colors.semantic.error : colors.neutral[300]}`,
               fontSize: '0.875rem',
               boxSizing: 'border-box',
@@ -258,7 +258,7 @@ export const LoginPage: React.FC = () => {
             color: '#ffffff',
             padding: `${spacing.sm} ${spacing.md}`,
             border: 'none',
-            borderRadius: '6px',
+            borderRadius: '4px',
             fontSize: '1rem',
             fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer',

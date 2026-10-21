@@ -16,7 +16,7 @@ describe('PWA Frontend Shell & Design System (E-13, E-14, F-02, F-03)', () => {
       expect(manifestContent.short_name).toBe('TalentSphere');
       expect(manifestContent.display).toBe('standalone');
       expect(manifestContent.start_url).toBe('/');
-      expect(manifestContent.theme_color).toBe('#0e8ce9');
+      expect(manifestContent.theme_color).toBe('#1e5b45');
     });
   });
 
@@ -36,10 +36,10 @@ describe('PWA Frontend Shell & Design System (E-13, E-14, F-02, F-03)', () => {
 
   describe('Design Tokens & Responsive Breakpoints', () => {
     it('defines accessible color scales with primary brand palette', () => {
-      expect(colors.primary[600]).toBe('#026fc7');
-      expect(colors.neutral[900]).toBe('#0f172a');
-      expect(colors.semantic.success).toBe('#10b981');
-      expect(colors.semantic.error).toBe('#ef4444');
+      expect(colors.primary[600]).toBe('#25634a');
+      expect(colors.neutral[900]).toBe('#17201c');
+      expect(colors.semantic.success).toBe('#1e5b45');
+      expect(colors.semantic.error).toBe('#c2410c');
     });
 
     it('defines spacing and motion scales', () => {

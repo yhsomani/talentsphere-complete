@@ -21,6 +21,9 @@ import {
   Select,
   CheckIcon,
   AlertCircleIcon,
+  TIER_LABEL,
+  VerificationSeal,
+  sealStateFor,
 } from '../components/ui/index.js';
 
 // Mirrors the owner view of VerifiedWorkHistory (GET /candidates/:id/work-history):
@@ -68,11 +71,9 @@ const RELATIONSHIP_OPTIONS = [
 ];
 
 const microLabel: React.CSSProperties = {
-  fontSize: '0.75rem',
-  fontWeight: 700,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
-  color: colors.neutral[600],
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  color: colors.neutral[700],
   display: 'block',
   marginBottom: spacing.xs,
 };
@@ -548,7 +549,7 @@ export const EvidencePage: React.FC = () => {
             data-testid="evidence-empty"
             style={{
               border: `1px dashed ${colors.neutral[300]}`,
-              borderRadius: '8px',
+              borderRadius: '4px',
               padding: `${spacing.xl} ${spacing.lg}`,
               textAlign: 'center',
               color: colors.neutral[600],
@@ -571,8 +572,8 @@ export const EvidencePage: React.FC = () => {
                 <div style={{ minWidth: 0 }}>
                   <CardTitle>
                     {item.title}{' '}
-                    <span style={{ color: colors.neutral[600], fontWeight: 600 }}>
-                      · {item.companyName}
+                    <span style={{ color: colors.neutral[600], fontWeight: 400 }}>
+                      at {item.companyName}
                     </span>
                   </CardTitle>
                   <CardDescription>
@@ -580,12 +581,22 @@ export const EvidencePage: React.FC = () => {
                     {item.isCurrent ? 'Present' : formatDate(item.endDate)}
                   </CardDescription>
                 </div>
-                <Badge variant={item.badgeTier === 'none' ? 'neutral' : item.badgeTier} mono>
-                  {item.badgeTier === 'none'
-                    ? 'UNVERIFIED'
-                    : `${item.badgeTier.toUpperCase()} TIER`}{' '}
-                  · {item.verificationScore}/100
-                </Badge>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flex: 'none' }}
+                >
+                  <VerificationSeal state={sealStateFor(item.badgeTier)} />
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 600, color: colors.neutral[900] }}>
+                      {TIER_LABEL[item.badgeTier]}
+                    </div>
+                    <div
+                      className="mono"
+                      style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}
+                    >
+                      {item.verificationScore} / 100
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
 
               <CardContent>
@@ -693,8 +704,8 @@ export const EvidencePage: React.FC = () => {
                     <p
                       style={{ fontSize: '0.75rem', color: colors.neutral[600], marginTop: '6px' }}
                     >
-                      Work email +40 · manager reference +30 (peer +20) · second reference +15 ·
-                      strong ratings +10.
+                      Work email +40; manager reference +30 (peer +20); second reference +15; strong
+                      ratings +10.
                     </p>
                   </div>
                 </div>

@@ -122,7 +122,7 @@ export const NotificationsPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {items.map((n, index) => {

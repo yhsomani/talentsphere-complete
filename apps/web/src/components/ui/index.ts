@@ -9,3 +9,4 @@ export * from './Notice.js';
 export * from './Field.js';
 export * from './PageHeader.js';
 export * from './StatusPill.js';
+export * from './VerificationSeal.js';

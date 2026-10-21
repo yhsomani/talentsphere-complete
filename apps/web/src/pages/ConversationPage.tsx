@@ -120,7 +120,7 @@ export const ConversationPage: React.FC = () => {
     <div style={{ maxWidth: '760px', margin: '0 auto' }}>
       <p style={{ margin: `0 0 ${spacing.sm}` }}>
         <Link className="back-link" to="/messages" data-testid="conversation-back">
-          ← All messages
+          All messages
         </Link>
       </p>
       <PageHeader title={title} intro={conversation?.thread.subject ?? undefined} />
@@ -167,7 +167,7 @@ export const ConversationPage: React.FC = () => {
                       alignSelf: mine ? 'flex-end' : 'flex-start',
                       maxWidth: 'min(85%, 560px)',
                       padding: `${spacing.sm} ${spacing.md}`,
-                      borderRadius: '10px',
+                      borderRadius: '4px',
                       backgroundColor: mine ? colors.primary[50] : '#ffffff',
                       border: `1px solid ${mine ? colors.primary[200] : colors.neutral[200]}`,
                     }}

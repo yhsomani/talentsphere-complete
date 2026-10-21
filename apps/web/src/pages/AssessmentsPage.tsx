@@ -130,9 +130,9 @@ export const AssessmentsPage: React.FC = () => {
             marginBottom: spacing.xs,
           }}
         >
-          <Badge variant="info">PREVIEW</Badge>
+          <Badge variant="info">Preview</Badge>
           <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-            Not available yet — nothing on this page is scored or saved
+            Not available yet. Nothing on this page is scored or saved.
           </span>
         </div>
         <h1
@@ -203,7 +203,7 @@ export const AssessmentsPage: React.FC = () => {
                     marginBottom: '4px',
                   }}
                 >
-                  EVALUATION RUBRIC:
+                  Evaluation rubric
                 </span>
                 <ul
                   style={{
@@ -254,7 +254,7 @@ export const AssessmentsPage: React.FC = () => {
             >
               <div>
                 <Badge variant="info">
-                  <CheckIcon size={14} /> PREVIEW &mdash; no server record
+                  <CheckIcon size={14} /> Preview. No server record.
                 </Badge>
               </div>
               <div style={{ display: 'flex', gap: spacing.sm }}>
@@ -289,9 +289,9 @@ export const AssessmentsPage: React.FC = () => {
               <pre
                 style={{
                   backgroundColor: colors.neutral[900],
-                  color: '#e2e8f0',
+                  color: '#e4e7e1',
                   padding: spacing.md,
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   fontSize: '0.8125rem',
                   fontFamily: 'JetBrains Mono, SFMono-Regular, monospace',
                   overflowX: 'auto',
@@ -324,7 +324,7 @@ export const AssessmentsPage: React.FC = () => {
                     backgroundColor: colors.neutral[950],
                     color: '#a7f3d0',
                     padding: spacing.md,
-                    borderRadius: '6px',
+                    borderRadius: '4px',
                     fontSize: '0.75rem',
                     fontFamily: 'JetBrains Mono, monospace',
                     lineHeight: 1.6,

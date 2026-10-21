@@ -14,6 +14,11 @@ import { JobsPage } from './pages/JobsPage.js';
 import { JobDetailPage } from './pages/JobDetailPage.js';
 import { ApplicationsPage } from './pages/ApplicationsPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
+import { SettingsPage } from './pages/SettingsPage.js';
+import { PortfolioPage } from './pages/PortfolioPage.js';
+import { ResumesPage } from './pages/ResumesPage.js';
+import { NetworkPage } from './pages/NetworkPage.js';
+import { LearningPage } from './pages/LearningPage.js';
 import { HiringPage } from './pages/HiringPage.js';
 import { HiringJobPage } from './pages/HiringJobPage.js';
 import { ReferencePage } from './pages/ReferencePage.js';
@@ -58,6 +63,11 @@ export const App: React.FC = () => {
             <Route path="applications" element={guarded(<ApplicationsPage />)} />
             <Route path="evidence" element={guarded(<EvidencePage />)} />
             <Route path="profile" element={guarded(<ProfilePage />)} />
+            <Route path="settings" element={guarded(<SettingsPage />)} />
+            <Route path="portfolio" element={guarded(<PortfolioPage />)} />
+            <Route path="resumes" element={guarded(<ResumesPage />)} />
+            <Route path="network" element={guarded(<NetworkPage />)} />
+            <Route path="learning" element={guarded(<LearningPage />)} />
             <Route path="notifications" element={guarded(<NotificationsPage />)} />
             <Route path="messages" element={guarded(<MessagesPage />)} />
             <Route path="messages/:id" element={guarded(<ConversationPage />)} />

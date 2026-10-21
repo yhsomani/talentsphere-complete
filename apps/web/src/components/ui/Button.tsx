@@ -32,11 +32,11 @@ const variantStyles: Record<string, { base: React.CSSProperties; hover: React.CS
       color: '#ffffff',
       border: '1px solid transparent',
       fontWeight: 700,
-      boxShadow: '0 1px 2px rgba(3, 88, 161, 0.25), 0 4px 12px rgba(3, 88, 161, 0.22)',
+      boxShadow: 'none',
     },
     hover: {
       backgroundColor: colors.primary[800],
-      boxShadow: '0 2px 4px rgba(3, 88, 161, 0.28), 0 8px 20px rgba(3, 88, 161, 0.28)',
+      boxShadow: 'none',
     },
   },
   secondary: {
@@ -139,7 +139,7 @@ const useButtonSurface = (
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    borderRadius: '8px',
+    borderRadius: '4px',
     cursor: isDisabled ? 'not-allowed' : 'pointer',
     opacity: isDisabled ? 0.65 : 1,
     transition: `background-color ${motion.duration.fast} ${motion.easing.easeOut}, border-color ${motion.duration.fast} ${motion.easing.easeOut}, box-shadow ${motion.duration.fast} ${motion.easing.easeOut}, transform ${motion.duration.fast} ${motion.easing.easeOut}, color ${motion.duration.fast} ${motion.easing.easeOut}`,

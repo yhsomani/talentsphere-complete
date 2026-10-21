@@ -191,7 +191,7 @@ export const HiringJobPage: React.FC = () => {
         to="/hiring"
         style={{ color: colors.primary[700], fontSize: '0.875rem' }}
       >
-        ← All jobs
+        All jobs
       </Link>
       <PageHeader
         title={job.title}
@@ -279,7 +279,7 @@ export const HiringJobPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {shown.map((applicant, index) => {
@@ -412,7 +412,7 @@ export const HiringJobPage: React.FC = () => {
                           marginTop: spacing.sm,
                           padding: spacing.md,
                           backgroundColor: colors.neutral[50],
-                          borderRadius: '8px',
+                          borderRadius: '4px',
                         }}
                       >
                         {applicant.coverLetter && (

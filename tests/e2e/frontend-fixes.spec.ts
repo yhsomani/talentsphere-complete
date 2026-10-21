@@ -31,8 +31,16 @@ test('FE-07: text inputs have a border that meets 3:1 contrast', async ({ page }
   const border = await page
     .getByTestId('signup-email')
     .evaluate((el) => getComputedStyle(el).borderTopColor);
-  // neutral[500] (#64748b) is 4.76:1 on white; the old neutral[300] was 1.5:1.
-  expect(border).toBe('rgb(100, 116, 139)');
+  // WCAG 1.4.11: the field edge must reach 3:1 against the white/paper it sits on.
+  // The old neutral[300] border was 1.5:1. Checked as a ratio, not a fixed colour,
+  // so a palette change cannot silently drop below the rule.
+  const [r, g, b] = (border.match(/\d+/g) ?? []).map(Number);
+  const lum = [r, g, b]
+    .map((c) => c / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (1 + 0.05) / (lum + 0.05);
+  expect(ratio).toBeGreaterThanOrEqual(3);
 });
 
 test('FE-04: retrying after a failed publish does not create a second job', async ({ browser }) => {

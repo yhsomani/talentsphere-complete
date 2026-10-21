@@ -52,7 +52,7 @@ export const TermsPage: React.FC = () => {
             backgroundColor: '#fffbeb',
             color: colors.semantic.warningText,
             border: `1px solid ${colors.semantic.warning}`,
-            borderRadius: '6px',
+            borderRadius: '4px',
             padding: `${spacing.sm} ${spacing.md}`,
             fontSize: '0.875rem',
             margin: `${spacing.sm} 0`,
