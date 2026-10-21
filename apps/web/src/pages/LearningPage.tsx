@@ -4,6 +4,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import {
   Button,
+  ButtonLink,
   Card,
   CardContent,
   Input,
@@ -153,13 +154,22 @@ export const LearningPage: React.FC = () => {
                 {course.estimatedDurationMinutes} minutes
               </p>
             </div>
-            <Button
-              loading={enrolling === course.id}
-              onClick={() => void enroll(course)}
-              data-testid="learning-enroll"
-            >
-              Enroll
-            </Button>
+            <div style={{ display: 'flex', gap: spacing.sm, flexWrap: 'wrap' }}>
+              <ButtonLink
+                to={`/learning/${course.id}`}
+                variant="outline"
+                data-testid="learning-open"
+              >
+                Open course
+              </ButtonLink>
+              <Button
+                loading={enrolling === course.id}
+                onClick={() => void enroll(course)}
+                data-testid="learning-enroll"
+              >
+                Enroll
+              </Button>
+            </div>
           </li>
         ))}
       </ul>

@@ -1,343 +1,248 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
+import { apiJson, errorMessage } from '../lib/api.js';
 import {
   Button,
-  Badge,
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardContent,
-  Modal,
-  CodeIcon,
-  CheckIcon,
+  LoadError,
+  Notice,
+  PageHeader,
+  Select,
+  TextArea,
 } from '../components/ui/index.js';
 
-interface AssessmentChallenge {
+interface PublicTestCase {
   id: string;
-  title: string;
-  tier: 'Staff' | 'Principal' | 'Senior';
-  timeLimitMinutes: number;
-  domain: string;
-  description: string;
-  starterCode: string;
-  rubric: string[];
-  testCases: string[];
+  input: string;
+  expectedOutput: string;
 }
 
-const CHALLENGES: AssessmentChallenge[] = [
-  {
-    id: 'ch-dist-01',
-    title: 'Distributed Systems: Transactional Queue & Partition Tolerance',
-    tier: 'Staff',
-    timeLimitMinutes: 45,
-    domain: 'Distributed Systems & Queues',
-    description:
-      'Implement an idempotent transactional message queue that preserves strict at-least-once delivery with deduplication under simulated network partitions.',
-    starterCode: `export class TransactionalQueue<T> {
-  private store = new Map<string, { payload: T; delivered: boolean }>();
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  category: string;
+  timeLimitMs: number;
+  policyMode: string;
+  publicTestCases: PublicTestCase[];
+}
 
-  async enqueue(idempotencyKey: string, payload: T): Promise<void> {
-    if (this.store.has(idempotencyKey)) return;
-    this.store.set(idempotencyKey, { payload, delivered: false });
-  }
+interface AssessmentSession {
+  id: string;
+  timeLimitSeconds: number;
+}
 
-  async processBatch(batchSize: number): Promise<T[]> {
-    // Implement partition-tolerant commit log
-    return [];
-  }
-}`,
-    rubric: [
-      'Strict idempotency key replay defense',
-      'Crash consistency without message corruption',
-      'Bounded memory footprint under retry storm',
-    ],
-    testCases: [
-      'Basic enqueue & dequeue invariant',
-      'Duplicate submission replay deduplication',
-      'Simulated 500ms network partition with retry recovery',
-    ],
-  },
-  {
-    id: 'ch-concurr-02',
-    title: 'Lockless Concurrent Cache with TTL Eviction',
-    tier: 'Senior',
-    timeLimitMinutes: 40,
-    domain: 'Concurrency & Systems',
-    description:
-      'Build a lock-free thread-safe in-memory cache supporting high-concurrency read-heavy workloads with background probabilistic TTL cleanup.',
-    starterCode: `export class ConcurrentCache<K, V> {
-  private map = new Map<K, { val: V; expiresAt: number }>();
+interface SubmitResponse {
+  evidence?: { id: string };
+  xpEarned: number;
+}
 
-  get(key: K): V | undefined {
-    const item = this.map.get(key);
-    if (!item || item.expiresAt < Date.now()) return undefined;
-    return item.val;
-  }
-}`,
-    rubric: [
-      'Sub-millisecond p99 read latency under 100 concurrent workers',
-      'Zero deadlocks during concurrent evictions',
-      'Memory reclamation within 5% variance of TTL expiry',
-    ],
-    testCases: [
-      'Concurrent read/write stress invariant',
-      'Atomic swap under eviction pressure',
-      'TTL sweep with memory threshold clamp',
-    ],
-  },
+const LANGUAGES = [
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'go', label: 'Go' },
 ];
 
+/**
+ * Challenges (F-08): start a timed session, write a solution, submit it. The platform does
+ * not run submitted code yet, so a submission is saved as unverified evidence and is not
+ * scored. This page says so instead of showing the API's placeholder pass/score.
+ */
 export const AssessmentsPage: React.FC = () => {
   usePageMeta(
-    'Skill assessments (preview)',
-    'A preview of planned coding exercises. Nothing on this page is scored or saved yet.'
+    'Challenges',
+    'Coding challenges. Submitted solutions are saved but not run or scored yet.'
   );
+  const [challenges, setChallenges] = useState<Challenge[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [active, setActive] = useState<{ challenge: Challenge; session: AssessmentSession } | null>(
+    null
+  );
+  const [language, setLanguage] = useState('typescript');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SubmitResponse | null>(null);
 
-  const [selectedChallenge, setSelectedChallenge] = useState<AssessmentChallenge | null>(null);
-  const [executionLog, setExecutionLog] = useState<string[]>([]);
+  const load = useCallback(async () => {
+    try {
+      setChallenges((await apiJson<{ challenges: Challenge[] }>('/api/v1/challenges')).challenges);
+      setLoadError(null);
+    } catch (err) {
+      setLoadError(errorMessage(err));
+    }
+  }, []);
 
-  const handleOpenChallenge = (ch: AssessmentChallenge) => {
-    setSelectedChallenge(ch);
-    setExecutionLog([]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const start = async (challenge: Challenge) => {
+    if (busy) return;
+    setBusy(challenge.id);
+    setError(null);
+    setSaved(null);
+    try {
+      const { session } = await apiJson<{ session: AssessmentSession }>(
+        `/api/v1/challenges/${challenge.id}/start-session`,
+        { method: 'POST' }
+      );
+      setCode('');
+      setActive({ challenge, session });
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const handleRunSandbox = () => {
-    // P0-07c: this preview executes nothing, so the log says exactly that —
-    // no fabricated PASS lines, no server-verified claim.
-    setExecutionLog([
-      'UI preview only — no code was executed in this session.',
-      'No tests ran, no score was generated, and no result was stored on the server.',
-      'Proctored execution will run against the assessment backend when it ships.',
-    ]);
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!active || busy) return;
+    if (!code.trim()) {
+      setError('Write your solution before submitting.');
+      return;
+    }
+    setBusy(active.challenge.id);
+    setError(null);
+    try {
+      const result = await apiJson<SubmitResponse>(
+        `/api/v1/challenges/${active.challenge.id}/submit`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ sessionId: active.session.id, language, code }),
+        }
+      );
+      setSaved(result);
+      setActive(null);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
-    <div style={{ paddingBottom: spacing['3xl'] }}>
-      <div
-        style={{
-          borderBottom: `1px solid ${colors.neutral[200]}`,
-          paddingBottom: spacing.lg,
-          marginBottom: spacing.xl,
-        }}
-      >
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginBottom: spacing.xs,
-          }}
-        >
-          <Badge variant="info">Preview</Badge>
-          <span style={{ fontSize: '0.8125rem', color: colors.neutral[600] }}>
-            Not available yet. Nothing on this page is scored or saved.
-          </span>
-        </div>
-        <h1
-          style={{
-            fontSize: '2rem',
-            fontWeight: 800,
-            color: colors.neutral[900],
-            margin: 0,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Skill assessments (preview)
-        </h1>
-        <p
-          style={{ color: colors.neutral[600], fontSize: '0.9375rem', margin: `${spacing.xs} 0 0` }}
-        >
-          A look at the coding exercises we plan to offer. You can read the brief and starter code;
-          running and scoring them is not built yet, so they do not count as evidence.
-        </p>
-      </div>
+    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: spacing['3xl'] }}>
+      <PageHeader title="Challenges" intro="Coding challenges you can take in a timed session." />
+      <Notice tone="info" style={{ marginBottom: spacing.lg }} data-testid="challenges-notice">
+        Submitted code is not run yet. Your solution is saved as unverified evidence and is not
+        scored.
+      </Notice>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
-          gap: spacing.lg,
-        }}
-      >
-        {CHALLENGES.map((ch) => (
-          <Card key={ch.id} data-testid={`challenge-card-${ch.id}`}>
-            <CardHeader>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: spacing.xs,
-                }}
-              >
-                <Badge variant={ch.tier === 'Staff' ? 'gold' : 'silver'}>{ch.tier} Tier</Badge>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: colors.neutral[600] }}>
-                  {ch.timeLimitMinutes} min allocation
-                </span>
-              </div>
-              <CardTitle style={{ fontSize: '1rem' }}>{ch.title}</CardTitle>
-              <CardDescription>{ch.domain}</CardDescription>
-            </CardHeader>
+      {error && (
+        <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="challenge-error">
+          {error}
+        </Notice>
+      )}
+      {saved && (
+        <Notice tone="success" style={{ marginBottom: spacing.md }} data-testid="challenge-saved">
+          Solution saved. It was not run, so it has no score and counts as unverified evidence.
+          {saved.xpEarned > 0 ? ` You earned ${saved.xpEarned} XP.` : ''}
+        </Notice>
+      )}
 
-            <CardContent>
-              <p
-                style={{
-                  fontSize: '0.875rem',
-                  color: colors.neutral[600],
-                  lineHeight: 1.5,
-                  marginBottom: spacing.md,
-                }}
-              >
-                {ch.description}
-              </p>
-
-              <div style={{ marginBottom: spacing.md }}>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: colors.neutral[700],
-                    display: 'block',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Evaluation rubric
-                </span>
-                <ul
-                  style={{
-                    paddingLeft: '18px',
-                    margin: 0,
-                    fontSize: '0.8125rem',
-                    color: colors.neutral[600],
-                  }}
-                >
-                  {ch.rubric.map((r, i) => (
-                    <li key={i} style={{ marginBottom: '2px' }}>
-                      {r}
+      {active ? (
+        <Card data-testid="challenge-session">
+          <CardContent style={{ padding: spacing.lg }}>
+            <h2 className="serif-display" style={{ fontSize: '1.375rem' }}>
+              {active.challenge.title}
+            </h2>
+            <p style={{ marginTop: spacing.xs }}>{active.challenge.description}</p>
+            <p style={{ color: colors.neutral[700], fontSize: '0.875rem' }}>
+              Session time limit: {Math.round(active.session.timeLimitSeconds / 60)} minutes.
+              {active.challenge.policyMode === 'AI_PROHIBITED'
+                ? ' AI assistance is turned off while this session is open.'
+                : ''}
+            </p>
+            {active.challenge.publicTestCases.length > 0 && (
+              <>
+                <h3 style={{ fontSize: '1rem', marginTop: spacing.md }}>Examples</h3>
+                <ul data-testid="challenge-examples">
+                  {active.challenge.publicTestCases.map((tc) => (
+                    <li key={tc.id}>
+                      Input <code>{tc.input}</code> gives <code>{tc.expectedOutput}</code>
                     </li>
                   ))}
                 </ul>
-              </div>
-
-              <Button
-                variant="primary"
-                size="sm"
-                data-testid={`start-challenge-${ch.id}`}
-                onClick={() => handleOpenChallenge(ch)}
-                style={{ width: '100%' }}
-              >
-                <CodeIcon size={16} /> Open Code Sandbox
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Challenge Sandbox Modal */}
-      {selectedChallenge && (
-        <Modal
-          isOpen={Boolean(selectedChallenge)}
-          onClose={() => setSelectedChallenge(null)}
-          title={selectedChallenge.title}
-          description={`${selectedChallenge.domain} • ${selectedChallenge.timeLimitMinutes} min limit`}
-          maxWidth="760px"
-          footer={
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <Badge variant="info">
-                  <CheckIcon size={14} /> Preview. No server record.
-                </Badge>
-              </div>
-              <div style={{ display: 'flex', gap: spacing.sm }}>
-                <Button variant="secondary" size="md" onClick={() => setSelectedChallenge(null)}>
-                  Close
-                </Button>
-                <Button
-                  variant="primary"
-                  size="md"
-                  data-testid="run-sandbox-btn"
-                  onClick={handleRunSandbox}
-                >
-                  Show Preview
-                </Button>
-              </div>
-            </div>
-          }
-        >
-          <div>
-            <div style={{ marginBottom: spacing.md }}>
-              <span
-                style={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  color: colors.neutral[800],
-                  display: 'block',
-                  marginBottom: '4px',
-                }}
-              >
-                STARTER IMPLEMENTATION:
-              </span>
-              <pre
-                style={{
-                  backgroundColor: colors.neutral[900],
-                  color: '#e4e7e1',
-                  padding: spacing.md,
-                  borderRadius: '4px',
-                  fontSize: '0.8125rem',
-                  fontFamily: 'JetBrains Mono, SFMono-Regular, monospace',
-                  overflowX: 'auto',
-                  margin: 0,
-                  maxHeight: '220px',
-                }}
-              >
-                {selectedChallenge.starterCode}
-              </pre>
-            </div>
-
-            {executionLog.length > 0 && (
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: colors.neutral[800],
-                    display: 'block',
-                    marginBottom: '4px',
-                  }}
-                >
-                  SANDBOX EXECUTION LOG:
-                </span>
-                <div
-                  data-testid="sandbox-log"
-                  role="log"
-                  aria-label="Sandbox execution log"
-                  style={{
-                    backgroundColor: colors.neutral[950],
-                    color: '#a7f3d0',
-                    padding: spacing.md,
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontFamily: 'JetBrains Mono, monospace',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {executionLog.map((log, idx) => (
-                    <div key={idx}>{log}</div>
-                  ))}
-                </div>
-              </div>
+              </>
             )}
-          </div>
-        </Modal>
+            <form onSubmit={submit} noValidate style={{ marginTop: spacing.md }}>
+              <Select
+                id="challenge-language"
+                label="Language"
+                value={language}
+                options={LANGUAGES}
+                onChange={(e) => setLanguage(e.target.value)}
+              />
+              <TextArea
+                id="challenge-code"
+                label="Your solution"
+                rows={12}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                spellCheck={false}
+                style={{ fontFamily: 'ui-monospace, Menlo, Consolas, monospace' }}
+                data-testid="challenge-code"
+              />
+              <div style={{ display: 'flex', gap: spacing.sm, marginTop: spacing.md }}>
+                <Button
+                  type="submit"
+                  loading={busy === active.challenge.id}
+                  data-testid="challenge-submit"
+                >
+                  Submit solution
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setActive(null)}>
+                  Leave session
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {loadError && <LoadError message={loadError} onRetry={() => void load()} />}
+          {!loadError && challenges === null && <p role="status">Loading challenges.</p>}
+          {challenges?.length === 0 && <p data-testid="challenges-empty">No challenges yet.</p>}
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }} data-testid="challenge-list">
+            {challenges?.map((c) => (
+              <li
+                key={c.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1fr) auto',
+                  gap: spacing.md,
+                  alignItems: 'center',
+                  padding: `${spacing.lg} 0`,
+                  borderTop: `1px solid ${colors.neutral[300]}`,
+                }}
+              >
+                <div>
+                  <h2 className="serif-display" style={{ fontSize: '1.25rem' }}>
+                    {c.title}
+                  </h2>
+                  <p style={{ marginTop: spacing.xs }}>{c.description}</p>
+                  <p style={{ color: colors.neutral[700], fontSize: '0.875rem' }}>
+                    {c.difficulty}, {c.category}
+                  </p>
+                </div>
+                <Button
+                  loading={busy === c.id}
+                  onClick={() => void start(c)}
+                  data-testid="challenge-start"
+                >
+                  Start session
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

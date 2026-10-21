@@ -30,6 +30,8 @@ import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
 import { AdminPage } from './pages/AdminPage.js';
 import { VerifyPage } from './pages/VerifyPage.js';
+import { CoursePage } from './pages/CoursePage.js';
+import { CareerPage } from './pages/CareerPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session token;
 // anyone else is sent to /login with the requested destination preserved in
@@ -71,6 +73,8 @@ export const App: React.FC = () => {
             <Route path="resumes" element={guarded(<ResumesPage />)} />
             <Route path="network" element={guarded(<NetworkPage />)} />
             <Route path="learning" element={guarded(<LearningPage />)} />
+            <Route path="learning/:id" element={guarded(<CoursePage />)} />
+            <Route path="career" element={guarded(<CareerPage />)} />
             <Route path="notifications" element={guarded(<NotificationsPage />)} />
             <Route path="messages" element={guarded(<MessagesPage />)} />
             <Route path="messages/:id" element={guarded(<ConversationPage />)} />

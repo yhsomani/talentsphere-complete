@@ -8,6 +8,7 @@ import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
 import { SignOutOtherDevices } from '../components/SignOutOtherDevices.js';
 import { CredentialsSection } from '../components/CredentialsSection.js';
+import { SkillsSection } from '../components/SkillsSection.js';
 import {
   Button,
   Card,
@@ -236,6 +237,8 @@ export const ProfilePage: React.FC = () => {
           Save profile
         </Button>
       </form>
+
+      <SkillsSection />
 
       <CredentialsSection />
 

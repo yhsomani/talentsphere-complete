@@ -1,10 +1,10 @@
 # Repository maintenance audit and proposed design
 
-Date: 2026-10-21. Status: discovery complete; design awaiting review; script not implemented or tested.
+Date: 2026-10-21. Status: implemented and locally verified; ready for operator review of the dry-run plan. No real repository cleanup or installation executed.
 
 ## Purpose and audit boundary
 
-Provide the requested single interactive Bash entry point, `project-maintenance.sh`, for recursive discovery, reviewed cleanup, dependency restoration, validation, and reporting. The attached brief is the requirements source. This document records the read-only discovery results and a concrete proposed design, not implementation evidence.
+Provide the requested single interactive Bash entry point, `project-maintenance.sh`, for recursive discovery, reviewed cleanup, dependency restoration, validation, and reporting. The attached brief is the requirements source. The discovery and approved design below are preserved for traceability; the implementation evidence section records actual results separately.
 
 Discovery used `find -P` from the physical repository root at every depth, pruning Git metadata and installed dependency trees. Manifest searches included Node, Python, JVM, .NET, PHP, Ruby, Go, Rust, and C/C++ project markers. Tooling files, package scripts, CI workflows, deployment scripts, TypeScript outputs, test outputs, and tracked-file provenance were inspected. Source-language inventory excluded generated distributions. Environment-file contents, credentials, database contents, and vault transaction payloads were not read.
 
@@ -147,13 +147,61 @@ The user explicitly requested creation of this script. That authorizes its imple
 
 Alternatives considered: fixed hard-coded cleanup paths are shorter but miss independent deep projects; a generic multi-language cleanup engine adds unverified destructive behavior for absent stacks. The proposed design instead scans all relevant manifests, supports the detected JavaScript ecosystem, and reports unsupported stacks conservatively, as the brief permits.
 
-Review requested: approve the above design before production implementation. This is an audit/proposed-design artifact; it does not claim that the requested script or tests exist yet.
+The user approved this design and explicitly requested implementation. The script, fixture tests, implementation plan and usage documentation now exist; see the evidence below.
 
 ## Current verification evidence and limitations
 
 - Read-only recursive project/configuration discovery ran successfully in Git Bash 5.3.15 on Windows.
 - `find`, `git`, `du`, `stat`, Node and pnpm are available. ShellCheck was not found on PATH; it has not run.
 - Dependency size measurement completed: root `node_modules` reported 150632 KiB, web 7177 KiB, and other members 30–40 KiB each. These are allocation readings, not a reliable reclaim estimate for the linked workspace.
-- No application checks were run during the audit; no script syntax, fixture or dry-run result exists before implementation.
+- No application checks were run during the initial audit. Script verification evidence gathered after implementation is recorded below.
 - Reticle is inapplicable to this CLI-only change and is not needed to verify Bash maintenance behavior.
 - No migrations, security architecture, production configuration or application source changes are proposed.
+
+## Implementation and verification evidence
+
+Delivered files:
+
+- [`../../project-maintenance.sh`](../../project-maintenance.sh): executable Bash entry point, reusable functions, menu choices 0–10, explicit CLI selectors, safe discovery, workspace ownership, reviewed cleanup, frozen restoration, configured validation, private reports and interruption handling.
+- [`../../scripts/tests/project-maintenance.test.sh`](../../scripts/tests/project-maintenance.test.sh): disposable-fixture suite. Package-manager invocations are stubbed; discovery, command planning, target validation, deletion, reporting and process cancellation execute for real inside temporary fixtures.
+- [`../engineering/PROJECT_MAINTENANCE.md`](../engineering/PROJECT_MAINTENANCE.md): launch commands, selection flags, supported technology/configuration dialects, recovery, reporting, exit codes and platform limitations.
+- [`../superpowers/plans/2026-10-21-project-maintenance.md`](../superpowers/plans/2026-10-21-project-maintenance.md): implementation plan based on the approved design.
+
+Verification completed so far:
+
+| Requirement / gate | Authoritative result |
+|---|---|
+| Test-first implementation | Initial fixture invocation failed with `requested project-maintenance.sh is missing`; later safety findings were reproduced in disposable fixtures before fixes |
+| Bash syntax | `bash -n project-maintenance.sh` and `bash -n scripts/tests/project-maintenance.test.sh` exit 0 |
+| Executable script | `chmod +x` applied; `test -x project-maintenance.sh` passed in Git Bash |
+| Fixture safety and behavior | Final fixed-content run: 74 assertions, zero failures, exit 0; raw stdout captured in `MAINTENANCE_FIXTURE_TESTS_2026-10-21.log` |
+| Real recursive scan | `--scan` exit 0; ten Node manifests, nine members and one installation owner; raw stdout captured in `MAINTENANCE_SCAN_2026-10-21.log` |
+| Real full preview | `--dry-run --operation full` exit 0; 29 proposed removal targets and 15 proposed commands; raw stdout captured in `MAINTENANCE_DRY_RUN_2026-10-21.log` |
+| Real cleanup/install/build | None executed by this task; all mutation tests used disposable temporary repositories |
+| Independent safety review | Final focused rechecks confirmed protected workspace ancestors and unsupported outside-root patterns refuse installation with exit 3; handwritten declarations and JS sources survive explicit cleanup approvals; no remaining important finding in the focused review |
+| ShellCheck | Unavailable on PATH; not run or installed |
+| Native symlink fixtures | Explicitly skipped: this host cannot create native symlinks with the current identity; ordinary Git Bash `ln -s` can silently copy instead |
+| Real Unix permission denial | Explicitly skipped because Windows/this identity bypasses Unix mode-bit enforcement; simulated `find` permission/discovery failure is covered |
+| Reticle | Skipped because this is CLI tooling without an application UI surface |
+
+The final real scan and dry-run were repeated after the safety fixes and both exited 0. No root `maintenance-reports` directory or maintenance lock was created by these read-only invocations. A preceding expanded test run had one exit-code assertion failure while implementation edits were still occurring; that run was not treated as passing. The script and fixture source were then held fixed for a complete rerun, which passed all 74 assertions. All actual application build/type/test commands in the dry-run remain proposals, not executed validation results.
+
+The real full preview proposes nine `dist` directories, nine incremental metadata files, ten local `node_modules` directories, and Playwright `test-results`. Commands are one root frozen pnpm restore with scripts disabled, one root recursive build, one root lint, the root/member configured typechecks, and root unit/integration tests. A preview is not a cleanup approval or a validation pass. Dependency descendant checks are deferred until execution prerequisites to avoid traversing installations during every scan; they can still prohibit removal if secrets/data are found.
+
+`graphify-out/cache` remains prohibited because it contains tracked files. `supabase/.temp` remains review-only. Vault state, Reticle/browser evidence, source/static inputs, migrations, environment files and backups are preserved. No database, auth, RLS, pricing, API, application source or existing build-configuration changes were made by this task.
+
+A before/after hash/size/mtime comparison sampled 55 protected existing files. It detected concurrent changes in `apps/web/tsconfig.tsbuildinfo`, `apps/web/vite.audit.config.ts`, and `playwright.audit.config.ts` while other work was active. This task only invoked the real maintenance script with scan/dry-run flags; it did not write those paths. The comparison therefore cannot be cited as proof that the entire shared checkout stayed unchanged. Fixture fingerprints and the implementation's separate read-only paths provide the maintenance-specific evidence; other agents' staged/committed work was left untouched.
+
+Reports produced by the script are timestamped private logs in an excluded `maintenance-reports` directory after confirmation. The raw verification stdout files beside this document are separate audit artifacts captured by the host and may be ignored by the repository's existing `*.log` rule. No credentials or raw package-manager output are stored in them.
+
+Known limitations and manual actions:
+
+- Native macOS/Linux, Bash 3.2, native symlinks and Unix permission enforcement still need execution on a suitable host. The implementation uses portable Bash constructs; this environment verifies Git Bash only.
+- Overlapping nested workspace definitions, unsupported/negative/recursive workspace glob syntax, dynamic/inherited/JSONC output configuration, unreviewed scripts and unsupported language ecosystems fail closed or remain review-only. They do not trigger guessed installations or deletion.
+- Yarn PnP/archive cleanup has no adapter; only verified local `node_modules` installations are removable. Yarn restore commands are detected, but actual Yarn/npm network installs were not performed here.
+- Install lifecycle scripts are disabled. Review required native-addon setup separately; a successful restore is not proof that build or application checks pass.
+- Use an isolated test database for database checks and a suitable browser/runtime for E2E checks; neither is automatically provisioned by maintenance.
+- Do not use cleanup across bind mounts or concurrently changing repositories. Portable shell validation does not defend against a malicious concurrent filesystem writer.
+- Actual cleanup/reinstallation remains an operator decision after inspecting the exact current plan and typing `APPLY`; no such authorization was requested or inferred during implementation.
+
+Final completion status: the requested script, tests, usage documentation, repository inventory and dry-run evidence are delivered. No existing build file was intentionally changed by this task; no migration or application security/behavior change was needed. Verification limits above remain explicit, particularly unsupported project/configuration dialects and platforms unavailable on this host.
