@@ -9,6 +9,8 @@ This is the single entry point to the project's documentation. Paths are relativ
 | Set up and run the project | [`../README.md`](../README.md) |
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Current implementation status | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) |
+| Evidence ledger: 173 features, 248 rules, 28 journeys, routes and current test results | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
+| Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
 | Canonical intent | [`../SSOT.md`](../SSOT.md) |
 | Coding-agent workflow | [`../AGENTS.md`](../AGENTS.md), [`../CLAUDE.md`](../CLAUDE.md) |
 | Browser verification with Reticle | [`../RETICLE.md`](../RETICLE.md) |
@@ -96,7 +98,7 @@ Each report is a point-in-time record. Read the newest one for status.
 
 | Document | Date | Status |
 |---|---|---|
-| [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) | 2026-10-21 | **Current.** Code-checked status of all 173 features. |
+| [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) | 2026-10-21 | **Current.** Provisional inventory of 173 features; semantic acceptance and runtime coverage limits are explicit. |
 | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) | 2026-10-21 | Plan that follows from the status cross-check. |
 | [`reports/FINAL_VALIDATION_REPORT.md`](reports/FINAL_VALIDATION_REPORT.md) | 2026-10-18 | Corpus integrity and founder corrections. Its test and feature counts are not re-measured. |
 | [`reports/IMPROVEMENT_PROGRAM_2026-10-10.md`](reports/IMPROVEMENT_PROGRAM_2026-10-10.md) | 2026-10-10 | Improvement program and open risks. |

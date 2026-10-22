@@ -1,5 +1,8 @@
 # Repository maintenance audit and proposed design
 
+> **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
+
+
 Date: 2026-10-21. Status: implemented and locally verified; ready for operator review of the dry-run plan. No real repository cleanup or installation executed.
 
 ## Purpose and audit boundary
@@ -162,8 +165,8 @@ The user approved this design and explicitly requested implementation. The scrip
 
 Delivered files:
 
-- [`../../project-maintenance.sh`](../../project-maintenance.sh): executable Bash entry point, reusable functions, menu choices 0–10, explicit CLI selectors, safe discovery, workspace ownership, reviewed cleanup, frozen restoration, configured validation, private reports and interruption handling.
-- [`../../scripts/tests/project-maintenance.test.sh`](../../scripts/tests/project-maintenance.test.sh): disposable-fixture suite. Package-manager invocations are stubbed; discovery, command planning, target validation, deletion, reporting and process cancellation execute for real inside temporary fixtures.
+- `project-maintenance.sh` (absent in current checkout): executable Bash entry point, reusable functions, menu choices 0–10, explicit CLI selectors, safe discovery, workspace ownership, reviewed cleanup, frozen restoration, configured validation, private reports and interruption handling.
+- `scripts/tests/project-maintenance.test.sh` (absent in current checkout): disposable-fixture suite. Package-manager invocations are stubbed; discovery, command planning, target validation, deletion, reporting and process cancellation execute for real inside temporary fixtures.
 - [`../engineering/PROJECT_MAINTENANCE.md`](../engineering/PROJECT_MAINTENANCE.md): launch commands, selection flags, supported technology/configuration dialects, recovery, reporting, exit codes and platform limitations.
 - [`../superpowers/plans/2026-10-21-project-maintenance.md`](../superpowers/plans/2026-10-21-project-maintenance.md): implementation plan based on the approved design.
 

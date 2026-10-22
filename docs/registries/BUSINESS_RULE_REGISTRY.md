@@ -8,6 +8,13 @@ This is the canonical business-rule identity and text registry derived from the 
 **Migration rules:** MIG-01 through MIG-08 are separate migration rules.  
 **Historical out-of-range BR references:** non-authoritative prose references outside BR-248 are treated as stale references unless explicitly ratified later.
 
+**Traceability limitation (2026-10-21):** IDs and rule text are inventoried in the
+[audit evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json), but a code comment
+or matching numeric ID does not verify the rule. Some SSOT feature summaries attach
+a different meaning to the same ID (for example F-01's BR-001/BR-002). Canonical rule
+text governs rule identity; the [conflict register](../governance/GAP_ANALYSIS.md)
+records the reconciliation work. No rule or security policy is changed by this note.
+
 ## Rule governance
 
 Rules are not duplicated inside feature prose. A feature references the relevant BR IDs.

@@ -47,7 +47,8 @@ export const CareerPaths: React.FC = () => {
       setKnown([...new Set(benchmarks.benchmarks.map((b) => b.fromRole))]);
       // Start from the role they hold now (or held last), so the common case is one click.
       const roles = [...history.workHistories].sort(
-        (a, b) => Number(b.isCurrent ?? false) - Number(a.isCurrent ?? false) ||
+        (a, b) =>
+          Number(b.isCurrent ?? false) - Number(a.isCurrent ?? false) ||
           b.startDate.localeCompare(a.startDate)
       );
       setRole((current) => current || roles[0]?.title || '');
@@ -109,25 +110,36 @@ export const CareerPaths: React.FC = () => {
               {error}
             </Notice>
           )}
-          <Button type="submit" loading={busy} style={{ marginTop: spacing.md }} data-testid="paths-submit">
+          <Button
+            type="submit"
+            loading={busy}
+            style={{ marginTop: spacing.md }}
+            data-testid="paths-submit"
+          >
             Show where people go
           </Button>
         </form>
 
         {result && result.pathways.length === 0 && (
           <p style={{ marginTop: spacing.md }} data-testid="paths-none">
-            Not enough shared moves from “{result.originRole}” to show figures yet. A move is
-            shown once at least 20 people have made it.
+            Not enough shared moves from “{result.originRole}” to show figures yet. A move is shown
+            once at least 20 people have made it.
           </p>
         )}
         {result && result.pathways.length > 0 && (
           <>
-            <ul style={{ listStyle: 'none', padding: 0, margin: `${spacing.md} 0 0` }} data-testid="paths-list">
+            <ul
+              style={{ listStyle: 'none', padding: 0, margin: `${spacing.md} 0 0` }}
+              data-testid="paths-list"
+            >
               {result.pathways.map((p) => (
                 <li
                   key={p.targetRole}
                   data-testid="path-item"
-                  style={{ padding: `${spacing.sm} 0`, borderTop: `1px solid ${colors.neutral[200]}` }}
+                  style={{
+                    padding: `${spacing.sm} 0`,
+                    borderTop: `1px solid ${colors.neutral[200]}`,
+                  }}
                 >
                   <strong>{p.targetRole}</strong>
                   <div data-testid="path-share">

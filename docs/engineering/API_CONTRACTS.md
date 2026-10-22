@@ -1,6 +1,14 @@
 # TalentSphere — API_CONTRACTS.md v6.0
 
-> **Status: target contracts.** Sections 1–7 and 9–10 state the contract rules the implemented API follows. Section 8.1 is the *intended* service, queue, integration and media surface. Most rows (Stripe, Mux, LMS/SSO, heavy queues, realtime channels) are **planned and not built**. For what exists, see [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md) and [`../governance/GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md) conflict C-5.
+> **Status: target contracts.** Sections 1–7 and 9–10 state target contract rules; compliance must be verified per endpoint. Shared schemas and error handling do not establish universal pagination, idempotency, transaction or audit coverage. Section 8.1 is the *intended* service, queue, integration and media surface. Most rows (Stripe, Mux, LMS/SSO, heavy queues, realtime channels) are **planned and not built**. For what exists, see [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md) and [`../governance/GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md) conflict C-5.
+
+Current source inventory: 274 direct API route registrations, with 70 entries in the
+durable-route registry, 3 stateless and 201 ephemeral-header routes. The
+[evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json) records methods, paths
+and source lines. Headers are not a complete storage contract: erasure spans multiple
+stores, and certificate verification can combine durable evidence with ephemeral
+certificate state. The service register below does not prove those operations have
+been implemented or accepted.
 
 ## 1. Contract-first Rule
 

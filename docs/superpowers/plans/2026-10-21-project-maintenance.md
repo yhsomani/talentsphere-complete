@@ -1,5 +1,8 @@
 # Project Maintenance Implementation Plan
 
+> **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
+
+
 > **For agentic workers:** Use superpowers:executing-plans for native execution; the user approved the design and requested implementation in this session.
 
 **Goal:** Deliver the complete interactive Bash maintenance tool and prove its safety using disposable fixture repositories and real read-only previews.

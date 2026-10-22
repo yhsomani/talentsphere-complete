@@ -2,7 +2,7 @@
 
 ## Authority
 
-Canonical user journeys are J-01 through J-28.
+Canonical user journeys are J-01 through J-28. These are target journeys, not a passing test inventory. The current [audit evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json) records verification limits for all 28. No full terminal journey was newly certified by the 2026-10-21 audit; isolated API assertions do not prove the terminal outcomes below.
 
 ## Journey register
 

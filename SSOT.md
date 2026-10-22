@@ -2,7 +2,7 @@
 ## Final Product, UX, Architecture, Engineering & Operations Source of Truth
 
 **Date:** 24 September 2026  
-**Implementation reality:** **PARTIALLY IMPLEMENTED** — 16 features implemented, 78 partial, 75 not started (code-checked 2026-10-21; see `docs/reports/FEATURE_STATUS_2026-10-21.md`)  
+**Implementation reality:** **PARTIALLY IMPLEMENTED; RELEASE READINESS NOT ESTABLISHED**. Current evidence and inspection limits are recorded in `docs/reports/FEATURE_STATUS_2026-10-21.md`; historical counts are not maintained here.
 **Status:** Canonical specification (intent). Implementation status is not recorded here; see `docs/reports/FEATURE_STATUS_2026-10-21.md`  
 **Authority:** This file is the authoritative definition of intended product/system behavior. Executable code, tests, migrations, runtime evidence and production evidence determine actual implementation status.
 

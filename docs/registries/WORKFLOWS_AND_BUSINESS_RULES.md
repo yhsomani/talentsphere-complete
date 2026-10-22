@@ -11,6 +11,6 @@
 | State machines and their invariants | [`../../SSOT.md`](../../SSOT.md), Part V, §10 (§18.1 to §18.3 of the source corpus) |
 | Business rules BR-001 to BR-248 (text) | [`BUSINESS_RULE_REGISTRY.md`](BUSINESS_RULE_REGISTRY.md) |
 | Migration rules MIG-01 to MIG-08 | [`BUSINESS_RULE_REGISTRY.md`](BUSINESS_RULE_REGISTRY.md), "Migration rules" |
-| Feature-to-rule links | [`FEATURE_REGISTRY.md`](FEATURE_REGISTRY.md) |
+| Feature-to-rule links | Detailed feature contracts in [`../../SSOT.md`](../../SSOT.md); reconcile semantic mismatches against the canonical business-rule registry before relying on them |
 
 The registry's IDs use two digits for BR-01 to BR-35 and three digits after that. See conflict C-9 in [`../governance/GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md).

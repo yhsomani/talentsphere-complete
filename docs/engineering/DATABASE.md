@@ -1,10 +1,10 @@
 # TalentSphere — DATABASE.md v6.0
 
-> **Status: target model for §3.** Measured 2026-10-21 across the 51 migration files: **111 distinct `CREATE TABLE` names** and 130 `ENABLE ROW LEVEL SECURITY` statements. That does not match the 50 canonical tables or the roughly 220 tables in §3.2. Whether every table has RLS is not verified by this document; the database tests check it.
+> **Status: target model for §3.** Measured 2026-10-21 across the 51 migration files: **111 distinct `CREATE TABLE` names** and 130 `ENABLE ROW LEVEL SECURITY` statements. That does not match the 50 canonical tables or the roughly 220 tables in §3.2. Neither statement counts nor this document verify per-table grants/RLS coverage. Selected database tests exist; they were not executed in the current audit.
 
 ## 1. Authority
 
-PostgreSQL is the system of record for relational state. SQL migrations are authoritative.
+PostgreSQL is the intended system of record for relational state. SQL migrations are authoritative for schema, but many API modules still use process-local state. A migrated table does not prove its feature uses it. Current SQL store coverage is recorded in the root [architecture](../../ARCHITECTURE.md) and [audit](../reports/FEATURE_STATUS_2026-10-21.md).
 
 ## 2. Data Rules
 
