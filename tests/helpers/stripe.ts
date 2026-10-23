@@ -120,6 +120,8 @@ export function chargeRefundedEvent(o: {
   refunded?: boolean;
   /** When the refunded charge was made (unix seconds). */
   chargeCreated?: number;
+  /** The payment the charge belongs to; the test gateway maps it to a subscription. */
+  paymentIntentId?: string;
   created?: number;
 }) {
   return {
@@ -132,6 +134,7 @@ export function chargeRefundedEvent(o: {
         id: 'ch_test_1',
         object: 'charge',
         customer: o.customerId,
+        payment_intent: o.paymentIntentId ?? 'pi_current',
         refunded: o.refunded ?? true,
         created: o.chargeCreated ?? now(),
       },

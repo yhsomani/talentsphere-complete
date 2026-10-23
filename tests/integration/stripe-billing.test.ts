@@ -57,6 +57,8 @@ const gateway: StripeGateway = {
       eventCreated: now + 3600,
     };
   },
+  subscriptionIdForPayment: async (paymentIntentId) =>
+    ({ pi_current: 'sub_second', pi_other_sub: 'sub_other' })[paymentIntentId],
   deleteCustomer: async (id) => {
     calls.deletedCustomers.push(id);
   },
@@ -475,6 +477,24 @@ describe('Stripe billing (F-16)', () => {
           chargeCreated: periodStart() - 86400,
         })
       );
+      expect(calls.cancellations).toEqual([]);
+      expect((await subscription()).entitlements.planTier).toBe('candidate_pro');
+    });
+
+    it("keeps access when the refunded charge belongs to another subscription or can't be resolved", async () => {
+      for (const [eventId, paymentIntentId] of [
+        ['evt_refund_other_sub', 'pi_other_sub'],
+        ['evt_refund_one_off', 'pi_one_off'],
+      ] as const) {
+        await send(
+          chargeRefundedEvent({
+            eventId,
+            customerId,
+            paymentIntentId,
+            chargeCreated: periodStart() + 10,
+          })
+        );
+      }
       expect(calls.cancellations).toEqual([]);
       expect((await subscription()).entitlements.planTier).toBe('candidate_pro');
     });

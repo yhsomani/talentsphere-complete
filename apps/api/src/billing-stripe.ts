@@ -156,13 +156,17 @@ export async function processStripeEvent(
       }
       const subscription = await billing.getSubscription(userId);
       const periodStart = subscription ? Date.parse(subscription.currentPeriodStart) / 1000 : 0;
-      // Only a full refund of the charge that paid for the current period ends
-      // access; a partial refund or an older charge's refund does not.
+      // Only a full refund of the charge that paid for the current period of the
+      // subscription that grants access ends it. A partial refund, an older
+      // charge, another subscription's charge or a one-off charge does not.
       if (
         !event.fullyRefunded ||
-        !subscription ||
+        !subscription?.stripeSubscriptionId ||
         !isLive(subscription) ||
-        event.chargeCreated < periodStart
+        !event.paymentIntentId ||
+        event.chargeCreated < periodStart ||
+        (await deps.gateway.subscriptionIdForPayment(event.paymentIntentId)) !==
+          subscription.stripeSubscriptionId
       ) {
         return done(await billing.applyEvent(record(userId, { chargeRefunded: true })));
       }

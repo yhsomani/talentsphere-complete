@@ -50,6 +50,8 @@ export type NormalizedStripeEvent =
       fullyRefunded: boolean;
       /** Unix seconds when the refunded charge was made. */
       chargeCreated: number;
+      /** The payment the charge belongs to; links it to an invoice and subscription. */
+      paymentIntentId: string | undefined;
     }
   | { kind: 'ignored'; id: string; type: string; created: number };
 
@@ -69,6 +71,11 @@ export interface StripeGateway {
   createPortalSession(input: { customerId: string; returnUrl: string }): Promise<{ url: string }>;
   /** Cancels at period end, or immediately; returns Stripe's resulting state. */
   setCancellation(subscriptionId: string, immediate: boolean): Promise<StripeSubscriptionSnapshot>;
+  /**
+   * The subscription an invoice payment was made for, or undefined when the
+   * payment is not a subscription invoice (or cannot be resolved).
+   */
+  subscriptionIdForPayment(paymentIntentId: string): Promise<string | undefined>;
   /** Deleting a customer also ends its subscriptions in Stripe. */
   deleteCustomer(customerId: string): Promise<void>;
   /**
@@ -152,6 +159,7 @@ export function normalizeEvent(event: Stripe.Event): NormalizedStripeEvent {
         customerId: idOf(charge.customer),
         fullyRefunded: charge.refunded === true,
         chargeCreated: charge.created,
+        paymentIntentId: idOf(charge.payment_intent),
       };
     }
     default:
@@ -251,6 +259,18 @@ export function createStripeGateway(options: {
           ? await stripe.subscriptions.cancel(subscriptionId)
           : await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
         return normalizeSubscription(sub, Math.floor(Date.now() / 1000));
+      }),
+
+    subscriptionIdForPayment: (paymentIntentId) =>
+      guard('invoicePayments.list', async () => {
+        const payments = await stripe.invoicePayments.list({
+          payment: { type: 'payment_intent', payment_intent: paymentIntentId },
+          expand: ['data.invoice'],
+          limit: 1,
+        });
+        const invoice = payments.data[0]?.invoice;
+        if (!invoice || typeof invoice === 'string' || !('parent' in invoice)) return undefined;
+        return idOf(invoice.parent?.subscription_details?.subscription);
       }),
 
     deleteCustomer: (customerId) =>
