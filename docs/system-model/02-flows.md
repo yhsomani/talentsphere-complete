@@ -107,7 +107,7 @@ Application states: `submitted` to `in_review`, `withdrawn` or `rejected`; `in_r
 
 ## F4 — Verified work history (the core promise)
 
-Evidence: Read + spot-checked. The lead re-read that the referee token has no expiry (only a hash is stored and compared, `S:12452`, `S:12544`) and that the email domain is taken from `org.website` only when `companyId` is set (`S:12274-12281`).
+Evidence: Read + spot-checked. The lead re-read that the referee token had no expiry (fixed afterwards: the link now stops working 30 days after the request) and that the email domain is taken from `org.website` only when `companyId` is set (`S:12274-12281`).
 
 ```mermaid
 flowchart TD
@@ -136,12 +136,12 @@ flowchart TD
   F0([POST references/request]) --> F1{"Referee is the candidate<br/>by id or email?"}
   F1 -- yes --> E409[["409 CONFLICT"]]
   F1 -- no --> F2["128-bit token, sha256 stored,<br/>plaintext token in the job payload"]
-  F2 --> F3[["201 (no expiry on the token)"]]
+  F2 --> F3[["201 (link valid 30 days)"]]
 
   G0([POST references/:id/submit]) --> G1{"Session is the candidate?"}
   G1 -- yes --> E403
-  G1 -- no --> G2{"Token present, hash matches,<br/>status requested?"}
-  G2 -- no --> E401[["401 or INVALID_STATE_TRANSITION"]]
+  G1 -- no --> G2{"Token present, hash matches,<br/>link under 30 days old,<br/>status requested?"}
+  G2 -- no --> E401[["403 UNAUTHORIZED or INVALID_STATE_TRANSITION"]]
   G2 -- yes --> G3{"Ratings integers 1 to 5?"}
   G3 -- no --> E422
   G3 -- yes --> G4[["submitted, tokenHash cleared (single use),<br/>role rescored, candidate notified"]]

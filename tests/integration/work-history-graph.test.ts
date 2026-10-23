@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 /**
  * The email the worker would deliver (dev/test outbox). Codes and referee
@@ -362,6 +363,49 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
         headers: { 'x-reference-token': '0'.repeat(32) },
       });
       expect(wrongToken.statusCode).toBe(404);
+    });
+
+    it('stops honouring the referee link 30 days after the request', async () => {
+      const day = 24 * 60 * 60 * 1000;
+      try {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(Date.now() + 29 * day);
+        const stillValid = await app.inject({
+          method: 'GET',
+          url: `/api/v1/references/${createdReferenceId}`,
+          headers: { 'x-reference-token': referenceToken },
+        });
+        expect(stillValid.statusCode).toBe(200);
+
+        vi.setSystemTime(Date.now() + 2 * day);
+        const expired = await app.inject({
+          method: 'GET',
+          url: `/api/v1/references/${createdReferenceId}`,
+          headers: { 'x-reference-token': referenceToken },
+        });
+        expect(expired.statusCode).toBe(404);
+
+        // The referee's own session is fresh, but the link they hold is not.
+        const freshSession = createSessionToken(refereeId, refereeEmail, ['candidate']);
+        const submit = await app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/references/${createdReferenceId}/submit`,
+          headers: { authorization: `Bearer ${freshSession}` },
+          payload: {
+            token: referenceToken,
+            confirmDates: true,
+            confirmTitle: true,
+            technicalProficiency: 5,
+            collaborationRating: 5,
+            deliveryReliability: 5,
+            leadershipRating: 5,
+            endorsedSkills: [],
+          },
+        });
+        expect(submit.statusCode).toBe(403);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('rejects candidate attempting to request a reference using their own email', async () => {

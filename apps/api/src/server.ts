@@ -918,6 +918,11 @@ export async function buildApp(
    */
   const ERASED_CREDENTIAL = '!erased';
 
+  /** A referee's emailed link stops working this long after the request was made. */
+  const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const referenceLinkExpired = (reference: { requestedAt: string }): boolean =>
+    Date.now() - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
+
   /** May this session manage the given organization's jobs and pipeline? (BR-12) */
   const canManageJobs = (
     session: { userId: string; roles: Role[] } | null | undefined,
@@ -12494,7 +12499,8 @@ export async function buildApp(
         !reference ||
         !reference.tokenHash ||
         !token ||
-        !safeEqualHex(sha256Hex(token), reference.tokenHash)
+        !safeEqualHex(sha256Hex(token), reference.tokenHash) ||
+        referenceLinkExpired(reference)
       ) {
         // One answer for "no such reference" and "wrong token": the endpoint
         // must not confirm which reference ids exist.
@@ -12545,7 +12551,8 @@ export async function buildApp(
       if (
         !body.token ||
         !reference.tokenHash ||
-        !safeEqualHex(sha256Hex(body.token.trim()), reference.tokenHash)
+        !safeEqualHex(sha256Hex(body.token.trim()), reference.tokenHash) ||
+        referenceLinkExpired(reference)
       ) {
         throw new DomainError(
           'UNAUTHORIZED',

@@ -48,7 +48,7 @@ Abbreviations: S = `apps/api/src/server.ts`, D = `packages/domain/src/work-histo
 | WH-02 | Production or staging and Resend not fully configured | 503, nothing stored | continue | S:12286,12418 | | Read; `tests/integration/email-delivery-gate.test.ts` |
 | WH-03 | Address is not webmail or disposable | continue | VALIDATION_FAILED | D:427 | | Read |
 | WH-04 | Role has a company with a website | the address domain must match it | any non-webmail domain passes | S:12274-12281 | CF-11 | Spot-checked |
-| WH-05 | Referee token present and hash matches | continue | 401 (no expiry check exists) | S:12544 | CF-10 | Spot-checked |
+| WH-05 | Referee token present, hash matches and the request is under 30 days old | continue | 404 on view, 403 on submit (`UNAUTHORIZED` maps to 403) | S `referenceLinkExpired` and the two routes | CF-10 | Tested (`tests/integration/work-history-graph.test.ts`) |
 | WH-06 | Email challenge expired (15 min) | deleted, VALIDATION_FAILED | continue | S:12339 | | Read |
 | WH-07 | Wrong-code attempts below 5 | attempts + 1 and VALIDATION_FAILED | RATE_LIMIT_EXCEEDED; challenge kept | S:12343-12357 | | Read |
 | WH-08 | Referee equals the candidate (id or email) | CONFLICT | continue | D:500-507 | | Read |
