@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ensureChallenge, ensureCourse } from './content.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -26,6 +27,7 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
   test('enforces strict server-side AI prohibition during active assessment session (BR-10)', async ({
     request,
   }) => {
+    await ensureChallenge(request);
     // 1. Fetch available challenges
     const challengesRes = await request.get(`${API_BASE}/challenges`);
     expect(challengesRes.status()).toBe(200);
@@ -83,6 +85,7 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
   test('enrolls in LMS course, enforces prerequisite sequential ordering, and issues verified evidence on completion (BR-21..BR-23)', async ({
     request,
   }) => {
+    await ensureCourse(request);
     // 1. Get published courses
     const coursesRes = await request.get(`${API_BASE}/courses`);
     expect(coursesRes.status()).toBe(200);

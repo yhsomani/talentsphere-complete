@@ -3,18 +3,22 @@ import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
 import { CORRELATION_DISCLAIMER_LABEL } from '../../packages/domain/src/learning-impact.js';
+import { createPublishedCourse, grantRoles } from '../helpers/content.js';
 
 describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189..BR-193, OD-51)', () => {
   let app: FastifyInstance;
   let candidateToken: string;
   let candidateId: string;
-  const seedCourseId = 'c0000000-0000-0000-0000-000000000001';
+  let courseId = '';
 
   beforeAll(async () => {
     app = await buildApp({
       NODE_ENV: 'test',
       PORT: '0',
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
+      // The suite registers a cohort of learners; sign-up has its own throttle.
+      RATE_LIMIT_MAX_REQUESTS: '100000',
+      AUTH_RATE_LIMIT_MAX_REQUESTS: '1000',
     });
     await app.ready();
 
@@ -32,10 +36,63 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     const d = JSON.parse(reg.body);
     candidateId = d.user.id;
     candidateToken = d.token;
+
+    // An instructor publishes a course; a cohort of learners enrols and records
+    // its own outcomes. Impact figures come only from those recorded outcomes.
+    const instructor = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'instructor.impact@talentsphere.test',
+        password: 'Password123!Secure',
+        fullName: 'Impact Instructor',
+        role: 'candidate',
+      },
+    });
+    const instructorBody = JSON.parse(instructor.body);
+    await grantRoles(app, instructorBody.user.id, ['candidate', 'instructor']);
+    courseId = (await createPublishedCourse(app, instructorBody.token, 'impact-course')).id;
+
+    for (let i = 0; i < 32; i++) {
+      const learner = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `learner.cohort.${i}@talentsphere.test`,
+          password: 'Password123!Secure',
+          fullName: `Cohort Learner ${i}`,
+          role: 'candidate',
+        },
+      });
+      const learnerToken = JSON.parse(learner.body).token;
+      const headers = { authorization: `Bearer ${learnerToken}` };
+      const enrolled = await app.inject({
+        method: 'POST',
+        url: `/api/v1/courses/${courseId}/enroll`,
+        headers,
+      });
+      expect(enrolled.statusCode).toBe(201);
+      const recorded = await app.inject({
+        method: 'POST',
+        url: '/api/v1/learning/impact/outcomes',
+        headers,
+        payload: {
+          courseId,
+          hiredWithin12m: i < 24,
+          salaryGrowthPct: 18 + (i % 8) * 1.5,
+          jobSatisfactionScore: 4 + (i % 3) * 0.2,
+          retentionMonths: i < 20 ? 10 : 3,
+          promotedWithin18m: i < 12,
+          skillsUsedOnJob: ['TypeScript'],
+          consentFlag: true,
+        },
+      });
+      expect(recorded.statusCode).toBe(201);
+    }
   });
 
-  const outcomePayload = {
-    courseId: seedCourseId,
+  const outcomePayload = () => ({
+    courseId,
     hiredWithin12m: true,
     salaryGrowthPct: 24.5,
     jobSatisfactionScore: 4.8,
@@ -43,7 +100,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     promotedWithin18m: true,
     skillsUsedOnJob: ['TypeScript', 'Fastify'],
     consentFlag: true,
-  };
+  });
 
   afterAll(async () => {
     await app.close();
@@ -55,7 +112,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
         method: 'POST',
         url: '/api/v1/learning/impact/outcomes',
         headers: { authorization: `Bearer ${candidateToken}` },
-        payload: outcomePayload,
+        payload: outcomePayload(),
       });
       expect(res.statusCode).toBe(403);
     });
@@ -63,7 +120,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     it('records a learner career outcome with explicit consent (201)', async () => {
       const enrolled = await app.inject({
         method: 'POST',
-        url: `/api/v1/courses/${seedCourseId}/enroll`,
+        url: `/api/v1/courses/${courseId}/enroll`,
         headers: { authorization: `Bearer ${candidateToken}` },
       });
       expect(enrolled.statusCode).toBe(201);
@@ -72,7 +129,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
         url: '/api/v1/learning/impact/outcomes',
         headers: { authorization: `Bearer ${candidateToken}` },
         payload: {
-          courseId: seedCourseId,
+          courseId: courseId,
           hiredWithin12m: true,
           salaryGrowthPct: 24.5,
           jobSatisfactionScore: 4.8,
@@ -86,7 +143,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
       expect(res.statusCode).toBe(201);
       const data = JSON.parse(res.body);
       expect(data.outcome).toBeDefined();
-      expect(data.outcome.courseId).toBe(seedCourseId);
+      expect(data.outcome.courseId).toBe(courseId);
       expect(data.outcome.hiredWithin12m).toBe(true);
       expect(data.outcome.salaryGrowthPct).toBe(24.5);
       expect(data.outcome.jobSatisfactionScore).toBe(4.8);
@@ -99,7 +156,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
         url: '/api/v1/learning/impact/outcomes',
         headers: { authorization: `Bearer ${candidateToken}` },
         payload: {
-          courseId: seedCourseId,
+          courseId: courseId,
           hiredWithin12m: true,
           consentFlag: false,
         },
@@ -116,7 +173,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
         method: 'POST',
         url: '/api/v1/learning/impact/outcomes',
         headers: { authorization: `Bearer ${candidateToken}` },
-        payload: outcomePayload,
+        payload: outcomePayload(),
       });
       expect(again.statusCode).toBe(409);
     });
@@ -126,7 +183,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
         method: 'POST',
         url: '/api/v1/learning/impact/outcomes',
         payload: {
-          courseId: seedCourseId,
+          courseId: courseId,
           hiredWithin12m: true,
           consentFlag: true,
         },
@@ -140,13 +197,13 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     it('retrieves publishable course impact metrics when sample count >= 30', async () => {
       const res = await app.inject({
         method: 'GET',
-        url: `/api/v1/learning/impact/courses/${seedCourseId}?minCohortSize=30`,
+        url: `/api/v1/learning/impact/courses/${courseId}?minCohortSize=30`,
       });
 
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       expect(data.metrics).toBeDefined();
-      expect(data.metrics.courseId).toBe(seedCourseId);
+      expect(data.metrics.courseId).toBe(courseId);
       expect(data.metrics.sampleCount).toBeGreaterThanOrEqual(30);
       expect(data.metrics.isPublishable).toBe(true);
       expect(data.metrics.hireRatePct).toBeGreaterThan(0);
@@ -170,7 +227,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     it('suppresses publication when cohort size is below threshold', async () => {
       const res = await app.inject({
         method: 'GET',
-        url: `/api/v1/learning/impact/courses/${seedCourseId}?minCohortSize=100`, // Requesting higher threshold
+        url: `/api/v1/learning/impact/courses/${courseId}?minCohortSize=100`, // Requesting higher threshold
       });
 
       expect(res.statusCode).toBe(200);
@@ -185,7 +242,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
     it("refuses a recompute by anyone but the course's instructor or an admin (REV-01)", async () => {
       const res = await app.inject({
         method: 'POST',
-        url: `/api/v1/learning/impact/courses/${seedCourseId}/compute`,
+        url: `/api/v1/learning/impact/courses/${courseId}/compute`,
         headers: { authorization: `Bearer ${candidateToken}` },
         payload: { enrolledCount: 50 },
       });
@@ -200,7 +257,7 @@ describe('Learning Impact Dashboard & Tracking Integration (F-153, F-114, BR-189
       );
       const res = await app.inject({
         method: 'POST',
-        url: `/api/v1/learning/impact/courses/${seedCourseId}/compute`,
+        url: `/api/v1/learning/impact/courses/${courseId}/compute`,
         headers: { authorization: `Bearer ${adminToken}` },
         payload: {
           enrolledCount: 50,

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { createChallenge } from '../helpers/content.js';
 
 describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Section D)', () => {
   let app: FastifyInstance;
@@ -40,13 +41,8 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     adminUserId = 'a0000000-0000-4000-a000-000000000001';
     adminToken = createSessionToken(adminUserId, 'admin@talentsphere.io', ['platform_admin']);
 
-    // 3. Fetch seeded challenge
-    const listRes = await app.inject({
-      method: 'GET',
-      url: '/api/v1/challenges',
-    });
-    const listBody = JSON.parse(listRes.body);
-    challengeId = listBody.challenges[0].id;
+    // 3. An admin creates the challenge the suite exercises
+    challengeId = (await createChallenge(app)).id;
   });
 
   afterAll(async () => {

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { createChallenge } from '../helpers/content.js';
 
 /**
  * Regression tests for the second review round (R2-2, R2-3, R2-7, R2-8).
@@ -185,12 +186,7 @@ describe('Review round 2 regressions (R2-2, R2-3, R2-7, R2-8)', () => {
   // response returns that stored record rather than an unsaved new id.
   it('R2-8: a repeat pass of the same challenge returns the stored evidence, not a new one', async () => {
     const candidate = await register('r2.challenge@example.com', 'Cy Challenger', 'candidate');
-    const listRes = await app.inject({
-      method: 'GET',
-      url: '/api/v1/challenges',
-      headers: { authorization: `Bearer ${candidate.token}` },
-    });
-    const challengeId = JSON.parse(listRes.body).challenges[0].id as string;
+    const challengeId = (await createChallenge(app)).id;
 
     const submit = () =>
       app.inject({

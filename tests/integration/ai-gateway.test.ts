@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { AI_ADVISORY_DISCLAIMER, AI_QUOTA_LIMITS } from '../../packages/domain/src/index.js';
+import { createChallenge } from '../helpers/content.js';
 
 describe('Central AI Gateway & Career Assistant Integration (F-11, SSOT Section 16)', () => {
   let app: FastifyInstance;
@@ -49,13 +50,8 @@ describe('Central AI Gateway & Career Assistant Integration (F-11, SSOT Section 
     charlieToken = charlieJson.token;
     charlieProfileId = charlieJson.profile.id;
 
-    // 3. Fetch seeded challenge for assessment session test
-    const chalListRes = await app.inject({
-      method: 'GET',
-      url: '/api/v1/challenges',
-    });
-    const chalList = chalListRes.json();
-    challengeId = chalList.challenges[0].id;
+    // 3. An admin creates the challenge the assessment session test uses
+    challengeId = (await createChallenge(app)).id;
   });
 
   afterAll(async () => {

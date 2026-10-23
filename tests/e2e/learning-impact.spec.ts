@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { ensureCourse } from './content.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
 test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..BR-193, OD-51, P-02)', () => {
   let candidateToken: string;
   let candidateId: string;
-  const seedCourseId = 'c0000000-0000-0000-0000-000000000001';
+  let courseId = '';
 
   test.beforeAll(async ({ request }) => {
     const ts = Date.now();
@@ -24,18 +25,50 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     const d = await reg.json();
     candidateId = d.user.id;
     candidateToken = d.token;
+
+    // A course exists only because an instructor created it, and its impact is
+    // measured only from learners who enrolled and recorded their own outcome.
+    courseId = (await ensureCourse(request, 'impact-course', 'Impact Course')).id;
+    for (let i = 0; i < 32; i++) {
+      const learner = await request.post(`${API_BASE}/auth/register`, {
+        data: {
+          email: `cohort.impact.${i}.${ts}@academy.test`,
+          password: 'Password123!Secure',
+          fullName: `Cohort Learner ${i}`,
+          role: 'candidate',
+        },
+      });
+      expect(learner.status()).toBe(201);
+      const headers = { authorization: `Bearer ${(await learner.json()).token}` };
+      const enrolled = await request.post(`${API_BASE}/courses/${courseId}/enroll`, { headers });
+      expect(enrolled.status()).toBe(201);
+      const recorded = await request.post(`${API_BASE}/learning/impact/outcomes`, {
+        headers,
+        data: {
+          courseId,
+          hiredWithin12m: i < 24,
+          salaryGrowthPct: 18 + (i % 8) * 1.5,
+          jobSatisfactionScore: 4 + (i % 3) * 0.2,
+          retentionMonths: i < 20 ? 10 : 3,
+          promotedWithin18m: i < 12,
+          skillsUsedOnJob: ['TypeScript'],
+          consentFlag: true,
+        },
+      });
+      expect(recorded.status()).toBe(201);
+    }
   });
 
   test('records an opt-in learner career outcome (F-114, BR-190)', async ({ request }) => {
     // Only enrolled learners record an outcome for a course (REV-01).
-    const enrolled = await request.post(`${API_BASE}/courses/${seedCourseId}/enroll`, {
+    const enrolled = await request.post(`${API_BASE}/courses/${courseId}/enroll`, {
       headers: { authorization: `Bearer ${candidateToken}` },
     });
     expect(enrolled.status()).toBe(201);
     const res = await request.post(`${API_BASE}/learning/impact/outcomes`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
-        courseId: seedCourseId,
+        courseId: courseId,
         hiredWithin12m: true,
         salaryGrowthPct: 26.0,
         jobSatisfactionScore: 4.7,
@@ -49,7 +82,7 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     expect(res.status()).toBe(201);
     const data = await res.json();
     expect(data.outcome).toBeDefined();
-    expect(data.outcome.courseId).toBe(seedCourseId);
+    expect(data.outcome.courseId).toBe(courseId);
     expect(data.outcome.hiredWithin12m).toBe(true);
     expect(data.outcome.salaryGrowthPct).toBe(26.0);
     expect(data.outcome.jobSatisfactionScore).toBe(4.7);
@@ -62,7 +95,7 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     const res = await request.post(`${API_BASE}/learning/impact/outcomes`, {
       headers: { authorization: `Bearer ${candidateToken}` },
       data: {
-        courseId: seedCourseId,
+        courseId: courseId,
         hiredWithin12m: true,
         consentFlag: false,
       },
@@ -78,13 +111,13 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     request,
   }) => {
     const res = await request.get(
-      `${API_BASE}/learning/impact/courses/${seedCourseId}?minCohortSize=30`
+      `${API_BASE}/learning/impact/courses/${courseId}?minCohortSize=30`
     );
     expect(res.status()).toBe(200);
     const data = await res.json();
 
     expect(data.metrics).toBeDefined();
-    expect(data.metrics.courseId).toBe(seedCourseId);
+    expect(data.metrics.courseId).toBe(courseId);
     expect(data.metrics.sampleCount).toBeGreaterThanOrEqual(30);
     expect(data.metrics.isPublishable).toBe(true);
     expect(data.metrics.hireRatePct).toBeGreaterThan(0);
@@ -97,7 +130,7 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     request,
   }) => {
     const res = await request.get(
-      `${API_BASE}/learning/impact/courses/${seedCourseId}?minCohortSize=200`
+      `${API_BASE}/learning/impact/courses/${courseId}?minCohortSize=200`
     );
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -111,17 +144,17 @@ test.describe('E2E: Learning Impact Dashboard & Tracking (F-153, F-114, BR-189..
     request,
   }) => {
     // BR-191: the course's instructor or a platform admin, not any learner.
-    const refused = await request.post(
-      `${API_BASE}/learning/impact/courses/${seedCourseId}/compute`,
-      { headers: { authorization: `Bearer ${candidateToken}` }, data: { enrolledCount: 60 } }
-    );
+    const refused = await request.post(`${API_BASE}/learning/impact/courses/${courseId}/compute`, {
+      headers: { authorization: `Bearer ${candidateToken}` },
+      data: { enrolledCount: 60 },
+    });
     expect(refused.status()).toBe(403);
     const adminToken = createSessionToken(
       `user_admin_impact_${Date.now()}`,
       `admin.impact.${Date.now()}@talentsphere.internal`,
       ['platform_admin']
     );
-    const res = await request.post(`${API_BASE}/learning/impact/courses/${seedCourseId}/compute`, {
+    const res = await request.post(`${API_BASE}/learning/impact/courses/${courseId}/compute`, {
       headers: { authorization: `Bearer ${adminToken}` },
       data: {
         enrolledCount: 60,

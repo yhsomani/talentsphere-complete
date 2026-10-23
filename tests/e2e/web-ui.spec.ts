@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { publishJob, registerAccount, useSession } from './fixtures.js';
+import { ensureChallenge } from './content.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -243,6 +244,7 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     page,
     request,
   }) => {
+    await ensureChallenge(request);
     // The challenges workspace requires a session (QW-04 guard).
     const email = `e2e.ui.assess.${Date.now()}@example.com`;
     const password = 'Password123!Secure';

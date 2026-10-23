@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ensureCourse } from './content.js';
 
 // Learning (F-07): the catalogue lists published courses, filters by level, and
 // enrolling in a course shows a confirmation.
@@ -7,6 +8,7 @@ test.describe('E2E: Learning catalogue (F-07)', () => {
   const password = 'Password123!Secure';
 
   test.beforeAll(async ({ request }) => {
+    await ensureCourse(request);
     const res = await request.post(`${'http://127.0.0.1:4000/api/v1'}/auth/register`, {
       data: { email, password, fullName: 'Learning E2E Candidate', role: 'candidate' },
     });

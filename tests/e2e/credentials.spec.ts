@@ -1,6 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { createSessionToken } from '../../packages/domain/src/index.js';
 import { API_BASE, registerAccount, type TestAccount } from './fixtures.js';
+import { ensureCourse } from './content.js';
 
 // Digital credentials (F-96) and the public verification page (F-52): a certificate
 // earned through the API shows on the candidate's profile with a verification link,
@@ -8,8 +9,7 @@ import { API_BASE, registerAccount, type TestAccount } from './fixtures.js';
 test.describe('E2E: Credentials on the profile and public verification (F-96, F-52)', () => {
   async function earnCertificate(request: APIRequestContext, account: TestAccount) {
     const auth = { authorization: `Bearer ${account.token}` };
-    const catalog = await (await request.get(`${API_BASE}/courses`)).json();
-    const courseId = catalog.courses[0].id;
+    const courseId = (await ensureCourse(request)).id;
     expect(
       (await request.post(`${API_BASE}/courses/${courseId}/enroll`, { headers: auth })).status()
     ).toBe(201);

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { API_BASE, registerAccount, type TestAccount } from './fixtures.js';
+import { ensureCourse } from './content.js';
 
 // Lesson player (F-07): open a course, enroll, read lessons in order, mark them complete,
 // see progress that survives a reload, and finish with a verifiable certificate.
@@ -13,8 +14,7 @@ test.describe('E2E: Lesson player (F-07)', () => {
   }
 
   test('a learner works through a course to a certificate', async ({ page, request }) => {
-    const catalog = await (await request.get(`${API_BASE}/courses`)).json();
-    const courseId: string = catalog.courses[0].id;
+    const courseId: string = (await ensureCourse(request)).id;
     const detail = await (await request.get(`${API_BASE}/courses/${courseId}`)).json();
     const total: number = detail.course.modules.flatMap(
       (m: { lessons: unknown[] }) => m.lessons
@@ -92,8 +92,7 @@ test.describe('E2E: Lesson player (F-07)', () => {
   test('completing a lesson out of order is refused by the server with a clear message', async ({
     request,
   }) => {
-    const catalog = await (await request.get(`${API_BASE}/courses`)).json();
-    const courseId: string = catalog.courses[0].id;
+    const courseId: string = (await ensureCourse(request)).id;
     const detail = await (await request.get(`${API_BASE}/courses/${courseId}`)).json();
     const lessons = detail.course.modules.flatMap((m: { lessons: { id: string }[] }) => m.lessons);
     const account = await registerAccount(request, 'lesson.order');

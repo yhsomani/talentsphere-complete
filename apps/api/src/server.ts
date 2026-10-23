@@ -4522,26 +4522,7 @@ export async function buildApp(
   const assessmentSessionsByCandidateId = new Map<string, AssessmentSession[]>();
   const xpTransactionsByUserId = new Map<string, XpTransaction[]>();
 
-  // Seed baseline challenge
-  const seedChallenge = createChallenge({
-    slug: 'reverse-words-string',
-    title: 'Reverse Words in a String',
-    description: 'Given an input string s, reverse the order of the words.',
-    difficulty: 'easy',
-    category: 'Strings',
-    testCases: [
-      {
-        id: 'tc1',
-        input: '"the sky is blue"',
-        expectedOutput: '"blue is sky the"',
-        isHidden: false,
-      },
-      { id: 'tc2', input: '"  hello world  "', expectedOutput: '"world hello"', isHidden: true },
-    ],
-    actor: { userId: '00000000-0000-0000-0000-000000000000', roles: ['platform_admin'] },
-  });
-  challengesById.set(seedChallenge.id, seedChallenge);
-  challengesBySlug.set(seedChallenge.slug, seedChallenge);
+  // No challenge is pre-loaded: the arena lists only challenges an admin created.
 
   // Challenges Endpoints
   app.get('/api/v1/challenges', async () => {
@@ -4771,93 +4752,7 @@ export async function buildApp(
   const certificatesByProofHash = new Map<string, CourseCertificate>();
   const courseSkillsByCourseId = new Map<string, string[]>();
 
-  // Seed baseline course for instant onboarding & exploration
-  const seedCourseId = 'c0000000-0000-0000-0000-000000000001';
-  const seedModule1Id = 'm0000000-0000-0000-0000-000000000001';
-  const seedModule2Id = 'm0000000-0000-0000-0000-000000000002';
-  const seedLesson1Id = 'l0000000-0000-0000-0000-000000000001';
-  const seedLesson2Id = 'l0000000-0000-0000-0000-000000000002';
-  const seedLesson3Id = 'l0000000-0000-0000-0000-000000000003';
-
-  const seedCourse: Course = {
-    id: seedCourseId,
-    instructorId: '00000000-0000-0000-0000-000000000000',
-    title: 'TypeScript Full-Stack Architecture',
-    slug: 'typescript-fullstack-architecture',
-    description:
-      'Master enterprise TypeScript, Fastify modular architecture, and schema migrations.',
-    status: 'published',
-    level: 'intermediate',
-    estimatedDurationMinutes: 60,
-    passingScorePercent: 70,
-    xpReward: 50,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  coursesById.set(seedCourse.id, seedCourse);
-  coursesBySlug.set(seedCourse.slug, seedCourse);
-
-  const seedModule1: CourseModule = {
-    id: seedModule1Id,
-    courseId: seedCourseId,
-    title: 'Module 1: Domain-Driven Foundations',
-    description: 'Pure domain business rules and entity invariants',
-    orderIndex: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  const seedModule2: CourseModule = {
-    id: seedModule2Id,
-    courseId: seedCourseId,
-    title: 'Module 2: Fastify & Async Processing',
-    description: 'High performance API endpoints and durable worker queues',
-    orderIndex: 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  courseModulesById.set(seedModule1.id, seedModule1);
-  courseModulesById.set(seedModule2.id, seedModule2);
-
-  const seedLesson1: Lesson = {
-    id: seedLesson1Id,
-    moduleId: seedModule1Id,
-    title: 'Domain Entities and Pure Functions',
-    contentType: 'text',
-    contentBody: 'Writing testable, framework-independent business rules.',
-    durationMinutes: 15,
-    orderIndex: 0,
-    isFreePreview: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  const seedLesson2: Lesson = {
-    id: seedLesson2Id,
-    moduleId: seedModule1Id,
-    title: 'Error Envelopes & Canonical Schemas',
-    contentType: 'text',
-    contentBody: 'Zod schemas and RFC-compliant error structures.',
-    durationMinutes: 20,
-    orderIndex: 1,
-    prerequisiteLessonId: seedLesson1Id,
-    isFreePreview: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  const seedLesson3: Lesson = {
-    id: seedLesson3Id,
-    moduleId: seedModule2Id,
-    title: 'Fastify Server Hooks and Rate Limiting',
-    contentType: 'video',
-    contentBody: 'Building hardened Fastify plugins.',
-    durationMinutes: 25,
-    orderIndex: 0,
-    isFreePreview: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  lessonsById.set(seedLesson1.id, seedLesson1);
-  lessonsById.set(seedLesson2.id, seedLesson2);
-  lessonsById.set(seedLesson3.id, seedLesson3);
+  // No course is pre-loaded: the catalogue holds only courses an instructor created.
 
   // LMS Endpoints (F-07)
   app.get(
@@ -7792,30 +7687,8 @@ export async function buildApp(
   const learningOutcomesByUserId = new Map<string, LearningOutcome[]>();
   const learningImpactMetricsByCourseId = new Map<string, LearningImpactMetrics>();
 
-  // Seed realistic outcome dataset for baseline seed course (35 outcomes, meeting k >= 30 threshold per BR-189)
-  const seedCourseOutcomes: LearningOutcome[] = [];
-  for (let i = 0; i < 35; i++) {
-    const outcome = recordLearningOutcome({
-      id: `seed-outcome-${seedCourseId}-${i + 1}`,
-      userId: `seed-learner-${i + 1}`,
-      courseId: seedCourseId,
-      completedAt: new Date(Date.now() - (35 - i) * 86400000).toISOString(),
-      hiredWithin12m: i < 28, // 80% hire rate
-      salaryGrowthPct: 18 + (i % 8) * 1.5,
-      jobSatisfactionScore: 4.2 + (i % 3) * 0.2,
-      retentionMonths: i < 25 ? 10 : 3,
-      promotedWithin18m: i < 15,
-      skillsUsedOnJob: ['TypeScript', 'Fastify', 'Domain-Driven Design'],
-      consentFlag: true,
-    });
-    learningOutcomesById.set(outcome.id, outcome);
-    seedCourseOutcomes.push(outcome);
-  }
-  learningOutcomesByCourseId.set(seedCourseId, seedCourseOutcomes);
-
-  // Compute and cache initial impact metrics for seed course
-  const seedMetrics = computeLearningImpactMetrics(seedCourseId, seedCourseOutcomes, 42);
-  learningImpactMetricsByCourseId.set(seedCourseId, seedMetrics);
+  // No outcomes are pre-loaded: impact figures come only from learners who recorded
+  // their own outcome, and are published only past the cohort threshold (BR-189).
 
   // 1. Record Learner Career Outcome (F-114, BR-190)
   app.post('/api/v1/learning/impact/outcomes', async (req: FastifyRequest, reply: FastifyReply) => {

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { ensureCourse } from './content.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
@@ -37,7 +38,8 @@ test.describe('E2E: Certificate Verification & Credential Proofs (F-52, S-02, BR
       ['platform_admin']
     );
 
-    // 3. Find seeded baseline course
+    // 3. An instructor publishes the course the candidate will complete
+    await ensureCourse(request);
     const catalogRes = await request.get(`${API_BASE}/courses`);
     expect(catalogRes.status()).toBe(200);
     const catalogData = await catalogRes.json();

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { createPublishedCourse, grantRoles } from '../helpers/content.js';
 
 describe('Integration: Certificate Verification & Public Proofs (F-52, S-02, BR-150, SSOT 1132)', () => {
   let app: FastifyInstance;
@@ -50,15 +51,20 @@ describe('Integration: Certificate Verification & Public Proofs (F-52, S-02, BR-
       'platform_admin',
     ]);
 
-    // 3. Find seeded baseline course
-    const catalogRes = await app.inject({
-      method: 'GET',
-      url: '/api/v1/courses',
+    // 3. An instructor publishes the course the candidate will complete
+    const instructorRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: `instructor.cert.${Date.now()}@example.com`,
+        password: 'Password123!Secure',
+        fullName: 'Certificate Instructor',
+        role: 'candidate',
+      },
     });
-    expect(catalogRes.statusCode).toBe(200);
-    const catalogData = JSON.parse(catalogRes.payload);
-    const seedCourse = catalogData.courses[0];
-    courseId = seedCourse.id;
+    const instructorData = JSON.parse(instructorRes.payload);
+    await grantRoles(app, instructorData.user.id, ['candidate', 'instructor']);
+    courseId = (await createPublishedCourse(app, instructorData.token, 'certificate-course')).id;
 
     // 4. Enroll in course
     const enrollRes = await app.inject({

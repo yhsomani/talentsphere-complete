@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { API_BASE, registerAccount, type TestAccount } from './fixtures.js';
+import { ensureChallenge } from './content.js';
 
 // Challenges (F-08): a candidate starts a timed session on a real challenge and submits a
 // solution. The platform does not run submitted code yet, so the page must say the solution
@@ -17,6 +18,7 @@ test.describe('E2E: Challenges (F-08)', () => {
     page,
     request,
   }) => {
+    await ensureChallenge(request);
     const account = await registerAccount(request, 'challenge.list');
     await signIn(page, account);
     await page.goto('/assessments');
@@ -35,6 +37,7 @@ test.describe('E2E: Challenges (F-08)', () => {
     page,
     request,
   }) => {
+    await ensureChallenge(request);
     const account = await registerAccount(request, 'challenge.submit');
     await signIn(page, account);
     await page.goto('/assessments');
@@ -71,6 +74,7 @@ test.describe('E2E: Challenges (F-08)', () => {
   test('AI assistance is refused while a session is open and allowed again after submitting', async ({
     request,
   }) => {
+    await ensureChallenge(request);
     const account = await registerAccount(request, 'challenge.ai');
     const auth = { authorization: `Bearer ${account.token}` };
     const challenges = await (await request.get(`${API_BASE}/challenges`)).json();

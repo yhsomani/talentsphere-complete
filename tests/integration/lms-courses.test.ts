@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+import { createPublishedCourse } from '../helpers/content.js';
 
 describe('LMS Courses & Learning Management Integration (F-07)', () => {
   let app: FastifyInstance;
@@ -79,22 +80,27 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
     await app.close();
   });
 
-  it('allows exploring seeded baseline courses', async () => {
+  it('starts with an empty catalogue: no course is pre-loaded', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/v1/courses' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().courses).toEqual([]);
+  });
+
+  it('lists a course once an instructor has published it', async () => {
+    await createPublishedCourse(app, instructorToken, 'typescript-fullstack-architecture');
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/courses',
     });
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.courses.length).toBeGreaterThanOrEqual(1);
+    expect(body.courses.length).toBe(1);
 
-    const seedCourse = body.courses.find(
-      (c: any) => c.slug === 'typescript-fullstack-architecture'
-    );
-    expect(seedCourse).toBeDefined();
-    expect(seedCourse.status).toBe('published');
-    expect(seedCourse.moduleCount).toBe(2);
-    expect(seedCourse.lessonCount).toBe(3);
+    const course = body.courses.find((c: any) => c.slug === 'typescript-fullstack-architecture');
+    expect(course).toBeDefined();
+    expect(course.status).toBe('published');
+    expect(course.moduleCount).toBe(2);
+    expect(course.lessonCount).toBe(3);
   });
 
   it('enforces course publishing readiness rules (BR-91, BR-92)', async () => {
