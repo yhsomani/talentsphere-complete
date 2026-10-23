@@ -40,3 +40,16 @@ Follows `PAYMENT_AUDIT_2026-10-23.md`, which predates the Stripe integration (PR
 | `pnpm build` (user-authorized; tracked tree unchanged)  | all packages and apps pass                   |
 | `pnpm test` after rebuild, before fixes                 | 117 files, 1231 tests pass                   |
 | S-1 and S-3 tests                                       | written after the fix, not run against the unfixed code |
+
+## Update: refund handling (O-2 partly closed)
+
+Decision (owner, 2026-10-23): a full refund of the charge that paid for the current period ends paid access.
+
+- `charge.refunded` is now handled. When the charge is fully refunded, was made at or after the current period start, and the subscription is live, the subscription is canceled at Stripe immediately; the existing subscription reconciliation then drops entitlements to free.
+- A partial refund, or a refund of an older charge, changes nothing.
+- The cancel runs before the event is recorded, so a Stripe failure makes Stripe retry the event. A replay is recorded once and does not cancel again.
+- `charge.dispute.created` and `invoice.voided` are still not handled (O-2 remains open for them).
+
+## Update: hosted Supabase (issues #46, #48)
+
+Project `talentsphere-production` (`qidckctwrkxyiwworchd`) was inspected read-only: one migration (`add_readonly_keepalive_ping`), no security advisories, no application tables. Migrations were **not** applied. `docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md` forbids it, and migrations 00016, 00018, 00022 and 00023 hold foreign keys to `auth.users(id)` while the app keeps users in `public.users`, so the schema would reject inserts and the Data API could expose tables. A hosted-specific migration path is needed first.

@@ -5,6 +5,7 @@ import { createStripeGateway, type StripeGateway } from '../../apps/api/src/stri
 import {
   FAKE_PRICES,
   FAKE_STRIPE_ENV,
+  chargeRefundedEvent,
   checkoutCompletedEvent,
   invoiceEvent,
   signStripeWebhook,
@@ -449,6 +450,58 @@ describe('Stripe billing (F-16)', () => {
 
       await post('/api/v1/billing/cancel', {});
       expect(calls.cancellations).toHaveLength(1);
+    });
+  });
+
+  describe('refunds', () => {
+    const periodStart = () => Math.floor(Date.parse(subStart) / 1000);
+    let subStart = '';
+
+    it('keeps access after a partial refund or a refund of an older charge', async () => {
+      subStart = (await subscription()).subscription.currentPeriodStart;
+      calls.cancellations.length = 0;
+      await send(
+        chargeRefundedEvent({
+          eventId: 'evt_refund_partial',
+          customerId,
+          refunded: false,
+          chargeCreated: periodStart() + 10,
+        })
+      );
+      await send(
+        chargeRefundedEvent({
+          eventId: 'evt_refund_old',
+          customerId,
+          chargeCreated: periodStart() - 86400,
+        })
+      );
+      expect(calls.cancellations).toEqual([]);
+      expect((await subscription()).entitlements.planTier).toBe('candidate_pro');
+    });
+
+    it('ends access, once, when the current period charge is fully refunded', async () => {
+      const event = chargeRefundedEvent({
+        eventId: 'evt_refund_full',
+        customerId,
+        chargeCreated: periodStart() + 10,
+      });
+      const first = await send(event);
+      expect(JSON.parse(first.body).status).toBe('processed');
+      expect(calls.cancellations).toEqual([{ id: 'sub_second', immediate: true }]);
+      const sub = await subscription();
+      expect(sub.subscription.status).toBe('canceled');
+      expect(sub.entitlements.planTier).toBe('free');
+
+      const replay = await send(event);
+      expect(JSON.parse(replay.body).status).toBe('replayed');
+      expect(calls.cancellations).toHaveLength(1);
+    });
+
+    it('ignores a refund for a customer nobody owns', async () => {
+      const res = await send(
+        chargeRefundedEvent({ eventId: 'evt_refund_stranger', customerId: 'cus_nobody' })
+      );
+      expect(JSON.parse(res.body)).toMatchObject({ status: 'ignored', reason: 'unknown customer' });
     });
   });
 });

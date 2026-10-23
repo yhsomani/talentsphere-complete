@@ -113,6 +113,32 @@ export function subscriptionEvent(o: {
   };
 }
 
+export function chargeRefundedEvent(o: {
+  eventId: string;
+  customerId: string;
+  /** False for a partial refund. */
+  refunded?: boolean;
+  /** When the refunded charge was made (unix seconds). */
+  chargeCreated?: number;
+  created?: number;
+}) {
+  return {
+    id: o.eventId,
+    object: 'event',
+    type: 'charge.refunded',
+    created: o.created ?? now(),
+    data: {
+      object: {
+        id: 'ch_test_1',
+        object: 'charge',
+        customer: o.customerId,
+        refunded: o.refunded ?? true,
+        created: o.chargeCreated ?? now(),
+      },
+    },
+  };
+}
+
 export function invoiceEvent(o: {
   eventId: string;
   customerId: string;

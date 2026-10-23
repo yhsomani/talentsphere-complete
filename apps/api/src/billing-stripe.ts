@@ -146,6 +146,32 @@ export async function processStripeEvent(
       return done(outcome);
     }
 
+    case 'refund': {
+      const userId = event.customerId
+        ? await billing.findUserIdByStripeCustomer(event.customerId)
+        : undefined;
+      if (!userId || !deps.getAccountEmail(userId)) {
+        deps.log.warn({ eventId: event.id }, 'Stripe refund event for an unknown customer');
+        return { status: 'ignored', reason: 'unknown customer' };
+      }
+      const subscription = await billing.getSubscription(userId);
+      const periodStart = subscription ? Date.parse(subscription.currentPeriodStart) / 1000 : 0;
+      // Only a full refund of the charge that paid for the current period ends
+      // access; a partial refund or an older charge's refund does not.
+      if (
+        !event.fullyRefunded ||
+        !subscription ||
+        !isLive(subscription) ||
+        event.chargeCreated < periodStart
+      ) {
+        return done(await billing.applyEvent(record(userId, { chargeRefunded: true })));
+      }
+      // Cancel before recording: a Stripe failure throws, so Stripe retries the
+      // event instead of it being recorded as handled.
+      await cancelWithStripe(deps, subscription, true);
+      return done(await billing.applyEvent(record(userId, { chargeRefunded: true })));
+    }
+
     case 'invoice': {
       const { snapshot } = event;
       const userId = await billing.findUserIdByStripeCustomer(snapshot.customerId);

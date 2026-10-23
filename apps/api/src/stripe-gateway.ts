@@ -40,6 +40,17 @@ export type NormalizedStripeEvent =
       created: number;
       snapshot: StripeInvoiceSnapshot;
     }
+  | {
+      kind: 'refund';
+      id: string;
+      type: string;
+      created: number;
+      customerId: string | undefined;
+      /** True only when the whole charge was refunded; partial refunds keep access. */
+      fullyRefunded: boolean;
+      /** Unix seconds when the refunded charge was made. */
+      chargeCreated: number;
+    }
   | { kind: 'ignored'; id: string; type: string; created: number };
 
 export interface StripeGateway {
@@ -133,6 +144,16 @@ export function normalizeEvent(event: Stripe.Event): NormalizedStripeEvent {
     case 'invoice.paid':
     case 'invoice.payment_failed':
       return { kind: 'invoice', ...base, snapshot: normalizeInvoice(event.data.object) };
+    case 'charge.refunded': {
+      const charge = event.data.object;
+      return {
+        kind: 'refund',
+        ...base,
+        customerId: idOf(charge.customer),
+        fullyRefunded: charge.refunded === true,
+        chargeCreated: charge.created,
+      };
+    }
     default:
       return { kind: 'ignored', ...base };
   }
