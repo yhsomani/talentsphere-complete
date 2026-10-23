@@ -284,6 +284,16 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
     expect(membersData.members).toHaveLength(2);
   });
 
+  it('does not let a joiner claim the moderator role for themselves (403)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/alumni/groups/${groupId}/join`,
+      headers: { authorization: `Bearer ${user2Token}` },
+      payload: { role: 'moderator' },
+    });
+    expect(res.statusCode).toBe(403);
+  });
+
   it('manages alumni mentorship lifecycle: request, accept, and complete', async () => {
     // 1. Bob requests mentorship from Alice
     const reqRes = await app.inject({

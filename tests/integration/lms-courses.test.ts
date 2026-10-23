@@ -121,6 +121,22 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
     expect(createRes.statusCode).toBe(201);
     const courseId = createRes.json().course.id;
 
+    // A draft is visible to its instructor only; anyone else sees a missing course.
+    const draftAnonymous = await app.inject({ method: 'GET', url: `/api/v1/courses/${courseId}` });
+    expect(draftAnonymous.statusCode).toBe(404);
+    const draftCandidate = await app.inject({
+      method: 'GET',
+      url: `/api/v1/courses/${courseId}`,
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(draftCandidate.statusCode).toBe(404);
+    const draftInstructor = await app.inject({
+      method: 'GET',
+      url: `/api/v1/courses/${courseId}`,
+      headers: { authorization: `Bearer ${instructorToken}` },
+    });
+    expect(draftInstructor.statusCode).toBe(200);
+
     // 2. Attempt publish with 0 modules/lessons -> fails validation
     const earlyPublishRes = await app.inject({
       method: 'POST',

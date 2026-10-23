@@ -192,6 +192,26 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
   });
 
   describe('POST /api/v1/skills/:skillId/forecast/generate', () => {
+    it('refuses a candidate, who may not replace the shared forecast (403)', async () => {
+      const reg = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: 'candidate.forecast@talentsphere.test',
+          password: 'Password123!Secure',
+          fullName: 'Forecast Candidate',
+          role: 'candidate',
+        },
+      });
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/skills/${canonicalSkillId}/forecast/generate`,
+        headers: { authorization: `Bearer ${JSON.parse(reg.body).token}` },
+        payload: { forecastHorizonMonths: 6, prerequisiteDepth: 1 },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+
     it('triggers explicit recomputation with custom horizon and prerequisite depth', async () => {
       const res = await app.inject({
         method: 'POST',

@@ -46,7 +46,7 @@ The investigators did not search for undocumented behaviour systematically. The 
 
 ## Limitations
 
-- Not every route, page and migration was read. `apps/api/src/server.ts` has 278 unique routes; the flows cover auth, jobs and applications, work history, billing and boot. Courses, messaging, networking, gamification, moderation, admin and the long tail were discovered but not modelled.
+- Not every route, page and migration was read. `apps/api/src/server.ts` has 278 unique routes. `02-flows.md` models auth, jobs and applications, work history, billing and boot with diagrams; `06-route-authorization.md` records the authorization and persistence of about 170 more routes from four further investigators, without diagrams. Per-route request validation schemas, several domain helpers and the storage SQL for those groups were not read.
 - GitHub issue threads were read through the public API only; private discussion and approved stakeholder decisions were not accessible.
 - No production or staging behaviour was observed. The Supabase project was inspected read-only (one keepalive migration, no application tables).
 - The "council" was five investigators and one reviewer, each an AI agent working from the code. They did not debate each other, and no human approved a decision.

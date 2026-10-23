@@ -4847,6 +4847,16 @@ export async function buildApp(
       if (!course) {
         throw new DomainError('NOT_FOUND', `Course with ID or slug "${id}" not found.`);
       }
+      // An unpublished course (and its lesson text) is visible only to its instructor
+      // and platform admins; everyone else gets the same 404 as for a missing course.
+      if (course.status !== 'published') {
+        const viewer = maybeExtractUser(req);
+        const isInstructor =
+          !!viewer && profilesByUserId.get(viewer.userId)?.id === course.instructorId;
+        if (!isInstructor && !viewer?.roles.includes('platform_admin')) {
+          throw new DomainError('NOT_FOUND', `Course with ID or slug "${id}" not found.`);
+        }
+      }
 
       const modules = Array.from(courseModulesById.values())
         .filter((m) => m.courseId === course.id)
@@ -7408,6 +7418,15 @@ export async function buildApp(
     '/api/v1/skills/:skillId/forecast/generate',
     async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
+      // Recomputing replaces the cached forecast everyone reads (route comment: Admin / Recruiter).
+      if (
+        !session.roles.some((r) => ['platform_admin', 'recruiter', 'hiring_manager'].includes(r))
+      ) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only recruiters and platform admins can regenerate forecasts.'
+        );
+      }
       const { skillId } = req.params;
 
       const skill = skillsById.get(skillId);
@@ -9134,6 +9153,13 @@ export async function buildApp(
       const input = JoinAlumniGroupInputSchema.parse(req.body || {});
       const userVerifiedInsts = getUserVerifiedInstitutions(session.userId);
       const isPrivileged = administersInstitution(session, group.institutionId);
+      // Moderation of a group is granted by the institution, not claimed by the joiner.
+      if (input.role === 'moderator' && !isPrivileged) {
+        throw new DomainError(
+          'FORBIDDEN',
+          'Only an institution administrator can join a group as a moderator.'
+        );
+      }
       const userInsts =
         isPrivileged && !userVerifiedInsts.includes(group.institutionId)
           ? [group.institutionId, ...userVerifiedInsts]
