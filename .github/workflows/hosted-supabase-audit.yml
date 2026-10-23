@@ -1,0 +1,29 @@
+name: Hosted Supabase migration audit
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'scripts/audit-hosted-supabase-migrations.mjs'
+      - '.github/workflows/hosted-supabase-audit.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inventory migration identity dependencies
+        run: |
+          node scripts/audit-hosted-supabase-migrations.mjs > "$RUNNER_TEMP/hosted-audit.json" || status=$?
+          cat "$RUNNER_TEMP/hosted-audit.json"
+          # Existing historical migrations remain incompatible. Prevent NEW
+          # migrations from adding more Supabase platform-auth dependencies.
+          node scripts/check-new-hosted-migrations.mjs
+          if [ ! -s "$RUNNER_TEMP/hosted-audit.json" ]; then exit 1; fi
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-supabase-migration-audit
+          path: ${{ runner.temp }}/hosted-audit.json
