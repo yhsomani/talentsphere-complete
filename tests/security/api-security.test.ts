@@ -502,10 +502,13 @@ describe('SEC: Error and secret leakage (SECURITY.md §6, §8)', () => {
 describe('SEC: Webhook authenticity, replay and billing idempotency (SECURITY.md §9)', () => {
   let app: FastifyInstance;
   let sequence = 0;
+  // A signed event must refer to a real account: recording one against an
+  // unknown user id is refused (404) rather than stored.
+  let accountId: string;
   const event = (overrides: Record<string, unknown> = {}) => ({
     eventType: 'invoice.paid',
     idempotencyKey: `sec-hook-${sequence++}`,
-    userId: crypto.randomUUID(),
+    userId: accountId,
     amountCents: 1900,
     currency: 'USD',
     ...overrides,
@@ -522,10 +525,27 @@ describe('SEC: Webhook authenticity, replay and billing idempotency (SECURITY.md
       BILLING_WEBHOOK_SECRET: TEST_WEBHOOK_SECRET,
     } as never);
     await app.ready();
+    const registered = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'webhook.account@example.com',
+        password: 'Password123!Secure',
+        fullName: 'Webhook Account',
+      },
+    });
+    expect(registered.statusCode).toBe(201);
+    accountId = registered.json().user.id;
   });
 
   afterAll(async () => {
     await app.close();
+  });
+
+  it('refuses a correctly signed event about a user that does not exist', async () => {
+    const signed = signWebhook(event({ userId: crypto.randomUUID() }));
+    const res = await post(signed.body, signed.headers);
+    expect(res.statusCode).toBe(404);
   });
 
   it('processes a correctly signed billing webhook', async () => {

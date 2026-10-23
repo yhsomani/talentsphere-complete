@@ -44,6 +44,11 @@ export interface Subscription {
   canceledAt?: string;
   createdAt: string;
   updatedAt: string;
+  /** Set only for subscriptions mirrored from Stripe. */
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  /** `created` of the newest Stripe event applied; older events are stale. */
+  providerEventCreatedAt?: string;
 }
 
 export interface Invoice {
@@ -56,6 +61,8 @@ export interface Invoice {
   paidAt?: string;
   hostedInvoiceUrl?: string;
   idempotencyKey?: string;
+  /** Set only for invoices mirrored from Stripe. */
+  stripeInvoiceId?: string;
   createdAt: string;
 }
 

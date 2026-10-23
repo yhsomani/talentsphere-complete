@@ -29,6 +29,9 @@ import {
   PgFeatureFlagStore,
   type FeatureFlagStore,
 } from './feature-flag-store.js';
+import { MemoryBillingStore, PgBillingStore, type BillingStore } from './billing-store.js';
+
+export type { BillingStore, BillingEventRecord, BillingStateWrite } from './billing-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
@@ -66,6 +69,8 @@ export interface Storage {
   readonly adminAudit: AdminAuditStore;
   /** Platform feature flags (F-35): durable in pg mode only. */
   readonly featureFlags: FeatureFlagStore;
+  /** Subscriptions, invoices, entitlements, Stripe mapping and billing events (F-16). */
+  readonly billing: BillingStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -93,6 +98,7 @@ class PgStorage implements Storage {
   readonly adminAudit: AdminAuditStore;
   /** Platform feature flags (F-35): durable in pg mode only. */
   readonly featureFlags: FeatureFlagStore;
+  readonly billing: BillingStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -121,6 +127,7 @@ class PgStorage implements Storage {
     this.savedJobs = new PgSavedJobStore(this.pool);
     this.adminAudit = new PgAdminAuditStore(this.pool);
     this.featureFlags = new PgFeatureFlagStore(this.pool);
+    this.billing = new PgBillingStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -223,6 +230,7 @@ class MemoryStorage implements Storage {
   readonly savedJobs: SavedJobStore = new MemorySavedJobStore();
   readonly adminAudit: AdminAuditStore = new MemoryAdminAuditStore();
   readonly featureFlags: FeatureFlagStore = new MemoryFeatureFlagStore();
+  readonly billing: BillingStore = new MemoryBillingStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

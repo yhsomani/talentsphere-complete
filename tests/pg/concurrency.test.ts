@@ -352,14 +352,22 @@ describe('Concurrency and integrity on PostgreSQL', () => {
     expect(durable.headers['x-talentsphere-durability']).toBeUndefined();
     const cand = await register(app, 'labels@example.org');
     const auth = { authorization: `Bearer ${cand.token}` };
-    // Billing records are still kept in process memory.
+    // Gamification is still kept in process memory.
     const ephemeral = await app.inject({
       method: 'GET',
-      url: '/api/v1/billing/subscription',
+      url: '/api/v1/gamification/summary',
       headers: auth,
     });
     expect(ephemeral.statusCode).toBe(200);
     expect(ephemeral.headers['x-talentsphere-durability']).toBe('ephemeral');
+    // Billing is durable since migration 00052.
+    const billing = await app.inject({
+      method: 'GET',
+      url: '/api/v1/billing/subscription',
+      headers: auth,
+    });
+    expect(billing.statusCode).toBe(200);
+    expect(billing.headers['x-talentsphere-durability']).toBeUndefined();
     // Notifications are durable since migration 00044.
     const notifications = await app.inject({
       method: 'GET',

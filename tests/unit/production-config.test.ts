@@ -4,6 +4,7 @@ import {
   MIN_DEPLOYED_PBKDF2_ITERATIONS,
   PUBLISHED_TEST_SECRET_SHA256,
   productionConfigProblems,
+  stripeConfigProblems,
   validateServerEnv,
 } from '../../packages/config/src/env.js';
 import { PBKDF2_DEFAULT_ITERATIONS } from '../../packages/domain/src/auth.js';
@@ -144,5 +145,52 @@ describe('Production configuration guard (apps/api/src/index.ts refuses to start
     const sha = (v: string) => createHash('sha256').update(v).digest('hex');
     expect(PUBLISHED_TEST_SECRET_SHA256.has(sha(TEST_TOKEN_SECRET))).toBe(true);
     expect(PUBLISHED_TEST_SECRET_SHA256.has(sha(TEST_WEBHOOK_SECRET))).toBe(true);
+  });
+});
+
+describe('Stripe billing configuration', () => {
+  const STRIPE = {
+    BILLING_MODE: 'stripe',
+    STRIPE_SECRET_KEY: `sk_test_${'a'.repeat(24)}`,
+    STRIPE_WEBHOOK_SECRET: `whsec_${'b'.repeat(32)}`,
+    STRIPE_PRICE_CANDIDATE_PRO_MONTHLY: 'price_pro_m',
+  };
+  const problems = (over: Record<string, unknown> = {}) =>
+    stripeConfigProblems(validateServerEnv({ ...STRIPE, ...over }));
+
+  it('accepts a complete configuration and ignores other billing modes', () => {
+    expect(problems()).toEqual([]);
+    expect(stripeConfigProblems(validateServerEnv({ BILLING_MODE: 'disabled' }))).toEqual([]);
+  });
+
+  it('refuses a half-configured Stripe mode', () => {
+    expect(problems({ STRIPE_SECRET_KEY: undefined }).join()).toContain('STRIPE_SECRET_KEY');
+    expect(problems({ STRIPE_WEBHOOK_SECRET: undefined }).join()).toContain('STRIPE_WEBHOOK_SECRET');
+    expect(problems({ STRIPE_PRICE_CANDIDATE_PRO_MONTHLY: undefined }).join()).toContain(
+      'STRIPE_PRICE_'
+    );
+  });
+
+  it('refuses one price id that would grant two plans', () => {
+    expect(problems({ STRIPE_PRICE_CANDIDATE_PRO_YEARLY: 'price_pro_m' }).join()).toContain('distinct');
+  });
+
+  it('rejects malformed keys at parse time', () => {
+    expect(() => validateServerEnv({ ...STRIPE, STRIPE_SECRET_KEY: 'not-a-key' })).toThrow();
+    expect(() => validateServerEnv({ ...STRIPE, STRIPE_WEBHOOK_SECRET: 'nope' })).toThrow();
+  });
+
+  it('refuses test-mode keys and an insecure return URL in production', () => {
+    const prod = (over: Record<string, unknown> = {}) =>
+      productionConfigProblems(
+        validateServerEnv({ ...SAFE_PRODUCTION, ...STRIPE, APP_URL: 'https://app.talentsphere.example', ...over })
+      );
+    expect(prod().join()).toContain('test-mode');
+    expect(
+      prod({ STRIPE_SECRET_KEY: `sk_live_${'a'.repeat(24)}` })
+    ).toEqual([]);
+    expect(
+      prod({ STRIPE_SECRET_KEY: `sk_live_${'a'.repeat(24)}`, APP_URL: 'http://app.example' }).join()
+    ).toContain('HTTPS');
   });
 });

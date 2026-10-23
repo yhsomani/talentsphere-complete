@@ -276,10 +276,37 @@ everything (503) rather than trusting callers. Duplicate event ids are idempoten
 Coverage: `tests/security/api-security.test.ts` (unsigned, wrong secret, stale timestamp,
 tampered body, valid).
 
-**Caveat:** no payment provider is integrated, so this scheme is TalentSphere's own
-(modelled on Stripe's `t=…,v1=…`). When a provider is chosen, verify **its** signature
-contract instead; do not keep this one alongside it. Paid plans cannot be bought until
-then (`BILLING_MODE=disabled`; `simulated` is for demos/tests and refused in production).
+**Caveat:** this scheme is TalentSphere's own and serves only `BILLING_MODE=simulated`
+and tests. Real payments use the Stripe endpoint below; the two are never both the source
+of paid access (`BILLING_MODE=disabled` is the default; `simulated` is refused in
+production).
+
+### Stripe billing (added 2026-10-23)
+
+With `BILLING_MODE=stripe`:
+
+- `POST /api/v1/billing/stripe-webhook` verifies Stripe's `Stripe-Signature` over the
+  exact bytes received (SDK `constructEvent`, 5-minute tolerance). Missing, forged, stale
+  or altered requests get 401 and change nothing.
+- Stripe is the source of truth. A paid tier exists only after a signed subscription event
+  at a price id in the server-side catalog, in `active`/`trialing` status. `past_due`,
+  `unpaid`, `paused`, `incomplete` and `canceled` fall back to free. The Checkout success
+  redirect grants nothing, and `POST /billing/subscribe` refuses paid plans.
+- The client names a plan and cycle only; price ids come from `STRIPE_PRICE_*`.
+- Events are recorded and applied in one transaction keyed by `(provider, event id)`;
+  duplicates are no-ops, and an event older than the newest applied one is skipped
+  (Stripe does not guarantee order).
+- Account erasure deletes the Stripe customer first (a Stripe outage stops the erasure
+  before anything else changes, so it can be retried) and then the local billing rows.
+- Personal data sent to Stripe: the account email and user id (metadata). Stripe holds card
+  data; this API never sees or stores it.
+- Billing tables are server-only (RLS on, `REVOKE ALL FROM PUBLIC`).
+- Provider failures return a generic 503; details go to the server log without secrets.
+
+Not covered: `scripts/check-client-secrets.mjs` was not extended with Stripe key patterns
+(protected file; ask first). Dispute/refund events are acknowledged but not acted on.
+Coverage: `tests/unit/stripe-billing-domain.test.ts`, `tests/integration/stripe-billing.test.ts`,
+`tests/pg/billing.test.ts`, `tests/unit/production-config.test.ts`.
 
 ## 10. AI Security
 

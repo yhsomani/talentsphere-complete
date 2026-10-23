@@ -24,6 +24,7 @@ export * from './portfolio.js';
 export * from './gamification.js';
 export * from './settings.js';
 export * from './billing.js';
+export * from './stripe-billing.js';
 export * from './admin.js';
 export * from './search.js';
 export * from './moderation.js';
