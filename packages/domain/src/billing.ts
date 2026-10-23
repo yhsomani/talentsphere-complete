@@ -227,6 +227,13 @@ export interface CreateSubscriptionParams {
   billingCycle?: BillingCycle;
   idempotencyKey?: string;
   nowIso?: string;
+  /**
+   * Dev/test only: activate a paid tier without payment evidence. The caller
+   * must pass true solely under BILLING_MODE=simulated (which production
+   * config validation refuses). Defaults to false so a paid tier can never be
+   * minted by omission.
+   */
+  allowSimulatedPayment?: boolean;
 }
 
 export interface CreateSubscriptionResult {
@@ -244,11 +251,12 @@ export function createSubscription(params: CreateSubscriptionParams): CreateSubs
     throw new DomainError('VALIDATION_FAILED', `Unknown plan tier: ${params.planTier}`);
   }
 
-  // This constructor is used by legacy/demo workflows and has no trusted
-  // Stripe webhook evidence. It must never mint paid access or paid invoices.
-  // A future Stripe billing reconciler must verify signed provider events and
-  // persist entitlements transactionally before enabling a paid tier.
-  if (params.planTier !== 'free') {
+  // This constructor has no trusted payment-provider evidence. It must never
+  // mint paid access or paid invoices unless the caller explicitly opts into
+  // simulation (dev/test only). A future billing reconciler must verify signed
+  // provider events and persist entitlements transactionally before enabling
+  // a paid tier for real.
+  if (params.planTier !== 'free' && !params.allowSimulatedPayment) {
     throw new DomainError(
       'PAYMENT_REQUIRED',
       'Paid subscriptions require verified payment from an approved payment provider.'
@@ -283,7 +291,7 @@ export function createSubscription(params: CreateSubscriptionParams): CreateSubs
     subscriptionId,
     amountCents,
     currency: plan.currency,
-    status: 'paid', // Only a zero-amount free subscription reaches this constructor
+    status: 'paid', // Free (0 cents) or explicitly simulated (dev/test) only
     paidAt: now,
     hostedInvoiceUrl: `/invoices/${invoiceId}`,
     idempotencyKey: params.idempotencyKey,
@@ -321,12 +329,44 @@ export function cancelSubscription(
     };
   }
 
+  // Re-requesting a cancellation that is already scheduled is a no-op: it must
+  // not move the original cancellation timestamp.
+  if (subscription.cancelAtPeriodEnd) {
+    return subscription;
+  }
+
   return {
     ...subscription,
     cancelAtPeriodEnd: true,
     canceledAt: nowIso,
     updatedAt: nowIso,
   };
+}
+
+/**
+ * Applies the passage of time to a subscription. A subscription scheduled to
+ * cancel at period end becomes `canceled` once that period has ended; without
+ * this, a "cancel at period end" would keep paid access forever.
+ * Returns the same object when nothing changes.
+ */
+export function settleSubscription(
+  subscription: Subscription,
+  nowIso: string = new Date().toISOString()
+): Subscription {
+  if (
+    subscription.status !== 'canceled' &&
+    subscription.cancelAtPeriodEnd &&
+    new Date(subscription.currentPeriodEnd).getTime() <= new Date(nowIso).getTime()
+  ) {
+    return {
+      ...subscription,
+      status: 'canceled',
+      cancelAtPeriodEnd: false,
+      canceledAt: subscription.canceledAt ?? nowIso,
+      updatedAt: nowIso,
+    };
+  }
+  return subscription;
 }
 
 /**
