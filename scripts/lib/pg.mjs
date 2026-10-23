@@ -49,6 +49,8 @@ export async function ensureSupabaseCompat(client) {
   const hosted = await client.query(`
     SELECT EXISTS (
       SELECT 1 FROM pg_namespace WHERE nspname = 'supabase_migrations'
+      UNION ALL SELECT 1 FROM pg_roles WHERE rolname = 'supabase_auth_admin'
+      UNION ALL SELECT 1 FROM information_schema.columns WHERE table_schema = 'auth' AND table_name = 'users' AND column_name = 'email'
     ) AS hosted
   `);
   if (hosted.rows[0]?.hosted) {
