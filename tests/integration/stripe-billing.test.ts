@@ -254,6 +254,33 @@ describe('Stripe billing (F-16)', () => {
       expect((await subscription()).entitlements.planTier).toBe('free');
     });
 
+    it('ignores a checkout whose customer is already linked to another account', async () => {
+      const other = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: 'stripe.other@example.com',
+          password: 'Password123!Secure',
+          fullName: 'Olive Other Buyer',
+          role: 'candidate',
+        },
+      });
+      expect(other.statusCode).toBe(201);
+      const res = await send(
+        checkoutCompletedEvent({
+          eventId: 'evt_co_clash',
+          userId: JSON.parse(other.body).user.id,
+          customerId,
+          subscriptionId: 'sub_clash',
+        })
+      );
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toMatchObject({
+        status: 'ignored',
+        reason: 'customer linked to another account',
+      });
+    });
+
     it('grants the paid tier from a signed active subscription and records the invoice', async () => {
       const t0 = Math.floor(Date.now() / 1000) - 600;
       const res = await send(

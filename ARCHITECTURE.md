@@ -58,7 +58,7 @@ flowchart TD
         OBS["@talentsphere/observability — pino logger + audit sink"]
         UI["@talentsphere/ui — design tokens"]
     end
-    PG[("PostgreSQL — 52 migrations<br/>core-loop tables + background_jobs")]
+    PG[("PostgreSQL — 53 migrations<br/>core-loop tables + background_jobs")]
     RM[("API read model: Maps hydrated from PG at boot,<br/>updated only after COMMIT (single writer)")]
     MEM[("Long-tail module state: in-process Maps<br/>lost on restart, labelled ephemeral")]
 
@@ -91,7 +91,7 @@ Key facts (source cross-check, 2026-10-21; not deployment verification):
 | ---------------------------------- | ----------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Authentication                     | Register/login/session tokens | Yes                                  | Own code: `packages/domain/src/auth.ts` (PBKDF2 + HMAC tokens). **Supabase Auth is NOT integrated** despite env keys existing.                                                                      |
 | Authorization                      | Role checks, ownership checks | Yes                                  | Server-side in `apps/api/src/server.ts` via `extractUser` + role assertions + domain functions (`canViewProfile`, `assertPlatformAdmin`, …).                                                        |
-| Database                           | Relational persistence        | **Yes - core plus dedicated stores** | 52 migrations; `pnpm db:migrate` applies them. Core loop, background jobs and dedicated metadata/search/bookmark/audit/flag/erasure stores persist; remaining long-tail modules use process memory. |
+| Database                           | Relational persistence        | **Yes - core plus dedicated stores** | 53 migrations; `pnpm db:migrate` applies them. Core loop, background jobs and dedicated metadata/search/bookmark/audit/flag/erasure stores persist; remaining long-tail modules use process memory. |
 | Payments                           | Card processing               | No — and **no provider exists**      | No card fields anywhere. Paid plans refused unless `BILLING_MODE=simulated` (demo/test; refused in production). Webhook HMAC-signed.                                                                |
 | Notifications delivery             | Email/push/SMS                | No                                   | Dev outbox in development; opt-in Resend in deployed environments. Delivery unverified; no push/SMS.                                                                                                |
 | AI inference                       | Career assistant              | Partially                            | Local heuristic inside domain package. External providers (Gemini/Claude) documented in SSOT but **not implemented**.                                                                               |
