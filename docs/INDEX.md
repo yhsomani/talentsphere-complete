@@ -47,6 +47,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture.** Intended modular monolith, bounded contexts, flows. Not a description of the running code. |
 | [`engineering/adr/ADR-015-core-loop-persistence.md`](engineering/adr/ADR-015-core-loop-persistence.md) | ADR: persist the core career loop; the API's in-memory maps are a read model. |
 | [`engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`](engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | ADR: measure UI quality in a real browser and test it adversarially. |
+| [`system-model/00-index.md`](system-model/00-index.md) | **System model.** Verified current behaviour: inventory, flowcharts, conflict register, rule matrix, audit. Not a statement of intent. |
 
 ## 3. Implementation details
 
