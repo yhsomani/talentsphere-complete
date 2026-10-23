@@ -122,7 +122,7 @@ Do **not** close R2-01 as fixed until PR CI passes; do **not** assert R2-07/R2-0
 | File | Branch action | Why / safety |
 |---|---|---|
 | `tests/e2e/account-security.spec.ts` | One narrow source-test change, replacing `waitForURL('**/login**')` after in-app navigation with `await expect(elsewhere).toHaveURL(/\/login(?:\?|$)/)` | Playwright's URL assertion retries through a client-side redirect without requiring an abort-prone `load` navigation event; exact revoked-session banner, re-login and landing checks **retained**. No app/auth code weakened. **CI verdict pending**. |
-| `REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` | New consolidated report | Current provenance, complete open-issue register, full historical feature appendix, new live Stripe/Supabase read-only evidence and verification limits |
+| `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` | New consolidated report | Current provenance, seven-issue register, 173-feature historical appendix, and live Stripe/Supabase read-only evidence. Root `REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` is a concise pointer to this report. |
 
 **Protected files:** none changed. **Hosted SQL/Stripe mutations:** none. **Existing user working tree:** not accessible, not modified/reset; remote `main` untouched.
 
@@ -144,19 +144,19 @@ Do **not** close R2-01 as fixed until PR CI passes; do **not** assert R2-07/R2-0
 
 ## J. GitHub issue reconciliation journal
 
-**Baseline GitHub issue states:** #44–#50 OPEN. Existing latest issue comments from 2026-10-23 ~18:15–18:25 UTC already cover hosted Supabase and older provider work. This audit will comment only on substantive changed facts, and preserve issue state/labels/assignees. The Markdown report and any submitted comments are the traceability record; no duplicate issues created and **no issue closed**.
+**Baseline and final GitHub issue states:** #44–#50 **OPEN**. Existing issue comments from 2026-10-23 ~18:15–18:25 UTC already cover hosted Supabase and older provider work. This review **posted five new substantive comments to #45, #46, #47, #48 and #50**; #44 and #49 were not repeated because their prior comments remain current. No issue state, labels, assignees or milestones were changed; no duplicate issues created and **no issue closed**.
 
 | Issue | Baseline state | Verified updated fact | Expected tracker disposition |
 |---|---|---|---|
-| #44 | OPEN | Live email remains unproven | Keep open; previous note adequate |
-| #45 | OPEN | No approved deletion/legal/live contact; payment erasure mode-off risk R2-05 | Keep open; link cross-cutting risk on review |
-| #46 | OPEN | Local migration count now 52; hosted public schema still empty | Comment change; keep open |
-| #47 | OPEN | CI latest red; stage/restore remains unproven | Keep open; link current CI and PR |
-| #48 | OPEN | Durable billing added to saved jobs/searches/settings; long-tail ephemeral | Comment correction; keep open |
-| #49 | OPEN | Simulated assessment/executor/token decisions still not resolved | Keep open; previous note adequate |
-| #50 | OPEN | Stripe added in PR71; connected test account zero webhook endpoints; UI free-only | Comment material change; keep open |
+| #44 | OPEN | Live email remains unproven | Keep open; no new comment (previous note adequate) |
+| #45 | OPEN | No approved deletion/legal/live contact; payment erasure mode-off risk R2-05 | [Comment 6374109469](https://github.com/yhsomani/talentsphere-complete/issues/45#issuecomment-6374109469); kept open |
+| #46 | OPEN | Local migration count now 52; hosted public schema still empty | [Comment 6374110168](https://github.com/yhsomani/talentsphere-complete/issues/46#issuecomment-6374110168); kept open |
+| #47 | OPEN | CI latest red; stage/restore remains unproven | [Comment 6374110786](https://github.com/yhsomani/talentsphere-complete/issues/47#issuecomment-6374110786); kept open |
+| #48 | OPEN | Durable billing added to saved jobs/searches/settings; long-tail ephemeral | [Comment 6374111482](https://github.com/yhsomani/talentsphere-complete/issues/48#issuecomment-6374111482); kept open |
+| #49 | OPEN | Simulated assessment/executor/token decisions still not resolved | Keep open; no new comment (previous note adequate) |
+| #50 | OPEN | Stripe added in PR71; connected test account zero webhook endpoints; UI free-only | [Comment 6374112336](https://github.com/yhsomani/talentsphere-complete/issues/50#issuecomment-6374112336); kept open |
 
-No unsupported claims of production delivery or hosted migrations should be posted. Where GitHub comments do not exist yet, this table records the **intended** comments pending their tool results.
+The five comments above were returned by the GitHub integration with the listed IDs. No production-delivery or hosted-migration success was claimed; all seven issue acceptance gates remain unsatisfied.
 
 ## K. Remaining blockers, owners and decisions
 
