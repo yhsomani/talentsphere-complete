@@ -74,6 +74,25 @@ jobs:
       - name: Verify migration history guard
         run: node --test scripts/tests/migration-integrity.test.mjs
 
+      # The historical migrations rely on Supabase Auth identity functions,
+      # while TalentSphere currently issues Fastify-owned tokens. The scanner
+      # must continue flagging these dependencies until an approved hosted
+      # migration adapter removes them. Never run these files on hosted Supabase.
+      - name: Detect unsafe hosted Supabase migration dependencies
+        run: |
+          set +e
+          node scripts/audit-hosted-supabase-migrations.mjs > /tmp/hosted-migrations.json 2>/tmp/hosted-migrations.err
+          code=$?
+          set -e
+          test "$code" -eq 1
+          node -e "
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('/tmp/hosted-migrations.json', 'utf8'));
+            if (report.checkedMigrations < 51) process.exit(1);
+            if (!(report.totals.auth_uid_claim > 0 || report.totals.platform_auth_fk > 0)) process.exit(1);
+            console.log('Hosted Supabase identity incompatibilities remain explicitly blocked');
+          "
+
       - name: Migrations on a clean database
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/talentsphere_ci
