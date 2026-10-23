@@ -79,6 +79,13 @@ export async function processStripeEvent(
         deps.log.warn({ eventId: event.id }, 'Stripe checkout completed for an unknown account');
         return { status: 'ignored', reason: 'unknown account' };
       }
+      // A customer already linked to another account would violate the unique
+      // customer mapping and make Stripe retry the event for days.
+      const linkedTo = await billing.findUserIdByStripeCustomer(event.customerId);
+      if (linkedTo && linkedTo !== event.userId) {
+        deps.log.warn({ eventId: event.id }, 'Stripe checkout customer belongs to another account');
+        return { status: 'ignored', reason: 'customer linked to another account' };
+      }
       // Links the customer only. Access is granted by the subscription events.
       return done(
         await billing.applyEvent(record(event.userId, { subscriptionId: event.subscriptionId }), {

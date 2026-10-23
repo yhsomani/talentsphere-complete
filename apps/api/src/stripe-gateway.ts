@@ -142,12 +142,16 @@ export function createStripeGateway(options: {
   secretKey: string;
   webhookSecret: string;
   logger: GatewayLogger;
+  /** Test seam: a stand-in for the SDK client. */
+  client?: Stripe;
 }): StripeGateway {
-  const stripe = new Stripe(options.secretKey, {
-    maxNetworkRetries: 2,
-    timeout: 15_000,
-    appInfo: { name: 'TalentSphere' },
-  });
+  const stripe =
+    options.client ??
+    new Stripe(options.secretKey, {
+      maxNetworkRetries: 2,
+      timeout: 15_000,
+      appInfo: { name: 'TalentSphere' },
+    });
 
   /** Provider failures never leak details to the client; they are logged without secrets. */
   const guard = async <T>(operation: string, run: () => Promise<T>): Promise<T> => {
@@ -230,7 +234,12 @@ export function createStripeGateway(options: {
 
     deleteCustomer: (customerId) =>
       guard('customers.del', async () => {
-        await stripe.customers.del(customerId);
+        try {
+          await stripe.customers.del(customerId);
+        } catch (error) {
+          // Already deleted: a retried erasure must still be able to finish.
+          if ((error as { code?: string }).code !== 'resource_missing') throw error;
+        }
       }),
 
     verifyWebhook: (rawBody, signature) => {
