@@ -22,6 +22,34 @@ describe('Production configuration guard (apps/api/src/index.ts refuses to start
     expect(productionConfigProblems(validateServerEnv(SAFE_PRODUCTION))).toEqual([]);
   });
 
+  it('only accepts the configured Mumbai Supabase project with verified TLS', () => {
+    const ref = 'qidckctwrkxyiwworchd';
+    const base = { ...SAFE_PRODUCTION, SUPABASE_PROJECT_REF: ref };
+    const direct = `postgresql://postgres:secret@db.${ref}.supabase.co:5432/postgres?sslmode=verify-full`;
+    expect(productionConfigProblems(validateServerEnv({ ...base, DATABASE_URL: direct }))).toEqual([]);
+    expect(
+      productionConfigProblems(
+        validateServerEnv({
+          ...base,
+          DATABASE_URL: `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=verify-full`,
+        })
+      )
+    ).toEqual([]);
+    expect(
+      productionConfigProblems(
+        validateServerEnv({ ...base, DATABASE_URL: direct.replace('verify-full', 'require') })
+      ).join(' | ')
+    ).toMatch(/sslmode=verify-full/);
+    expect(
+      productionConfigProblems(
+        validateServerEnv({
+          ...base,
+          DATABASE_URL: direct.replace(ref, 'abcdefghijklmnopqrst'),
+        })
+      ).join(' | ')
+    ).toMatch(/does not match SUPABASE_PROJECT_REF/);
+  });
+
   it('never applies in development or test', () => {
     expect(productionConfigProblems(validateServerEnv({ NODE_ENV: 'development' }))).toEqual([]);
     expect(productionConfigProblems(validateServerEnv({ NODE_ENV: 'test' }))).toEqual([]);
