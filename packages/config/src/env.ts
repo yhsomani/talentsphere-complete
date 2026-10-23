@@ -21,6 +21,8 @@ export const ServerEnvSchema = z.object({
   // Database
   DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/postgres'),
   DIRECT_URL: z.string().optional(),
+  // Identifies the expected hosted Supabase tenant; no credentials live here.
+  SUPABASE_PROJECT_REF: z.string().regex(/^[a-z0-9]{20}$/).optional(),
   // Persistence backend: 'pg' (real Postgres, the product default) or
   // 'memory' (explicit non-durable Maps, tests only). Unset resolves to
   // memory when NODE_ENV=test, pg otherwise — see apps/api/src/storage.
@@ -161,6 +163,30 @@ export function productionConfigProblems(env: ServerEnv): string[] {
   }
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');
+  }
+  if (env.SUPABASE_PROJECT_REF) {
+    // Supabase direct connections have the project ref in the host; session/
+    // transaction poolers use postgres.<ref> in their database username.
+    // Refuse a wrong database rather than writing TalentSphere data elsewhere.
+    try {
+      const url = new URL(env.DATABASE_URL);
+      const hostname = url.hostname.toLowerCase();
+      const username = decodeURIComponent(url.username).toLowerCase();
+      const ref = env.SUPABASE_PROJECT_REF;
+      const isExpected =
+        hostname === `db.${ref}.supabase.co` ||
+        ((hostname.endsWith('.pooler.supabase.com') ||
+          hostname.endsWith('.pooler.supabase.co')) &&
+          username === `postgres.${ref}`);
+      if (!isExpected) {
+        problems.push('DATABASE_URL does not match SUPABASE_PROJECT_REF');
+      }
+      if (url.searchParams.get('sslmode') !== 'verify-full') {
+        problems.push('Hosted Supabase DATABASE_URL must set sslmode=verify-full');
+      }
+    } catch {
+      problems.push('Hosted Supabase DATABASE_URL is not a valid URL');
+    }
   }
   if (env.EMAIL_PROVIDER === 'resend') {
     if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
