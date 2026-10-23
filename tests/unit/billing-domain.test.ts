@@ -57,13 +57,15 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
   describe('createSubscription & Invoices', () => {
     it('refuses to activate paid plans without verified Stripe payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      expect(() => createSubscription({
-        userId,
-        planTier: 'candidate_pro',
-        billingCycle: 'monthly',
-        idempotencyKey: 'idem_sub_123',
-        nowIso,
-      })).toThrow(/verified payment|payment provider/i);
+      expect(() =>
+        createSubscription({
+          userId,
+          planTier: 'candidate_pro',
+          billingCycle: 'monthly',
+          idempotencyKey: 'idem_sub_123',
+          nowIso,
+        })
+      ).toThrow(/verified payment|payment provider/i);
     });
 
     it('keeps free subscriptions active without paid invoice fraud', () => {
@@ -76,12 +78,14 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
 
     it('refuses yearly paid activation without verified payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      expect(() => createSubscription({
-        userId,
-        planTier: 'recruiter_starter',
-        billingCycle: 'yearly',
-        nowIso,
-      })).toThrow(/verified payment|payment provider/i);
+      expect(() =>
+        createSubscription({
+          userId,
+          planTier: 'recruiter_starter',
+          billingCycle: 'yearly',
+          nowIso,
+        })
+      ).toThrow(/verified payment|payment provider/i);
     });
   });
 
