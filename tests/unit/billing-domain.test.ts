@@ -55,16 +55,20 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
   });
 
   describe('createSubscription & Invoices', () => {
-    it('creates active subscription and initial paid invoice for monthly pro plan', () => {
+    it('refuses to activate paid plans without verified Stripe payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      const result = createSubscription({
+      expect(() => createSubscription({
         userId,
         planTier: 'candidate_pro',
         billingCycle: 'monthly',
         idempotencyKey: 'idem_sub_123',
         nowIso,
-      });
+      })).toThrow(/verified payment|payment provider/i);
+    });
 
+    it.skip('legacy paid-activation expectations removed pending verified Stripe fulfillment', () => {
+      const result = createSubscription({ userId, planTier: 'candidate_pro' });
+      const nowIso = '2026-09-24T12:00:00.000Z';
       expect(result.subscription.userId).toBe(userId);
       expect(result.subscription.planTier).toBe('candidate_pro');
       expect(result.subscription.status).toBe('active');
@@ -83,20 +87,14 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       expect(result.entitlements.aiDailyRequestsLimit).toBe(50);
     });
 
-    it('handles yearly billing cycle with 365-day period and discounted price', () => {
+    it('refuses yearly paid activation without verified payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      const result = createSubscription({
+      expect(() => createSubscription({
         userId,
         planTier: 'recruiter_starter',
         billingCycle: 'yearly',
         nowIso,
-      });
-
-      expect(result.invoice.amountCents).toBe(99000);
-      const expectedEnd = new Date(
-        new Date(nowIso).getTime() + 365 * 24 * 60 * 60 * 1000
-      ).toISOString();
-      expect(result.subscription.currentPeriodEnd).toBe(expectedEnd);
+      })).toThrow(/verified payment|payment provider/i);
     });
   });
 
