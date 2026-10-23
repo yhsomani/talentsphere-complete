@@ -28,6 +28,24 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
   test('queries top emerging skills with forward growth and scarcity scores', async ({
     request,
   }) => {
+    // Nothing is pre-loaded: a skill is ranked only once market data was recorded for it.
+    for (const [demand, candidates, salary] of [
+      [1200, 950, 135000],
+      [1650, 1050, 142000],
+    ]) {
+      const recorded = await request.post(`${API_BASE}/skills/${canonicalSkillId}/market-signals`, {
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        data: {
+          demandPostingsCount: demand,
+          activeCandidatesCount: candidates,
+          avgSalaryOffered: salary,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+        },
+      });
+      expect(recorded.status()).toBe(201);
+    }
+
     const res = await request.get(`${API_BASE}/skills/forecast/top-growth?limit=5`);
     expect(res.status()).toBe(200);
     const data = await res.json();
@@ -35,6 +53,9 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     expect(data.topEmergingSkills).toBeDefined();
     expect(Array.isArray(data.topEmergingSkills)).toBe(true);
     expect(data.topEmergingSkills.length).toBeGreaterThan(0);
+    expect(data.topEmergingSkills.map((s: { skillId: string }) => s.skillId)).toContain(
+      canonicalSkillId
+    );
 
     const first = data.topEmergingSkills[0];
     expect(first.skillId).toBeDefined();

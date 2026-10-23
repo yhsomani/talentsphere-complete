@@ -45,7 +45,6 @@ export interface ProgressionBenchmark {
   confidenceLevel: number;
   successFactors: string[];
   riskFactors: string[];
-  retentionRatePct: number;
   isPublishable: boolean;
   dataSources: string[];
   updatedAt: string;
@@ -62,7 +61,6 @@ export interface ProgressionPathwayNode {
   medianSalaryDelta: number;
   salaryGrowthPct: number;
   sampleCount: number;
-  retentionRatePct: number;
   successFactors: string[];
   riskFactors: string[];
   isPublishable: boolean;
@@ -322,8 +320,9 @@ export function calculateCareerTransitionProbability(
     (t) => t.toRole.trim().toLowerCase() === normalizedTo
   );
 
-  const sampleCount = matchingTransitions.length;
-  const totalCount = totalFromTransitions.length;
+  // k-anonymity counts people, not rows: one person posting many moves is still one person.
+  const sampleCount = new Set(matchingTransitions.map((t) => t.userId)).size;
+  const totalCount = new Set(totalFromTransitions.map((t) => t.userId)).size;
 
   const transitionProbability =
     totalCount > 0 ? Math.round((sampleCount / totalCount) * 1000) / 1000 : 0;
@@ -385,9 +384,8 @@ export function calculateCareerTransitionProbability(
     confidenceLevel: 0.95,
     successFactors,
     riskFactors,
-    retentionRatePct: 88.5,
     isPublishable,
-    dataSources: ['opt_in_career_transitions', 'verified_ats_outcomes'],
+    dataSources: ['opt_in_career_transitions'],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -434,7 +432,7 @@ export function generateProgressionPathways(
   let allMeetK = true;
 
   for (const [destRole, targetList] of destRoleMap.entries()) {
-    const sampleCount = targetList.length;
+    const sampleCount = new Set(targetList.map((t) => t.userId)).size;
     const isPublishable = sampleCount >= 20;
 
     if (!isPublishable) {
@@ -459,7 +457,6 @@ export function generateProgressionPathways(
       medianSalaryDelta: benchmark.medianSalaryDelta,
       salaryGrowthPct: benchmark.salaryGrowthPct,
       sampleCount: benchmark.sampleCount,
-      retentionRatePct: benchmark.retentionRatePct,
       successFactors: benchmark.successFactors,
       riskFactors: benchmark.riskFactors,
       isPublishable: benchmark.isPublishable,
@@ -475,7 +472,7 @@ export function generateProgressionPathways(
     totalHistoricalTransitions,
     pathways: nodes,
     kAnonymityMet: allMeetK && nodes.length > 0,
-    dataSources: ['opt_in_career_transitions', 'verified_ats_outcomes'],
+    dataSources: ['opt_in_career_transitions'],
   };
 }
 

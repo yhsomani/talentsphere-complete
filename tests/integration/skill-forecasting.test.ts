@@ -37,7 +37,44 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
   });
 
   describe('GET /api/v1/skills/forecast/top-growth', () => {
-    it('returns ranked top emerging skills across seeded catalog', async () => {
+    it('lists nothing, and invents no figures, before any market data is recorded', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/v1/skills/forecast/top-growth?limit=5',
+      });
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).topEmergingSkills).toEqual([]);
+
+      const forecast = await app.inject({
+        method: 'GET',
+        url: `/api/v1/skills/${canonicalSkillId}/forecast`,
+      });
+      expect(forecast.statusCode).toBe(404);
+
+      const generate = await app.inject({
+        method: 'POST',
+        url: `/api/v1/skills/${canonicalSkillId}/forecast/generate`,
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        payload: { forecastHorizonMonths: 12, prerequisiteDepth: 1 },
+      });
+      expect(generate.statusCode).toBe(404);
+    });
+
+    it('ranks a skill once market data has been recorded for it', async () => {
+      const record = await app.inject({
+        method: 'POST',
+        url: `/api/v1/skills/${canonicalSkillId}/market-signals`,
+        headers: { authorization: `Bearer ${recruiterToken}` },
+        payload: {
+          demandPostingsCount: 1650,
+          activeCandidatesCount: 1050,
+          avgSalaryOffered: 142000,
+          geographicRegion: 'Global',
+          industry: 'Technology',
+        },
+      });
+      expect(record.statusCode).toBe(201);
+
       const res = await app.inject({
         method: 'GET',
         url: '/api/v1/skills/forecast/top-growth?limit=5',
@@ -45,11 +82,11 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
 
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
-      expect(data.topEmergingSkills).toBeDefined();
       expect(Array.isArray(data.topEmergingSkills)).toBe(true);
-      expect(data.topEmergingSkills.length).toBeGreaterThan(0);
+      expect(data.topEmergingSkills.map((s: { skillId: string }) => s.skillId)).toEqual([
+        canonicalSkillId,
+      ]);
       expect(data.topEmergingSkills[0]).toHaveProperty('emergingScore');
-      expect(data.topEmergingSkills[0]).toHaveProperty('forecast');
       expect(data.topEmergingSkills[0].forecast.confidenceLevel).toBe(0.95);
     });
   });

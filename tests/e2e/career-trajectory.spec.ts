@@ -36,6 +36,44 @@ test.describe('E2E: Career Trajectory Analysis & Progression Benchmarks (F-152, 
     expect(reg2.status()).toBe(201);
     const d2 = await reg2.json();
     otherCandidateToken = d2.token;
+
+    // Benchmarks are built only from moves real people recorded with consent,
+    // so the data these tests read is recorded here, one person per move.
+    const contribute = async (
+      label: string,
+      people: number,
+      fromRole: string,
+      toRole: string,
+      salaryDelta: number,
+      timeInRoleMonths: number
+    ) => {
+      for (let i = 0; i < people; i++) {
+        const reg = await request.post(`${API_BASE}/auth/register`, {
+          data: {
+            email: `contrib.${label}.${i}.${ts}@pathway.test`,
+            password: 'Password123!Secure',
+            fullName: `Contributor ${label} ${i}`,
+            role: 'candidate',
+          },
+        });
+        expect(reg.status()).toBe(201);
+        const { token } = await reg.json();
+        const res = await request.post(`${API_BASE}/career/transitions`, {
+          headers: { authorization: `Bearer ${token}` },
+          data: {
+            fromRole,
+            toRole,
+            salaryDelta: salaryDelta + (i % 5) * 1000,
+            timeInRoleMonths: timeInRoleMonths + (i % 6),
+            consentFlag: true,
+          },
+        });
+        expect(res.status()).toBe(201);
+      }
+    };
+    await contribute('se-sse', 24, 'Software Engineer', 'Senior Software Engineer', 25000, 24);
+    await contribute('sse-staff', 22, 'Senior Software Engineer', 'Staff Engineer', 40000, 36);
+    await contribute('se-pm', 10, 'Software Engineer', 'Product Manager', 18000, 28);
   });
 
   test('records an opt-in career transition and verifies individual user privacy (BR-157, BR-159, BR-161)', async ({

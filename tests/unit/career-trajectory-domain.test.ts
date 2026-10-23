@@ -304,7 +304,6 @@ describe('Career Trajectory Domain Logic (F-152, F-85, BR-157..BR-163)', () => {
           medianSalaryDelta: 30000,
           salaryGrowthPct: 25.0,
           sampleCount: 25,
-          retentionRatePct: 90.0,
           successFactors: ['System Architecture'],
           riskFactors: ['Communication'],
           isPublishable: true,
@@ -381,6 +380,46 @@ describe('Career Trajectory Domain Logic (F-152, F-85, BR-157..BR-163)', () => {
       expect(evaluation.educationReadinessPct).toBe(100);
       expect(evaluation.overallReadinessScore).toBe(100);
       expect(evaluation.missingPrerequisites.length).toBe(0);
+    });
+  });
+
+  describe('k-anonymity counts people, not rows (BR-160)', () => {
+    const rows = (people: number, perPerson: number): CareerTransition[] =>
+      Array.from({ length: people * perPerson }, (_, i) => ({
+        id: `row-${i}`,
+        userId: `person-${i % people}`,
+        fromRole: 'Software Engineer',
+        toRole: 'Senior Software Engineer',
+        salaryDelta: 20000,
+        timeInRoleMonths: 24,
+        consentFlag: true,
+        transitionDate: '2025-01-15',
+        createdAt: '2025-01-15T00:00:00Z',
+      }));
+
+    it('does not publish a benchmark that one person filled with repeated moves', () => {
+      const benchmark = calculateCareerTransitionProbability(
+        rows(1, 25),
+        'Software Engineer',
+        'Senior Software Engineer'
+      );
+      expect(benchmark.sampleCount).toBe(1);
+      expect(benchmark.isPublishable).toBe(false);
+    });
+
+    it('does not offer a pathway that one person filled with repeated moves', () => {
+      const pathway = generateProgressionPathways(rows(1, 25), 'Software Engineer');
+      expect(pathway.pathways).toEqual([]);
+    });
+
+    it('publishes once 20 different people have made the move', () => {
+      const benchmark = calculateCareerTransitionProbability(
+        rows(20, 2),
+        'Software Engineer',
+        'Senior Software Engineer'
+      );
+      expect(benchmark.sampleCount).toBe(20);
+      expect(benchmark.isPublishable).toBe(true);
     });
   });
 });

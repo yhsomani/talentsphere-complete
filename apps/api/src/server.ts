@@ -7364,113 +7364,8 @@ export async function buildApp(
   const skillMarketSignalsBySkillId = new Map<string, SkillMarketSignal[]>();
   const skillForecastsBySkillId = new Map<string, SkillForecast>();
 
-  // Seed baseline market signals for canonical skills
-  const nowTs = Date.now();
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  const initialSkillSignals: Array<{
-    skillId: string;
-    signals: Array<{
-      demandPostingsCount: number;
-      activeCandidatesCount: number;
-      avgSalaryOffered: number;
-      geographicRegion: string;
-      industry: string;
-      recordedAt: string;
-    }>;
-  }> = [
-    {
-      skillId: '10000000-0000-4000-a000-000000000001', // TypeScript
-      signals: [
-        {
-          demandPostingsCount: 1200,
-          activeCandidatesCount: 950,
-          avgSalaryOffered: 135000,
-          geographicRegion: 'North America',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
-        },
-        {
-          demandPostingsCount: 1650,
-          activeCandidatesCount: 1050,
-          avgSalaryOffered: 142000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs).toISOString(),
-        },
-      ],
-    },
-    {
-      skillId: '10000000-0000-4000-a000-000000000002', // React
-      signals: [
-        {
-          demandPostingsCount: 1500,
-          activeCandidatesCount: 1400,
-          avgSalaryOffered: 125000,
-          geographicRegion: 'North America',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
-        },
-        {
-          demandPostingsCount: 1750,
-          activeCandidatesCount: 1550,
-          avgSalaryOffered: 130000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs).toISOString(),
-        },
-      ],
-    },
-    {
-      skillId: '10000000-0000-4000-a000-000000000003', // PostgreSQL
-      signals: [
-        {
-          demandPostingsCount: 800,
-          activeCandidatesCount: 700,
-          avgSalaryOffered: 130000,
-          geographicRegion: 'North America',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
-        },
-        {
-          demandPostingsCount: 1100,
-          activeCandidatesCount: 780,
-          avgSalaryOffered: 138000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs).toISOString(),
-        },
-      ],
-    },
-    {
-      skillId: '10000000-0000-4000-a000-000000000004', // System Design
-      signals: [
-        {
-          demandPostingsCount: 950,
-          activeCandidatesCount: 600,
-          avgSalaryOffered: 155000,
-          geographicRegion: 'North America',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs - thirtyDaysMs * 6).toISOString(),
-        },
-        {
-          demandPostingsCount: 1400,
-          activeCandidatesCount: 680,
-          avgSalaryOffered: 168000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-          recordedAt: new Date(nowTs).toISOString(),
-        },
-      ],
-    },
-  ];
-
-  for (const item of initialSkillSignals) {
-    const recordedList: SkillMarketSignal[] = [];
-    for (const s of item.signals) {
-      recordedList.push(recordSkillMarketSignal({ skillId: item.skillId, ...s }));
-    }
-    skillMarketSignalsBySkillId.set(item.skillId, recordedList);
-  }
+  // No market signals are pre-loaded: a forecast exists only for a skill that has
+  // recorded signals. Nothing here invents demand, candidate or salary figures.
 
   // 1. Get Top Emerging Skills (trajectory & scarcity ranking)
   app.get(
@@ -7486,20 +7381,9 @@ export async function buildApp(
       }> = [];
 
       for (const skill of skillsById.values()) {
-        let signals = skillMarketSignalsBySkillId.get(skill.id) || [];
-        if (signals.length === 0) {
-          signals = [
-            recordSkillMarketSignal({
-              skillId: skill.id,
-              demandPostingsCount: 50,
-              activeCandidatesCount: 50,
-              avgSalaryOffered: 100000,
-              geographicRegion: 'Global',
-              industry: 'Technology',
-            }),
-          ];
-          skillMarketSignalsBySkillId.set(skill.id, signals);
-        }
+        const signals = skillMarketSignalsBySkillId.get(skill.id) || [];
+        // A skill with no recorded market data has no forecast to rank.
+        if (signals.length === 0) continue;
 
         let forecast = skillForecastsBySkillId.get(skill.id);
         if (!forecast) {
@@ -7591,18 +7475,9 @@ export async function buildApp(
       const query = QuerySkillForecastInputSchema.parse(req.query);
       const horizon = query.forecastHorizonMonths ?? 12;
 
-      let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+      const signals = skillMarketSignalsBySkillId.get(skillId) || [];
       if (signals.length === 0) {
-        const baseline = recordSkillMarketSignal({
-          skillId,
-          demandPostingsCount: 100,
-          activeCandidatesCount: 80,
-          avgSalaryOffered: 110000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-        });
-        signals = [baseline];
-        skillMarketSignalsBySkillId.set(skillId, signals);
+        throw new DomainError('NOT_FOUND', 'No market data has been recorded for this skill yet.');
       }
 
       const prevForecast = skillForecastsBySkillId.get(skillId);
@@ -7639,18 +7514,9 @@ export async function buildApp(
 
       const input = GenerateSkillForecastInputSchema.parse(req.body);
 
-      let signals = skillMarketSignalsBySkillId.get(skillId) || [];
+      const signals = skillMarketSignalsBySkillId.get(skillId) || [];
       if (signals.length === 0) {
-        const baseline = recordSkillMarketSignal({
-          skillId,
-          demandPostingsCount: 100,
-          activeCandidatesCount: 80,
-          avgSalaryOffered: 110000,
-          geographicRegion: 'Global',
-          industry: 'Technology',
-        });
-        signals = [baseline];
-        skillMarketSignalsBySkillId.set(skillId, signals);
+        throw new DomainError('NOT_FOUND', 'No market data has been recorded for this skill yet.');
       }
 
       const prevForecast = skillForecastsBySkillId.get(skillId);
@@ -7694,54 +7560,8 @@ export async function buildApp(
   const allCareerTransitions: CareerTransition[] = [];
   const careerMilestoneEvaluationsByUserId = new Map<string, CareerMilestoneReadiness[]>();
 
-  // Seed baseline historical career transitions (F-85, F-152)
-  // 28 transitions: Software Engineer -> Senior Software Engineer (sampleCount >= 20, publishable)
-  for (let i = 0; i < 28; i++) {
-    const t = recordCareerTransition({
-      id: `seed-trans-se-sse-${i + 1}`,
-      userId: `seed-user-se-${i + 1}`,
-      fromRole: 'Software Engineer',
-      toRole: 'Senior Software Engineer',
-      salaryDelta: 25000 + (i % 5) * 1000,
-      timeInRoleMonths: 24 + (i % 6),
-      consentFlag: true,
-      transitionDate: '2025-01-15',
-    });
-    careerTransitionsById.set(t.id, t);
-    allCareerTransitions.push(t);
-  }
-
-  // 22 transitions: Senior Software Engineer -> Staff Engineer (sampleCount >= 20, publishable)
-  for (let i = 0; i < 22; i++) {
-    const t = recordCareerTransition({
-      id: `seed-trans-sse-staff-${i + 1}`,
-      userId: `seed-user-sse-${i + 1}`,
-      fromRole: 'Senior Software Engineer',
-      toRole: 'Staff Engineer',
-      salaryDelta: 40000 + (i % 4) * 2000,
-      timeInRoleMonths: 36 + (i % 8),
-      consentFlag: true,
-      transitionDate: '2025-02-10',
-    });
-    careerTransitionsById.set(t.id, t);
-    allCareerTransitions.push(t);
-  }
-
-  // 10 transitions: Software Engineer -> Product Manager (sampleCount < 20, demonstrating BR-160 k-anonymity suppression)
-  for (let i = 0; i < 10; i++) {
-    const t = recordCareerTransition({
-      id: `seed-trans-se-pm-${i + 1}`,
-      userId: `seed-user-pm-${i + 1}`,
-      fromRole: 'Software Engineer',
-      toRole: 'Product Manager',
-      salaryDelta: 18000 + (i % 3) * 1500,
-      timeInRoleMonths: 28 + (i % 5),
-      consentFlag: true,
-      transitionDate: '2025-03-05',
-    });
-    careerTransitionsById.set(t.id, t);
-    allCareerTransitions.push(t);
-  }
+  // No transitions are pre-loaded. Benchmarks are built only from people who
+  // recorded a move with consent, so a rare move honestly shows too few figures.
 
   // 1. Record Opt-in Career Transition (BR-157, BR-159, BR-161)
   app.post('/api/v1/career/transitions', async (req: FastifyRequest, reply: FastifyReply) => {

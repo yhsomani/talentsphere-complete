@@ -13,6 +13,9 @@ describe('Career Trajectory Analysis Integration (F-152, F-85, BR-157..BR-163)',
       NODE_ENV: 'test',
       PORT: '0',
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
+      // The suite registers dozens of contributors; sign-up has its own throttle.
+      RATE_LIMIT_MAX_REQUESTS: '100000',
+      AUTH_RATE_LIMIT_MAX_REQUESTS: '1000',
     });
     await app.ready();
 
@@ -44,6 +47,46 @@ describe('Career Trajectory Analysis Integration (F-152, F-85, BR-157..BR-163)',
     });
     const d2 = JSON.parse(reg2.body);
     secondCandidateToken = d2.token;
+
+    // Benchmarks are built only from moves people recorded with consent, so the
+    // data this suite reads is recorded here, one person per move.
+    const contribute = async (
+      people: number,
+      fromRole: string,
+      toRole: string,
+      salaryDelta: number,
+      timeInRoleMonths: number
+    ) => {
+      for (let i = 0; i < people; i++) {
+        const reg = await app.inject({
+          method: 'POST',
+          url: '/api/v1/auth/register',
+          payload: {
+            email: `contrib.${toRole.replace(/\W+/g, '-').toLowerCase()}.${i}@talentsphere.test`,
+            password: 'Password123!Secure',
+            fullName: `Contributor ${i}`,
+            role: 'candidate',
+          },
+        });
+        const { token } = JSON.parse(reg.body);
+        const res = await app.inject({
+          method: 'POST',
+          url: '/api/v1/career/transitions',
+          headers: { authorization: `Bearer ${token}` },
+          payload: {
+            fromRole,
+            toRole,
+            salaryDelta: salaryDelta + (i % 5) * 1000,
+            timeInRoleMonths: timeInRoleMonths + (i % 6),
+            consentFlag: true,
+          },
+        });
+        expect(res.statusCode).toBe(201);
+      }
+    };
+    await contribute(24, 'Software Engineer', 'Senior Software Engineer', 25000, 24);
+    await contribute(22, 'Senior Software Engineer', 'Staff Engineer', 40000, 36);
+    await contribute(10, 'Software Engineer', 'Product Manager', 18000, 28);
   });
 
   afterAll(async () => {
