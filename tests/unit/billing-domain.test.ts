@@ -90,7 +90,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -104,7 +104,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -123,7 +123,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -141,7 +141,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
       const canceled = cancelSubscription(subscription, true, nowIso);
