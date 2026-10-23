@@ -9,7 +9,7 @@ import {
   notificationTarget,
   type AppNotification,
 } from '../lib/notifications.js';
-import { Button, EmptyState, Notice, PageHeader } from '../components/ui/index.js';
+import { Button, EmptyState, LoadError, PageHeader } from '../components/ui/index.js';
 
 /**
  * What happened to you, newest first: application moves, new applicants for
@@ -94,11 +94,7 @@ export const NotificationsPage: React.FC = () => {
         }
       />
 
-      {error && (
-        <Notice tone="error" data-testid="notifications-error">
-          {error}
-        </Notice>
-      )}
+      {error && <LoadError message={error} onRetry={() => void load()} />}
 
       {!error && items === null && (
         <p style={{ color: colors.neutral[600] }} data-testid="notifications-loading">
@@ -122,7 +118,7 @@ export const NotificationsPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {items.map((n, index) => {

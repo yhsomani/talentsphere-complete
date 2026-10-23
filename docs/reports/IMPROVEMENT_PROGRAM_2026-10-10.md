@@ -1,5 +1,8 @@
 # TalentSphere — Improvement Program Report (2026-10-10)
 
+> **Historical snapshot.** Counts, absence claims and passing checks below describe their recorded baseline. Current source and verification scope are in [FEATURE_STATUS_2026-10-21.md](FEATURE_STATUS_2026-10-21.md). In particular, Resend and additional SQL stores now exist; that does not establish live delivery or release readiness.
+
+
 - **Branch:** `improvement/core-loop-durability` (from `main` at `32a3abc7`), not pushed.
 - **Commits:** `1bb0f625` (API: durable core loop, proof-based verification, authz), `ae99e31c` (web: real journeys, honest pricing and copy), `93dfe125` (fixes from adversarial review), plus the documentation commit that adds this file.
 - **Method:** multidisciplinary audit → prioritised fixes in small increments → each increment verified by tests that drive the real API, a real PostgreSQL and a real browser → independent adversarial review of the diff → its findings reproduced, fixed and regression-tested.

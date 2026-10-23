@@ -6,7 +6,7 @@ import { apiJson, errorMessage } from '../lib/api.js';
 import { formatDateTime } from '../lib/format.js';
 import { otherNames, type ConversationSummary } from '../lib/messages.js';
 import { useSession } from '../lib/SessionContext.js';
-import { EmptyState, Notice, PageHeader } from '../components/ui/index.js';
+import { LoadError, EmptyState, PageHeader } from '../components/ui/index.js';
 
 /**
  * Your conversations, most recent first. A hiring team starts one from an
@@ -48,9 +48,7 @@ export const MessagesPage: React.FC = () => {
       />
 
       {error && (
-        <Notice tone="error" data-testid="messages-error">
-          {error}
-        </Notice>
+        <LoadError message={error} data-testid="messages-error" onRetry={() => void load()} />
       )}
 
       {!error && threads === null && (
@@ -79,7 +77,7 @@ export const MessagesPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {threads.map((t, index) => {

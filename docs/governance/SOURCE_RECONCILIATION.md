@@ -1,5 +1,7 @@
 # TalentSphere — Source Reconciliation v1.0
 
+> **Historical record (2026-09-24). Not current status.** This file records the greenfield baseline before any code existed, including the claim "GREENFIELD — 0% IMPLEMENTATION VERIFIED". That claim is no longer true. Current status: [`docs/reports/FEATURE_STATUS_2026-10-21.md`](../reports/FEATURE_STATUS_2026-10-21.md). Current architecture: [`ARCHITECTURE.md`](../../ARCHITECTURE.md). The file tree in §4 names `FINAL_DOCUMENT_INDEX.md`, which was removed on 2026-10-21; the index is now [`docs/INDEX.md`](../INDEX.md).
+
 ## 1. Executive Summary
 
 This document establishes the canonical forensic baseline for the TalentSphere codebase in accordance with the TalentSphere Master Execution Protocol and AGENTS.md v6.0.

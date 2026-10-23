@@ -1,3 +1,54 @@
+## Repository instructions
+
+Read and follow [AGENTS.md](./AGENTS.md) before making changes. Its "Build files are read-only for AI agents" rule applies to all work, including setup and verification commands.
+
+# TalentSphere
+
+A PWA-first career platform where candidates prove their skills and work history, and recruiters, hiring managers and institutions review that evidence.
+
+## Stack
+
+- Web: React 19, TypeScript, Vite, react-router-dom (`apps/web`). Server state is a small `fetch` helper; there is no TanStack Query.
+- API: Fastify 5 modular monolith (`apps/api`), Zod contracts (`packages/contracts`), pure business rules (`packages/domain`).
+- Data: PostgreSQL via `pg`. SQL migrations in `supabase/migrations` (51 files), applied by `pnpm db:migrate`. The core career loop is persisted; other API modules are in memory and labelled `ephemeral`.
+- Worker: `apps/worker` claims `background_jobs` with `FOR UPDATE SKIP LOCKED`.
+- Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`). Supabase Auth is not used.
+- Payments and email: none integrated. Billing is disabled; email codes go to the dev outbox only.
+
+Read `ARCHITECTURE.md` (what is built) before changing code. `SSOT.md` is the intent, not a status report.
+
+## Commands
+
+- Install: `pnpm install` (pnpm 11.7, pinned in `package.json`)
+- Dev: `pnpm dev` (web and API in parallel)
+- Test: `pnpm test` (Vitest: unit, integration, security). `pnpm test:pg` needs `TEST_DATABASE_URL`. `pnpm test:e2e` runs Playwright.
+- Lint: `pnpm lint` (Prettier check). Typecheck: `pnpm typecheck`. Build: `pnpm build`.
+- Migrations: `pnpm db:migrate`
+- Windows PowerShell may block `pnpm.ps1`; run the `.cmd` form or use `cmd`.
+
+## Rules
+
+- Keep changes small. Ask before any big refactor.
+- Build files are read-only for AI agents: `package.json`, lockfiles, `tsconfig*`, `vite*`/`vitest*`/`playwright.config.*`, `.github/`, `deploy/`, Dockerfiles, and the Prettier and git ignore files. Ask first (see `AGENTS.md`).
+- Business rules live only in `packages/domain`. Routes call them and never restate them.
+- Do not weaken auth, RLS, rate limits, or the honesty and migration tests (`persistence-honesty`, `database-migrations`).
+- Do not call a feature "implemented" from documentation. Check `docs/reports/FEATURE_STATUS_2026-10-21.md`.
+- Verify user-visible changes in the running app with Reticle before reporting them done (block below).
+- Do not commit or push unless asked.
+
+## Style
+
+- Follow `docs/engineering/CODE_STYLE.md`: `camelCase` values, `PascalCase` components and types, IDs with stable prefixes (`F-`, `J-`, `BR-`).
+- Use design tokens from `packages/ui/src/tokens.ts`. Do not hard-code colours or spacing in feature code.
+
+## Where things live
+
+- Pages: `apps/web/src/pages`. Shared UI: `apps/web/src/components` (primitives in `components/ui`).
+- API routes: `apps/api/src/server.ts`, one commented block per feature under `/api/v1`.
+- Request and response schemas: `packages/contracts/src/index.ts`.
+- Business rules and state machines: `packages/domain/src`.
+- Migrations: `supabase/migrations`. Docs index: `docs/INDEX.md`.
+
 <!-- reticle:begin (managed by `reticle init` — edit outside these markers) -->
 ## Verifying with Reticle
 

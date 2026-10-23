@@ -19,6 +19,7 @@ import {
   PageHeader,
   StatusPill,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 /** Pipeline moves offered to the hiring team, in the order they happen. */
@@ -169,9 +170,7 @@ export const HiringJobPage: React.FC = () => {
     return (
       <div style={{ maxWidth: '760px', margin: '0 auto' }}>
         <PageHeader title="Applicants" />
-        <Notice tone="error" data-testid="hiring-job-error">
-          {error}
-        </Notice>
+        <LoadError message={error} data-testid="hiring-job-error" onRetry={() => void load()} />
         <p style={{ marginTop: spacing.md }}>
           <Link to="/hiring">Back to hiring</Link>
         </p>
@@ -191,7 +190,7 @@ export const HiringJobPage: React.FC = () => {
         to="/hiring"
         style={{ color: colors.primary[700], fontSize: '0.875rem' }}
       >
-        ← All jobs
+        All jobs
       </Link>
       <PageHeader
         title={job.title}
@@ -279,7 +278,7 @@ export const HiringJobPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {shown.map((applicant, index) => {
@@ -412,7 +411,7 @@ export const HiringJobPage: React.FC = () => {
                           marginTop: spacing.sm,
                           padding: spacing.md,
                           backgroundColor: colors.neutral[50],
-                          borderRadius: '8px',
+                          borderRadius: '4px',
                         }}
                       >
                         {applicant.coverLetter && (

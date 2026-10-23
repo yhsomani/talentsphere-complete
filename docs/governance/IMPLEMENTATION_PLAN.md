@@ -1,5 +1,21 @@
 # TalentSphere — IMPLEMENTATION_PLAN.md v6.0
 
+## Current delivery baseline — 2026-10-21
+
+The phases below preserve founder intent. For the evidence-based execution sequence,
+read the [current audit](../reports/FEATURE_STATUS_2026-10-21.md) and
+[delivery roadmap](../reports/FEATURE_PLAN_2026-10-21.md). They distinguish a proposed
+restricted beta from the full PRD career-loop GA; neither scope is silently approved.
+Prioritize honest assessment results, safe worker claims, recoverable erasure and
+live verification evidence before expanding the portfolio. Registry scores remain
+separate from P0–P3 delivery urgency. Persist only admitted user journeys, one complete
+increment at a time. Existing mail adapters and durable stores must be reused.
+
+Current memory-mode tests and non-emitting typechecks pass; formatting and missing
+PostgreSQL/browser/deployment evidence remain explicit gates. Protected build files
+stay read-only without explicit user authorization. See the audit for inspection
+limits, moving-HEAD provenance and the remaining atomic-contract review.
+
 ## Founder execution order
 
 ### Phase 0 — Platform Trust Foundation

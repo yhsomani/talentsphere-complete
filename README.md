@@ -4,26 +4,30 @@ PWA-first Career Operating System built around a Talent Graph + Evidence Graph.
 
 ## Current status
 
-**IN ACTIVE DEVELOPMENT — NOT PRODUCTION-READY.** Per-feature verification is tracked in
-[`BRAIN/MEMORY.md`](BRAIN/MEMORY.md); the latest assessment, open risks and owner decisions
-are in [`docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md`](docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md).
+**IN ACTIVE DEVELOPMENT - NOT PRODUCTION-READY.** Current evidence and feature
+maturity are recorded in [the 2026-10-21 audit](docs/reports/FEATURE_STATUS_2026-10-21.md)
+and its [evidence ledger](docs/reports/AUDIT_EVIDENCE_2026-10-21.json).
+[BRAIN/MEMORY.md](BRAIN/MEMORY.md) preserves execution history.
 
-What works end to end, in the browser, on durable data: sign-up (candidate or recruiter),
-profile, work history with proof (corporate-email code, referee link), job posting and
-lifecycle, applying, application tracking and withdrawal, the recruiter's applicant
-pipeline, and GDPR erasure. What does not exist yet: email delivery outside development,
-payments (paid plans cannot be bought), email or push delivery of notifications (in-app
-notifications exist), and durable storage for modules
-outside the core loop (their responses carry `x-talentsphere-durability: ephemeral`).
+The API implements the core career loop with PostgreSQL persistence and a browser
+UI. Additional SQL stores cover account metadata, erasure requests, saved searches,
+bookmarks, admin audit and feature flags. Other modules remain in process memory;
+a route durability header does not prove a whole journey survives restart.
+The worker includes an opt-in Resend adapter; live mailbox delivery is unverified.
+Payments remain disabled by default, and no external AI provider is integrated.
 
-Test suites (counts as measured on 2026-10-10; re-run rather than trust them):
+The audit reproduced simulated assessment success for invalid code and duplicate
+worker execution after batch leases expire. Erasure cleanup has a separate static
+failure-recovery finding. These remain open; browser completion, full erasure and
+production readiness are not established by the current unit/integration results.
 
-- `pnpm test` — unit, integration and security (Vitest, ~1,000 tests, in-memory storage)
-- `pnpm test:pg` — durability and concurrency against a real PostgreSQL (`TEST_DATABASE_URL` required)
-- `pnpm test:e2e` — Playwright: end-to-end journeys, accessibility, performance (~190 tests)
-- CI (`.github/workflows/ci.yml`) runs lint, typecheck, all three suites (with a Postgres
-  service container), a migration-idempotency check and the build on every push and PR.
-- 46 sequential SQL migrations (`supabase/migrations/`), applied by `pnpm db:migrate`.
+Measured at source `a771a87b` on 2026-10-21:
+
+- Vitest: 1,172 assertions passed across 115 files using memory storage, native config loading and no cache. Workspace imports still use existing built dependencies.
+- Migration helper tests: 5 passed; ten project checks passed with TypeScript emission and incremental output disabled.
+- Lint: failed on seven existing files; see the audit for paths.
+- PostgreSQL, Playwright, Reticle and deployment checks were not run in this audit. Prior dated results are historical evidence only.
+- 51 SQL migration files exist; presence is not proof of successful application to a populated database.
 
 ## Core loop
 
@@ -50,10 +54,10 @@ what exists, `ARCHITECTURE.md` and the code win.
 
 1. [`SSOT.md`](SSOT.md) — Single Source of Truth
 2. [`BRAIN/MEMORY.md`](BRAIN/MEMORY.md) — Living project memory & execution history
-3. [`FINAL_DOCUMENT_INDEX.md`](FINAL_DOCUMENT_INDEX.md) — Master documentation index
-4. [`docs/INDEX.md`](docs/INDEX.md) — Intra-docs documentation navigation
-5. [`docs/product/PRD.md`](docs/product/PRD.md) — Product requirements
-6. [`docs/engineering/ARCHITECTURE.md`](docs/engineering/ARCHITECTURE.md) — System architecture
+3. [`docs/INDEX.md`](docs/INDEX.md) — Documentation index (single entry point)
+4. [`docs/product/PRD.md`](docs/product/PRD.md) — Product requirements
+5. [`ARCHITECTURE.md`](ARCHITECTURE.md) — Architecture as built (read before changing code)
+6. [`docs/engineering/TARGET_ARCHITECTURE.md`](docs/engineering/TARGET_ARCHITECTURE.md) — Target architecture (intent, not current state)
 7. [`docs/engineering/TRD.md`](docs/engineering/TRD.md) — Technical requirements
 8. [`docs/registries/FEATURE_REGISTRY.md`](docs/registries/FEATURE_REGISTRY.md) — 173-feature inventory
 9. [`docs/governance/IMPLEMENTATION_PLAN.md`](docs/governance/IMPLEMENTATION_PLAN.md) — Sequential execution roadmap

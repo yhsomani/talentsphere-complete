@@ -239,11 +239,11 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page.getByText('Email Verified')).toBeVisible();
   });
 
-  test('runs proctored assessment sandbox execution with verifiable invariants', async ({
+  test('takes a challenge in a session and is told plainly that nothing was run or scored', async ({
     page,
     request,
   }) => {
-    // The assessments workspace requires a session (QW-04 guard).
+    // The challenges workspace requires a session (QW-04 guard).
     const email = `e2e.ui.assess.${Date.now()}@example.com`;
     const password = 'Password123!Secure';
     const reg = await request.post(`${API_BASE}/auth/register`, {
@@ -258,27 +258,22 @@ test.describe('TalentSphere Web Shell & UI Experience (E-09, E-10, F-01, F-16)',
     await expect(page).toHaveURL(/.*dashboard/);
 
     await page.goto('/assessments');
+    await expect(page.locator('h1')).toContainText('Challenges');
+    await expect(page.getByTestId('challenges-notice')).toContainText('not run yet');
 
-    // Heading verification
-    await expect(page.locator('h1')).toContainText('Skill assessments (preview)');
-    await expect(page.getByText('nothing on this page is scored or saved')).toBeVisible();
+    // Real challenge from the API; start a session and submit a solution.
+    await page.getByTestId('challenge-start').first().click();
+    await expect(page.getByTestId('challenge-session')).toBeVisible();
+    await page
+      .getByTestId('challenge-code')
+      .fill('export const reverse = (s: string) => s.split(" ").reverse().join(" ");');
+    await page.getByTestId('challenge-submit').click();
 
-    // Launch first sandbox challenge
-    await page.getByTestId('start-challenge-ch-dist-01').click();
-
-    // Verify modal and code pre-block
-    await expect(page.getByTestId('run-sandbox-btn')).toBeVisible();
-    await expect(page.locator('pre')).toContainText('TransactionalQueue');
-
-    // The preview must report honestly: nothing executed, nothing recorded.
-    await page.getByTestId('run-sandbox-btn').click();
-
-    await expect(page.getByTestId('sandbox-log')).toBeVisible();
-    await expect(page.getByTestId('sandbox-log')).toContainText(
-      'no code was executed in this session'
-    );
-    await expect(page.getByTestId('sandbox-log')).toContainText('no result was stored');
+    // The page reports honestly: saved, not run, not scored, nothing claimed as verified.
+    await expect(page.getByTestId('challenge-saved')).toContainText('was not run');
+    await expect(page.getByTestId('challenge-saved')).toContainText('no score');
     await expect(page.getByText('Sandbox Invariants Verified')).toHaveCount(0);
+    await expect(page.getByText(/\bpassed\b|score: \d+/i)).toHaveCount(0);
   });
 
   test('browses real job postings, is asked to sign in, then applies and tracks it', async ({

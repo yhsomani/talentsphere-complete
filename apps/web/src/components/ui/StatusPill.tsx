@@ -47,7 +47,7 @@ export const StatusPill: React.FC<{
         ...TONE_STYLE[tone],
         display: 'inline-block',
         padding: '2px 10px',
-        borderRadius: '999px',
+        borderRadius: '3px',
         fontSize: '0.8125rem',
         fontWeight: 600,
         whiteSpace: 'nowrap',

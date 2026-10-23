@@ -14,6 +14,11 @@ import { JobsPage } from './pages/JobsPage.js';
 import { JobDetailPage } from './pages/JobDetailPage.js';
 import { ApplicationsPage } from './pages/ApplicationsPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
+import { SettingsPage } from './pages/SettingsPage.js';
+import { PortfolioPage } from './pages/PortfolioPage.js';
+import { ResumesPage } from './pages/ResumesPage.js';
+import { NetworkPage } from './pages/NetworkPage.js';
+import { LearningPage } from './pages/LearningPage.js';
 import { HiringPage } from './pages/HiringPage.js';
 import { HiringJobPage } from './pages/HiringJobPage.js';
 import { ReferencePage } from './pages/ReferencePage.js';
@@ -23,6 +28,10 @@ import { ConversationPage } from './pages/ConversationPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { PrivacyPage } from './pages/PrivacyPage.js';
 import { TermsPage } from './pages/TermsPage.js';
+import { AdminPage } from './pages/AdminPage.js';
+import { VerifyPage } from './pages/VerifyPage.js';
+import { CoursePage } from './pages/CoursePage.js';
+import { CareerPage } from './pages/CareerPage.js';
 
 // QW-04: authenticated workspaces are reachable only with a session token;
 // anyone else is sent to /login with the requested destination preserved in
@@ -54,16 +63,25 @@ export const App: React.FC = () => {
             <Route path="jobs/:id" element={<JobDetailPage />} />
             {/* A referee responds from an emailed link, without an account. */}
             <Route path="reference/:id" element={<ReferencePage />} />
+            <Route path="verify/:hash" element={<VerifyPage />} />
             <Route path="dashboard" element={guarded(<DashboardPage />)} />
             <Route path="applications" element={guarded(<ApplicationsPage />)} />
             <Route path="evidence" element={guarded(<EvidencePage />)} />
             <Route path="profile" element={guarded(<ProfilePage />)} />
+            <Route path="settings" element={guarded(<SettingsPage />)} />
+            <Route path="portfolio" element={guarded(<PortfolioPage />)} />
+            <Route path="resumes" element={guarded(<ResumesPage />)} />
+            <Route path="network" element={guarded(<NetworkPage />)} />
+            <Route path="learning" element={guarded(<LearningPage />)} />
+            <Route path="learning/:id" element={guarded(<CoursePage />)} />
+            <Route path="career" element={guarded(<CareerPage />)} />
             <Route path="notifications" element={guarded(<NotificationsPage />)} />
             <Route path="messages" element={guarded(<MessagesPage />)} />
             <Route path="messages/:id" element={guarded(<ConversationPage />)} />
             <Route path="hiring" element={guarded(<HiringPage />)} />
             <Route path="hiring/jobs/:id" element={guarded(<HiringJobPage />)} />
             <Route path="assessments" element={guarded(<AssessmentsPage />)} />
+            <Route path="admin" element={guarded(<AdminPage />)} />
             {/* Catch-all: friendly 404 page for any unknown route */}
             <Route path="*" element={<NotFoundPage />} />
           </Route>

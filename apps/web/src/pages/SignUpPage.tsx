@@ -134,7 +134,7 @@ export const SignUpPage: React.FC = () => {
                   style={{
                     display: 'block',
                     padding: spacing.md,
-                    borderRadius: '8px',
+                    borderRadius: '4px',
                     border: `2px solid ${selected ? colors.primary[600] : colors.neutral[200]}`,
                     backgroundColor: selected ? colors.primary[50] : '#ffffff',
                     cursor: 'pointer',

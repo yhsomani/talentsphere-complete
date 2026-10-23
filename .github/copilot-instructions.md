@@ -1,0 +1,3 @@
+# Repository instructions
+
+Read and follow [AGENTS.md](../AGENTS.md) before making changes. Its "Build files are read-only for AI agents" rule applies repository-wide, including setup and verification commands.

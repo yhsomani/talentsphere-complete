@@ -1,5 +1,8 @@
 # TalentSphere — FINAL_VALIDATION_REPORT.md v6.0
 
+> **Historical snapshot.** Counts, absence claims and passing checks below describe their recorded baseline. Current source and verification scope are in [FEATURE_STATUS_2026-10-21.md](FEATURE_STATUS_2026-10-21.md). In particular, Resend and additional SQL stores now exist; that does not establish live delivery or release readiness.
+
+
 ## Corpus
 
 - Features: **173 unique IDs**

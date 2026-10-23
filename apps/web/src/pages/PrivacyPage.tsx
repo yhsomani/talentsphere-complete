@@ -41,7 +41,7 @@ export const PrivacyPage: React.FC = () => {
             backgroundColor: '#fffbeb',
             color: colors.semantic.warningText,
             border: `1px solid ${colors.semantic.warning}`,
-            borderRadius: '6px',
+            borderRadius: '4px',
             padding: `${spacing.sm} ${spacing.md}`,
             fontSize: '0.875rem',
             marginBottom: spacing.md,
@@ -148,7 +148,7 @@ export const PrivacyPage: React.FC = () => {
             style={{
               backgroundColor: '#ffffff',
               border: `1px solid ${colors.neutral[200]}`,
-              borderRadius: '6px',
+              borderRadius: '4px',
               overflow: 'hidden',
             }}
           >
@@ -364,7 +364,7 @@ export const PrivacyPage: React.FC = () => {
               style={{
                 backgroundColor: '#ffffff',
                 padding: spacing.md,
-                borderRadius: '6px',
+                borderRadius: '4px',
                 border: `1px solid ${colors.neutral[200]}`,
               }}
             >
@@ -394,7 +394,7 @@ export const PrivacyPage: React.FC = () => {
               style={{
                 backgroundColor: '#ffffff',
                 padding: spacing.md,
-                borderRadius: '6px',
+                borderRadius: '4px',
                 border: `1px solid ${colors.neutral[200]}`,
               }}
             >
@@ -424,7 +424,7 @@ export const PrivacyPage: React.FC = () => {
               style={{
                 backgroundColor: '#ffffff',
                 padding: spacing.md,
-                borderRadius: '6px',
+                borderRadius: '4px',
                 border: `1px solid ${colors.neutral[200]}`,
               }}
             >
@@ -471,7 +471,7 @@ export const PrivacyPage: React.FC = () => {
             style={{
               backgroundColor: colors.neutral[100],
               padding: spacing.md,
-              borderRadius: '6px',
+              borderRadius: '4px',
               fontSize: '0.875rem',
               color: colors.neutral[800],
             }}

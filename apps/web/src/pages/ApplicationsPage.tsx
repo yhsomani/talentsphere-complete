@@ -13,6 +13,7 @@ import {
   Notice,
   PageHeader,
   StatusPill,
+  LoadError,
 } from '../components/ui/index.js';
 
 /** What the status means for the candidate, in plain words. */
@@ -82,7 +83,7 @@ export const ApplicationsPage: React.FC = () => {
         margin: 0,
         backgroundColor: '#ffffff',
         border: `1px solid ${colors.neutral[200]}`,
-        borderRadius: '10px',
+        borderRadius: '4px',
       }}
     >
       {list.map((application, index) => (
@@ -155,7 +156,12 @@ export const ApplicationsPage: React.FC = () => {
         }
       />
 
-      {error && <Notice tone="error">Could not load your applications: {error}</Notice>}
+      {error && (
+        <LoadError
+          message={`Could not load your applications: ${error}`}
+          onRetry={() => void load()}
+        />
+      )}
       {!error && applications === null && <p style={{ color: colors.neutral[600] }}>Loading…</p>}
 
       {applications !== null && applications.length === 0 && (

@@ -19,6 +19,16 @@ import {
   type SavedSearchStore,
 } from './saved-search-store.js';
 import { MemorySavedJobStore, PgSavedJobStore, type SavedJobStore } from './saved-job-store.js';
+import {
+  MemoryAdminAuditStore,
+  PgAdminAuditStore,
+  type AdminAuditStore,
+} from './admin-audit-store.js';
+import {
+  MemoryFeatureFlagStore,
+  PgFeatureFlagStore,
+  type FeatureFlagStore,
+} from './feature-flag-store.js';
 
 // Phase 1 (production audit): the API's only persistence boundary. Two modes,
 // both honest:
@@ -52,6 +62,10 @@ export interface Storage {
   readonly accountMetadata: AccountMetadataStore;
   readonly savedSearches: SavedSearchStore;
   readonly savedJobs: SavedJobStore;
+  /** Administrator action trail (F-17, BR-067): durable in pg mode only. */
+  readonly adminAudit: AdminAuditStore;
+  /** Platform feature flags (F-35): durable in pg mode only. */
+  readonly featureFlags: FeatureFlagStore;
   /** Live round-trip check against the backing store — never cached, never assumed. */
   health(): Promise<StorageHealth>;
   /** Claim a session-level advisory lease before hydrating the in-memory read model. */
@@ -76,6 +90,9 @@ class PgStorage implements Storage {
   readonly accountMetadata: AccountMetadataStore;
   readonly savedSearches: SavedSearchStore;
   readonly savedJobs: SavedJobStore;
+  readonly adminAudit: AdminAuditStore;
+  /** Platform feature flags (F-35): durable in pg mode only. */
+  readonly featureFlags: FeatureFlagStore;
   private readonly pool: pg.Pool;
   private readonly target: string;
   private writerLease: pg.PoolClient | null = null;
@@ -102,6 +119,8 @@ class PgStorage implements Storage {
     this.accountMetadata = new PgAccountMetadataStore(this.pool, encryptionKey);
     this.savedSearches = new PgSavedSearchStore(this.pool);
     this.savedJobs = new PgSavedJobStore(this.pool);
+    this.adminAudit = new PgAdminAuditStore(this.pool);
+    this.featureFlags = new PgFeatureFlagStore(this.pool);
   }
 
   async acquireWriterLease(): Promise<void> {
@@ -202,6 +221,8 @@ class MemoryStorage implements Storage {
   readonly accountMetadata: AccountMetadataStore = new MemoryAccountMetadataStore();
   readonly savedSearches: SavedSearchStore = new MemorySavedSearchStore();
   readonly savedJobs: SavedJobStore = new MemorySavedJobStore();
+  readonly adminAudit: AdminAuditStore = new MemoryAdminAuditStore();
+  readonly featureFlags: FeatureFlagStore = new MemoryFeatureFlagStore();
 
   health(): Promise<StorageHealth> {
     return Promise.resolve({

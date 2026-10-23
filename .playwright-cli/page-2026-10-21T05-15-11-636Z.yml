@@ -1,0 +1,87 @@
+- generic [ref=f1e3]:
+  - link "Skip to main content" [ref=f1e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - status [ref=f1e5]
+  - banner [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - link "TalentSphere home" [ref=f1e8] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e13]: TalentSphere
+      - navigation "Main Navigation" [ref=f1e14]:
+        - link "Dashboard" [ref=f1e15] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Jobs" [ref=f1e16] [cursor=pointer]:
+          - /url: /jobs
+        - link "Applications" [ref=f1e17] [cursor=pointer]:
+          - /url: /applications
+        - link "Work history" [ref=f1e18] [cursor=pointer]:
+          - /url: /evidence
+        - link "Messages" [ref=f1e19] [cursor=pointer]:
+          - /url: /messages
+      - generic [ref=f1e20]:
+        - link "Notifications" [ref=f1e21] [cursor=pointer]:
+          - /url: /notifications
+        - 'button "Account: Cli Candidate" [ref=f1e26] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f1e27]: CC
+          - generic "Cli Candidate" [ref=f1e28]
+  - main [ref=f1e31]:
+    - generic [ref=f1e32]:
+      - generic [ref=f1e34]:
+        - heading "Network" [level=1] [ref=f1e35]
+        - paragraph [ref=f1e36]: Answer requests, follow up on the ones you sent, and see your connections.
+      - status [ref=f1e37]: This page is not saved permanently yet. A server restart clears your connections and requests.
+      - alert [ref=f1e88]: Cannot send a connection request to yourself.
+      - generic [ref=f1e39]:
+        - heading "Find a member" [level=2] [ref=f1e40]
+        - search [ref=f1e41]:
+          - generic [ref=f1e42]:
+            - generic [ref=f1e43]: Name
+            - textbox "Name" [ref=f1e44]: Cli Candidate
+            - paragraph [ref=f1e45]: Search for someone you have worked with or met.
+          - button "Search" [ref=f1e46] [cursor=pointer]
+        - list [ref=f1e82]:
+          - listitem [ref=f1e83]:
+            - generic [ref=f1e84]:
+              - generic [ref=f1e85]: Cli Candidate
+              - generic [ref=f1e86]: TalentSphere Member
+            - button "Connect" [ref=f1e87] [cursor=pointer]
+        - heading "Or send to a member ID" [level=3] [ref=f1e47]
+        - generic [ref=f1e48]:
+          - generic [ref=f1e49]:
+            - generic [ref=f1e50]: Member ID
+            - textbox "Member ID" [ref=f1e51]
+            - paragraph [ref=f1e52]: The ID of the person you want to connect with.
+          - generic [ref=f1e53]:
+            - generic [ref=f1e54]: Note (optional)
+            - textbox "Note (optional)" [ref=f1e55]
+          - button "Send request" [ref=f1e56] [cursor=pointer]
+      - region [ref=f1e57]:
+        - heading "Requests for you" [level=2] [ref=f1e58]
+        - paragraph [ref=f1e59]: No one is waiting for your answer.
+        - list
+      - region [ref=f1e60]:
+        - heading "Requests you sent" [level=2] [ref=f1e61]
+        - paragraph [ref=f1e62]: You have no pending requests.
+        - list
+      - region [ref=f1e63]:
+        - heading "Your connections" [level=2] [ref=f1e64]
+        - paragraph [ref=f1e65]: You have no connections yet.
+        - list
+  - contentinfo [ref=f1e66]:
+    - generic [ref=f1e67]:
+      - generic [ref=f1e68]:
+        - generic [ref=f1e69]:
+          - generic [ref=f1e70]: TalentSphere
+          - paragraph [ref=f1e71]: Work history that is checked, not just claimed — and the jobs to use it on.
+        - navigation "Footer" [ref=f1e72]:
+          - link "Jobs" [ref=f1e73] [cursor=pointer]:
+            - /url: /jobs
+          - link "Pricing" [ref=f1e74] [cursor=pointer]:
+            - /url: /checkout
+          - link "Privacy" [ref=f1e75] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=f1e76] [cursor=pointer]:
+            - /url: /terms
+      - generic [ref=f1e77]:
+        - generic [ref=f1e78]: © 2026 TalentSphere
+        - generic "This app can be installed, but offline support is not enabled" [ref=f1e79]: PWA Installable

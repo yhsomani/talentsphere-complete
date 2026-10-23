@@ -261,6 +261,17 @@ describe('Professional Networking & Connection Requests Integration (F-09)', () 
       headers: { authorization: `Bearer ${candidateBToken}` },
     });
     expect(connsB.json().connections.length).toBe(1);
+
+    // Audit finding N04b: each side must see the OTHER person, by name. The page used to
+    // print recipientId for both, so the accepting user saw their own id.
+    expect(connsA.json().connections[0].counterpart).toMatchObject({
+      userId: candidateBUserId,
+      fullName: 'Bob Martinez',
+    });
+    expect(connsB.json().connections[0].counterpart).toMatchObject({
+      userId: candidateAUserId,
+      fullName: 'Alice Walker',
+    });
   });
 
   it('prevents duplicate connection requests when already connected', async () => {

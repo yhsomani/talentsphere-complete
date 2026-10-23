@@ -1,5 +1,8 @@
 # TalentSphere Complete — End-User / Business-Owner Production Audit
 
+> **Historical audit (2026-10-03, revisions A to D).** Its route count ("9 browser routes") and several P0 findings describe the repository before the 2026-10-10 improvement program. Most of its P0 items are marked **Fixed** in [`IMPROVEMENT_PROGRAM_2026-10-10.md`](IMPROVEMENT_PROGRAM_2026-10-10.md) §B, with the test that proves each fix. Its verdict (not production-ready) still holds, as recorded in the improvement report §I. Current status: [`FEATURE_STATUS_2026-10-21.md`](FEATURE_STATUS_2026-10-21.md).
+
+
 **Repository audited:** `yhsomani/talentsphere-complete`
 **Branch reviewed:** `main` (working tree commit `8db0930`)
 **Audit date:** 03 October 2026
@@ -50,7 +53,7 @@ The documentation itself acknowledges several of these gaps, including the absen
 
 ---
 
-# 2. Product Reality
+## 2. Product Reality
 
 ## What problem the product is supposed to solve
 
@@ -82,7 +85,7 @@ That distinction matters because a business owner cares about the terminal user 
 
 ---
 
-# 3. Critical Findings
+## 3. Critical Findings
 
 ## P0 — Critical Production Blockers
 
@@ -218,7 +221,7 @@ Added in Revision B and re-confirmed against the live remote in Revision C (thir
 
 ---
 
-# 4. User Journey Matrix
+## 4. User Journey Matrix
 
 ## A. First-Time User Onboarding
 
@@ -475,7 +478,7 @@ The current frontend does not consistently implement this contract. [APP_FLOW.md
 
 ---
 
-# 5. Feature Completeness Review
+## 5. Feature Completeness Review
 
 | Feature | Backend | Web UI | End-user status | Assessment |
 |---|---|---|---|---|
@@ -510,7 +513,7 @@ The current frontend does not consistently implement this contract. [APP_FLOW.md
 
 ---
 
-# 6. Requirement Mismatches
+## 6. Requirement Mismatches
 
 ## RM-01 — "Authentication & Session"
 
@@ -594,7 +597,7 @@ The E2E test explicitly acknowledges that offline support is not implemented. [w
 
 ---
 
-# 7. UX Audit
+## 7. UX Audit
 
 ## What is good
 
@@ -705,7 +708,7 @@ That creates enormous navigation discoverability debt. [App.tsx](../../apps/web/
 
 ---
 
-# 8. Accessibility Audit
+## 8. Accessibility Audit
 
 ## Automated strengths
 
@@ -748,7 +751,7 @@ The important distinction is:
 
 ---
 
-# 9. Security Audit
+## 9. Security Audit
 
 ## Positive controls
 
@@ -809,7 +812,7 @@ Do not treat static legal copy as compliance evidence.
 
 ---
 
-# 10. Performance Audit
+## 10. Performance Audit
 
 ## Good
 
@@ -836,7 +839,7 @@ Other concerns:
 
 ---
 
-# 11. Architecture Audit
+## 11. Architecture Audit
 
 ## Current architecture
 
@@ -907,7 +910,7 @@ That exact distinction is visible in the repository's test design.
 
 ---
 
-# 12. Business-Value Audit
+## 12. Business-Value Audit
 
 ## North-star value
 
@@ -943,7 +946,7 @@ The system is not currently suitable for billing real customers because the paym
 
 ---
 
-# 13. Broken Journeys
+## 13. Broken Journeys
 
 These are the highest-impact broken end-to-end paths.
 
@@ -1015,7 +1018,7 @@ Therefore paid entitlement does not correctly flow into AI quota logic.
 
 ---
 
-# 14. Missing Features
+## 14. Missing Features
 
 ## Requested user/business surface
 
@@ -1063,7 +1066,7 @@ Therefore paid entitlement does not correctly flow into AI quota logic.
 
 ---
 
-# 15. Technical Debt
+## 15. Technical Debt
 
 ## High
 
@@ -1101,7 +1104,7 @@ Test suites validate many API capabilities that are not reachable through the pr
 
 ---
 
-# 16. Quick Wins
+## 16. Quick Wins
 
 ## QW-01 — Delete demo authentication fallback
 
@@ -1164,7 +1167,7 @@ Do not say "GDPR & CCPA Compliant" until executable and operational evidence exi
 
 ---
 
-# 17. Prioritized Remediation Roadmap
+## 17. Prioritized Remediation Roadmap
 
 ## Phase 0 — Stop pretending transactions succeeded
 
@@ -1293,7 +1296,7 @@ Measure:
 
 ---
 
-# 18. Production Readiness Scorecard
+## 18. Production Readiness Scorecard
 
 ## Scoring method
 
@@ -1332,7 +1335,7 @@ Rounded to one decimal:
 
 ---
 
-# 19. Go-Live Decision
+## 19. Go-Live Decision
 
 ## **NOT READY**
 
@@ -1353,7 +1356,7 @@ A polished UI does not compensate for those failures.
 
 ---
 
-# 20. Final Owner-Level Assessment
+## 20. Final Owner-Level Assessment
 
 ## What TalentSphere has
 

@@ -1,0 +1,114 @@
+- generic [ref=f4e3]:
+  - link "Skip to main content" [ref=f4e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - status [ref=f4e5]
+  - banner [ref=f4e6]:
+    - generic [ref=f4e7]:
+      - link "TalentSphere home" [ref=f4e8] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f4e13]: TalentSphere
+      - navigation "Main Navigation" [ref=f4e14]:
+        - link "Dashboard" [ref=f4e15] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Jobs" [ref=f4e16] [cursor=pointer]:
+          - /url: /jobs
+        - link "Applications" [ref=f4e17] [cursor=pointer]:
+          - /url: /applications
+        - link "Work history" [ref=f4e18] [cursor=pointer]:
+          - /url: /evidence
+        - link "Messages" [ref=f4e19] [cursor=pointer]:
+          - /url: /messages
+      - generic [ref=f4e20]:
+        - link "Notifications" [ref=f4e21] [cursor=pointer]:
+          - /url: /notifications
+        - 'button "Account: Cli Candidate" [ref=f4e26] [cursor=pointer]':
+          - generic [aria-hidden] [ref=f4e27]: CC
+          - generic "Cli Candidate" [ref=f4e28]
+  - main [ref=f4e31]:
+    - generic [ref=f4e32]:
+      - generic [ref=f4e34]:
+        - heading "Settings" [level=1] [ref=f4e35]
+        - paragraph [ref=f4e36]: Choose how TalentSphere looks, who can see you, and what we send you.
+      - status [ref=f4e115]: Settings saved.
+      - generic [ref=f4e37]:
+        - group "Appearance" [ref=f4e38]:
+          - generic [ref=f4e40]:
+            - generic [ref=f4e41]: Theme
+            - combobox "Theme" [ref=f4e42]:
+              - option "Match my device" [selected]
+              - option "Light"
+              - option "Dark"
+          - generic [ref=f4e43]:
+            - generic [ref=f4e44]: Language
+            - textbox "Language" [ref=f4e45]: en
+            - paragraph [ref=f4e46]: A language tag such as en.
+          - generic [ref=f4e47]:
+            - generic [ref=f4e48]: Time zone
+            - textbox "Time zone" [ref=f4e49]: Europe/London
+            - paragraph [ref=f4e50]: For example Europe/London.
+        - group "Privacy" [ref=f4e51]:
+          - generic [ref=f4e53]:
+            - generic [ref=f4e54]: Who can see your profile
+            - combobox "Who can see your profile" [ref=f4e55]:
+              - option "Anyone" [selected]
+              - option "Only my connections"
+              - option "Only people hiring on TalentSphere"
+              - option "Only me"
+          - generic [ref=f4e57] [cursor=pointer]:
+            - checkbox "Show my email address on my profile" [ref=f4e58]
+            - generic [ref=f4e59]: Show my email address on my profile
+          - generic [ref=f4e61] [cursor=pointer]:
+            - checkbox "Show my activity" [checked] [ref=f4e62]
+            - generic [ref=f4e63]: Show my activity
+          - generic [ref=f4e65] [cursor=pointer]:
+            - checkbox "Allow connection requests" [checked] [ref=f4e66]
+            - generic [ref=f4e67]: Allow connection requests
+          - generic [ref=f4e68]:
+            - generic [ref=f4e69]: Who can message you directly
+            - combobox "Who can message you directly" [ref=f4e70]:
+              - option "Anyone" [selected]
+              - option "Only my connections"
+              - option "Nobody"
+          - generic [ref=f4e72] [cursor=pointer]:
+            - checkbox "Allow search engines to index my profile" [ref=f4e73]
+            - generic [ref=f4e74]: Allow search engines to index my profile
+        - group "Notifications" [ref=f4e75]:
+          - generic [ref=f4e78] [cursor=pointer]:
+            - checkbox "Email me about activity" [checked] [ref=f4e79]
+            - generic [ref=f4e80]: Email me about activity
+          - generic [ref=f4e82] [cursor=pointer]:
+            - checkbox "Send push notifications" [checked] [ref=f4e83]
+            - generic [ref=f4e84]: Send push notifications
+          - generic [ref=f4e86] [cursor=pointer]:
+            - checkbox "Email me about new features and offers" [ref=f4e87]
+            - generic [ref=f4e88]: Email me about new features and offers
+          - generic [ref=f4e89]:
+            - generic [ref=f4e90]: Summary email frequency
+            - combobox "Summary email frequency" [ref=f4e91]:
+              - option "As it happens"
+              - option "Daily" [selected]
+              - option "Weekly"
+              - option "Never"
+        - group "AI features" [ref=f4e92]:
+          - generic [ref=f4e95] [cursor=pointer]:
+            - checkbox "Allow TalentSphere AI to use my profile data" [ref=f4e96]
+            - generic [ref=f4e97]: Allow TalentSphere AI to use my profile data
+        - button "Save settings" [ref=f4e98] [cursor=pointer]
+  - contentinfo [ref=f4e99]:
+    - generic [ref=f4e100]:
+      - generic [ref=f4e101]:
+        - generic [ref=f4e102]:
+          - generic [ref=f4e103]: TalentSphere
+          - paragraph [ref=f4e104]: Work history that is checked, not just claimed — and the jobs to use it on.
+        - navigation "Footer" [ref=f4e105]:
+          - link "Jobs" [ref=f4e106] [cursor=pointer]:
+            - /url: /jobs
+          - link "Pricing" [ref=f4e107] [cursor=pointer]:
+            - /url: /checkout
+          - link "Privacy" [ref=f4e108] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=f4e109] [cursor=pointer]:
+            - /url: /terms
+      - generic [ref=f4e110]:
+        - generic [ref=f4e111]: © 2026 TalentSphere
+        - generic "This app can be installed, but offline support is not enabled" [ref=f4e112]: PWA Installable

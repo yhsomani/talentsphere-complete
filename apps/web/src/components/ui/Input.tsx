@@ -53,7 +53,7 @@ export const Input: React.FC<InputProps> = ({
         style={{
           width: '100%',
           padding: '8px 12px',
-          borderRadius: '6px',
+          borderRadius: '4px',
           border: `1px solid ${
             focused
               ? error

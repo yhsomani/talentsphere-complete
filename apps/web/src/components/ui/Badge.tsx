@@ -25,9 +25,9 @@ export const Badge: React.FC<BadgeProps> = ({
       border: '1px solid #fde047',
     },
     silver: {
-      backgroundColor: '#f1f5f9',
-      color: '#334155',
-      border: '1px solid #cbd5e1',
+      backgroundColor: '#f4f5f1',
+      color: '#3f4a44',
+      border: '1px solid #c9cfc8',
     },
     bronze: {
       backgroundColor: '#fff7ed',

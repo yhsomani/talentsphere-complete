@@ -21,3 +21,6 @@ playwright-report/
 *.log
 # Database dumps contain personal data
 private-backups/
+
+# graphify per-session hook state
+graphify-out/cache/

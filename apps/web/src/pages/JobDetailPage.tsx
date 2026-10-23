@@ -14,6 +14,7 @@ import {
   Notice,
   StatusPill,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 interface JobResponse {
@@ -29,6 +30,8 @@ export const JobDetailPage: React.FC = () => {
   const session = useSession();
   const [data, setData] = useState<JobResponse | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // A missing job is a final answer; only a failed fetch is worth retrying.
+  const [loadRetryable, setLoadRetryable] = useState(true);
   const [myApplication, setMyApplication] = useState<Application | null>(null);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [attached, setAttached] = useState<string[]>([]);
@@ -58,10 +61,10 @@ export const JobDetailPage: React.FC = () => {
       .then((res) => !cancelled && setData(res))
       .catch((err) => {
         if (cancelled) return;
+        const notFound = err instanceof ApiError && err.status === 404;
+        setLoadRetryable(!notFound);
         setLoadError(
-          err instanceof ApiError && err.status === 404
-            ? 'This job does not exist or is no longer open.'
-            : errorMessage(err)
+          notFound ? 'This job does not exist or is no longer open.' : errorMessage(err)
         );
       });
     return () => {
@@ -133,9 +136,17 @@ export const JobDetailPage: React.FC = () => {
         <h1 className="serif-display" style={{ fontSize: '2rem', fontWeight: 500 }}>
           Job not available
         </h1>
-        <Notice tone="error" style={{ margin: `${spacing.md} 0` }} data-testid="job-error">
-          {loadError}
-        </Notice>
+        {loadRetryable ? (
+          <LoadError
+            message={loadError}
+            style={{ margin: `${spacing.md} 0` }}
+            data-testid="job-error"
+          />
+        ) : (
+          <Notice tone="error" style={{ margin: `${spacing.md} 0` }} data-testid="job-error">
+            {loadError}
+          </Notice>
+        )}
         <ButtonLink to="/jobs" variant="outline">
           Back to jobs
         </ButtonLink>
@@ -177,7 +188,7 @@ export const JobDetailPage: React.FC = () => {
           to="/jobs"
           style={{ color: colors.primary[700], fontSize: '0.875rem' }}
         >
-          ← All jobs
+          All jobs
         </Link>
         <h1
           className="serif-display"

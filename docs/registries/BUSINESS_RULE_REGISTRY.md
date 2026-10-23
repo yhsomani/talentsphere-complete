@@ -8,6 +8,13 @@ This is the canonical business-rule identity and text registry derived from the 
 **Migration rules:** MIG-01 through MIG-08 are separate migration rules.  
 **Historical out-of-range BR references:** non-authoritative prose references outside BR-248 are treated as stale references unless explicitly ratified later.
 
+**Traceability limitation (2026-10-21):** IDs and rule text are inventoried in the
+[audit evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json), but a code comment
+or matching numeric ID does not verify the rule. Some SSOT feature summaries attach
+a different meaning to the same ID (for example F-01's BR-001/BR-002). Canonical rule
+text governs rule identity; the [conflict register](../governance/GAP_ANALYSIS.md)
+records the reconciliation work. No rule or security policy is changed by this note.
+
 ## Rule governance
 
 Rules are not duplicated inside feature prose. A feature references the relevant BR IDs.
@@ -264,6 +271,19 @@ Rules are not duplicated inside feature prose. A feature references the relevant
 | BR-246 | No cross-institution data leakage |
 | BR-247 | Graduated students retain alumni status |
 | BR-248 | Alumni networks public or private (institution choice) |
+
+## Migration rules (MIG-01 to MIG-08)
+
+| ID | Rule |
+|---|---|
+| MIG-01 | Imported data becomes project-owned; user may edit/delete/replace/export |
+| MIG-02 | Migration is one-way and user-initiated; no continuous sync by default |
+| MIG-03 | Migration never auto-publishes; imported posts land as drafts |
+| MIG-04 | Imported skills are self-reported until natively verified |
+| MIG-05 | Connection graphs are never imported; hashed-email mutual-consent discovery only, hashes TTL-bound |
+| MIG-06 | Provider tokens server-side, short-lived, revocable; disconnect purges tokens + raw archive |
+| MIG-07 | External provider IDs are never primary keys, auth claims, URLs, or analytics keys |
+| MIG-08 | Every provider surface is feature-flagged and removable without core schema change |
 
 ## Change policy
 

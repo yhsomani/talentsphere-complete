@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { colors } from '@talentsphere/ui';
-import { BellIcon, ChevronDownIcon, MenuIcon, ShieldCheckIcon, XIcon } from './ui/Icons.js';
+import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from './ui/Icons.js';
+import { VerificationSeal } from './ui/VerificationSeal.js';
 import { describePwaCapability, usePwaCapability } from '../pwa.js';
 import { getStoredUser } from '../lib/session.js';
 import { useSession } from '../lib/SessionContext.js';
 import { apiJson } from '../lib/api.js';
 import { NOTIFICATIONS_EVENT } from '../lib/notifications.js';
+import { CommandPalette } from './CommandPalette.js';
+import { RouteErrorBoundary } from './RouteErrorBoundary.js';
 
 /**
  * Support contact is configuration, not copy: an address that nobody reads
@@ -86,11 +89,15 @@ export const Layout: React.FC = () => {
   // navigation to draw, so the header does not flicker on every load.
   const signedIn = session.status !== 'anonymous';
   const roles = session.user?.roles ?? (getStoredUser()?.roles as string[] | undefined) ?? [];
-  const navLinks = !signedIn
+  const baseNavLinks = !signedIn
     ? PUBLIC_NAV
     : roles.some((r) => HIRING_ROLES.includes(r))
       ? HIRING_NAV
       : CANDIDATE_NAV;
+  const navLinks =
+    signedIn && roles.includes('platform_admin')
+      ? [...baseNavLinks, { label: 'Admin', path: '/admin', testId: 'nav-admin' }]
+      : baseNavLinks;
   const accountName = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
   const accountEmail = session.user?.email ?? getStoredUser()?.email;
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -269,7 +276,7 @@ export const Layout: React.FC = () => {
         <div className="container site-header__bar">
           <Link to={signedIn ? '/dashboard' : '/'} aria-label="TalentSphere home" className="brand">
             <span aria-hidden="true" className="brand__mark">
-              <ShieldCheckIcon size={16} />
+              <VerificationSeal state="reference" size={26} />
             </span>
             <span>
               <span className="wordmark-serif">Talent</span>Sphere
@@ -335,7 +342,17 @@ export const Layout: React.FC = () => {
                           isActivePath(location.pathname, '/profile') ? 'page' : undefined
                         }
                       >
-                        Profile and settings
+                        Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="menu-item"
+                        data-testid="nav-settings"
+                        aria-current={
+                          isActivePath(location.pathname, '/settings') ? 'page' : undefined
+                        }
+                      >
+                        Settings
                       </Link>
                       <button type="button" className="menu-item" onClick={signOut}>
                         Sign out
@@ -395,7 +412,17 @@ export const Layout: React.FC = () => {
                     data-testid="mobile-nav-profile"
                     aria-current={isActivePath(location.pathname, '/profile') ? 'page' : undefined}
                   >
-                    Profile and settings
+                    Profile
+                  </Link>
+                )}
+                {signedIn && (
+                  <Link
+                    to="/settings"
+                    className="menu-item"
+                    data-testid="mobile-nav-settings"
+                    aria-current={isActivePath(location.pathname, '/settings') ? 'page' : undefined}
+                  >
+                    Settings
                   </Link>
                 )}
               </nav>
@@ -426,8 +453,26 @@ export const Layout: React.FC = () => {
         )}
       </header>
 
+      <CommandPalette
+        items={
+          signedIn
+            ? [
+                ...navLinks,
+                { label: 'Notifications', path: '/notifications' },
+                { label: 'Profile', path: '/profile' },
+                { label: 'Portfolio', path: '/portfolio' },
+                { label: 'Resumes', path: '/resumes' },
+                { label: 'Network', path: '/network' },
+                { label: 'Learning', path: '/learning' },
+                { label: 'Settings', path: '/settings' },
+              ]
+            : navLinks
+        }
+      />
       <main id="main-content" tabIndex={-1} className="site-main container">
-        <Outlet />
+        <RouteErrorBoundary resetKey={location.pathname}>
+          <Outlet />
+        </RouteErrorBoundary>
       </main>
 
       <footer className="site-footer">

@@ -43,6 +43,27 @@ export async function apiFetch(input: string, init: RequestInit = {}): Promise<R
   return res;
 }
 
+/** "contactEmail" → "Contact email", so a field issue reads as a sentence. */
+const fieldLabel = (path: string): string => {
+  const words = path
+    .replace(/\[\d+\]/g, '')
+    .split('.')
+    .pop()!
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+/** First field issue of the API's validation envelope, e.g. "Project url: Invalid url". */
+export function validationMessage(details: unknown): string | undefined {
+  if (!Array.isArray(details) || details.length === 0) return undefined;
+  const first = details[0] as { path?: unknown; message?: unknown };
+  if (typeof first?.message !== 'string' || !first.message) return undefined;
+  return typeof first.path === 'string' && first.path
+    ? `${fieldLabel(first.path)}: ${first.message}`
+    : first.message;
+}
+
 /** A non-2xx API response, carrying the server's own explanation. */
 export class ApiError extends Error {
   constructor(
@@ -68,11 +89,27 @@ export async function apiJson<T = unknown>(input: string, init: RequestInit = {}
   }
   let res: Response;
   try {
-    res = await apiFetch(input, { ...init, headers });
-  } catch {
+    // A hung request must end: without a deadline a page sits on its spinner forever.
+    res = await apiFetch(input, {
+      ...init,
+      headers,
+      signal: init.signal ?? AbortSignal.timeout(20_000),
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'TimeoutError') {
+      throw new ApiError(0, 'The request timed out. Check your connection and try again.');
+    }
     throw new ApiError(0, 'Could not reach TalentSphere. Check your connection and try again.');
   }
   const body = await res.json().catch(() => null);
+  if (res.ok && body === null && /text\/html/i.test(res.headers.get('content-type') ?? '')) {
+    // A proxy or gateway error page served with 200: callers expect JSON and would
+    // otherwise show "Cannot read properties of null" to the person using the app.
+    throw new ApiError(
+      res.status,
+      'TalentSphere sent an unexpected response. Try again in a moment.'
+    );
+  }
   if (!res.ok) {
     if (res.status === 429) {
       // Refreshing would only spend more of the budget. When the server says
@@ -92,9 +129,18 @@ export async function apiJson<T = unknown>(input: string, init: RequestInit = {}
         body?.error?.code ?? 'RATE_LIMIT_EXCEEDED'
       );
     }
+    // A 5xx body can carry internals; only an explicit 503 (maintenance, outage) is
+    // allowed to speak for itself.
+    const masked = res.status >= 500 && res.status !== 503;
     throw new ApiError(
       res.status,
-      body?.error?.message ?? `The request failed (HTTP ${res.status}).`,
+      masked
+        ? 'TalentSphere had a problem on its side. Try again in a moment.'
+        : (body?.error?.code === 'VALIDATION_FAILED' && validationMessage(body.error.details)) ||
+            body?.error?.message ||
+            (res.status >= 500
+              ? 'TalentSphere had a problem on its side. Try again in a moment.'
+              : `The request failed (HTTP ${res.status}).`),
       body?.error?.code,
       body?.error?.details
     );

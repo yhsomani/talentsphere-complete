@@ -12,7 +12,7 @@ import {
 } from '../lib/messages.js';
 import { NOTIFICATIONS_EVENT } from '../lib/notifications.js';
 import { useSession } from '../lib/SessionContext.js';
-import { Button, Notice, PageHeader, TextArea } from '../components/ui/index.js';
+import { LoadError, Button, Notice, PageHeader, TextArea } from '../components/ui/index.js';
 
 interface Conversation {
   thread: { id: string; subject?: string | null };
@@ -120,15 +120,17 @@ export const ConversationPage: React.FC = () => {
     <div style={{ maxWidth: '760px', margin: '0 auto' }}>
       <p style={{ margin: `0 0 ${spacing.sm}` }}>
         <Link className="back-link" to="/messages" data-testid="conversation-back">
-          ← All messages
+          All messages
         </Link>
       </p>
       <PageHeader title={title} intro={conversation?.thread.subject ?? undefined} />
 
       {loadError && (
-        <Notice tone="error" data-testid="conversation-error">
-          {loadError}
-        </Notice>
+        <LoadError
+          message={loadError}
+          data-testid="conversation-error"
+          onRetry={() => void load()}
+        />
       )}
 
       {!loadError && conversation === null && (
@@ -167,7 +169,7 @@ export const ConversationPage: React.FC = () => {
                       alignSelf: mine ? 'flex-end' : 'flex-start',
                       maxWidth: 'min(85%, 560px)',
                       padding: `${spacing.sm} ${spacing.md}`,
-                      borderRadius: '10px',
+                      borderRadius: '4px',
                       backgroundColor: mine ? colors.primary[50] : '#ffffff',
                       border: `1px solid ${mine ? colors.primary[200] : colors.neutral[200]}`,
                     }}

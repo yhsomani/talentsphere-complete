@@ -1,5 +1,12 @@
 # TalentSphere — SECURITY.md v6.0
 
+> **Evidence scope (2026-10-21):** security objectives and checklists below are requirements, not certification. Implementation notes describe source behavior; referenced PostgreSQL/browser results remain historical unless the current audit records a fresh run. See [current findings](../reports/FEATURE_STATUS_2026-10-21.md), especially D-01 assessment simulation, D-02 worker duplicates, D-03 erasure recovery and D-07 scanner false positives.
+
+The deployed interview-execution refusal below does not cover challenge submissions:
+that separate evaluator can award simulated success without executing code. Erasure
+also spans several stores after account deactivation; complete cleanup and recovery
+are not established. Neither behavior meets full security/privacy acceptance. LMS certificate issuance also omits the BR-048 final-assessment gate (audit D-09): lesson completion alone currently produces authority-verified evidence.
+
 ## 1. Security Objective
 
 Protect identity, private career data, evidence, assessments, tenant data, financial state, credentials, provider credentials and audit history.
@@ -27,7 +34,7 @@ Never trust client role/tenant IDs.
 
 ## 4. Supabase Security
 
-RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. citeturn123371search0turn123371search4
+RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. [Supabase Data API security](https://supabase.com/docs/guides/api/securing-your-api)
 
 ### Private-data RLS corrections (migrations 00047–00048)
 
@@ -233,9 +240,7 @@ verified must never hold the proof.
   a dead link on behalf of someone who withdrew the request. Best effort: an email the
   worker has already picked up still goes out (`tests/integration/work-history-removal.test.ts`,
   `tests/pg/work-history-removal.test.ts`).
-- **Delivery:** no email provider is integrated. In development the worker prints these
-  messages ("DEV OUTBOX"); in any other environment it fails them permanently, so the
-  verification loop does not work outside development until a provider is chosen.
+- **Delivery:** development uses the dev outbox; deployed environments support the opt-in Resend adapter in `apps/worker/src/mail-provider.ts`. Live mailbox delivery and sender approval remain unverified. Without configured delivery, creation endpoints fail closed. Queue idempotency does not establish exactly-once handler execution; see audit D-02.
 
 ### Object-level authorization
 
@@ -295,7 +300,7 @@ AI restrictions must be inherited by all AI routes. Protected answers are never 
 
 ## 12. Security Testing Baseline
 
-Use OWASP ASVS 5.0 and OWASP API Security Top 10 as the verification frameworks. citeturn398510search0turn617445search0
+Use OWASP ASVS 5.0 and OWASP API Security Top 10 as the verification frameworks. [OWASP ASVS](https://asvs.owasp.org/) and [OWASP security projects](https://devguide.owasp.org/en/02-foundations/05-top-ten/)
 
 ## 13. Incident Response
 
@@ -305,4 +310,4 @@ DETECT → CONTAIN → PRESERVE → ASSESS → ERADICATE → RECOVER → NOTIFY 
 
 ## 14. Privacy
 
-Implement privacy controls against applicable legal requirements. For India, map the program to the DPDP Act/Rules and their staged commencement timeline; do not claim legal compliance without implementation evidence. citeturn832916search0turn832916search8turn832916search9
+Implement privacy controls against applicable legal requirements. For India, map the program to the DPDP Act/Rules and their staged commencement timeline; do not claim legal compliance without implementation evidence. [MeitY rules, corrigendum and enforcement documents](https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa)

@@ -9,9 +9,9 @@ export const Card: React.FC<CardProps> = ({ children, elevated = false, style, .
   <div
     style={{
       backgroundColor: '#ffffff',
-      borderRadius: '8px',
+      borderRadius: '4px',
       border: `1px solid ${colors.neutral[200]}`,
-      boxShadow: elevated ? '0 1px 3px 0 rgba(0, 0, 0, 0.05)' : 'none',
+      boxShadow: 'none',
       overflow: 'hidden',
       ...style,
     }}

@@ -11,7 +11,7 @@ import {
   type EvidenceItem,
   type Job,
 } from '../lib/types.js';
-import { ButtonLink, CheckIcon, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
+import { LoadError, ButtonLink, Notice, PageHeader, StatusPill } from '../components/ui/index.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 
 interface WorkHistorySummary {
@@ -46,7 +46,12 @@ const NextSteps: React.FC<{ steps: Step[] }> = ({ steps }) => {
           : `${steps.length - remaining} of ${steps.length} done.`}
       </p>
       <ol
-        style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: spacing.sm }}
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          borderBottom: `1px solid ${colors.neutral[300]}`,
+        }}
         data-testid="next-steps"
       >
         {steps.map((step, i) => (
@@ -58,28 +63,23 @@ const NextSteps: React.FC<{ steps: Step[] }> = ({ steps }) => {
               display: 'flex',
               alignItems: 'center',
               gap: spacing.md,
-              padding: `${spacing.md} ${spacing.lg}`,
-              backgroundColor: '#ffffff',
-              border: `1px solid ${step.done ? colors.neutral[200] : colors.primary[200]}`,
-              borderRadius: '10px',
+              padding: `${spacing.md} 0`,
+              borderTop: `1px solid ${colors.neutral[300]}`,
             }}
           >
+            {/* Done is a filled mark, to do an open ring: the state is the drawing, as on the seals. */}
             <span
               aria-hidden="true"
               style={{
-                flex: '0 0 32px',
-                height: '32px',
+                flex: '0 0 14px',
+                width: '14px',
+                height: '14px',
                 borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                backgroundColor: step.done ? '#ecfdf5' : colors.primary[50],
-                color: step.done ? colors.semantic.successText : colors.primary[800],
+                boxSizing: 'border-box',
+                border: `2px solid ${step.done ? colors.primary[700] : colors.semantic.warningText}`,
+                backgroundColor: step.done ? colors.primary[700] : 'transparent',
               }}
-            >
-              {step.done ? <CheckIcon size={16} /> : i + 1}
-            </span>
+            ></span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <strong style={{ color: step.done ? colors.neutral[600] : colors.neutral[900] }}>
                 {step.title}
@@ -145,8 +145,7 @@ const CandidateDashboard: React.FC = () => {
     };
   }, [session.user]);
 
-  if (failed)
-    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (failed) return <LoadError message="Could not load your dashboard." />;
   if (!applications || !history || !evidence || !jobs) {
     return (
       <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">
@@ -323,8 +322,7 @@ const RecruiterDashboard: React.FC = () => {
     };
   }, []);
 
-  if (failed)
-    return <Notice tone="error">Could not load your dashboard. Refresh to try again.</Notice>;
+  if (failed) return <LoadError message="Could not load your dashboard." />;
   if (!orgs || !jobs)
     return (
       <p style={{ color: colors.neutral[600] }} data-testid="dashboard-loading">

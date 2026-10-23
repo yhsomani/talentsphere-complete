@@ -93,7 +93,7 @@ repository actually requires today.
   would serve state that diverges from the first. Scaling out requires the ADR-015 exit
   path (core reads in SQL) first.
 - **Worker** (`apps/worker`) — claims `background_jobs` with `FOR UPDATE SKIP LOCKED`;
-  safe to run more than one.
+  multiple workers can reclaim expired batch leases and execute jobs twice (audit D-02). SKIP LOCKED does not establish exactly-once execution.
 - **Web** (`apps/web/dist`) — static bundle; `VITE_SUPPORT_EMAIL` is baked in at build time.
 
 ### Required configuration
@@ -154,7 +154,7 @@ approval before a public release. Do not claim due-date deletion is automatic.
 
 The core loop — accounts, profiles, organizations and members, skills, jobs,
 applications, evidence, work history, references, open email challenges,
-notifications and notification preferences — and background jobs. Every other route keeps its state in process memory and says so with
+notifications and notification preferences — and background jobs. Dedicated SQL stores also persist account metadata, erasure requests, saved searches/jobs, admin audit and flags. Remaining ephemeral routes keep state in process memory and are labelled with
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 

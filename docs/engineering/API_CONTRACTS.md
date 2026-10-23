@@ -1,5 +1,15 @@
 # TalentSphere — API_CONTRACTS.md v6.0
 
+> **Status: target contracts.** Sections 1–7 and 9–10 state target contract rules; compliance must be verified per endpoint. Shared schemas and error handling do not establish universal pagination, idempotency, transaction or audit coverage. Section 8.1 is the *intended* service, queue, integration and media surface. Most rows (Stripe, Mux, LMS/SSO, heavy queues, realtime channels) are **planned and not built**. For what exists, see [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md) and [`../governance/GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md) conflict C-5.
+
+Current source inventory: 274 direct API route registrations, with 70 entries in the
+durable-route registry, 3 stateless and 201 ephemeral-header routes. The
+[evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json) records methods, paths
+and source lines. Headers are not a complete storage contract: erasure spans multiple
+stores, and certificate verification can combine durable evidence with ephemeral
+certificate state. The service register below does not prove those operations have
+been implemented or accepted.
+
 ## 1. Contract-first Rule
 
 Public APIs describe business capabilities rather than accidental database structure.
@@ -39,11 +49,11 @@ Signature + replay window + provider event ID + idempotent processing.
 
 ## 8. Source Behavioral Contract
 
-## 13. API, Event, Integration, Queue, Realtime & Media Contracts
+### 8.1 API, Event, Integration, Queue, Realtime & Media Contracts
 
 All external and cross-domain interfaces are contract-first. Public API behavior must not accidentally mirror internal tables. Every mutation specifies authorization, validation, idempotency, rate limits, errors, audit, and observability.
 
-### 25.1 Complete Service Contract Register (SCI-01..SCI-54)
+#### 8.1.1 Complete Service Contract Register (SCI-01..SCI-54)
 
 | ID | Operation | Actor | Idempotency |
 |---|---|---|---|
@@ -102,7 +112,7 @@ All external and cross-domain interfaces are contract-first. Public API behavior
 | SCI-53 | Referral request lifecycle | Candidate | (job_id, referrer_id) |
 | SCI-54 | Alumni affiliation / group lifecycle | User | Affiliation key |
 
-### 25.2 Error Taxonomy
+#### 8.1.2 Error Taxonomy
 
 | Error Class | HTTP | Client-Visible Behavior |
 |---|---|---|
@@ -121,7 +131,7 @@ All external and cross-domain interfaces are contract-first. Public API behavior
 
 ---
 
-### 26.1 Integration Register
+#### 8.1.3 Integration Register
 
 | Integration | Direction | Purpose | Phase |
 |---|---|---|---|
@@ -145,7 +155,7 @@ All external and cross-domain interfaces are contract-first. Public API behavior
 | Proctoring vendor | Outbound | Exam proctoring | Ph10 (OD-35) |
 | Zapier / Make | Outbound | Automation | Future |
 
-### 26.2 Integration Layer Doctrine (ADR-009)
+#### 8.1.4 Integration Layer Doctrine (ADR-009)
 
 ```
 Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) ← Provider Adapters
@@ -161,14 +171,14 @@ Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) �
 
 ---
 
-### 27.1 Dual-Queue Boundary (ADR-009)
+#### 8.1.5 Dual-Queue Boundary (ADR-009)
 
 | Queue | Infra | Workloads | SLA |
 |---|---|---|---|
 | Transactional | Postgres `background_jobs` (SKIP LOCKED) | XP settle, notifications, webhooks, digests, rollups, retention purge, search reindex | Enqueue <10ms; process <5s |
 | Heavy async | Dedicated worker pool (Redis/BullMQ or equivalent, OD-38) | Video transcode, AI enrichment, 5k+ row imports, large exports, embedding generation | Enqueue <100ms; process best-effort; DLQ after 3 retries |
 
-### 27.2 Transactional Job Catalog
+#### 8.1.6 Transactional Job Catalog
 
 | Kind | Cadence | Retries |
 |---|---|---|
@@ -187,7 +197,7 @@ Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) �
 | `learning.outcome_correlation` | Nightly | 3 |
 | `emerging_skill.detect` | Weekly | 3 |
 
-### 27.3 Heavy Job Catalog
+#### 8.1.7 Heavy Job Catalog
 
 | Kind | Cadence | Retries |
 |---|---|---|
@@ -201,7 +211,7 @@ Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) �
 | `coupon.expiry_scan` | Daily | 3 |
 | `interview.ai_analysis` | On session complete | 3 |
 
-### 27.4 Job Schema
+#### 8.1.8 Job Schema
 
 ```
 id UUID · kind · payload jsonb · status (queued/running/succeeded/failed/dead/canceled)
@@ -211,7 +221,7 @@ idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 
 ---
 
-### 28.1 Realtime vs Polling Boundary
+#### 8.1.9 Realtime vs Polling Boundary
 
 | Surface | Mechanism |
 |---|---|
@@ -224,14 +234,14 @@ idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 | Leaderboards | Polling + optimistic |
 | Contest live leaderboard | Realtime (bounded) |
 
-### 28.2 Channel Contract
+#### 8.1.10 Channel Contract
 
 - Payload ≤4KB `{type, entity, id, ts}` + monotonic cursor
 - No raw rows; server RLS projection
 - JWT-authenticated channels; RLS applied before event body
 - Channel registry `<channelType>:<boundedId>`
 
-### 28.3 Resilience
+#### 8.1.11 Resilience
 
 - Reconnect backoff 1s → 8s
 - >3 failures → polling path with cursor resync
@@ -241,7 +251,7 @@ idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 
 ---
 
-### 29.1 Unified Content Model
+#### 8.1.12 Unified Content Model
 
 ```
 Course → Section → ContentItem (VIDEO | PLAYLIST | ARTICLE | PDF | QUIZ | ASSIGNMENT | EXTERNAL_LINK)
@@ -250,7 +260,7 @@ Course → Section → ContentItem (VIDEO | PLAYLIST | ARTICLE | PDF | QUIZ | AS
                 → ProviderPlayer
 ```
 
-### 29.2 Delivery Modes
+#### 8.1.13 Delivery Modes
 
 | Mode | Description | Storage | Playback |
 |---|---|---|---|
@@ -260,11 +270,11 @@ Course → Section → ContentItem (VIDEO | PLAYLIST | ARTICLE | PDF | QUIZ | AS
 | D — Playlist import | Items imported as individual content items | Reference only | Provider players |
 | E — External link | Provider prohibits embedding | N/A | External link |
 
-### 29.3 Provider Capability System
+#### 8.1.14 Provider Capability System
 
 Each provider declares: `canEmbed`, `canPlayPlaylist`, `canTrackPlayback`, `canTrackProgress`, `supportsCaptions`, `supportsSubtitles`, `supportsTranscript`, `supportsPlaybackSpeed`, `supportsStartTime`, `supportsEndTime`, `supportsFullscreen`, `supportsPictureInPicture`, `supportsThumbnail`, `supportsMetadataLookup`, `supportsOAuth`.
 
-### 29.4 Media Pipeline
+#### 8.1.15 Media Pipeline
 
 ```mermaid
 flowchart LR
@@ -279,7 +289,7 @@ flowchart LR
     T -.->|failure| F[FAILED]
 ```
 
-### 29.5 Media Security
+#### 8.1.16 Media Security
 
 > [!WARNING]
 > No arbitrary HTML/JS from authors. Provider-specific renderers only. Domain allowlist in CSP `frame-src`. Reject `javascript:`, `data:`, unknown iframes. SSRF allow-list on server fetches. iframe sandboxing where compatible. Never download protected third-party content.

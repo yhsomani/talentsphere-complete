@@ -72,7 +72,7 @@ export const CheckoutPage: React.FC = () => {
             style={{
               backgroundColor: '#ffffff',
               border: `1px solid ${colors.neutral[200]}`,
-              borderRadius: '12px',
+              borderRadius: '4px',
               padding: spacing.xl,
               display: 'flex',
               flexDirection: 'column',

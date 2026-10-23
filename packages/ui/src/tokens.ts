@@ -3,49 +3,54 @@
  * Conforming to WCAG 2.2 AA contrast rules and docs/experience/UI_UX_DESIGN_SYSTEM.md
  */
 
+/*
+ * Palette: spruce is the brand (verified state, primary actions), ink is the
+ * text, paper is the page. Neutrals are green-grey, not blue-grey, so nothing
+ * reads as a default SaaS slate. Every text tone is AA on paper (#f4f5f1).
+ */
 export const colors = {
   primary: {
-    50: '#f0f7ff',
-    100: '#e0effe',
-    200: '#bae0fd',
-    300: '#7cc7fb',
-    400: '#38a8f8',
-    500: '#0e8ce9',
-    600: '#026fc7',
-    700: '#0358a1',
-    800: '#074b85',
-    900: '#0c3f6e',
+    50: '#eef5f1',
+    100: '#d9e9e0',
+    200: '#b3d3c2',
+    300: '#7fb29a',
+    400: '#4f8f75',
+    500: '#2f7559',
+    600: '#25634a',
+    700: '#1e5b45',
+    800: '#17493a',
+    900: '#10342a',
   },
   neutral: {
-    50: '#f8fafc',
-    100: '#f1f5f9',
-    200: '#e2e8f0',
-    300: '#cbd5e1',
-    400: '#94a3b8',
-    500: '#64748b',
-    600: '#475569',
-    700: '#334155',
-    800: '#1e293b',
-    900: '#0f172a',
-    950: '#020617',
+    50: '#fafbf8',
+    100: '#f4f5f1',
+    200: '#e4e7e1',
+    300: '#c9cfc8',
+    400: '#9aa39c',
+    500: '#6f7971',
+    600: '#55605a',
+    700: '#3f4a44',
+    800: '#2a342f',
+    900: '#17201c',
+    950: '#0c110e',
   },
   semantic: {
     // Bright display tones — icons/badges/large graphics ONLY, never body text.
-    success: '#10b981',
-    warning: '#f59e0b',
-    error: '#ef4444',
-    info: '#3b82f6',
-    // Text-safe tones — >=4.5:1 contrast on white surfaces (WCAG AA).
-    successText: '#047857',
-    warningText: '#92400e',
-    errorText: '#b91c1c',
-    infoText: '#1d4ed8',
+    success: '#1e5b45',
+    warning: '#c98a1b',
+    error: '#c2410c',
+    info: '#4a6b8a',
+    // Text-safe tones — >=4.5:1 contrast on paper (WCAG AA).
+    successText: '#1e5b45',
+    warningText: '#8a5a12',
+    errorText: '#a8360a',
+    infoText: '#3d5a75',
   },
   surface: {
-    background: '#ffffff',
-    card: '#ffffff',
-    subtle: '#f8fafc',
-    overlay: 'rgba(15, 23, 42, 0.5)',
+    background: '#f4f5f1',
+    card: '#fafbf8',
+    subtle: '#eceee8',
+    overlay: 'rgba(23, 32, 28, 0.55)',
   },
 } as const;
 
@@ -62,8 +67,9 @@ export const spacing = {
 
 export const typography = {
   fontFamily: {
-    sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    mono: 'JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    sans: '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif',
+    mono: '"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+    serif: 'Newsreader, "Iowan Old Style", Georgia, "Times New Roman", serif',
   },
   fontSize: {
     xs: '0.75rem',

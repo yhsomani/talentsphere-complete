@@ -1,5 +1,24 @@
 # TalentSphere — TESTING.md v6.0
 
+## Latest measured baseline (2026-10-21)
+
+At source `a771a87b`, the audit executed 1,172 passing Vitest assertions across
+115 files and five passing migration-helper tests. Ten project TypeScript checks
+passed with emission and incremental output disabled. Lint failed on seven files.
+These tests reused existing built workspace dependencies; they do not establish a
+fresh source build, PostgreSQL behavior, browser acceptance or deployment readiness.
+See the [audit](../reports/FEATURE_STATUS_2026-10-21.md) and
+[evidence ledger](../reports/AUDIT_EVIDENCE_2026-10-21.json) for commands and scope.
+
+The assessment suite currently accepts simulated scoring, and the injection scan
+can pass when its external grep command is unavailable. Passing assertions must
+therefore be checked against the intended requirement. The audit's worker probe
+also reproduced duplicate execution outside the ordinary passing suite.
+
+Agent checks must respect the repository build-file restriction: do not run emitting
+builds, install dependencies or write tool caches. Database and browser verification
+remain outstanding; documentation edits do not require Reticle.
+
 ## 1. Testing Philosophy
 
 Tests prove intended behavior, not accidental current behavior.
@@ -59,6 +78,7 @@ below has **no** dedicated suite yet and must not be reported as covered.
 | E2E           | `pnpm test:e2e`             | Playwright (Chromium)| Executable                        |
 | Accessibility | `pnpm test:a11y`            | Playwright (Chromium)| Executable (see limits below)     |
 | Performance   | `pnpm test:performance`     | Playwright (Chromium)| Baseline + regression guards only |
+| Durability    | `pnpm test:pg`              | Vitest + real PostgreSQL | Executable when `TEST_DATABASE_URL` is set (`vitest.pg.config.ts`) |
 
 Accessibility and performance run inside the full `pnpm test:e2e` gate, so
 neither can be skipped by merging.
@@ -86,9 +106,9 @@ API that stops responding. It does not assert SLOs, because
 `docs/quality/OPERATIONS.md` §3 defers SLOs until after baseline measurement.
 Ratifying SLOs is what converts this layer into a real budget check.
 
-**Known limits — not covered:** DB query counts and queue age, because the
-service currently runs against in-process state with no database. Those become
-measurable only once real persistence lands.
+**Known limits — not covered:** DB query counts and queue age are not measured
+by this layer. The core career loop now persists to PostgreSQL (ADR-015, see
+`docs/quality/OPERATIONS.md` §9); a measurement of those costs is still missing.
 
 ## 5. Critical E2E Suites
 

@@ -2,8 +2,8 @@
 ## Final Product, UX, Architecture, Engineering & Operations Source of Truth
 
 **Date:** 24 September 2026  
-**Implementation reality:** **GREENFIELD / 0% VERIFIED**  
-**Status:** Canonical specification baseline — implementation pending verification  
+**Implementation reality:** **PARTIALLY IMPLEMENTED; RELEASE READINESS NOT ESTABLISHED**. Current evidence and inspection limits are recorded in `docs/reports/FEATURE_STATUS_2026-10-21.md`; historical counts are not maintained here.
+**Status:** Canonical specification (intent). Implementation status is not recorded here; see `docs/reports/FEATURE_STATUS_2026-10-21.md`  
 **Authority:** This file is the authoritative definition of intended product/system behavior. Executable code, tests, migrations, runtime evidence and production evidence determine actual implementation status.
 
 > **Founder directive:** Preserve valid capabilities and intent, not obsolete wording or weak technical choices. This document supersedes prior TalentSphere SSOT editions as an active specification. Older documents remain historical evidence only.
@@ -371,7 +371,7 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 
 > **Authority:** every feature from every edition is preserved. The three sub-tables below are the single canonical register. Priority `P` and `Phase` here GOVERN any band list elsewhere (§8.1), the roadmap (§R), and the dependency map (§DEPMAP). Renumbering history: §LOCK.3.
 
-### 6.1 Baseline & Core Features (F-01 … F-120)
+### 7.1 Baseline & Core Features (F-01 … F-120)
 
 | ID | Feature | Category | P | Phase | Key dependencies |
 |---|---|---|---|---|---|
@@ -496,7 +496,7 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 | F-119 | Diversity & Inclusion Analytics | Hiring | 4 | Ph8 | F-06 |
 | F-120 | API & Integration Platform | Platform | 2 | Ph10 | F-01, F-34 |
 
-### 6.2 v2.1 Integration Family (F-121 … F-143) — preserved numbering
+### 7.2 v2.1 Integration Family (F-121 … F-143) — preserved numbering
 
 | ID | Feature | Category | P | Phase | Key dependencies |
 |---|---|---|---|---|---|
@@ -524,7 +524,7 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 | F-142 | Referral Request System | Jobs | 8 | Ph4 | F-09, F-04 |
 | F-143 | OSS Contribution Discovery | Portfolio | 4 | Ph8 | F-89, F-26 |
 
-### 6.3 Gap-Analysis Family (F-144 … F-173) — renumbered (former F-121 … F-150)
+### 7.3 Gap-Analysis Family (F-144 … F-173) — renumbered (former F-121 … F-150)
 
 | ID | Feature | Category | P | Phase | Key dependencies |
 |---|---|---|---|---|---|
@@ -559,7 +559,7 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 | F-172 | Advanced Compensation Intelligence | Analytics | 4 | Ph8 | F-86, F-98, F-109 |
 | F-173 | Company-to-Skills Mapping | Intelligence | 3 | Ph4 | F-84, F-04 |
 
-### 6.4 Distribution Summary
+### 7.4 Distribution Summary
 | P | Count | 
 |---|---|
 | 10 | 10 | 
@@ -4189,7 +4189,7 @@ Code Push
 
 ## 23. Implementation Roadmap & Dependency-Aware Build Order
 
-Implementation starts from the greenfield baseline. The roadmap is capability-driven; phases can shift when dependencies or validated business priorities change, but no phase may bypass foundational security, authorization, data integrity, or testing controls.
+Implementation started from the greenfield baseline (2026-09-24); status is recorded in `docs/reports/FEATURE_STATUS_2026-10-21.md`. The roadmap is capability-driven; phases can shift when dependencies or validated business priorities change, but no phase may bypass foundational security, authorization, data integrity, or testing controls.
 
 ### 38.1 Phases (0–10)
 
@@ -5672,4 +5672,4 @@ These facts are external dependencies, not substitutes for implementation eviden
 
 **TalentSphere is specified as a trust-first, evidence-backed Career Operating System with a PWA-first experience, modular architecture, governed intelligence, strong privacy/security boundaries, and an evidence-driven implementation program.**
 
-**Implementation status:** GREENFIELD / 0% VERIFIED.
+**Implementation status:** **PARTIALLY IMPLEMENTED** — 16 features implemented, 78 partial, 75 not started (code-checked 2026-10-21; see `docs/reports/FEATURE_STATUS_2026-10-21.md`).

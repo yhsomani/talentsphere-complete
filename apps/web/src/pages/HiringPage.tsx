@@ -23,6 +23,7 @@ import {
   Select,
   StatusPill,
   TextArea,
+  LoadError,
 } from '../components/ui/index.js';
 
 interface Organization {
@@ -518,11 +519,7 @@ export const HiringPage: React.FC = () => {
         />
       )}
 
-      {error && (
-        <Notice tone="error" style={{ marginBottom: spacing.md }}>
-          {error}
-        </Notice>
-      )}
+      {error && <LoadError message={error} style={{ marginBottom: spacing.md }} />}
       {statusError && (
         <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="job-status-error">
           {statusError}
@@ -556,7 +553,7 @@ export const HiringPage: React.FC = () => {
             margin: 0,
             backgroundColor: '#ffffff',
             border: `1px solid ${colors.neutral[200]}`,
-            borderRadius: '10px',
+            borderRadius: '4px',
           }}
         >
           {jobs.map((job, index) => {

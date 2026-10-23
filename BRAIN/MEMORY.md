@@ -1,5 +1,35 @@
 # TalentSphere — Project Memory
 
+## Audit update — 2026-10-21 (current evidence, not release acceptance)
+
+- Current audit and roadmap remain in `docs/reports/FEATURE_STATUS_2026-10-21.md`
+  and `docs/reports/FEATURE_PLAN_2026-10-21.md`; supporting source/reference/test
+  records are in `docs/reports/AUDIT_EVIDENCE_2026-10-21.json`.
+- Initial `main` HEAD was `a30b35bf` with 27 staged entries. Another actor committed
+  those entries as `a771a87b` during discovery. The auditor did not commit or alter
+  that product work; all audit changes are documentation/evidence only.
+- Current execution: 1,172 Vitest tests across 115 files passed, zero failed/pending;
+  five migration-history helper tests passed; all ten projects passed non-emitting
+  typechecks. Formatting failed in seven existing paths. Native Vitest config
+  loading and disabled cache avoided protected build writes. Existing compiled
+  workspace imports limit source-to-result attribution.
+- No current PG, browser, live-provider, deployment or restore pass is claimed.
+  Build/install/root emitting typecheck were not run under the protected-file rule.
+- Reproduced: non-executable challenge text receives simulated passed/100 while
+  evidence remains unverified; sequential worker batch leases allow duplicate
+  handler executions. Static finding: cross-store erasure can fail after account
+  deactivation, requiring durable recovery. See D-01–D-03 before implementation.
+- GitHub #44–#50 remain open. PRs #43 and #51–#58 are merged. Existing Resend,
+  saved-search/bookmark/account/audit/flag stores, writer lease and heartbeat must
+  not be rebuilt from stale absence claims. Live acceptance and owner decisions
+  still gate release.
+- All 173 features have provisional maturity/limitations and backlog disposition;
+  detailed subfeature and 248-rule semantic acceptance review remains incomplete.
+  No whole feature was newly certified implemented-and-verified. Product scope,
+  legal/privacy, provider, pricing and architecture decisions remain with owners.
+
+> **Historical log.** Status figures in §2 to §7 ("51 verified", "1058 tests pass", milestone dates) were written on 2026-10-10 and 2026-10-18. They are not re-measured and conflict with the code-checked status of record, `docs/reports/FEATURE_STATUS_2026-10-21.md` (see the current matrix; earlier counts are superseded). See `docs/governance/GAP_ANALYSIS.md` conflicts C-2 and C-3.
+
 ## 1. Memory Control
 
 - **Project:** TalentSphere
