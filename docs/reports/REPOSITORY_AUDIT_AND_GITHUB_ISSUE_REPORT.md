@@ -204,7 +204,7 @@ No unsupported claims of production delivery or hosted migrations should be post
 
 ## N. Feature inventory (historical baseline, not reverified)
 
-The **173 entries below are imported directly from** [`docs/reports/FEATURE_STATUS_2026-10-21.md`](docs/reports/FEATURE_STATUS_2026-10-21.md). They retain its October 21 **provisional/search-limited** statuses, because the remote-only targeted re-audit cannot honestly recertify 173 end-to-end contracts. **F-16 has advanced since this snapshot** with PR #71; see section F. **¹NOT FOUND** means search-limited absence, not a universal impossibility; **¹BROKEN** references older reproduced evidence unless explicitly verified above.
+The **173 entries below are imported directly from** [`docs/reports/FEATURE_STATUS_2026-10-21.md`](FEATURE_STATUS_2026-10-21.md). They retain its October 21 **provisional/search-limited** statuses, because the remote-only targeted re-audit cannot honestly recertify 173 end-to-end contracts. **F-16 has advanced since this snapshot** with PR #71; see section F. **¹NOT FOUND** means search-limited absence, not a universal impossibility; **¹BROKEN** references older reproduced evidence unless explicitly verified above.
 
 | Feature | Canonical name | 2026-10-21 provisional status | Historical code/evidence observation (not new verification) |
 |---|---|---|---|
@@ -387,8 +387,8 @@ The **173 entries below are imported directly from** [`docs/reports/FEATURE_STAT
 - [Latest red main CI, run 40017740619](https://github.com/yhsomani/talentsphere-complete/actions/runs/40017740619) — exact commit 0f40b6c, one E2E failure
 - [Earlier green run 40016584724](https://github.com/yhsomani/talentsphere-complete/actions/runs/40016584724), [green run 40014603225](https://github.com/yhsomani/talentsphere-complete/actions/runs/40014603225)
 - [PR #71: durable Stripe billing](https://github.com/yhsomani/talentsphere-complete/pull/71), [PR #70: billing fixes](https://github.com/yhsomani/talentsphere-complete/pull/70), [PRs #61–#66: hosted migration guards](https://github.com/yhsomani/talentsphere-complete/pulls?q=is%3Apr+is%3Amerged)
-- [Original 173-feature matrix](docs/reports/FEATURE_STATUS_2026-10-21.md), [backlog](docs/reports/FEATURE_PLAN_2026-10-21.md), [docs index](docs/INDEX.md), [architecture ADR-015](docs/engineering/adr/ADR-015-core-loop-persistence.md)
-- [Hosted dependency analysis](docs/engineering/HOSTED_SUPABASE_DEPENDENCY_AUDIT.md), [hosted migration release gate](docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md), [historical payment audit](docs/reports/PAYMENT_AUDIT_2026-10-23.md)
-- [Agent safety and build-file restrictions](AGENTS.md), [exact CI workflow](.github/workflows/ci.yml), [open issues](https://github.com/yhsomani/talentsphere-complete/issues)
+- [Original 173-feature matrix](FEATURE_STATUS_2026-10-21.md), [backlog](FEATURE_PLAN_2026-10-21.md), [docs index](../INDEX.md), [architecture ADR-015](../engineering/adr/ADR-015-core-loop-persistence.md)
+- [Hosted dependency analysis](../engineering/HOSTED_SUPABASE_DEPENDENCY_AUDIT.md), [hosted migration release gate](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md), [historical payment audit](PAYMENT_AUDIT_2026-10-23.md)
+- [Agent safety and build-file restrictions](../../AGENTS.md), [exact CI workflow](../../.github/workflows/ci.yml), [open issues](https://github.com/yhsomani/talentsphere-complete/issues)
 
 **Review boundary:** A GitHub report is a maintainable evidence artifact, not authority to deploy, migrate hosted SQL, run live charges or declare all canonical features verified. Update this report as CI and staging proof become available.
