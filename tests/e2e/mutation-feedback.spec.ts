@@ -4,6 +4,9 @@ import { publishJob, type PublishedJob } from './fixtures.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
 
+/** What apps/web/src/lib/api.ts shows for any 5xx other than 503. */
+const SERVER_ERROR_MESSAGE = 'TalentSphere had a problem on its side. Try again in a moment.';
+
 /**
  * Mutation feedback & truthfulness verdicts (optimistic-UI audit 2026-10-08).
  *
@@ -13,7 +16,8 @@ const API_BASE = 'http://127.0.0.1:4000/api/v1';
  * route-intercepted server and proves the UI never claims a state the server
  * has not confirmed: pending feedback must appear while the response is still
  * held by the test (causal, not timing-based), failures must roll back to a
- * truthful idle state with the server's message, 409 must reconcile to server
+ * truthful idle state with a safe message (a 5xx body is never shown, since it
+ * can carry internals), 409 must reconcile to server
  * truth, retries must reuse the same idempotency key, and offline/401 must
  * degrade honestly. Validation failures are covered in web-ui.spec.ts and
  * server-side replay dedupe in tests/integration (work-history-graph,
@@ -162,11 +166,13 @@ test.describe('MUT: pending feedback precedes the server response', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('add-employment-form')).toBeVisible();
 
-    // Server rejects the first attempt — truthful error, form intact.
+    // Server rejects the first attempt — truthful error, form intact. A 5xx
+    // body can carry internals, so the UI shows its own message, never the body.
     await first!.fulfill(
       json({ error: { code: 'INTERNAL', message: 'Attestation pipeline unavailable.' } }, 500)
     );
-    await expect(page.getByTestId('add-error')).toHaveText('Attestation pipeline unavailable.');
+    await expect(page.getByTestId('add-error')).toHaveText(SERVER_ERROR_MESSAGE);
+    await expect(page.getByTestId('add-error')).not.toContainText('Attestation pipeline');
     await expect(page.getByTestId('add-employment-form')).toBeVisible();
     await expect(page.getByTestId('input-company')).toHaveValue(sampleEntry.companyName);
 
@@ -184,7 +190,7 @@ test.describe('MUT: pending feedback precedes the server response', () => {
 });
 
 test.describe('MUT: rollback, conflict reconciliation and failure matrix', () => {
-  test('apply failure rolls back to idle with the server message, then retry succeeds', async ({
+  test('apply failure rolls back to idle with a safe error message, then retry succeeds', async ({
     page,
     request,
   }) => {
@@ -206,7 +212,8 @@ test.describe('MUT: rollback, conflict reconciliation and failure matrix', () =>
     const btn = applyBtn(page);
     await btn.click();
 
-    await expect(page.getByTestId('apply-error')).toHaveText('Upstream evaluation unavailable.');
+    await expect(page.getByTestId('apply-error')).toHaveText(SERVER_ERROR_MESSAGE);
+    await expect(page.getByTestId('apply-error')).not.toContainText('Upstream evaluation');
     await expect(btn).toBeEnabled();
     await expect(btn).toHaveText('Send application'); // never claimed applied
     await expect(page.getByTestId('apply-done')).toHaveCount(0);
