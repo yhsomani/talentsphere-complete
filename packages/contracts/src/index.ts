@@ -574,10 +574,37 @@ export type GetLeaderboardQuery = z.infer<typeof GetLeaderboardQuerySchema>;
 /**
  * Account Settings, Privacy & GDPR Erasure Contracts (F-15, §31, BR-06)
  */
+const isLanguageTag = (value: string): boolean => {
+  try {
+    return Intl.getCanonicalLocales(value).length === 1;
+  } catch {
+    return false;
+  }
+};
+
+const isTimeZone = (value: string): boolean => {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const UpdateUserSettingsInputSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).optional(),
-  language: z.string().min(2).max(10).optional(),
-  timezone: z.string().min(1).max(64).optional(),
+  language: z
+    .string()
+    .min(2)
+    .max(10)
+    .refine(isLanguageTag, 'Use a language tag such as en or en-GB.')
+    .optional(),
+  timezone: z
+    .string()
+    .min(1)
+    .max(64)
+    .refine(isTimeZone, 'Use a time zone such as UTC or Europe/London.')
+    .optional(),
   profileVisibility: z
     .enum(['public', 'connections_only', 'recruiters_only', 'private'])
     .optional(),
