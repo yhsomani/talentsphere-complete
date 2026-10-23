@@ -55,48 +55,33 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
   });
 
   describe('createSubscription & Invoices', () => {
-    it('creates active subscription and initial paid invoice for monthly pro plan', () => {
+    it('refuses to activate paid plans without verified Stripe payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      const result = createSubscription({
+      expect(() => createSubscription({
         userId,
         planTier: 'candidate_pro',
         billingCycle: 'monthly',
         idempotencyKey: 'idem_sub_123',
         nowIso,
-      });
-
-      expect(result.subscription.userId).toBe(userId);
-      expect(result.subscription.planTier).toBe('candidate_pro');
-      expect(result.subscription.status).toBe('active');
-      expect(result.subscription.currentPeriodStart).toBe(nowIso);
-
-      const expectedEnd = new Date(
-        new Date(nowIso).getTime() + 30 * 24 * 60 * 60 * 1000
-      ).toISOString();
-      expect(result.subscription.currentPeriodEnd).toBe(expectedEnd);
-
-      expect(result.invoice.amountCents).toBe(1999);
-      expect(result.invoice.currency).toBe('USD');
-      expect(result.invoice.status).toBe('paid');
-      expect(result.invoice.idempotencyKey).toBe('idem_sub_123');
-
-      expect(result.entitlements.aiDailyRequestsLimit).toBe(50);
+      })).toThrow(/verified payment|payment provider/i);
     });
 
-    it('handles yearly billing cycle with 365-day period and discounted price', () => {
+    it('keeps free subscriptions active without paid invoice fraud', () => {
+      const result = createSubscription({ userId, planTier: 'free' });
+      expect(result.subscription.status).toBe('active');
+      expect(result.invoice.amountCents).toBe(0);
+      expect(result.invoice.status).toBe('paid');
+      expect(result.entitlements.planTier).toBe('free');
+    });
+
+    it('refuses yearly paid activation without verified payment', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
-      const result = createSubscription({
+      expect(() => createSubscription({
         userId,
         planTier: 'recruiter_starter',
         billingCycle: 'yearly',
         nowIso,
-      });
-
-      expect(result.invoice.amountCents).toBe(99000);
-      const expectedEnd = new Date(
-        new Date(nowIso).getTime() + 365 * 24 * 60 * 60 * 1000
-      ).toISOString();
-      expect(result.subscription.currentPeriodEnd).toBe(expectedEnd);
+      })).toThrow(/verified payment|payment provider/i);
     });
   });
 
@@ -105,7 +90,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -119,7 +104,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -138,7 +123,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
 
@@ -156,7 +141,7 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
         userId,
-        planTier: 'candidate_pro',
+        planTier: 'free',
         nowIso,
       });
       const canceled = cancelSubscription(subscription, true, nowIso);
