@@ -7312,6 +7312,9 @@ export async function buildApp(
     '/api/v1/skills/:skillId/market-signals',
     async (req: FastifyRequest<{ Params: { skillId: string } }>, reply: FastifyReply) => {
       const session = extractUser(req);
+      // Signals feed the public forecasts, so only the platform may supply them:
+      // any signed-in account could otherwise move a skill's demand and salary figures.
+      assertPlatformAdmin(session.roles);
       const { skillId } = req.params;
 
       const skill = skillsById.get(skillId);

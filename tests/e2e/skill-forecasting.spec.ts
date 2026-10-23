@@ -1,6 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 const API_BASE = 'http://127.0.0.1:4000/api/v1';
+
+// Market data is supplied by the platform, never by an ordinary account.
+const adminHeaders = () => ({
+  authorization: `Bearer ${createSessionToken(
+    '00000000-0000-4000-a000-0000000000c4',
+    'admin.e2e.forecast@talentsphere.internal',
+    ['platform_admin']
+  )}`,
+});
 
 test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-02)', () => {
   let recruiterToken: string;
@@ -34,7 +44,7 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
       [1650, 1050, 142000],
     ]) {
       const recorded = await request.post(`${API_BASE}/skills/${canonicalSkillId}/market-signals`, {
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: adminHeaders(),
         data: {
           demandPostingsCount: demand,
           activeCandidatesCount: candidates,
@@ -66,9 +76,19 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     expect(first.forecast.confidenceLevel).toBe(0.95);
   });
 
-  test('records a new real-time labor market signal for a skill', async ({ request }) => {
+  test('refuses a signed-in account that is not a platform admin supplying market data', async ({
+    request,
+  }) => {
     const res = await request.post(`${API_BASE}/skills/${canonicalSkillId}/market-signals`, {
       headers: { authorization: `Bearer ${recruiterToken}` },
+      data: { demandPostingsCount: 999999, activeCandidatesCount: 1, avgSalaryOffered: 1 },
+    });
+    expect(res.status()).toBe(403);
+  });
+
+  test('records a new real-time labor market signal for a skill', async ({ request }) => {
+    const res = await request.post(`${API_BASE}/skills/${canonicalSkillId}/market-signals`, {
+      headers: adminHeaders(),
       data: {
         demandPostingsCount: 2800,
         activeCandidatesCount: 1450,
@@ -142,7 +162,7 @@ test.describe('E2E: Skill Supply/Demand Forecasting (F-151, F-84, F-86, F-97, P-
     const invalidData = await request.post(
       `${API_BASE}/skills/${canonicalSkillId}/market-signals`,
       {
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: adminHeaders(),
         data: {
           demandPostingsCount: -50,
           activeCandidatesCount: 100,

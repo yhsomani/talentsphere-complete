@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { adminToken } from '../helpers/content.js';
 
 describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)', () => {
   let app: FastifyInstance;
@@ -64,7 +65,7 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
       const record = await app.inject({
         method: 'POST',
         url: `/api/v1/skills/${canonicalSkillId}/market-signals`,
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: { authorization: `Bearer ${adminToken()}` },
         payload: {
           demandPostingsCount: 1650,
           activeCandidatesCount: 1050,
@@ -92,11 +93,21 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
   });
 
   describe('POST /api/v1/skills/:skillId/market-signals', () => {
-    it('records a labor market signal when authenticated', async () => {
+    it('refuses a signed-in account that is not a platform admin (403)', async () => {
       const res = await app.inject({
         method: 'POST',
         url: `/api/v1/skills/${canonicalSkillId}/market-signals`,
         headers: { authorization: `Bearer ${recruiterToken}` },
+        payload: { demandPostingsCount: 999999, activeCandidatesCount: 1, avgSalaryOffered: 1 },
+      });
+      expect(res.statusCode).toBe(403);
+    });
+
+    it('records a labor market signal when a platform admin supplies it', async () => {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/skills/${canonicalSkillId}/market-signals`,
+        headers: { authorization: `Bearer ${adminToken()}` },
         payload: {
           demandPostingsCount: 2200,
           activeCandidatesCount: 1200,
@@ -134,7 +145,7 @@ describe('Skill Supply/Demand Forecasting Integration (F-151, F-84, F-86, F-97)'
       const res = await app.inject({
         method: 'POST',
         url: '/api/v1/skills/99999999-9999-4000-a000-999999999999/market-signals',
-        headers: { authorization: `Bearer ${recruiterToken}` },
+        headers: { authorization: `Bearer ${adminToken()}` },
         payload: {
           demandPostingsCount: 100,
           activeCandidatesCount: 80,
