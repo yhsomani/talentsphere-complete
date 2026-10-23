@@ -244,6 +244,17 @@ export function createSubscription(params: CreateSubscriptionParams): CreateSubs
     throw new DomainError('VALIDATION_FAILED', `Unknown plan tier: ${params.planTier}`);
   }
 
+  // This constructor is used by legacy/demo workflows and has no trusted
+  // Stripe webhook evidence. It must never mint paid access or paid invoices.
+  // A future Stripe billing reconciler must verify signed provider events and
+  // persist entitlements transactionally before enabling a paid tier.
+  if (params.planTier !== 'free') {
+    throw new DomainError(
+      'PAYMENT_REQUIRED',
+      'Paid subscriptions require verified payment from an approved payment provider.'
+    );
+  }
+
   const cycle = params.billingCycle || 'monthly';
   const now = params.nowIso || new Date().toISOString();
   const startDate = new Date(now);
@@ -272,7 +283,7 @@ export function createSubscription(params: CreateSubscriptionParams): CreateSubs
     subscriptionId,
     amountCents,
     currency: plan.currency,
-    status: amountCents === 0 ? 'paid' : 'paid', // In mock/test baseline, auto-marked paid
+    status: 'paid', // Only a zero-amount free subscription reaches this constructor
     paidAt: now,
     hostedInvoiceUrl: `/invoices/${invoiceId}`,
     idempotencyKey: params.idempotencyKey,
