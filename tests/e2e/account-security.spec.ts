@@ -124,7 +124,10 @@ test('signing out of other devices ends the other session and keeps this one', a
   // unchanged password still works there. An in-app navigation, not a page
   // load: it fires several requests at once, and every one of them gets 401.
   await elsewhere.getByTestId('nav-evidence').click();
-  await elsewhere.waitForURL('**/login**');
+  // Assert the final URL without waiting for a load event: simultaneous 401
+  // responses can trigger overlapping client-side navigations, aborting load.
+  // The next assertion still requires the precise revoked-session message.
+  await expect(elsewhere).toHaveURL(/\/login(?:\?|$)/);
   // ...and told why, not dropped there unexplained.
   await expect(elsewhere.getByTestId('login-session-ended')).toHaveText(
     'This session was ended from another device. Sign in again.'
