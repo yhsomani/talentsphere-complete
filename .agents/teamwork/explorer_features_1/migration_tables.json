@@ -1,0 +1,206 @@
+{
+  "00001_core_schema.sql": [
+    "users",
+    "profiles",
+    "evidence",
+    "organizations",
+    "org_memberships",
+    "jobs",
+    "job_applications",
+    "audit_logs",
+    "feature_flags"
+  ],
+  "00002_evidence_skills_schema.sql": [
+    "skills",
+    "skill_relationships",
+    "evidence_skills"
+  ],
+  "00003_jobs_applications_schema.sql": [
+    "job_skills",
+    "application_evidence"
+  ],
+  "00004_challenges_assessment_schema.sql": [
+    "challenges",
+    "assessment_sessions",
+    "challenge_submissions",
+    "xp_transactions"
+  ],
+  "00005_lms_courses_schema.sql": [
+    "courses",
+    "course_modules",
+    "lessons",
+    "course_enrollments",
+    "lesson_progress",
+    "course_certificates",
+    "course_skills"
+  ],
+  "00006_messaging_schema.sql": [
+    "message_threads",
+    "thread_participants",
+    "messages"
+  ],
+  "00007_notifications_schema.sql": [
+    "notifications",
+    "notification_preferences"
+  ],
+  "00008_ai_gateway_schema.sql": [
+    "ai_conversations",
+    "ai_messages",
+    "ai_usage_meters"
+  ],
+  "00009_resumes_schema.sql": [
+    "resumes",
+    "resume_exports"
+  ],
+  "00010_networking_connections_schema.sql": [
+    "connections"
+  ],
+  "00011_portfolio_showcase_schema.sql": [
+    "portfolio_projects",
+    "portfolio_project_skills",
+    "portfolio_project_media",
+    "portfolio_project_evidence"
+  ],
+  "00012_gamification_xp_ledger_schema.sql": [
+    "user_gamification_profiles",
+    "gamification_badges",
+    "user_badges"
+  ],
+  "00013_account_settings_privacy_schema.sql": [
+    "user_settings",
+    "data_erasure_requests",
+    "data_export_requests"
+  ],
+  "00014_billing_subscriptions_schema.sql": [
+    "subscriptions",
+    "invoices",
+    "entitlements",
+    "billing_events"
+  ],
+  "00015_admin_governance_schema.sql": [
+    "platform_config"
+  ],
+  "00016_search_discovery_schema.sql": [
+    "search_history"
+  ],
+  "00017_moderation_trust_safety_schema.sql": [
+    "moderation_reports",
+    "moderation_appeals"
+  ],
+  "00018_saved_searches_job_alerts_schema.sql": [
+    "saved_searches",
+    "job_alerts",
+    "saved_jobs"
+  ],
+  "00019_application_drafts_schema.sql": [
+    "application_drafts",
+    "application_draft_versions"
+  ],
+  "00020_product_analytics_schema.sql": [
+    "analytics_events",
+    "analytics_daily_kpis"
+  ],
+  "00021_certificate_verification_schema.sql": [
+    "certificate_revocations"
+  ],
+  "00022_job_templates_schema.sql": [
+    "job_templates"
+  ],
+  "00023_salary_intelligence_schema.sql": [
+    "salary_reports",
+    "salary_aggregates"
+  ],
+  "00024_application_feedback_schema.sql": [
+    "feedback_templates",
+    "application_feedback"
+  ],
+  "00025_skill_decay_schema.sql": [
+    "skill_freshness",
+    "skill_freshness_history"
+  ],
+  "00026_technical_interview_platform_schema.sql": [
+    "interview_questions",
+    "interview_assessments",
+    "interview_scorecards",
+    "interview_ai_feedbacks"
+  ],
+  "00027_reputation_engine_schema.sql": [
+    "reputation_scores",
+    "reputation_signals",
+    "reputation_history",
+    "reputation_recovery_plans"
+  ],
+  "00028_warm_introductions_schema.sql": [
+    "warm_introduction_preferences",
+    "warm_introduction_requests"
+  ],
+  "00029_referral_requests_schema.sql": [
+    "referral_requests",
+    "referral_outcomes"
+  ],
+  "00030_activity_contributions_schema.sql": [
+    "activity_events",
+    "contribution_scores"
+  ],
+  "00031_instructor_reputation_schema.sql": [
+    "instructor_reputation_breakdown",
+    "instructor_endorsements"
+  ],
+  "00032_peer_credibility_schema.sql": [
+    "skill_endorsements",
+    "endorsement_weights"
+  ],
+  "00033_alumni_networks_schema.sql": [
+    "alumni_affiliations",
+    "alumni_groups",
+    "alumni_group_members",
+    "alumni_mentorship"
+  ],
+  "00034_employer_reputation_schema.sql": [
+    "employer_reputation_breakdown",
+    "employer_reviews"
+  ],
+  "00035_skill_forecasting_schema.sql": [
+    "skill_market_signals",
+    "skill_forecasts"
+  ],
+  "00036_career_trajectory_schema.sql": [
+    "career_transitions",
+    "progression_benchmarks",
+    "career_milestone_evaluations"
+  ],
+  "00037_learning_impact_schema.sql": [
+    "learning_outcomes",
+    "learning_impact_metrics"
+  ],
+  "00038_talent_pool_intelligence_schema.sql": [
+    "talent_pools",
+    "talent_pool_members"
+  ],
+  "00039_behavioral_talent_discovery_schema.sql": [
+    "behavioral_talent_profiles"
+  ],
+  "00040_talent_segmentation_schema.sql": [
+    "candidate_segmentations"
+  ],
+  "00041_verified_work_history_schema.sql": [
+    "verified_work_histories",
+    "employment_references"
+  ],
+  "00042_background_jobs_schema.sql": [
+    "background_jobs"
+  ],
+  "00043_core_persistence_alignment.sql": [
+    "work_history_email_challenges"
+  ],
+  "00044_notifications_persistence.sql": [],
+  "00045_session_revocation.sql": [],
+  "00046_session_sign_out.sql": [
+    "revoked_sessions"
+  ],
+  "00047_private_data_rls_hardening.sql": [],
+  "00048_notification_preferences_rls_scope.sql": [],
+  "00049_worker_liveness.sql": [
+    "worker_health"
+  ]
+}

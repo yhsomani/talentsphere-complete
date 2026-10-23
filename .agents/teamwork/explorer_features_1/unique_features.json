@@ -1,0 +1,1386 @@
+[
+  {
+    "id": "F-01",
+    "name": "Authentication & Session",
+    "category": "Identity",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-02",
+    "name": "Landing Page",
+    "category": "Shell",
+    "priority": 3,
+    "phase": "Ph0",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-03",
+    "name": "Dashboard (Role-Adaptive)",
+    "category": "Shell",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-04",
+    "name": "Job Marketplace",
+    "category": "Marketplace",
+    "priority": 9,
+    "phase": "Ph2",
+    "dependencies": "F-01, F-12"
+  },
+  {
+    "id": "F-05",
+    "name": "Post Job Studio",
+    "category": "Marketplace",
+    "priority": 8,
+    "phase": "Ph2",
+    "dependencies": "F-04"
+  },
+  {
+    "id": "F-06",
+    "name": "ATS / Candidate Pipeline",
+    "category": "Recruiting",
+    "priority": 9,
+    "phase": "Ph2–3",
+    "dependencies": "F-04, F-05"
+  },
+  {
+    "id": "F-07",
+    "name": "Learning Management System",
+    "category": "Learning",
+    "priority": 9,
+    "phase": "Ph1",
+    "dependencies": "F-01, F-12"
+  },
+  {
+    "id": "F-08",
+    "name": "Challenges Arena",
+    "category": "Assessment",
+    "priority": 9,
+    "phase": "Ph1",
+    "dependencies": "F-01, F-12"
+  },
+  {
+    "id": "F-09",
+    "name": "Professional Networking",
+    "category": "Social",
+    "priority": 8,
+    "phase": "Ph2",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-10",
+    "name": "Direct Messaging",
+    "category": "Communication",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-11",
+    "name": "AI Career Assistant (Basic)",
+    "category": "AI",
+    "priority": 8,
+    "phase": "Ph1/Ph4",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-12",
+    "name": "Profile Management",
+    "category": "Identity",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-13",
+    "name": "Resume Builder",
+    "category": "Identity",
+    "priority": 7,
+    "phase": "Ph1",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-14",
+    "name": "Notification Center",
+    "category": "Communication",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-15",
+    "name": "Settings",
+    "category": "Shell",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-16",
+    "name": "Billing & Subscriptions",
+    "category": "Monetization",
+    "priority": 7,
+    "phase": "Ph5",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-17",
+    "name": "Admin Console",
+    "category": "Governance",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-18",
+    "name": "Chrome Extension Companion",
+    "category": "Edge",
+    "priority": 5,
+    "phase": "Ph2",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-19",
+    "name": "Product Analytics",
+    "category": "Telemetry",
+    "priority": 7,
+    "phase": "Ph1",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-20",
+    "name": "Command Search (⌘K)",
+    "category": "Shell",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-21",
+    "name": "Error Recovery & Resilience",
+    "category": "Shell",
+    "priority": 10,
+    "phase": "Ph0",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-22",
+    "name": "Gamification & XP Ledger",
+    "category": "Engagement",
+    "priority": 8,
+    "phase": "Ph1",
+    "dependencies": "F-07, F-08"
+  },
+  {
+    "id": "F-23",
+    "name": "Leaderboard & Badges",
+    "category": "Engagement",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-22"
+  },
+  {
+    "id": "F-24",
+    "name": "Trust, Safety & Moderation",
+    "category": "Safety",
+    "priority": 8,
+    "phase": "Ph2",
+    "dependencies": "F-01"
+  },
+  {
+    "id": "F-25",
+    "name": "Job Detail View",
+    "category": "Marketplace",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-04"
+  },
+  {
+    "id": "F-26",
+    "name": "Portfolio Showcase",
+    "category": "Identity",
+    "priority": 8,
+    "phase": "Ph1",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-27",
+    "name": "Local Resume Match Preview",
+    "category": "Edge",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-18"
+  },
+  {
+    "id": "F-28",
+    "name": "External Job Page Scanner",
+    "category": "Edge",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-18"
+  },
+  {
+    "id": "F-29",
+    "name": "Scheduled Notification Digest",
+    "category": "Communication",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-14"
+  },
+  {
+    "id": "F-30",
+    "name": "Networking Stale-Request Nudges",
+    "category": "Engagement",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-09"
+  },
+  {
+    "id": "F-31",
+    "name": "KPI Aggregation & Rollups",
+    "category": "Analytics",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-19"
+  },
+  {
+    "id": "F-32",
+    "name": "Saved Searches & Job Alerts",
+    "category": "Candidate",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-04"
+  },
+  {
+    "id": "F-33",
+    "name": "Video Interview Rooms",
+    "category": "Communication",
+    "priority": 8,
+    "phase": "Ph3",
+    "dependencies": "F-10"
+  },
+  {
+    "id": "F-34",
+    "name": "Multi-Entity Backend Search",
+    "category": "Platform",
+    "priority": 7,
+    "phase": "Ph2",
+    "dependencies": "F-04, F-07"
+  },
+  {
+    "id": "F-35",
+    "name": "Feature Flag Console",
+    "category": "Administration",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-17"
+  },
+  {
+    "id": "F-36",
+    "name": "Application Draft Autosave",
+    "category": "Candidate",
+    "priority": 7,
+    "phase": "Ph1",
+    "dependencies": "F-04"
+  },
+  {
+    "id": "F-37",
+    "name": "Job Templates",
+    "category": "Recruiting",
+    "priority": 6,
+    "phase": "Ph2",
+    "dependencies": "F-05"
+  },
+  {
+    "id": "F-38",
+    "name": "Legacy Chat Service (DEPRECATED)",
+    "category": "Communication",
+    "priority": 0,
+    "phase": "–",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-39",
+    "name": "Unified Backend Stub (DEPRECATED)",
+    "category": "Platform",
+    "priority": 0,
+    "phase": "–",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-40",
+    "name": "Institutional Managed Learning",
+    "category": "Institutions",
+    "priority": 8,
+    "phase": "Ph3",
+    "dependencies": "F-01, F-07"
+  },
+  {
+    "id": "F-41",
+    "name": "Procurement & Seat Licensing",
+    "category": "Institutions",
+    "priority": 6,
+    "phase": "Ph6",
+    "dependencies": "F-40, F-16"
+  },
+  {
+    "id": "F-42",
+    "name": "Provider-Agnostic Media Engine",
+    "category": "Platform",
+    "priority": 8,
+    "phase": "Ph2",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-43",
+    "name": "B2B2C Graduation Flywheel",
+    "category": "Institutions",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-40"
+  },
+  {
+    "id": "F-44",
+    "name": "AI Media Enrichment",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph4",
+    "dependencies": "F-42, F-11"
+  },
+  {
+    "id": "F-45",
+    "name": "Proctoring (Third-Party, vendor-gated OD-35)",
+    "category": "Learning",
+    "priority": 4,
+    "phase": "Ph10",
+    "dependencies": "F-40, F-115"
+  },
+  {
+    "id": "F-46",
+    "name": "Institutional Analytics",
+    "category": "Institutions",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-40"
+  },
+  {
+    "id": "F-47",
+    "name": "Faculty Dashboard",
+    "category": "Institutions",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-40"
+  },
+  {
+    "id": "F-48",
+    "name": "OS Shell & Workbench",
+    "category": "OS",
+    "priority": 4,
+    "phase": "Ph2+",
+    "dependencies": "F-01, F-03"
+  },
+  {
+    "id": "F-49",
+    "name": "Automation & Agents",
+    "category": "OS",
+    "priority": 4,
+    "phase": "Ph3+",
+    "dependencies": "F-48"
+  },
+  {
+    "id": "F-50",
+    "name": "Institutional Course Marketplace",
+    "category": "Institutions",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-40, F-42"
+  },
+  {
+    "id": "F-51",
+    "name": "Media Health Monitoring",
+    "category": "Platform",
+    "priority": 6,
+    "phase": "Ph4",
+    "dependencies": "F-42"
+  },
+  {
+    "id": "F-52",
+    "name": "Certificate Verification",
+    "category": "Verification",
+    "priority": 8,
+    "phase": "Ph3",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-53",
+    "name": "Professional Social Graph & Feed",
+    "category": "Networking",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-54",
+    "name": "Content Publishing",
+    "category": "Networking",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-55",
+    "name": "Groups & Communities",
+    "category": "Community",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-53"
+  },
+  {
+    "id": "F-56",
+    "name": "Organization & Institution Pages",
+    "category": "Recruiting",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-12, F-40"
+  },
+  {
+    "id": "F-57",
+    "name": "Events & Webinars",
+    "category": "Community",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-53"
+  },
+  {
+    "id": "F-58",
+    "name": "Written Recommendations",
+    "category": "Networking",
+    "priority": 6,
+    "phase": "Ph8",
+    "dependencies": "F-53"
+  },
+  {
+    "id": "F-59",
+    "name": "Outreach Credits (TalentMail)",
+    "category": "Recruiting",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-10"
+  },
+  {
+    "id": "F-60",
+    "name": "Profile Views & Privacy Controls",
+    "category": "Networking",
+    "priority": 6,
+    "phase": "Ph8",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-61",
+    "name": "Premium Candidate Tier (OD-34 gated)",
+    "category": "Business",
+    "priority": 4,
+    "phase": "Ph10+",
+    "dependencies": "F-60"
+  },
+  {
+    "id": "F-62",
+    "name": "Sponsored Content (NOT RECOMMENDED)",
+    "category": "Business",
+    "priority": 0,
+    "phase": "Ph10+",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-63",
+    "name": "Business-Development Graph (NOT RECOMMENDED)",
+    "category": "Intelligence",
+    "priority": 0,
+    "phase": "Ph10+",
+    "dependencies": "–"
+  },
+  {
+    "id": "F-64",
+    "name": "LinkedIn Migration Engine",
+    "category": "Integration",
+    "priority": 5,
+    "phase": "Ph1/2",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-65",
+    "name": "LinkedIn Decoupling & Independence",
+    "category": "Foundation",
+    "priority": 8,
+    "phase": "Ph1/2",
+    "dependencies": "F-64"
+  },
+  {
+    "id": "F-66",
+    "name": "Course Creation Studio",
+    "category": "Learning",
+    "priority": 8,
+    "phase": "Ph7",
+    "dependencies": "F-07, F-42"
+  },
+  {
+    "id": "F-67",
+    "name": "Categories, Discovery & Comparison",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07, F-145"
+  },
+  {
+    "id": "F-68",
+    "name": "Quizzes, Practice Tests & Final Exams",
+    "category": "Learning",
+    "priority": 8,
+    "phase": "Ph7",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-69",
+    "name": "Assignments & Peer Review",
+    "category": "Learning",
+    "priority": 8,
+    "phase": "Ph7",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-70",
+    "name": "Learning Paths, Programs & Specializations",
+    "category": "Learning",
+    "priority": 8,
+    "phase": "Ph7",
+    "dependencies": "F-07, F-66"
+  },
+  {
+    "id": "F-71",
+    "name": "Course Q&A, Discussions, Notes",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-72",
+    "name": "Course Reviews & Ratings",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-73",
+    "name": "Course Commerce",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07, F-16"
+  },
+  {
+    "id": "F-74",
+    "name": "Instructor Platform",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07, F-66"
+  },
+  {
+    "id": "F-75",
+    "name": "Employer Insights",
+    "category": "Intelligence",
+    "priority": 7,
+    "phase": "Ph9",
+    "dependencies": "F-12, F-56"
+  },
+  {
+    "id": "F-76",
+    "name": "Coding Contests & Live Leaderboards",
+    "category": "Assessment",
+    "priority": 5,
+    "phase": "Ph9",
+    "dependencies": "F-08"
+  },
+  {
+    "id": "F-77",
+    "name": "Skill Certification Exams",
+    "category": "Assessment",
+    "priority": 8,
+    "phase": "Ph3",
+    "dependencies": "F-08"
+  },
+  {
+    "id": "F-78",
+    "name": "Practice Sets & Interview Prep",
+    "category": "Learning",
+    "priority": 5,
+    "phase": "Ph9",
+    "dependencies": "F-08"
+  },
+  {
+    "id": "F-79",
+    "name": "Articles & Newsletters",
+    "category": "Networking",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-54"
+  },
+  {
+    "id": "F-80",
+    "name": "Profile Enhancements",
+    "category": "Profile",
+    "priority": 6,
+    "phase": "Ph1/Ph8",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-81",
+    "name": "Identity Verification",
+    "category": "Verification",
+    "priority": 3,
+    "phase": "Ph9",
+    "dependencies": "F-12"
+  },
+  {
+    "id": "F-82",
+    "name": "Student Learning Analytics",
+    "category": "Analytics",
+    "priority": 6,
+    "phase": "Ph7",
+    "dependencies": "F-07"
+  },
+  {
+    "id": "F-83",
+    "name": "Admin Platform Expansion",
+    "category": "Administration",
+    "priority": 3,
+    "phase": "Ph8",
+    "dependencies": "F-17"
+  },
+  {
+    "id": "F-84",
+    "name": "Skills Graph & Taxonomy",
+    "category": "Platform",
+    "priority": 10,
+    "phase": "Ph1–2",
+    "dependencies": "F-12, F-07, F-08"
+  },
+  {
+    "id": "F-85",
+    "name": "Career Graph & Progression",
+    "category": "Intelligence",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-12, F-04, F-06, F-84"
+  },
+  {
+    "id": "F-86",
+    "name": "Salary Intelligence",
+    "category": "Intelligence",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-04, F-06, F-56"
+  },
+  {
+    "id": "F-87",
+    "name": "Interview Experience Repository",
+    "category": "Candidate",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-04, F-56, F-88"
+  },
+  {
+    "id": "F-88",
+    "name": "Technical Interview Platform",
+    "category": "Hiring",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-08, F-33, F-06"
+  },
+  {
+    "id": "F-89",
+    "name": "Contribution Verification System",
+    "category": "Verification",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-26, F-12"
+  },
+  {
+    "id": "F-90",
+    "name": "Peer Mentorship & Advisor Network",
+    "category": "Community",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-12, F-10, F-55"
+  },
+  {
+    "id": "F-91",
+    "name": "Career Readiness Assessment",
+    "category": "Career",
+    "priority": 9,
+    "phase": "Ph2",
+    "dependencies": "F-84, F-08, F-12"
+  },
+  {
+    "id": "F-92",
+    "name": "Advanced Recruiter Search",
+    "category": "Recruiting",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-12, F-34, F-08, F-96"
+  },
+  {
+    "id": "F-93",
+    "name": "Interview Video Recording & AI Feedback",
+    "category": "Hiring",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-33, F-06, F-88"
+  },
+  {
+    "id": "F-94",
+    "name": "Verified Work History & References",
+    "category": "Verification",
+    "priority": 7,
+    "phase": "Ph3",
+    "dependencies": "F-12, F-58"
+  },
+  {
+    "id": "F-95",
+    "name": "Career Transition Planning",
+    "category": "Career",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-84, F-91, F-07"
+  },
+  {
+    "id": "F-96",
+    "name": "Skill Evidence & Digital Credentials",
+    "category": "Verification",
+    "priority": 10,
+    "phase": "Ph2",
+    "dependencies": "F-12, F-26"
+  },
+  {
+    "id": "F-97",
+    "name": "Real-Time Job Market Analytics",
+    "category": "Intelligence",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-04, F-06"
+  },
+  {
+    "id": "F-98",
+    "name": "Employer Equity & Compensation Intelligence",
+    "category": "Intelligence",
+    "priority": 7,
+    "phase": "Ph3",
+    "dependencies": "F-56, F-86"
+  },
+  {
+    "id": "F-99",
+    "name": "AI Career Coach (Enhanced)",
+    "category": "AI",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-12, F-84, F-91, F-07"
+  },
+  {
+    "id": "F-100",
+    "name": "Peer Project Collaboration",
+    "category": "Learning",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-69, F-10"
+  },
+  {
+    "id": "F-101",
+    "name": "Badge Marketplace & Recognition",
+    "category": "Gamification",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-23, F-26"
+  },
+  {
+    "id": "F-102",
+    "name": "Hiring Manager Portal",
+    "category": "Recruiting",
+    "priority": 8,
+    "phase": "Ph3",
+    "dependencies": "F-06, F-88"
+  },
+  {
+    "id": "F-103",
+    "name": "Candidate Comparison & Rubric",
+    "category": "Recruiting",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-06, F-92"
+  },
+  {
+    "id": "F-104",
+    "name": "Pre-Hire Assessment Customization",
+    "category": "Hiring",
+    "priority": 7,
+    "phase": "Ph3",
+    "dependencies": "F-06, F-08, F-88"
+  },
+  {
+    "id": "F-105",
+    "name": "Post-Hire Analytics & ROI Tracking",
+    "category": "Analytics",
+    "priority": 4,
+    "phase": "Ph4",
+    "dependencies": "F-102, F-93"
+  },
+  {
+    "id": "F-106",
+    "name": "Skill Prerequisite Engine",
+    "category": "Learning",
+    "priority": 7,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-70, F-84"
+  },
+  {
+    "id": "F-107",
+    "name": "Live Q&A with Instructors",
+    "category": "Learning",
+    "priority": 6,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-71, F-10"
+  },
+  {
+    "id": "F-108",
+    "name": "Expert Network Matching",
+    "category": "Networking",
+    "priority": 4,
+    "phase": "Ph7",
+    "dependencies": "F-09, F-12, F-10"
+  },
+  {
+    "id": "F-109",
+    "name": "Salary Negotiation Guidance",
+    "category": "Career",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-86, F-98"
+  },
+  {
+    "id": "F-110",
+    "name": "Verified Skill Endorsements",
+    "category": "Verification",
+    "priority": 7,
+    "phase": "Ph8",
+    "dependencies": "F-96, F-12, F-58"
+  },
+  {
+    "id": "F-111",
+    "name": "Industry-Specific Learning Hubs",
+    "category": "Learning",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-07, F-55"
+  },
+  {
+    "id": "F-112",
+    "name": "Resume Parsing & Optimization",
+    "category": "Candidate",
+    "priority": 6,
+    "phase": "Ph8",
+    "dependencies": "F-13, F-12"
+  },
+  {
+    "id": "F-113",
+    "name": "Recruiter Outreach Analytics",
+    "category": "Recruiting",
+    "priority": 6,
+    "phase": "Ph8",
+    "dependencies": "F-59, F-06"
+  },
+  {
+    "id": "F-114",
+    "name": "Learning Impact Tracking",
+    "category": "Analytics",
+    "priority": 9,
+    "phase": "Ph4",
+    "dependencies": "F-07, F-04, F-06"
+  },
+  {
+    "id": "F-115",
+    "name": "Certification Exam Platform",
+    "category": "Assessment",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-77, F-45"
+  },
+  {
+    "id": "F-116",
+    "name": "Accessibility & Inclusive Learning",
+    "category": "Platform",
+    "priority": 7,
+    "phase": "Ph8",
+    "dependencies": "F-07, F-44"
+  },
+  {
+    "id": "F-117",
+    "name": "Mobile-First Job Application",
+    "category": "Candidate",
+    "priority": 5,
+    "phase": "Ph8",
+    "dependencies": "F-04, F-33"
+  },
+  {
+    "id": "F-118",
+    "name": "Emerging Skills Detection",
+    "category": "Intelligence",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-84"
+  },
+  {
+    "id": "F-119",
+    "name": "Diversity & Inclusion Analytics",
+    "category": "Hiring",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-06"
+  },
+  {
+    "id": "F-120",
+    "name": "API & Integration Platform",
+    "category": "Platform",
+    "priority": 2,
+    "phase": "Ph10",
+    "dependencies": "F-01, F-34"
+  },
+  {
+    "id": "F-121",
+    "name": "Warm Introduction Paths",
+    "category": "Networking",
+    "priority": 8,
+    "phase": "Ph4",
+    "dependencies": "F-09, F-12, F-56, F-125"
+  },
+  {
+    "id": "F-122",
+    "name": "Application Feedback Loop",
+    "category": "Jobs",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-06, F-04"
+  },
+  {
+    "id": "F-123",
+    "name": "Skill Decay Tracking (Freshness Engine)",
+    "category": "Verification",
+    "priority": 9,
+    "phase": "Ph3",
+    "dependencies": "F-84, F-96"
+  },
+  {
+    "id": "F-124",
+    "name": "Project Marketplace",
+    "category": "Learning",
+    "priority": 5,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-26, F-100"
+  },
+  {
+    "id": "F-125",
+    "name": "Alumni Networks",
+    "category": "Networking",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-12, F-09, F-40"
+  },
+  {
+    "id": "F-126",
+    "name": "Interview Prep Marketplace",
+    "category": "Careers",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-87, F-90, F-88"
+  },
+  {
+    "id": "F-127",
+    "name": "Company Culture Assessment",
+    "category": "Companies",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-56, F-75"
+  },
+  {
+    "id": "F-128",
+    "name": "Offer Comparison Tool",
+    "category": "Careers",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-86, F-98, F-109"
+  },
+  {
+    "id": "F-129",
+    "name": "Leadership Development",
+    "category": "Learning",
+    "priority": 3,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-84"
+  },
+  {
+    "id": "F-130",
+    "name": "Freelance Marketplace",
+    "category": "Jobs",
+    "priority": 3,
+    "phase": "Ph7",
+    "dependencies": "F-04, F-100, F-124"
+  },
+  {
+    "id": "F-131",
+    "name": "Apprenticeship Matching",
+    "category": "Jobs",
+    "priority": 3,
+    "phase": "Ph6",
+    "dependencies": "F-04, F-40"
+  },
+  {
+    "id": "F-132",
+    "name": "Scholarship Discovery",
+    "category": "Learning",
+    "priority": 3,
+    "phase": "Ph6",
+    "dependencies": "F-40, F-07"
+  },
+  {
+    "id": "F-133",
+    "name": "Volunteer Matching",
+    "category": "Community",
+    "priority": 2,
+    "phase": "Ph7",
+    "dependencies": "F-26, F-100"
+  },
+  {
+    "id": "F-134",
+    "name": "Code Review Practice",
+    "category": "Skills",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-08, F-26"
+  },
+  {
+    "id": "F-135",
+    "name": "System Design Practice",
+    "category": "Skills",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-88, F-08"
+  },
+  {
+    "id": "F-136",
+    "name": "Micro-Learning",
+    "category": "Learning",
+    "priority": 2,
+    "phase": "Ph4",
+    "dependencies": "F-07, F-42"
+  },
+  {
+    "id": "F-137",
+    "name": "Spaced Repetition",
+    "category": "Learning",
+    "priority": 2,
+    "phase": "Ph6",
+    "dependencies": "F-07, F-68"
+  },
+  {
+    "id": "F-138",
+    "name": "Study Accountability Partners",
+    "category": "Learning",
+    "priority": 3,
+    "phase": "Ph6",
+    "dependencies": "F-07, F-55"
+  },
+  {
+    "id": "F-139",
+    "name": "Local Communities & Meetups",
+    "category": "Networking",
+    "priority": 3,
+    "phase": "Ph7",
+    "dependencies": "F-09, F-55, F-57"
+  },
+  {
+    "id": "F-140",
+    "name": "Affinity Groups",
+    "category": "Community",
+    "priority": 3,
+    "phase": "Ph7",
+    "dependencies": "F-55, F-09"
+  },
+  {
+    "id": "F-141",
+    "name": "Onboarding Preparation",
+    "category": "Careers",
+    "priority": 1,
+    "phase": "Ph8",
+    "dependencies": "F-06, F-33"
+  },
+  {
+    "id": "F-142",
+    "name": "Referral Request System",
+    "category": "Jobs",
+    "priority": 8,
+    "phase": "Ph4",
+    "dependencies": "F-09, F-04"
+  },
+  {
+    "id": "F-143",
+    "name": "OSS Contribution Discovery",
+    "category": "Portfolio",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-89, F-26"
+  },
+  {
+    "id": "F-144",
+    "name": "Reputation Engine (multi-context)",
+    "category": "Platform",
+    "priority": 9,
+    "phase": "Ph2",
+    "dependencies": "F-96, F-58, F-72"
+  },
+  {
+    "id": "F-145",
+    "name": "Recommendation Engine Core",
+    "category": "Platform",
+    "priority": 8,
+    "phase": "Ph2–3",
+    "dependencies": "F-84, F-144"
+  },
+  {
+    "id": "F-146",
+    "name": "Activity & Contribution Tracking",
+    "category": "Platform",
+    "priority": 7,
+    "phase": "Ph3",
+    "dependencies": "F-123, F-84, F-144"
+  },
+  {
+    "id": "F-147",
+    "name": "Unified Search & Discovery",
+    "category": "Platform",
+    "priority": 8,
+    "phase": "Ph2",
+    "dependencies": "F-84, F-145"
+  },
+  {
+    "id": "F-148",
+    "name": "Instructor Reputation System",
+    "category": "Reputation",
+    "priority": 8,
+    "phase": "Ph7",
+    "dependencies": "F-72, F-144"
+  },
+  {
+    "id": "F-149",
+    "name": "Employer Reputation & Brand System",
+    "category": "Reputation",
+    "priority": 7,
+    "phase": "Ph8",
+    "dependencies": "F-75, F-56, F-144"
+  },
+  {
+    "id": "F-150",
+    "name": "Peer Credibility Networks",
+    "category": "Reputation",
+    "priority": 7,
+    "phase": "Ph8",
+    "dependencies": "F-110, F-144"
+  },
+  {
+    "id": "F-151",
+    "name": "Skill Supply/Demand Forecasting",
+    "category": "Intelligence",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-84, F-86, F-97"
+  },
+  {
+    "id": "F-152",
+    "name": "Career Trajectory Analysis",
+    "category": "Intelligence",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-85, F-86, F-93"
+  },
+  {
+    "id": "F-153",
+    "name": "Learning Impact Dashboard (Enhanced)",
+    "category": "Intelligence",
+    "priority": 7,
+    "phase": "Ph4",
+    "dependencies": "F-114, F-85, F-86"
+  },
+  {
+    "id": "F-154",
+    "name": "Interview Prediction & Benchmarking",
+    "category": "Intelligence",
+    "priority": 6,
+    "phase": "Ph4",
+    "dependencies": "F-88, F-102, F-105"
+  },
+  {
+    "id": "F-155",
+    "name": "Adaptive Learning System",
+    "category": "Personalization",
+    "priority": 6,
+    "phase": "Ph5",
+    "dependencies": "F-07, F-84, F-145"
+  },
+  {
+    "id": "F-156",
+    "name": "Professional Development Plan System",
+    "category": "Career",
+    "priority": 6,
+    "phase": "Ph4–5",
+    "dependencies": "F-91, F-95, F-145"
+  },
+  {
+    "id": "F-157",
+    "name": "Skills Co-Learning Path Optimizer",
+    "category": "Learning",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-84, F-114, F-07"
+  },
+  {
+    "id": "F-158",
+    "name": "Talent Pool Intelligence & Analytics",
+    "category": "Recruiting",
+    "priority": 6,
+    "phase": "Ph3",
+    "dependencies": "F-92, F-84, F-144"
+  },
+  {
+    "id": "F-159",
+    "name": "Behavioral Talent Discovery",
+    "category": "Discovery",
+    "priority": 6,
+    "phase": "Ph4",
+    "dependencies": "F-123, F-84, F-144"
+  },
+  {
+    "id": "F-160",
+    "name": "Talent Segmentation & Classification",
+    "category": "Analytics",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-84, F-85, F-144"
+  },
+  {
+    "id": "F-161",
+    "name": "Internal Mobility & Succession Platform",
+    "category": "Enterprise",
+    "priority": 3,
+    "phase": "Ph6–7",
+    "dependencies": "F-84, F-91, F-132"
+  },
+  {
+    "id": "F-162",
+    "name": "Verified Work History Network & Graph",
+    "category": "Verification",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-94, F-84"
+  },
+  {
+    "id": "F-163",
+    "name": "Credential Wallet & Portability",
+    "category": "Credential",
+    "priority": 3,
+    "phase": "Ph5",
+    "dependencies": "F-96"
+  },
+  {
+    "id": "F-164",
+    "name": "Skills Evidence Narrative & Storytelling",
+    "category": "Credential",
+    "priority": 4,
+    "phase": "Ph5",
+    "dependencies": "F-96, F-26"
+  },
+  {
+    "id": "F-165",
+    "name": "Diversity, Equity & Inclusion Data System",
+    "category": "Analytics",
+    "priority": 3,
+    "phase": "Ph8",
+    "dependencies": "F-119"
+  },
+  {
+    "id": "F-166",
+    "name": "Interview Performance Benchmarking",
+    "category": "Analytics",
+    "priority": 5,
+    "phase": "Ph4",
+    "dependencies": "F-88, F-102"
+  },
+  {
+    "id": "F-167",
+    "name": "Candidate Comparison & Rubric (Enhanced)",
+    "category": "Hiring",
+    "priority": 5,
+    "phase": "Ph3",
+    "dependencies": "F-88, F-103"
+  },
+  {
+    "id": "F-168",
+    "name": "Hiring Prediction & Success Modeling",
+    "category": "Analytics",
+    "priority": 3,
+    "phase": "Ph5",
+    "dependencies": "F-88, F-105"
+  },
+  {
+    "id": "F-169",
+    "name": "Community Contribution Scoring & Recognition",
+    "category": "Community",
+    "priority": 5,
+    "phase": "Ph7",
+    "dependencies": "F-55, F-144"
+  },
+  {
+    "id": "F-170",
+    "name": "Expert Network (Enhanced)",
+    "category": "Community",
+    "priority": 4,
+    "phase": "Ph7",
+    "dependencies": "F-144, F-90"
+  },
+  {
+    "id": "F-171",
+    "name": "Employer Brand Management System",
+    "category": "Company",
+    "priority": 3,
+    "phase": "Ph8",
+    "dependencies": "F-56, F-75, F-149"
+  },
+  {
+    "id": "F-172",
+    "name": "Advanced Compensation Intelligence",
+    "category": "Analytics",
+    "priority": 4,
+    "phase": "Ph8",
+    "dependencies": "F-86, F-98, F-109"
+  },
+  {
+    "id": "F-173",
+    "name": "Company-to-Skills Mapping",
+    "category": "Intelligence",
+    "priority": 3,
+    "phase": "Ph4",
+    "dependencies": "F-84, F-04"
+  }
+]

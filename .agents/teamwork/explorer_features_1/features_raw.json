@@ -1,0 +1,2993 @@
+{
+  "features": [
+    {
+      "id": "F-01",
+      "name": "Authentication & Session",
+      "category": "Identity",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-02",
+      "name": "Landing Page",
+      "category": "Shell",
+      "priority": 3,
+      "phase": "Ph0",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-03",
+      "name": "Dashboard (Role-Adaptive)",
+      "category": "Shell",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-04",
+      "name": "Job Marketplace",
+      "category": "Marketplace",
+      "priority": 9,
+      "phase": "Ph2",
+      "dependencies": "F-01, F-12"
+    },
+    {
+      "id": "F-05",
+      "name": "Post Job Studio",
+      "category": "Marketplace",
+      "priority": 8,
+      "phase": "Ph2",
+      "dependencies": "F-04"
+    },
+    {
+      "id": "F-06",
+      "name": "ATS / Candidate Pipeline",
+      "category": "Recruiting",
+      "priority": 9,
+      "phase": "Ph2–3",
+      "dependencies": "F-04, F-05"
+    },
+    {
+      "id": "F-07",
+      "name": "Learning Management System",
+      "category": "Learning",
+      "priority": 9,
+      "phase": "Ph1",
+      "dependencies": "F-01, F-12"
+    },
+    {
+      "id": "F-08",
+      "name": "Challenges Arena",
+      "category": "Assessment",
+      "priority": 9,
+      "phase": "Ph1",
+      "dependencies": "F-01, F-12"
+    },
+    {
+      "id": "F-09",
+      "name": "Professional Networking",
+      "category": "Social",
+      "priority": 8,
+      "phase": "Ph2",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-10",
+      "name": "Direct Messaging",
+      "category": "Communication",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-11",
+      "name": "AI Career Assistant (Basic)",
+      "category": "AI",
+      "priority": 8,
+      "phase": "Ph1/Ph4",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-12",
+      "name": "Profile Management",
+      "category": "Identity",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-13",
+      "name": "Resume Builder",
+      "category": "Identity",
+      "priority": 7,
+      "phase": "Ph1",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-14",
+      "name": "Notification Center",
+      "category": "Communication",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-15",
+      "name": "Settings",
+      "category": "Shell",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-16",
+      "name": "Billing & Subscriptions",
+      "category": "Monetization",
+      "priority": 7,
+      "phase": "Ph5",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-17",
+      "name": "Admin Console",
+      "category": "Governance",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-18",
+      "name": "Chrome Extension Companion",
+      "category": "Edge",
+      "priority": 5,
+      "phase": "Ph2",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-19",
+      "name": "Product Analytics",
+      "category": "Telemetry",
+      "priority": 7,
+      "phase": "Ph1",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-20",
+      "name": "Command Search (⌘K)",
+      "category": "Shell",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-21",
+      "name": "Error Recovery & Resilience",
+      "category": "Shell",
+      "priority": 10,
+      "phase": "Ph0",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-22",
+      "name": "Gamification & XP Ledger",
+      "category": "Engagement",
+      "priority": 8,
+      "phase": "Ph1",
+      "dependencies": "F-07, F-08"
+    },
+    {
+      "id": "F-23",
+      "name": "Leaderboard & Badges",
+      "category": "Engagement",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-22"
+    },
+    {
+      "id": "F-24",
+      "name": "Trust, Safety & Moderation",
+      "category": "Safety",
+      "priority": 8,
+      "phase": "Ph2",
+      "dependencies": "F-01"
+    },
+    {
+      "id": "F-25",
+      "name": "Job Detail View",
+      "category": "Marketplace",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-04"
+    },
+    {
+      "id": "F-26",
+      "name": "Portfolio Showcase",
+      "category": "Identity",
+      "priority": 8,
+      "phase": "Ph1",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-27",
+      "name": "Local Resume Match Preview",
+      "category": "Edge",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-18"
+    },
+    {
+      "id": "F-28",
+      "name": "External Job Page Scanner",
+      "category": "Edge",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-18"
+    },
+    {
+      "id": "F-29",
+      "name": "Scheduled Notification Digest",
+      "category": "Communication",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-14"
+    },
+    {
+      "id": "F-30",
+      "name": "Networking Stale-Request Nudges",
+      "category": "Engagement",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-09"
+    },
+    {
+      "id": "F-31",
+      "name": "KPI Aggregation & Rollups",
+      "category": "Analytics",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-19"
+    },
+    {
+      "id": "F-32",
+      "name": "Saved Searches & Job Alerts",
+      "category": "Candidate",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-04"
+    },
+    {
+      "id": "F-33",
+      "name": "Video Interview Rooms",
+      "category": "Communication",
+      "priority": 8,
+      "phase": "Ph3",
+      "dependencies": "F-10"
+    },
+    {
+      "id": "F-34",
+      "name": "Multi-Entity Backend Search",
+      "category": "Platform",
+      "priority": 7,
+      "phase": "Ph2",
+      "dependencies": "F-04, F-07"
+    },
+    {
+      "id": "F-35",
+      "name": "Feature Flag Console",
+      "category": "Administration",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-17"
+    },
+    {
+      "id": "F-36",
+      "name": "Application Draft Autosave",
+      "category": "Candidate",
+      "priority": 7,
+      "phase": "Ph1",
+      "dependencies": "F-04"
+    },
+    {
+      "id": "F-37",
+      "name": "Job Templates",
+      "category": "Recruiting",
+      "priority": 6,
+      "phase": "Ph2",
+      "dependencies": "F-05"
+    },
+    {
+      "id": "F-38",
+      "name": "Legacy Chat Service (DEPRECATED)",
+      "category": "Communication",
+      "priority": 0,
+      "phase": "–",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-39",
+      "name": "Unified Backend Stub (DEPRECATED)",
+      "category": "Platform",
+      "priority": 0,
+      "phase": "–",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-40",
+      "name": "Institutional Managed Learning",
+      "category": "Institutions",
+      "priority": 8,
+      "phase": "Ph3",
+      "dependencies": "F-01, F-07"
+    },
+    {
+      "id": "F-41",
+      "name": "Procurement & Seat Licensing",
+      "category": "Institutions",
+      "priority": 6,
+      "phase": "Ph6",
+      "dependencies": "F-40, F-16"
+    },
+    {
+      "id": "F-42",
+      "name": "Provider-Agnostic Media Engine",
+      "category": "Platform",
+      "priority": 8,
+      "phase": "Ph2",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-43",
+      "name": "B2B2C Graduation Flywheel",
+      "category": "Institutions",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-40"
+    },
+    {
+      "id": "F-44",
+      "name": "AI Media Enrichment",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph4",
+      "dependencies": "F-42, F-11"
+    },
+    {
+      "id": "F-45",
+      "name": "Proctoring (Third-Party, vendor-gated OD-35)",
+      "category": "Learning",
+      "priority": 4,
+      "phase": "Ph10",
+      "dependencies": "F-40, F-115"
+    },
+    {
+      "id": "F-46",
+      "name": "Institutional Analytics",
+      "category": "Institutions",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-40"
+    },
+    {
+      "id": "F-47",
+      "name": "Faculty Dashboard",
+      "category": "Institutions",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-40"
+    },
+    {
+      "id": "F-48",
+      "name": "OS Shell & Workbench",
+      "category": "OS",
+      "priority": 4,
+      "phase": "Ph2+",
+      "dependencies": "F-01, F-03"
+    },
+    {
+      "id": "F-49",
+      "name": "Automation & Agents",
+      "category": "OS",
+      "priority": 4,
+      "phase": "Ph3+",
+      "dependencies": "F-48"
+    },
+    {
+      "id": "F-50",
+      "name": "Institutional Course Marketplace",
+      "category": "Institutions",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-40, F-42"
+    },
+    {
+      "id": "F-51",
+      "name": "Media Health Monitoring",
+      "category": "Platform",
+      "priority": 6,
+      "phase": "Ph4",
+      "dependencies": "F-42"
+    },
+    {
+      "id": "F-52",
+      "name": "Certificate Verification",
+      "category": "Verification",
+      "priority": 8,
+      "phase": "Ph3",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-53",
+      "name": "Professional Social Graph & Feed",
+      "category": "Networking",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-54",
+      "name": "Content Publishing",
+      "category": "Networking",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-55",
+      "name": "Groups & Communities",
+      "category": "Community",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-53"
+    },
+    {
+      "id": "F-56",
+      "name": "Organization & Institution Pages",
+      "category": "Recruiting",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-12, F-40"
+    },
+    {
+      "id": "F-57",
+      "name": "Events & Webinars",
+      "category": "Community",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-53"
+    },
+    {
+      "id": "F-58",
+      "name": "Written Recommendations",
+      "category": "Networking",
+      "priority": 6,
+      "phase": "Ph8",
+      "dependencies": "F-53"
+    },
+    {
+      "id": "F-59",
+      "name": "Outreach Credits (TalentMail)",
+      "category": "Recruiting",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-10"
+    },
+    {
+      "id": "F-60",
+      "name": "Profile Views & Privacy Controls",
+      "category": "Networking",
+      "priority": 6,
+      "phase": "Ph8",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-61",
+      "name": "Premium Candidate Tier (OD-34 gated)",
+      "category": "Business",
+      "priority": 4,
+      "phase": "Ph10+",
+      "dependencies": "F-60"
+    },
+    {
+      "id": "F-62",
+      "name": "Sponsored Content (NOT RECOMMENDED)",
+      "category": "Business",
+      "priority": 0,
+      "phase": "Ph10+",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-63",
+      "name": "Business-Development Graph (NOT RECOMMENDED)",
+      "category": "Intelligence",
+      "priority": 0,
+      "phase": "Ph10+",
+      "dependencies": "–"
+    },
+    {
+      "id": "F-64",
+      "name": "LinkedIn Migration Engine",
+      "category": "Integration",
+      "priority": 5,
+      "phase": "Ph1/2",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-65",
+      "name": "LinkedIn Decoupling & Independence",
+      "category": "Foundation",
+      "priority": 8,
+      "phase": "Ph1/2",
+      "dependencies": "F-64"
+    },
+    {
+      "id": "F-66",
+      "name": "Course Creation Studio",
+      "category": "Learning",
+      "priority": 8,
+      "phase": "Ph7",
+      "dependencies": "F-07, F-42"
+    },
+    {
+      "id": "F-67",
+      "name": "Categories, Discovery & Comparison",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07, F-145"
+    },
+    {
+      "id": "F-68",
+      "name": "Quizzes, Practice Tests & Final Exams",
+      "category": "Learning",
+      "priority": 8,
+      "phase": "Ph7",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-69",
+      "name": "Assignments & Peer Review",
+      "category": "Learning",
+      "priority": 8,
+      "phase": "Ph7",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-70",
+      "name": "Learning Paths, Programs & Specializations",
+      "category": "Learning",
+      "priority": 8,
+      "phase": "Ph7",
+      "dependencies": "F-07, F-66"
+    },
+    {
+      "id": "F-71",
+      "name": "Course Q&A, Discussions, Notes",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-72",
+      "name": "Course Reviews & Ratings",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-73",
+      "name": "Course Commerce",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07, F-16"
+    },
+    {
+      "id": "F-74",
+      "name": "Instructor Platform",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07, F-66"
+    },
+    {
+      "id": "F-75",
+      "name": "Employer Insights",
+      "category": "Intelligence",
+      "priority": 7,
+      "phase": "Ph9",
+      "dependencies": "F-12, F-56"
+    },
+    {
+      "id": "F-76",
+      "name": "Coding Contests & Live Leaderboards",
+      "category": "Assessment",
+      "priority": 5,
+      "phase": "Ph9",
+      "dependencies": "F-08"
+    },
+    {
+      "id": "F-77",
+      "name": "Skill Certification Exams",
+      "category": "Assessment",
+      "priority": 8,
+      "phase": "Ph3",
+      "dependencies": "F-08"
+    },
+    {
+      "id": "F-78",
+      "name": "Practice Sets & Interview Prep",
+      "category": "Learning",
+      "priority": 5,
+      "phase": "Ph9",
+      "dependencies": "F-08"
+    },
+    {
+      "id": "F-79",
+      "name": "Articles & Newsletters",
+      "category": "Networking",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-54"
+    },
+    {
+      "id": "F-80",
+      "name": "Profile Enhancements",
+      "category": "Profile",
+      "priority": 6,
+      "phase": "Ph1/Ph8",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-81",
+      "name": "Identity Verification",
+      "category": "Verification",
+      "priority": 3,
+      "phase": "Ph9",
+      "dependencies": "F-12"
+    },
+    {
+      "id": "F-82",
+      "name": "Student Learning Analytics",
+      "category": "Analytics",
+      "priority": 6,
+      "phase": "Ph7",
+      "dependencies": "F-07"
+    },
+    {
+      "id": "F-83",
+      "name": "Admin Platform Expansion",
+      "category": "Administration",
+      "priority": 3,
+      "phase": "Ph8",
+      "dependencies": "F-17"
+    },
+    {
+      "id": "F-84",
+      "name": "Skills Graph & Taxonomy",
+      "category": "Platform",
+      "priority": 10,
+      "phase": "Ph1–2",
+      "dependencies": "F-12, F-07, F-08"
+    },
+    {
+      "id": "F-85",
+      "name": "Career Graph & Progression",
+      "category": "Intelligence",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-12, F-04, F-06, F-84"
+    },
+    {
+      "id": "F-86",
+      "name": "Salary Intelligence",
+      "category": "Intelligence",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-04, F-06, F-56"
+    },
+    {
+      "id": "F-87",
+      "name": "Interview Experience Repository",
+      "category": "Candidate",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-04, F-56, F-88"
+    },
+    {
+      "id": "F-88",
+      "name": "Technical Interview Platform",
+      "category": "Hiring",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-08, F-33, F-06"
+    },
+    {
+      "id": "F-89",
+      "name": "Contribution Verification System",
+      "category": "Verification",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-26, F-12"
+    },
+    {
+      "id": "F-90",
+      "name": "Peer Mentorship & Advisor Network",
+      "category": "Community",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-12, F-10, F-55"
+    },
+    {
+      "id": "F-91",
+      "name": "Career Readiness Assessment",
+      "category": "Career",
+      "priority": 9,
+      "phase": "Ph2",
+      "dependencies": "F-84, F-08, F-12"
+    },
+    {
+      "id": "F-92",
+      "name": "Advanced Recruiter Search",
+      "category": "Recruiting",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-12, F-34, F-08, F-96"
+    },
+    {
+      "id": "F-93",
+      "name": "Interview Video Recording & AI Feedback",
+      "category": "Hiring",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-33, F-06, F-88"
+    },
+    {
+      "id": "F-94",
+      "name": "Verified Work History & References",
+      "category": "Verification",
+      "priority": 7,
+      "phase": "Ph3",
+      "dependencies": "F-12, F-58"
+    },
+    {
+      "id": "F-95",
+      "name": "Career Transition Planning",
+      "category": "Career",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-84, F-91, F-07"
+    },
+    {
+      "id": "F-96",
+      "name": "Skill Evidence & Digital Credentials",
+      "category": "Verification",
+      "priority": 10,
+      "phase": "Ph2",
+      "dependencies": "F-12, F-26"
+    },
+    {
+      "id": "F-97",
+      "name": "Real-Time Job Market Analytics",
+      "category": "Intelligence",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-04, F-06"
+    },
+    {
+      "id": "F-98",
+      "name": "Employer Equity & Compensation Intelligence",
+      "category": "Intelligence",
+      "priority": 7,
+      "phase": "Ph3",
+      "dependencies": "F-56, F-86"
+    },
+    {
+      "id": "F-99",
+      "name": "AI Career Coach (Enhanced)",
+      "category": "AI",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-12, F-84, F-91, F-07"
+    },
+    {
+      "id": "F-100",
+      "name": "Peer Project Collaboration",
+      "category": "Learning",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-69, F-10"
+    },
+    {
+      "id": "F-101",
+      "name": "Badge Marketplace & Recognition",
+      "category": "Gamification",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-23, F-26"
+    },
+    {
+      "id": "F-102",
+      "name": "Hiring Manager Portal",
+      "category": "Recruiting",
+      "priority": 8,
+      "phase": "Ph3",
+      "dependencies": "F-06, F-88"
+    },
+    {
+      "id": "F-103",
+      "name": "Candidate Comparison & Rubric",
+      "category": "Recruiting",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-06, F-92"
+    },
+    {
+      "id": "F-104",
+      "name": "Pre-Hire Assessment Customization",
+      "category": "Hiring",
+      "priority": 7,
+      "phase": "Ph3",
+      "dependencies": "F-06, F-08, F-88"
+    },
+    {
+      "id": "F-105",
+      "name": "Post-Hire Analytics & ROI Tracking",
+      "category": "Analytics",
+      "priority": 4,
+      "phase": "Ph4",
+      "dependencies": "F-102, F-93"
+    },
+    {
+      "id": "F-106",
+      "name": "Skill Prerequisite Engine",
+      "category": "Learning",
+      "priority": 7,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-70, F-84"
+    },
+    {
+      "id": "F-107",
+      "name": "Live Q&A with Instructors",
+      "category": "Learning",
+      "priority": 6,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-71, F-10"
+    },
+    {
+      "id": "F-108",
+      "name": "Expert Network Matching",
+      "category": "Networking",
+      "priority": 4,
+      "phase": "Ph7",
+      "dependencies": "F-09, F-12, F-10"
+    },
+    {
+      "id": "F-109",
+      "name": "Salary Negotiation Guidance",
+      "category": "Career",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-86, F-98"
+    },
+    {
+      "id": "F-110",
+      "name": "Verified Skill Endorsements",
+      "category": "Verification",
+      "priority": 7,
+      "phase": "Ph8",
+      "dependencies": "F-96, F-12, F-58"
+    },
+    {
+      "id": "F-111",
+      "name": "Industry-Specific Learning Hubs",
+      "category": "Learning",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-07, F-55"
+    },
+    {
+      "id": "F-112",
+      "name": "Resume Parsing & Optimization",
+      "category": "Candidate",
+      "priority": 6,
+      "phase": "Ph8",
+      "dependencies": "F-13, F-12"
+    },
+    {
+      "id": "F-113",
+      "name": "Recruiter Outreach Analytics",
+      "category": "Recruiting",
+      "priority": 6,
+      "phase": "Ph8",
+      "dependencies": "F-59, F-06"
+    },
+    {
+      "id": "F-114",
+      "name": "Learning Impact Tracking",
+      "category": "Analytics",
+      "priority": 9,
+      "phase": "Ph4",
+      "dependencies": "F-07, F-04, F-06"
+    },
+    {
+      "id": "F-115",
+      "name": "Certification Exam Platform",
+      "category": "Assessment",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-77, F-45"
+    },
+    {
+      "id": "F-116",
+      "name": "Accessibility & Inclusive Learning",
+      "category": "Platform",
+      "priority": 7,
+      "phase": "Ph8",
+      "dependencies": "F-07, F-44"
+    },
+    {
+      "id": "F-117",
+      "name": "Mobile-First Job Application",
+      "category": "Candidate",
+      "priority": 5,
+      "phase": "Ph8",
+      "dependencies": "F-04, F-33"
+    },
+    {
+      "id": "F-118",
+      "name": "Emerging Skills Detection",
+      "category": "Intelligence",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-84"
+    },
+    {
+      "id": "F-119",
+      "name": "Diversity & Inclusion Analytics",
+      "category": "Hiring",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-06"
+    },
+    {
+      "id": "F-120",
+      "name": "API & Integration Platform",
+      "category": "Platform",
+      "priority": 2,
+      "phase": "Ph10",
+      "dependencies": "F-01, F-34"
+    },
+    {
+      "id": "F-121",
+      "name": "Warm Introduction Paths",
+      "category": "Networking",
+      "priority": 8,
+      "phase": "Ph4",
+      "dependencies": "F-09, F-12, F-56, F-125"
+    },
+    {
+      "id": "F-122",
+      "name": "Application Feedback Loop",
+      "category": "Jobs",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-06, F-04"
+    },
+    {
+      "id": "F-123",
+      "name": "Skill Decay Tracking (Freshness Engine)",
+      "category": "Verification",
+      "priority": 9,
+      "phase": "Ph3",
+      "dependencies": "F-84, F-96"
+    },
+    {
+      "id": "F-124",
+      "name": "Project Marketplace",
+      "category": "Learning",
+      "priority": 5,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-26, F-100"
+    },
+    {
+      "id": "F-125",
+      "name": "Alumni Networks",
+      "category": "Networking",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-12, F-09, F-40"
+    },
+    {
+      "id": "F-126",
+      "name": "Interview Prep Marketplace",
+      "category": "Careers",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-87, F-90, F-88"
+    },
+    {
+      "id": "F-127",
+      "name": "Company Culture Assessment",
+      "category": "Companies",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-56, F-75"
+    },
+    {
+      "id": "F-128",
+      "name": "Offer Comparison Tool",
+      "category": "Careers",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-86, F-98, F-109"
+    },
+    {
+      "id": "F-129",
+      "name": "Leadership Development",
+      "category": "Learning",
+      "priority": 3,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-84"
+    },
+    {
+      "id": "F-130",
+      "name": "Freelance Marketplace",
+      "category": "Jobs",
+      "priority": 3,
+      "phase": "Ph7",
+      "dependencies": "F-04, F-100, F-124"
+    },
+    {
+      "id": "F-131",
+      "name": "Apprenticeship Matching",
+      "category": "Jobs",
+      "priority": 3,
+      "phase": "Ph6",
+      "dependencies": "F-04, F-40"
+    },
+    {
+      "id": "F-132",
+      "name": "Scholarship Discovery",
+      "category": "Learning",
+      "priority": 3,
+      "phase": "Ph6",
+      "dependencies": "F-40, F-07"
+    },
+    {
+      "id": "F-133",
+      "name": "Volunteer Matching",
+      "category": "Community",
+      "priority": 2,
+      "phase": "Ph7",
+      "dependencies": "F-26, F-100"
+    },
+    {
+      "id": "F-134",
+      "name": "Code Review Practice",
+      "category": "Skills",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-08, F-26"
+    },
+    {
+      "id": "F-135",
+      "name": "System Design Practice",
+      "category": "Skills",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-88, F-08"
+    },
+    {
+      "id": "F-136",
+      "name": "Micro-Learning",
+      "category": "Learning",
+      "priority": 2,
+      "phase": "Ph4",
+      "dependencies": "F-07, F-42"
+    },
+    {
+      "id": "F-137",
+      "name": "Spaced Repetition",
+      "category": "Learning",
+      "priority": 2,
+      "phase": "Ph6",
+      "dependencies": "F-07, F-68"
+    },
+    {
+      "id": "F-138",
+      "name": "Study Accountability Partners",
+      "category": "Learning",
+      "priority": 3,
+      "phase": "Ph6",
+      "dependencies": "F-07, F-55"
+    },
+    {
+      "id": "F-139",
+      "name": "Local Communities & Meetups",
+      "category": "Networking",
+      "priority": 3,
+      "phase": "Ph7",
+      "dependencies": "F-09, F-55, F-57"
+    },
+    {
+      "id": "F-140",
+      "name": "Affinity Groups",
+      "category": "Community",
+      "priority": 3,
+      "phase": "Ph7",
+      "dependencies": "F-55, F-09"
+    },
+    {
+      "id": "F-141",
+      "name": "Onboarding Preparation",
+      "category": "Careers",
+      "priority": 1,
+      "phase": "Ph8",
+      "dependencies": "F-06, F-33"
+    },
+    {
+      "id": "F-142",
+      "name": "Referral Request System",
+      "category": "Jobs",
+      "priority": 8,
+      "phase": "Ph4",
+      "dependencies": "F-09, F-04"
+    },
+    {
+      "id": "F-143",
+      "name": "OSS Contribution Discovery",
+      "category": "Portfolio",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-89, F-26"
+    },
+    {
+      "id": "F-144",
+      "name": "Reputation Engine (multi-context)",
+      "category": "Platform",
+      "priority": 9,
+      "phase": "Ph2",
+      "dependencies": "F-96, F-58, F-72"
+    },
+    {
+      "id": "F-145",
+      "name": "Recommendation Engine Core",
+      "category": "Platform",
+      "priority": 8,
+      "phase": "Ph2–3",
+      "dependencies": "F-84, F-144"
+    },
+    {
+      "id": "F-146",
+      "name": "Activity & Contribution Tracking",
+      "category": "Platform",
+      "priority": 7,
+      "phase": "Ph3",
+      "dependencies": "F-123, F-84, F-144"
+    },
+    {
+      "id": "F-147",
+      "name": "Unified Search & Discovery",
+      "category": "Platform",
+      "priority": 8,
+      "phase": "Ph2",
+      "dependencies": "F-84, F-145"
+    },
+    {
+      "id": "F-148",
+      "name": "Instructor Reputation System",
+      "category": "Reputation",
+      "priority": 8,
+      "phase": "Ph7",
+      "dependencies": "F-72, F-144"
+    },
+    {
+      "id": "F-149",
+      "name": "Employer Reputation & Brand System",
+      "category": "Reputation",
+      "priority": 7,
+      "phase": "Ph8",
+      "dependencies": "F-75, F-56, F-144"
+    },
+    {
+      "id": "F-150",
+      "name": "Peer Credibility Networks",
+      "category": "Reputation",
+      "priority": 7,
+      "phase": "Ph8",
+      "dependencies": "F-110, F-144"
+    },
+    {
+      "id": "F-151",
+      "name": "Skill Supply/Demand Forecasting",
+      "category": "Intelligence",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-84, F-86, F-97"
+    },
+    {
+      "id": "F-152",
+      "name": "Career Trajectory Analysis",
+      "category": "Intelligence",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-85, F-86, F-93"
+    },
+    {
+      "id": "F-153",
+      "name": "Learning Impact Dashboard (Enhanced)",
+      "category": "Intelligence",
+      "priority": 7,
+      "phase": "Ph4",
+      "dependencies": "F-114, F-85, F-86"
+    },
+    {
+      "id": "F-154",
+      "name": "Interview Prediction & Benchmarking",
+      "category": "Intelligence",
+      "priority": 6,
+      "phase": "Ph4",
+      "dependencies": "F-88, F-102, F-105"
+    },
+    {
+      "id": "F-155",
+      "name": "Adaptive Learning System",
+      "category": "Personalization",
+      "priority": 6,
+      "phase": "Ph5",
+      "dependencies": "F-07, F-84, F-145"
+    },
+    {
+      "id": "F-156",
+      "name": "Professional Development Plan System",
+      "category": "Career",
+      "priority": 6,
+      "phase": "Ph4–5",
+      "dependencies": "F-91, F-95, F-145"
+    },
+    {
+      "id": "F-157",
+      "name": "Skills Co-Learning Path Optimizer",
+      "category": "Learning",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-84, F-114, F-07"
+    },
+    {
+      "id": "F-158",
+      "name": "Talent Pool Intelligence & Analytics",
+      "category": "Recruiting",
+      "priority": 6,
+      "phase": "Ph3",
+      "dependencies": "F-92, F-84, F-144"
+    },
+    {
+      "id": "F-159",
+      "name": "Behavioral Talent Discovery",
+      "category": "Discovery",
+      "priority": 6,
+      "phase": "Ph4",
+      "dependencies": "F-123, F-84, F-144"
+    },
+    {
+      "id": "F-160",
+      "name": "Talent Segmentation & Classification",
+      "category": "Analytics",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-84, F-85, F-144"
+    },
+    {
+      "id": "F-161",
+      "name": "Internal Mobility & Succession Platform",
+      "category": "Enterprise",
+      "priority": 3,
+      "phase": "Ph6–7",
+      "dependencies": "F-84, F-91, F-132"
+    },
+    {
+      "id": "F-162",
+      "name": "Verified Work History Network & Graph",
+      "category": "Verification",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-94, F-84"
+    },
+    {
+      "id": "F-163",
+      "name": "Credential Wallet & Portability",
+      "category": "Credential",
+      "priority": 3,
+      "phase": "Ph5",
+      "dependencies": "F-96"
+    },
+    {
+      "id": "F-164",
+      "name": "Skills Evidence Narrative & Storytelling",
+      "category": "Credential",
+      "priority": 4,
+      "phase": "Ph5",
+      "dependencies": "F-96, F-26"
+    },
+    {
+      "id": "F-165",
+      "name": "Diversity, Equity & Inclusion Data System",
+      "category": "Analytics",
+      "priority": 3,
+      "phase": "Ph8",
+      "dependencies": "F-119"
+    },
+    {
+      "id": "F-166",
+      "name": "Interview Performance Benchmarking",
+      "category": "Analytics",
+      "priority": 5,
+      "phase": "Ph4",
+      "dependencies": "F-88, F-102"
+    },
+    {
+      "id": "F-167",
+      "name": "Candidate Comparison & Rubric (Enhanced)",
+      "category": "Hiring",
+      "priority": 5,
+      "phase": "Ph3",
+      "dependencies": "F-88, F-103"
+    },
+    {
+      "id": "F-168",
+      "name": "Hiring Prediction & Success Modeling",
+      "category": "Analytics",
+      "priority": 3,
+      "phase": "Ph5",
+      "dependencies": "F-88, F-105"
+    },
+    {
+      "id": "F-169",
+      "name": "Community Contribution Scoring & Recognition",
+      "category": "Community",
+      "priority": 5,
+      "phase": "Ph7",
+      "dependencies": "F-55, F-144"
+    },
+    {
+      "id": "F-170",
+      "name": "Expert Network (Enhanced)",
+      "category": "Community",
+      "priority": 4,
+      "phase": "Ph7",
+      "dependencies": "F-144, F-90"
+    },
+    {
+      "id": "F-171",
+      "name": "Employer Brand Management System",
+      "category": "Company",
+      "priority": 3,
+      "phase": "Ph8",
+      "dependencies": "F-56, F-75, F-149"
+    },
+    {
+      "id": "F-172",
+      "name": "Advanced Compensation Intelligence",
+      "category": "Analytics",
+      "priority": 4,
+      "phase": "Ph8",
+      "dependencies": "F-86, F-98, F-109"
+    },
+    {
+      "id": "F-173",
+      "name": "Company-to-Skills Mapping",
+      "category": "Intelligence",
+      "priority": 3,
+      "phase": "Ph4",
+      "dependencies": "F-84, F-04"
+    },
+    {
+      "id": "F-01",
+      "name": "",
+      "category": "**Priority**",
+      "priority": 10,
+      "phase": "",
+      "dependencies": "**Phase**"
+    },
+    {
+      "id": "F-12",
+      "name": "",
+      "category": "**Priority**",
+      "priority": 10,
+      "phase": "",
+      "dependencies": "**Phase**"
+    },
+    {
+      "id": "F-84",
+      "name": "",
+      "category": "**Priority**",
+      "priority": 10,
+      "phase": "",
+      "dependencies": "**Phase**"
+    },
+    {
+      "id": "F-96",
+      "name": "",
+      "category": "**Priority**",
+      "priority": 10,
+      "phase": "",
+      "dependencies": "**Phase**"
+    }
+  ],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "full": "GET /health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/health",
+      "full": "GET /api/v1/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/feature-flags",
+      "full": "GET /api/v1/feature-flags"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/register",
+      "full": "POST /api/v1/auth/register"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "full": "POST /api/v1/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/password",
+      "full": "POST /api/v1/auth/password"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/sign-out",
+      "full": "POST /api/v1/auth/sign-out"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/sign-out-others",
+      "full": "POST /api/v1/auth/sign-out-others"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/session",
+      "full": "GET /api/v1/auth/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/profile/me",
+      "full": "GET /api/v1/profile/me"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/profile/me",
+      "full": "PATCH /api/v1/profile/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/profile/:id",
+      "full": "GET /api/v1/profile/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/evidence",
+      "full": "POST /api/v1/evidence"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/evidence/:id",
+      "full": "GET /api/v1/evidence/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/evidence/mine",
+      "full": "GET /api/v1/evidence/mine"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/evidence/subject/:subjectId",
+      "full": "GET /api/v1/evidence/subject/:subjectId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/evidence/:id/verify",
+      "full": "POST /api/v1/evidence/:id/verify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/evidence/:id/dispute",
+      "full": "POST /api/v1/evidence/:id/dispute"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/evidence/:id/revoke",
+      "full": "POST /api/v1/evidence/:id/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/evidence/:id/verify-public",
+      "full": "GET /api/v1/evidence/:id/verify-public"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills",
+      "full": "GET /api/v1/skills"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills",
+      "full": "POST /api/v1/skills"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/relationships",
+      "full": "POST /api/v1/skills/relationships"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/:id/graph",
+      "full": "GET /api/v1/skills/:id/graph"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations",
+      "full": "POST /api/v1/organizations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/mine",
+      "full": "GET /api/v1/organizations/mine"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/:id/jobs",
+      "full": "GET /api/v1/organizations/:id/jobs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/:id",
+      "full": "GET /api/v1/organizations/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations/:id/members",
+      "full": "POST /api/v1/organizations/:id/members"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs",
+      "full": "POST /api/v1/jobs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs",
+      "full": "GET /api/v1/jobs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/:id",
+      "full": "GET /api/v1/jobs/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/jobs/:id/status",
+      "full": "PATCH /api/v1/jobs/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/job-templates",
+      "full": "POST /api/v1/job-templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/job-templates",
+      "full": "GET /api/v1/job-templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/job-templates/:id",
+      "full": "GET /api/v1/job-templates/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/job-templates/:id",
+      "full": "PATCH /api/v1/job-templates/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/job-templates/:id",
+      "full": "DELETE /api/v1/job-templates/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/job-templates/:id/instantiate",
+      "full": "POST /api/v1/job-templates/:id/instantiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/:id/save-as-template",
+      "full": "POST /api/v1/jobs/:id/save-as-template"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/salaries/reports",
+      "full": "POST /api/v1/salaries/reports"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries/reports/my",
+      "full": "GET /api/v1/salaries/reports/my"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/salaries/reports/:id",
+      "full": "DELETE /api/v1/salaries/reports/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries/benchmarks",
+      "full": "GET /api/v1/salaries/benchmarks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/salaries/company/:companyName",
+      "full": "GET /api/v1/salaries/company/:companyName"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/:id/apply",
+      "full": "POST /api/v1/jobs/:id/apply"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/applications/my",
+      "full": "GET /api/v1/applications/my"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/applications/:id",
+      "full": "GET /api/v1/applications/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/:id/applications",
+      "full": "GET /api/v1/jobs/:id/applications"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/applications/:id/transition",
+      "full": "POST /api/v1/applications/:id/transition"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/applications/:id/feedback",
+      "full": "POST /api/v1/applications/:id/feedback"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/applications/:id/feedback",
+      "full": "GET /api/v1/applications/:id/feedback"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/applications/:id/feedback/request",
+      "full": "POST /api/v1/applications/:id/feedback/request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/organizations/:orgId/feedback-templates",
+      "full": "POST /api/v1/organizations/:orgId/feedback-templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/organizations/:orgId/feedback-templates",
+      "full": "GET /api/v1/organizations/:orgId/feedback-templates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/feedback/aggregate-insights",
+      "full": "GET /api/v1/feedback/aggregate-insights"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/freshness",
+      "full": "POST /api/v1/skills/freshness"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/freshness/my",
+      "full": "GET /api/v1/skills/freshness/my"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/candidates/:candidateProfileId/skills/freshness",
+      "full": "GET /api/v1/candidates/:candidateProfileId/skills/freshness"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/:skillId/reverify",
+      "full": "POST /api/v1/skills/:skillId/reverify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/freshness/refresh-all",
+      "full": "POST /api/v1/skills/freshness/refresh-all"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/questions",
+      "full": "POST /api/v1/interviews/questions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/questions",
+      "full": "GET /api/v1/interviews/questions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments",
+      "full": "POST /api/v1/interviews/assessments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/assessments/:id",
+      "full": "GET /api/v1/interviews/assessments/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/join",
+      "full": "POST /api/v1/interviews/assessments/:id/join"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/consent",
+      "full": "POST /api/v1/interviews/assessments/:id/consent"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/end",
+      "full": "POST /api/v1/interviews/assessments/:id/end"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/code",
+      "full": "POST /api/v1/interviews/assessments/:id/code"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/scorecard",
+      "full": "POST /api/v1/interviews/assessments/:id/scorecard"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/scorecard/compensate",
+      "full": "POST /api/v1/interviews/assessments/:id/scorecard/compensate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/interviews/assessments/:id/scorecards",
+      "full": "GET /api/v1/interviews/assessments/:id/scorecards"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/ai-feedback",
+      "full": "POST /api/v1/interviews/assessments/:id/ai-feedback"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/interviews/assessments/:id/review",
+      "full": "POST /api/v1/interviews/assessments/:id/review"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/signals",
+      "full": "POST /api/v1/reputation/signals"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reputation/users/:userId",
+      "full": "GET /api/v1/reputation/users/:userId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reputation/my/signals",
+      "full": "GET /api/v1/reputation/my/signals"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/recovery",
+      "full": "POST /api/v1/reputation/recovery"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/recovery/:planId/tasks/:taskId/complete",
+      "full": "POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/recalculate-all",
+      "full": "POST /api/v1/reputation/recalculate-all"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reputation/instructors/:instructorId",
+      "full": "GET /api/v1/reputation/instructors/:instructorId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/instructors/:instructorId/metrics",
+      "full": "POST /api/v1/reputation/instructors/:instructorId/metrics"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/instructors/:instructorId/endorse",
+      "full": "POST /api/v1/reputation/instructors/:instructorId/endorse"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/instructors/:instructorId/reviews",
+      "full": "POST /api/v1/reputation/instructors/:instructorId/reviews"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/instructors/recompute",
+      "full": "POST /api/v1/reputation/instructors/recompute"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reputation/organizations/:organizationId",
+      "full": "GET /api/v1/reputation/organizations/:organizationId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/organizations/:organizationId/reviews",
+      "full": "POST /api/v1/reputation/organizations/:organizationId/reviews"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/reputation/organizations/:organizationId/metrics",
+      "full": "POST /api/v1/reputation/organizations/:organizationId/metrics"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/reputation/organizations/:organizationId/reviews",
+      "full": "GET /api/v1/reputation/organizations/:organizationId/reviews"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/challenges",
+      "full": "GET /api/v1/challenges"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/challenges/:id",
+      "full": "GET /api/v1/challenges/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/challenges",
+      "full": "POST /api/v1/challenges"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/challenges/:id/start-session",
+      "full": "POST /api/v1/challenges/:id/start-session"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/challenges/:id/submit",
+      "full": "POST /api/v1/challenges/:id/submit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/assistant/query",
+      "full": "POST /api/v1/ai/assistant/query"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/xp/ledger",
+      "full": "GET /api/v1/xp/ledger"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courses",
+      "full": "GET /api/v1/courses"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courses",
+      "full": "POST /api/v1/courses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courses/:id",
+      "full": "GET /api/v1/courses/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courses/:id/modules",
+      "full": "POST /api/v1/courses/:id/modules"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/modules/:id/lessons",
+      "full": "POST /api/v1/modules/:id/lessons"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courses/:id/publish",
+      "full": "POST /api/v1/courses/:id/publish"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courses/:id/enroll",
+      "full": "POST /api/v1/courses/:id/enroll"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courses/:id/progress",
+      "full": "GET /api/v1/courses/:id/progress"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lessons/:id/complete",
+      "full": "POST /api/v1/lessons/:id/complete"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/certificates/:certificateNumber",
+      "full": "GET /api/v1/certificates/:certificateNumber"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/verify/:hash",
+      "full": "GET /api/v1/verify/:hash"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/certificates/verify/:hash",
+      "full": "GET /api/v1/certificates/verify/:hash"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/certificates/my",
+      "full": "GET /api/v1/certificates/my"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/certificates/:certificateNumber/revoke",
+      "full": "POST /api/v1/certificates/:certificateNumber/revoke"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/threads",
+      "full": "GET /api/v1/threads"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/threads",
+      "full": "POST /api/v1/threads"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/threads/:id",
+      "full": "GET /api/v1/threads/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/threads/:id/messages",
+      "full": "POST /api/v1/threads/:id/messages"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/threads/:id/read",
+      "full": "POST /api/v1/threads/:id/read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications",
+      "full": "GET /api/v1/notifications"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/summary",
+      "full": "GET /api/v1/notifications/summary"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notifications/mark-read",
+      "full": "POST /api/v1/notifications/mark-read"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/preferences",
+      "full": "GET /api/v1/notifications/preferences"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/notifications/preferences",
+      "full": "PATCH /api/v1/notifications/preferences"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/conversations",
+      "full": "POST /api/v1/ai/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations",
+      "full": "GET /api/v1/ai/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/conversations/:id",
+      "full": "GET /api/v1/ai/conversations/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ai/career-assistant/chat",
+      "full": "POST /api/v1/ai/career-assistant/chat"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ai/usage",
+      "full": "GET /api/v1/ai/usage"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resumes",
+      "full": "POST /api/v1/resumes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resumes",
+      "full": "GET /api/v1/resumes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resumes/:id",
+      "full": "GET /api/v1/resumes/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/resumes/:id",
+      "full": "PATCH /api/v1/resumes/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resumes/:id/export",
+      "full": "POST /api/v1/resumes/:id/export"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resumes/:id/exports",
+      "full": "GET /api/v1/resumes/:id/exports"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/resumes/exports/:exportId",
+      "full": "DELETE /api/v1/resumes/exports/:exportId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/connections/request",
+      "full": "POST /api/v1/connections/request"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/connections",
+      "full": "GET /api/v1/connections"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/connections/status/:targetUserId",
+      "full": "GET /api/v1/connections/status/:targetUserId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/connections/:id/respond",
+      "full": "POST /api/v1/connections/:id/respond"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/connections/:id/withdraw",
+      "full": "POST /api/v1/connections/:id/withdraw"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/connections/:id",
+      "full": "DELETE /api/v1/connections/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/networking/warm-intros/preferences",
+      "full": "POST /api/v1/networking/warm-intros/preferences"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/networking/warm-intros/preferences",
+      "full": "GET /api/v1/networking/warm-intros/preferences"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/networking/warm-intros/paths",
+      "full": "GET /api/v1/networking/warm-intros/paths"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/networking/warm-intros/requests",
+      "full": "POST /api/v1/networking/warm-intros/requests"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/networking/warm-intros/requests/incoming",
+      "full": "GET /api/v1/networking/warm-intros/requests/incoming"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/networking/warm-intros/requests/outgoing",
+      "full": "GET /api/v1/networking/warm-intros/requests/outgoing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/networking/warm-intros/requests/:id",
+      "full": "GET /api/v1/networking/warm-intros/requests/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/networking/warm-intros/requests/:id/respond",
+      "full": "POST /api/v1/networking/warm-intros/requests/:id/respond"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/referrals/requests",
+      "full": "POST /api/v1/referrals/requests"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/referrals/requests/incoming",
+      "full": "GET /api/v1/referrals/requests/incoming"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/referrals/requests/outgoing",
+      "full": "GET /api/v1/referrals/requests/outgoing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/referrals/requests/:id",
+      "full": "GET /api/v1/referrals/requests/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/referrals/requests/:id/respond",
+      "full": "POST /api/v1/referrals/requests/:id/respond"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/referrals/outcomes",
+      "full": "GET /api/v1/referrals/outcomes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/endorsements",
+      "full": "POST /api/v1/skills/endorsements"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/endorsements/recipients/:recipientId",
+      "full": "GET /api/v1/skills/endorsements/recipients/:recipientId"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/skills/endorsements/:id",
+      "full": "DELETE /api/v1/skills/endorsements/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/endorsements/my/given",
+      "full": "GET /api/v1/skills/endorsements/my/given"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/forecast/top-growth",
+      "full": "GET /api/v1/skills/forecast/top-growth"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/:skillId/market-signals",
+      "full": "POST /api/v1/skills/:skillId/market-signals"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/skills/:skillId/forecast",
+      "full": "GET /api/v1/skills/:skillId/forecast"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/skills/:skillId/forecast/generate",
+      "full": "POST /api/v1/skills/:skillId/forecast/generate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/career/transitions",
+      "full": "POST /api/v1/career/transitions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/career/transitions/my",
+      "full": "GET /api/v1/career/transitions/my"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/career/benchmarks",
+      "full": "GET /api/v1/career/benchmarks"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/career/transition-probability",
+      "full": "POST /api/v1/career/transition-probability"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/career/pathways",
+      "full": "GET /api/v1/career/pathways"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/career/milestones/readiness",
+      "full": "POST /api/v1/career/milestones/readiness"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/learning/impact/outcomes",
+      "full": "POST /api/v1/learning/impact/outcomes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/learning/impact/courses/:courseId",
+      "full": "GET /api/v1/learning/impact/courses/:courseId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/learning/impact/courses/:courseId/compute",
+      "full": "POST /api/v1/learning/impact/courses/:courseId/compute"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/learning/impact/dashboard",
+      "full": "GET /api/v1/learning/impact/dashboard"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recruiter/talent-pools",
+      "full": "POST /api/v1/recruiter/talent-pools"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-pools",
+      "full": "GET /api/v1/recruiter/talent-pools"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-pools/:poolId",
+      "full": "GET /api/v1/recruiter/talent-pools/:poolId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recruiter/talent-pools/:poolId/members",
+      "full": "POST /api/v1/recruiter/talent-pools/:poolId/members"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/recruiter/talent-pools/:poolId/members/:memberId",
+      "full": "PATCH /api/v1/recruiter/talent-pools/:poolId/members/:memberId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-pools/:poolId/intelligence",
+      "full": "GET /api/v1/recruiter/talent-pools/:poolId/intelligence"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recruiter/discovery/behavioral/compute",
+      "full": "POST /api/v1/recruiter/discovery/behavioral/compute"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/discovery/behavioral",
+      "full": "GET /api/v1/recruiter/discovery/behavioral"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/discovery/behavioral/:candidateId",
+      "full": "GET /api/v1/recruiter/discovery/behavioral/:candidateId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/recruiter/talent-segmentation/classify",
+      "full": "POST /api/v1/recruiter/talent-segmentation/classify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-segmentation/segments",
+      "full": "GET /api/v1/recruiter/talent-segmentation/segments"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-segmentation/candidates",
+      "full": "GET /api/v1/recruiter/talent-segmentation/candidates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/recruiter/talent-segmentation/candidates/:candidateId",
+      "full": "GET /api/v1/recruiter/talent-segmentation/candidates/:candidateId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/affiliations",
+      "full": "POST /api/v1/alumni/affiliations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/affiliations/:id/verify",
+      "full": "POST /api/v1/alumni/affiliations/:id/verify"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/alumni/affiliations/my",
+      "full": "GET /api/v1/alumni/affiliations/my"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/alumni/institutions/:institutionId/directory",
+      "full": "GET /api/v1/alumni/institutions/:institutionId/directory"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/institutions/:institutionId/groups",
+      "full": "POST /api/v1/alumni/institutions/:institutionId/groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/alumni/institutions/:institutionId/groups",
+      "full": "GET /api/v1/alumni/institutions/:institutionId/groups"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/groups/:id/join",
+      "full": "POST /api/v1/alumni/groups/:id/join"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/alumni/groups/:id/members",
+      "full": "GET /api/v1/alumni/groups/:id/members"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/mentorship/request",
+      "full": "POST /api/v1/alumni/mentorship/request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/alumni/mentorship/:id/respond",
+      "full": "POST /api/v1/alumni/mentorship/:id/respond"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/alumni/mentorship/my",
+      "full": "GET /api/v1/alumni/mentorship/my"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/activity/events",
+      "full": "POST /api/v1/activity/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activity/events",
+      "full": "GET /api/v1/activity/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activity/scores/me",
+      "full": "GET /api/v1/activity/scores/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activity/users/:userId/score",
+      "full": "GET /api/v1/activity/users/:userId/score"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/activity/recalculate",
+      "full": "POST /api/v1/activity/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/portfolio/projects",
+      "full": "POST /api/v1/portfolio/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/portfolio/projects",
+      "full": "GET /api/v1/portfolio/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/portfolio/projects/:id",
+      "full": "GET /api/v1/portfolio/projects/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/portfolio/projects/:id",
+      "full": "PATCH /api/v1/portfolio/projects/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/portfolio/projects/:id",
+      "full": "DELETE /api/v1/portfolio/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/portfolio/showcase/:targetUserId",
+      "full": "GET /api/v1/portfolio/showcase/:targetUserId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gamification/summary",
+      "full": "GET /api/v1/gamification/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gamification/transactions",
+      "full": "GET /api/v1/gamification/transactions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gamification/badges",
+      "full": "GET /api/v1/gamification/badges"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/gamification/leaderboard",
+      "full": "GET /api/v1/gamification/leaderboard"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gamification/claim-activity",
+      "full": "POST /api/v1/gamification/claim-activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings",
+      "full": "GET /api/v1/settings"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/settings",
+      "full": "PATCH /api/v1/settings"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/settings/export",
+      "full": "POST /api/v1/settings/export"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/export/latest",
+      "full": "GET /api/v1/settings/export/latest"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/settings/erasure/request",
+      "full": "POST /api/v1/settings/erasure/request"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/settings/erasure/status",
+      "full": "GET /api/v1/settings/erasure/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/settings/erasure/cancel",
+      "full": "POST /api/v1/settings/erasure/cancel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/settings/erasure/execute",
+      "full": "POST /api/v1/settings/erasure/execute"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/billing/plans",
+      "full": "GET /api/v1/billing/plans"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/billing/subscription",
+      "full": "GET /api/v1/billing/subscription"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/billing/subscribe",
+      "full": "POST /api/v1/billing/subscribe"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/billing/cancel",
+      "full": "POST /api/v1/billing/cancel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/billing/invoices",
+      "full": "GET /api/v1/billing/invoices"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "full": "GET /api/v1/admin/users"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/:id/status",
+      "full": "PATCH /api/v1/admin/users/:id/status"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/admin/users/:id/roles",
+      "full": "PATCH /api/v1/admin/users/:id/roles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/feature-flags",
+      "full": "GET /api/v1/admin/feature-flags"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/admin/feature-flags/:key",
+      "full": "PUT /api/v1/admin/feature-flags/:key"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/audit-logs",
+      "full": "GET /api/v1/admin/audit-logs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/health-diagnostics",
+      "full": "GET /api/v1/admin/health-diagnostics"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/admin/maintenance",
+      "full": "POST /api/v1/admin/maintenance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search",
+      "full": "GET /api/v1/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search/autocomplete",
+      "full": "GET /api/v1/search/autocomplete"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search/commands",
+      "full": "GET /api/v1/search/commands"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/search/history",
+      "full": "GET /api/v1/search/history"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/search/history",
+      "full": "DELETE /api/v1/search/history"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/moderation/scan",
+      "full": "POST /api/v1/moderation/scan"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/moderation/reports",
+      "full": "POST /api/v1/moderation/reports"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/moderation/reports/my",
+      "full": "GET /api/v1/moderation/reports/my"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/moderation/reports",
+      "full": "GET /api/v1/moderation/reports"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/moderation/reports/:id",
+      "full": "GET /api/v1/moderation/reports/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/moderation/reports/:id/status",
+      "full": "PATCH /api/v1/moderation/reports/:id/status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/moderation/reports/:id/resolve",
+      "full": "POST /api/v1/moderation/reports/:id/resolve"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/moderation/reports/:id/appeal",
+      "full": "POST /api/v1/moderation/reports/:id/appeal"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/moderation/appeals",
+      "full": "GET /api/v1/moderation/appeals"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/moderation/appeals/:id/review",
+      "full": "POST /api/v1/moderation/appeals/:id/review"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/saved-searches",
+      "full": "POST /api/v1/jobs/saved-searches"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/saved-searches",
+      "full": "GET /api/v1/jobs/saved-searches"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/saved-searches/:id",
+      "full": "GET /api/v1/jobs/saved-searches/:id"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/jobs/saved-searches/:id",
+      "full": "PATCH /api/v1/jobs/saved-searches/:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/jobs/saved-searches/:id",
+      "full": "DELETE /api/v1/jobs/saved-searches/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/saved-searches/:id/run",
+      "full": "POST /api/v1/jobs/saved-searches/:id/run"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/alerts",
+      "full": "GET /api/v1/jobs/alerts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/jobs/alerts/:id/read",
+      "full": "PATCH /api/v1/jobs/alerts/:id/read"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/:id/save",
+      "full": "POST /api/v1/jobs/:id/save"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/jobs/:id/save",
+      "full": "DELETE /api/v1/jobs/:id/save"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/saved",
+      "full": "GET /api/v1/jobs/saved"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/jobs/:jobId/draft",
+      "full": "PUT /api/v1/jobs/:jobId/draft"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/jobs/:jobId/draft",
+      "full": "GET /api/v1/jobs/:jobId/draft"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/jobs/:jobId/draft",
+      "full": "DELETE /api/v1/jobs/:jobId/draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/jobs/:jobId/draft/restore",
+      "full": "POST /api/v1/jobs/:jobId/draft/restore"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/applications/drafts",
+      "full": "GET /api/v1/applications/drafts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/analytics/events",
+      "full": "POST /api/v1/analytics/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/events",
+      "full": "GET /api/v1/analytics/events"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/kpis",
+      "full": "GET /api/v1/analytics/kpis"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/candidates/work-history",
+      "full": "POST /api/v1/candidates/work-history"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/candidates/work-history/:id/verify-email",
+      "full": "POST /api/v1/candidates/work-history/:id/verify-email"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/candidates/work-history/:id/references/request",
+      "full": "POST /api/v1/candidates/work-history/:id/references/request"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/references/:refId",
+      "full": "GET /api/v1/references/:refId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/candidates/work-history/references/:refId/submit",
+      "full": "POST /api/v1/candidates/work-history/references/:refId/submit"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/candidates/:candidateId/work-history",
+      "full": "GET /api/v1/candidates/:candidateId/work-history"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/candidates/:candidateId/work-history-graph",
+      "full": "GET /api/v1/candidates/:candidateId/work-history-graph"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/candidates/work-history/:id",
+      "full": "DELETE /api/v1/candidates/work-history/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/internal/worker-jobs",
+      "full": "GET /api/v1/internal/worker-jobs"
+    }
+  ],
+  "durableRoutes": [
+    "POST /api/v1/auth/register",
+    "POST /api/v1/auth/login",
+    "GET /api/v1/auth/session",
+    "POST /api/v1/auth/password",
+    "POST /api/v1/auth/sign-out",
+    "POST /api/v1/auth/sign-out-others",
+    "GET /api/v1/profile/me",
+    "PATCH /api/v1/profile/me",
+    "GET /api/v1/profile/:id",
+    "POST /api/v1/evidence",
+    "GET /api/v1/evidence/mine",
+    "GET /api/v1/evidence/:id",
+    "GET /api/v1/evidence/subject/:subjectId",
+    "POST /api/v1/evidence/:id/verify",
+    "POST /api/v1/evidence/:id/dispute",
+    "POST /api/v1/evidence/:id/revoke",
+    "GET /api/v1/evidence/:id/verify-public",
+    "GET /api/v1/skills",
+    "POST /api/v1/skills",
+    "POST /api/v1/organizations",
+    "GET /api/v1/organizations/mine",
+    "GET /api/v1/organizations/:id",
+    "GET /api/v1/organizations/:id/jobs",
+    "POST /api/v1/organizations/:id/members",
+    "POST /api/v1/jobs",
+    "GET /api/v1/jobs",
+    "GET /api/v1/jobs/:id",
+    "PATCH /api/v1/jobs/:id/status",
+    "POST /api/v1/jobs/:id/apply",
+    "GET /api/v1/jobs/:id/applications",
+    "GET /api/v1/applications/my",
+    "GET /api/v1/applications/:id",
+    "POST /api/v1/applications/:id/transition",
+    "POST /api/v1/candidates/work-history",
+    "POST /api/v1/candidates/work-history/:id/verify-email",
+    "POST /api/v1/candidates/work-history/:id/references/request",
+    "POST /api/v1/candidates/work-history/references/:refId/submit",
+    "DELETE /api/v1/candidates/work-history/:id",
+    "GET /api/v1/references/:refId",
+    "GET /api/v1/candidates/:candidateId/work-history",
+    "GET /api/v1/candidates/:candidateId/work-history-graph",
+    "GET /api/v1/threads",
+    "POST /api/v1/threads",
+    "GET /api/v1/threads/:id",
+    "POST /api/v1/threads/:id/messages",
+    "POST /api/v1/threads/:id/read",
+    "GET /api/v1/notifications",
+    "GET /api/v1/notifications/summary",
+    "POST /api/v1/notifications/mark-read",
+    "GET /api/v1/notifications/preferences",
+    "PATCH /api/v1/notifications/preferences",
+    "POST /api/v1/jobs/saved-searches",
+    "GET /api/v1/jobs/saved-searches",
+    "GET /api/v1/jobs/saved-searches/:id",
+    "PATCH /api/v1/jobs/saved-searches/:id",
+    "DELETE /api/v1/jobs/saved-searches/:id",
+    "POST /api/v1/jobs/saved-searches/:id/run",
+    "POST /api/v1/jobs/:id/save",
+    "DELETE /api/v1/jobs/:id/save",
+    "GET /api/v1/jobs/saved",
+    "GET /api/v1/settings",
+    "PATCH /api/v1/settings",
+    "GET /api/v1/settings/export/latest",
+    "POST /api/v1/settings/erasure/request",
+    "GET /api/v1/settings/erasure/status",
+    "POST /api/v1/settings/erasure/cancel",
+    "GET /health",
+    "GET /api/v1/health",
+    "GET /api/v1/billing/plans"
+  ],
+  "migrations": [
+    "00001_core_schema.sql",
+    "00002_evidence_skills_schema.sql",
+    "00003_jobs_applications_schema.sql",
+    "00004_challenges_assessment_schema.sql",
+    "00005_lms_courses_schema.sql",
+    "00006_messaging_schema.sql",
+    "00007_notifications_schema.sql",
+    "00008_ai_gateway_schema.sql",
+    "00009_resumes_schema.sql",
+    "00010_networking_connections_schema.sql",
+    "00011_portfolio_showcase_schema.sql",
+    "00012_gamification_xp_ledger_schema.sql",
+    "00013_account_settings_privacy_schema.sql",
+    "00014_billing_subscriptions_schema.sql",
+    "00015_admin_governance_schema.sql",
+    "00016_search_discovery_schema.sql",
+    "00017_moderation_trust_safety_schema.sql",
+    "00018_saved_searches_job_alerts_schema.sql",
+    "00019_application_drafts_schema.sql",
+    "00020_product_analytics_schema.sql",
+    "00021_certificate_verification_schema.sql",
+    "00022_job_templates_schema.sql",
+    "00023_salary_intelligence_schema.sql",
+    "00024_application_feedback_schema.sql",
+    "00025_skill_decay_schema.sql",
+    "00026_technical_interview_platform_schema.sql",
+    "00027_reputation_engine_schema.sql",
+    "00028_warm_introductions_schema.sql",
+    "00029_referral_requests_schema.sql",
+    "00030_activity_contributions_schema.sql",
+    "00031_instructor_reputation_schema.sql",
+    "00032_peer_credibility_schema.sql",
+    "00033_alumni_networks_schema.sql",
+    "00034_employer_reputation_schema.sql",
+    "00035_skill_forecasting_schema.sql",
+    "00036_career_trajectory_schema.sql",
+    "00037_learning_impact_schema.sql",
+    "00038_talent_pool_intelligence_schema.sql",
+    "00039_behavioral_talent_discovery_schema.sql",
+    "00040_talent_segmentation_schema.sql",
+    "00041_verified_work_history_schema.sql",
+    "00042_background_jobs_schema.sql",
+    "00043_core_persistence_alignment.sql",
+    "00044_notifications_persistence.sql",
+    "00045_session_revocation.sql",
+    "00046_session_sign_out.sql",
+    "00047_private_data_rls_hardening.sql",
+    "00048_notification_preferences_rls_scope.sql",
+    "00049_worker_liveness.sql"
+  ],
+  "domainFiles": [
+    "activity-contributions.ts",
+    "admin.ts",
+    "ai-gateway.ts",
+    "alumni-networks.ts",
+    "analytics.ts",
+    "application-drafts.ts",
+    "application-feedback.ts",
+    "applications.ts",
+    "assessment.ts",
+    "auth.ts",
+    "background-jobs.ts",
+    "behavioral-talent-discovery.ts",
+    "billing.ts",
+    "career-trajectory.ts",
+    "challenges.ts",
+    "core.ts",
+    "employer-reputation.ts",
+    "evidence.ts",
+    "gamification.ts",
+    "index.ts",
+    "input-security.ts",
+    "instructor-reputation.ts",
+    "job-templates.ts",
+    "jobs.ts",
+    "learning-impact.ts",
+    "lms.ts",
+    "messaging.ts",
+    "moderation.ts",
+    "networking.ts",
+    "notifications.ts",
+    "peer-credibility.ts",
+    "portfolio.ts",
+    "profile.ts",
+    "referral-requests.ts",
+    "reputation-engine.ts",
+    "resumes.ts",
+    "salary-intelligence.ts",
+    "saved-searches.ts",
+    "search.ts",
+    "settings.ts",
+    "skill-decay.ts",
+    "skill-forecasting.ts",
+    "skills.ts",
+    "talent-pool-intelligence.ts",
+    "talent-segmentation.ts",
+    "technical-interview.ts",
+    "warm-introductions.ts",
+    "work-history-graph.ts"
+  ],
+  "webPages": [
+    "ApplicationsPage.tsx",
+    "AssessmentsPage.tsx",
+    "CheckoutPage.tsx",
+    "ConversationPage.tsx",
+    "DashboardPage.tsx",
+    "EvidencePage.tsx",
+    "HiringJobPage.tsx",
+    "HiringPage.tsx",
+    "JobDetailPage.tsx",
+    "JobsPage.tsx",
+    "LandingPage.tsx",
+    "LoginPage.tsx",
+    "MessagesPage.tsx",
+    "NotFoundPage.tsx",
+    "NotificationsPage.tsx",
+    "PrivacyPage.tsx",
+    "ProfilePage.tsx",
+    "ReferencePage.tsx",
+    "SignUpPage.tsx",
+    "TermsPage.tsx"
+  ],
+  "webComponents": [
+    "ChangePasswordForm.tsx",
+    "Layout.tsx",
+    "SessionErrorNotice.tsx",
+    "SignOutOtherDevices.tsx",
+    "ui"
+  ]
+}

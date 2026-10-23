@@ -1,0 +1,249 @@
+{
+  "apiCalls": [
+    {
+      "file": "apps/web/src/components/ChangePasswordForm.tsx",
+      "endpoint": "/api/v1/auth/password"
+    },
+    {
+      "file": "apps/web/src/components/Layout.tsx",
+      "endpoint": "/api/v1/notifications/summary"
+    },
+    {
+      "file": "apps/web/src/components/SignOutOtherDevices.tsx",
+      "endpoint": "/api/v1/auth/sign-out-others"
+    },
+    {
+      "file": "apps/web/src/lib/session.ts",
+      "endpoint": "/api/v1/auth/sign-out"
+    },
+    {
+      "file": "apps/web/src/lib/SessionContext.tsx",
+      "endpoint": "/api/v1/auth/session"
+    },
+    {
+      "file": "apps/web/src/pages/ApplicationsPage.tsx",
+      "endpoint": "/api/v1/applications/my"
+    },
+    {
+      "file": "apps/web/src/pages/ApplicationsPage.tsx",
+      "endpoint": "/api/v1/applications/${withdrawing.id}/transition"
+    },
+    {
+      "file": "apps/web/src/pages/ConversationPage.tsx",
+      "endpoint": "/api/v1/threads/${encodeURIComponent(id)}"
+    },
+    {
+      "file": "apps/web/src/pages/ConversationPage.tsx",
+      "endpoint": "/api/v1/threads/${encodeURIComponent(id)}/messages"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/applications/my"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/candidates/${session.user.id}/work-history"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/evidence/mine"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/jobs"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/organizations/mine"
+    },
+    {
+      "file": "apps/web/src/pages/DashboardPage.tsx",
+      "endpoint": "/api/v1/organizations/${res.organizations[0].id}/jobs"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/${item.id}/verify-email"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/${item.id}/verify-email"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/${userId}/work-history"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/${created.workHistory.id}/verify-email"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/${selectedEntryId}/references/request"
+    },
+    {
+      "file": "apps/web/src/pages/EvidencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/${target.id}"
+    },
+    {
+      "file": "apps/web/src/pages/HiringJobPage.tsx",
+      "endpoint": "/api/v1/jobs/${encodeURIComponent(id)}"
+    },
+    {
+      "file": "apps/web/src/pages/HiringJobPage.tsx",
+      "endpoint": "/api/v1/jobs/${encodeURIComponent(id)}/applications"
+    },
+    {
+      "file": "apps/web/src/pages/HiringJobPage.tsx",
+      "endpoint": "/api/v1/applications/${applicant.id}/transition"
+    },
+    {
+      "file": "apps/web/src/pages/HiringJobPage.tsx",
+      "endpoint": "/api/v1/threads"
+    },
+    {
+      "file": "apps/web/src/pages/HiringJobPage.tsx",
+      "endpoint": "/api/v1/jobs/${job.id}/status"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/organizations"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/jobs"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/jobs/${jobId}/status"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/organizations/mine"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/organizations/${selectedOrgId}/jobs"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/skills"
+    },
+    {
+      "file": "apps/web/src/pages/HiringPage.tsx",
+      "endpoint": "/api/v1/jobs/${job.id}/status"
+    },
+    {
+      "file": "apps/web/src/pages/JobDetailPage.tsx",
+      "endpoint": "/api/v1/jobs/${encodeURIComponent(id)}"
+    },
+    {
+      "file": "apps/web/src/pages/JobDetailPage.tsx",
+      "endpoint": "/api/v1/applications/my"
+    },
+    {
+      "file": "apps/web/src/pages/JobDetailPage.tsx",
+      "endpoint": "/api/v1/evidence/mine"
+    },
+    {
+      "file": "apps/web/src/pages/JobDetailPage.tsx",
+      "endpoint": "/api/v1/jobs/${encodeURIComponent(forJob)}/apply"
+    },
+    {
+      "file": "apps/web/src/pages/JobDetailPage.tsx",
+      "endpoint": "/api/v1/applications/my"
+    },
+    {
+      "file": "apps/web/src/pages/JobsPage.tsx",
+      "endpoint": "/api/v1/jobs"
+    },
+    {
+      "file": "apps/web/src/pages/JobsPage.tsx",
+      "endpoint": "/api/v1/applications/my"
+    },
+    {
+      "file": "apps/web/src/pages/LoginPage.tsx",
+      "endpoint": "/api/v1/auth/login"
+    },
+    {
+      "file": "apps/web/src/pages/MessagesPage.tsx",
+      "endpoint": "/api/v1/threads"
+    },
+    {
+      "file": "apps/web/src/pages/NotificationsPage.tsx",
+      "endpoint": "/api/v1/notifications"
+    },
+    {
+      "file": "apps/web/src/pages/NotificationsPage.tsx",
+      "endpoint": "/api/v1/notifications/mark-read"
+    },
+    {
+      "file": "apps/web/src/pages/ProfilePage.tsx",
+      "endpoint": "/api/v1/profile/me"
+    },
+    {
+      "file": "apps/web/src/pages/ProfilePage.tsx",
+      "endpoint": "/api/v1/settings/erasure/execute"
+    },
+    {
+      "file": "apps/web/src/pages/ProfilePage.tsx",
+      "endpoint": "/api/v1/settings/export"
+    },
+    {
+      "file": "apps/web/src/pages/ReferencePage.tsx",
+      "endpoint": "/api/v1/references/${encodeURIComponent(id)}"
+    },
+    {
+      "file": "apps/web/src/pages/ReferencePage.tsx",
+      "endpoint": "/api/v1/candidates/work-history/references/${encodeURIComponent(id)}/submit"
+    },
+    {
+      "file": "apps/web/src/pages/SignUpPage.tsx",
+      "endpoint": "/api/v1/auth/register"
+    }
+  ],
+  "uniqueEndpoints": [
+    "/api/v1/applications/${applicant.id}/transition",
+    "/api/v1/applications/${withdrawing.id}/transition",
+    "/api/v1/applications/my",
+    "/api/v1/auth/login",
+    "/api/v1/auth/password",
+    "/api/v1/auth/register",
+    "/api/v1/auth/session",
+    "/api/v1/auth/sign-out",
+    "/api/v1/auth/sign-out-others",
+    "/api/v1/candidates/${session.user.id}/work-history",
+    "/api/v1/candidates/${userId}/work-history",
+    "/api/v1/candidates/work-history",
+    "/api/v1/candidates/work-history/${created.workHistory.id}/verify-email",
+    "/api/v1/candidates/work-history/${item.id}/verify-email",
+    "/api/v1/candidates/work-history/${selectedEntryId}/references/request",
+    "/api/v1/candidates/work-history/${target.id}",
+    "/api/v1/candidates/work-history/references/${encodeURIComponent(id)}/submit",
+    "/api/v1/evidence/mine",
+    "/api/v1/jobs",
+    "/api/v1/jobs/${encodeURIComponent(forJob)}/apply",
+    "/api/v1/jobs/${encodeURIComponent(id)}",
+    "/api/v1/jobs/${encodeURIComponent(id)}/applications",
+    "/api/v1/jobs/${job.id}/status",
+    "/api/v1/jobs/${jobId}/status",
+    "/api/v1/notifications",
+    "/api/v1/notifications/mark-read",
+    "/api/v1/notifications/summary",
+    "/api/v1/organizations",
+    "/api/v1/organizations/${res.organizations[0].id}/jobs",
+    "/api/v1/organizations/${selectedOrgId}/jobs",
+    "/api/v1/organizations/mine",
+    "/api/v1/profile/me",
+    "/api/v1/references/${encodeURIComponent(id)}",
+    "/api/v1/settings/erasure/execute",
+    "/api/v1/settings/export",
+    "/api/v1/skills",
+    "/api/v1/threads",
+    "/api/v1/threads/${encodeURIComponent(id)}",
+    "/api/v1/threads/${encodeURIComponent(id)}/messages"
+  ]
+}

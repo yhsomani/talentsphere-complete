@@ -1,0 +1,1646 @@
+[
+  {
+    "method": "GET",
+    "path": "/health",
+    "line": 719,
+    "full": "GET /health"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/health",
+    "line": 727,
+    "full": "GET /api/v1/health"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/feature-flags",
+    "line": 817,
+    "full": "GET /api/v1/feature-flags"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/register",
+    "line": 994,
+    "full": "POST /api/v1/auth/register"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "line": 1034,
+    "full": "POST /api/v1/auth/login"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/password",
+    "line": 1093,
+    "full": "POST /api/v1/auth/password"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/sign-out",
+    "line": 1164,
+    "full": "POST /api/v1/auth/sign-out"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/sign-out-others",
+    "line": 1190,
+    "full": "POST /api/v1/auth/sign-out-others"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/auth/session",
+    "line": 1218,
+    "full": "GET /api/v1/auth/session"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/profile/me",
+    "line": 1239,
+    "full": "GET /api/v1/profile/me"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/profile/me",
+    "line": 1248,
+    "full": "PATCH /api/v1/profile/me"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/profile/:id",
+    "line": 1263,
+    "full": "GET /api/v1/profile/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/evidence",
+    "line": 1395,
+    "full": "POST /api/v1/evidence"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/evidence/:id",
+    "line": 1439,
+    "full": "GET /api/v1/evidence/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/evidence/mine",
+    "line": 1472,
+    "full": "GET /api/v1/evidence/mine"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/evidence/subject/:subjectId",
+    "line": 1480,
+    "full": "GET /api/v1/evidence/subject/:subjectId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/evidence/:id/verify",
+    "line": 1524,
+    "full": "POST /api/v1/evidence/:id/verify"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/evidence/:id/dispute",
+    "line": 1572,
+    "full": "POST /api/v1/evidence/:id/dispute"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/evidence/:id/revoke",
+    "line": 1613,
+    "full": "POST /api/v1/evidence/:id/revoke"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/evidence/:id/verify-public",
+    "line": 1654,
+    "full": "GET /api/v1/evidence/:id/verify-public"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills",
+    "line": 1669,
+    "full": "GET /api/v1/skills"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills",
+    "line": 1673,
+    "full": "POST /api/v1/skills"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/relationships",
+    "line": 1703,
+    "full": "POST /api/v1/skills/relationships"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/:id/graph",
+    "line": 1732,
+    "full": "GET /api/v1/skills/:id/graph"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/organizations",
+    "line": 1775,
+    "full": "POST /api/v1/organizations"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/organizations/mine",
+    "line": 1809,
+    "full": "GET /api/v1/organizations/mine"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/organizations/:id/jobs",
+    "line": 1822,
+    "full": "GET /api/v1/organizations/:id/jobs"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/organizations/:id",
+    "line": 1846,
+    "full": "GET /api/v1/organizations/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/organizations/:id/members",
+    "line": 1858,
+    "full": "POST /api/v1/organizations/:id/members"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs",
+    "line": 1905,
+    "full": "POST /api/v1/jobs"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs",
+    "line": 1971,
+    "full": "GET /api/v1/jobs"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/:id",
+    "line": 1985,
+    "full": "GET /api/v1/jobs/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/jobs/:id/status",
+    "line": 2005,
+    "full": "PATCH /api/v1/jobs/:id/status"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/job-templates",
+    "line": 2046,
+    "full": "POST /api/v1/job-templates"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/job-templates",
+    "line": 2113,
+    "full": "GET /api/v1/job-templates"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/job-templates/:id",
+    "line": 2154,
+    "full": "GET /api/v1/job-templates/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/job-templates/:id",
+    "line": 2180,
+    "full": "PATCH /api/v1/job-templates/:id"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/job-templates/:id",
+    "line": 2264,
+    "full": "DELETE /api/v1/job-templates/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/job-templates/:id/instantiate",
+    "line": 2311,
+    "full": "POST /api/v1/job-templates/:id/instantiate"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/:id/save-as-template",
+    "line": 2389,
+    "full": "POST /api/v1/jobs/:id/save-as-template"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/salaries/reports",
+    "line": 2452,
+    "full": "POST /api/v1/salaries/reports"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/salaries/reports/my",
+    "line": 2514,
+    "full": "GET /api/v1/salaries/reports/my"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/salaries/reports/:id",
+    "line": 2520,
+    "full": "DELETE /api/v1/salaries/reports/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/salaries/benchmarks",
+    "line": 2552,
+    "full": "GET /api/v1/salaries/benchmarks"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/salaries/company/:companyName",
+    "line": 2570,
+    "full": "GET /api/v1/salaries/company/:companyName"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/:id/apply",
+    "line": 2582,
+    "full": "POST /api/v1/jobs/:id/apply"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/applications/my",
+    "line": 2678,
+    "full": "GET /api/v1/applications/my"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/applications/:id",
+    "line": 2702,
+    "full": "GET /api/v1/applications/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/:id/applications",
+    "line": 2727,
+    "full": "GET /api/v1/jobs/:id/applications"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/applications/:id/transition",
+    "line": 2778,
+    "full": "POST /api/v1/applications/:id/transition"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/applications/:id/feedback",
+    "line": 2868,
+    "full": "POST /api/v1/applications/:id/feedback"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/applications/:id/feedback",
+    "line": 2953,
+    "full": "GET /api/v1/applications/:id/feedback"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/applications/:id/feedback/request",
+    "line": 2994,
+    "full": "POST /api/v1/applications/:id/feedback/request"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/organizations/:orgId/feedback-templates",
+    "line": 3046,
+    "full": "POST /api/v1/organizations/:orgId/feedback-templates"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/organizations/:orgId/feedback-templates",
+    "line": 3090,
+    "full": "GET /api/v1/organizations/:orgId/feedback-templates"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/feedback/aggregate-insights",
+    "line": 3112,
+    "full": "GET /api/v1/feedback/aggregate-insights"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/freshness",
+    "line": 3122,
+    "full": "POST /api/v1/skills/freshness"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/freshness/my",
+    "line": 3163,
+    "full": "GET /api/v1/skills/freshness/my"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/candidates/:candidateProfileId/skills/freshness",
+    "line": 3174,
+    "full": "GET /api/v1/candidates/:candidateProfileId/skills/freshness"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/:skillId/reverify",
+    "line": 3213,
+    "full": "POST /api/v1/skills/:skillId/reverify"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/freshness/refresh-all",
+    "line": 3266,
+    "full": "POST /api/v1/skills/freshness/refresh-all"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/questions",
+    "line": 3302,
+    "full": "POST /api/v1/interviews/questions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/interviews/questions",
+    "line": 3344,
+    "full": "GET /api/v1/interviews/questions"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments",
+    "line": 3417,
+    "full": "POST /api/v1/interviews/assessments"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/interviews/assessments/:id",
+    "line": 3513,
+    "full": "GET /api/v1/interviews/assessments/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/join",
+    "line": 3545,
+    "full": "POST /api/v1/interviews/assessments/:id/join"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/consent",
+    "line": 3573,
+    "full": "POST /api/v1/interviews/assessments/:id/consent"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/end",
+    "line": 3594,
+    "full": "POST /api/v1/interviews/assessments/:id/end"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/code",
+    "line": 3630,
+    "full": "POST /api/v1/interviews/assessments/:id/code"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/scorecard",
+    "line": 3680,
+    "full": "POST /api/v1/interviews/assessments/:id/scorecard"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/scorecard/compensate",
+    "line": 3756,
+    "full": "POST /api/v1/interviews/assessments/:id/scorecard/compensate"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/interviews/assessments/:id/scorecards",
+    "line": 3816,
+    "full": "GET /api/v1/interviews/assessments/:id/scorecards"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/ai-feedback",
+    "line": 3848,
+    "full": "POST /api/v1/interviews/assessments/:id/ai-feedback"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/interviews/assessments/:id/review",
+    "line": 3868,
+    "full": "POST /api/v1/interviews/assessments/:id/review"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/signals",
+    "line": 3894,
+    "full": "POST /api/v1/reputation/signals"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/reputation/users/:userId",
+    "line": 3957,
+    "full": "GET /api/v1/reputation/users/:userId"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/reputation/my/signals",
+    "line": 4029,
+    "full": "GET /api/v1/reputation/my/signals"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/recovery",
+    "line": 4035,
+    "full": "POST /api/v1/reputation/recovery"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/recovery/:planId/tasks/:taskId/complete",
+    "line": 4066,
+    "full": "POST /api/v1/reputation/recovery/:planId/tasks/:taskId/complete"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/recalculate-all",
+    "line": 4131,
+    "full": "POST /api/v1/reputation/recalculate-all"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/reputation/instructors/:instructorId",
+    "line": 4186,
+    "full": "GET /api/v1/reputation/instructors/:instructorId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/instructors/:instructorId/metrics",
+    "line": 4213,
+    "full": "POST /api/v1/reputation/instructors/:instructorId/metrics"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/instructors/:instructorId/endorse",
+    "line": 4267,
+    "full": "POST /api/v1/reputation/instructors/:instructorId/endorse"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/instructors/:instructorId/reviews",
+    "line": 4317,
+    "full": "POST /api/v1/reputation/instructors/:instructorId/reviews"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/instructors/recompute",
+    "line": 4349,
+    "full": "POST /api/v1/reputation/instructors/recompute"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/reputation/organizations/:organizationId",
+    "line": 4380,
+    "full": "GET /api/v1/reputation/organizations/:organizationId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/organizations/:organizationId/reviews",
+    "line": 4403,
+    "full": "POST /api/v1/reputation/organizations/:organizationId/reviews"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reputation/organizations/:organizationId/metrics",
+    "line": 4486,
+    "full": "POST /api/v1/reputation/organizations/:organizationId/metrics"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/reputation/organizations/:organizationId/reviews",
+    "line": 4531,
+    "full": "GET /api/v1/reputation/organizations/:organizationId/reviews"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/challenges",
+    "line": 4579,
+    "full": "GET /api/v1/challenges"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/challenges/:id",
+    "line": 4584,
+    "full": "GET /api/v1/challenges/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/challenges",
+    "line": 4596,
+    "full": "POST /api/v1/challenges"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/challenges/:id/start-session",
+    "line": 4628,
+    "full": "POST /api/v1/challenges/:id/start-session"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/challenges/:id/submit",
+    "line": 4661,
+    "full": "POST /api/v1/challenges/:id/submit"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/assistant/query",
+    "line": 4764,
+    "full": "POST /api/v1/ai/assistant/query"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/xp/ledger",
+    "line": 4782,
+    "full": "GET /api/v1/xp/ledger"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/courses",
+    "line": 4895,
+    "full": "GET /api/v1/courses"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/courses",
+    "line": 4927,
+    "full": "POST /api/v1/courses"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/courses/:id",
+    "line": 4974,
+    "full": "GET /api/v1/courses/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/courses/:id/modules",
+    "line": 5007,
+    "full": "POST /api/v1/courses/:id/modules"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/modules/:id/lessons",
+    "line": 5052,
+    "full": "POST /api/v1/modules/:id/lessons"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/courses/:id/publish",
+    "line": 5112,
+    "full": "POST /api/v1/courses/:id/publish"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/courses/:id/enroll",
+    "line": 5154,
+    "full": "POST /api/v1/courses/:id/enroll"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/courses/:id/progress",
+    "line": 5187,
+    "full": "GET /api/v1/courses/:id/progress"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/lessons/:id/complete",
+    "line": 5222,
+    "full": "POST /api/v1/lessons/:id/complete"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/certificates/:certificateNumber",
+    "line": 5385,
+    "full": "GET /api/v1/certificates/:certificateNumber"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/verify/:hash",
+    "line": 5408,
+    "full": "GET /api/v1/verify/:hash"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/certificates/verify/:hash",
+    "line": 5456,
+    "full": "GET /api/v1/certificates/verify/:hash"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/certificates/my",
+    "line": 5478,
+    "full": "GET /api/v1/certificates/my"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/certificates/:certificateNumber/revoke",
+    "line": 5503,
+    "full": "POST /api/v1/certificates/:certificateNumber/revoke"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/threads",
+    "line": 5639,
+    "full": "GET /api/v1/threads"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/threads",
+    "line": 5671,
+    "full": "POST /api/v1/threads"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/threads/:id",
+    "line": 5762,
+    "full": "GET /api/v1/threads/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/threads/:id/messages",
+    "line": 5805,
+    "full": "POST /api/v1/threads/:id/messages"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/threads/:id/read",
+    "line": 5866,
+    "full": "POST /api/v1/threads/:id/read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications",
+    "line": 5894,
+    "full": "GET /api/v1/notifications"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications/summary",
+    "line": 5925,
+    "full": "GET /api/v1/notifications/summary"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/notifications/mark-read",
+    "line": 5934,
+    "full": "POST /api/v1/notifications/mark-read"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications/preferences",
+    "line": 5964,
+    "full": "GET /api/v1/notifications/preferences"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/notifications/preferences",
+    "line": 5980,
+    "full": "PATCH /api/v1/notifications/preferences"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/conversations",
+    "line": 6039,
+    "full": "POST /api/v1/ai/conversations"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/ai/conversations",
+    "line": 6053,
+    "full": "GET /api/v1/ai/conversations"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/ai/conversations/:id",
+    "line": 6059,
+    "full": "GET /api/v1/ai/conversations/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/career-assistant/chat",
+    "line": 6079,
+    "full": "POST /api/v1/ai/career-assistant/chat"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/ai/usage",
+    "line": 6172,
+    "full": "GET /api/v1/ai/usage"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/resumes",
+    "line": 6187,
+    "full": "POST /api/v1/resumes"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/resumes",
+    "line": 6201,
+    "full": "GET /api/v1/resumes"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/resumes/:id",
+    "line": 6207,
+    "full": "GET /api/v1/resumes/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/resumes/:id",
+    "line": 6226,
+    "full": "PATCH /api/v1/resumes/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/resumes/:id/export",
+    "line": 6257,
+    "full": "POST /api/v1/resumes/:id/export"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/resumes/:id/exports",
+    "line": 6298,
+    "full": "GET /api/v1/resumes/:id/exports"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/resumes/exports/:exportId",
+    "line": 6326,
+    "full": "DELETE /api/v1/resumes/exports/:exportId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/connections/request",
+    "line": 6363,
+    "full": "POST /api/v1/connections/request"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/connections",
+    "line": 6427,
+    "full": "GET /api/v1/connections"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/connections/status/:targetUserId",
+    "line": 6459,
+    "full": "GET /api/v1/connections/status/:targetUserId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/connections/:id/respond",
+    "line": 6481,
+    "full": "POST /api/v1/connections/:id/respond"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/connections/:id/withdraw",
+    "line": 6549,
+    "full": "POST /api/v1/connections/:id/withdraw"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/connections/:id",
+    "line": 6585,
+    "full": "DELETE /api/v1/connections/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/networking/warm-intros/preferences",
+    "line": 6652,
+    "full": "POST /api/v1/networking/warm-intros/preferences"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/networking/warm-intros/preferences",
+    "line": 6679,
+    "full": "GET /api/v1/networking/warm-intros/preferences"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/networking/warm-intros/paths",
+    "line": 6694,
+    "full": "GET /api/v1/networking/warm-intros/paths"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/networking/warm-intros/requests",
+    "line": 6720,
+    "full": "POST /api/v1/networking/warm-intros/requests"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/networking/warm-intros/requests/incoming",
+    "line": 6799,
+    "full": "GET /api/v1/networking/warm-intros/requests/incoming"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/networking/warm-intros/requests/outgoing",
+    "line": 6808,
+    "full": "GET /api/v1/networking/warm-intros/requests/outgoing"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/networking/warm-intros/requests/:id",
+    "line": 6817,
+    "full": "GET /api/v1/networking/warm-intros/requests/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/networking/warm-intros/requests/:id/respond",
+    "line": 6843,
+    "full": "POST /api/v1/networking/warm-intros/requests/:id/respond"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/referrals/requests",
+    "line": 6924,
+    "full": "POST /api/v1/referrals/requests"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/referrals/requests/incoming",
+    "line": 7004,
+    "full": "GET /api/v1/referrals/requests/incoming"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/referrals/requests/outgoing",
+    "line": 7013,
+    "full": "GET /api/v1/referrals/requests/outgoing"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/referrals/requests/:id",
+    "line": 7022,
+    "full": "GET /api/v1/referrals/requests/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/referrals/requests/:id/respond",
+    "line": 7047,
+    "full": "POST /api/v1/referrals/requests/:id/respond"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/referrals/outcomes",
+    "line": 7161,
+    "full": "GET /api/v1/referrals/outcomes"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/endorsements",
+    "line": 7215,
+    "full": "POST /api/v1/skills/endorsements"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/endorsements/recipients/:recipientId",
+    "line": 7303,
+    "full": "GET /api/v1/skills/endorsements/recipients/:recipientId"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/skills/endorsements/:id",
+    "line": 7330,
+    "full": "DELETE /api/v1/skills/endorsements/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/endorsements/my/given",
+    "line": 7360,
+    "full": "GET /api/v1/skills/endorsements/my/given"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/forecast/top-growth",
+    "line": 7493,
+    "full": "GET /api/v1/skills/forecast/top-growth"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/:skillId/market-signals",
+    "line": 7549,
+    "full": "POST /api/v1/skills/:skillId/market-signals"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/skills/:skillId/forecast",
+    "line": 7598,
+    "full": "GET /api/v1/skills/:skillId/forecast"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/skills/:skillId/forecast/generate",
+    "line": 7646,
+    "full": "POST /api/v1/skills/:skillId/forecast/generate"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/career/transitions",
+    "line": 7764,
+    "full": "POST /api/v1/career/transitions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/career/transitions/my",
+    "line": 7823,
+    "full": "GET /api/v1/career/transitions/my"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/career/benchmarks",
+    "line": 7841,
+    "full": "GET /api/v1/career/benchmarks"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/career/transition-probability",
+    "line": 7884,
+    "full": "POST /api/v1/career/transition-probability"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/career/pathways",
+    "line": 7917,
+    "full": "GET /api/v1/career/pathways"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/career/milestones/readiness",
+    "line": 7941,
+    "full": "POST /api/v1/career/milestones/readiness"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/learning/impact/outcomes",
+    "line": 8018,
+    "full": "POST /api/v1/learning/impact/outcomes"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/learning/impact/courses/:courseId",
+    "line": 8096,
+    "full": "GET /api/v1/learning/impact/courses/:courseId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/learning/impact/courses/:courseId/compute",
+    "line": 8129,
+    "full": "POST /api/v1/learning/impact/courses/:courseId/compute"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/learning/impact/dashboard",
+    "line": 8175,
+    "full": "GET /api/v1/learning/impact/dashboard"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/recruiter/talent-pools",
+    "line": 8204,
+    "full": "POST /api/v1/recruiter/talent-pools"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-pools",
+    "line": 8254,
+    "full": "GET /api/v1/recruiter/talent-pools"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-pools/:poolId",
+    "line": 8294,
+    "full": "GET /api/v1/recruiter/talent-pools/:poolId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/recruiter/talent-pools/:poolId/members",
+    "line": 8321,
+    "full": "POST /api/v1/recruiter/talent-pools/:poolId/members"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/recruiter/talent-pools/:poolId/members/:memberId",
+    "line": 8413,
+    "full": "PATCH /api/v1/recruiter/talent-pools/:poolId/members/:memberId"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-pools/:poolId/intelligence",
+    "line": 8460,
+    "full": "GET /api/v1/recruiter/talent-pools/:poolId/intelligence"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/recruiter/discovery/behavioral/compute",
+    "line": 8668,
+    "full": "POST /api/v1/recruiter/discovery/behavioral/compute"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/discovery/behavioral",
+    "line": 8719,
+    "full": "GET /api/v1/recruiter/discovery/behavioral"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/discovery/behavioral/:candidateId",
+    "line": 8774,
+    "full": "GET /api/v1/recruiter/discovery/behavioral/:candidateId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/recruiter/talent-segmentation/classify",
+    "line": 8896,
+    "full": "POST /api/v1/recruiter/talent-segmentation/classify"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-segmentation/segments",
+    "line": 8969,
+    "full": "GET /api/v1/recruiter/talent-segmentation/segments"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-segmentation/candidates",
+    "line": 8994,
+    "full": "GET /api/v1/recruiter/talent-segmentation/candidates"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/recruiter/talent-segmentation/candidates/:candidateId",
+    "line": 9057,
+    "full": "GET /api/v1/recruiter/talent-segmentation/candidates/:candidateId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/affiliations",
+    "line": 9125,
+    "full": "POST /api/v1/alumni/affiliations"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/affiliations/:id/verify",
+    "line": 9195,
+    "full": "POST /api/v1/alumni/affiliations/:id/verify"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/alumni/affiliations/my",
+    "line": 9290,
+    "full": "GET /api/v1/alumni/affiliations/my"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/alumni/institutions/:institutionId/directory",
+    "line": 9300,
+    "full": "GET /api/v1/alumni/institutions/:institutionId/directory"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/institutions/:institutionId/groups",
+    "line": 9363,
+    "full": "POST /api/v1/alumni/institutions/:institutionId/groups"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/alumni/institutions/:institutionId/groups",
+    "line": 9408,
+    "full": "GET /api/v1/alumni/institutions/:institutionId/groups"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/groups/:id/join",
+    "line": 9439,
+    "full": "POST /api/v1/alumni/groups/:id/join"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/alumni/groups/:id/members",
+    "line": 9486,
+    "full": "GET /api/v1/alumni/groups/:id/members"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/mentorship/request",
+    "line": 9513,
+    "full": "POST /api/v1/alumni/mentorship/request"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/alumni/mentorship/:id/respond",
+    "line": 9564,
+    "full": "POST /api/v1/alumni/mentorship/:id/respond"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/alumni/mentorship/my",
+    "line": 9592,
+    "full": "GET /api/v1/alumni/mentorship/my"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/activity/events",
+    "line": 9609,
+    "full": "POST /api/v1/activity/events"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/activity/events",
+    "line": 9646,
+    "full": "GET /api/v1/activity/events"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/activity/scores/me",
+    "line": 9671,
+    "full": "GET /api/v1/activity/scores/me"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/activity/users/:userId/score",
+    "line": 9680,
+    "full": "GET /api/v1/activity/users/:userId/score"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/activity/recalculate",
+    "line": 9710,
+    "full": "POST /api/v1/activity/recalculate"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/portfolio/projects",
+    "line": 9723,
+    "full": "POST /api/v1/portfolio/projects"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portfolio/projects",
+    "line": 9748,
+    "full": "GET /api/v1/portfolio/projects"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portfolio/projects/:id",
+    "line": 9754,
+    "full": "GET /api/v1/portfolio/projects/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/portfolio/projects/:id",
+    "line": 9782,
+    "full": "PATCH /api/v1/portfolio/projects/:id"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/portfolio/projects/:id",
+    "line": 9821,
+    "full": "DELETE /api/v1/portfolio/projects/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portfolio/showcase/:targetUserId",
+    "line": 9860,
+    "full": "GET /api/v1/portfolio/showcase/:targetUserId"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/gamification/summary",
+    "line": 9934,
+    "full": "GET /api/v1/gamification/summary"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/gamification/transactions",
+    "line": 9958,
+    "full": "GET /api/v1/gamification/transactions"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/gamification/badges",
+    "line": 9964,
+    "full": "GET /api/v1/gamification/badges"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/gamification/leaderboard",
+    "line": 9978,
+    "full": "GET /api/v1/gamification/leaderboard"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/gamification/claim-activity",
+    "line": 10020,
+    "full": "POST /api/v1/gamification/claim-activity"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/settings",
+    "line": 10159,
+    "full": "GET /api/v1/settings"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/settings",
+    "line": 10169,
+    "full": "PATCH /api/v1/settings"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/settings/export",
+    "line": 10212,
+    "full": "POST /api/v1/settings/export"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/settings/export/latest",
+    "line": 10317,
+    "full": "GET /api/v1/settings/export/latest"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/settings/erasure/request",
+    "line": 10327,
+    "full": "POST /api/v1/settings/erasure/request"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/settings/erasure/status",
+    "line": 10352,
+    "full": "GET /api/v1/settings/erasure/status"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/settings/erasure/cancel",
+    "line": 10365,
+    "full": "POST /api/v1/settings/erasure/cancel"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/settings/erasure/execute",
+    "line": 10387,
+    "full": "POST /api/v1/settings/erasure/execute"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/billing/plans",
+    "line": 10560,
+    "full": "GET /api/v1/billing/plans"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/billing/subscription",
+    "line": 10567,
+    "full": "GET /api/v1/billing/subscription"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/billing/subscribe",
+    "line": 10600,
+    "full": "POST /api/v1/billing/subscribe"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/billing/cancel",
+    "line": 10667,
+    "full": "POST /api/v1/billing/cancel"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/billing/invoices",
+    "line": 10706,
+    "full": "GET /api/v1/billing/invoices"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/users",
+    "line": 10807,
+    "full": "GET /api/v1/admin/users"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/admin/users/:id/status",
+    "line": 10843,
+    "full": "PATCH /api/v1/admin/users/:id/status"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/admin/users/:id/roles",
+    "line": 10900,
+    "full": "PATCH /api/v1/admin/users/:id/roles"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/feature-flags",
+    "line": 10955,
+    "full": "GET /api/v1/admin/feature-flags"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/feature-flags/:key",
+    "line": 10967,
+    "full": "PUT /api/v1/admin/feature-flags/:key"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/audit-logs",
+    "line": 11009,
+    "full": "GET /api/v1/admin/audit-logs"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/health-diagnostics",
+    "line": 11040,
+    "full": "GET /api/v1/admin/health-diagnostics"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/maintenance",
+    "line": 11092,
+    "full": "POST /api/v1/admin/maintenance"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/search",
+    "line": 11121,
+    "full": "GET /api/v1/search"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/search/autocomplete",
+    "line": 11369,
+    "full": "GET /api/v1/search/autocomplete"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/search/commands",
+    "line": 11447,
+    "full": "GET /api/v1/search/commands"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/search/history",
+    "line": 11457,
+    "full": "GET /api/v1/search/history"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/search/history",
+    "line": 11467,
+    "full": "DELETE /api/v1/search/history"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/moderation/scan",
+    "line": 11490,
+    "full": "POST /api/v1/moderation/scan"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/moderation/reports",
+    "line": 11497,
+    "full": "POST /api/v1/moderation/reports"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/moderation/reports/my",
+    "line": 11565,
+    "full": "GET /api/v1/moderation/reports/my"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/moderation/reports",
+    "line": 11590,
+    "full": "GET /api/v1/moderation/reports"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/moderation/reports/:id",
+    "line": 11612,
+    "full": "GET /api/v1/moderation/reports/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/moderation/reports/:id/status",
+    "line": 11633,
+    "full": "PATCH /api/v1/moderation/reports/:id/status"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/moderation/reports/:id/resolve",
+    "line": 11656,
+    "full": "POST /api/v1/moderation/reports/:id/resolve"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/moderation/reports/:id/appeal",
+    "line": 11793,
+    "full": "POST /api/v1/moderation/reports/:id/appeal"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/moderation/appeals",
+    "line": 11830,
+    "full": "GET /api/v1/moderation/appeals"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/moderation/appeals/:id/review",
+    "line": 11839,
+    "full": "POST /api/v1/moderation/appeals/:id/review"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/saved-searches",
+    "line": 11888,
+    "full": "POST /api/v1/jobs/saved-searches"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/saved-searches",
+    "line": 11906,
+    "full": "GET /api/v1/jobs/saved-searches"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/saved-searches/:id",
+    "line": 11913,
+    "full": "GET /api/v1/jobs/saved-searches/:id"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/jobs/saved-searches/:id",
+    "line": 11930,
+    "full": "PATCH /api/v1/jobs/saved-searches/:id"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/jobs/saved-searches/:id",
+    "line": 11950,
+    "full": "DELETE /api/v1/jobs/saved-searches/:id"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/saved-searches/:id/run",
+    "line": 11968,
+    "full": "POST /api/v1/jobs/saved-searches/:id/run"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/alerts",
+    "line": 11987,
+    "full": "GET /api/v1/jobs/alerts"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/jobs/alerts/:id/read",
+    "line": 11996,
+    "full": "PATCH /api/v1/jobs/alerts/:id/read"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/:id/save",
+    "line": 12015,
+    "full": "POST /api/v1/jobs/:id/save"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/jobs/:id/save",
+    "line": 12032,
+    "full": "DELETE /api/v1/jobs/:id/save"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/saved",
+    "line": 12043,
+    "full": "GET /api/v1/jobs/saved"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/jobs/:jobId/draft",
+    "line": 12056,
+    "full": "PUT /api/v1/jobs/:jobId/draft"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/jobs/:jobId/draft",
+    "line": 12122,
+    "full": "GET /api/v1/jobs/:jobId/draft"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/jobs/:jobId/draft",
+    "line": 12152,
+    "full": "DELETE /api/v1/jobs/:jobId/draft"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/jobs/:jobId/draft/restore",
+    "line": 12178,
+    "full": "POST /api/v1/jobs/:jobId/draft/restore"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/applications/drafts",
+    "line": 12219,
+    "full": "GET /api/v1/applications/drafts"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/analytics/events",
+    "line": 12245,
+    "full": "POST /api/v1/analytics/events"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/analytics/events",
+    "line": 12306,
+    "full": "GET /api/v1/analytics/events"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/analytics/kpis",
+    "line": 12325,
+    "full": "GET /api/v1/analytics/kpis"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/candidates/work-history",
+    "line": 12372,
+    "full": "POST /api/v1/candidates/work-history"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/candidates/work-history/:id/verify-email",
+    "line": 12428,
+    "full": "POST /api/v1/candidates/work-history/:id/verify-email"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/candidates/work-history/:id/references/request",
+    "line": 12556,
+    "full": "POST /api/v1/candidates/work-history/:id/references/request"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/references/:refId",
+    "line": 12654,
+    "full": "GET /api/v1/references/:refId"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/candidates/work-history/references/:refId/submit",
+    "line": 12689,
+    "full": "POST /api/v1/candidates/work-history/references/:refId/submit"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/candidates/:candidateId/work-history",
+    "line": 12845,
+    "full": "GET /api/v1/candidates/:candidateId/work-history"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/candidates/:candidateId/work-history-graph",
+    "line": 12894,
+    "full": "GET /api/v1/candidates/:candidateId/work-history-graph"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/candidates/work-history/:id",
+    "line": 12938,
+    "full": "DELETE /api/v1/candidates/work-history/:id"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/internal/worker-jobs",
+    "line": 12992,
+    "full": "GET /api/v1/internal/worker-jobs"
+  }
+]
