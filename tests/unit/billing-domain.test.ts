@@ -66,25 +66,12 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       })).toThrow(/verified payment|payment provider/i);
     });
 
-    it.skip('legacy paid-activation expectations removed pending verified Stripe fulfillment', () => {
-      const result = createSubscription({ userId, planTier: 'candidate_pro' });
-      const nowIso = '2026-09-24T12:00:00.000Z';
-      expect(result.subscription.userId).toBe(userId);
-      expect(result.subscription.planTier).toBe('candidate_pro');
+    it('keeps free subscriptions active without paid invoice fraud', () => {
+      const result = createSubscription({ userId, planTier: 'free' });
       expect(result.subscription.status).toBe('active');
-      expect(result.subscription.currentPeriodStart).toBe(nowIso);
-
-      const expectedEnd = new Date(
-        new Date(nowIso).getTime() + 30 * 24 * 60 * 60 * 1000
-      ).toISOString();
-      expect(result.subscription.currentPeriodEnd).toBe(expectedEnd);
-
-      expect(result.invoice.amountCents).toBe(1999);
-      expect(result.invoice.currency).toBe('USD');
+      expect(result.invoice.amountCents).toBe(0);
       expect(result.invoice.status).toBe('paid');
-      expect(result.invoice.idempotencyKey).toBe('idem_sub_123');
-
-      expect(result.entitlements.aiDailyRequestsLimit).toBe(50);
+      expect(result.entitlements.planTier).toBe('free');
     });
 
     it('refuses yearly paid activation without verified payment', () => {
