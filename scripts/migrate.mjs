@@ -7,6 +7,7 @@ import {
   requireDatabaseUrl,
   ensureDatabase,
   ensureSupabaseCompat,
+  assertNotHostedSupabase,
   ensureOrgAliases,
   ensureUsersMirror,
   connect,
@@ -78,10 +79,19 @@ async function runMigrations() {
   const target = databaseUrl.replace(/:[^:@/]*@/, ':***@');
   console.log(`target: ${target}`);
 
-  await ensureDatabase(databaseUrl);
+  // Hosted Supabase must be rejected before *any* database creation or
+  // bootstrap attempt; its auth schema is owned by the provider.
+  const host = new URL(databaseUrl).hostname.toLowerCase();
+  const hostedEndpoint =
+    host.endsWith('.supabase.co') || host.endsWith('.pooler.supabase.com');
+  if (!hostedEndpoint) await ensureDatabase(databaseUrl);
   const client = await connect(databaseUrl);
 
   try {
+    await assertNotHostedSupabase(client);
+    if (hostedEndpoint) {
+      throw new Error('Refusing provider-hosted endpoint without a reviewed Supabase migration adapter.');
+    }
     await ensureSupabaseCompat(client);
     await ensureOrgAliases(client);
 
