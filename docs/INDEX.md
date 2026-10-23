@@ -8,6 +8,7 @@ This is the single entry point to the project's documentation. Paths are relativ
 |---|---|
 | Set up and run the project | [`../README.md`](../README.md) |
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
+| Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | [`../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`](../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) |
 | Current implementation status | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) |
 | Evidence ledger: 173 features, 248 rules, 28 journeys, routes and current test results | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
 | Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
