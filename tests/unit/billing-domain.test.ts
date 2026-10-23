@@ -4,8 +4,10 @@ import {
   getPlanEntitlements,
   createSubscription,
   cancelSubscription,
+  settleSubscription,
   renewSubscription,
   validateMonetizationIntegrity,
+  DomainError,
 } from '../../packages/domain/src/index.js';
 
 describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16, WIT-016)', () => {
@@ -68,6 +70,31 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       ).toThrow(/verified payment|payment provider/i);
     });
 
+    it('refuses paid plans with PAYMENT_REQUIRED unless simulation is explicitly allowed', () => {
+      try {
+        createSubscription({ userId, planTier: 'candidate_pro' });
+        throw new Error('expected createSubscription to throw');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DomainError);
+        expect((error as DomainError).code).toBe('PAYMENT_REQUIRED');
+      }
+      expect(() =>
+        createSubscription({ userId, planTier: 'candidate_pro', allowSimulatedPayment: false })
+      ).toThrow(/payment provider/i);
+    });
+
+    it('activates a paid plan at the exact catalog price when simulation is explicitly allowed', () => {
+      const result = createSubscription({
+        userId,
+        planTier: 'candidate_pro',
+        billingCycle: 'yearly',
+        allowSimulatedPayment: true,
+      });
+      expect(result.subscription.planTier).toBe('candidate_pro');
+      expect(result.invoice.amountCents).toBe(19990);
+      expect(result.entitlements.aiDailyRequestsLimit).toBe(50);
+    });
+
     it('keeps free subscriptions active without paid invoice fraud', () => {
       const result = createSubscription({ userId, planTier: 'free' });
       expect(result.subscription.status).toBe('active');
@@ -104,6 +131,20 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       expect(cancelled.canceledAt).toBe(nowIso);
     });
 
+    it('treats a repeated period-end cancellation as a no-op that keeps the original timestamp', () => {
+      const first = '2026-09-24T12:00:00.000Z';
+      const later = '2026-09-25T12:00:00.000Z';
+      const { subscription } = createSubscription({ userId, planTier: 'free', nowIso: first });
+
+      const once = cancelSubscription(subscription, false, first);
+      const twice = cancelSubscription(once, false, later);
+      expect(twice).toBe(once);
+      expect(twice.canceledAt).toBe(first);
+
+      // An immediate cancellation is still allowed after one is scheduled.
+      expect(cancelSubscription(once, true, later).status).toBe('canceled');
+    });
+
     it('immediately cancels subscription when requested', () => {
       const nowIso = '2026-09-24T12:00:00.000Z';
       const { subscription } = createSubscription({
@@ -119,6 +160,44 @@ describe('Billing, Subscriptions & Monetization Domain (F-16, Section 64, WF-16,
       expect(() => {
         cancelSubscription(cancelled, true, nowIso);
       }).toThrowError(/already canceled/);
+    });
+  });
+
+  describe('settleSubscription', () => {
+    const start = '2026-09-24T12:00:00.000Z';
+    const paid = () =>
+      createSubscription({
+        userId,
+        planTier: 'candidate_pro',
+        allowSimulatedPayment: true,
+        nowIso: start,
+      }).subscription;
+
+    it('ends access once a scheduled cancellation reaches the end of the period', () => {
+      const scheduled = cancelSubscription(paid(), false, start);
+      const afterEnd = new Date(
+        new Date(scheduled.currentPeriodEnd).getTime() + 1000
+      ).toISOString();
+
+      const settled = settleSubscription(scheduled, afterEnd);
+      expect(settled.status).toBe('canceled');
+      expect(settled.cancelAtPeriodEnd).toBe(false);
+      expect(settled.canceledAt).toBe(start);
+    });
+
+    it('keeps access until the period ends, and leaves unscheduled subscriptions alone', () => {
+      const subscription = paid();
+      const scheduled = cancelSubscription(subscription, false, start);
+      const midPeriod = '2026-09-30T00:00:00.000Z';
+
+      expect(settleSubscription(scheduled, midPeriod)).toBe(scheduled);
+      const farFuture = '2030-01-01T00:00:00.000Z';
+      expect(settleSubscription(subscription, farFuture)).toBe(subscription);
+    });
+
+    it('does not touch an already canceled subscription', () => {
+      const canceled = cancelSubscription(paid(), true, start);
+      expect(settleSubscription(canceled, '2030-01-01T00:00:00.000Z')).toBe(canceled);
     });
   });
 

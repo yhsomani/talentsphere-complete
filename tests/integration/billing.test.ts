@@ -163,6 +163,81 @@ describe('Billing, Subscriptions & Monetization Integration (F-16, Section 64, W
     expect(body.subscription.status).toBe('active');
   });
 
+  it('rejects reuse of an idempotency key for a different plan or cycle with 409', async () => {
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'billing.conflict@example.com',
+        password: 'Password123!Secure',
+        fullName: 'Casey Conflict',
+        role: 'candidate',
+      },
+    });
+    expect(reg.statusCode).toBe(201);
+    const headers = { authorization: `Bearer ${JSON.parse(reg.body).token}` };
+    const idempotencyKey = 'sub_idem_conflict_001';
+
+    const first = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/subscribe',
+      headers,
+      payload: { planTier: 'candidate_pro', billingCycle: 'monthly', idempotencyKey },
+    });
+    expect(first.statusCode).toBe(201);
+
+    const different = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/subscribe',
+      headers,
+      payload: { planTier: 'candidate_pro', billingCycle: 'yearly', idempotencyKey },
+    });
+    expect(different.statusCode).toBe(409);
+
+    // Exactly one invoice exists: the conflicting replay created nothing.
+    const invoices = await app.inject({ method: 'GET', url: '/api/v1/billing/invoices', headers });
+    expect(JSON.parse(invoices.body).invoices).toHaveLength(1);
+  });
+
+  it('keeps the original cancellation timestamp when cancel is requested twice', async () => {
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'billing.cancel2@example.com',
+        password: 'Password123!Secure',
+        fullName: 'Robin Recancel',
+        role: 'candidate',
+      },
+    });
+    const headers = { authorization: `Bearer ${JSON.parse(reg.body).token}` };
+    const sub = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/subscribe',
+      headers,
+      payload: { planTier: 'candidate_pro', billingCycle: 'monthly' },
+    });
+    expect(sub.statusCode).toBe(201);
+
+    const cancelOnce = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/cancel',
+      headers,
+      payload: { immediate: false },
+    });
+    expect(cancelOnce.statusCode).toBe(200);
+    const stamped = JSON.parse(cancelOnce.body).subscription.canceledAt;
+
+    const cancelTwice = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/cancel',
+      headers,
+      payload: { immediate: false },
+    });
+    expect(cancelTwice.statusCode).toBe(200);
+    expect(JSON.parse(cancelTwice.body).subscription.canceledAt).toBe(stamped);
+  });
+
   it('processes payment webhook with replay resistance (WIT-016)', async () => {
     const idempotencyKey = 'stripe_evt_webhook_999';
 

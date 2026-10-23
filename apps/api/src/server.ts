@@ -136,6 +136,7 @@ import {
   getPlanEntitlements,
   createSubscription,
   cancelSubscription,
+  settleSubscription,
   assertPlatformAdmin,
   computeSystemHealth,
   validateUserStatusTransition,
@@ -646,6 +647,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         INVALID_STATE_TRANSITION: 422,
         ASSESSMENT_AI_PROHIBITED: 403,
         FREE_USER_AI_QUOTA_EXCEEDED: 402,
+        PAYMENT_REQUIRED: 402,
         POLICY_VIOLATION: 422,
         RATE_LIMIT_EXCEEDED: 429,
         TENANT_ISOLATION_VIOLATION: 403,
@@ -10437,7 +10439,13 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     await storage.savedJobs.eraseUser(session.userId);
     subscriptionsByUserId.delete(session.userId);
     entitlementsByUserId.delete(session.userId);
+    for (const invoice of invoicesByUserId.get(session.userId) ?? []) {
+      invoicesById.delete(invoice.id);
+    }
     invoicesByUserId.delete(session.userId);
+    for (const [key, event] of billingEventsByIdempotency) {
+      if (event.userId === session.userId) billingEventsByIdempotency.delete(key);
+    }
     salaryReportsByUserId.delete(session.userId);
     reputationSignalsByUserId.delete(session.userId);
     xpTransactionsByUserId.delete(session.userId);
@@ -10516,6 +10524,22 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // Billing & Subscriptions Routes (F-16, Section 64, WF-16, WIT-016)
   // ============================================================================
 
+  /**
+   * Applies elapsed time to a user's stored subscription (a scheduled
+   * cancellation whose period has ended) and drops entitlements to the free
+   * tier when that happens. Returns the up-to-date subscription, if any.
+   */
+  const settleUserSubscription = (userId: string): Subscription | undefined => {
+    const current = subscriptionsByUserId.get(userId);
+    if (!current) return undefined;
+    const settled = settleSubscription(current);
+    if (settled !== current) {
+      subscriptionsByUserId.set(userId, settled);
+      entitlementsByUserId.set(userId, getPlanEntitlements(userId, 'free'));
+    }
+    return settled;
+  };
+
   // 1. Get available platform plans (public catalog)
   app.get('/api/v1/billing/plans', async (_req: FastifyRequest, reply: FastifyReply) => {
     return reply.status(200).send({
@@ -10527,7 +10551,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.get('/api/v1/billing/subscription', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
 
-    let subscription = subscriptionsByUserId.get(session.userId);
+    let subscription = settleUserSubscription(session.userId);
     if (!subscription) {
       const now = new Date().toISOString();
       subscription = {
@@ -10577,6 +10601,20 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       const existingInvoices = invoicesByUserId.get(session.userId) || [];
       const match = existingInvoices.find((i) => i.idempotencyKey === input.idempotencyKey);
       if (match) {
+        // The same key must mean the same request. Replaying it with a
+        // different plan or cycle is a client bug that would otherwise be
+        // answered with the first request's result as if it were this one.
+        const requestedPlan = PLATFORM_PLANS[input.planTier];
+        const requestedAmount =
+          input.billingCycle === 'yearly'
+            ? requestedPlan.priceYearlyCents
+            : requestedPlan.priceMonthlyCents;
+        if (requestedAmount !== match.amountCents) {
+          throw new DomainError(
+            'CONFLICT',
+            'This idempotency key was already used for a different plan or billing cycle.'
+          );
+        }
         const sub = subscriptionsByUserId.get(session.userId)!;
         const ent = entitlementsByUserId.get(session.userId)!;
         return reply.status(200).send({
@@ -10594,6 +10632,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       planTier: input.planTier,
       billingCycle: input.billingCycle,
       idempotencyKey: input.idempotencyKey,
+      // Reaching here with a paid tier is only possible under
+      // BILLING_MODE=simulated (guarded above; refused in production config).
+      allowSimulatedPayment: env.BILLING_MODE === 'simulated',
     });
 
     subscriptionsByUserId.set(session.userId, result.subscription);
@@ -10628,7 +10669,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = CancelSubscriptionInputSchema.parse(req.body || {});
 
-    const current = subscriptionsByUserId.get(session.userId);
+    const current = settleUserSubscription(session.userId);
     if (!current || current.planTier === 'free' || current.status === 'canceled') {
       throw new DomainError(
         'INVALID_STATE_TRANSITION',
