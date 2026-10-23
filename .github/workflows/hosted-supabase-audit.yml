@@ -18,9 +18,9 @@ jobs:
         run: |
           node scripts/audit-hosted-supabase-migrations.mjs > "$RUNNER_TEMP/hosted-audit.json" || status=$?
           cat "$RUNNER_TEMP/hosted-audit.json"
-          # Existing history has known Supabase Auth incompatibilities.
-          # Enforce the report and keep legacy SQL changes reviewable, while a
-          # separate hosted migration track is implemented.
+          # Existing historical migrations remain incompatible. Prevent NEW
+          # migrations from adding more Supabase platform-auth dependencies.
+          node scripts/check-new-hosted-migrations.mjs
           if [ ! -s "$RUNNER_TEMP/hosted-audit.json" ]; then exit 1; fi
       - name: Upload audit report
         uses: actions/upload-artifact@v4
