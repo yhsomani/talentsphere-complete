@@ -33,7 +33,13 @@ try {
     hasApplicationMigrationLedger: migrationLedger.rows[0].exists,
     blockers: [
       ...(platform
-        ? ['The existing migration runner cannot be run against hosted Supabase.']
+        ? ['The legacy local-Postgres migration runner is not safe on hosted Supabase.']
+        : ['Expected a hosted Supabase database; refusing an unrecognized target.']),
+      ...(!migrationLedger.rows[0].exists
+        ? ['Application migration ledger is missing: schema has not been verified.']
+        : []),
+      ...(tables.rows.length === 0
+        ? ['No application tables exist in public: not ready for application traffic.']
         : []),
       ...tables.rows.filter(t => !t.rls_enabled).map(t => `RLS disabled: ${t.table_name}`),
     ],
