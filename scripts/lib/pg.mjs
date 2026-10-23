@@ -41,23 +41,28 @@ export function databaseName(databaseUrl) {
  * public.users ids via ensureUsersMirror() once migrations (and therefore
  * public.users) exist. Nothing queries auth.users — see ensureUsersMirror.
  */
-export async function ensureSupabaseCompat(client) {
-  // Hosted Supabase owns auth.users, auth.uid() and auth.jwt(). The local
-  // compatibility shim must NEVER redefine those objects on a hosted project.
-  // Fail before any migration DDL so the operator can use a reviewed
-  // Supabase-specific migration path rather than corrupt platform identity.
-  const hosted = await client.query(`
+export async function isHostedSupabase(client) {
+  // Read-only probe: protects Supabase-managed identity objects.
+  const result = await client.query(`
     SELECT EXISTS (
       SELECT 1 FROM pg_namespace WHERE nspname = 'supabase_migrations'
       UNION ALL SELECT 1 FROM pg_roles WHERE rolname = 'supabase_auth_admin'
       UNION ALL SELECT 1 FROM information_schema.columns WHERE table_schema = 'auth' AND table_name = 'users' AND column_name = 'email'
     ) AS hosted
   `);
-  if (hosted.rows[0]?.hosted) {
+  return result.rows[0]?.hosted === true;
+}
+
+export async function assertNotHostedSupabase(client) {
+  if (await isHostedSupabase(client)) {
     throw new Error(
-      'Hosted Supabase detected: the local PostgreSQL compatibility shim modifies auth.users/auth.uid/auth.jwt. Refusing migration; use a reviewed hosted-Supabase migration path.'
+      'Hosted Supabase detected: local migration/bootstrap modifies provider-managed auth objects. Refusing before any DDL.'
     );
   }
+}
+
+export async function ensureSupabaseCompat(client) {
+  await assertNotHostedSupabase(client);
   await client.query(`
     CREATE SCHEMA IF NOT EXISTS auth;
     CREATE TABLE IF NOT EXISTS auth.users (id uuid PRIMARY KEY);
@@ -86,6 +91,7 @@ export async function ensureSupabaseCompat(client) {
  * code queries it. Must run after migrations (needs public.users to exist).
  */
 export async function ensureUsersMirror(client) {
+  await assertNotHostedSupabase(client);
   await client.query(`
     CREATE OR REPLACE FUNCTION auth.sync_users_mirror() RETURNS trigger
       LANGUAGE plpgsql AS $$
