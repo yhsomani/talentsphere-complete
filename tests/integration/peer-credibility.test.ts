@@ -121,6 +121,16 @@ describe('Peer Credibility Networks Integration (F-150, F-110, F-144)', () => {
     expect(weight.finalWeight).toBeGreaterThan(0.2);
   });
 
+  it('refuses to endorse someone who does not exist (404)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/skills/endorsements',
+      headers: { authorization: `Bearer ${user1Token}` },
+      payload: { recipientId: '00000000-0000-4000-a000-00000000dead', skillId },
+    });
+    expect(res.statusCode).toBe(404);
+  });
+
   it('prevents duplicate active endorsement and self-endorsements (BR-153)', async () => {
     // 1. Self endorsement rejected
     const selfRes = await app.inject({

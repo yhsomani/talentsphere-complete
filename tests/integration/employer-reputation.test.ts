@@ -97,12 +97,14 @@ describe('Employer Reputation & Brand System Integration (F-149, F-75, F-56, F-1
         leadershipRating: 4.5,
         title: 'Streamlined interview with timely feedback',
         feedback: 'Recruiter responded within 24 hours at every stage.',
-        isVerifiedEmployee: false,
+        // A claim in the body is not evidence: the reviewer is not a member of this organization.
+        isVerifiedEmployee: true,
       },
     });
 
     expect(res.statusCode).toBe(201);
     const body = JSON.parse(res.body);
+    expect(body.review.isVerifiedEmployee).toBe(false);
     expect(body.review.organizationId).toBe(orgId);
     expect(body.review.reviewerId).toBe(candidateId);
     expect(body.profile.overallScore).toBeGreaterThan(70);

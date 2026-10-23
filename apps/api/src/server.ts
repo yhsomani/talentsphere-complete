@@ -4396,7 +4396,8 @@ export async function buildApp(
       const userMembership = memberships.find((m) => m.userId === session.userId);
       const isOwnerOrRecruiter =
         userMembership?.role === 'owner' || userMembership?.role === 'admin';
-      const isVerifiedEmployee = input.isVerifiedEmployee || !!userMembership;
+      // Membership is known to the server; a claim in the request body is not evidence.
+      const isVerifiedEmployee = !!userMembership;
 
       const review = createEmployerReview({
         organizationId,
@@ -7112,6 +7113,9 @@ export async function buildApp(
     const skill = skillsById.get(input.skillId);
     if (!skill) {
       throw new DomainError('NOT_FOUND', `Skill with ID ${input.skillId} not found.`);
+    }
+    if (!usersById.has(input.recipientId)) {
+      throw new DomainError('NOT_FOUND', 'The person you are endorsing was not found.');
     }
 
     // Check rate limit: max 5 endorsements given per week
