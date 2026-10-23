@@ -73,14 +73,33 @@ export const ServerEnvSchema = z.object({
   RESEND_API_KEY: z.string().min(12).optional(),
   EMAIL_FROM: z.string().email().optional(),
 
-  // Billing. No payment processor is integrated yet, so paid plans cannot be
-  // bought: 'disabled' (default) refuses paid subscriptions honestly;
-  // 'simulated' activates them WITHOUT payment for development and tests
-  // only (refused in production by productionConfigProblems).
-  BILLING_MODE: z.enum(['disabled', 'simulated']).default('disabled'),
+  // Billing. 'disabled' (default) refuses paid subscriptions honestly;
+  // 'simulated' activates them WITHOUT payment for development and tests only
+  // (refused in production by productionConfigProblems); 'stripe' sells them
+  // through Stripe Checkout and mirrors Stripe's subscription state (needs the
+  // STRIPE_* settings below; stripeConfigProblems refuses a half-configured one).
+  BILLING_MODE: z.enum(['disabled', 'simulated', 'stripe']).default('disabled'),
   // HMAC-SHA256 secret for /api/v1/billing/webhook. Unset = the webhook is
   // not configured and refuses every call (it never accepts unsigned events).
   BILLING_WEBHOOK_SECRET: z.string().min(16).optional(),
+  // Stripe (server-only; never sent to the browser). Secret or restricted key,
+  // and the signing secret of this API's /api/v1/billing/stripe-webhook endpoint.
+  STRIPE_SECRET_KEY: z
+    .string()
+    .regex(/^(sk|rk)_(test|live)_[A-Za-z0-9]{16,}$/, 'must be a Stripe secret or restricted key')
+    .optional(),
+  STRIPE_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^whsec_[A-Za-z0-9]{16,}$/, 'must be a Stripe webhook signing secret (whsec_…)')
+    .optional(),
+  // Stripe Price ids for each paid plan and cycle (server-side catalog: the
+  // client never supplies a price or an amount).
+  STRIPE_PRICE_CANDIDATE_PRO_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_CANDIDATE_PRO_YEARLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_RECRUITER_STARTER_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_RECRUITER_STARTER_YEARLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY: z.string().regex(/^price_\w+$/).optional(),
 
   // AI Policy Invariants
   AI_ENABLED: z.coerce.boolean().default(true),
@@ -133,6 +152,35 @@ export const MIN_DEPLOYED_PBKDF2_ITERATIONS = 210_000;
 
 const isPublishedTestSecret = (value: string | undefined) =>
   !!value && PUBLISHED_TEST_SECRET_SHA256.has(createHash('sha256').update(value).digest('hex'));
+
+/**
+ * Settings BILLING_MODE=stripe cannot work without. Checked at boot in every
+ * environment: selling plans with a missing key or webhook secret would either
+ * fail at the first purchase or, worse, accept unverifiable events.
+ */
+export function stripeConfigProblems(env: ServerEnv): string[] {
+  if (env.BILLING_MODE !== 'stripe') return [];
+  const problems: string[] = [];
+  if (!env.STRIPE_SECRET_KEY) problems.push('BILLING_MODE=stripe requires STRIPE_SECRET_KEY');
+  if (!env.STRIPE_WEBHOOK_SECRET) {
+    problems.push('BILLING_MODE=stripe requires STRIPE_WEBHOOK_SECRET');
+  }
+  const prices = [
+    env.STRIPE_PRICE_CANDIDATE_PRO_MONTHLY,
+    env.STRIPE_PRICE_CANDIDATE_PRO_YEARLY,
+    env.STRIPE_PRICE_RECRUITER_STARTER_MONTHLY,
+    env.STRIPE_PRICE_RECRUITER_STARTER_YEARLY,
+    env.STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY,
+    env.STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY,
+  ].filter(Boolean) as string[];
+  if (prices.length === 0) {
+    problems.push('BILLING_MODE=stripe requires at least one STRIPE_PRICE_* id');
+  }
+  if (new Set(prices).size !== prices.length) {
+    problems.push('STRIPE_PRICE_* ids must be distinct: one price cannot grant two plans');
+  }
+  return problems;
+}
 
 export function productionConfigProblems(env: ServerEnv): string[] {
   if (!isDeployed(env)) return [];
@@ -196,7 +244,15 @@ export function productionConfigProblems(env: ServerEnv): string[] {
       problems.push('Email reference links require an HTTPS APP_URL in deployed environments');
     }
   }
+  if (env.BILLING_MODE === 'stripe') {
+    if (!env.APP_URL.startsWith('https://')) {
+      problems.push('Stripe Checkout return links require an HTTPS APP_URL in deployed environments');
+    }
+  }
   if (env.NODE_ENV === 'production') {
+    if (env.BILLING_MODE === 'stripe' && /^(sk|rk)_test_/.test(env.STRIPE_SECRET_KEY ?? '')) {
+      problems.push('STRIPE_SECRET_KEY is a test-mode key: production would take no real payments');
+    }
     if (env.BILLING_MODE === 'simulated') {
       problems.push('BILLING_MODE=simulated activates paid plans without payment');
     }
@@ -204,6 +260,7 @@ export function productionConfigProblems(env: ServerEnv): string[] {
       problems.push('CORS_ALLOWED_ORIGINS still allows localhost in production');
     }
   }
+  problems.push(...stripeConfigProblems(env));
   return problems;
 }
 

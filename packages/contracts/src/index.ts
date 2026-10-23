@@ -632,6 +632,19 @@ export const SubscribePlanInputSchema = z.object({
 
 export type SubscribePlanInput = z.infer<typeof SubscribePlanInputSchema>;
 
+/**
+ * Starts a Stripe Checkout session. The client names a plan and cycle only:
+ * the price, amount and currency come from the server-side catalog, never
+ * from this request.
+ */
+export const CreateCheckoutSessionInputSchema = z.object({
+  planTier: z.enum(['candidate_pro', 'recruiter_starter', 'recruiter_enterprise']),
+  billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
+  idempotencyKey: z.string().min(1).max(128).optional(),
+});
+
+export type CreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionInputSchema>;
+
 export const CancelSubscriptionInputSchema = z.object({
   immediate: z.boolean().default(false),
   reason: z.string().max(500).optional(),

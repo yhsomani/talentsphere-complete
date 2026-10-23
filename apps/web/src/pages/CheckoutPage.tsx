@@ -3,6 +3,7 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { useSession } from '../lib/SessionContext.js';
 import { ButtonLink, CheckIcon, PageHeader } from '../components/ui/index.js';
+import { PaidPlans } from '../components/PaidPlans.js';
 
 /**
  * Pricing, stated truthfully.
@@ -128,6 +129,7 @@ export const CheckoutPage: React.FC = () => {
           </section>
         ))}
       </div>
+      <PaidPlans signedIn={signedIn} />
       <p
         style={{
           color: colors.neutral[600],

@@ -233,8 +233,16 @@ describe('Dispatch kind drift guard (server.ts ↔ DISPATCH_EVENT_KINDS)', () =>
   const serverSource = fs.readFileSync(path.join(repoRoot, 'apps/api/src/server.ts'), 'utf8');
   // Required delivery jobs now enqueue directly so an enqueue failure cannot
   // be mistaken for successful email dispatch. Both paths must remain covered.
+  // Stripe billing emits from its own module (it receives dispatchJob as `deps`).
+  const stripeBillingSource = fs.readFileSync(
+    path.join(repoRoot, 'apps/api/src/billing-stripe.ts'),
+    'utf8'
+  );
   const emittedKinds = [
     ...[...serverSource.matchAll(/await dispatchJob\(\{\s*type: '([^']+)'/g)].map((m) => m[1]),
+    ...[...stripeBillingSource.matchAll(/await deps\.dispatchJob\(\{\s*type: '([^']+)'/g)].map(
+      (m) => m[1]
+    ),
     ...[...serverSource.matchAll(/await storage\.jobs\.enqueue\(\{\s*kind: '([^']+)'/g)].map(
       (m) => m[1]
     ),

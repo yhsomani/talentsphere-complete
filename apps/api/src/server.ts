@@ -4,8 +4,19 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import crypto from 'node:crypto';
 import { ZodError } from 'zod';
-import { isDeployed, validateServerEnv, ServerEnv } from '@talentsphere/config';
+import {
+  isDeployed,
+  stripeConfigProblems,
+  validateServerEnv,
+  ServerEnv,
+} from '@talentsphere/config';
 import { DURABLE_ROUTES, isEphemeralRoute } from './durability.js';
+import {
+  cancelWithStripe,
+  registerStripeBilling,
+  type StripeBillingDeps,
+} from './billing-stripe.js';
+import { createStripeGateway, type StripeGateway } from './stripe-gateway.js';
 import {
   concurrentModification,
   createStorage,
@@ -129,14 +140,12 @@ import {
   executeLogicalAnonymization,
   compileDataExportArchive,
   Subscription,
-  Invoice,
-  Entitlements,
-  BillingEvent,
   PLATFORM_PLANS,
   getPlanEntitlements,
   createSubscription,
   cancelSubscription,
   settleSubscription,
+  buildPriceCatalog,
   assertPlatformAdmin,
   computeSystemHealth,
   validateUserStatusTransition,
@@ -466,8 +475,23 @@ export function parseTrustProxy(
  */
 export type BuildAppEnv = Partial<Record<keyof ServerEnv, string | number | boolean>>;
 
-export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance> {
+/** Test seams: replace external services without touching the network. */
+export interface BuildAppOverrides {
+  /** Replaces the Stripe SDK gateway (BILLING_MODE=stripe only). */
+  stripeGateway?: StripeGateway;
+}
+
+export async function buildApp(
+  customEnv?: BuildAppEnv,
+  overrides: BuildAppOverrides = {}
+): Promise<FastifyInstance> {
   const env = validateServerEnv(customEnv as Record<string, string | undefined>);
+  // Refuse a half-configured Stripe mode in every environment, before any
+  // connection is opened: it would fail at the first purchase or webhook.
+  const stripeProblems = stripeConfigProblems(env);
+  if (stripeProblems.length > 0) {
+    throw new Error(`Invalid billing configuration: ${stripeProblems.join('; ')}`);
+  }
 
   const app = Fastify({
     trustProxy: parseTrustProxy(env.TRUST_PROXY),
@@ -743,11 +767,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   const profilesById = new Map<string, any>();
   const userSettingsByUserId = new Map<string, UserSettings>();
   const exportRequestsByUserId = new Map<string, DataExportRequest[]>();
-  const subscriptionsByUserId = new Map<string, Subscription>();
-  const entitlementsByUserId = new Map<string, Entitlements>();
-  const invoicesByUserId = new Map<string, Invoice[]>();
-  const invoicesById = new Map<string, Invoice>();
-  const billingEventsByIdempotency = new Map<string, BillingEvent>();
+  // Billing (subscriptions, invoices, entitlements, Stripe mapping, events)
+  // lives in storage.billing: durable in pg mode (migrations 00014, 00052).
   const searchHistoryByUserId = new Map<string, SearchHistoryItem[]>();
   const moderationReportsById = new Map<string, ModerationReport>();
   const moderationAppealsById = new Map<string, ModerationAppeal>();
@@ -10368,6 +10389,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       profile
     );
 
+    // Billing first: ends the Stripe customer (and its subscriptions) and
+    // removes local billing records. If Stripe is unreachable this throws
+    // before anything else is changed, so the request is safe to retry.
+    await eraseBillingData(session.userId);
+
     // Persist the anonymized state in ONE transaction. Now that this data is
     // durable, erasure has to remove personal data rather than rely on a
     // restart to forget it:
@@ -10437,15 +10463,6 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     exportRequestsByUserId.delete(session.userId);
     searchHistoryByUserId.delete(session.userId);
     await storage.savedJobs.eraseUser(session.userId);
-    subscriptionsByUserId.delete(session.userId);
-    entitlementsByUserId.delete(session.userId);
-    for (const invoice of invoicesByUserId.get(session.userId) ?? []) {
-      invoicesById.delete(invoice.id);
-    }
-    invoicesByUserId.delete(session.userId);
-    for (const [key, event] of billingEventsByIdempotency) {
-      if (event.userId === session.userId) billingEventsByIdempotency.delete(key);
-    }
     salaryReportsByUserId.delete(session.userId);
     reputationSignalsByUserId.delete(session.userId);
     xpTransactionsByUserId.delete(session.userId);
@@ -10524,18 +10541,103 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // Billing & Subscriptions Routes (F-16, Section 64, WF-16, WIT-016)
   // ============================================================================
 
+  // Stripe (BILLING_MODE=stripe): the gateway owns every SDK call; the catalog
+  // maps Stripe price ids to plans on the server, so the client never names a
+  // price or an amount.
+  const stripeGateway: StripeGateway | undefined =
+    env.BILLING_MODE === 'stripe'
+      ? (overrides.stripeGateway ??
+        createStripeGateway({
+          secretKey: env.STRIPE_SECRET_KEY!,
+          webhookSecret: env.STRIPE_WEBHOOK_SECRET!,
+          logger: app.log,
+        }))
+      : undefined;
+  const priceCatalog = buildPriceCatalog({
+    'candidate_pro:monthly': env.STRIPE_PRICE_CANDIDATE_PRO_MONTHLY,
+    'candidate_pro:yearly': env.STRIPE_PRICE_CANDIDATE_PRO_YEARLY,
+    'recruiter_starter:monthly': env.STRIPE_PRICE_RECRUITER_STARTER_MONTHLY,
+    'recruiter_starter:yearly': env.STRIPE_PRICE_RECRUITER_STARTER_YEARLY,
+    'recruiter_enterprise:monthly': env.STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY,
+    'recruiter_enterprise:yearly': env.STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY,
+  });
+  const stripeDeps: StripeBillingDeps | undefined = stripeGateway
+    ? {
+        appUrl: env.APP_URL.replace(/\/+$/, ''),
+        storage,
+        gateway: stripeGateway,
+        catalog: priceCatalog,
+        extractUser,
+        getAccountEmail: (userId) => usersById.get(userId)?.email,
+        dispatchJob: (event) => dispatchJob(event),
+        log: { warn: (obj, msg) => app.log.warn(obj, msg) },
+      }
+    : undefined;
+  if (stripeDeps) {
+    await registerStripeBilling(app, stripeDeps);
+  } else {
+    // The routes exist in every mode and refuse honestly when Stripe is off.
+    const stripeOff = (): never => {
+      throw new DomainError(
+        'SERVICE_UNAVAILABLE',
+        'Stripe billing is not enabled on this server.',
+        {
+          billingMode: env.BILLING_MODE,
+        }
+      );
+    };
+    app.post('/api/v1/billing/checkout', async (req: FastifyRequest) => {
+      extractUser(req);
+      return stripeOff();
+    });
+    app.post('/api/v1/billing/portal', async (req: FastifyRequest) => {
+      extractUser(req);
+      return stripeOff();
+    });
+    app.post('/api/v1/billing/stripe-webhook', async () => stripeOff());
+  }
+
+  /**
+   * Account erasure (F-17): ends the Stripe customer, which also ends its
+   * subscriptions, then removes every local billing record. A Stripe failure
+   * throws, so the caller can refuse before changing anything else.
+   */
+  const eraseBillingData = async (userId: string): Promise<void> => {
+    const customerId = await storage.billing.getStripeCustomerId(userId);
+    if (customerId && stripeGateway) {
+      await stripeGateway.deleteCustomer(customerId);
+    } else if (customerId) {
+      app.log.warn(
+        { userId },
+        'Stripe customer not deleted at erasure: BILLING_MODE is not stripe; remove it in the Stripe dashboard'
+      );
+    }
+    await storage.billing.eraseUser(userId);
+  };
+
+  /** A stable id for the implicit free subscription, so reads need not write. */
+  const implicitFreeSubscriptionId = (userId: string): string => {
+    const bytes = crypto.createHash('sha256').update(`free-subscription:${userId}`).digest();
+    bytes[6] = (bytes[6]! & 0x0f) | 0x50;
+    bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+    const hex = bytes.subarray(0, 16).toString('hex');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+  };
+
   /**
    * Applies elapsed time to a user's stored subscription (a scheduled
    * cancellation whose period has ended) and drops entitlements to the free
    * tier when that happens. Returns the up-to-date subscription, if any.
    */
-  const settleUserSubscription = (userId: string): Subscription | undefined => {
-    const current = subscriptionsByUserId.get(userId);
+  const settleUserSubscription = async (userId: string): Promise<Subscription | undefined> => {
+    const current = await storage.billing.getSubscription(userId);
     if (!current) return undefined;
     const settled = settleSubscription(current);
     if (settled !== current) {
-      subscriptionsByUserId.set(userId, settled);
-      entitlementsByUserId.set(userId, getPlanEntitlements(userId, 'free'));
+      await storage.billing.saveState({
+        subscription: settled,
+        entitlements: getPlanEntitlements(userId, 'free'),
+      });
     }
     return settled;
   };
@@ -10544,6 +10646,9 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.get('/api/v1/billing/plans', async (_req: FastifyRequest, reply: FastifyReply) => {
     return reply.status(200).send({
       plans: Object.values(PLATFORM_PLANS),
+      billingMode: env.BILLING_MODE,
+      // True only when a purchase can really be started (Stripe is configured).
+      checkoutEnabled: env.BILLING_MODE === 'stripe',
     });
   });
 
@@ -10551,11 +10656,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   app.get('/api/v1/billing/subscription', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
 
-    let subscription = settleUserSubscription(session.userId);
+    let subscription = await settleUserSubscription(session.userId);
     if (!subscription) {
       const now = new Date().toISOString();
       subscription = {
-        id: crypto.randomUUID(),
+        id: implicitFreeSubscriptionId(session.userId),
         userId: session.userId,
         planTier: 'free',
         status: 'active',
@@ -10565,14 +10670,11 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
         createdAt: now,
         updatedAt: now,
       };
-      subscriptionsByUserId.set(session.userId, subscription);
     }
 
-    let entitlements = entitlementsByUserId.get(session.userId);
-    if (!entitlements) {
-      entitlements = getPlanEntitlements(session.userId, subscription.planTier);
-      entitlementsByUserId.set(session.userId, entitlements);
-    }
+    const entitlements =
+      (await storage.billing.getEntitlements(session.userId)) ??
+      getPlanEntitlements(session.userId, subscription.planTier);
 
     return reply.status(200).send({
       subscription,
@@ -10585,46 +10687,72 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = SubscribePlanInputSchema.parse(req.body);
 
-    // No payment processor is integrated. Activating a paid plan here would
-    // hand out paid entitlements and an "invoice" for money never collected,
-    // so outside BILLING_MODE=simulated (dev/test only) paid plans are refused.
-    if (input.planTier !== 'free' && env.BILLING_MODE !== 'simulated') {
-      throw new DomainError(
-        'SERVICE_UNAVAILABLE',
-        'Paid plans are not available yet. TalentSphere is free while payments are being set up.',
-        { billingMode: env.BILLING_MODE }
-      );
+    if (input.planTier !== 'free') {
+      // With Stripe, paid plans exist only after a verified payment: they are
+      // bought through Checkout and activated by Stripe's signed webhook.
+      if (env.BILLING_MODE === 'stripe') {
+        throw new DomainError(
+          'POLICY_VIOLATION',
+          'Paid plans are bought through Stripe Checkout: POST /api/v1/billing/checkout.'
+        );
+      }
+      // No processor: activating a paid plan here would hand out paid
+      // entitlements and an "invoice" for money never collected, so outside
+      // BILLING_MODE=simulated (dev/test only) paid plans are refused.
+      if (env.BILLING_MODE !== 'simulated') {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'Paid plans are not available yet. TalentSphere is free while payments are being set up.',
+          { billingMode: env.BILLING_MODE }
+        );
+      }
     }
 
-    // Idempotency check if idempotencyKey provided
-    if (input.idempotencyKey) {
-      const existingInvoices = invoicesByUserId.get(session.userId) || [];
-      const match = existingInvoices.find((i) => i.idempotencyKey === input.idempotencyKey);
-      if (match) {
-        // The same key must mean the same request. Replaying it with a
-        // different plan or cycle is a client bug that would otherwise be
-        // answered with the first request's result as if it were this one.
-        const requestedPlan = PLATFORM_PLANS[input.planTier];
-        const requestedAmount =
-          input.billingCycle === 'yearly'
-            ? requestedPlan.priceYearlyCents
-            : requestedPlan.priceMonthlyCents;
-        if (requestedAmount !== match.amountCents) {
-          throw new DomainError(
-            'CONFLICT',
-            'This idempotency key was already used for a different plan or billing cycle.'
-          );
-        }
-        const sub = subscriptionsByUserId.get(session.userId)!;
-        const ent = entitlementsByUserId.get(session.userId)!;
-        return reply.status(200).send({
-          message: 'Subscription already active for this idempotency key.',
-          subscription: sub,
-          invoice: match,
-          entitlements: ent,
-          isDuplicate: true,
-        });
+    // Stripe keeps billing a paid subscription until it is canceled there, so
+    // a local switch to "free" would leave the customer paying for nothing.
+    if (env.BILLING_MODE === 'stripe') {
+      const live = await settleUserSubscription(session.userId);
+      if (
+        live &&
+        live.planTier !== 'free' &&
+        ['active', 'trialing', 'past_due'].includes(live.status)
+      ) {
+        throw new DomainError(
+          'CONFLICT',
+          'Cancel your paid subscription before switching to the free plan.'
+        );
       }
+    }
+
+    const replayFor = async (key: string) => {
+      const match = await storage.billing.findInvoiceByIdempotencyKey(session.userId, key);
+      if (!match) return undefined;
+      // The same key must mean the same request. Replaying it with a
+      // different plan or cycle is a client bug that would otherwise be
+      // answered with the first request's result as if it were this one.
+      const requestedPlan = PLATFORM_PLANS[input.planTier];
+      const requestedAmount =
+        input.billingCycle === 'yearly'
+          ? requestedPlan.priceYearlyCents
+          : requestedPlan.priceMonthlyCents;
+      if (requestedAmount !== match.amountCents) {
+        throw new DomainError(
+          'CONFLICT',
+          'This idempotency key was already used for a different plan or billing cycle.'
+        );
+      }
+      return reply.status(200).send({
+        message: 'Subscription already active for this idempotency key.',
+        subscription: await storage.billing.getSubscription(session.userId),
+        invoice: match,
+        entitlements: await storage.billing.getEntitlements(session.userId),
+        isDuplicate: true,
+      });
+    };
+
+    if (input.idempotencyKey) {
+      const replay = await replayFor(input.idempotencyKey);
+      if (replay) return replay;
     }
 
     const result = createSubscription({
@@ -10637,13 +10765,16 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       allowSimulatedPayment: env.BILLING_MODE === 'simulated',
     });
 
-    subscriptionsByUserId.set(session.userId, result.subscription);
-    entitlementsByUserId.set(session.userId, result.entitlements);
-
-    const userInvoices = invoicesByUserId.get(session.userId) || [];
-    userInvoices.unshift(result.invoice);
-    invoicesByUserId.set(session.userId, userInvoices);
-    invoicesById.set(result.invoice.id, result.invoice);
+    const saved = await storage.billing.saveState({
+      subscription: result.subscription,
+      entitlements: result.entitlements,
+      invoice: result.invoice,
+    });
+    if (saved === 'duplicate' && input.idempotencyKey) {
+      // A concurrent request with the same key committed first.
+      const replay = await replayFor(input.idempotencyKey);
+      if (replay) return replay;
+    }
 
     await dispatchJob({
       type: 'billing.subscription.created',
@@ -10658,7 +10789,8 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
     return reply.status(201).send({
       message: 'Subscription successfully activated.',
-      subscription: result.subscription,
+      // Re-read: an existing row keeps its id when the plan changes.
+      subscription: (await storage.billing.getSubscription(session.userId)) ?? result.subscription,
       invoice: result.invoice,
       entitlements: result.entitlements,
     });
@@ -10669,7 +10801,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
     const session = extractUser(req);
     const input = CancelSubscriptionInputSchema.parse(req.body || {});
 
-    const current = settleUserSubscription(session.userId);
+    const current = await settleUserSubscription(session.userId);
     if (!current || current.planTier === 'free' || current.status === 'canceled') {
       throw new DomainError(
         'INVALID_STATE_TRANSITION',
@@ -10677,12 +10809,22 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
       );
     }
 
-    const cancelled = cancelSubscription(current, input.immediate);
-    subscriptionsByUserId.set(session.userId, cancelled);
-
-    if (input.immediate) {
-      const freeEntitlements = getPlanEntitlements(session.userId, 'free');
-      entitlementsByUserId.set(session.userId, freeEntitlements);
+    let cancelled: Subscription;
+    if (current.stripeSubscriptionId) {
+      // Stripe is the source of truth: cancel there first, then mirror it.
+      if (!stripeDeps) {
+        throw new DomainError(
+          'SERVICE_UNAVAILABLE',
+          'This subscription is managed by Stripe, which is not configured on this server.'
+        );
+      }
+      cancelled = await cancelWithStripe(stripeDeps, current, input.immediate);
+    } else {
+      cancelled = cancelSubscription(current, input.immediate);
+      await storage.billing.saveState({
+        subscription: cancelled,
+        ...(input.immediate ? { entitlements: getPlanEntitlements(session.userId, 'free') } : {}),
+      });
     }
 
     await dispatchJob({
@@ -10706,7 +10848,7 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
   // 5. Get user invoices history
   app.get('/api/v1/billing/invoices', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const invoices = invoicesByUserId.get(session.userId) || [];
+    const invoices = await storage.billing.listInvoices(session.userId);
 
     return reply.status(200).send({
       invoices,
@@ -10715,12 +10857,15 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
   // 6. External Payment Webhook (signed, replay-resistant, idempotent - WIT-016)
   //
-  // Previously this accepted any unsigned JSON (SECURITY.md §9 open gap).
-  // Every call must now carry
+  // Generic provider-agnostic endpoint (kept for non-Stripe senders; Stripe uses
+  // /api/v1/billing/stripe-webhook with its own signature scheme). Every call
+  // must carry
   //   x-talentsphere-signature: t=<unix seconds>,v1=<hex HMAC-SHA256>
   // over `${t}.${rawBody}` with BILLING_WEBHOOK_SECRET, within five minutes.
   // With no secret configured the endpoint refuses everything: an
   // unconfigured webhook must never fall back to trusting its callers.
+  // Replays are recognised durably: the idempotency key is stored with the
+  // event, so a retry after a restart is still a replay.
   const WEBHOOK_TOLERANCE_SECONDS = 300;
   await app.register(async (scope) => {
     // The signature covers the exact bytes received, so this route keeps the
@@ -10757,45 +10902,45 @@ export async function buildApp(customEnv?: BuildAppEnv): Promise<FastifyInstance
 
       const input = ProcessPaymentWebhookInputSchema.parse(req.body);
 
-      const existingEvent = billingEventsByIdempotency.get(input.idempotencyKey);
-      if (existingEvent) {
-        return reply.status(200).send({
-          replayed: true,
-          message: 'Billing event already processed (idempotent duplicate).',
-          eventId: existingEvent.id,
-        });
+      // A signed event about nobody must not be recorded against a user id
+      // that does not exist.
+      if (!usersById.has(input.userId)) {
+        throw new DomainError('NOT_FOUND', 'The webhook refers to an unknown user.');
       }
 
-      const eventId = crypto.randomUUID();
-      const event: BillingEvent = {
-        id: eventId,
-        userId: input.userId,
+      const outcome = await storage.billing.applyEvent({
+        provider: 'generic',
+        providerEventId: input.idempotencyKey,
         eventType: input.eventType,
+        userId: input.userId,
         payload: {
           amountCents: input.amountCents,
           currency: input.currency,
           subscriptionId: input.subscriptionId,
         },
-        idempotencyKey: input.idempotencyKey,
-        createdAt: new Date().toISOString(),
-      };
-
-      billingEventsByIdempotency.set(input.idempotencyKey, event);
+      });
+      if (outcome === 'duplicate') {
+        return reply.status(200).send({
+          replayed: true,
+          message: 'Billing event already processed (idempotent duplicate).',
+          eventId: input.idempotencyKey,
+        });
+      }
 
       await dispatchJob({
         type: 'billing.webhook.received',
         payload: {
-          eventId,
+          eventId: input.idempotencyKey,
           eventType: input.eventType,
           userId: input.userId,
         },
-        enqueuedAt: event.createdAt,
+        enqueuedAt: new Date().toISOString(),
       });
 
       return reply.status(200).send({
         status: 'success',
         message: 'Billing webhook processed successfully.',
-        eventId,
+        eventId: input.idempotencyKey,
       });
     });
   });

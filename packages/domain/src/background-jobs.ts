@@ -153,6 +153,7 @@ export const DISPATCH_EVENT_KINDS = [
   'application.submitted',
   'billing.subscription.cancelled',
   'billing.subscription.created',
+  'billing.subscription.synced',
   'billing.webhook.received',
   'career.transition_recorded',
   'connection.accepted',

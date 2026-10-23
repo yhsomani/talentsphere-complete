@@ -96,6 +96,17 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
   'PUT /api/v1/admin/feature-flags/:key',
   'GET /api/v1/admin/audit-logs',
   'POST /api/v1/settings/erasure/cancel',
+  // Billing (migrations 00014 and 00052): subscriptions, invoices, entitlements,
+  // Stripe customer mapping and provider events. The Stripe routes always exist;
+  // outside BILLING_MODE=stripe they refuse with 503.
+  'GET /api/v1/billing/subscription',
+  'POST /api/v1/billing/subscribe',
+  'POST /api/v1/billing/cancel',
+  'GET /api/v1/billing/invoices',
+  'POST /api/v1/billing/webhook',
+  'POST /api/v1/billing/checkout',
+  'POST /api/v1/billing/portal',
+  'POST /api/v1/billing/stripe-webhook',
 ]);
 
 /** Routes that hold no entity state at all (health, static catalogs). */
