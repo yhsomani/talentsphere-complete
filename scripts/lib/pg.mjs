@@ -42,6 +42,22 @@ export function databaseName(databaseUrl) {
  * public.users) exist. Nothing queries auth.users — see ensureUsersMirror.
  */
 export async function ensureSupabaseCompat(client) {
+  // Hosted Supabase owns auth.users, auth.uid() and auth.jwt(). The local
+  // compatibility shim must NEVER redefine those objects on a hosted project.
+  // Fail before any migration DDL so the operator can use a reviewed
+  // Supabase-specific migration path rather than corrupt platform identity.
+  const hosted = await client.query(`
+    SELECT EXISTS (
+      SELECT 1 FROM pg_namespace WHERE nspname = 'supabase_migrations'
+      UNION ALL SELECT 1 FROM pg_roles WHERE rolname = 'supabase_auth_admin'
+      UNION ALL SELECT 1 FROM information_schema.columns WHERE table_schema = 'auth' AND table_name = 'users' AND column_name = 'email'
+    ) AS hosted
+  `);
+  if (hosted.rows[0]?.hosted) {
+    throw new Error(
+      'Hosted Supabase detected: the local PostgreSQL compatibility shim modifies auth.users/auth.uid/auth.jwt. Refusing migration; use a reviewed hosted-Supabase migration path.'
+    );
+  }
   await client.query(`
     CREATE SCHEMA IF NOT EXISTS auth;
     CREATE TABLE IF NOT EXISTS auth.users (id uuid PRIMARY KEY);
