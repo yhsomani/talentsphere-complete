@@ -10,10 +10,24 @@ export interface ErasureRequestStore {
   list(userId: string): Promise<DataErasureRequest[]>;
   create(request: DataErasureRequest): Promise<void>;
   cancel(userId: string, requestId: string): Promise<DataErasureRequest>;
+  /**
+   * Records that irreversible execution has started, BEFORE any destructive
+   * step, so an interrupted run can be resumed. Moves the user's active
+   * request (or an existing 'processing' one) to 'processing' and stores the
+   * anonymized hash; with no request at all (immediate erasure) a 'processing'
+   * row is created with `newId`. Idempotent.
+   */
+  beginExecution(
+    userId: string,
+    newId: string,
+    startedAt: string,
+    anonymizedHash: string
+  ): Promise<DataErasureRequest>;
   completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void>;
 }
 
 const isActive = (r: DataErasureRequest) => r.status === 'pending' || r.status === 'grace_period';
+const isOpen = (r: DataErasureRequest) => isActive(r) || r.status === 'processing';
 
 export class MemoryErasureRequestStore implements ErasureRequestStore {
   private readonly requests = new Map<string, DataErasureRequest>();
@@ -25,7 +39,7 @@ export class MemoryErasureRequestStore implements ErasureRequestStore {
   }
 
   async create(request: DataErasureRequest): Promise<void> {
-    if ((await this.list(request.userId)).some(isActive)) {
+    if ((await this.list(request.userId)).some(isOpen)) {
       throw new DomainError('CONFLICT', 'An active erasure request already exists.');
     }
     this.requests.set(request.id, request);
@@ -42,9 +56,33 @@ export class MemoryErasureRequestStore implements ErasureRequestStore {
     return next;
   }
 
+  async beginExecution(
+    userId: string,
+    newId: string,
+    startedAt: string,
+    anonymizedHash: string
+  ): Promise<DataErasureRequest> {
+    const open = (await this.list(userId)).filter(isOpen);
+    const current = open.find((r) => r.status === 'processing') ?? open[0];
+    const next: DataErasureRequest = current
+      ? { ...current, status: 'processing', confirmedAt: current.confirmedAt ?? startedAt }
+      : {
+          id: newId,
+          userId,
+          status: 'processing',
+          gracePeriodEndsAt: startedAt,
+          confirmedAt: startedAt,
+          createdAt: startedAt,
+          updatedAt: startedAt,
+        };
+    // A retry before the account was erased re-derives the hash; keep the latest.
+    this.requests.set(next.id, { ...next, anonymizedHash, updatedAt: startedAt });
+    return this.requests.get(next.id)!;
+  }
+
   async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
     for (const request of await this.list(userId)) {
-      if (isActive(request)) {
+      if (isOpen(request)) {
         this.requests.set(request.id, {
           ...request,
           status: 'completed',
@@ -110,7 +148,7 @@ export class PgErasureRequestStore implements ErasureRequestStore {
         throw new DomainError('NOT_FOUND', 'Account for erasure not found.');
       }
       const existing = await client.query(
-        "SELECT id FROM public.data_erasure_requests WHERE user_id = $1 AND status IN ('pending', 'grace_period') LIMIT 1",
+        "SELECT id FROM public.data_erasure_requests WHERE user_id = $1 AND status IN ('pending', 'grace_period', 'processing') LIMIT 1",
         [request.userId]
       );
       if (existing.rowCount) {
@@ -165,9 +203,54 @@ export class PgErasureRequestStore implements ErasureRequestStore {
     }
   }
 
+  async beginExecution(
+    userId: string,
+    newId: string,
+    startedAt: string,
+    anonymizedHash: string
+  ): Promise<DataErasureRequest> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Serializes concurrent executions for one owner across instances.
+      const owner = await client.query('SELECT id FROM public.users WHERE id = $1 FOR UPDATE', [
+        userId,
+      ]);
+      if (!owner.rowCount) throw new DomainError('NOT_FOUND', 'Account for erasure not found.');
+      const open = await client.query<Row>(
+        "SELECT * FROM public.data_erasure_requests WHERE user_id = $1 AND status IN ('pending', 'grace_period', 'processing') ORDER BY (status = 'processing') DESC, created_at DESC LIMIT 1 FOR UPDATE",
+        [userId]
+      );
+      let row: Row | undefined;
+      if (open.rows[0]) {
+        const updated = await client.query<Row>(
+          "UPDATE public.data_erasure_requests SET status = 'processing', confirmed_at = COALESCE(confirmed_at, $2), updated_at = $2, anonymized_hash = $3 WHERE id = $1 AND status IN ('pending', 'grace_period', 'processing') RETURNING *",
+          [open.rows[0].id, startedAt, anonymizedHash]
+        );
+        row = updated.rows[0];
+        if (!row) {
+          throw new DomainError('CONFLICT', 'The erasure request changed state; retry.');
+        }
+      } else {
+        const inserted = await client.query<Row>(
+          "INSERT INTO public.data_erasure_requests (id, user_id, status, grace_period_ends_at, confirmed_at, anonymized_hash, created_at, updated_at) VALUES ($1, $2, 'processing', $3, $3, $4, $3, $3) RETURNING *",
+          [newId, userId, startedAt, anonymizedHash]
+        );
+        row = inserted.rows[0];
+      }
+      await client.query('COMMIT');
+      return toRequest(row!);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   async completeActive(userId: string, completedAt: string, anonymizedHash: string): Promise<void> {
     await this.pool.query(
-      "UPDATE public.data_erasure_requests SET status = 'completed', completed_at = $2, updated_at = $2, anonymized_hash = $3 WHERE user_id = $1 AND status IN ('pending', 'grace_period')",
+      "UPDATE public.data_erasure_requests SET status = 'completed', completed_at = $2, updated_at = $2, anonymized_hash = $3 WHERE user_id = $1 AND status IN ('pending', 'grace_period', 'processing')",
       [userId, completedAt, anonymizedHash]
     );
   }

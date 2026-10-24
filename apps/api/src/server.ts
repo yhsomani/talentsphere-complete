@@ -41,6 +41,7 @@ import {
   createSessionToken,
   verifySessionToken,
   type AuthPayload,
+  type DataErasureRequest,
   type Profile,
   createProfileEntity,
   updateProfileEntity,
@@ -10144,7 +10145,9 @@ export async function buildApp(
   app.get('/api/v1/settings/erasure/status', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const userRequests = await storage.erasureRequests.list(session.userId);
-    const active = userRequests.find((r) => r.status === 'grace_period' || r.status === 'pending');
+    const active = userRequests.find(
+      (r) => r.status === 'grace_period' || r.status === 'pending' || r.status === 'processing'
+    );
 
     return reply.status(200).send({
       hasPendingErasure: !!active,
@@ -10177,7 +10180,45 @@ export async function buildApp(
 
   // 8. Execute Immediate Account Erasure / Logical Anonymization (§31.4)
   app.post('/api/v1/settings/erasure/execute', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
+    let session: AuthPayload;
+    // Set when this call finishes an erasure whose core transaction already
+    // committed in an earlier, interrupted call.
+    let resumed: DataErasureRequest | undefined;
+    try {
+      session = extractUser(req);
+    } catch (err) {
+      // Once the core transaction commits the account is closed and every
+      // normal session is refused. A still-validly-signed, unrevoked token of
+      // that same user may finish (or re-read) its own erasure and nothing
+      // else; any other failure keeps its original error.
+      const bearer = req.headers.authorization;
+      const raw = bearer?.startsWith('Bearer ')
+        ? verifySessionToken(bearer.substring(7).trim())
+        : null;
+      const closed =
+        raw &&
+        !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
+        usersById.get(raw.userId)?.passwordHash === ERASED_CREDENTIAL &&
+        // Same cut-off rule as resolveSession: sessions ended by a password
+        // change or "sign out other devices" cannot resume either.
+        !(
+          usersById.get(raw.userId)?.sessionsValidAfter &&
+          raw.issuedAt * 1000 < Date.parse(usersById.get(raw.userId)!.sessionsValidAfter!)
+        );
+      if (!raw || !closed) throw err;
+      const history = await storage.erasureRequests.list(raw.userId);
+      resumed = history.find((r) => r.status === 'processing');
+      const done = history.find((r) => r.status === 'completed' && r.anonymizedHash);
+      if (!resumed && !done) throw err;
+      if (!resumed) {
+        return reply.status(200).send({
+          message: 'Account erasure was already completed.',
+          anonymizedHash: done!.anonymizedHash,
+          completedAt: done!.completedAt,
+        });
+      }
+      session = raw;
+    }
 
     const user = usersById.get(session.userId);
     const profile = profilesByUserId.get(session.userId);
@@ -10197,6 +10238,21 @@ export async function buildApp(
       },
       profile
     );
+    // A resumed run keeps the hash and request recorded before the first
+    // attempt: the original email it was derived from is already gone.
+    const anonymizedHash = resumed?.anonymizedHash ?? result.anonymizedHash;
+    const completedAt = result.completedAt;
+
+    // Durable 'executing' marker, written BEFORE any destructive step so a
+    // process that dies part-way leaves a request that the next call resumes.
+    if (!resumed) {
+      await storage.erasureRequests.beginExecution(
+        session.userId,
+        crypto.randomUUID(),
+        completedAt,
+        anonymizedHash
+      );
+    }
 
     // Billing first: ends the Stripe customer (and its subscriptions) and
     // removes local billing records. If Stripe is unreachable this throws
@@ -10211,58 +10267,60 @@ export async function buildApp(
     //    corporate emails, referee contacts, free text) are deleted;
     //  - open applications are withdrawn and cover letters blanked, keeping
     //    only the minimal record an employer's pipeline still points at.
-    const erasedAt = result.completedAt;
-    const erasureOps: CoreOp[] = [
-      {
-        kind: 'user',
-        base: user,
-        value: {
-          ...user,
-          email: result.anonymizedUser.email,
-          status: 'deactivated',
-          passwordHash: ERASED_CREDENTIAL,
+    // Skipped on resume: the account is already anonymized and its credential
+    // destroyed, so the core transaction is not repeated.
+    if (!resumed) {
+      const erasedAt = completedAt;
+      const erasureOps: CoreOp[] = [
+        {
+          kind: 'user',
+          base: user,
+          value: {
+            ...user,
+            email: result.anonymizedUser.email,
+            status: 'deactivated',
+            passwordHash: ERASED_CREDENTIAL,
+          },
         },
-      },
-      { kind: 'profile', value: result.anonymizedProfile },
-      // Notifications addressed to the person name their applications,
-      // employers and referees.
-      { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
-      // What they wrote, and their place in every conversation.
-      { kind: 'messagesDeleteForProfile', profileId: profile.id },
-    ];
-    const erasedHistoryIds: string[] = [];
-    const erasedReferenceIds: string[] = [];
-    for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
-      erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
-      erasedHistoryIds.push(history.id);
-      for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
-        erasedReferenceIds.push(ref.id);
+        { kind: 'profile', value: result.anonymizedProfile },
+        // Notifications addressed to the person name their applications,
+        // employers and referees.
+        { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
+        // What they wrote, and their place in every conversation.
+        { kind: 'messagesDeleteForProfile', profileId: profile.id },
+      ];
+      const erasedHistoryIds: string[] = [];
+      const erasedReferenceIds: string[] = [];
+      for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+        erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
+        erasedHistoryIds.push(history.id);
+        for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
+          erasedReferenceIds.push(ref.id);
+        }
       }
+      for (const item of evidenceBySubjectId.get(profile.id) || []) {
+        erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+      }
+      for (const application of applicationsByCandidateId.get(profile.id) || []) {
+        const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
+        erasureOps.push({
+          kind: 'application',
+          base: application,
+          value: {
+            ...application,
+            status: terminal ? application.status : 'withdrawn',
+            withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
+            coverLetter: undefined,
+            attachedEvidenceIds: [],
+            updatedAt: erasedAt,
+          },
+        });
+      }
+      // Queued referee emails name the work history being deleted, so they are
+      // cancelled while those ids are still known (best effort, idempotent).
+      await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
+      await persist(...erasureOps);
     }
-    for (const item of evidenceBySubjectId.get(profile.id) || []) {
-      erasureOps.push({ kind: 'evidenceDelete', id: item.id });
-    }
-    for (const application of applicationsByCandidateId.get(profile.id) || []) {
-      const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
-      erasureOps.push({
-        kind: 'application',
-        base: application,
-        value: {
-          ...application,
-          status: terminal ? application.status : 'withdrawn',
-          withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
-          coverLetter: undefined,
-          attachedEvidenceIds: [],
-          updatedAt: erasedAt,
-        },
-      });
-    }
-    await persist(...erasureOps);
-    // No reference email or verification code goes out on an erased person's
-    // behalf after they are gone.
-    await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
-    // Existing 00013 metadata tables are not deleted by core anonymization.
-    // Erase BYO keys and export history in the DB before acknowledging success.
     await storage.accountMetadata.erase(session.userId);
 
     // Remove the subject's remaining ephemeral private state while this process
@@ -10322,27 +10380,23 @@ export async function buildApp(
 
     // Mark the durable request history only after core erasure commits.
     // If this write fails, do not claim the lifecycle was updated.
-    await storage.erasureRequests.completeActive(
-      session.userId,
-      result.completedAt,
-      result.anonymizedHash
-    );
+    await storage.erasureRequests.completeActive(session.userId, completedAt, anonymizedHash);
 
     await dispatchJob({
       type: 'gdpr.erasure.completed',
       payload: {
         userId: session.userId,
-        anonymizedHash: result.anonymizedHash,
+        anonymizedHash,
       },
-      enqueuedAt: result.completedAt,
+      enqueuedAt: completedAt,
     });
 
     return reply.status(200).send({
       message:
         'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
         'This does not certify full statutory erasure across all modules and backups.',
-      anonymizedHash: result.anonymizedHash,
-      completedAt: result.completedAt,
+      anonymizedHash,
+      completedAt,
     });
   });
 

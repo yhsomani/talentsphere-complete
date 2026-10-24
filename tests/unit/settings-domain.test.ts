@@ -215,3 +215,20 @@ describe('Account Settings, Privacy & GDPR Erasure Domain (F-15, §31, BR-06)', 
     });
   });
 });
+
+describe('cancelAccountErasure once execution has started', () => {
+  it('refuses to cancel a request that is processing', async () => {
+    const { cancelAccountErasure } = await import('../../packages/domain/src/index.js');
+    const now = new Date().toISOString();
+    expect(() =>
+      cancelAccountErasure({
+        id: 'r1',
+        userId: 'u1',
+        status: 'processing',
+        gracePeriodEndsAt: new Date(Date.now() + 86_400_000).toISOString(),
+        createdAt: now,
+        updatedAt: now,
+      })
+    ).toThrow(/cannot be cancelled/);
+  });
+});

@@ -225,6 +225,13 @@ export function cancelAccountErasure(
     throw new DomainError('INVALID_STATE_TRANSITION', 'Erasure request is already cancelled.');
   }
 
+  if (request.status === 'processing') {
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      'Account erasure has started and cannot be cancelled.'
+    );
+  }
+
   const currentDate = new Date(nowIso);
   const graceEnd = new Date(request.gracePeriodEndsAt);
 
