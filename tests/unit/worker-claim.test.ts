@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MemoryJobStore } from '../../packages/domain/src/background-jobs.js';
 import {
   runClaimCycle,
@@ -245,5 +245,71 @@ describe('Claim cycle: worker safety', () => {
     });
     expect(runs).toBe(0);
     expect(result).toMatchObject({ claimed: 1, succeeded: 0, lapsed: 1 });
+  });
+});
+
+describe('Claim cycle: attempts fencing against stale workers', () => {
+  async function reclaimed() {
+    const store = new MemoryJobStore();
+    const { job } = await store.enqueue({ kind: 'fence.job', payload: {} });
+    const [a] = await store.claim({ limit: 1, leaseMs: 1 });
+    await new Promise((r) => setTimeout(r, 10));
+    const [b] = await store.claim({ limit: 1, leaseMs: 60_000 });
+    expect(a.attempts).toBe(1);
+    expect(b.attempts).toBe(2);
+    return { store, id: job.id };
+  }
+  const outcome = (attempts: number) => ({
+    disposition: 'retry' as const,
+    error: 'boom',
+    maxAttempts: 5,
+    backoffMs: 100,
+    attempts,
+    fence: attempts,
+  });
+
+  it('refuses a stale complete and accepts the current holder', async () => {
+    const { store, id } = await reclaimed();
+    expect(await store.complete(id, 1)).toBe(false);
+    expect((await store.list())[0].status).toBe('running');
+    expect(await store.complete(id, 2)).toBe(true);
+    expect((await store.list())[0].status).toBe('succeeded');
+  });
+
+  it('keeps legacy complete(id) without a token working', async () => {
+    const { store, id } = await reclaimed();
+    expect(await store.complete(id)).toBe(true);
+  });
+
+  it('refuses a stale fail and accepts the current holder', async () => {
+    const { store, id } = await reclaimed();
+    expect(await store.fail(id, outcome(1))).toBeNull();
+    expect((await store.list())[0].status).toBe('running');
+    expect((await store.fail(id, outcome(2)))?.status).toBe('queued');
+  });
+
+  it('reports a stale ack in a claim cycle as superseded, never succeeded', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      const store = new MemoryJobStore();
+      await store.enqueue({ kind: 'stale.job', payload: {} });
+      const result = await runClaimCycle({
+        store,
+        handlers: handlers({
+          'stale.job': async () => {
+            // Lease lapses while the handler is paused; another worker re-claims.
+            vi.setSystemTime(Date.now() + 120_000);
+            const [b] = await store.claim({ limit: 1, leaseMs: 60_000 });
+            expect(b.attempts).toBe(2);
+          },
+        }),
+        leaseMs: 60_000,
+        handlerTimeoutMs: 1_000,
+      });
+      expect(result).toMatchObject({ claimed: 1, succeeded: 0, superseded: 1 });
+      expect((await store.list())[0].status).toBe('running');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

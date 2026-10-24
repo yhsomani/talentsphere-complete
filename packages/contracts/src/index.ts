@@ -1327,7 +1327,8 @@ export type CreateInstructorEndorsementInput = z.infer<
 
 export const SubmitInstructorReviewInputSchema = z.object({
   rating: z.number().min(1).max(5),
-  isVerifiedEnrollment: z.boolean().default(true),
+  // Ignored by the server: verified status is derived from real enrollment data.
+  isVerifiedEnrollment: z.boolean().optional(),
   feedback: z.string().max(2000).optional(),
 });
 

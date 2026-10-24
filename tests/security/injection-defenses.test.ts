@@ -17,8 +17,7 @@
  *                         client bundle source.
  */
 import { describe, it, expect } from 'vitest';
-import { execSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { FastifyInstance } from 'fastify';
 import {
@@ -207,19 +206,57 @@ describe('INJ-4: SSRF defense (deny-by-default outbound URL validation)', () => 
   });
 });
 
+const CLIENT_SOURCE_DIRS = [
+  path.resolve(ROOT, 'apps/web/src'),
+  path.resolve(ROOT, 'packages/ui/src'),
+];
+const CLIENT_SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.css', '.html']);
+const SECRET_PATTERN = /sk_live_[A-Za-z0-9]{8,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}/;
+
+// Recursive walk. readdirSync throws on a missing or unreadable directory, so the
+// scan fails closed instead of treating the error as "no hits".
+function walkSourceFiles(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkSourceFiles(full, out);
+    } else if (entry.isFile() && CLIENT_SOURCE_EXTENSIONS.has(path.extname(entry.name))) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+function scanForSecrets(dirs: string[]): { filesScanned: number; hits: string[] } {
+  const hits: string[] = [];
+  let filesScanned = 0;
+  for (const dir of dirs) {
+    for (const file of walkSourceFiles(dir)) {
+      filesScanned += 1;
+      readFileSync(file, 'utf8')
+        .split('\n')
+        .forEach((line, index) => {
+          if (SECRET_PATTERN.test(line)) {
+            hits.push(`${path.relative(ROOT, file)}:${index + 1}`);
+          }
+        });
+    }
+  }
+  return { filesScanned, hits };
+}
+
 describe('BONUS: Leaked secret keys never reach the client bundle', () => {
   it('no live-mode payment or provider secret keys exist in web (client) sources', () => {
-    // Grep the actual client source tree for sk_live/sk_pro style secrets.
-    let hits = '';
-    try {
-      hits = execSync(
-        "grep -rInE 'sk_live_[A-Za-z0-9]{8,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}' apps/web/src packages/ui/src || true",
-        { cwd: ROOT, encoding: 'utf8' }
-      ).trim();
-    } catch {
-      hits = '';
-    }
-    expect(hits).toBe('');
+    const scan = scanForSecrets(CLIENT_SOURCE_DIRS);
+    // A scan that read nothing proves nothing: fail if the walk found no files.
+    expect(scan.filesScanned).toBeGreaterThan(0);
+    expect(scan.hits).toEqual([]);
+  });
+
+  it('the secret scanner regex matches a synthetic key built at runtime', () => {
+    // Concatenated so the literal key never appears in source.
+    const synthetic = 'sk_live_' + 'a'.repeat(12);
+    expect(SECRET_PATTERN.test(synthetic)).toBe(true);
   });
 
   it('the API keeps provider secrets server-side via environment configuration only', () => {

@@ -54,6 +54,12 @@ export interface FailOutcome {
   backoffMs: number;
   /** Attempt count of the claimed record — the backoff exponent. */
   attempts: number;
+  /**
+   * Fencing token: the attempt count the caller claimed the row at. When set,
+   * a row re-claimed since (attempts moved on) refuses the transition. Omitted
+   * = legacy behaviour, any running row.
+   */
+  fence?: number;
 }
 
 export interface JobStore {
@@ -73,8 +79,14 @@ export interface JobStore {
   cancelQueued(match: { kind: string; payloadField: string; values: string[] }): Promise<number>;
   /** Claims due jobs (queued & run_after elapsed, or running with an expired lease). */
   claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]>;
-  /** running → succeeded; guarded so double-completion is a no-op. */
-  complete(id: string): Promise<boolean>;
+  /**
+   * running → succeeded; guarded so double-completion is a no-op. `attempts`
+   * is the fencing token (the claimed record's attempt count): when given, a
+   * worker whose lease lapsed and whose job was re-claimed (attempts moved on)
+   * is refused. Omitted = legacy behaviour, any running row.
+   */
+  complete(id: string, attempts?: number): Promise<boolean>;
+  /** running → retry/failed/dead; fenced by `outcome.fence` like complete(). */
   fail(id: string, outcome: FailOutcome): Promise<BackgroundJobRecord | null>;
   /** Retention: purges terminal rows older than the cutoff; active rows are kept. */
   purgeOlderThan(cutoffIso: string): Promise<number>;
@@ -290,10 +302,12 @@ export class MemoryJobStore implements JobStore {
     return claimed;
   }
 
-  async complete(id: string): Promise<boolean> {
+  async complete(id: string, attempts?: number): Promise<boolean> {
     const job = this.jobs.find((j) => j.id === id);
     // A canceled record refuses the success transition (cooperative cancel).
     if (!job || job.status !== 'running') return false;
+    // Fenced: a re-claimed job has a higher attempt count than the stale holder's.
+    if (attempts !== undefined && job.attempts !== attempts) return false;
     job.status = 'succeeded';
     job.payload = withoutSecrets(job.payload);
     job.lockExpiresAt = null;
@@ -304,6 +318,7 @@ export class MemoryJobStore implements JobStore {
   async fail(id: string, outcome: FailOutcome): Promise<BackgroundJobRecord | null> {
     const job = this.jobs.find((j) => j.id === id);
     if (!job || job.status !== 'running') return null;
+    if (outcome.fence !== undefined && job.attempts !== outcome.fence) return null;
     const { nextStatus, delayMs } = decideFailure({
       disposition: outcome.disposition,
       // Same source as the pg backend: the claimed record's attempt count
@@ -460,13 +475,14 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
       return result.rows.map(mapRow);
     },
 
-    async complete(id: string): Promise<boolean> {
+    async complete(id: string, attempts?: number): Promise<boolean> {
       const result = await query(
         `UPDATE public.background_jobs
          SET status = 'succeeded', lock_expires_at = NULL, updated_at = NOW(),
              payload = payload - $2::text[]
-         WHERE id = $1 AND status = 'running'`,
-        [id, SECRET_PAYLOAD_KEYS]
+         WHERE id = $1 AND status = 'running'
+           AND ($3::int IS NULL OR attempts = $3::int)`,
+        [id, SECRET_PAYLOAD_KEYS, attempts ?? null]
       );
       return (result.rowCount ?? 0) > 0;
     },
@@ -474,9 +490,9 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
     async fail(id: string, outcome: FailOutcome): Promise<BackgroundJobRecord | null> {
       // The transition is decided in JS by the shared decideFailure() so both
       // backends apply byte-identical backoff+jitter rules; the WHERE clause
-      // guards it (only a `running` row may fail) — safe because the runner's
-      // lease (60s) exceeds its handler timeout (30s), so attempts cannot move
-      // between claim and fail.
+      // guards it (only a `running` row whose attempts still equal the fence
+      // token (when given) may fail, so a stale worker whose job was
+      // re-claimed cannot fail it).
       const { nextStatus, delayMs } = decideFailure({
         disposition: outcome.disposition,
         attempts: outcome.attempts,
@@ -493,9 +509,9 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
              lock_expires_at = NULL,
              updated_at = NOW(),
              payload = CASE WHEN $2::text = 'queued' THEN payload ELSE payload - $5::text[] END
-         WHERE id = $1 AND status = 'running'
+         WHERE id = $1 AND status = 'running' AND ($6::int IS NULL OR attempts = $6::int)
          RETURNING *`,
-        [id, nextStatus, delayMs, outcome.error, SECRET_PAYLOAD_KEYS]
+        [id, nextStatus, delayMs, outcome.error, SECRET_PAYLOAD_KEYS, outcome.fence ?? null]
       );
       return result.rows.length > 0 ? mapRow(result.rows[0]) : null;
     },

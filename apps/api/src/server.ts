@@ -4337,11 +4337,28 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Instructors cannot review themselves.');
       }
 
+      // Verified status is derived from server-held enrollment data, never from
+      // the request body: the caller must be enrolled in a course this
+      // instructor teaches (course.instructorId is the instructor's profile id).
+      const reviewerProfile = profilesByUserId.get(session.userId);
+      const instructorProfileId = profilesByUserId.get(instructorId)?.id;
+      const isVerifiedEnrollment =
+        reviewerProfile !== undefined &&
+        Array.from(enrollmentsById.values()).some((e) => {
+          if (e.userId !== reviewerProfile.id) return false;
+          if (e.status !== 'enrolled' && e.status !== 'completed') return false;
+          const course = coursesById.get(e.courseId);
+          return (
+            course !== undefined &&
+            (course.instructorId === instructorId || course.instructorId === instructorProfileId)
+          );
+        });
+
       const metrics = getOrCreateInstructorMetrics(instructorId);
       metrics.reviews.push({
         id: crypto.randomUUID(),
         rating: input.rating,
-        isVerifiedEnrollment: input.isVerifiedEnrollment,
+        isVerifiedEnrollment,
         createdAt: new Date().toISOString(),
       });
 
@@ -6106,6 +6123,18 @@ export async function buildApp(
   const resumeExportsById = new Map<string, ResumeExport>();
   const resumeExportsByResumeId = new Map<string, ResumeExport[]>();
 
+  // A resume id supplied by a client must exist and belong to the caller.
+  function assertOwnedResume(resumeId: string | undefined, userId: string): void {
+    if (resumeId === undefined) return;
+    const resume = resumesById.get(resumeId);
+    if (!resume) {
+      throw new DomainError('NOT_FOUND', `Resume with ID "${resumeId}" not found.`);
+    }
+    if (resume.userId !== userId) {
+      throw new DomainError('FORBIDDEN', 'Access denied to resume.');
+    }
+  }
+
   app.post('/api/v1/resumes', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = CreateResumeInputSchema.parse(req.body || {});
@@ -6866,6 +6895,8 @@ export async function buildApp(
     if (!job) {
       throw new DomainError('NOT_FOUND', `Job with ID ${input.jobId} not found.`);
     }
+
+    assertOwnedResume(input.resumeId, session.userId);
 
     let referrerUserId = input.referrerId;
     const referrerProfile = profilesById.get(referrerUserId);
@@ -11980,6 +12011,7 @@ export async function buildApp(
       }
 
       const input = SaveApplicationDraftInputSchema.parse(req.body);
+      assertOwnedResume(input.resumeId, session.userId);
 
       const draftKey = `${profile.id}:${jobId}`;
       const existingDraftId = applicationDraftsByCandidateAndJob.get(draftKey);

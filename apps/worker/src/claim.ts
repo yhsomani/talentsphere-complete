@@ -114,6 +114,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
         maxAttempts,
         backoffMs,
         attempts: record.attempts,
+        fence: record.attempts,
       });
       result.dead += 1;
       logger.warn({ jobId: record.id, kind: record.kind }, 'no handler for job kind; marked dead');
@@ -136,12 +137,13 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
 
     try {
       await runWithTimeout(handler, record, handlerTimeoutMs);
-      const acked = await store.complete(record.id);
+      const acked = await store.complete(record.id, record.attempts);
       if (acked) {
         result.succeeded += 1;
         logger.debug({ jobId: record.id, kind: record.kind }, 'job succeeded');
       } else {
-        // Canceled while running: the store refused the success transition.
+        // Canceled while running, or the lease lapsed and another worker
+        // re-claimed it (attempts fence): the store refused the success transition.
         // The handler's side effects are not rolled back — cancel is a
         // cooperative request honored at the acknowledgment boundary.
         result.superseded += 1;
@@ -158,6 +160,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
         maxAttempts,
         backoffMs,
         attempts: record.attempts,
+        fence: record.attempts,
       });
       if (!failed) {
         result.superseded += 1;
