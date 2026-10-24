@@ -205,4 +205,27 @@ describe('Claim cycle: worker safety', () => {
     const [record] = await store.list();
     expect(record.lastError).toHaveLength(4096);
   });
+
+  it('does not start a claimed job whose lease cannot cover the handler timeout', async () => {
+    const store = new MemoryJobStore();
+    await store.enqueue({ kind: 'slow.job', payload: {} });
+    await store.enqueue({ kind: 'slow.job', payload: {} });
+    let runs = 0;
+    const base = Date.now();
+    let clock = base;
+    const result = await runClaimCycle({
+      store,
+      leaseMs: 60_000,
+      handlerTimeoutMs: 30_000,
+      now: () => clock,
+      handlers: handlers({
+        'slow.job': async () => {
+          runs += 1;
+          clock += 45_000; // first job eats most of the second job's lease
+        },
+      }),
+    });
+    expect(runs).toBe(1);
+    expect(result).toMatchObject({ claimed: 2, succeeded: 1, lapsed: 1 });
+  });
 });

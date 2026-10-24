@@ -32,6 +32,8 @@ export interface ClaimCycleOptions {
   /** Base backoff; actual delay is base * 2^(attempts-1), capped, ±20% jitter. */
   backoffMs?: number;
   batchSize?: number;
+  /** Clock, injectable for tests. */
+  now?: () => number;
 }
 
 export interface ClaimCycleResult {
@@ -42,6 +44,8 @@ export interface ClaimCycleResult {
   dead: number;
   /** Finished after a concurrent cancel, or record left terminal by cancel — no double-write. */
   superseded: number;
+  /** Not started because its lease could expire mid-run; redelivered after the lease lapses. */
+  lapsed: number;
 }
 
 async function runWithTimeout(
@@ -76,6 +80,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     maxAttempts = 3,
     backoffMs = 1_000,
     batchSize = 10,
+    now = Date.now,
   } = options;
 
   const result: ClaimCycleResult = {
@@ -85,6 +90,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     permanent: 0,
     dead: 0,
     superseded: 0,
+    lapsed: 0,
   };
 
   const claimed = await store.claim({ limit: batchSize, leaseMs });
@@ -104,6 +110,20 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
       });
       result.dead += 1;
       logger.warn({ jobId: record.id, kind: record.kind }, 'no handler for job kind; marked dead');
+      continue;
+    }
+
+    // Handlers run one after another, so a later job in the batch may have
+    // waited out most of its lease. Starting it now could outlive the lease and
+    // let another worker claim and run it too (duplicate side effects such as a
+    // second email). Leave it: it is redelivered once its lease lapses.
+    const leaseEnd = record.lockExpiresAt ? Date.parse(record.lockExpiresAt) : Infinity;
+    if (now() + handlerTimeoutMs >= leaseEnd) {
+      result.lapsed += 1;
+      logger.warn(
+        { jobId: record.id, kind: record.kind },
+        'lease too short to finish safely; not started, will be redelivered'
+      );
       continue;
     }
 
