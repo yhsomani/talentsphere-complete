@@ -161,3 +161,66 @@ describe('Account erasure execute is resumable and idempotent', () => {
     );
   });
 });
+
+describe('Concurrent account erasure execute from one active session', () => {
+  it('runs the erasure once: one completed job, one hash, loser gets 200 or 409', async () => {
+    const app = await buildApp({
+      NODE_ENV: 'test',
+      PORT: '0',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
+      LOG_LEVEL: 'error',
+    });
+    await app.ready();
+    try {
+      const reg = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: 'race.erasure@example.com',
+          password: 'Password123!Secure',
+          fullName: 'Race Erasure',
+          role: 'candidate',
+        },
+      });
+      expect(reg.statusCode).toBe(201);
+      const token = JSON.parse(reg.body).token as string;
+      const fire = () =>
+        app.inject({
+          method: 'POST',
+          url: '/api/v1/settings/erasure/execute',
+          headers: { authorization: `Bearer ${token}` },
+        });
+
+      const results = await Promise.all([fire(), fire()]);
+      const codes = results.map((r) => r.statusCode);
+      // No 5xx; the only acceptable non-200 is a CONFLICT/409 for the loser.
+      for (const r of results) {
+        expect(r.statusCode).toBeLessThan(500);
+        if (r.statusCode !== 200) {
+          expect(r.statusCode).toBe(409);
+          expect(JSON.parse(r.body).error?.code ?? JSON.parse(r.body).code).toBe('CONFLICT');
+        }
+      }
+      expect(codes).toContain(200);
+
+      const jobs = JSON.parse(
+        (await app.inject({ method: 'GET', url: '/api/v1/internal/worker-jobs' })).body
+      ).jobs as Array<{ type: string; payload?: { anonymizedHash?: string } }>;
+      const completedJobs = jobs.filter((j) => j.type === 'gdpr.erasure.completed');
+      expect(completedJobs).toHaveLength(1);
+
+      // The follow-up call (a no-op re-read) returns the one recorded hash.
+      const again = await fire();
+      expect(again.statusCode).toBe(200);
+      const hash = JSON.parse(again.body).anonymizedHash as string;
+      expect(hash).toHaveLength(64);
+      for (const r of results.filter((x) => x.statusCode === 200)) {
+        expect(JSON.parse(r.body).anonymizedHash).toBe(hash);
+      }
+      expect(completedJobs[0]?.payload?.anonymizedHash ?? hash).toBe(hash);
+      expect(jobs.filter((j) => j.type === 'gdpr.erasure.completed')).toHaveLength(1);
+    } finally {
+      await app.close();
+    }
+  });
+});
