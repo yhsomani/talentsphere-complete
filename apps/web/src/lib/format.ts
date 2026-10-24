@@ -31,13 +31,18 @@ export function formatDateTime(value: string | undefined | null): string {
   return Number.isNaN(parsed.getTime()) ? value : dateTimeFormatter.format(parsed);
 }
 
-/** Integer minor units → "$90,000" (SSOT money rule: integers on the wire). */
+/**
+ * Integer minor units → "$90,000" or "$19.99" (SSOT money rule: integers on the wire).
+ * Whole-dollar amounts drop the cents; anything else shows both decimals.
+ */
 export function formatMoney(minor: number, currency: string): string {
+  const fractionDigits = Number.isInteger(minor / 100) ? 0 : 2;
   try {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
     }).format(minor / 100);
   } catch {
     return `${(minor / 100).toLocaleString()} ${currency}`;

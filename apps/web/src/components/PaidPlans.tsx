@@ -110,6 +110,10 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
     padding: spacing.sm,
     border: `1px solid ${colors.neutral[200]}`,
     verticalAlign: 'top',
+    // global.css lets table cells break anywhere, which crushes columns mid-word;
+    // here the wrapper scrolls instead.
+    overflowWrap: 'normal',
+    wordBreak: 'normal',
   };
 
   const go = async (path: string, body: unknown, key: string) => {
@@ -171,7 +175,7 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
           {usage && (
             <>
               <label style={{ display: 'block' }}>
-                AI assistant today: {usage.requestsUsed} of {usage.requestsLimit} requests
+                AI assistant requests today: {usage.requestsUsed} of {usage.requestsLimit}
                 <progress
                   value={usage.requestsUsed}
                   max={usage.requestsLimit}
@@ -179,8 +183,8 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
                 />
               </label>
               <label style={{ display: 'block', marginTop: spacing.sm }}>
-                AI assistant today: {usage.tokensUsed.toLocaleString()} of{' '}
-                {usage.tokensLimit.toLocaleString()} tokens
+                AI assistant tokens today: {usage.tokensUsed.toLocaleString()} of{' '}
+                {usage.tokensLimit.toLocaleString()}
                 <progress
                   value={usage.tokensUsed}
                   max={usage.tokensLimit}
@@ -255,7 +259,12 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
       <div style={{ overflowX: 'auto' }}>
         <table
           data-testid="plan-comparison"
-          style={{ marginTop: spacing.lg, width: '100%', borderCollapse: 'collapse' }}
+          style={{
+            marginTop: spacing.lg,
+            width: '100%',
+            minWidth: '520px',
+            borderCollapse: 'collapse',
+          }}
         >
           <caption style={{ textAlign: 'left', fontWeight: 600, marginBottom: spacing.sm }}>
             Compare paid plans ({cycle === 'monthly' ? 'monthly' : 'yearly'} billing)
