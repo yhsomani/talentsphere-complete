@@ -108,7 +108,7 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     );
   });
 
-  it('evaluates solution, closes session, auto-mints verified evidence, and unlocks AI (F-08, BR-49, BR-25)', async () => {
+  it('records an unscored submission, closes session, stores unverified evidence, and unlocks AI (F-08, BR-49, D-01)', async () => {
     // 1. Submit solution
     const submitRes = await app.inject({
       method: 'POST',
@@ -122,9 +122,9 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
 
     expect(submitRes.statusCode).toBe(200);
     const submitBody = JSON.parse(submitRes.body);
-    expect(submitBody.result.status).toBe('passed');
-    expect(submitBody.result.score).toBe(100);
-    expect(submitBody.xpEarned).toBeGreaterThan(0);
+    expect(submitBody.result.status).toBe('submitted');
+    expect(submitBody.result.score).toBe(0);
+    expect(submitBody.xpEarned).toBe(0);
     expect(submitBody.executed).toBe(false);
     expect(submitBody.verified).toBe(false);
     expect(submitBody.note).toContain('not executed');
@@ -145,7 +145,7 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     });
     expect(evRes.statusCode).toBe(200);
 
-    // 4. Verify XP ledger recorded transaction
+    // 4. Unexecuted code earns no XP
     const xpRes = await app.inject({
       method: 'GET',
       url: '/api/v1/xp/ledger',
@@ -153,8 +153,8 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     });
     expect(xpRes.statusCode).toBe(200);
     const xpBody = JSON.parse(xpRes.body);
-    expect(xpBody.totalXp).toBe(submitBody.xpEarned);
-    expect(xpBody.transactions).toHaveLength(1);
+    expect(xpBody.totalXp).toBe(0);
+    expect(xpBody.transactions).toHaveLength(0);
 
     // 5. Post-assessment AI query succeeds now that active session is concluded
     const postRes = await app.inject({

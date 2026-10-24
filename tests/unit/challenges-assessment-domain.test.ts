@@ -117,7 +117,7 @@ describe('Challenges Arena & Assessment Domain Model (F-08, BR-24, BR-25, BR-49.
     );
   });
 
-  it('evaluates solution, verifies all test cases, and auto-mints verified evidence', () => {
+  it('records a submission as unscored, unverified evidence and never reports a pass (D-01, SEC-02)', () => {
     const challenge = createChallenge({
       slug: 'two-sum',
       title: 'Two Sum',
@@ -129,22 +129,27 @@ describe('Challenges Arena & Assessment Domain Model (F-08, BR-24, BR-25, BR-49.
     });
 
     const candidateProfileId = 'p0000000-0000-4000-a000-000000000002';
-    const result = evaluateChallengeSubmission({
-      challenge,
-      candidateProfileId,
-      language: 'typescript',
-      code: 'function twoSum(a: number, b: number) { return a + b; }',
-    });
+    for (const code of [
+      'function twoSum(a: number, b: number) { return a + b; }',
+      'this is not executable code',
+    ]) {
+      const result = evaluateChallengeSubmission({
+        challenge,
+        candidateProfileId,
+        language: 'typescript',
+        code,
+      });
 
-    expect(result.status).toBe('passed');
-    expect(result.score).toBe(100);
-    expect(result.passedCases).toBe(2);
-    expect(result.xpEarned).toBe(25);
-    expect(result.evidence).toBeDefined();
-    expect(result.evidence?.type).toBe('assessment');
-    // A simulated check proves nothing: the evidence is recorded unverified (SEC-02).
-    expect(result.evidence?.verificationLevel).toBe('unverified');
-    expect(result.evidence?.status).toBe('pending');
+      // Code is never run, so there is no pass, no score and no XP.
+      expect(result.status).toBe('submitted');
+      expect(result.score).toBe(0);
+      expect(result.passedCases).toBe(0);
+      expect(result.xpEarned).toBe(0);
+      expect(result.evidence?.type).toBe('assessment');
+      expect(result.evidence?.verificationLevel).toBe('unverified');
+      expect(result.evidence?.status).toBe('pending');
+      expect(result.evidence?.metadata?.executed).toBe(false);
+    }
   });
 
   it('enforces language allowlist (BR-24)', () => {

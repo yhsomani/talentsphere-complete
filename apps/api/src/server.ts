@@ -78,6 +78,7 @@ import {
   enrollUserInCourse,
   verifySequentialModuleProgress,
   verifyLessonPrerequisites,
+  computeCourseLockState,
   calculateCourseProgress,
   mintCourseCertificate,
   revokeCourseCertificate,
@@ -342,6 +343,7 @@ import {
   CreateCourseInputSchema,
   CreateCourseModuleInputSchema,
   CreateLessonInputSchema,
+  CourseProgressResponseSchema,
   CreateThreadInputSchema,
   SendMessageInputSchema,
   MarkNotificationsReadInputSchema,
@@ -4714,9 +4716,9 @@ export async function buildApp(
       });
 
       let awardedXp = 0;
-      if (evalResult.status === 'passed') {
+      if (evalResult.status === 'submitted') {
         // 1. Store the submission as (unverified) evidence, once per challenge.
-        // A repeat pass returns the record already stored, not a fresh id that
+        // A repeat submission returns the record already stored, not a fresh id that
         // was never saved (review R2-8).
         const existingEvidence = (evidenceBySubjectId.get(profile.id) || []).find(
           (e) => e.metadata?.challengeId === challenge.id
@@ -5150,12 +5152,29 @@ export async function buildApp(
       const completedLessonIds = completedProgress.map((p) => p.lessonId);
       const certificate = certificatesByEnrollmentId.get(enrollment.id);
 
-      return reply.status(200).send({
-        enrolled: true,
-        enrollment,
-        completedLessonIds,
-        certificate,
-      });
+      const courseModules = Array.from(courseModulesById.values()).filter(
+        (m) => m.courseId === course.id
+      );
+      const courseModuleIds = new Set(courseModules.map((m) => m.id));
+      const courseLessons = Array.from(lessonsById.values()).filter((l) =>
+        courseModuleIds.has(l.moduleId)
+      );
+      const { locked, nextLessonId } = computeCourseLockState(
+        courseModules,
+        courseLessons,
+        new Set(completedLessonIds)
+      );
+
+      return reply.status(200).send(
+        CourseProgressResponseSchema.parse({
+          enrolled: true,
+          enrollment,
+          completedLessonIds,
+          certificate,
+          nextLessonId,
+          locked,
+        })
+      );
     }
   );
 

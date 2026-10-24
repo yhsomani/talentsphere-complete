@@ -3,41 +3,49 @@ import { Link } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { useSession } from '../lib/SessionContext.js';
-import { ButtonLink, VerificationSeal, type VerificationState } from '../components/ui/index.js';
+import { ButtonLink } from '../components/ui/index.js';
+import {
+  CandidateArt,
+  HeroRecordArt,
+  RecruiterArt,
+  StepEmailArt,
+  StepReferenceArt,
+  StepRoleArt,
+} from '../components/LandingArt.js';
+import '../styles/landing.css';
 
 /**
- * The example shows the product's one idea: a role gains weight as it is
- * proven. Scores follow the real rules (packages/domain work-history-graph:
- * work email +40, manager reference +30, strong ratings +10). Labelled as an
- * example, not a customer.
+ * The page shows the product's one idea: a role gains weight as it is proven.
+ * Points follow the real rules (packages/domain work-history-graph: work email
+ * +40, manager reference +30, strong ratings +10). The pictures are drawn
+ * examples, not customers, and the page makes no claim it cannot back.
  */
-const EXAMPLE_ROLES: ReadonlyArray<{
-  event: string;
-  detail: string;
-  state: VerificationState;
-  score: number;
+const STEPS: ReadonlyArray<{
+  title: string;
+  body: string;
+  points: string;
+  art: React.ReactNode;
 }> = [
   {
-    event: 'Role added',
-    detail: 'Platform Engineer at Northwind, 2021 – 2024',
-    state: 'unverified',
-    score: 0,
+    title: 'Add a role',
+    body: 'Enter the company, your title and your dates. It starts as a claim, and it is shown that way.',
+    points: '0 / 100',
+    art: <StepRoleArt />,
   },
   {
-    event: 'Work email confirmed',
-    detail: 'A one-time code sent to an @northwind address was entered',
-    state: 'work-email',
-    score: 40,
+    title: 'Confirm with your work email',
+    body: 'We send a one-time code to an address at the employer’s domain. Enter it and the role is confirmed.',
+    points: '+40',
+    art: <StepEmailArt />,
   },
   {
-    event: 'Manager vouched',
-    detail: 'Confirmed title and dates, rated the work 4–5 out of 5',
-    state: 'reference',
-    score: 80,
+    title: 'Ask a manager to vouch',
+    body: 'The person you name gets a private link, confirms your title and dates, and rates the work. Strong ratings add more.',
+    points: '+30, up to +10 more',
+    art: <StepReferenceArt />,
   },
 ];
 
-// Ruled rows, not bullets: the list is a record of what happens, one line each.
 const ROW_LIST: React.CSSProperties = {
   listStyle: 'none',
   margin: `${spacing.md} 0 0`,
@@ -51,6 +59,25 @@ const ROW: React.CSSProperties = {
   borderTop: `1px solid ${colors.neutral[300]}`,
 };
 
+const SECTION: React.CSSProperties = {
+  padding: `${spacing['3xl']} 0`,
+  borderTop: `1px solid ${colors.neutral[300]}`,
+};
+
+const H2: React.CSSProperties = {
+  fontSize: 'clamp(1.75rem, 1.3rem + 1.4vw, 2.25rem)',
+  lineHeight: 1.15,
+  color: colors.neutral[900],
+};
+
+const PICTURE: React.CSSProperties = {
+  margin: 0,
+  minWidth: 0,
+  border: `1px solid ${colors.neutral[300]}`,
+  borderRadius: '6px',
+  overflow: 'hidden',
+};
+
 export const LandingPage: React.FC = () => {
   usePageMeta(
     'Verified work history and jobs',
@@ -60,17 +87,12 @@ export const LandingPage: React.FC = () => {
   const signedIn = session.status !== 'anonymous';
 
   return (
-    <div style={{ paddingBottom: spacing['3xl'] }}>
+    <div style={{ paddingBottom: spacing['2xl'] }}>
       <section
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(360px, 100%), 1fr))',
-          gap: spacing['2xl'],
-          alignItems: 'start',
-          padding: `${spacing['3xl']} 0 ${spacing['2xl']}`,
-        }}
+        className="landing-hero"
+        style={{ gap: spacing['2xl'], padding: `${spacing['3xl']} 0` }}
       >
-        <div style={{ minWidth: 0, paddingTop: spacing.md }}>
+        <div style={{ minWidth: 0 }}>
           <h1
             className="serif-display"
             style={{
@@ -119,67 +141,104 @@ export const LandingPage: React.FC = () => {
             .
           </p>
         </div>
-
-        <figure style={{ minWidth: 0, margin: 0 }}>
-          <ol
-            aria-label="Example: how one role gains weight"
-            style={{
-              listStyle: 'none',
-              margin: 0,
-              padding: `${spacing.xs} ${spacing.lg}`,
-              backgroundColor: colors.surface.card,
-              border: `1px solid ${colors.neutral[300]}`,
-              borderRadius: '4px',
-            }}
-          >
-            {EXAMPLE_ROLES.map((role, i) => (
-              <li
-                key={role.event}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '28px minmax(0, 1fr) auto',
-                  gap: spacing.md,
-                  alignItems: 'center',
-                  padding: `${spacing.lg} 0`,
-                  borderTop: i === 0 ? 'none' : `1px solid ${colors.neutral[200]}`,
-                }}
-              >
-                <VerificationSeal state={role.state} />
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, color: colors.neutral[900] }}>{role.event}</div>
-                  <div style={{ color: colors.neutral[600], fontSize: '0.875rem', marginTop: 2 }}>
-                    {role.detail}
-                  </div>
-                </div>
-                <div
-                  className="mono"
-                  style={{ textAlign: 'right', fontSize: '0.875rem', color: colors.neutral[700] }}
-                >
-                  {role.score} / 100
-                </div>
-              </li>
-            ))}
-          </ol>
+        <figure style={{ margin: 0, minWidth: 0 }}>
+          <HeroRecordArt />
           <figcaption
             style={{ fontSize: '0.875rem', color: colors.neutral[600], marginTop: spacing.sm }}
           >
-            An example of one role gaining weight. The scores follow the rules the product uses.
+            An example record. The work email is confirmed; the manager has not replied yet.
           </figcaption>
         </figure>
       </section>
 
+      <section aria-labelledby="how-proven" style={SECTION}>
+        <h2 id="how-proven" className="serif-display" style={H2}>
+          How a role gets proven
+        </h2>
+        <p
+          style={{
+            color: colors.neutral[700],
+            lineHeight: 1.6,
+            maxWidth: '40em',
+            marginTop: spacing.sm,
+          }}
+        >
+          Each step adds points to that one role. Recruiters see which steps were done, not just a
+          total.
+        </p>
+        <ol
+          style={{
+            listStyle: 'none',
+            margin: `${spacing.xl} 0 0`,
+            padding: 0,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
+            gap: spacing.xl,
+          }}
+        >
+          {STEPS.map((step, i) => (
+            <li key={step.title} style={{ minWidth: 0 }}>
+              <div style={PICTURE}>{step.art}</div>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: spacing.md,
+                  alignItems: 'baseline',
+                  marginTop: spacing.md,
+                }}
+              >
+                <span
+                  className="mono"
+                  aria-hidden="true"
+                  style={{ color: colors.primary[700], fontWeight: 600 }}
+                >
+                  {i + 1}
+                </span>
+                <h3
+                  style={{
+                    fontSize: '1.125rem',
+                    margin: 0,
+                    color: colors.neutral[900],
+                    fontWeight: 600,
+                  }}
+                >
+                  {step.title}
+                </h3>
+              </div>
+              <p
+                style={{
+                  margin: `${spacing.sm} 0 0`,
+                  color: colors.neutral[700],
+                  lineHeight: 1.6,
+                }}
+              >
+                {step.body}
+              </p>
+              <p
+                className="mono"
+                style={{
+                  margin: `${spacing.sm} 0 0`,
+                  color: colors.neutral[700],
+                  fontSize: '0.875rem',
+                }}
+              >
+                {step.points}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section
-        aria-label="Who it is for"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
-          gap: spacing['2xl'],
-          padding: `${spacing['2xl']} 0`,
-          borderTop: `1px solid ${colors.neutral[300]}`,
-        }}
+        aria-labelledby="for-candidates"
+        className="landing-split"
+        style={{ ...SECTION, gap: spacing['2xl'] }}
       >
-        <div>
-          <h2 className="serif-display" style={{ fontSize: '1.75rem', color: colors.neutral[900] }}>
+        <figure style={PICTURE}>
+          <CandidateArt />
+        </figure>
+        <div style={{ minWidth: 0 }}>
+          <h2 id="for-candidates" className="serif-display" style={H2}>
             Looking for work
           </h2>
           <ul style={ROW_LIST}>
@@ -187,9 +246,24 @@ export const LandingPage: React.FC = () => {
             <li style={ROW}>Apply to jobs with a short note and the evidence that fits.</li>
             <li style={ROW}>See where each application stands, and withdraw any time.</li>
           </ul>
+          <div style={{ marginTop: spacing.lg }}>
+            <ButtonLink to="/jobs" variant="outline">
+              See open jobs
+            </ButtonLink>
+          </div>
         </div>
-        <div>
-          <h2 className="serif-display" style={{ fontSize: '1.75rem', color: colors.neutral[900] }}>
+      </section>
+
+      <section
+        aria-labelledby="for-recruiters"
+        className="landing-split landing-split--flip"
+        style={{ ...SECTION, gap: spacing['2xl'] }}
+      >
+        <figure style={PICTURE}>
+          <RecruiterArt />
+        </figure>
+        <div style={{ minWidth: 0 }}>
+          <h2 id="for-recruiters" className="serif-display" style={H2}>
             Hiring
           </h2>
           <ul style={ROW_LIST}>
@@ -197,18 +271,16 @@ export const LandingPage: React.FC = () => {
             <li style={ROW}>See which of an applicant’s roles are confirmed, and by what.</li>
             <li style={ROW}>Move people from review to offer in one place.</li>
           </ul>
+          <div style={{ marginTop: spacing.lg }}>
+            <ButtonLink to="/signup?role=recruiter" variant="outline">
+              Post a job
+            </ButtonLink>
+          </div>
         </div>
       </section>
 
-      <section
-        aria-labelledby="what-we-check"
-        style={{ padding: `${spacing['2xl']} 0`, borderTop: `1px solid ${colors.neutral[300]}` }}
-      >
-        <h2
-          id="what-we-check"
-          className="serif-display"
-          style={{ fontSize: '1.75rem', color: colors.neutral[900] }}
-        >
+      <section aria-labelledby="what-we-check" style={SECTION}>
+        <h2 id="what-we-check" className="serif-display" style={H2}>
           What “verified” means here
         </h2>
         <div
@@ -233,6 +305,33 @@ export const LandingPage: React.FC = () => {
             role look more verified than it is.
           </p>
         </div>
+      </section>
+
+      <section
+        aria-labelledby="start-now"
+        style={{
+          padding: `${spacing['2xl']} ${spacing.xl}`,
+          backgroundColor: colors.primary[50],
+          border: `1px solid ${colors.primary[200]}`,
+          borderRadius: '6px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: spacing.lg,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ minWidth: 0, maxWidth: '36em' }}>
+          <h2 id="start-now" className="serif-display" style={H2}>
+            Start with one role
+          </h2>
+          <p style={{ margin: `${spacing.sm} 0 0`, color: colors.neutral[800], lineHeight: 1.6 }}>
+            Add your current job and confirm it with your work email. It takes a few minutes.
+          </p>
+        </div>
+        <ButtonLink to={signedIn ? '/dashboard' : '/signup'} size="lg">
+          {signedIn ? 'Go to your dashboard' : 'Create a free account'}
+        </ButtonLink>
       </section>
     </div>
   );

@@ -6,7 +6,7 @@ export interface SubmissionResult {
   submissionId: string;
   challengeId: string;
   candidateId: string;
-  status: 'passed' | 'failed' | 'compilation_error' | 'runtime_error' | 'timed_out';
+  status: 'submitted' | 'passed' | 'failed' | 'compilation_error' | 'runtime_error' | 'timed_out';
   score: number;
   passedCases: number;
   totalCases: number;
@@ -90,77 +90,37 @@ export function evaluateChallengeSubmission(params: {
 
   const submissionId = params.submissionId || crypto.randomUUID();
   const testCases = params.challenge.testCases;
-  let passedCases = 0;
 
-  // Sandboxed test evaluation runner simulation
-  // For algorithmic solutions, code is evaluated against test case inputs and outputs
-  for (const _tc of testCases) {
-    // Basic verification: test that solution passes input/output constraints
-    // If solution contains syntax/runtime exception keywords, simulate failure
-    if (params.code.includes('throw new Error') || params.code.includes('syntax_error')) {
-      return {
-        submissionId,
-        challengeId: params.challenge.id,
-        candidateId: params.candidateProfileId,
-        status: 'runtime_error',
-        score: 0,
-        passedCases: 0,
-        totalCases: testCases.length,
-        xpEarned: 0,
-        details: 'Runtime exception encountered during execution.',
-      };
-    }
-    passedCases++;
-  }
-
-  const isPassed = passedCases === testCases.length;
-  const score = Math.round((passedCases / testCases.length) * 100);
-
-  let evidence: Evidence | undefined;
-  let xpEarned = 0;
-
-  if (isPassed) {
-    // 1. Calculate XP based on challenge difficulty (easy: 25, medium: 50, hard: 100)
-    const xpByDifficulty: Record<string, number> = {
-      easy: 25,
-      medium: 50,
-      hard: 100,
-    };
-    xpEarned = xpByDifficulty[params.challenge.difficulty] || 25;
-
-    // 2. Record the submission as evidence — unverified. The check above is
-    // a placeholder, not a sandbox: it never runs the code, so a pass proves
-    // nothing and must not carry the platform's top trust level (security
-    // audit SEC-02: any account could mint "authority verified" evidence by
-    // submitting any text). Raise the level once submissions really run
-    // against the test cases.
-    evidence = createEvidence({
-      subjectId: params.candidateProfileId,
-      type: 'assessment',
-      title: `${params.challenge.title} — solution submitted`,
-      description: `Submitted a solution to "${params.challenge.title}". Solutions are not executed yet, so it has not been verified.`,
-      source: 'talentsphere_challenges_arena',
-      provenance: `challenge_submission:${submissionId}`,
-      recencyDate: new Date().toISOString().split('T')[0],
-      metadata: {
-        challengeId: params.challenge.id,
-        challengeSlug: params.challenge.slug,
-        language: params.language,
-        executed: false,
-      },
-    });
-  }
+  // Code is never executed here, so no pass/fail or score can be reported (D-01,
+  // SEC-02). The submission is only recorded as unverified evidence, with no XP.
+  // Raise this once submissions really run against the test cases.
+  const evidence = createEvidence({
+    subjectId: params.candidateProfileId,
+    type: 'assessment',
+    title: `${params.challenge.title} — solution submitted`,
+    description: `Submitted a solution to "${params.challenge.title}". Solutions are not executed yet, so it has not been verified.`,
+    source: 'talentsphere_challenges_arena',
+    provenance: `challenge_submission:${submissionId}`,
+    recencyDate: new Date().toISOString().split('T')[0],
+    metadata: {
+      challengeId: params.challenge.id,
+      challengeSlug: params.challenge.slug,
+      language: params.language,
+      executed: false,
+    },
+  });
 
   return {
     submissionId,
     challengeId: params.challenge.id,
     candidateId: params.candidateProfileId,
-    status: isPassed ? 'passed' : 'failed',
-    score,
-    passedCases,
+    status: 'submitted',
+    score: 0,
+    passedCases: 0,
     totalCases: testCases.length,
     evidence,
-    xpEarned,
+    xpEarned: 0,
+    details: 'Solution saved but not executed, so it has no score.',
   };
 }
 

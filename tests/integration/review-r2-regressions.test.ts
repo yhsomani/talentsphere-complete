@@ -202,12 +202,12 @@ describe('Review round 2 regressions (R2-2, R2-3, R2-7, R2-8)', () => {
     const first = await submit();
     expect(first.statusCode).toBe(200);
     const firstBody = JSON.parse(first.body);
-    expect(firstBody.result.status).toBe('passed');
+    expect(firstBody.result.status).toBe('submitted');
 
     const second = await submit();
     expect(second.statusCode).toBe(200);
     const secondBody = JSON.parse(second.body);
-    expect(secondBody.result.status).toBe('passed');
+    expect(secondBody.result.status).toBe('submitted');
     expect(secondBody.evidence.id).toBe(firstBody.evidence.id);
 
     // The stored evidence is retrievable by the id the second response returned.

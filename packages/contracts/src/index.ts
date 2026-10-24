@@ -386,6 +386,18 @@ export const CreateLessonInputSchema = z.object({
 
 export type CreateLessonInput = z.infer<typeof CreateLessonInputSchema>;
 
+/** GET /courses/:id/progress. The server owns lock state (BR-47, BR-22); clients only display it. */
+export const CourseProgressResponseSchema = z
+  .object({
+    enrolled: z.boolean(),
+    completedLessonIds: z.array(z.string()).optional(),
+    nextLessonId: z.string().nullable().optional(),
+    locked: z.record(z.string(), z.string()).optional(),
+  })
+  .passthrough();
+
+export type CourseProgressResponse = z.infer<typeof CourseProgressResponseSchema>;
+
 /**
  * Direct Messaging Contracts (F-10, WF-10, BR-214)
  */

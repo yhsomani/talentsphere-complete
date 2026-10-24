@@ -222,6 +222,49 @@ export function verifyLessonPrerequisites(
   }
 }
 
+export interface CourseLockState {
+  /** lessonId -> why it cannot be completed yet; lessons that can be completed are absent. */
+  locked: Record<string, string>;
+  /** First lesson in course order that is neither done nor locked, or null. */
+  nextLessonId: string | null;
+}
+
+/**
+ * Lock state for every lesson from the rules the completion route enforces:
+ * BR-47 (earlier modules finished), then BR-22 (direct prerequisite), plus where to continue.
+ */
+export function computeCourseLockState(
+  modules: CourseModule[],
+  lessons: Lesson[],
+  completedLessonIds: ReadonlySet<string>
+): CourseLockState {
+  const ordered = [...modules].sort((a, b) => a.orderIndex - b.orderIndex);
+  const locked: Record<string, string> = {};
+  let nextLessonId: string | null = null;
+  ordered.forEach((m, i) => {
+    const unfinished = ordered
+      .slice(0, i)
+      .find(
+        (p) =>
+          !lessons.filter((l) => l.moduleId === p.id).every((l) => completedLessonIds.has(l.id))
+      );
+    const own = lessons
+      .filter((l) => l.moduleId === m.id)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    for (const l of own) {
+      let reason: string | null = null;
+      if (unfinished) reason = `Finish “${unfinished.title}” first.`;
+      else if (l.prerequisiteLessonId && !completedLessonIds.has(l.prerequisiteLessonId)) {
+        const prerequisite = lessons.find((x) => x.id === l.prerequisiteLessonId);
+        reason = `Finish “${prerequisite?.title ?? 'the previous lesson'}” first.`;
+      }
+      if (reason) locked[l.id] = reason;
+      else if (nextLessonId === null && !completedLessonIds.has(l.id)) nextLessonId = l.id;
+    }
+  });
+  return { locked, nextLessonId };
+}
+
 /**
  * Computes course completion percentage.
  */

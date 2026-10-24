@@ -248,6 +248,38 @@ describe('Claim cycle: worker safety', () => {
   });
 });
 
+describe('Claim cycle: D-02 two workers, slow handlers', () => {
+  it('runs each of 6 jobs exactly once when worker two starts after worker one lease would lapse', async () => {
+    const store = new MemoryJobStore();
+    for (let i = 0; i < 6; i += 1) await store.enqueue({ kind: 'slow.job', payload: { i } });
+    const runs = new Map<number, number>();
+    const opts = {
+      store,
+      leaseMs: 600,
+      handlerTimeoutMs: 300,
+      batchSize: 6,
+      handlers: handlers({
+        'slow.job': async (payload) => {
+          const i = payload.i as number;
+          runs.set(i, (runs.get(i) ?? 0) + 1);
+          await new Promise((r) => setTimeout(r, 190));
+        },
+      }),
+    };
+    const drain = async () => {
+      while ((await store.countActive()) > 0) {
+        const r = await runClaimCycle(opts);
+        if (r.claimed === 0) await new Promise((res) => setTimeout(res, 20));
+      }
+    };
+    const w1 = drain();
+    await new Promise((r) => setTimeout(r, 650));
+    await Promise.all([w1, drain()]);
+    expect([...runs.values()]).toEqual([1, 1, 1, 1, 1, 1]);
+    expect((await store.list()).every((j) => j.status === 'succeeded')).toBe(true);
+  }, 15_000);
+});
+
 describe('Claim cycle: attempts fencing against stale workers', () => {
   async function reclaimed() {
     const store = new MemoryJobStore();

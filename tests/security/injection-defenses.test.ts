@@ -17,7 +17,15 @@
  *                         client bundle source.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import {
+  readFileSync,
+  readdirSync,
+  existsSync,
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { FastifyInstance } from 'fastify';
 import {
@@ -257,6 +265,20 @@ describe('BONUS: Leaked secret keys never reach the client bundle', () => {
     // Concatenated so the literal key never appears in source.
     const synthetic = 'sk_live_' + 'a'.repeat(12);
     expect(SECRET_PATTERN.test(synthetic)).toBe(true);
+  });
+
+  it('scanForSecrets detects a seeded match and fails closed on a missing dir', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'secret-scan-'));
+    try {
+      writeFileSync(path.join(dir, 'seed.ts'), `const k = '${'sk_live_' + 'b'.repeat(12)}';
+`);
+      const scan = scanForSecrets([dir]);
+      expect(scan.filesScanned).toBe(1);
+      expect(scan.hits).toHaveLength(1);
+      expect(() => scanForSecrets([path.join(dir, 'missing')])).toThrow();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('the API keeps provider secrets server-side via environment configuration only', () => {

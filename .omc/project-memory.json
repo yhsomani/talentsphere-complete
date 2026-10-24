@@ -261,9 +261,57 @@
       "type": "file"
     },
     {
+      "path": "apps/web/src/components/LandingArt.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1792867797747,
+      "type": "file"
+    },
+    {
+      "path": "apps/web/src/pages/LandingPage.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1792867862783,
+      "type": "file"
+    },
+    {
       "path": "AGENTS.md",
       "accessCount": 1,
       "lastAccessed": 1792866526122,
+      "type": "file"
+    },
+    {
+      "path": "packages/ui/src/tokens.ts",
+      "accessCount": 1,
+      "lastAccessed": 1792867668268,
+      "type": "file"
+    },
+    {
+      "path": "tests/e2e/web-ui.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1792867715399,
+      "type": "file"
+    },
+    {
+      "path": "apps/web/src",
+      "accessCount": 1,
+      "lastAccessed": 1792867756262,
+      "type": "directory"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1792867807477,
+      "type": "directory"
+    },
+    {
+      "path": "apps/web/src/styles/landing.css",
+      "accessCount": 1,
+      "lastAccessed": 1792867814291,
+      "type": "file"
+    },
+    {
+      "path": ".playwright-mcp/landing-desktop.png",
+      "accessCount": 1,
+      "lastAccessed": 1792867925259,
       "type": "file"
     }
   ],

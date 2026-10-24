@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
-import { lockedReason, nextLesson, type CourseLesson, type CourseModule } from '../lib/course.js';
+import type { CourseLesson, CourseModule } from '../lib/course.js';
 import { safeHref } from '../lib/format.js';
 import {
   Button,
@@ -28,6 +28,9 @@ interface Progress {
   enrolled: boolean;
   enrollment?: { progressPercent: number; status: string };
   completedLessonIds?: string[];
+  nextLessonId?: string | null;
+  /** lessonId -> why it cannot be completed yet (server-computed, BR-47 / BR-22). */
+  locked?: Record<string, string>;
   certificate?: { certificateNumber: string; verificationProofHash: string };
 }
 
@@ -58,10 +61,7 @@ export const CoursePage: React.FC = () => {
       setProgress(prog);
       setSelectedId(
         (current) =>
-          current ??
-          nextLesson(detail.course.modules, new Set(prog.completedLessonIds ?? []))?.id ??
-          detail.course.modules[0]?.lessons[0]?.id ??
-          null
+          current ?? prog.nextLessonId ?? detail.course.modules[0]?.lessons[0]?.id ?? null
       );
     } catch (err) {
       // A course that does not exist is a final answer; only a failed request is worth retrying.
@@ -102,8 +102,7 @@ export const CoursePage: React.FC = () => {
     try {
       await apiJson(`/api/v1/lessons/${lesson.id}/complete`, { method: 'POST' });
       const prog = await refreshProgress();
-      const next = nextLesson(course.modules, new Set(prog.completedLessonIds ?? []));
-      if (next) setSelectedId(next.id);
+      if (prog.nextLessonId) setSelectedId(prog.nextLessonId);
     } catch (err) {
       setActionError(errorMessage(err));
     } finally {
@@ -132,7 +131,7 @@ export const CoursePage: React.FC = () => {
   const selected = lessons.find((l) => l.id === selectedId) ?? null;
   const enrolled = progress.enrolled;
   const percent = Math.round(progress.enrollment?.progressPercent ?? 0);
-  const locked = selected ? lockedReason(course.modules, completed, selected) : null;
+  const locked = selected ? (progress.locked?.[selected.id] ?? null) : null;
   const canRead = enrolled || Boolean(selected?.isFreePreview);
   const videoLink = selected?.contentType === 'video' ? safeHref(selected.contentBody) : undefined;
 
@@ -211,7 +210,7 @@ export const CoursePage: React.FC = () => {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {m.lessons.map((l) => {
                   const done = completed.has(l.id);
-                  const lock = enrolled ? lockedReason(course.modules, completed, l) : null;
+                  const lock = enrolled ? (progress.locked?.[l.id] ?? null) : null;
                   return (
                     <li key={l.id}>
                       <button

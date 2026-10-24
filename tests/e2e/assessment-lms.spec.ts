@@ -66,8 +66,8 @@ test.describe('E2E: Skills Assessment, Anti-Cheating (BR-10), LMS & Course Compl
     });
     expect(submitRes.status()).toBe(200);
     const submitData = await submitRes.json();
-    expect(submitData.result.status).toBe('passed');
-    expect(submitData.xpEarned).toBeGreaterThan(0);
+    expect(submitData.result.status).toBe('submitted');
+    expect(submitData.xpEarned).toBe(0);
 
     // 5. Post-assessment: AI assistant query is now permitted
     const aiAllowedRes = await request.post(`${API_BASE}/ai/assistant/query`, {
