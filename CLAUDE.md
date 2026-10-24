@@ -10,7 +10,7 @@ A PWA-first career platform where candidates prove their skills and work history
 
 - Web: React 19, TypeScript, Vite, react-router-dom (`apps/web`). Server state is a small `fetch` helper; there is no TanStack Query.
 - API: Fastify 5 modular monolith (`apps/api`), Zod contracts (`packages/contracts`), pure business rules (`packages/domain`).
-- Data: PostgreSQL via `pg`. SQL migrations in `supabase/migrations` (54 files), applied by `pnpm db:migrate`. The core career loop is persisted; other API modules are in memory and labelled `ephemeral`.
+- Data: PostgreSQL via `pg`. SQL migrations in `supabase/migrations` (55 files), applied by `pnpm db:migrate`. The core career loop is persisted; other API modules are in memory and labelled `ephemeral`.
 - Worker: `apps/worker` claims `background_jobs` with `FOR UPDATE SKIP LOCKED`.
 - Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`). Supabase Auth is not used.
 - Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: opt-in Resend for transactional work-history messages; development uses the labelled dev outbox. Live delivery is not established by source.

@@ -54,7 +54,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 
 | Document | Purpose |
 |---|---|
-| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 54 migrations, lifecycle and hosted/local boundaries. |
+| [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries. |
 | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 278 unique method/path pairs, request-schema locators, response/error semantics and billing retries. |
 | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
 | [`experience/UI_UX_DESIGN_SYSTEM.md`](experience/UI_UX_DESIGN_SYSTEM.md) | Design tokens, components, accessibility (WCAG 2.2 AA). |
