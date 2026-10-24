@@ -52,3 +52,19 @@ How the "council" was run: five read-only investigators (auth, jobs, work histor
 | CF-02 | Count rows; count people | Count people. k-anonymity protects individuals, so the unit must be a person. | Within `AGENTS.md` authority (defect fix). |
 | CF-07 | Time window only; resolve the payment to its subscription | Resolve through invoice payments and fail safe when unresolved. | Owner chose "refund revokes access"; CodeRabbit finding fixed. |
 | CF-10, CF-11, CF-12, CF-14, CF-15, CF-27, CF-30 | Several | **No decision made.** Each changes security architecture, schema or product behaviour and needs an owner. | Not approved. |
+
+
+## Documentation reconciliation at source 431c425a (2026-10-23)
+
+CF-17 and CF-18 are resolved as documentation changes: architecture now describes
+PostgreSQL, Stripe, revocation and candidate/recruiter-only self-registration.
+CF-19 is clarified: current account access uses active/restricted/erased handling,
+not an invented `banned` enum. CF-13 is partially advanced in source: the manual
+hosted adapter and migration 00054 exist, but complete applied state and isolation
+remain unverified. CF-10's source TTL is 30 days; older ?no expiry? audit rows are
+historical. No product/security decision or code fix was made by this pass.
+
+Additional source discrepancy: AI flags use `z.coerce.boolean()` in `env.ts`, so
+textual `false` is not a strict false parser. Documented in operations; code is
+unchanged. The maintenance dry-run writes a log and explicit flags may avoid the
+no-argument confirmation branch; the current guide now states these limits.

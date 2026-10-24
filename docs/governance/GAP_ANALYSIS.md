@@ -87,3 +87,15 @@ Found during the documentation consolidation. Each needs an owner decision; none
 | C-18 | Routes in target docs but not built | `APP_FLOW.md` §1 lists about 30 routes that `apps/web/src/App.tsx` does not define (for example `/register`, `/courses`, `/recruiter/*`, `/feed`). `App.tsx` defines 30 `<Route>` entries, including layout, index and catch-all | Measured 2026-10-21 | Owner: keep these as planned routes, or drop them. Banner added to `APP_FLOW.md`; the root architecture doc's "9 leaf routes" is now counted directly from source |
 | C-20 | Who owns the 173-feature register | `SSOT.md` §7 says it is the active feature identity and priority index. `docs/product/PRD.md` §11 says the canonical register lives in `FEATURE_REGISTRY.md`. The two inventories are identical except for heading numbers (checked 2026-10-21: 175 of 180 unique lines match, and the 5 others are headings). `FEATURE_STATUS_2026-10-21.md` uses the registry as its source | Measured on the two files | Owner: pick one register. Until then the registry's §9 detail was moved to SSOT, so SSOT is the only detail source |
 | C-21 | Role count | `SSOT.md` §6.1 describes two tiers: three JWT roles (`ROLE_USER`, `ROLE_RECRUITER`, `ROLE_ADMIN`) and 24 contextual roles. The built `Role` union in `packages/domain/src/core.ts` has 10 values (candidate, recruiter, hiring_manager, course_author, instructor, institution_admin, platform_admin, moderator, verification_staff, service_account). `ARCHITECTURE.md` §12 says 10 | Measured 2026-10-21 | Owner: confirm whether the 24-role model is target. Measured role union is 10 |
+
+
+## Source reconciliation, 2026-10-23
+
+C-2/C-3 remain dated evidence, not freshly measured feature/test totals. C-4 now
+has 54 migrations in source; the database reference owns the inventory. C-5's
+?no provider SDKs? wording is historical: Stripe and the Resend adapter exist,
+while Supabase Auth, TanStack Query and Edge Functions remain target differences.
+The hosted manual adapter and migration 00054 exist; full live application and
+isolation are unverified. Salary policy, rule-ID semantics and ADR authority
+conflicts remain owner decisions. This audit changes documentation only and
+preserves SSOT. See [coverage and disposition](../system-model/01-inventory-and-coverage.md).
