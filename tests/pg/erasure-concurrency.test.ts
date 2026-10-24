@@ -25,10 +25,14 @@ const dbName = `ts_pgerase_${crypto.randomBytes(4).toString('hex')}`;
 const withDb = (url: string, name: string) => url.replace(/\/[^/?]*(\?|$)/, `/${name}$1`);
 const databaseUrl = withDb(baseUrl, dbName);
 
-const ROUNDS = 15;
+// Each round races 2-3 calls, so a pool of 4 is enough; 8 rounds keep the
+// shared CI service container (default max_connections) well clear of limits.
+const ROUNDS = 8;
+const POOL_MAX = 4;
+const TEST_TIMEOUT = 60_000;
 const OPEN = ['pending', 'grace_period', 'processing'];
 
-describe('Erasure store concurrency on PostgreSQL', () => {
+describe('Erasure store concurrency on PostgreSQL', { timeout: TEST_TIMEOUT }, () => {
   let pool: pg.Pool;
   let store: PgErasureRequestStore;
 
@@ -41,7 +45,9 @@ describe('Erasure store concurrency on PostgreSQL', () => {
       env: { ...process.env, DATABASE_URL: databaseUrl },
       stdio: 'pipe',
     });
-    pool = new pg.Pool({ connectionString: databaseUrl, max: 8 });
+    pool = new pg.Pool({ connectionString: databaseUrl, max: POOL_MAX });
+    // An idle client killed server-side must not become an unhandled 'error' event.
+    pool.on('error', () => {});
     store = new PgErasureRequestStore(pool);
   }, 120_000);
 
