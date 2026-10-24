@@ -1,0 +1,23 @@
+{
+    auto_https off
+    servers {
+        # Coolify's Traefik terminates TLS and sets X-Forwarded-For; keep it.
+        trusted_proxies static private_ranges
+    }
+}
+:80 {
+    encode zstd gzip
+    root * /srv
+    handle /api/* {
+        reverse_proxy api:4000
+    }
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options DENY
+    }
+}
