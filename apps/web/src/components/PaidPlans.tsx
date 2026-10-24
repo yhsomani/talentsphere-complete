@@ -15,13 +15,18 @@ interface Plan {
   targetRole: string;
 }
 
-interface CurrentState {
+interface SubscriptionState {
   planTier: string;
   status: string;
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: string;
-  aiRequestsUsed: number;
-  aiRequestsLimit: number;
+}
+
+interface UsageState {
+  requestsUsed: number;
+  requestsLimit: number;
+  tokensUsed: number;
+  tokensLimit: number;
 }
 
 interface PlansResponse {
@@ -37,7 +42,11 @@ interface PlansResponse {
  */
 export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [current, setCurrent] = useState<CurrentState | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionState | null>(null);
+  const [entitledTier, setEntitledTier] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageState | null>(null);
+  const [subscriptionFailed, setSubscriptionFailed] = useState(false);
+  const [usageFailed, setUsageFailed] = useState(false);
   const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,28 +65,52 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
   useEffect(() => {
     if (!signedIn) return;
     const controller = new AbortController();
-    Promise.all([
-      apiJson<{ subscription: Omit<CurrentState, 'aiRequestsUsed' | 'aiRequestsLimit'> }>(
-        '/api/v1/billing/subscription',
-        { signal: controller.signal }
-      ),
-      apiJson<{ usage: { requestsCount: number }; limits: { maxRequestsPerDay: number } }>(
-        '/api/v1/ai/usage',
-        { signal: controller.signal }
-      ),
-    ])
-      .then(([sub, ai]) =>
-        setCurrent({
-          ...sub.subscription,
-          aiRequestsUsed: ai.usage.requestsCount,
-          aiRequestsLimit: ai.limits.maxRequestsPerDay,
+    // Independent calls: one failing must not hide the other.
+    setSubscription(null);
+    setEntitledTier(null);
+    setUsage(null);
+    setSubscriptionFailed(false);
+    setUsageFailed(false);
+    apiJson<{ subscription: SubscriptionState; entitlements: { planTier: string } }>(
+      '/api/v1/billing/subscription',
+      {
+        signal: controller.signal,
+      }
+    )
+      .then((data) => {
+        setSubscription(data.subscription);
+        setEntitledTier(data.entitlements.planTier);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setSubscriptionFailed(true);
+      });
+    apiJson<{
+      usage: { requestsCount: number; tokensConsumed: number };
+      limits: { maxRequestsPerDay: number; maxTokensPerDay: number };
+    }>('/api/v1/ai/usage', { signal: controller.signal })
+      .then((data) =>
+        setUsage({
+          requestsUsed: data.usage.requestsCount,
+          requestsLimit: data.limits.maxRequestsPerDay,
+          tokensUsed: data.usage.tokensConsumed,
+          tokensLimit: data.limits.maxTokensPerDay,
         })
       )
-      .catch(() => undefined);
+      .catch(() => {
+        if (!controller.signal.aborted) setUsageFailed(true);
+      });
     return () => controller.abort();
   }, [signedIn]);
 
   if (plans.length === 0) return null;
+
+  const allFeatures = Array.from(new Set(plans.flatMap((p) => p.features)));
+  const cellStyle: React.CSSProperties = {
+    textAlign: 'left',
+    padding: spacing.sm,
+    border: `1px solid ${colors.neutral[200]}`,
+    verticalAlign: 'top',
+  };
 
   const go = async (path: string, body: unknown, key: string) => {
     setBusy(key);
@@ -116,26 +149,55 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
           </Button>
         ))}
       </div>
-      {current && (
+      {signedIn && (
         <div data-testid="current-plan" style={{ marginTop: spacing.md }}>
-          <p style={{ margin: 0 }}>
-            Current plan: <strong>{current.planTier.replace(/_/g, ' ')}</strong> ({current.status}
-            {current.cancelAtPeriodEnd
-              ? `, ends ${new Date(current.currentPeriodEnd).toLocaleDateString()}`
-              : ''}
-            )
-          </p>
-          <label>
-            AI assistant today: {current.aiRequestsUsed} of {current.aiRequestsLimit} requests
-            <progress
-              value={current.aiRequestsUsed}
-              max={current.aiRequestsLimit}
-              style={{ display: 'block', width: '100%' }}
-            />
-          </label>
-          {current.aiRequestsUsed >= current.aiRequestsLimit && (
-            <Notice tone="error">
-              You have reached today&apos;s AI limit. Choose a higher plan below for more.
+          {subscription && (
+            <p style={{ margin: 0 }}>
+              Current plan: <strong>{(entitledTier ?? 'free').replace(/_/g, ' ')}</strong>
+              {entitledTier === 'free' && subscription.planTier !== 'free'
+                ? ` (subscription ${subscription.status})`
+                : ` (${subscription.status}${
+                    subscription.cancelAtPeriodEnd
+                      ? `, ends ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
+                      : ''
+                  })`}
+            </p>
+          )}
+          {subscriptionFailed && (
+            <Notice tone="warning" data-testid="subscription-unavailable">
+              Your current plan could not be loaded right now.
+            </Notice>
+          )}
+          {usage && (
+            <>
+              <label style={{ display: 'block' }}>
+                AI assistant today: {usage.requestsUsed} of {usage.requestsLimit} requests
+                <progress
+                  value={usage.requestsUsed}
+                  max={usage.requestsLimit}
+                  style={{ display: 'block', width: '100%' }}
+                />
+              </label>
+              <label style={{ display: 'block', marginTop: spacing.sm }}>
+                AI assistant today: {usage.tokensUsed.toLocaleString()} of{' '}
+                {usage.tokensLimit.toLocaleString()} tokens
+                <progress
+                  value={usage.tokensUsed}
+                  max={usage.tokensLimit}
+                  style={{ display: 'block', width: '100%' }}
+                />
+              </label>
+              {(usage.requestsUsed >= usage.requestsLimit ||
+                usage.tokensUsed >= usage.tokensLimit) && (
+                <Notice tone="error">
+                  You have reached today&apos;s AI limit. Choose a higher plan below for more.
+                </Notice>
+              )}
+            </>
+          )}
+          {usageFailed && (
+            <Notice tone="warning" data-testid="usage-unavailable">
+              Your AI usage could not be loaded right now.
             </Notice>
           )}
         </div>
@@ -189,6 +251,55 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
             )}
           </div>
         ))}
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table
+          data-testid="plan-comparison"
+          style={{ marginTop: spacing.lg, width: '100%', borderCollapse: 'collapse' }}
+        >
+          <caption style={{ textAlign: 'left', fontWeight: 600, marginBottom: spacing.sm }}>
+            Compare paid plans ({cycle === 'monthly' ? 'monthly' : 'yearly'} billing)
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" style={cellStyle}>
+                Feature
+              </th>
+              {plans.map((plan) => (
+                <th key={plan.tier} scope="col" style={cellStyle}>
+                  {plan.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style={cellStyle}>
+                Price per {cycle === 'monthly' ? 'month' : 'year'}
+              </th>
+              {plans.map((plan) => (
+                <td key={plan.tier} style={cellStyle}>
+                  {formatMoney(
+                    cycle === 'monthly' ? plan.priceMonthlyCents : plan.priceYearlyCents,
+                    plan.currency
+                  )}
+                </td>
+              ))}
+            </tr>
+            {allFeatures.map((feature) => (
+              <tr key={feature}>
+                <th scope="row" style={{ ...cellStyle, fontWeight: 400 }}>
+                  {feature}
+                </th>
+                {plans.map((plan) => (
+                  <td key={plan.tier} style={cellStyle}>
+                    {plan.features.includes(feature) ? 'Included' : 'Not included'}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       {signedIn && (
         <p style={{ marginTop: spacing.md }}>
