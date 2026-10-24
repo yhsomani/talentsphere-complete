@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 import {
   isDeployed,
   stripeConfigProblems,
+  emailDeliveryConfigured,
   validateServerEnv,
   ServerEnv,
 } from '@talentsphere/config';
@@ -12323,12 +12324,7 @@ export async function buildApp(
         // Without a mail provider queued work fails permanently; do not say a code was sent.
         if (
           (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
-          !(
-            env.EMAIL_PROVIDER === 'resend' &&
-            !!env.RESEND_API_KEY &&
-            !!env.EMAIL_FROM &&
-            env.APP_URL.startsWith('https://')
-          )
+          !emailDeliveryConfigured(env)
         ) {
           throw new DomainError(
             'SERVICE_UNAVAILABLE',
@@ -12455,12 +12451,7 @@ export async function buildApp(
 
       if (
         (env.NODE_ENV === 'production' || env.NODE_ENV === 'staging') &&
-        !(
-          env.EMAIL_PROVIDER === 'resend' &&
-          !!env.RESEND_API_KEY &&
-          !!env.EMAIL_FROM &&
-          env.APP_URL.startsWith('https://')
-        )
+        !emailDeliveryConfigured(env)
       ) {
         throw new DomainError(
           'SERVICE_UNAVAILABLE',

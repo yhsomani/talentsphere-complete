@@ -1,8 +1,11 @@
 import pg from 'pg';
 import { createLogger } from '@talentsphere/observability';
 import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsphere/domain';
-import { runClaimCycle, type ClaimHandler } from './claim.js';
-import { sendTransactionalEmail } from './mail-provider.js';
+import { runClaimCycle, PermanentJobError, type ClaimHandler } from './claim.js';
+import { loadEmailConfig, emailConfigProblems } from './email/config.js';
+import { createEmailService } from './email/service.js';
+import { renderTemplate } from './email/templates.js';
+import { EmailError, type EmailTemplateId } from './email/types.js';
 
 // Load .env natively (Node process.loadEnvFile) exactly like the API entry
 // (apps/api/src/index.ts): found from the repo root, or two levels up when
@@ -38,50 +41,68 @@ for (const kind of DISPATCH_EVENT_KINDS) {
   claimHandlers.set(kind, recordEvent);
 }
 
-// Transactional email is opt-in; deployed API routes fail closed until a
-// configured provider exists. Development retains its clearly labelled outbox.
-const APP_URL = (process.env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '');
+// Transactional email is opt-in and provider-independent: handlers name a
+// logical template and variables; apps/worker/src/email owns validation,
+// rendering and the provider adapter. Development with no provider keeps its
+// clearly labelled outbox.
+const emailConfig = loadEmailConfig(process.env);
+const emailService = createEmailService(emailConfig);
 const deliverEmail = (
-  render: (payload: Record<string, unknown>) => {
-    to: string;
-    subject: string;
-    text: string;
-  }
+  templateId: EmailTemplateId,
+  variables: (payload: Record<string, unknown>) => Record<string, unknown>
 ): ClaimHandler => {
   return async (payload, record) => {
-    const message = render(payload);
-    if ((process.env.NODE_ENV ?? 'development') === 'development') {
+    const to = String(payload.to);
+    const vars = variables(payload);
+    if (
+      emailConfig.provider === 'none' &&
+      (process.env.NODE_ENV ?? 'development') === 'development'
+    ) {
+      const rendered = renderTemplate({ templateId, variables: vars }, emailConfig.appUrl);
       logger.warn(
-        { jobId: record.id, to: message.to, subject: message.subject, text: message.text },
+        { jobId: record.id, to, subject: rendered.subject, text: rendered.text },
         'DEV OUTBOX: email NOT sent (no provider configured)'
       );
       return;
     }
-    await sendTransactionalEmail(message, record.id, {
-      provider: process.env.EMAIL_PROVIDER === 'resend' ? 'resend' : 'none',
-      apiKey: process.env.RESEND_API_KEY,
-      from: process.env.EMAIL_FROM,
-    });
+    try {
+      const result = await emailService.send({
+        templateId,
+        to,
+        variables: vars,
+        idempotencyKey: record.id,
+      });
+      // Acceptance by the provider is not proof of mailbox delivery.
+      logger.info(
+        { jobId: record.id, templateId, provider: result.provider, messageId: result.messageId },
+        'email accepted by provider'
+      );
+    } catch (err) {
+      if (err instanceof EmailError) {
+        logger.warn({ jobId: record.id, templateId, code: err.code }, 'email send failed');
+        if (!err.retryable) throw new PermanentJobError(err.message);
+        throw new Error(err.message);
+      }
+      throw err;
+    }
   };
 };
 
 claimHandlers.set(
   'work_history.email_verification_requested',
-  deliverEmail((p) => ({
-    to: String(p.to),
-    subject: 'Your TalentSphere verification code',
-    text: `Your code is ${String(p.code)}. It expires at ${String(p.expiresAt)}.`,
+  deliverEmail('work_history.email_verification', (p) => ({
+    code: p.code,
+    expiresAt: p.expiresAt,
   }))
 );
 claimHandlers.set(
   'reference.requested',
-  deliverEmail((p) => ({
-    to: String(p.to),
-    subject: `${String(p.candidateName ?? 'A candidate')} asked you for a reference`,
-    text:
-      `${String(p.candidateName ?? 'A candidate')} listed you as a reference for ` +
-      `${String(p.title)} at ${String(p.companyName)}. Respond here: ` +
-      `${APP_URL}/reference/${String(p.referenceId)}#token=${String(p.token)}`,
+  deliverEmail('reference.request', (p) => ({
+    candidateName: p.candidateName,
+    title: p.title,
+    companyName: p.companyName,
+    referenceId: p.referenceId,
+    token: p.token,
   }))
 );
 
@@ -125,16 +146,14 @@ function resolveStore(): { store: JobStore; heartbeat: () => Promise<void> } | n
 }
 
 async function runWorker(): Promise<void> {
-  if (
-    (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') &&
-    process.env.EMAIL_PROVIDER === 'resend' &&
-    (!process.env.RESEND_API_KEY ||
-      !process.env.EMAIL_FROM ||
-      !process.env.APP_URL?.startsWith('https://'))
-  ) {
-    throw new Error(
-      'Email provider configuration invalid: use a verified sender, API key and HTTPS APP_URL.'
-    );
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') {
+    const problems = emailConfigProblems(emailConfig);
+    if (emailConfig.provider !== 'none' && !emailConfig.appUrl.startsWith('https://')) {
+      problems.push('APP_URL must be HTTPS for emailed links');
+    }
+    if (problems.length > 0) {
+      throw new Error(`Email provider configuration invalid: ${problems.join('; ')}.`);
+    }
   }
   const runner = resolveStore();
   if (!runner) {

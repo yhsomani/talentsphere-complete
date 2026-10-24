@@ -240,7 +240,7 @@ verified must never hold the proof.
   a dead link on behalf of someone who withdrew the request. Best effort: an email the
   worker has already picked up still goes out (`tests/integration/work-history-removal.test.ts`,
   `tests/pg/work-history-removal.test.ts`).
-- **Delivery:** development uses the dev outbox; deployed environments support the opt-in Resend adapter in `apps/worker/src/mail-provider.ts`. Live mailbox delivery and sender approval remain unverified. Without configured delivery, creation endpoints fail closed. Queue idempotency does not establish exactly-once handler execution; see audit D-02.
+- **Delivery:** development uses the dev outbox; deployed environments support the opt-in Brevo adapter in `apps/worker/src/email/brevo.ts`. Live mailbox delivery and sender approval remain unverified. Without configured delivery, creation endpoints fail closed. Queue idempotency does not establish exactly-once handler execution; see audit D-02.
 
 ### Object-level authorization
 

@@ -67,11 +67,13 @@ export const ServerEnvSchema = z.object({
   SUPABASE_BUCKET_PORTFOLIO: z.string().default('portfolio'),
 
   // Optional, server-only transactional email. 'none' fails closed in deployed
-  // environments; enabling Resend still requires provider account, DNS and
-  // actual mailbox validation outside CI.
-  EMAIL_PROVIDER: z.enum(['none', 'resend']).default('none'),
-  RESEND_API_KEY: z.string().min(12).optional(),
+  // environments. Brevo is the only provider; it still needs a verified sender
+  // domain (SPF/DKIM/DMARC at the DNS host) and a real mailbox test outside CI.
+  EMAIL_PROVIDER: z.enum(['none', 'brevo']).default('none'),
+  BREVO_API_KEY: z.string().min(12).optional(),
   EMAIL_FROM: z.string().email().optional(),
+  EMAIL_FROM_NAME: z.string().min(1).optional(),
+  EMAIL_REPLY_TO: z.string().email().optional(),
 
   // Billing. 'disabled' (default) refuses paid subscriptions honestly;
   // 'simulated' activates them WITHOUT payment for development and tests only
@@ -182,6 +184,16 @@ export function stripeConfigProblems(env: ServerEnv): string[] {
   return problems;
 }
 
+/** True when deployed email delivery is fully configured. The single gate the API routes use. */
+export function emailDeliveryConfigured(env: ServerEnv): boolean {
+  return (
+    env.EMAIL_PROVIDER === 'brevo' &&
+    !!env.BREVO_API_KEY &&
+    !!env.EMAIL_FROM &&
+    env.APP_URL.startsWith('https://')
+  );
+}
+
 export function productionConfigProblems(env: ServerEnv): string[] {
   if (!isDeployed(env)) return [];
   const where = env.NODE_ENV;
@@ -236,9 +248,9 @@ export function productionConfigProblems(env: ServerEnv): string[] {
       problems.push('Hosted Supabase DATABASE_URL is not a valid URL');
     }
   }
-  if (env.EMAIL_PROVIDER === 'resend') {
-    if (!env.RESEND_API_KEY || !env.EMAIL_FROM) {
-      problems.push('EMAIL_PROVIDER=resend requires RESEND_API_KEY and EMAIL_FROM');
+  if (env.EMAIL_PROVIDER === 'brevo') {
+    if (!env.BREVO_API_KEY || !env.EMAIL_FROM) {
+      problems.push('EMAIL_PROVIDER=brevo requires BREVO_API_KEY and EMAIL_FROM');
     }
     if (!env.APP_URL.startsWith('https://')) {
       problems.push('Email reference links require an HTTPS APP_URL in deployed environments');

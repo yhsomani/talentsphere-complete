@@ -160,11 +160,16 @@ the response header `x-talentsphere-durability: ephemeral` (registry:
 
 ### Transactional email (opt-in)
 
-Set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (server/worker secret),
-`EMAIL_FROM` (verified sender), and an HTTPS `APP_URL` in both the API and
-worker environments. **Configured does not mean delivered:** the API reports
-durable enqueue, and the worker submits with a provider idempotency key. The
-provider response can still be rejected, delayed or bounced. Validate sender
+Brevo is the only provider. Set `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`
+(server/worker secret), `EMAIL_FROM` (a sender authenticated in Brevo), optional
+`EMAIL_FROM_NAME` / `EMAIL_REPLY_TO`, and an HTTPS `APP_URL` in both the API
+and worker environments. An unrecognised `EMAIL_PROVIDER` is a startup error,
+never a silent fallback. **Configured does not mean delivered:** the API reports
+durable enqueue; the worker records only that Brevo *accepted* the message
+(`messageId` logged). Delivery, bounce and block events are not consumed yet
+(no webhook route or table), and Brevo has no idempotency key, so a retry after
+a timeout can send a duplicate. The provider response can still be rejected,
+delayed or bounced. Validate sender
 DNS, delivery and bounce monitoring in staging before claiming issue #44 closed.
 With no configuration, deployed creation endpoints fail closed with 503.
 
@@ -192,9 +197,10 @@ the archive contains only a subset of personal data.
 
 ### Transactional email operational gate
 
-The Resend adapter is present and **opt-in**, not proof of mailbox delivery.
-Before enabling public verification, configure a verified sender domain, install
-`EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, and `APP_URL` in the
+The Brevo adapter is present and **opt-in**, not proof of mailbox delivery.
+Before enabling public verification, authenticate the sender domain in Brevo
+(SPF, DKIM, DMARC records at the DNS host), install
+`EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `EMAIL_FROM`, and `APP_URL` in the
 API and worker secrets, send both code and referee-link emails to real staging
 mailboxes, and record delivery, bounce and failure evidence. Never put sample
 one-time tokens or provider credentials in GitHub evidence. Pending delivery is

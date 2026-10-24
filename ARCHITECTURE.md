@@ -34,7 +34,7 @@ flowchart LR
     API -->|billing adapter| Stripe[Stripe]
     API -->|enqueue| PG
     PG -->|leased claim| Worker[Worker]
-    Worker -->|two mail handlers| Resend[Resend / dev outbox]
+    Worker -->|two mail handlers| Brevo[Brevo adapter / dev outbox]
 ```
 
 The [API reference](docs/engineering/API_CONTRACTS.md) owns endpoint counts and
@@ -48,7 +48,7 @@ store/table relationships and migration inventory. Do not duplicate their counts
 | Identity    | Email/password, HMAC sessions, password change and session revocation           | No Supabase Auth, OAuth or password-reset email flow                     |
 | Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                     | Many long-tail features are ephemeral                                    |
 | Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records | Disabled by default; live acceptance unverified                          |
-| Email       | Opt-in Resend for work-email verification and reference requests                | Provider acceptance is not mailbox delivery; no push/SMS                 |
+| Email       | Opt-in Brevo (provider-independent service) for work-email verification and reference requests | Provider acceptance is not mailbox delivery; no push/SMS                 |
 | AI          | Local heuristic and simpler assistant scaffold                                  | No remote model execution; saved BYO keys are not integration            |
 | Search      | In-process matching/ranking over available data                                 | No PostgreSQL FTS runtime integration                                    |
 | Browser     | React routes, API fetch helpers, PWA manifest/capability detection              | No implemented offline synchronization/service-worker installation       |
@@ -231,8 +231,13 @@ not run the entire API environment validator.
 ## 17. Integrations
 
 Stripe SDK calls live in `stripe-gateway.ts`; normalized snapshots keep provider
-objects out of business rules. Resend uses native fetch in the worker with a
-20-second timeout and provider idempotency key. Development mail goes to the
+objects out of business rules. Email goes through `apps/worker/src/email`: logical
+template ids and variable validation (`templates.ts`), a vendor-free contract
+(`types.ts`), one provider registry (`service.ts`), the only Brevo code
+(`brevo.ts`, native fetch, 20-second timeout) and the worker's single env reader
+(`config.ts`). To add a provider: write an adapter that passes
+`tests/unit/email/provider-contract.ts`, add it to `buildProvider` and
+`SUPPORTED_EMAIL_PROVIDERS`, set `EMAIL_PROVIDER`. Call sites do not change. Development mail goes to the
 labelled log outbox. Neither live delivery nor live billing was exercised here.
 Supabase Auth/Storage/Realtime/Queues, Mux, OAuth, LinkedIn and external LLM adapters
 remain unimplemented targets. Hosted PostgreSQL assets do not implement those

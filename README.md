@@ -26,7 +26,7 @@ admin audit, feature flags and billing. Run **one API process per database**;
 an advisory lock refuses a second writer.
 
 Stripe Checkout, Customer Portal, signed webhooks and subscription reconciliation
-exist in source. Billing defaults to disabled. Resend delivery is opt-in. Neither
+exist in source. Billing defaults to disabled. Brevo email delivery is opt-in. Neither
 adapter's presence proves a successful live payment or mailbox delivery. AI uses
 local heuristics; no external model provider is connected.
 

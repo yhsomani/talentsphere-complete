@@ -13,7 +13,7 @@ A PWA-first career platform where candidates prove their skills and work history
 - Data: PostgreSQL via `pg`. SQL migrations in `supabase/migrations` (55 files), applied by `pnpm db:migrate`. The core career loop is persisted; other API modules are in memory and labelled `ephemeral`.
 - Worker: `apps/worker` claims `background_jobs` with `FOR UPDATE SKIP LOCKED`.
 - Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`). Supabase Auth is not used.
-- Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: opt-in Resend for transactional work-history messages; development uses the labelled dev outbox. Live delivery is not established by source.
+- Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: opt-in Brevo (behind a provider-independent service in `apps/worker/src/email`) for transactional work-history messages; development uses the labelled dev outbox. Live delivery is not established by source.
 
 Read `ARCHITECTURE.md` (what is built) before changing code. `SSOT.md` is the intent, not a status report.
 
