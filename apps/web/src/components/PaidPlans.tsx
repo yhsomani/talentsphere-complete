@@ -15,6 +15,15 @@ interface Plan {
   targetRole: string;
 }
 
+interface CurrentState {
+  planTier: string;
+  status: string;
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: string;
+  aiRequestsUsed: number;
+  aiRequestsLimit: number;
+}
+
 interface PlansResponse {
   plans: Plan[];
   checkoutEnabled?: boolean;
@@ -28,6 +37,7 @@ interface PlansResponse {
  */
 export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [current, setCurrent] = useState<CurrentState | null>(null);
   const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +51,31 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
       .catch(() => undefined); // The free pricing page stands on its own.
     return () => controller.abort();
   }, []);
+
+  // Display only: the server decides the plan and the limits.
+  useEffect(() => {
+    if (!signedIn) return;
+    const controller = new AbortController();
+    Promise.all([
+      apiJson<{ subscription: Omit<CurrentState, 'aiRequestsUsed' | 'aiRequestsLimit'> }>(
+        '/api/v1/billing/subscription',
+        { signal: controller.signal }
+      ),
+      apiJson<{ usage: { requestsCount: number }; limits: { maxRequestsPerDay: number } }>(
+        '/api/v1/ai/usage',
+        { signal: controller.signal }
+      ),
+    ])
+      .then(([sub, ai]) =>
+        setCurrent({
+          ...sub.subscription,
+          aiRequestsUsed: ai.usage.requestsCount,
+          aiRequestsLimit: ai.limits.maxRequestsPerDay,
+        })
+      )
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [signedIn]);
 
   if (plans.length === 0) return null;
 
@@ -81,6 +116,30 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
           </Button>
         ))}
       </div>
+      {current && (
+        <div data-testid="current-plan" style={{ marginTop: spacing.md }}>
+          <p style={{ margin: 0 }}>
+            Current plan: <strong>{current.planTier.replace(/_/g, ' ')}</strong> ({current.status}
+            {current.cancelAtPeriodEnd
+              ? `, ends ${new Date(current.currentPeriodEnd).toLocaleDateString()}`
+              : ''}
+            )
+          </p>
+          <label>
+            AI assistant today: {current.aiRequestsUsed} of {current.aiRequestsLimit} requests
+            <progress
+              value={current.aiRequestsUsed}
+              max={current.aiRequestsLimit}
+              style={{ display: 'block', width: '100%' }}
+            />
+          </label>
+          {current.aiRequestsUsed >= current.aiRequestsLimit && (
+            <Notice tone="error">
+              You have reached today&apos;s AI limit. Choose a higher plan below for more.
+            </Notice>
+          )}
+        </div>
+      )}
       {error && <Notice tone="error">{error}</Notice>}
       <div style={{ display: 'grid', gap: spacing.md, marginTop: spacing.md }}>
         {plans.map((plan) => (

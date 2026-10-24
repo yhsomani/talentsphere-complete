@@ -76,8 +76,9 @@ the deployment environment, never into chat or git.
 - Free-recruiter posting policy; which advertised features to build or drop.
 - Frontend: `PaidPlans.tsx` (shown only when the server reports Stripe checkout
   enabled) now lists each plan's features from `/billing/plans` and has a
-  monthly/yearly toggle; the browser sends the plan and cycle only. It has no
-  comparison table, usage meter or upgrade prompt yet, and was not exercised in
+  monthly/yearly toggle; the browser sends the plan and cycle only. It also shows the signed-in user's current plan and today's AI usage (read from
+  `/billing/subscription` and `/ai/usage`, display only) with a limit-reached
+  prompt. It has no comparison table yet, and was not exercised in
   a running app (needs Stripe test config).
 - Stripe: webhook registration, upgrade/downgrade proration, trials.
 - Not verified: any live billing.
