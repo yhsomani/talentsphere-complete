@@ -122,7 +122,7 @@ are extracted from `CREATE TABLE` statements; alterations/policies are not table
 creation, and presence does not establish applied state or runtime use. For column
 bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DDL.
 
-54 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
+55 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
 
 | Migration | Created tables |
 | --- | --- |
@@ -180,3 +180,4 @@ bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DD
 | [00052_billing_persistence_and_stripe.sql](../../supabase/migrations/00052_billing_persistence_and_stripe.sql) | `stripe_customers` |
 | [00053_billing_role_grants_hardening.sql](../../supabase/migrations/00053_billing_role_grants_hardening.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
 | [00054_repoint_auth_users_foreign_keys.sql](../../supabase/migrations/00054_repoint_auth_users_foreign_keys.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00055_certificate_revocations_rls.sql](../../supabase/migrations/00055_certificate_revocations_rls.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
