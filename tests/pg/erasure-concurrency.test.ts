@@ -8,42 +8,13 @@
  *
  * Requires TEST_DATABASE_URL. Run: pnpm test:pg.
  */
-import {
-  afterAll as baseAfterAll,
-  beforeAll as baseBeforeAll,
-  describe,
-  expect,
-  it as baseIt,
-} from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import pg from 'pg';
-import { DomainError, requestAccountErasure } from '../../packages/domain/src/index.js';
+import { requestAccountErasure } from '../../packages/domain/src/index.js';
 import { PgErasureRequestStore } from '../../apps/api/src/storage/erasure-store.js';
 import { dropTestDatabase } from './test-db.js';
-
-// DIAGNOSTIC: surface failures as GitHub annotations.
-const emit = (where: string, err: unknown) => {
-  const e = err as { stack?: string; message?: string; code?: string };
-  const msg = `[${where}] code=${e?.code} ${String(e?.stack ?? err)}`
-    .replace(/\r?\n/g, '%0A')
-    .slice(0, 1500);
-  console.log(`::error title=erasure-pg::${msg}`);
-};
-process.on('unhandledRejection', (e) => emit('unhandledRejection', e));
-process.on('uncaughtException', (e) => emit('uncaughtException', e));
-const wrap = <T extends (...a: never[]) => Promise<void>>(where: string, fn: T) =>
-  (async (...a: never[]) => {
-    try {
-      await fn(...a);
-    } catch (e) {
-      emit(where, e);
-      throw e;
-    }
-  }) as unknown as T;
-const it = (name: string, fn: () => Promise<void>) => baseIt(name, wrap(name, fn));
-const beforeAll = (fn: () => Promise<void>, t?: number) => baseBeforeAll(wrap('beforeAll', fn), t);
-const afterAll = (fn: () => Promise<void>) => baseAfterAll(wrap('afterAll', fn));
 
 const baseUrl = process.env.TEST_DATABASE_URL;
 if (!baseUrl) {
@@ -78,8 +49,6 @@ describe('Erasure store concurrency on PostgreSQL', { timeout: TEST_TIMEOUT }, (
     // An idle client killed server-side must not become an unhandled 'error' event.
     pool.on('error', () => {});
     store = new PgErasureRequestStore(pool);
-    const v = await pool.query("SELECT version() v, current_setting('max_connections') mc");
-    console.log(`::notice title=erasure-pg-info::${v.rows[0].v} max_connections=${v.rows[0].mc}`);
   }, 120_000);
 
   afterAll(async () => {
@@ -105,12 +74,16 @@ describe('Erasure store concurrency on PostgreSQL', { timeout: TEST_TIMEOUT }, (
       )
     ).rows as { id: string; status: string; cancelled_at: Date | null }[];
 
-  /** Every rejection must be a defined DomainError, never a raw pg error. */
+  /** Every rejection must be a defined DomainError (by name and code), never a raw pg error. */
   function expectDomainErrors(results: PromiseSettledResult<unknown>[], codes: string[]) {
     for (const r of results) {
       if (r.status === 'rejected') {
-        expect(r.reason).toBeInstanceOf(DomainError);
-        expect(codes).toContain((r.reason as DomainError).code);
+        // Duck-typed: the store resolves '@talentsphere/domain' (dist) while this
+        // file imports the source, so they hold two distinct DomainError classes
+        // and instanceof is always false across that boundary.
+        const reason = r.reason as { name?: string; code?: string };
+        expect(reason.name).toBe('DomainError');
+        expect(codes).toContain(reason.code);
       }
     }
   }
