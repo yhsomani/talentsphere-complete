@@ -1,0 +1,271 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1792855169219,
+  "projectRoot": "C:\\Users\\yashs\\OneDrive\\Desktop\\talentsphere-complete",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "@playwright/test",
+        "version": "1.63.0",
+        "category": "testing"
+      },
+      {
+        "name": "fastify",
+        "version": "5.12.5",
+        "category": "backend"
+      },
+      {
+        "name": "vitest",
+        "version": "3.2.7",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "lintCommand": "pnpm lint",
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+      "build": "pnpm --recursive --filter \"./packages/*\" build && pnpm --recursive --filter \"./apps/*\" build",
+      "test": "vitest run",
+      "test:unit": "vitest run tests/unit",
+      "test:integration": "vitest run tests/integration",
+      "test:e2e": "playwright test",
+      "test:playwright": "playwright test",
+      "test:security": "vitest run --dir tests/security",
+      "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
+      "test:performance": "playwright test tests/e2e/performance.spec.ts",
+      "typecheck": "tsc -b && tsc -p tests",
+      "lint": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+      "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+      "validate": "pnpm typecheck && pnpm test:unit",
+      "db:migrate": "node scripts/migrate.mjs",
+      "db:seed": "node scripts/seed.mjs",
+      "test:pg": "vitest run --config vitest.pg.config.ts"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": true,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "scripts",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "apps": {
+      "path": "apps",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1792855168879,
+      "keyFiles": []
+    },
+    "BRAIN": {
+      "path": "BRAIN",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1792855168880,
+      "keyFiles": [
+        "BRAIN.md",
+        "MEMORY.md"
+      ]
+    },
+    "deploy": {
+      "path": "deploy",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1792855168894,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 2,
+      "lastAccessed": 1792855168895,
+      "keyFiles": [
+        "INDEX.md",
+        "PRICING.md"
+      ]
+    },
+    "graphify-out": {
+      "path": "graphify-out",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1792855168896,
+      "keyFiles": [
+        "cost.json",
+        "graph.html",
+        "graph.json",
+        "GRAPH_REPORT.md",
+        "manifest.json"
+      ]
+    },
+    "packages": {
+      "path": "packages",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1792855168897,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 9,
+      "lastAccessed": 1792855168898,
+      "keyFiles": [
+        "audit-hosted-supabase-migrations.mjs",
+        "check-client-secrets.mjs",
+        "check-new-hosted-migrations.mjs",
+        "generate-icons.js",
+        "hosted-supabase-preflight.mjs"
+      ]
+    },
+    "supabase": {
+      "path": "supabase",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1792855168899,
+      "keyFiles": []
+    },
+    "TalentSphere": {
+      "path": "TalentSphere",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1792855168900,
+      "keyFiles": [
+        "create a link.md",
+        "Welcome.md"
+      ]
+    },
+    "test-results": {
+      "path": "test-results",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1792855168901,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 8,
+      "lastAccessed": 1792855168902,
+      "keyFiles": [
+        "run-tests.ps1",
+        "test-challenger-stress.ps1",
+        "test-fixtures-helper.ps1",
+        "test-tier1-feature-coverage.ps1",
+        "test-tier2-boundary-corners.ps1"
+      ]
+    },
+    "apps\\api": {
+      "path": "apps\\api",
+      "purpose": "API routes",
+      "fileCount": 3,
+      "lastAccessed": 1792855168903,
+      "keyFiles": [
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.tsbuildinfo"
+      ]
+    },
+    "packages\\config": {
+      "path": "packages\\config",
+      "purpose": "Configuration files",
+      "fileCount": 3,
+      "lastAccessed": 1792855168907,
+      "keyFiles": [
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.tsbuildinfo"
+      ]
+    },
+    "scripts\\lib": {
+      "path": "scripts\\lib",
+      "purpose": "Library code",
+      "fileCount": 2,
+      "lastAccessed": 1792855168908,
+      "keyFiles": [
+        "migration-integrity.mjs",
+        "pg.mjs"
+      ]
+    },
+    "supabase\\migrations": {
+      "path": "supabase\\migrations",
+      "purpose": "Database migrations",
+      "fileCount": 55,
+      "lastAccessed": 1792855168909,
+      "keyFiles": [
+        "00001_core_schema.sql",
+        "00002_evidence_skills_schema.sql",
+        "00003_jobs_applications_schema.sql"
+      ]
+    },
+    "supabase\\tests": {
+      "path": "supabase\\tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1792855168910,
+      "keyFiles": []
+    },
+    "tests\\helpers": {
+      "path": "tests\\helpers",
+      "purpose": "Helper functions",
+      "fileCount": 3,
+      "lastAccessed": 1792855168912,
+      "keyFiles": [
+        "content.ts",
+        "stripe.ts",
+        "webhook.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "docs/reports/FEATURE_STATUS_2026-10-21.md",
+      "accessCount": 3,
+      "lastAccessed": 1792866540170,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1792866526122,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
