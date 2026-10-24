@@ -1,5 +1,7 @@
 # Payment audit and fixes, 2026-10-23
 
+> Superseded in part: this report says no Stripe provider exists. Stripe Checkout, Portal, signed webhook and refund handling now exist in source (apps/api/src/billing-stripe.ts, stripe-gateway.ts) and plans/entitlements are described in docs/PRICING.md. Findings below are kept as a dated record; live billing remains unverified.
+
 > Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
 
 ## Scope and what exists
