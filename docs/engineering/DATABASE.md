@@ -99,8 +99,8 @@ impact, verification, release ordering and a rollback or forward-fix plan.
 
 The runner deliberately refuses hosted Supabase. A manual ordered adapter exists
 in [supabase/hosted/README.md](../../supabase/hosted/README.md), including aliases,
-00054 and a Data API lockdown. That file records a historical partial application,
-not a freshly observed state. Follow the
+00054 and a Data API lockdown. That file records the state applied on 2026-10-23 (00001-00054, aliases, lockdown,
+`schema_migrations` ledger; all tables empty), not a freshly observed state. Follow the
 [hosted gate](HOSTED_SUPABASE_MIGRATION_GATE.md) before any live action. Never
 create synthetic platform Auth users or replace hosted `auth.uid()`/`auth.jwt()`
 to make custom Fastify identities appear compatible.
