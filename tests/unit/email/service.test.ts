@@ -47,6 +47,106 @@ describe('email templates', () => {
     expect(r.subject).toBe('A candidate asked you for a reference');
     expect(r.text).toContain('https://app.example.test/reference/r1#token=t0k');
   });
+  it('keeps CR/LF out of the subject when the candidate name contains them', () => {
+    const r = renderTemplate(
+      {
+        templateId: 'reference.request',
+        variables: {
+          candidateName: 'Eve\r\nBcc: x@evil.test',
+          title: 'Eng',
+          companyName: 'Acme',
+          referenceId: 'r1',
+          token: 't0k',
+        },
+      },
+      'https://app.example.test'
+    );
+    expect(r.subject).not.toMatch(/[\r\n]/);
+    expect(r.subject).toBe('Eve Bcc: x@evil.test asked you for a reference');
+    expect(r.text).not.toMatch(/[\r\n]/);
+  });
+  it('treats a whitespace-only title as missing', () => {
+    expect(() =>
+      renderTemplate(
+        {
+          templateId: 'reference.request',
+          variables: {
+            candidateName: 'Eve',
+            title: '   ',
+            companyName: 'Acme',
+            referenceId: 'r1',
+            token: 't0k',
+          },
+        },
+        'https://app.example.test'
+      )
+    ).toThrow(EmailError);
+    expect(() =>
+      renderTemplate(
+        {
+          templateId: 'reference.request',
+          variables: {
+            candidateName: 'Eve',
+            title: '   ',
+            companyName: 'Acme',
+            referenceId: 'r1',
+            token: 't0k',
+          },
+        },
+        'https://app.example.test'
+      )
+    ).toThrow(/title/);
+  });
+  it('removes CR/LF from companyName in the body', () => {
+    const r = renderTemplate(
+      {
+        templateId: 'reference.request',
+        variables: {
+          candidateName: 'Eve',
+          title: 'Eng',
+          companyName: 'Acme\r\nBcc: x@evil.test',
+          referenceId: 'r1',
+          token: 't0k',
+        },
+      },
+      'https://app.example.test'
+    );
+    expect(r.text).not.toMatch(/[\r\n]/);
+    expect(r.text).toContain('at Acme Bcc: x@evil.test.');
+  });
+  it('removes the U+202E bidi override from a candidate name', () => {
+    const r = renderTemplate(
+      {
+        templateId: 'reference.request',
+        variables: {
+          candidateName: 'Eve‮evil',
+          title: 'Eng',
+          companyName: 'Acme',
+          referenceId: 'r1',
+          token: 't0k',
+        },
+      },
+      'https://app.example.test'
+    );
+    expect(r.subject).not.toContain('‮');
+    expect(r.subject).toBe('Eve evil asked you for a reference');
+  });
+  it('truncates a 200-character candidate name to 80 characters plus an ellipsis', () => {
+    const r = renderTemplate(
+      {
+        templateId: 'reference.request',
+        variables: {
+          candidateName: 'a'.repeat(200),
+          title: 'Eng',
+          companyName: 'Acme',
+          referenceId: 'r1',
+          token: 't0k',
+        },
+      },
+      'https://app.example.test'
+    );
+    expect(r.subject).toBe(`${'a'.repeat(80)}… asked you for a reference`);
+  });
   it('names missing variables without echoing values', () => {
     expect(() =>
       renderTemplate(

@@ -11,6 +11,20 @@ interface TemplateDefinition {
   render(v: Record<string, string>, appUrl: string): RenderedTemplate;
 }
 
+const FREE_TEXT_MAX_CHARS = 80;
+
+/**
+ * Makes candidate-controlled free text safe for a plain-text email: control characters and
+ * whitespace (including CR, LF, TAB) collapse to single spaces, then the value is trimmed and capped.
+ */
+function cleanFreeText(value: string | undefined): string {
+  const flat = (value ?? '').replace(/[\p{Cc}\p{Cf}\s]+/gu, ' ').trim();
+  const chars = Array.from(flat);
+  return chars.length > FREE_TEXT_MAX_CHARS
+    ? `${chars.slice(0, FREE_TEXT_MAX_CHARS).join('')}…`
+    : flat;
+}
+
 const TEMPLATES: Record<EmailTemplateId, TemplateDefinition> = {
   'work_history.email_verification': {
     required: ['code', 'expiresAt'],
@@ -22,11 +36,13 @@ const TEMPLATES: Record<EmailTemplateId, TemplateDefinition> = {
   'reference.request': {
     required: ['title', 'companyName', 'referenceId', 'token'],
     render: (v, appUrl) => {
-      const who = v.candidateName || 'A candidate';
+      const who = cleanFreeText(v.candidateName) || 'A candidate';
+      const title = cleanFreeText(v.title);
+      const companyName = cleanFreeText(v.companyName);
       return {
         subject: `${who} asked you for a reference`,
         text:
-          `${who} listed you as a reference for ${v.title} at ${v.companyName}. ` +
+          `${who} listed you as a reference for ${title} at ${companyName}. ` +
           `Respond here: ${appUrl}/reference/${v.referenceId}#token=${v.token}`,
       };
     },
@@ -50,7 +66,7 @@ export function renderTemplate(
   for (const [k, v] of Object.entries(request.variables)) {
     if (typeof v === 'string' || typeof v === 'number') values[k] = String(v);
   }
-  const missing = def.required.filter((k) => !values[k]);
+  const missing = def.required.filter((k) => !values[k]?.trim());
   if (missing.length > 0) {
     // Names only; values may be one-time secrets.
     throw new EmailError(
