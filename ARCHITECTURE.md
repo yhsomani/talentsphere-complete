@@ -43,17 +43,17 @@ store/table relationships and migration inventory. Do not duplicate their counts
 
 ## 3. System boundary
 
-| Area        | Implemented boundary                                                            | Limit                                                                    |
-| ----------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Identity    | Email/password, HMAC sessions, password change and session revocation           | No Supabase Auth, OAuth or password-reset email flow                     |
-| Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                     | Many long-tail features are ephemeral                                    |
-| Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records | Disabled by default; live acceptance unverified                          |
+| Area        | Implemented boundary                                                                           | Limit                                                                    |
+| ----------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Identity    | Email/password, HMAC sessions, password change and session revocation                          | No Supabase Auth, OAuth or password-reset email flow                     |
+| Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                                    | Many long-tail features are ephemeral                                    |
+| Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records                | Disabled by default; live acceptance unverified                          |
 | Email       | Opt-in Brevo (provider-independent service) for work-email verification and reference requests | Provider acceptance is not mailbox delivery; no push/SMS                 |
-| AI          | Local heuristic and simpler assistant scaffold                                  | No remote model execution; saved BYO keys are not integration            |
-| Search      | In-process matching/ranking over available data                                 | No PostgreSQL FTS runtime integration                                    |
-| Browser     | React routes, API fetch helpers, PWA manifest/capability detection              | No implemented offline synchronization/service-worker installation       |
-| Hosting     | Oracle container/Compose/proxy/backup assets exist                              | Configuration is not proof of deployment or restore                      |
-| Supabase    | SQL history and hosted adapter assets                                           | Custom API identity remains distinct; live applied state unverified here |
+| AI          | Local heuristic and simpler assistant scaffold                                                 | No remote model execution; saved BYO keys are not integration            |
+| Search      | In-process matching/ranking over available data                                                | No PostgreSQL FTS runtime integration                                    |
+| Browser     | React routes, API fetch helpers, PWA manifest/capability detection                             | No implemented offline synchronization/service-worker installation       |
+| Hosting     | Oracle container/Compose/proxy/backup assets exist                                             | Configuration is not proof of deployment or restore                      |
+| Supabase    | SQL history and hosted adapter assets                                                          | Custom API identity remains distinct; live applied state unverified here |
 
 ## 4. Components
 
