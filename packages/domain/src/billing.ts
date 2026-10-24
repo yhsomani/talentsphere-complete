@@ -137,7 +137,7 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
     currency: 'USD',
     targetRole: 'recruiter',
     features: [
-      'Unlimited active job postings',
+      'Up to 1,000 active job postings',
       'Multi-seat workspace team access',
       'Deep Talent Graph candidate discovery',
       'Advanced recruitment intelligence & benchmarking',
