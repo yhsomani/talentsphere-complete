@@ -4767,6 +4767,10 @@ export async function buildApp(
         result: evalResult,
         evidence: evalResult.evidence,
         xpEarned: awardedXp,
+        // The evaluator never runs the submitted code; say so in the response.
+        executed: false,
+        verified: false,
+        note: 'Submitted code is not executed yet, so the score is not a verified test result.',
       });
     }
   );

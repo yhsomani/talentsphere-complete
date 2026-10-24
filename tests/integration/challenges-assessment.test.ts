@@ -125,6 +125,9 @@ describe('Challenges Arena & Assessment Engine Integration Suite (F-08, SSOT Sec
     expect(submitBody.result.status).toBe('passed');
     expect(submitBody.result.score).toBe(100);
     expect(submitBody.xpEarned).toBeGreaterThan(0);
+    expect(submitBody.executed).toBe(false);
+    expect(submitBody.verified).toBe(false);
+    expect(submitBody.note).toContain('not executed');
 
     // 2. The submission is recorded as evidence, but not as verified: the
     // evaluator does not execute code yet (SEC-02).
