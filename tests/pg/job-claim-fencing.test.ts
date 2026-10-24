@@ -29,6 +29,7 @@ const outcome = (attempts: number) => ({
   maxAttempts: 5,
   backoffMs: 100,
   attempts,
+  fence: attempts,
 });
 
 describe('background_jobs attempts fencing (pg)', () => {
