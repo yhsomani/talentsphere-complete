@@ -43,35 +43,35 @@ store/table relationships and migration inventory. Do not duplicate their counts
 
 ## 3. System boundary
 
-| Area | Implemented boundary | Limit |
-| --- | --- | --- |
-| Identity | Email/password, HMAC sessions, password change and session revocation | No Supabase Auth, OAuth or password-reset email flow |
-| Persistence | PostgreSQL core plus dedicated stores; explicit memory mode | Many long-tail features are ephemeral |
-| Billing | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records | Disabled by default; live acceptance unverified |
-| Email | Opt-in Resend for work-email verification and reference requests | Provider acceptance is not mailbox delivery; no push/SMS |
-| AI | Local heuristic and simpler assistant scaffold | No remote model execution; saved BYO keys are not integration |
-| Search | In-process matching/ranking over available data | No PostgreSQL FTS runtime integration |
-| Browser | React routes, API fetch helpers, PWA manifest/capability detection | No implemented offline synchronization/service-worker installation |
-| Hosting | Oracle container/Compose/proxy/backup assets exist | Configuration is not proof of deployment or restore |
-| Supabase | SQL history and hosted adapter assets | Custom API identity remains distinct; live applied state unverified here |
+| Area        | Implemented boundary                                                            | Limit                                                                    |
+| ----------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Identity    | Email/password, HMAC sessions, password change and session revocation           | No Supabase Auth, OAuth or password-reset email flow                     |
+| Persistence | PostgreSQL core plus dedicated stores; explicit memory mode                     | Many long-tail features are ephemeral                                    |
+| Billing     | Stripe Checkout/Portal/SDK callback, durable subscription/invoice/event records | Disabled by default; live acceptance unverified                          |
+| Email       | Opt-in Resend for work-email verification and reference requests                | Provider acceptance is not mailbox delivery; no push/SMS                 |
+| AI          | Local heuristic and simpler assistant scaffold                                  | No remote model execution; saved BYO keys are not integration            |
+| Search      | In-process matching/ranking over available data                                 | No PostgreSQL FTS runtime integration                                    |
+| Browser     | React routes, API fetch helpers, PWA manifest/capability detection              | No implemented offline synchronization/service-worker installation       |
+| Hosting     | Oracle container/Compose/proxy/backup assets exist                              | Configuration is not proof of deployment or restore                      |
+| Supabase    | SQL history and hosted adapter assets                                           | Custom API identity remains distinct; live applied state unverified here |
 
 ## 4. Components
 
-| Location | Responsibility |
-| --- | --- |
-| `apps/api/src/index.ts` | Load environment, validate deployed configuration, build and listen |
-| `apps/api/src/server.ts` | `buildApp`, hooks/errors, route orchestration, authorization, read models, `persist` |
-| `apps/api/src/storage/` | Core and dedicated SQL/memory implementations |
-| `apps/api/src/billing-stripe.ts`, `stripe-gateway.ts` | Billing orchestration and the only Stripe SDK boundary |
-| `apps/worker/src/index.ts`, `claim.ts`, `mail-provider.ts` | Durable claims, event acknowledgements and transactional email |
-| `apps/web/src/App.tsx`, `pages/`, `components/`, `lib/` | Routes, UI, session state and HTTP helpers |
-| `packages/domain/src/` | State machines, scoring, policy and auth primitives; injected-query job store |
-| `packages/contracts/src/index.ts` | Zod request schemas, validation helpers and error envelope |
-| `packages/config/src/env.ts` | Server environment schema and deployment/Stripe refusal checks |
-| `packages/observability/src/` | Pino logger/redaction and separate audit interface |
-| `packages/ui/src/` | Design tokens; components remain in the web app |
-| `packages/testing/src/` | Shared mock factories |
-| `supabase/`, `scripts/`, `tests/` | SQL, operational tools and executable checks |
+| Location                                                   | Responsibility                                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `apps/api/src/index.ts`                                    | Load environment, validate deployed configuration, build and listen                  |
+| `apps/api/src/server.ts`                                   | `buildApp`, hooks/errors, route orchestration, authorization, read models, `persist` |
+| `apps/api/src/storage/`                                    | Core and dedicated SQL/memory implementations                                        |
+| `apps/api/src/billing-stripe.ts`, `stripe-gateway.ts`      | Billing orchestration and the only Stripe SDK boundary                               |
+| `apps/worker/src/index.ts`, `claim.ts`, `mail-provider.ts` | Durable claims, event acknowledgements and transactional email                       |
+| `apps/web/src/App.tsx`, `pages/`, `components/`, `lib/`    | Routes, UI, session state and HTTP helpers                                           |
+| `packages/domain/src/`                                     | State machines, scoring, policy and auth primitives; injected-query job store        |
+| `packages/contracts/src/index.ts`                          | Zod request schemas, validation helpers and error envelope                           |
+| `packages/config/src/env.ts`                               | Server environment schema and deployment/Stripe refusal checks                       |
+| `packages/observability/src/`                              | Pino logger/redaction and separate audit interface                                   |
+| `packages/ui/src/`                                         | Design tokens; components remain in the web app                                      |
+| `packages/testing/src/`                                    | Shared mock factories                                                                |
+| `supabase/`, `scripts/`, `tests/`                          | SQL, operational tools and executable checks                                         |
 
 ## 5. Responsibility owners
 
@@ -149,18 +149,18 @@ Known violations stay visible in section 24 and the conflict register.
 
 ## 10. Extension points
 
-| Change | Existing home |
-| --- | --- |
-| Domain rule/state machine | Owning `packages/domain/src/<context>.ts` and unit tests |
-| API route | Existing context in `server.ts`, or existing injected billing module |
-| Payload | Contracts schema and route parsing |
-| Persistent record | Owning storage interface/implementation; additive migration if approved |
-| Async effect | Dispatch-kind registry plus worker handler; do not acknowledge undelivered work |
-| Notification | Domain notification type/preferences; transactional core notification op where applicable |
-| Browser page/component | `pages`, `App.tsx`, existing navigation and `components/ui` |
-| Session/data errors | `SessionProvider`, `lib/session.ts`, `apiFetch`/`apiJson` |
-| Environment | `packages/config/src/env.ts` and documented example, subject to build-file restriction |
-| Provider | Existing adapter boundary or an explicitly approved new integration |
+| Change                    | Existing home                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| Domain rule/state machine | Owning `packages/domain/src/<context>.ts` and unit tests                                  |
+| API route                 | Existing context in `server.ts`, or existing injected billing module                      |
+| Payload                   | Contracts schema and route parsing                                                        |
+| Persistent record         | Owning storage interface/implementation; additive migration if approved                   |
+| Async effect              | Dispatch-kind registry plus worker handler; do not acknowledge undelivered work           |
+| Notification              | Domain notification type/preferences; transactional core notification op where applicable |
+| Browser page/component    | `pages`, `App.tsx`, existing navigation and `components/ui`                               |
+| Session/data errors       | `SessionProvider`, `lib/session.ts`, `apiFetch`/`apiJson`                                 |
+| Environment               | `packages/config/src/env.ts` and documented example, subject to build-file restriction    |
+| Provider                  | Existing adapter boundary or an explicitly approved new integration                       |
 
 ## 11. Escalation
 
@@ -347,27 +347,26 @@ above are fixed. Invariant 007 has a known assistant-scaffold exception. Invaria
 - **INVARIANT-014:** Every route that loads a record by id authorizes the caller against that record (owner, organization, participant, admin); "authenticated" is never sufficient on its own.
 - **INVARIANT-015:** A verification credential (email code, referee token) is never returned to the person it verifies and is stored only as a hash.
 
-
 ## 26. Decision register
 
 These IDs belong to the implemented-architecture register; SSOT has a distinct
 numbering namespace. This reconciliation does not approve new architecture.
 
-| ID | Decision / status | Reason and trade-off / revisit |
-| --- | --- | --- |
-| ADR-001 | Fastify modular monolith | Shared domain boundaries; split only for measured ownership/scale needs |
-| ADR-002 | Pure domain business functions | Testability and reuse; preserve framework independence |
-| ADR-003 | Memory persistence, superseded for core by ADR-015 | Long tail still loses state; migrate deliberately |
-| ADR-004 | Self-issued HMAC sessions | No external IdP; stable secret/revocation required; provider adoption is a security decision |
-| ADR-005 | Shared Zod contracts | One request-shape owner; large file can be split without duplicate schemas |
-| ADR-006 | Central error envelope | Consistent clients/logs; extend mappings deliberately |
-| ADR-007 | Local heuristic AI | No external inference cost; remote provider needs explicit approval |
-| ADR-008 | Early memory queue engine, superseded at runtime | Durable claim loop now runs; unused engine retained pending removal decision |
-| ADR-009 | Early SQL-as-text migration guard, superseded | Runner now executes SQL; checksum/honesty controls remain |
-| ADR-010 | pnpm, packages before apps | Built workspace dependencies are required; toolchain changes respect build-file protection |
-| ADR-011 | Reticle for visible changes | Real flow verdict required; setup alone is not verification |
-| ADR-015 | [Core persistence/read model](docs/engineering/adr/ADR-015-core-loop-persistence.md), pending owner ratification | One writer and boot hydration; move reads to SQL before scaling |
-| ADR-016 | [Browser UI quality gates](docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | Browser evidence, with its documented coverage limits |
+| ID      | Decision / status                                                                                                | Reason and trade-off / revisit                                                               |
+| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ADR-001 | Fastify modular monolith                                                                                         | Shared domain boundaries; split only for measured ownership/scale needs                      |
+| ADR-002 | Pure domain business functions                                                                                   | Testability and reuse; preserve framework independence                                       |
+| ADR-003 | Memory persistence, superseded for core by ADR-015                                                               | Long tail still loses state; migrate deliberately                                            |
+| ADR-004 | Self-issued HMAC sessions                                                                                        | No external IdP; stable secret/revocation required; provider adoption is a security decision |
+| ADR-005 | Shared Zod contracts                                                                                             | One request-shape owner; large file can be split without duplicate schemas                   |
+| ADR-006 | Central error envelope                                                                                           | Consistent clients/logs; extend mappings deliberately                                        |
+| ADR-007 | Local heuristic AI                                                                                               | No external inference cost; remote provider needs explicit approval                          |
+| ADR-008 | Early memory queue engine, superseded at runtime                                                                 | Durable claim loop now runs; unused engine retained pending removal decision                 |
+| ADR-009 | Early SQL-as-text migration guard, superseded                                                                    | Runner now executes SQL; checksum/honesty controls remain                                    |
+| ADR-010 | pnpm, packages before apps                                                                                       | Built workspace dependencies are required; toolchain changes respect build-file protection   |
+| ADR-011 | Reticle for visible changes                                                                                      | Real flow verdict required; setup alone is not verification                                  |
+| ADR-015 | [Core persistence/read model](docs/engineering/adr/ADR-015-core-loop-persistence.md), pending owner ratification | One writer and boot hydration; move reads to SQL before scaling                              |
+| ADR-016 | [Browser UI quality gates](docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md)                    | Browser evidence, with its documented coverage limits                                        |
 
 ## 27. Agent quick reference
 
