@@ -69,7 +69,7 @@ export function createBrevoProvider(options: BrevoOptions): EmailProvider {
         throw new EmailError('authentication', `Email provider refused credentials (${s}).`);
       }
       if (s === 429) throw new EmailError('rate_limited', 'Email provider rate limit (429).');
-      if (s === 408 || s === 409 || s >= 500) {
+      if (s === 408 || s >= 500) {
         throw new EmailError('unavailable', `Email provider temporarily unavailable (${s}).`);
       }
       throw new EmailError('invalid_request', `Email provider rejected the request (${s}).`);

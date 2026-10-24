@@ -93,7 +93,14 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     lapsed: 0,
   };
 
-  const claimed = await store.claim({ limit: batchSize, leaseMs });
+  // Handlers run one after another, so claim only as many jobs as can run
+  // back to back inside one lease. Claiming more let later jobs' leases lapse
+  // while earlier handlers ran: another worker could then run them too
+  // (duplicate side effects such as a second email), or they were skipped with a
+  // retry attempt already burned. With the defaults this claims one job per
+  // cycle; the worker loop re-cycles immediately while there is work.
+  const safeBatch = Math.max(1, Math.min(batchSize, Math.floor(leaseMs / handlerTimeoutMs) - 1));
+  const claimed = await store.claim({ limit: safeBatch, leaseMs });
   result.claimed = claimed.length;
 
   for (const record of claimed) {

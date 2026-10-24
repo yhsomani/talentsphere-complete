@@ -45,7 +45,15 @@ for (const kind of DISPATCH_EVENT_KINDS) {
 // logical template and variables; apps/worker/src/email owns validation,
 // rendering and the provider adapter. Development with no provider keeps its
 // clearly labelled outbox.
-const emailConfig = loadEmailConfig(process.env);
+const emailConfig = (() => {
+  try {
+    return loadEmailConfig(process.env);
+  } catch (err) {
+    // A stale or mistyped EMAIL_PROVIDER must stop the worker with one clear line.
+    logger.error({ reason: (err as Error).message }, 'invalid email configuration; exiting');
+    return process.exit(1);
+  }
+})();
 const emailService = createEmailService(emailConfig);
 const deliverEmail = (
   templateId: EmailTemplateId,

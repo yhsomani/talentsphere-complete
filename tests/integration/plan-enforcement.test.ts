@@ -109,4 +109,49 @@ describe('Plan entitlements are enforced by the backend', () => {
     expect(results.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
     expect(results[5]).toBe(402);
   });
+
+  it('parallel publishes cannot exceed the Recruiter Starter limit', async () => {
+    const token = await register('plan-race@example.com', 'recruiter');
+    const org = await app.inject({
+      method: 'POST',
+      url: '/api/v1/organizations',
+      headers: auth(token),
+      payload: { name: 'Race Corp', slug: 'race-corp', website: 'https://race.example.com' },
+    });
+    const orgId = org.json().organization.id as string;
+    await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/subscribe',
+      headers: auth(token),
+      payload: { planTier: 'recruiter_starter', billingCycle: 'monthly', idempotencyKey: 'race-1' },
+    });
+    const ids: string[] = [];
+    for (let i = 0; i < 8; i++) {
+      const job = await app.inject({
+        method: 'POST',
+        url: '/api/v1/jobs',
+        headers: auth(token),
+        payload: {
+          orgId,
+          title: `Parallel ${i}`,
+          description: 'Build and run reliable distributed services for our customers.',
+          location: 'Remote',
+        },
+      });
+      ids.push(job.json().job.id as string);
+    }
+    const codes = await Promise.all(
+      ids.map(async (id) => {
+        const res = await app.inject({
+          method: 'PATCH',
+          url: `/api/v1/jobs/${id}/status`,
+          headers: auth(token),
+          payload: { status: 'published' },
+        });
+        return res.statusCode;
+      })
+    );
+    expect(codes.filter((c) => c === 200)).toHaveLength(5);
+    expect(codes.filter((c) => c === 402)).toHaveLength(3);
+  });
 });

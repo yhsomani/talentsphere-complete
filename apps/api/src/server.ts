@@ -1883,6 +1883,21 @@ export async function buildApp(
   const currentEntitlements = async (userId: string) =>
     effectiveEntitlements(userId, await settleUserSubscription(userId));
 
+  /**
+   * Serialises "count published jobs, check the plan, persist" per organisation.
+   * Without it, parallel publishes all read the same count and exceed the limit.
+   */
+  const orgPublishTails = new Map<string, Promise<unknown>>();
+  const withOrgPublishLock = <T>(orgId: string, fn: () => Promise<T>): Promise<T> => {
+    const run = (orgPublishTails.get(orgId) ?? Promise.resolve()).catch(() => undefined).then(fn);
+    const tail = run.catch(() => undefined);
+    orgPublishTails.set(orgId, tail);
+    void tail.then(() => {
+      if (orgPublishTails.get(orgId) === tail) orgPublishTails.delete(orgId);
+    });
+    return run;
+  };
+
   /** Plan posting limit (BR plan limits): count the organisation's published jobs. */
   const assertJobPlanAllowsPublishing = async (userId: string, orgId: string) => {
     const published = [...jobsById.values()].filter(
@@ -2016,9 +2031,13 @@ export async function buildApp(
       });
 
       if (updated.status === 'published' && job.status !== 'published') {
-        await assertJobPlanAllowsPublishing(session.userId, job.orgId);
+        await withOrgPublishLock(job.orgId, async () => {
+          await assertJobPlanAllowsPublishing(session.userId, job.orgId);
+          await persist({ kind: 'job', value: updated, base: job });
+        });
+      } else {
+        await persist({ kind: 'job', value: updated, base: job });
       }
-      await persist({ kind: 'job', value: updated, base: job });
 
       if (updated.status === 'published' && job.status !== 'published') {
         const activeSearches = (await storage.savedSearches.listAll()).filter((s) => s.isActive);

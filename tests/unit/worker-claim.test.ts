@@ -206,26 +206,44 @@ describe('Claim cycle: worker safety', () => {
     expect(record.lastError).toHaveLength(4096);
   });
 
-  it('does not start a claimed job whose lease cannot cover the handler timeout', async () => {
+  it('claims only as many jobs as fit inside one lease', async () => {
+    const store = new MemoryJobStore();
+    for (let i = 0; i < 3; i += 1) await store.enqueue({ kind: 'slow.job', payload: {} });
+    const claimSizes: number[] = [];
+    const spy = {
+      ...store,
+      claim: (o: { limit: number; leaseMs: number }) => {
+        claimSizes.push(o.limit);
+        return store.claim(o);
+      },
+      complete: store.complete.bind(store),
+      fail: store.fail.bind(store),
+    } as unknown as MemoryJobStore;
+    const result = await runClaimCycle({
+      store: spy,
+      handlers: handlers({ 'slow.job': async () => undefined }),
+    });
+    expect(result).toMatchObject({ claimed: 1, succeeded: 1, lapsed: 0 });
+    expect(claimSizes[0]).toBe(1); // 60s lease / 30s handler timeout leaves room for one
+  });
+
+  it('still refuses to start a job whose lease cannot cover the handler timeout', async () => {
     const store = new MemoryJobStore();
     await store.enqueue({ kind: 'slow.job', payload: {} });
-    await store.enqueue({ kind: 'slow.job', payload: {} });
     let runs = 0;
-    const base = Date.now();
-    let clock = base;
     const result = await runClaimCycle({
       store,
       leaseMs: 60_000,
       handlerTimeoutMs: 30_000,
-      now: () => clock,
+      // Worker clock is 45s ahead of the database: only 15s of lease remain.
+      now: () => Date.now() + 45_000,
       handlers: handlers({
         'slow.job': async () => {
           runs += 1;
-          clock += 45_000; // first job eats most of the second job's lease
         },
       }),
     });
-    expect(runs).toBe(1);
-    expect(result).toMatchObject({ claimed: 2, succeeded: 1, lapsed: 1 });
+    expect(runs).toBe(0);
+    expect(result).toMatchObject({ claimed: 1, succeeded: 0, lapsed: 1 });
   });
 });

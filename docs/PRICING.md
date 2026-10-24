@@ -82,3 +82,10 @@ the deployment environment, never into chat or git.
   a running app (needs Stripe test config).
 - Stripe: webhook registration, upgrade/downgrade proration, trials.
 - Not verified: any live billing.
+
+## Review notes (2026-10-24)
+
+- AI quota values were aligned to the entitlement table: free 20 to 5, Candidate Pro 500 to 50, Enterprise 5,000 to 200 requests/day (tokens 1M to 500k). This lowers limits that were previously generous; confirm before any paying customer exists.
+- Entitlements follow the **acting user's** subscription, not the organisation's. A free-plan member of a paying organisation is not capped, and downgrades do not unpublish existing jobs. Deciding an organisation-level billing owner is an open product decision.
+- The AI usage meter is in process memory (ephemeral): it resets on restart and is not shared between API instances, so quotas are not durable.
+- Publishes are serialised per organisation in the API process; a second API instance would need a database-level guard.
