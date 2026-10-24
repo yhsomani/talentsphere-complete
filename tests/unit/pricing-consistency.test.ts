@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   PLATFORM_PLANS,
@@ -6,7 +7,7 @@ import {
   type PlanTier,
 } from '../../packages/domain/src/index.js';
 
-const read = (path: string) => readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8');
+const read = (file: string) => readFileSync(resolve('.', file), 'utf8');
 const pricing = read('docs/PRICING.md');
 const tiers = Object.keys(PLATFORM_PLANS) as PlanTier[];
 const paid = tiers.filter((t) => t !== 'free');
