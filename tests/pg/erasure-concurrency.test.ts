@@ -74,15 +74,18 @@ describe('Erasure store concurrency on PostgreSQL', { timeout: TEST_TIMEOUT }, (
       )
     ).rows as { id: string; status: string; cancelled_at: Date | null }[];
 
-  /** Every rejection must be a defined DomainError (by name and code), never a raw pg error. */
+  /**
+   * Every rejection must be a defined DomainError, never a raw pg error. The
+   * store may load @talentsphere/domain from a different module instance than
+   * this test (built dist vs source), so check structurally, not by class.
+   */
   function expectDomainErrors(results: PromiseSettledResult<unknown>[], codes: string[]) {
     for (const r of results) {
       if (r.status === 'rejected') {
-        // Duck-typed: the store resolves '@talentsphere/domain' (dist) while this
-        // file imports the source, so they hold two distinct DomainError classes
-        // and instanceof is always false across that boundary.
-        const reason = r.reason as { name?: string; code?: string };
+        const reason = r.reason as { name?: unknown; code?: unknown };
+        expect(reason).toBeTypeOf('object');
         expect(reason.name).toBe('DomainError');
+        expect(typeof reason.code).toBe('string');
         expect(codes).toContain(reason.code);
       }
     }
