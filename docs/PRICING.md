@@ -74,8 +74,10 @@ the deployment environment, never into chat or git.
 
 - Founder approval of the prices above; currency is USD only.
 - Free-recruiter posting policy; which advertised features to build or drop.
-- Frontend: `PaidPlans.tsx` shows monthly prices and a Subscribe button only. No
-  yearly toggle, comparison table, usage meter or upgrade prompt yet; the
-  API already returns what they need (`/billing/subscription`, `/ai/usage`).
+- Frontend: `PaidPlans.tsx` (shown only when the server reports Stripe checkout
+  enabled) now lists each plan's features from `/billing/plans` and has a
+  monthly/yearly toggle; the browser sends the plan and cycle only. It has no
+  comparison table, usage meter or upgrade prompt yet, and was not exercised in
+  a running app (needs Stripe test config).
 - Stripe: webhook registration, upgrade/downgrade proration, trials.
 - Not verified: any live billing.

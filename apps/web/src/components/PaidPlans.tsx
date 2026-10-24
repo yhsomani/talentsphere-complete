@@ -9,6 +9,8 @@ interface Plan {
   name: string;
   description: string;
   priceMonthlyCents: number;
+  priceYearlyCents: number;
+  features: string[];
   currency: string;
   targetRole: string;
 }
@@ -26,6 +28,7 @@ interface PlansResponse {
  */
 export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,6 +68,19 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
       <h2 id="paid-plans-title" style={{ fontSize: '1.125rem', color: colors.neutral[700] }}>
         Paid plans
       </h2>
+      <div role="group" aria-label="Billing period" style={{ display: 'flex', gap: spacing.sm }}>
+        {(['monthly', 'yearly'] as const).map((c) => (
+          <Button
+            key={c}
+            variant={cycle === c ? 'primary' : 'outline'}
+            aria-pressed={cycle === c}
+            onClick={() => setCycle(c)}
+            data-testid={`cycle-${c}`}
+          >
+            {c === 'monthly' ? 'Monthly' : 'Yearly'}
+          </Button>
+        ))}
+      </div>
       {error && <Notice tone="error">{error}</Notice>}
       <div style={{ display: 'grid', gap: spacing.md, marginTop: spacing.md }}>
         {plans.map((plan) => (
@@ -83,8 +99,15 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
             <div>
               <strong>{plan.name}</strong>
               <p style={{ color: colors.neutral[600], margin: 0 }}>{plan.description}</p>
-              <p style={{ margin: 0 }}>
-                {formatMoney(plan.priceMonthlyCents, plan.currency)} / month
+              <ul style={{ margin: `${spacing.sm} 0`, paddingLeft: spacing.lg }}>
+                {plan.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+              <p style={{ margin: 0 }} data-testid={`price-${plan.tier}`}>
+                {cycle === 'monthly'
+                  ? `${formatMoney(plan.priceMonthlyCents, plan.currency)} / month`
+                  : `${formatMoney(plan.priceYearlyCents, plan.currency)} / year`}
               </p>
             </div>
             {signedIn ? (
@@ -94,7 +117,7 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
                 onClick={() =>
                   go(
                     '/api/v1/billing/checkout',
-                    { planTier: plan.tier, billingCycle: 'monthly' },
+                    { planTier: plan.tier, billingCycle: cycle },
                     plan.tier
                   )
                 }
