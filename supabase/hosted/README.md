@@ -9,6 +9,6 @@ The repo's migrations assume a plain PostgreSQL where `pnpm db:migrate` runs. Th
 5. `02_data_api_lockdown.sql` (removes the Data API's access for `anon` and `authenticated`)
 6. Record each applied file in `schema_migrations(filename, checksum)` with the sha256 of the repo file.
 
-Status as applied on 2026-10-23 (project `qidckctwrkxyiwworchd`, all tables empty): 00001-00054, the alias views and `02_data_api_lockdown.sql` (including its additions) are applied, and `schema_migrations` holds a row per file.
+Status as applied on 2026-10-23 (project `qidckctwrkxyiwworchd`, all tables empty): 00001-00055, the alias views and `02_data_api_lockdown.sql` (including its additions) are applied, and `schema_migrations` holds a row per file.
 
 Caveats: 00001-00038 were applied by an earlier session in grouped batches and their SQL was not re-read, so their ledger checksums record the repo files, not proof of byte-identical SQL. 00039-00054 were applied one file at a time with comment lines removed; the SQL statements are the repo's. Hosted RLS isolation (two-user test) and a restore drill are still unproven (#46, #47).
