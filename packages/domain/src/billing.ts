@@ -204,6 +204,34 @@ export function getPlanEntitlements(
 }
 
 /**
+ * Maximum simultaneously published job postings a plan allows, or undefined
+ * when the plan does not limit postings. Only recruiter plans carry a posting
+ * limit; the free and candidate tiers (limit 0 in the entitlement table) are
+ * not recruiter plans, so existing organisation posting rules are untouched
+ * until the founder decides a free-recruiter policy (see docs/PRICING.md).
+ */
+export function activeJobPostingLimit(entitlements: Entitlements): number | undefined {
+  return entitlements.planTier === 'recruiter_starter' ||
+    entitlements.planTier === 'recruiter_enterprise'
+    ? entitlements.activeJobsLimit
+    : undefined;
+}
+
+/** Throws PAYMENT_REQUIRED when publishing one more job would exceed the plan's limit. */
+export function assertCanPublishAnotherJob(
+  entitlements: Entitlements,
+  currentlyPublished: number
+): void {
+  const limit = activeJobPostingLimit(entitlements);
+  if (limit !== undefined && currentlyPublished + 1 > limit) {
+    throw new DomainError(
+      'PAYMENT_REQUIRED',
+      `Your plan allows ${limit} active job posting${limit === 1 ? '' : 's'}. Close a job or upgrade to publish another.`
+    );
+  }
+}
+
+/**
  * Section 64 Monetization Invariant:
  * Monetization must never:
  * - buy professional credibility;

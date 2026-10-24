@@ -1,4 +1,5 @@
 import { DomainError } from './core.js';
+import { getPlanEntitlements, type Entitlements, type PlanTier } from './billing.js';
 
 export type AISenderRole = 'user' | 'assistant' | 'system';
 export type AITier = 'free' | 'pro' | 'enterprise';
@@ -49,24 +50,34 @@ export interface AIEngineResponse {
   provenance: AIProvenance;
 }
 
-// Daily Quota Limits (SSOT Section 16.4: Free-User Cost Invariant)
-export const AI_QUOTA_LIMITS: Record<
-  AITier,
-  { maxTokensPerDay: number; maxRequestsPerDay: number }
-> = {
-  free: {
-    maxTokensPerDay: 5000,
-    maxRequestsPerDay: 20,
-  },
-  pro: {
-    maxTokensPerDay: 100000,
-    maxRequestsPerDay: 500,
-  },
-  enterprise: {
-    maxTokensPerDay: 1000000,
-    maxRequestsPerDay: 5000,
-  },
+// Daily Quota Limits (SSOT Section 16.4: Free-User Cost Invariant).
+// Derived from the plan entitlement table in billing.ts, the single source of
+// plan limits, so the quota, the plan copy and /billing/subscription agree.
+export interface AIQuotaLimits {
+  maxTokensPerDay: number;
+  maxRequestsPerDay: number;
+}
+
+const limitsOf = (e: Entitlements): AIQuotaLimits => ({
+  maxTokensPerDay: e.aiDailyTokensLimit,
+  maxRequestsPerDay: e.aiDailyRequestsLimit,
+});
+
+export const AI_QUOTA_LIMITS: Record<AITier, AIQuotaLimits> = {
+  free: limitsOf(getPlanEntitlements('', 'free')),
+  pro: limitsOf(getPlanEntitlements('', 'candidate_pro')),
+  enterprise: limitsOf(getPlanEntitlements('', 'recruiter_enterprise')),
 };
+
+/** The AI quota a user's current entitlements grant (any plan tier, e.g. recruiter_starter). */
+export function aiQuotaForEntitlements(entitlements: Entitlements): AIQuotaLimits {
+  return limitsOf(entitlements);
+}
+
+/** Meter label for a plan tier. Limits come from entitlements, not from this label. */
+export function aiTierForPlan(tier: PlanTier): AITier {
+  return tier === 'free' ? 'free' : tier === 'recruiter_enterprise' ? 'enterprise' : 'pro';
+}
 
 export const AI_ADVISORY_DISCLAIMER =
   'AI outputs are advisory and not verified candidate evidence. Recommendations do not mutate your verified profile or credentials.';
@@ -149,9 +160,9 @@ export function sanitizePromptInput(
 export function assertWithinAIQuota(
   meter: AIUsageMeter | undefined,
   requestedTokens: number,
-  tier: AITier = 'free'
+  tier: AITier | AIQuotaLimits = 'free'
 ): void {
-  const limits = AI_QUOTA_LIMITS[tier] || AI_QUOTA_LIMITS.free;
+  const limits = typeof tier === 'string' ? AI_QUOTA_LIMITS[tier] || AI_QUOTA_LIMITS.free : tier;
 
   const currentTokens = meter?.tokensConsumed ?? 0;
   const currentRequests = meter?.requestsCount ?? 0;

@@ -59,7 +59,7 @@ describe('Central AI Gateway Domain (F-11, SSOT Section 16)', () => {
         userId: 'user-1',
         periodDate: '2026-09-24',
         tokensConsumed: 1000,
-        requestsCount: 5,
+        requestsCount: AI_QUOTA_LIMITS.free.maxRequestsPerDay - 1,
         tier: 'free',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

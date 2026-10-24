@@ -117,6 +117,20 @@ export function entitledTier(status: SubscriptionStatus, tier: PlanTier): PlanTi
   return status === 'active' || status === 'trialing' ? tier : 'free';
 }
 
+/**
+ * The single answer to "what may this user do now": derived from the stored
+ * subscription (never from the browser), so a lapsed, unpaid or absent
+ * subscription is the free tier. Callers settle elapsed cancellations first.
+ */
+export function effectiveEntitlements(
+  userId: string,
+  subscription: Subscription | undefined,
+  nowIso: string = new Date().toISOString()
+): Entitlements {
+  const tier = subscription ? entitledTier(subscription.status, subscription.planTier) : 'free';
+  return getPlanEntitlements(userId, tier, nowIso);
+}
+
 export interface ReconcileSubscriptionResult {
   /** True when the snapshot is older than state already applied: change nothing. */
   stale: boolean;

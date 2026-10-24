@@ -100,7 +100,6 @@ import {
   AIMessage,
   AIUsageMeter,
   AITier,
-  AI_QUOTA_LIMITS,
   createAIConversationEntity,
   sanitizePromptInput,
   estimateTokens,
@@ -143,6 +142,10 @@ import {
   Subscription,
   PLATFORM_PLANS,
   getPlanEntitlements,
+  effectiveEntitlements,
+  assertCanPublishAnotherJob,
+  aiQuotaForEntitlements,
+  aiTierForPlan,
   createSubscription,
   cancelSubscription,
   settleSubscription,
@@ -1876,6 +1879,18 @@ export async function buildApp(
   );
 
   // Jobs Endpoints (F-04, F-05, BR-01..BR-12)
+  /** Entitlements from the stored subscription (elapsed cancellations settled first). */
+  const currentEntitlements = async (userId: string) =>
+    effectiveEntitlements(userId, await settleUserSubscription(userId));
+
+  /** Plan posting limit (BR plan limits): count the organisation's published jobs. */
+  const assertJobPlanAllowsPublishing = async (userId: string, orgId: string) => {
+    const published = [...jobsById.values()].filter(
+      (j) => j.orgId === orgId && j.status === 'published'
+    ).length;
+    assertCanPublishAnotherJob(await currentEntitlements(userId), published);
+  };
+
   app.post('/api/v1/jobs', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
     const input = CreateJobInputSchema.parse(req.body);
@@ -1922,6 +1937,7 @@ export async function buildApp(
       },
     });
 
+    if (job.status === 'published') await assertJobPlanAllowsPublishing(session.userId, job.orgId);
     await persist({ kind: 'job', value: job });
 
     if (job.status === 'published') {
@@ -1999,6 +2015,9 @@ export async function buildApp(
         orgId: actorOrgId,
       });
 
+      if (updated.status === 'published' && job.status !== 'published') {
+        await assertJobPlanAllowsPublishing(session.userId, job.orgId);
+      }
       await persist({ kind: 'job', value: updated, base: job });
 
       if (updated.status === 'published' && job.status !== 'published') {
@@ -5974,10 +5993,12 @@ export async function buildApp(
     const { sanitized } = sanitizePromptInput(input.prompt);
 
     // 3. Entitlement Quota Check (SSOT Section 16.4: Free-User Cost Invariant)
-    const userTier: AITier = 'free'; // default free tier, strictly metered
-    const meter = getOrCreateAIUsageMeter(session.userId, userTier);
+    // The quota follows the stored, Stripe-verified subscription, never a client hint.
+    const entitlements = await currentEntitlements(session.userId);
+    const meter = getOrCreateAIUsageMeter(session.userId, aiTierForPlan(entitlements.planTier));
+    meter.tier = aiTierForPlan(entitlements.planTier);
     const requestedTokens = estimateTokens(input.prompt);
-    assertWithinAIQuota(meter, requestedTokens, userTier);
+    assertWithinAIQuota(meter, requestedTokens, aiQuotaForEntitlements(entitlements));
 
     // 4. Conversation Management
     let conversation: AIConversation;
@@ -6051,10 +6072,12 @@ export async function buildApp(
 
   app.get('/api/v1/ai/usage', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
-    const meter = getOrCreateAIUsageMeter(session.userId, 'free');
+    const entitlements = await currentEntitlements(session.userId);
+    const meter = getOrCreateAIUsageMeter(session.userId, aiTierForPlan(entitlements.planTier));
+    meter.tier = aiTierForPlan(entitlements.planTier);
     return reply.status(200).send({
       usage: meter,
-      limits: AI_QUOTA_LIMITS[meter.tier],
+      limits: aiQuotaForEntitlements(entitlements),
     });
   });
 
