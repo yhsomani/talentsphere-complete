@@ -13,14 +13,14 @@ A PWA-first career platform where candidates prove their skills and work history
 - Data: PostgreSQL via `pg`. SQL migrations in `supabase/migrations` (54 files), applied by `pnpm db:migrate`. The core career loop is persisted; other API modules are in memory and labelled `ephemeral`.
 - Worker: `apps/worker` claims `background_jobs` with `FOR UPDATE SKIP LOCKED`.
 - Auth: self-issued HMAC session tokens (`packages/domain/src/auth.ts`). Supabase Auth is not used.
-- Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: none integrated; codes go to the dev outbox only.
+- Payments: Stripe Checkout, Customer Portal and a signed webhook, active only with `BILLING_MODE=stripe` and the `STRIPE_*` settings (default `disabled`). Billing state is durable in Postgres. Email: opt-in Resend for transactional work-history messages; development uses the labelled dev outbox. Live delivery is not established by source.
 
 Read `ARCHITECTURE.md` (what is built) before changing code. `SSOT.md` is the intent, not a status report.
 
 ## Commands
 
 - Install: `pnpm install` (pnpm 11.7, pinned in `package.json`)
-- Dev: `pnpm dev` (web and API in parallel)
+- Dev: `pnpm dev` (web, API and worker in parallel; API/worker require existing compiled output)
 - Test: `pnpm test` (Vitest: unit, integration, security). `pnpm test:pg` needs `TEST_DATABASE_URL`. `pnpm test:e2e` runs Playwright.
 - Lint: `pnpm lint` (Prettier check). Typecheck: `pnpm typecheck`. Build: `pnpm build`.
 - Migrations: `pnpm db:migrate`

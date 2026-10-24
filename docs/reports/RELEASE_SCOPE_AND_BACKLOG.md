@@ -1,5 +1,7 @@
 # TalentSphere — Release Scope, Backlog & Sprint Roadmap (Stages A–F)
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 **Date:** 2026-10-22  
 **Author:** Teamwork Master Synthesis Engineering Group  
 **Repository:** `https://github.com/yhsomani/talentsphere-complete.git`  

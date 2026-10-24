@@ -1,5 +1,7 @@
 # Stripe and Supabase audit, 2026-10-23
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 Follows `PAYMENT_AUDIT_2026-10-23.md`, which predates the Stripe integration (PR #71).
 
 ## Access limits

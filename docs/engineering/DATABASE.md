@@ -1,162 +1,182 @@
-# TalentSphere — DATABASE.md v6.0
+# Database and persistence
 
-> **Status: target model for §3.** Measured 2026-10-21 across the 51 migration files: **111 distinct `CREATE TABLE` names** and 130 `ENABLE ROW LEVEL SECURITY` statements. That does not match the 50 canonical tables or the roughly 220 tables in §3.2. Neither statement counts nor this document verify per-table grants/RLS coverage. Selected database tests exist; they were not executed in the current audit.
+Source cross-check: `431c425a`, 2026-10-23. This is a source/storage reference,
+not a claim about an applied database. The schema is the ordered SQL in
+[supabase/migrations](../../supabase/migrations); the API does not use every table.
 
-## 1. Authority
+## Ownership and relationships
 
-PostgreSQL is the intended system of record for relational state. SQL migrations are authoritative for schema, but many API modules still use process-local state. A migrated table does not prove its feature uses it. Current SQL store coverage is recorded in the root [architecture](../../ARCHITECTURE.md) and [audit](../reports/FEATURE_STATUS_2026-10-21.md).
+[createStorage](../../apps/api/src/storage/index.ts) chooses PostgreSQL by default,
+or memory for tests unless overridden. PostgreSQL failure does not silently fall
+back to memory. `PgCoreStore` loads its tables before the API accepts traffic.
+A retained connection holds `pg_try_advisory_lock(718201, 1)`; a second API writer
+is refused. A lost lock connection makes traffic fail until restart. Transaction
+pooling cannot be assumed compatible with this session-scoped lease.
 
-## 2. Data Rules
+| Store | Persisted records / relationship | Read/write behavior |
+| --- | --- | --- |
+| [core-store.ts](../../apps/api/src/storage/core-store.ts) | `users` ? `profiles`; organizations ? `org_memberships`; jobs ? `job_skills`; applications ? `application_evidence`; evidence ? `evidence_skills`; work histories ? references/email challenges; threads ? participants/messages; notifications/preferences; revoked sessions | Boot-hydrated Maps; `persist` commits operations then updates read model |
+| [account-store.ts](../../apps/api/src/storage/account-store.ts) | `user_settings`, `data_export_requests`, keyed by account | SQL-backed settings/export history; BYO credentials encrypted with separate AES-GCM key |
+| [erasure-store.ts](../../apps/api/src/storage/erasure-store.ts) | `data_erasure_requests`, account relationship | Request/status/cancel/complete; account-row locking serializes requests |
+| [saved-search-store.ts](../../apps/api/src/storage/saved-search-store.ts) | `saved_searches` owned by user | Owner-scoped CRUD; alert-generation state remains separate |
+| [saved-job-store.ts](../../apps/api/src/storage/saved-job-store.ts) | `saved_jobs` joins user/job | Database uniqueness prevents duplicate bookmarks |
+| [admin-audit-store.ts](../../apps/api/src/storage/admin-audit-store.ts) | `admin_audit_logs` | Append and filtered list; distinct from observability's in-memory sink |
+| [feature-flag-store.ts](../../apps/api/src/storage/feature-flag-store.ts) | `feature_flags` | SQL list/get/upsert; maintenance-mode state is separate |
+| [billing-store.ts](../../apps/api/src/storage/billing-store.ts) | `subscriptions`, `invoices`, `entitlements`, `billing_events`, `stripe_customers` | Transactional state/event writes and customer ownership mapping |
+| [background-jobs.ts](../../packages/domain/src/background-jobs.ts) | `background_jobs` | Injected query boundary; enqueue, leased claim, completion/failure, cancellation and retention |
 
-- explicit PK/FK/unique/check constraints;
-- transaction boundaries for state transitions;
-- UTC timestamps + timezone context;
-- integer minor units + ISO currency;
-- version/concurrency fields where needed;
-- append-only audit/event lineage where required;
-- RLS and grants designed together;
-- storage lifecycle separated from relational lifecycle.
+User IDs and profile IDs are different: applications/evidence and messaging often
+refer to profile IDs, while billing/settings use account IDs. Check the actual
+foreign key and handler lookup before joining them. Migration 00043 aligns core
+persistence; 00047?00048 repair selected private-data policies; 00052?00053 add
+billing persistence and harden grants; 00054 repoints historical `auth.users`
+foreign keys to application-owned `public.users`.
 
-## 3. Canonical Domain Data Model
+## Transactions, reads and failure recovery
 
-### 3.1 Canonical logical core schema + operational extensions — LOCKED
+`persist(...CoreOp[])` in `apps/api/src/server.ts` rejects guarded records already
+being written or whose `base` object is stale. `PgCoreStore.commit` rechecks
+important database columns and writes in one transaction. Only after COMMIT does
+`applyToReadModel` update Maps and indexes. Unique violations become 409 conflicts;
+foreign-key/check/data errors become validation failures. A failed commit leaves
+the read model unchanged. Direct SQL changes to hydrated records need an API
+restart; dedicated SQL-backed stores have their own read behavior.
 
-| # | Table | Domain |
-|---|---|---|
-| 1 | `profiles` | Profile |
-| 2 | `profile_skills` | Profile |
-| 2a | `user_profiles` | Profile (1:1) |
-| 2b | `user_settings` | Profile (1:1) |
-| 3 | `profile_experience` | Profile |
-| 4 | `profile_education` | Profile |
-| 5 | `profile_portfolios` | Profile |
-| 6 | `resumes` | Profile |
-| 7 | `organizations` | Organizations |
-| 8 | `org_memberships` | Organizations |
-| 9 | `jobs` | Jobs |
-| 10 | `job_skills` | Jobs |
-| 11 | `job_applications` | Applications |
-| 12 | `application_status_events` | Applications |
-| 13 | `scorecards` | Applications |
-| 14 | `offers` | Applications |
-| 15 | `requisitions` | Jobs |
-| 16 | `courses` | Learning |
-| 17 | `course_modules` | Learning |
-| 18 | `course_enrollments` | Learning |
-| 19 | `module_progress` | Learning |
-| 20 | `course_reviews` | Learning |
-| 21 | `challenges` | Assessment |
-| 22 | `challenge_submissions` | Assessment |
-| 23 | `badges` | Gamification |
-| 24 | `user_badges` | Gamification |
-| 25 | `xp_transactions` | Gamification |
-| 26 | `leaderboards` | Gamification |
-| 27 | `messages` | Messaging |
-| 28 | `message_threads` | Messaging |
-| 29 | `thread_participants` | Messaging |
-| 30 | `connections` | Social |
-| 31 | `feed_activities` | Social |
-| 32 | `notifications` | Messaging |
-| 33 | `subscriptions` | Billing |
-| 34 | `invoices` | Billing |
-| 35 | `entitlements` | Billing |
-| 36 | `payment_methods` | Billing |
-| 37 | `billing_events` | Billing |
-| 38 | `reports` | Moderation |
-| 39 | `moderation_flags` | Moderation |
-| 40 | `audit_logs` | Admin |
-| 41 | `feature_flags` | Admin |
-| 42 | `platform_config` | Admin |
-| 43 | `ai_audit_log` | Admin |
-| 44 | `saved_jobs` | Marketplace |
-| 45 | `saved_searches` | Marketplace |
-| 46 | `job_alerts` | Marketplace |
-| 47 | `email_templates` | Admin |
-| 48 | `system_announcements` | Admin |
-| 49 | `mentorship_relationships` | Social |
-| 50 | `course_cohorts` | Learning |
+This is a single-writer architecture, not a distributed cache. The core transaction
+does not automatically include dedicated stores, Stripe calls or queued jobs.
+`dispatchJob` follows committed effects and logs enqueue failures. There is no
+transactional outbox guaranteeing delivery of every committed event.
 
-**Canonical invariants:** Every table has RLS enabled · UUID primary keys · `created_at`/`updated_at` audit columns · soft delete where applicable.
+Long-tail modules (courses/enrollments/certificates, challenge sessions, resumes,
+portfolio, connections, analytics, reputation and intelligence) retain Maps even
+where SQL tables exist. Course/challenge routes may persist evidence while their
+originating records disappear on restart. See the
+[route inventory](API_CONTRACTS.md#complete-static-endpoint-index) and
+[authorization review](../system-model/06-route-authorization.md).
 
-### 3.2 Operational Clusters (Non-Canonical, ~185 tables)
+## Data lifecycle and privacy
 
-| Cluster | Count | Examples |
-|---|---|---|
-| Journey | 20 | connection_requests, skill_endorsements, job_referrals, career_roadmaps, cohorts, cohort_members, cohort_curriculum, payout_profiles, creator_payouts, mentor_profiles, mentorship_sessions, mentorship_notes, mentor_reviews, institutional_showcases, agency_client_contracts, agency_placements, agency_invoices, job_trackers, course_challenges, talent_pool |
-| OS layer | 27+4 | workspaces, saved_workspace_layouts, workspace_widgets, user_tasks, os_objects, os_object_links, os_tags, os_bookmarks, os_favorites, os_history, knowledge_graph_nodes, knowledge_graph_edges, domain_events, event_subscriptions, workbench_boards, automation_rules, automation_runs, journey_instances, interventions, liquidity_signals, data_quality_findings, agents, agent_runs, agent_memory, device_trust, session_risk_scores, fraud_cases, audit_findings + os_clipboard_items, os_undo_log, os_mentions, notification_center_events |
-| Institutional | 12 | departments, batches, batch_memberships, license_pools, license_assignments, purchase_requests, procurement_orders, institutional_courses, certificates, organization_invitations, import_batches, student_consent_records |
-| Media | 10 | content_items, media_sources, media_assets, media_versions, playlist_sources, playlist_items, media_progress, media_events, media_provider_configs, media_health_checks |
-| Migration/LinkedIn | 5 | migration_jobs, migration_import_batches, imported_records, migration_consents, external_identity_references |
-| Learning marketplace | 27 | course_categories, course_versions, lessons, lesson_resources, quizzes, quiz_questions, quiz_attempts, assignments, assignment_submissions, peer_reviews, course_qna, course_qna_replies, course_discussions, course_discussion_replies, lesson_notes, lesson_bookmarks, course_wishlist, course_announcements, learning_paths, learning_path_courses, learning_path_enrollments, path_progress, course_pricing, coupons, coupon_redemptions, course_orders, instructor_earnings |
-| Social/content | 24 | follows, posts, post_media, comments, reactions, reposts, bookmarks, hashtags, post_hashtags, mentions, polls, poll_votes, articles, article_versions, newsletters, newsletter_issues, newsletter_subscriptions, post_analytics, feed_ranking_signals, muted_accounts, communities, community_memberships, community_moderation_log, profile_views |
-| Profile expansion | 11 | profile_media, career_signals, profile_certifications, profile_achievements, profile_publications, profile_test_scores, profile_volunteer, profile_languages, profile_interests, experience_media, identity_verifications |
-| Recommendations/outreach/pools | 5 | written_recommendations, outreach_credits, outreach_messages, talent_pools, talent_pool_members |
-| Pages/events | 6 | organization_pages, showcase_pages, events, event_speakers, event_rsvps, event_updates |
-| Employer insights | 6 | company_reviews, company_review_ratings, salary_reports, interview_experiences, interview_questions, company_responses |
-| Contests/certification | 9 | coding_contests, contest_problems, contest_registrations, contest_submissions, contest_leaderboard, skill_certifications, certification_attempts, practice_problems, problem_discussions |
-| Commerce ops | 2 | refunds, instructor_payouts |
+Passwords use salted, versioned PBKDF2 hashes. Work-email codes and reference
+bearer tokens are stored as SHA-256 hashes; pending email jobs necessarily carry
+delivery payloads, which are scrubbed on terminal transitions. Development outbox
+logs contain delivery text. Treat these logs as sensitive. BYO-key encryption
+uses `BYO_AI_KEY_ENCRYPTION_KEY`, not the session signing secret; rotating it needs
+re-encryption of existing ciphertext.
 
-**Effective schema ≈ 220 tables.** The "50 canonical" lock refers only to the baseline cluster; count is fixed by migrations and verified by VER-002.
+Erasure request history is durable, but there is no scheduled grace-period
+executor. `/settings/erasure/execute` performs immediate deletion without checking
+that grace period: billing/customer cleanup first, then one core anonymization
+transaction, then queued-email cancellation and additional store/Map cleanup.
+Failure after account deactivation can prevent the caller retrying later steps.
+Retained multi-party records require a retention/redaction policy. Full erasure,
+legal-hold behavior and recovery are not established by the core transaction.
+Export compiles the available account data; it is not proof of an exhaustive
+archive of every ephemeral module.
 
-## 4. RLS
+Requirements remain: explicit constraints, UTC timestamps, integer minor units
+and currency, auditable lifecycle, concurrency policy, and corrections preserving
+evidence lineage. The current evidence code mutates state; do not equate these
+requirements with an implemented append-only version/event system. Target table
+clusters and RLS generator design are in [SSOT](../../SSOT.md), Part VII sections
+24.1?24.3. They replace the former duplicated 50/~220-table target lists here.
 
-### 4.1 RLS Policy Model (ADR-010)
+## Local migrations and hosted Supabase
 
-**Policy Categories:**
+For ordinary local PostgreSQL, `pnpm db:migrate` runs `scripts/migrate.mjs`:
 
-| Category | Pattern |
-|---|---|
-| Own-row | `auth.uid() = user_id` |
-| Org-scoped | Membership subquery on `org_memberships` |
-| Application-scoped | `auth.uid() = applicant_id OR recruiter_for_job(job_id)` |
-| Public-read | Always true for SELECT on published records |
-| Admin-all | `auth.jwt()->>'role' = 'ROLE_ADMIN'` |
-| Deny-by-default | No matching policy → access denied |
+1. Check nonempty, contiguous filenames from 00001.
+2. Load `.env`; require `DATABASE_URL`; create the local database if needed.
+3. Refuse detected hosted Supabase before its identity bootstrap.
+4. Add local compatibility roles/auth helpers and organization alias views.
+5. Validate `schema_migrations` filenames/checksums using `assertMigrationHistory`.
+6. Apply each pending file and its ledger row in one transaction. On failure,
+   that file rolls back; earlier files stay applied.
+7. Maintain the local identity mirror compatibility helper.
 
-**Generator Model:**
+This is a mutating command, not a schema linter. Preserve applied SQL checksums;
+use additive migrations. Each migration needs purpose, affected data/index/RLS
+impact, verification, release ordering and a rollback or forward-fix plan.
 
-```
-generate_tenant_rls_policy(table, tenant_column, owner_column, is_public_read)
-```
+The runner deliberately refuses hosted Supabase. A manual ordered adapter exists
+in [supabase/hosted/README.md](../../supabase/hosted/README.md), including aliases,
+00054 and a Data API lockdown. That file records a historical partial application,
+not a freshly observed state. Follow the
+[hosted gate](HOSTED_SUPABASE_MIGRATION_GATE.md) before any live action. Never
+create synthetic platform Auth users or replace hosted `auth.uid()`/`auth.jwt()`
+to make custom Fastify identities appear compatible.
 
-Creates admin-override, owner, org-member, and optional public-read policies. Helpers: `auth_is_admin()`, `auth_is_org_member(org)`, `auth_is_owner(user)`.
+## Authorization and verification
 
-**RLS Fuzzing (CI Gate):** On every migration: create Tenant A/B users + orgs, seed rows, assert cross-tenant SELECT returns 0 rows, cross-tenant UPDATE/DELETE fails, owner-only tables deny non-owners, public-read tables expose no PII. Blocks merge on any failure.
+Fastify enforces authorization using its own sessions. The privileged database
+connection is not proof that RLS protects API calls. Review grants, policies,
+views and privileged functions separately before any direct Data API access;
+application tokens are not Supabase Auth identities. Private-data two-user tests
+exist in `tests/pg/private-data-rls.test.ts`; memory and SQL-text tests cannot prove
+hosted isolation. No database was queried, migrated or tested during this
+source-only documentation pass.
 
----
+## Migration inventory
 
----
+The following is a static inventory of all checked-in migration files. Table names
+are extracted from `CREATE TABLE` statements; alterations/policies are not table
+creation, and presence does not establish applied state or runtime use. For column
+bounds, foreign keys and indexes, read the linked SQL rather than a duplicate DDL.
 
-RLS is a defense-in-depth database boundary. Application authorization remains mandatory.
+54 numbered migrations; 112 distinct table names in CREATE TABLE statements (not a live schema count).
 
-## 15–22, §31–§32. Security, privacy, AI, assessment, matching, PWA, performance, testing, deployment (moved)
-
-These sections are canonical in [`SSOT.md`](../../SSOT.md), Part VII. An earlier copy here was out of date (its salary-cell threshold said k ≥5 where SSOT says k ≥10) and was removed on 2026-10-21 so that each topic has one authority. Database-specific rules stay in this file (§1–§8).
-
-## 5. Data Lifecycle
-
-```text
-CREATE → ACTIVE → ARCHIVE / DEACTIVATE → DELETE / ANONYMIZE
-```
-
-Legal hold and audit retention may override normal deletion.
-
-## 6. Evidence
-
-Evidence lineage is immutable in meaning. Corrections create new versions/events.
-
-## 7. Concurrency
-
-Use optimistic concurrency and explicit conflict policy for user-editable critical data.
-
-## 8. Migration
-
-Every migration must define:
-- purpose;
-- forward change;
-- affected data;
-- index impact;
-- RLS impact;
-- verification;
-- rollback/forward-fix strategy;
-- release ordering.
+| Migration | Created tables |
+| --- | --- |
+| [00001_core_schema.sql](../../supabase/migrations/00001_core_schema.sql) | `users`, `profiles`, `evidence`, `organizations`, `org_memberships`, `jobs`, `job_applications`, `audit_logs`, `feature_flags` |
+| [00002_evidence_skills_schema.sql](../../supabase/migrations/00002_evidence_skills_schema.sql) | `skills`, `skill_relationships`, `evidence_skills` |
+| [00003_jobs_applications_schema.sql](../../supabase/migrations/00003_jobs_applications_schema.sql) | `job_skills`, `application_evidence` |
+| [00004_challenges_assessment_schema.sql](../../supabase/migrations/00004_challenges_assessment_schema.sql) | `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions` |
+| [00005_lms_courses_schema.sql](../../supabase/migrations/00005_lms_courses_schema.sql) | `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills` |
+| [00006_messaging_schema.sql](../../supabase/migrations/00006_messaging_schema.sql) | `message_threads`, `thread_participants`, `messages` |
+| [00007_notifications_schema.sql](../../supabase/migrations/00007_notifications_schema.sql) | `notifications`, `notification_preferences` |
+| [00008_ai_gateway_schema.sql](../../supabase/migrations/00008_ai_gateway_schema.sql) | `ai_conversations`, `ai_messages`, `ai_usage_meters` |
+| [00009_resumes_schema.sql](../../supabase/migrations/00009_resumes_schema.sql) | `resumes`, `resume_exports` |
+| [00010_networking_connections_schema.sql](../../supabase/migrations/00010_networking_connections_schema.sql) | `connections` |
+| [00011_portfolio_showcase_schema.sql](../../supabase/migrations/00011_portfolio_showcase_schema.sql) | `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence` |
+| [00012_gamification_xp_ledger_schema.sql](../../supabase/migrations/00012_gamification_xp_ledger_schema.sql) | `user_gamification_profiles`, `gamification_badges`, `user_badges` |
+| [00013_account_settings_privacy_schema.sql](../../supabase/migrations/00013_account_settings_privacy_schema.sql) | `user_settings`, `data_erasure_requests`, `data_export_requests` |
+| [00014_billing_subscriptions_schema.sql](../../supabase/migrations/00014_billing_subscriptions_schema.sql) | `subscriptions`, `invoices`, `entitlements`, `billing_events` |
+| [00015_admin_governance_schema.sql](../../supabase/migrations/00015_admin_governance_schema.sql) | `platform_config` |
+| [00016_search_discovery_schema.sql](../../supabase/migrations/00016_search_discovery_schema.sql) | `search_history` |
+| [00017_moderation_trust_safety_schema.sql](../../supabase/migrations/00017_moderation_trust_safety_schema.sql) | `moderation_reports`, `moderation_appeals` |
+| [00018_saved_searches_job_alerts_schema.sql](../../supabase/migrations/00018_saved_searches_job_alerts_schema.sql) | `saved_searches`, `job_alerts`, `saved_jobs` |
+| [00019_application_drafts_schema.sql](../../supabase/migrations/00019_application_drafts_schema.sql) | `application_drafts`, `application_draft_versions` |
+| [00020_product_analytics_schema.sql](../../supabase/migrations/00020_product_analytics_schema.sql) | `analytics_events`, `analytics_daily_kpis` |
+| [00021_certificate_verification_schema.sql](../../supabase/migrations/00021_certificate_verification_schema.sql) | `certificate_revocations` |
+| [00022_job_templates_schema.sql](../../supabase/migrations/00022_job_templates_schema.sql) | `job_templates` |
+| [00023_salary_intelligence_schema.sql](../../supabase/migrations/00023_salary_intelligence_schema.sql) | `salary_reports`, `salary_aggregates` |
+| [00024_application_feedback_schema.sql](../../supabase/migrations/00024_application_feedback_schema.sql) | `feedback_templates`, `application_feedback` |
+| [00025_skill_decay_schema.sql](../../supabase/migrations/00025_skill_decay_schema.sql) | `skill_freshness`, `skill_freshness_history` |
+| [00026_technical_interview_platform_schema.sql](../../supabase/migrations/00026_technical_interview_platform_schema.sql) | `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks` |
+| [00027_reputation_engine_schema.sql](../../supabase/migrations/00027_reputation_engine_schema.sql) | `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans` |
+| [00028_warm_introductions_schema.sql](../../supabase/migrations/00028_warm_introductions_schema.sql) | `warm_introduction_preferences`, `warm_introduction_requests` |
+| [00029_referral_requests_schema.sql](../../supabase/migrations/00029_referral_requests_schema.sql) | `referral_requests`, `referral_outcomes` |
+| [00030_activity_contributions_schema.sql](../../supabase/migrations/00030_activity_contributions_schema.sql) | `activity_events`, `contribution_scores` |
+| [00031_instructor_reputation_schema.sql](../../supabase/migrations/00031_instructor_reputation_schema.sql) | `instructor_reputation_breakdown`, `instructor_endorsements` |
+| [00032_peer_credibility_schema.sql](../../supabase/migrations/00032_peer_credibility_schema.sql) | `skill_endorsements`, `endorsement_weights` |
+| [00033_alumni_networks_schema.sql](../../supabase/migrations/00033_alumni_networks_schema.sql) | `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship` |
+| [00034_employer_reputation_schema.sql](../../supabase/migrations/00034_employer_reputation_schema.sql) | `employer_reputation_breakdown`, `employer_reviews` |
+| [00035_skill_forecasting_schema.sql](../../supabase/migrations/00035_skill_forecasting_schema.sql) | `skill_market_signals`, `skill_forecasts` |
+| [00036_career_trajectory_schema.sql](../../supabase/migrations/00036_career_trajectory_schema.sql) | `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations` |
+| [00037_learning_impact_schema.sql](../../supabase/migrations/00037_learning_impact_schema.sql) | `learning_outcomes`, `learning_impact_metrics` |
+| [00038_talent_pool_intelligence_schema.sql](../../supabase/migrations/00038_talent_pool_intelligence_schema.sql) | `talent_pools`, `talent_pool_members` |
+| [00039_behavioral_talent_discovery_schema.sql](../../supabase/migrations/00039_behavioral_talent_discovery_schema.sql) | `behavioral_talent_profiles` |
+| [00040_talent_segmentation_schema.sql](../../supabase/migrations/00040_talent_segmentation_schema.sql) | `candidate_segmentations` |
+| [00041_verified_work_history_schema.sql](../../supabase/migrations/00041_verified_work_history_schema.sql) | `verified_work_histories`, `employment_references` |
+| [00042_background_jobs_schema.sql](../../supabase/migrations/00042_background_jobs_schema.sql) | `background_jobs` |
+| [00043_core_persistence_alignment.sql](../../supabase/migrations/00043_core_persistence_alignment.sql) | `work_history_email_challenges` |
+| [00044_notifications_persistence.sql](../../supabase/migrations/00044_notifications_persistence.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00045_session_revocation.sql](../../supabase/migrations/00045_session_revocation.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00046_session_sign_out.sql](../../supabase/migrations/00046_session_sign_out.sql) | `revoked_sessions` |
+| [00047_private_data_rls_hardening.sql](../../supabase/migrations/00047_private_data_rls_hardening.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00048_notification_preferences_rls_scope.sql](../../supabase/migrations/00048_notification_preferences_rls_scope.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00049_worker_liveness.sql](../../supabase/migrations/00049_worker_liveness.sql) | `worker_health` |
+| [00050_admin_audit_logs.sql](../../supabase/migrations/00050_admin_audit_logs.sql) | `admin_audit_logs` |
+| [00051_feature_flags.sql](../../supabase/migrations/00051_feature_flags.sql) | `feature_flags` |
+| [00052_billing_persistence_and_stripe.sql](../../supabase/migrations/00052_billing_persistence_and_stripe.sql) | `stripe_customers` |
+| [00053_billing_role_grants_hardening.sql](../../supabase/migrations/00053_billing_role_grants_hardening.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |
+| [00054_repoint_auth_users_foreign_keys.sql](../../supabase/migrations/00054_repoint_auth_users_foreign_keys.sql) | Alterations, policies, indexes or operational alignment; inspect SQL |

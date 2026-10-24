@@ -80,7 +80,7 @@ No release without:
 
 ---
 
-## 9. Operating the current build (as implemented, 2026-10-10)
+## 9. Operating the current build (source checked 2026-10-23)
 
 Sections 1–8 are the target operating model. This section is what the code in this
 repository actually requires today.
@@ -94,7 +94,7 @@ repository actually requires today.
   path (core reads in SQL) first.
 - **Worker** (`apps/worker`) — claims `background_jobs` with `FOR UPDATE SKIP LOCKED`;
   multiple workers can reclaim expired batch leases and execute jobs twice (audit D-02). SKIP LOCKED does not establish exactly-once execution.
-- **Web** (`apps/web/dist`) — static bundle; `VITE_SUPPORT_EMAIL` is baked in at build time.
+- **Web** (`apps/web/dist`) — static bundle; contact variables `VITE_SUPPORT_EMAIL`, `VITE_PRIVACY_EMAIL` and `VITE_SECURITY_EMAIL` are baked in at build time where used.
 
 ### Required configuration
 
@@ -104,7 +104,7 @@ repository actually requires today.
 | `DATABASE_URL`                 | Required; not the local default.                                              |
 | `STORAGE`                      | `pg` (default). `memory` is refused in production and staging.                |
 | `CORS_ALLOWED_ORIGINS`         | The web origin(s); localhost is refused in production.                        |
-| `BILLING_MODE`                 | `disabled` (default). `simulated` activates paid plans without payment and is refused in production. |
+| `BILLING_MODE`                 | `disabled` (default), `simulated` (no payment; refused in production), or `stripe` (configured provider). |
 | `BILLING_WEBHOOK_SECRET`       | Unset ⇒ the billing webhook answers 503 to everything.                        |
 | `AUTH_RATE_LIMIT_MAX_REQUESTS` | Login attempts per IP+email and sign-ups per IP per window (default 10).      |
 | `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | Global limiter per signed-in account (per address when anonymous); default 300 per minute. |
@@ -122,14 +122,14 @@ localhost origin for testing.
   the same database refuses to boot, rather than serving a stale read model.
   Losing the lock session makes API traffic return 503 until restarted.
   This is a **single-writer enforcement**, not horizontal scaling support.
-- The worker writes `public.worker_health.last_seen_at` every ten seconds.
+- The worker checks `public.worker_health.last_seen_at` between claim cycles and writes a heartbeat when ten seconds have elapsed; long batches can delay the write.
   Admin health diagnostics now mark the queue degraded if the last heartbeat
   is more than 45 seconds old, missing, or unavailable. Monitor stale
   heartbeats and `background_jobs` retry/dead records. An API health liveness
   response alone does not establish worker processing.
-- Apply migrations with `pnpm db:migrate` (`scripts/migrate.mjs`: one transaction per
+- For ordinary local PostgreSQL, apply migrations with `pnpm db:migrate` (`scripts/migrate.mjs`: one transaction per
   file, `schema_migrations` ledger, re-running is a no-op). CI applies all migrations to
-  an empty database and re-runs the runner on every push.
+  an empty database and re-runs the runner on every push. Hosted Supabase must use the separate [migration gate](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md); the local runner refuses it.
 - Migration `00043` builds a case-insensitive unique index on `users.email`; on a database
   that already holds two emails differing only by case it fails — de-duplicate first.
 - **Rows changed directly in SQL are seen by the API only after a restart** (the read
@@ -154,7 +154,7 @@ approval before a public release. Do not claim due-date deletion is automatic.
 
 The core loop — accounts, profiles, organizations and members, skills, jobs,
 applications, evidence, work history, references, open email challenges,
-notifications and notification preferences — and background jobs. Dedicated SQL stores also persist account metadata, erasure requests, saved searches/jobs, admin audit and flags. Remaining ephemeral routes keep state in process memory and are labelled with
+notifications and notification preferences — and background jobs. Dedicated SQL stores also persist account metadata, erasure requests, saved searches/jobs, admin audit, flags and billing. Remaining ephemeral routes keep state in process memory and are labelled with
 the response header `x-talentsphere-durability: ephemeral` (registry:
 `apps/api/src/durability.ts`; admin health diagnostics report the split).
 
@@ -247,3 +247,40 @@ separate staging evidence and operator approval before closing #46 or #47.
   reachability (a live round-trip), queue status and active job count, and how many routes
   are durable. Worker liveness uses the database heartbeat and flags an absent or stale worker.
   Also monitor overdue queued and failed/dead jobs; health is not a delivery receipt.
+
+
+### Stripe configuration and troubleshooting
+
+`BILLING_MODE=stripe` requires `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and
+at least one distinct configured `STRIPE_PRICE_*` ID. The six optional catalog
+keys cover candidate pro, recruiter starter and recruiter enterprise, monthly
+or yearly. Deployed return links require HTTPS `APP_URL`; production refuses
+Stripe test-mode keys. The server chooses prices and checks plan role eligibility.
+Provider price amounts/currency are external configuration and must be reconciled
+with the domain catalog before release.
+
+Register the callback path `/api/v1/billing/stripe-webhook` for the events handled
+by `normalizeEvent`: checkout completion, subscription created/updated/deleted,
+invoice paid/payment_failed and charge refunded. The generic `/billing/webhook`
+uses a different signature. Portal setup is external. A checkout redirect alone
+is not subscription confirmation; inspect persisted subscription/events and
+provider logs. Watch superseded subscriptions, webhook throttling and failed
+post-commit event enqueue. Disputes and voided invoices remain unsupported.
+
+### Common local failures
+
+| Symptom | Check |
+| --- | --- |
+| Missing workspace export or stale behavior | API/worker import existing `dist`; operator rebuild required after source changes |
+| Database boot failure | `DATABASE_URL`, schema/ledger and storage mode; no automatic memory fallback |
+| Second API refuses boot | Existing session advisory writer lease; do not launch another writer |
+| Sessions expire after every restart | Stable private `TOKEN_SECRET`; do not use published test keys |
+| Queue degraded despite API liveness | Heartbeat age, long claim batch, database reachability, retry/dead records |
+| Email route returns 503 | Deployed provider configuration and durable enqueue; sender/delivery require separate evidence |
+| Checkout unavailable | Billing mode, server catalog IDs, secrets and account role; never supply a client-controlled price |
+| Changes made directly in SQL do not appear | Restart/re-hydrate the API for core read-model records |
+
+The environment schema uses `z.coerce.boolean()` for AI flags. String values are
+not a strict true/false parser; do not assume textual `false` disables a flag.
+This is a configuration discrepancy to address in an explicitly scoped code fix.
+The flags do not establish a connected paid model provider.

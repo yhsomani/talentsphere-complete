@@ -18,7 +18,7 @@ Supporting documents specialize:
 - IMPLEMENTATION_PLAN = execution order;
 - AGENTS = coding-agent operation;
 - CODE_STYLE = engineering conventions;
-- DATABASE/API = infrastructure contracts (API contracts are target-state until built);
+- DATABASE/API = current storage and HTTP references; target registers remain in SSOT;
 - BRAIN = conceptual model.
 
 ## 2. No Duplication

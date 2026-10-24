@@ -1,5 +1,7 @@
 # Dependency-aware delivery roadmap — 2026-10-21
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 ## G. Product backlog and proposed release scope
 
 This is the planning companion to the [current audit](FEATURE_STATUS_2026-10-21.md). The existing portfolio plan is preserved below as history. The current sections supersede its blanket persistence rewrite, missing-email-adapter assumption, registry-derived P0 labels and permission to expose simulated scoring. No product implementation or remote issue edits were performed in this audit.

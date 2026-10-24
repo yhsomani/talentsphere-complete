@@ -1,5 +1,7 @@
 # Payment audit and fixes, 2026-10-23
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 ## Scope and what exists
 
 TalentSphere has **no Stripe or other payment-processor integration** (`CLAUDE.md`, `docs/reports/FEATURE_STATUS_2026-10-21.md`, issue #50). Billing is an in-memory scaffold in `apps/api/src/server.ts` (`/api/v1/billing/*`) over pure rules in `packages/domain/src/billing.ts`, plus an HMAC-signed generic webhook. Supabase Auth is not used (self-issued HMAC session tokens). Tables from `00014_billing_subscriptions_schema.sql` exist, but the API does not read or write them.

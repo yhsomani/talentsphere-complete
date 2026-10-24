@@ -1,5 +1,7 @@
 # TalentSphere Complete — End-User / Business-Owner Production Audit
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 > **Historical audit (2026-10-03, revisions A to D).** Its route count ("9 browser routes") and several P0 findings describe the repository before the 2026-10-10 improvement program. Most of its P0 items are marked **Fixed** in [`IMPROVEMENT_PROGRAM_2026-10-10.md`](IMPROVEMENT_PROGRAM_2026-10-10.md) §B, with the test that proves each fix. Its verdict (not production-ready) still holds, as recorded in the improvement report §I. Current status: [`FEATURE_STATUS_2026-10-21.md`](FEATURE_STATUS_2026-10-21.md).
 
 

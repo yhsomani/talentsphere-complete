@@ -1,6 +1,6 @@
 # TalentSphere — TESTING.md v6.0
 
-## Latest measured baseline (2026-10-21)
+## Historical measured baseline (2026-10-21)
 
 At source `a771a87b`, the audit executed 1,172 passing Vitest assertions across
 115 files and five passing migration-helper tests. Ten project TypeScript checks
@@ -18,6 +18,34 @@ also reproduced duplicate execution outside the ordinary passing suite.
 Agent checks must respect the repository build-file restriction: do not run emitting
 builds, install dependencies or write tool caches. Database and browser verification
 remain outstanding; documentation edits do not require Reticle.
+
+## Documentation checks and read-only alternatives
+
+For the 2026-10-23 documentation pass, current checks and limitations are recorded
+in [the coverage inventory](../system-model/01-inventory-and-coverage.md).
+The historical counts above and the [system-model test record](../system-model/05-audit.md)
+were not rerun as application acceptance.
+
+The root `typecheck` runs `tsc -b`, which emits protected files. A per-project
+read-only substitute, when existing declarations are available, is:
+
+```sh
+node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --incremental false --composite false --declaration false --declarationMap false
+```
+
+This does not replace the full reference build. For an authorized source check,
+the existing Vitest can avoid config bundling and cache writes:
+
+```sh
+node node_modules/vitest/vitest.mjs run --configLoader native --no-cache
+```
+
+Inspect selected tests' own side effects before running them. This still imports
+existing built workspace dependencies and cannot certify a fresh build. Default
+Playwright startup uses compiled outputs; installing Chromium, rebuilding outputs
+or starting Vite can write protected paths. The documentation pass therefore uses
+static path/anchor/schema/migration checks and the pure migration-ledger helper
+suite, without installing or building anything.
 
 ## 1. Testing Philosophy
 

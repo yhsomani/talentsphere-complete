@@ -1,6 +1,36 @@
 # TalentSphere — APP_FLOW.md v6.0
 
-> **Status: target navigation model.** Section 1 is the intended route map. Routes built in `apps/web/src/App.tsx` (2026-10-21): `/`, `/login`, `/signup`, `/jobs`, `/jobs/:id`, `/reference/:id`, `/verify/:hash`, `/checkout`, `/privacy`, `/terms`, `/dashboard`, `/applications`, `/evidence`, `/profile`, `/settings`, `/portfolio`, `/resumes`, `/network`, `/learning`, `/learning/:id`, `/career`, `/notifications`, `/messages`, `/messages/:id`, `/hiring`, `/hiring/jobs/:id`, `/assessments`, `/admin`. Section 1 routes **not built**: `/register` (the app uses `/signup`), `/courses`, `/challenges`, `/career/*`, `/recruiter/*`, `/hm/dashboard`, `/paths`, `/teach/*`, `/cart`, `/orders`, `/feed`, `/posts/:id`, `/articles/:id`, `/communities`, `/events`, `/institution/*`. Sections 2 to 10 are flow targets, not records of what runs.
+Source cross-check: `431c425a`, 2026-10-23. The table below is the current
+router; numbered sections retain the intended journey model and are not acceptance
+claims. Request/error behavior is owned by [API_CONTRACTS.md](../engineering/API_CONTRACTS.md).
+
+## Current browser routes
+
+`App.tsx` wraps authenticated workspaces with `RequireAuth` (token presence only).
+`SessionProvider` loads current user/profile/memberships from the API. Server
+permissions still decide every protected action. A missing token redirects to
+`/login?return=...`; the login helper validates local return paths.
+
+| Routes | UI access / purpose |
+| --- | --- |
+| `/`, `/login`, `/signup` | Public landing and credentials |
+| `/jobs`, `/jobs/:id` | Public browsing; application requires authentication |
+| `/reference/:id` | Public shell; emailed token authorizes reference access/submission |
+| `/verify/:hash` | Public proof verification |
+| `/checkout`, `/privacy`, `/terms` | Public shells; purchase/account calls need a session; legal text is draft |
+| `/dashboard`, `/profile`, `/settings` | Guarded account workspaces |
+| `/applications`, `/evidence`, `/assessments` | Guarded application/evidence/challenge workflows |
+| `/portfolio`, `/resumes`, `/network` | Guarded, with ephemeral feature state |
+| `/learning`, `/learning/:id`, `/career` | Guarded course and career views; incomplete durable journey |
+| `/notifications`, `/messages`, `/messages/:id` | Guarded messaging and notifications |
+| `/hiring`, `/hiring/jobs/:id`, `/admin` | Guarded shells; API role/ownership checks remain essential |
+| `*` | NotFoundPage |
+
+`/register`, `/courses`, `/challenges`, `/career/*`, `/recruiter/*`,
+`/hm/dashboard`, `/paths`, `/teach/*`, `/cart`, `/orders`, `/feed`, `/posts/:id`,
+`/articles/:id`, `/communities`, `/events` and `/institution/*` below are planned
+browser routes, not mounted routes. Backend endpoints with similar names do not
+make those pages exist.
 
 ## 1. Navigation Model
 

@@ -1,117 +1,81 @@
 # TalentSphere
 
-PWA-first Career Operating System built around a Talent Graph + Evidence Graph.
-
-## Current status
-
-**IN ACTIVE DEVELOPMENT - NOT PRODUCTION-READY.** Current evidence and feature
-maturity are recorded in [the 2026-10-21 audit](docs/reports/FEATURE_STATUS_2026-10-21.md)
-and its [evidence ledger](docs/reports/AUDIT_EVIDENCE_2026-10-21.json).
-[BRAIN/MEMORY.md](BRAIN/MEMORY.md) preserves execution history.
-
-The API implements the core career loop with PostgreSQL persistence and a browser
-UI. Additional SQL stores cover account metadata, erasure requests, saved searches,
-bookmarks, admin audit and feature flags. Other modules remain in process memory;
-a route durability header does not prove a whole journey survives restart.
-The worker includes an opt-in Resend adapter; live mailbox delivery is unverified.
-Payments remain disabled by default, and no external AI provider is integrated.
-
-The audit reproduced simulated assessment success for invalid code and duplicate
-worker execution after batch leases expire. Erasure cleanup has a separate static
-failure-recovery finding. These remain open; browser completion, full erasure and
-production readiness are not established by the current unit/integration results.
-
-Measured at source `a771a87b` on 2026-10-21:
-
-- Vitest: 1,172 assertions passed across 115 files using memory storage, native config loading and no cache. Workspace imports still use existing built dependencies.
-- Migration helper tests: 5 passed; ten project checks passed with TypeScript emission and incremental output disabled.
-- Lint: failed on seven existing files; see the audit for paths.
-- PostgreSQL, Playwright, Reticle and deployment checks were not run in this audit. Prior dated results are historical evidence only.
-- 51 SQL migration files exist; presence is not proof of successful application to a populated database.
-
-## Core loop
-
-```text
-Goal → Gap → Learn → Practice → Prove → Verify
-→ Discover → Match → Apply → Interview → Outcome → New Evidence
-```
-
-## Architecture & Stack
-
-What exists (see [`ARCHITECTURE.md`](ARCHITECTURE.md) — the record of the implemented system):
-
-- **Backend:** Node.js + Fastify modular monolith (`apps/api`) with Zod contract validation, self-issued HMAC session tokens, rate limiting and one error envelope. The core career loop is persisted to PostgreSQL ([ADR-015](docs/engineering/adr/ADR-015-core-loop-persistence.md)); run **one API process per database**.
-- **Frontend:** React 19 + TypeScript + Vite PWA shell (`apps/web`), plain React state and a small `fetch` helper (no data-fetching library), design tokens from `packages/ui`.
-- **Background worker:** claims durable jobs from Postgres (`background_jobs`, `FOR UPDATE SKIP LOCKED`) with retries, permanent failures and dead-lettering (`apps/worker`).
-- **Shared packages:** pure business rules (`packages/domain`), request contracts (`packages/contracts`), UI tokens (`packages/ui`), logging (`packages/observability`), environment configuration (`packages/config`), test utilities (`packages/testing`).
-- **AI:** a local heuristic behind a gateway-shaped API with prompt sanitising, the assessment `AI_PROHIBITED` boundary and free-tier quotas — no model provider is integrated.
-
-Documents under `docs/` and `SSOT.md` describe the intended product and architecture, which
-differs in places (e.g. Supabase Auth, Edge Functions, Stripe). Where they disagree about
-what exists, `ARCHITECTURE.md` and the code win.
+Career identity, evidence, learning and hiring in a React application backed by a
+Fastify API and PostgreSQL worker. **In development; production readiness is not
+established.**
 
 ## Start here
 
-1. [`SSOT.md`](SSOT.md) — Single Source of Truth
-2. [`BRAIN/MEMORY.md`](BRAIN/MEMORY.md) — Living project memory & execution history
-3. [`docs/INDEX.md`](docs/INDEX.md) — Documentation index (single entry point)
-4. [`docs/product/PRD.md`](docs/product/PRD.md) — Product requirements
-5. [`ARCHITECTURE.md`](ARCHITECTURE.md) — Architecture as built (read before changing code)
-6. [`docs/engineering/TARGET_ARCHITECTURE.md`](docs/engineering/TARGET_ARCHITECTURE.md) — Target architecture (intent, not current state)
-7. [`docs/engineering/TRD.md`](docs/engineering/TRD.md) — Technical requirements
-8. [`docs/registries/FEATURE_REGISTRY.md`](docs/registries/FEATURE_REGISTRY.md) — 173-feature inventory
-9. [`docs/governance/IMPLEMENTATION_PLAN.md`](docs/governance/IMPLEMENTATION_PLAN.md) — Sequential execution roadmap
-10. [`AGENTS.md`](AGENTS.md) — Coding agent rules and golden workflow
+- [Documentation index](docs/INDEX.md): topic ownership and reading order.
+- [Architecture](ARCHITECTURE.md): implementation, boundaries and failure modes.
+- [Implementation coverage](docs/system-model/01-inventory-and-coverage.md): source
+  inventory, feature status and documentation audit scope.
+- [SSOT](SSOT.md): preserved canonical product intent; requirements are not proof
+  of implementation.
+- [API contracts](docs/engineering/API_CONTRACTS.md),
+  [database](docs/engineering/DATABASE.md),
+  [operations](docs/quality/OPERATIONS.md), and
+  [testing](docs/quality/TESTING.md): developer references.
 
-## Golden rule
+## What exists
 
-Do not confuse:
-`documented → implemented → verified → production-ready`.
+The API persists accounts, profiles, organizations, jobs, applications, evidence,
+work history, messaging and notifications through a boot-hydrated read model.
+Dedicated SQL stores handle settings, erasure requests, saved searches/bookmarks,
+admin audit, feature flags and billing. Run **one API process per database**;
+an advisory lock refuses a second writer.
 
-## Development & Testing
+Stripe Checkout, Customer Portal, signed webhooks and subscription reconciliation
+exist in source. Billing defaults to disabled. Resend delivery is opt-in. Neither
+adapter's presence proves a successful live payment or mailbox delivery. AI uses
+local heuristics; no external model provider is connected.
 
-TalentSphere uses `pnpm` workspaces.
+Learning, assessments, portfolios, resumes, networking and many intelligence
+features retain process-local state. Some write durable evidence while losing
+their originating records on restart. Challenge evaluation is simulated; worker
+batch leases and multi-store erasure have unresolved recovery risks. See the
+[conflict register](docs/system-model/03-conflict-register.md) and
+[route review](docs/system-model/06-route-authorization.md).
 
-```bash
-# Install dependencies
-pnpm install
+## Local development
 
-# Configure (copy, then edit — see comments in the file)
-cp .env.example .env
+Use Node 24 (the CI runtime), pnpm 11.7.0 (the root `packageManager`), and a local
+PostgreSQL database. The commands below are operator setup instructions. **Agents
+must follow [AGENTS.md](AGENTS.md): installs, builds, emitting typechecks and cache
+writes require explicit authorization because build files are read-only.**
 
-# Run database migrations (needs a reachable Postgres at DATABASE_URL)
-pnpm db:migrate
+1. Run `pnpm install --frozen-lockfile`.
+2. Copy `.env.example` to `.env`, then set `DATABASE_URL` and a private, stable
+   `TOKEN_SECRET`. API and worker load `.env` from the root or two directories
+   above their working directory. Existing environment values take precedence.
+3. For **local PostgreSQL**, run `pnpm db:migrate`. This changes the database and
+   may create it. Do not use this runner on hosted Supabase; follow the
+   [hosted migration gate](docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md).
+4. Run `pnpm build` before `pnpm dev`. API and worker `dev` scripts execute
+   `dist/index.js`; they do not compile or watch TypeScript. Rebuild and restart
+   those processes after source changes. The web `dev` script runs Vite.
+5. Open `http://localhost:5173`. The API defaults to port 4000; Vite proxies `/api`
+   there. `/health` is liveness, not database or delivery acceptance.
 
-# Start development servers (API, Web, Worker)
-pnpm dev
+For disposable development, `STORAGE=memory` avoids a database but loses data on
+restart; the separate worker idles and does not process the API's memory queue.
+It is refused by deployed API startup checks. Keep `BILLING_MODE=disabled` unless
+intentionally configuring the billing adapter.
 
-# Execute full automated test suites
-pnpm test               # Runs unit, integration and security suites
-pnpm test:unit          # Runs unit tests only
-pnpm test:integration   # Runs integration tests only
-pnpm test:pg            # Real-PostgreSQL durability/concurrency suite (TEST_DATABASE_URL=...)
-pnpm test:e2e           # Runs Playwright E2E browser and API tests
+On Windows, use `pnpm.cmd` if PowerShell blocks the `pnpm.ps1` shim. No change to
+machine execution policy is necessary.
 
-# Typecheck and lint
-pnpm typecheck          # tsc -b for every package and app, then the test suites
-pnpm lint               # Verifies Prettier code style
-```
+## Checks and contribution
 
-## Security & Privacy Invariants
+Root scripts: `pnpm test` (Vitest unit/integration/security), `pnpm test:pg`
+(isolated PostgreSQL via `TEST_DATABASE_URL`), `pnpm test:e2e` (Playwright),
+`pnpm lint` (Prettier check), and `pnpm typecheck` (emitting project-reference
+build). Prerequisites, read-only alternatives and evidence limits are in
+[TESTING.md](docs/quality/TESTING.md). Dated test counts in reports describe their
+recorded source revisions, not this checkout.
 
-- **Proof, not self-description:** a work-history tier rises only on proof the candidate does not control — a code sent to the corporate mailbox, or a reference submitted through a one-time link sent to the referee. Codes and tokens are stored only as SHA-256 hashes ([`docs/quality/SECURITY.md`](docs/quality/SECURITY.md) §8).
-- **Zero-PII Public Proofs:** Public evidence verification uses SHA-256 proofs without exposing personal candidate data (BR-150, BR-155).
-- **Free-User Cost Invariant:** Zero unbudgeted third-party AI cost for free-tier users; hard token budgets strictly enforced.
-- **Server-Authoritative AI Integrity:** Assessment sessions forbid AI assistance (`ASSESSMENT_AI_PROHIBITED`, BR-10).
-- **Differential Privacy Thresholds:** Career benchmarks require $k \ge 20$ (BR-160) and learning impact dashboards require $k \ge 30$ (BR-189) to prevent deanonymization.
-- **Dual Consent & Multi-Admin Checks:** Audio/video recording mandates dual participant consent (BR-169); permanent account bans require dual-admin approval (BR-068).
-
-## Contribution
-
-Every behavior-changing PR updates:
-
-- tests (unit, integration, and E2E);
-- required documentation under `docs/`;
-- migrations in `supabase/migrations/` if applicable;
-- analytics/observability events;
-- feature status in `BRAIN/MEMORY.md`.
+Keep domain rules in `packages/domain`, request validation in `packages/contracts`,
+and persistence/provider code behind the API or worker boundaries. Update the
+owning document and relevant tests when behavior changes. UI changes require a
+real browser verdict under [Reticle](RETICLE.md). Never promote documented,
+implemented, verified and production-ready to equivalent statuses.

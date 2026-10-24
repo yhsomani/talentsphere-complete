@@ -1,5 +1,7 @@
 # TalentSphere — FINAL_VALIDATION_REPORT.md v6.0
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 > **Historical snapshot.** Counts, absence claims and passing checks below describe their recorded baseline. Current source and verification scope are in [FEATURE_STATUS_2026-10-21.md](FEATURE_STATUS_2026-10-21.md). In particular, Resend and additional SQL stores now exist; that does not establish live delivery or release readiness.
 
 

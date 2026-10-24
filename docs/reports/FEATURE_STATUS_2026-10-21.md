@@ -1,5 +1,7 @@
 # Repository and feature audit — 2026-10-21
 
+> Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+
 ## A. Executive assessment
 
 TalentSphere connects career identity, evidence, learning, applications and recruiter decisions. Its strongest implemented foundation is the Fastify API with server-side authorization, a PostgreSQL-backed core write path, and explicit separation of verified evidence from claims. This audit assumes a small beta with one API writer per database; no traffic forecast or team capacity was supplied.

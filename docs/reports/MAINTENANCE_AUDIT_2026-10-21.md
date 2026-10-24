@@ -1,5 +1,7 @@
 # Repository maintenance audit and proposed design
 
+> Historical maintenance evidence. The Bash tool described below is absent in this checkout. Current Windows tooling and its limits are documented in [PROJECT_MAINTENANCE.md](../engineering/PROJECT_MAINTENANCE.md). Recorded passes are not fresh results.
+
 > **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
 
 
@@ -208,3 +210,298 @@ Known limitations and manual actions:
 - Actual cleanup/reinstallation remains an operator decision after inspecting the exact current plan and typing `APPLY`; no such authorization was requested or inferred during implementation.
 
 Final completion status: the requested script, tests, usage documentation, repository inventory and dry-run evidence are delivered. No existing build file was intentionally changed by this task; no migration or application security/behavior change was needed. Verification limits above remain explicit, particularly unsupported project/configuration dialects and platforms unavailable on this host.
+
+
+## Archived Bash usage reference
+
+The following preserves the unique usage/portability details formerly in the engineering guide. It is historical; the named Bash implementation is absent.
+
+### Archived Bash guide
+
+> **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
+
+
+Run from the repository root in Bash:
+
+```bash
+./project-maintenance.sh
+```
+
+If the executable bit was not preserved by the checkout:
+
+```bash
+chmod +x project-maintenance.sh
+./project-maintenance.sh
+```
+
+The script opens a menu for scanning, build cleanup, dependency removal, cache cleanup, installation, combined maintenance, individual project selection, dry-run previews and report export. Menu option 11 deletes all recursively discovered *verified* build artifacts and caches; menu option 12 installs frozen dependencies and rebuilds all supported projects. Choosing a mutation shows the exact targets and commands, validates prerequisites, then requires the exact confirmation `APPLY`. Empty input or EOF cancels. Report-only export requires `EXPORT`. Cleanup is irreversible; ignored artifacts have no Git rollback. Stop dev servers/builds before maintenance and keep backups of anything that is not disposable.
+
+## Read-only inspection
+
+```bash
+./project-maintenance.sh --scan
+./project-maintenance.sh --dry-run --operation full
+./project-maintenance.sh --scan --sizes
+```
+
+Scanning and dry-run write nothing to the target repository. Disk measurements are opt-in because traversing dependency installations can be slow; readings are not additive in linked workspaces. `--scan`, `--dry-run` and `--execute` are mutually exclusive. No configuration module or arbitrary project command is executed during discovery.
+
+## Selecting operations
+
+```bash
+# Review one member's build cleanup, without changing anything.
+./project-maintenance.sh --dry-run --operation build --project apps/web
+
+# Restore once at the workspace root, with a fresh confirmation prompt.
+./project-maintenance.sh --execute --operation install --project .
+
+# Choose validation commands; order is preserved.
+./project-maintenance.sh --dry-run --operation validate --check build --check unit --check integration
+
+# Exclude an exact subtree; exclusions are literal, not shell globs.
+./project-maintenance.sh --dry-run --operation full --exclude path/to/independent-project
+
+# Explicitly classify a reviewed, regenerable local cache. Hard protections remain.
+./project-maintenance.sh --dry-run --operation caches --approve-cleanup caches:tools/generated-cache
+
+# Explicit report export after a scan; requires typing EXPORT.
+./project-maintenance.sh --scan --export-report
+```
+
+`--root PATH` inspects another explicitly chosen project boundary. Repeat `--project`, `--exclude`, `--approve-cleanup` and `--check` as needed. A selected workspace member cannot remove a shared installation without selecting the workspace owner. A root workspace install installs its members once; a genuinely independent deep project gets its own command. A combined reinstall cleans selected build output and dependency installations before frozen installation; use `--operation rebuild` (menu option 12) to clean verified build/cache output, install frozen dependencies, and rebuild the discovered workspace.
+
+## Supported projects
+
+The script is Bash, with existing Node used only to parse JSON data. Bash 3.2 or newer and standard `find`, Git, `rm`, `mkdir`, `mktemp`, `mv`, `chmod`, `wc`, `date` and `sleep` are required. `du` is optional for `--sizes`. It adds no package dependency.
+
+- Node projects are discovered recursively outside protected/dependency directories, including independently configured deep subprojects.
+- pnpm workspaces use the repository's simple `packages:` YAML list. npm/Yarn workspace arrays and `{packages: [...]}` are recognized. Literal path components and single-component globs work. Unsupported workspace syntax, negative patterns, recursive `**` patterns and overlapping nested workspace definitions block installation rather than guessing ownership. Commands also refuse workspace scopes containing excluded/protected projects or their pruned ancestors.
+- Manager declarations and lockfiles must agree. Ambiguous managers, missing lockfiles, symlink manifests/locks, unsupported managers and declared-version mismatches block execution before removal. No lockfile is generated or deleted.
+- Frozen restores use `pnpm install --frozen-lockfile --ignore-scripts`, `npm ci --ignore-scripts`, Yarn 1 frozen installs with scripts disabled, or Yarn modern immutable installs with `YARN_ENABLE_SCRIPTS=false`.
+- Lifecycle scripts are deliberately disabled during installation. Review any required native-addon/build approvals and run them manually afterwards. This can prevent an application build until those project-specific steps are completed; restore success alone is not application validation.
+- TypeScript outputs are eligible when a safely parsed `tsconfig.json` explicitly identifies an in-project `outDir`. Composite metadata is paired with that output. Ambiguous JSONC, inherited/dynamic output configuration and Vite-only output conventions remain review-only instead of executing configuration code.
+- Known Playwright `test-results` output is classified when this repository's Playwright config exists. Losing diagnostic output is called out in the plan. Other caches require explicit review/approval.
+- Common Python, JVM, .NET, PHP, Ruby, Go, Rust, C/C++, Swift and Deno manifests are reported as unsupported for execution. The actual repository is a Node monorepo; `.audit/shoot.py` is a preserved auxiliary script without a Python dependency manifest. This tool does not install absent language runtimes or speculate about their cleanup conventions.
+
+Available check selectors are `lint`, `typecheck`, `unit`, `integration`, `security`, `test`, `build`, `smoke` and `e2e`. Missing scripts are reported as skipped. Only inspected command forms run; unknown scripts and pre/post hooks require manual review and are refused. Recursive pnpm builds also inspect member build scripts/hooks. Formatting checks are supported; formatting writes, migrations, seeding, deployment, Docker cleanup, database tests against an inferred target, global cache purges and automatic server termination are excluded.
+
+In this repository the root typecheck emits output, API/worker/tests import built shared packages, and Playwright needs Chromium and free server ports. A cleanup or dependency restore alone does not prove the app works. Choose builds before dependent checks, and read failed/skipped results.
+
+## Safety and reports
+
+No directory is deletable merely because it is named `dist`, `build`, `cache`, `target` or `vendor`. Candidate rows show the owner, category, evidence, classification and optional size. Only verified/explicitly approved candidates reach the execution plan; every target is checked again immediately before deletion.
+
+Hard protections cover source/configuration, environment files and credentials, databases/dumps/migrations, original public assets, documentation, user data, nested repositories, tracked/staged files, excluded descendants, Reticle/browser evidence and the Obsidian vault. Dependency cleanup allows installed package source/configuration but still refuses embedded secrets and data. Symlink roots/ancestors are rejected; dependency symlinks are unlinked with their installation and never traversed. Generated declarations/maps/assets inside verified output directories are distinguished from original source/static input.
+
+A repository-local `.project-maintenance.lock` serializes approved operations. An existing lock is never overridden automatically; investigate whether a run is active before removing a stale lock manually. This does not synchronize external dev servers or defend against a malicious concurrent filesystem writer. Do not run maintenance across bind mounts or other externally managed storage. Installation and selected validation run trusted repository/tooling code after review; this script is not a sandbox for hostile projects.
+
+Confirmed execution and explicit export create private timestamped logs under `maintenance-reports/`, excluded from scanning and cleanup. Logs record selected operations, paths, classifications, skipped items, commands, exact exit codes, failures, warnings and final status. Raw command stdout/stderr is captured in a mode-600 temporary file, counted and removed; arbitrary output is withheld from logs to avoid publishing credentials. On failure, rerun the displayed command privately for full diagnostics. No environment dump or `.env` contents are logged. A failed restore/build stops dependent commands, and incomplete work is never reported as a pass. Removed space is not asserted from overlapping/shared allocations.
+
+SIGINT/SIGTERM stop the invocation-owned command process group, remove private capture files and the lock, retain the report and return 130/143. Deleted artifacts stay deleted. Other errors use 1 for partial failures, 2 for invalid arguments, and 3 for fatal safety/prerequisite/discovery/reporting errors. Cancellation/no-op uses 0; interactive invalid input redisplays the menu.
+
+## Tests and portability
+
+```bash
+bash -n project-maintenance.sh
+bash -n scripts/tests/project-maintenance.test.sh
+bash scripts/tests/project-maintenance.test.sh
+shellcheck project-maintenance.sh scripts/tests/project-maintenance.test.sh # if installed
+```
+
+The tests create disposable temporary repositories, use stub package managers for command outcomes, and never delete real project output or download packages. They cover recursive discovery, spaces, workspace boundaries, dry-run preservation, confirmations, unknown/protected paths, Git provenance, exclusions, restoration failures, hooks, private reports and descendant cancellation. Native symlink and permission-denial checks explicitly skip when the host cannot enforce them.
+
+The implementation uses portable Bash/Unix forms intended for macOS/Linux; verification in this environment uses Git Bash on Windows. Native macOS/Linux and Bash 3.2 have not been executed here. Git Bash may copy instead of creating native symlinks, and Windows ACLs do not necessarily enforce Unix mode bits. The fixture suite detects these cases instead of presenting a false pass. WSL and ShellCheck are not installed on this host.
+
+See [the repository audit and validation record](../reports/MAINTENANCE_AUDIT_2026-10-21.md) for detected projects, approximate candidate sizes, verification results and remaining limitations. Existing build files and agent instructions are unchanged by this implementation; real cleanup/reinstallation is an operator action requiring review of the exact current plan.
+
+
+## Original Windows tool requirements
+
+Preserved from root `ORIGINAL_REQUEST.md`. This is historical requirements/evidence, not a current execution result or permission to mutate protected build files.
+
+### Archived request
+
+## 2026-10-22T03:12:14Z
+
+Build a production-grade, universal, safe, and reusable Windows batch script (`clean-reinstall.bat`) paired with a robust PowerShell engine (`clean-reinstall.ps1`) to recursively discover, clean, and reinstall dependencies across multi-language projects, monorepos, and nested polyglot repositories.
+
+Working directory: C:\Users\yashs\.gemini\antigravity\worktrees\talentsphere-complete\universal_project_clean_reinstall
+
+## Requirements
+
+### R1. Universal Project Discovery & Detection
+- Recursively scan repository directories up to configurable `--max-depth` (default 5).
+- Identify project manifests and technology stacks: Node/JS/TS (npm, Yarn Classic/Berry, pnpm, Bun), Python (pip, poetry, pipenv, uv, venv/.venv), .NET (.sln, .csproj, .fsproj), Java/JVM (Maven pom.xml, Gradle build.gradle/build.gradle.kts, wrappers mvnw/gradlew), PHP (Composer), Ruby (Bundler), Rust (Cargo), Go (go.mod), CMake/Make.
+- Monorepo & Workspace awareness: Detect root workspaces (pnpm-workspace.yaml, npm/yarn workspaces, Lerna, Turborepo, Nx, cargo workspaces, etc.). When a workspace root manages nested packages, execute installation only at the workspace root to prevent duplicate/conflicting package manager runs.
+- Prevent traversal into dependency or generated output directories (`node_modules`, `.venv`, `vendor`, `target`, `bin`, `obj`, `.next`, etc.) and reject symlinks/junctions pointing outside repository boundaries.
+
+### R2. Safe & Comprehensive Cleanup Operations
+- Remove build outputs, local dependency folders, and temporary caches according to detected technology (e.g., `node_modules`, `.venv`, `__pycache__`, `.pytest_cache`, `.turbo`, `.next`, `.nuxt`, `dist`, `build`, `bin`, `obj`, `target`, `vendor`).
+- Strict Guardrails: Never delete source files, configuration (`.env*`, `.git`, IDE settings), manifests (`package.json`, `pom.xml`, etc.), or lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `Cargo.lock`, `poetry.lock`, etc.).
+- Path validation: Canonicalize every target path and verify it is strictly within the selected project root before deletion. Forbid root drives (e.g. `C:\`) or system directories.
+- Optional `--deep-clean` flag for cleaning additional local caches, and `--clean-only` to skip reinstall.
+
+### R3. Deterministic Dependency Reinstallation & Rebuild
+- Reinstall dependencies deterministically using existing lockfiles where present (`pnpm install --frozen-lockfile`, `npm ci`, `yarn install --immutable`, `poetry install`, `uv sync`, `cargo fetch/build`, `dotnet restore`, etc.).
+- Respect local wrappers (`mvnw`, `gradlew`) when present; detect installed tools via PATH (`where.exe`) and gracefully warn/skip if a tool/runtime is absent without crashing the entire run.
+- Support optional `--build` flag to run build commands post-install when standard build scripts or manifests exist.
+- Support `--install-only` to perform reinstallation without prior cleanup.
+
+### R4. Command-Line Interface, Safety Controls & Reporting
+- Batch entry point `clean-reinstall.bat` forwarding all arguments cleanly to `clean-reinstall.ps1`.
+- Supported CLI flags: `--dry-run`, `--clean-only`, `--install-only`, `--build`, `--deep-clean`, `--root <path>`, `--exclude <patterns>`, `--max-depth <int>`, `--continue-on-error`, `--verbose`, `--help`.
+- Interactive confirmation when invoked with no arguments, summarizing planned deletions and asking for confirmation.
+- Write structured timestamped log file (excluding tokens or secrets) and output a colorized console summary of discovered, cleaned, installed, skipped, and failed projects with nonzero exit code on errors.
+
+## Acceptance Criteria
+
+### Project Detection & Workspace Awareness
+- [ ] Correctly identifies polyglot structures and marks monorepo packages as workspace-managed without individual redundant installs.
+- [ ] Ignores dependency folders during discovery and skips symlinks escaping the repository root.
+
+### Safety & Deletion Verifications
+- [ ] `--dry-run` prints exact paths that would be removed without modifying disk state.
+- [ ] Running cleanup removes generated folders (`node_modules`, `.venv`, `dist`, `target`, `bin`, `obj`) while 100% preserving lockfiles, `.env`, `.git`, and source code.
+- [ ] Path canonicalization strictly blocks attempts to delete paths outside the target root.
+
+### Reinstallation & Diagnostics
+- [ ] Accurately invokes frozen/immutable lockfile install commands matching detected package managers.
+- [ ] Missing CLI tools are logged with clean warnings without terminating unaffected independent projects when `--continue-on-error` is active.
+- [ ] Detailed run summary and log file produced with counts of discovered, cleaned, reinstalled, and failed projects.
+
+
+## Historical Windows test readiness
+
+Preserved from root `TEST_READY.md`. This is historical requirements/evidence, not a current execution result or permission to mutate protected build files.
+
+# Universal Clean & Reinstall — Test Readiness Report (`TEST_READY.md`)
+
+## 1. Executive Summary
+The comprehensive, opaque-box, zero-dependency End-to-End (E2E) Test Suite for `clean-reinstall.bat` and `clean-reinstall.ps1` is fully implemented, verified, and operational.
+The test harness runs with standard Windows PowerShell 5.1 and PowerShell Core 7+ with zero external package dependencies (no Pester 5 or npm packages required). All tests execute in isolated, dynamically created hermetic temporary sandboxes (`$env:TEMP\cr-test-*`) and cleanly tear down on completion.
+
+- **Total Test Cases**: 38
+- **Passed**: 38 (100%)
+- **Failed**: 0 (0%)
+- **Execution Duration**: ~77.13s
+- **Process Exit Code**: 0
+
+---
+
+## 2. Test Execution Command
+
+To run the complete test suite:
+```powershell
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1
+```
+
+To run individual tiers or specific tests:
+```powershell
+# Run Tier 1 only (Feature Coverage, TC-01..TC-20)
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 1
+
+# Run Tier 2 only (Boundary Values & Safety Attack Vectors, TC-21..TC-28)
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 2
+
+# Run Tier 3 only (Pairwise Cross-Feature Interactions, TC-29..TC-33)
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 3
+
+# Run Tier 4 only (Realistic Polyglot Monorepo Application Scenarios, TC-34..TC-38)
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 4
+
+# Run a specific test case by ID
+powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -TestId TC-34
+```
+
+---
+
+## 3. Test Suite Architecture & File Inventory
+
+| File Path | Purpose |
+|:---|:---|
+| `tests/run-tests.ps1` | Zero-dependency native PowerShell test runner supporting `-Tier <1\|2\|3\|4\|all>`, `-TestId <string>`, `-FailFast`, `-VerboseOutput`, stopwatch timing, per-test assertions, and exit code propagation. |
+| `tests/test-fixtures-helper.ps1` | Hermetic mock sandbox engine managing sandbox lifecycle, fixture generators for Node (npm, pnpm, yarn, bun), Python (poetry, uv, pipenv, pip), Rust (Cargo), Java (Maven, Gradle, wrappers), .NET (sln, csproj), NTFS junctions, and assertion primitives. |
+| `tests/test-tier1-feature-coverage.ps1` | Tier 1: 20 isolation tests covering R1-R4 requirements (TC-01 through TC-20). |
+| `tests/test-tier2-boundary-corners.ps1` | Tier 2: 8 boundary and safety-critical attack vector tests (TC-21 through TC-28). |
+| `tests/test-tier3-cross-feature.ps1` | Tier 3: 5 pairwise cross-feature combination tests (TC-29 through TC-33). |
+| `tests/test-tier4-scenarios.ps1` | Tier 4: 5 realistic polyglot monorepo application workloads (TC-34 through TC-38). |
+
+---
+
+## 4. Test Case Matrix & Verification Results
+
+### Tier 1: Feature Coverage (20/20 Passed)
+| Test ID | Feature | Description | Status | Time |
+|:---|:---|:---|:---:|:---:|
+| `TC-01` | Batch Entry Point (`clean-reinstall.bat`) | Verifies command-line forwarding, execution policy bypass, and process exit code preservation. | PASS | ~3.1s |
+| `TC-02` | CLI Parameter Parsing & Aliases | Verifies double-dash kebab-case flags (`--dry-run`, `--clean-only`, `--max-depth`, `--yes`, etc.). | PASS | ~1.4s |
+| `TC-03` | Parameter Validation & Mutex | Verifies immediate exit code 1 when `--clean-only` and `--install-only` are passed simultaneously. | PASS | ~0.7s |
+| `TC-04` | Structured Logging & Secret Redaction | Verifies log creation and regex masking of NPM tokens, GitHub PATs, and passwords. | PASS | ~1.6s |
+| `TC-05` | Path Containment Guard | Blocks execution against root drive (`C:\`) and Windows system directory roots. | PASS | ~2.1s |
+| `TC-06` | Directory Scanner (`--max-depth`) | Verifies discovery up to depth limit (depth 2 found, depth 5 excluded at limit 3). | PASS | ~1.9s |
+| `TC-07` | Traversal Pruning | Verifies scanner prunes `node_modules` and does not discover internal dependencies as standalone projects. | PASS | ~1.8s |
+| `TC-08` | Reparse Point & Junction Security | Verifies junctions pointing outside repository root are safely rejected without traversal. | PASS | ~1.5s |
+| `TC-09` | Multi-Ecosystem: Node | Detects npm (`package-lock.json`), pnpm (`pnpm-lock.yaml`), yarn (`yarn.lock`), and bun (`bun.lockb`). | PASS | ~2.1s |
+| `TC-10` | Multi-Ecosystem: Python & Rust | Detects Poetry (`poetry.lock`), uv (`uv.lock`), pip (`requirements.txt`), and Rust (`Cargo.toml`). | PASS | ~2.3s |
+| `TC-11` | Multi-Ecosystem: Java & .NET | Detects Maven (`pom.xml`), Gradle (`build.gradle`), and .NET (`*.sln` / `*.csproj`). | PASS | ~1.5s |
+| `TC-12` | Monorepo Workspace Resolution | Identifies workspace roots and registers nested packages as workspace members. | PASS | ~1.6s |
+| `TC-13` | Safe Cleanup (Standard Clean) | Purges standard build artifacts: `node_modules`, `dist`, `.venv`, `bin`, `obj`, `target`. | PASS | ~1.8s |
+| `TC-14` | Deep Cleanup (`--deep-clean`) | Purges extended caches: `.turbo`, `.next`, `__pycache__`, `.pytest_cache`. | PASS | ~1.8s |
+| `TC-15` | Absolute Guardrails | Strict preservation of lockfiles (`pnpm-lock.yaml`, `Cargo.lock`), `.env*`, `.git`, and source files. | PASS | ~1.8s |
+| `TC-16` | Dry-Run Simulation (`--dry-run`) | Verifies planned deletion display with zero disk modifications. | PASS | ~1.9s |
+| `TC-17` | Missing Tool PATH Detection | Verifies clean warning and graceful skip when an ecosystem CLI tool is not on PATH. | PASS | ~1.3s |
+| `TC-18` | Local Wrapper Preference | Prioritizes local `mvnw.cmd` / `gradlew.bat` execution over global PATH executables. | PASS | ~1.5s |
+| `TC-19` | Deterministic Reinstall Matrix | Selects frozen lockfile install commands (`npm ci`, `pnpm install --frozen-lockfile`). | PASS | ~1.6s |
+| `TC-20` | Post-Install Rebuild (`--build`) | Schedules build script execution following successful dependency installation. | PASS | ~1.6s |
+
+### Tier 2: Boundary Values & Attack Vectors (8/8 Passed)
+| Test ID | Boundary / Attack Vector | Description | Status | Time |
+|:---|:---|:---|:---:|:---:|
+| `TC-21` | Special Characters in Paths | Handles repository paths containing spaces, ampersands (`&`), and parentheses (`(v1.0)`). | PASS | ~1.7s |
+| `TC-22` | Non-Interactive Prompt Guard | Exits cleanly with error code 1 when invoked without flags in non-interactive sessions. | PASS | ~1.5s |
+| `TC-23` | Complex Secret Patterns | Redacts URL credentials (`http://user:pass@host`), AWS keys, and JWT tokens in logs. | PASS | ~1.8s |
+| `TC-24` | Traversal Escape Attack | Verifies containment check strictly prevents deleting paths outside project root. | PASS | ~1.3s |
+| `TC-25` | Exact Max-Depth Boundary | Inclusive discovery at exact `--max-depth 5`, exclusive cutoff at depth 6. | PASS | ~1.4s |
+| `TC-26` | Escaping Junction Security | Prevents deletion of external directory targets linked via NTFS junctions. | PASS | ~1.3s |
+| `TC-27` | Mixed Workspaces | Manages polyglot hierarchy: Node pnpm monorepo alongside a Rust Cargo workspace. | PASS | ~2.2s |
+| `TC-28` | Read-Only Files Resilience | Forcefully clears read-only attributes on cached files and deletes target directories. | PASS | ~1.7s |
+
+### Tier 3: Pairwise Cross-Feature Interactions (5/5 Passed)
+| Test ID | Interaction Pair | Description | Status | Time |
+|:---|:---|:---|:---:|:---:|
+| `TC-29` | Monorepo + `--dry-run` + `--yes` | Verifies planned operations for all monorepo members without modifying files on disk. | PASS | ~2.2s |
+| `TC-30` | `--clean-only` + `--deep-clean` | Cleans both standard artifacts and deep caches across polyglot stacks without reinstall. | PASS | ~2.2s |
+| `TC-31` | Safety Containment Under Dry-Run | Confirms drive root and system path guards cannot be bypassed by `--dry-run` or `--deep-clean`. | PASS | ~2.4s |
+| `TC-32` | Monorepo + `--exclude` | Selectively cleans included packages while 100% preserving excluded package artifacts. | PASS | ~2.3s |
+| `TC-33` | `--continue-on-error` Isolation | Continues processing independent projects when one project hits a tool failure. | PASS | ~1.6s |
+
+### Tier 4: Realistic Polyglot Monorepo Scenarios (5/5 Passed)
+| Test ID | Scenario | Description | Status | Time |
+|:---|:---|:---|:---:|:---:|
+| `TC-34` | Full Polyglot Monorepo | Next.js frontend + Express API + Rust background worker + Python FastAPI service. Verifies workspace root resolution, member reinstallation skip, and full artifact purge. | PASS | ~3.2s |
+| `TC-35` | Enterprise Nested Submodules | Multi-tier folder hierarchy up to depth 5 with `--max-depth 4` boundary and custom excludes. | PASS | ~1.9s |
+| `TC-36` | Full Pipeline with `--build` | Reinstall and build pipeline executing Maven wrappers and scripts with real-time log streaming. | PASS | ~6.9s |
+| `TC-37` | Safety Attack Vectors in Enterprise Repo | Escaping junctions, read-only cache files, `.env.production` secrets, and lockfiles. | PASS | ~1.8s |
+| `TC-38` | Mega Monorepo Deep Cache Clearance | Large monorepo with `.turbo`, `.next`, `__pycache__`, `.pytest_cache`, and `target` directories. | PASS | ~3.5s |
+
+---
+
+## 5. Escalation: Implementation Defect Discovered
+
+During test execution, an implementation defect was identified in `clean-reinstall.ps1`:
+- **Defect Location**: `clean-reinstall.ps1` line 583: `return ,$rawProjects`.
+- **Root Cause**: When a scanned repository contains zero recognized project manifests (e.g. an empty repository or a repository with only non-manifest files), `$rawProjects` is `@()`. The unary comma operator `,$rawProjects` wraps the empty array into a 1-element array whose first element is `@()`.
+- **Symptom**: Calling `$discoveredProjects = @(Get-DiscoveredProjects ...)` yields an array of `Count = 1`, where element 0 has empty properties (`Path = $null`). Subsequent calls to `Resolve-ProjectCleanTargets` evaluate `Join-Path "" $candidate`, resolving candidate artifact directory names against `$PWD` (the host working directory). If any folder exists in `$PWD`, it is added to clean targets; `Test-SafePathContainment` then correctly detects that the target is outside the scanned root and throws a fatal security exception (`exit 1`).
+- **Recommended Fix for Implementing Agent**:
+  In `clean-reinstall.ps1` around line 583, update the return statement:
+  ```powershell
+  if ($rawProjects.Count -eq 0) {
+      return @()
+  }
+  return ,$rawProjects
+  ```
+
+
+## Windows implementation plan location
+
+The former root `PROJECT.md` was byte-identical to the retained [orchestrator plan](../../.agents/teamwork/orchestrator_1/PROJECT.md). Its PLANNED milestones and safety claims are historical. Current source takes precedence.
