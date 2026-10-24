@@ -63,7 +63,7 @@ describe('email service', () => {
     const provider: EmailProvider = { name: 'fake', send };
     await createEmailService(loadEmailConfig(env), { provider }).send(verification);
     expect(send).toHaveBeenCalledOnce();
-    expect(send.mock.calls[0][0]).toMatchObject({
+    expect((send.mock.calls as unknown as unknown[][])[0][0]).toMatchObject({
       from: { email: 'verified@example.test', name: 'TalentSphere' },
       to: 'a@example.test',
       idempotencyKey: 'job_9',
