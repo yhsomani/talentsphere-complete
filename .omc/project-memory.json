@@ -267,6 +267,12 @@
       "type": "file"
     },
     {
+      "path": "SSOT.md",
+      "accessCount": 3,
+      "lastAccessed": 1792918001328,
+      "type": "directory"
+    },
+    {
       "path": "apps/web/src/pages/LandingPage.tsx",
       "accessCount": 2,
       "lastAccessed": 1792867862783,
@@ -312,6 +318,12 @@
       "path": ".playwright-mcp/landing-desktop.png",
       "accessCount": 1,
       "lastAccessed": 1792867925259,
+      "type": "file"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792917989497,
       "type": "file"
     }
   ],
