@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/events/EventEnvelope.schema.json",
+  "title": "EventEnvelope",
+  "description": "Envelope for every domain event written to outbox_event and delivered at-least-once (BE-01 section 6). Envelope fields mirror outbox columns (snake_case); data fields mirror REST DTOs (camelCase). Consumers MUST dedupe on event_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "type",
+    "version",
+    "occurred_at",
+    "trace_id",
+    "tenant",
+    "aggregate",
+    "data"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUIDv7; dedupe key for consumer_inbox"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z_]*(\\.[a-z_]+)+$",
+      "description": "Dotted lowercase event type, e.g. evidence.verified"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version of data for this type"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "description": "W3C trace-id hex of the originating request"
+    },
+    "tenant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "org_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "institution_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        }
+      },
+      "description": "Both null for tenant-less (self-scoped or platform) events. Consumers MUST NOT widen scope beyond this tenant (INV-T03)."
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "seq"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Per-aggregate monotonic sequence (best-effort ordering)"
+        }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "system",
+            "support",
+            "referee"
+          ]
+        },
+        "account_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        }
+      }
+    },
+    "correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Request id that started the causal chain"
+    },
+    "causation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "description": "event_id of the event that caused this one, if any"
+    },
+    "data": {
+      "type": "object",
+      "description": "Type-specific payload; no direct personal data beyond ids (consumers fetch through owner interfaces under policy)"
+    }
+  }
+}

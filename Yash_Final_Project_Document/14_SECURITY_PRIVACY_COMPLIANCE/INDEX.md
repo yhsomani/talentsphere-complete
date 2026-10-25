@@ -1,0 +1,3 @@
+# 14 Security, Privacy & Compliance - Index
+Supersedes nothing. Doc ID: IDX-14 · Owner: Security Architect · Version 1.0 · Status: Under Review · Relates: SEC-01..SEC-04
+- [THREAT_MODEL.md](THREAT_MODEL.md) · [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) · [PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md](PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md) · [COMPLIANCE_APPLICABILITY_MATRIX.md](COMPLIANCE_APPLICABILITY_MATRIX.md)

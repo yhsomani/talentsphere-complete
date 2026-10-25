@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/domain/Application.schema.json",
+  "title": "Application",
+  "description": "Application read model. state transitions only via POST stage-transitions by a human actor (INV-T09); terminal states are immutable (INV-T11). One non-terminal application per (candidate, job) (BR-T001).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "jobId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "orgId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "candidateAccountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "in_review",
+        "interviewing",
+        "offer",
+        "hired",
+        "rejected",
+        "withdrawn"
+      ]
+    },
+    "stageKey": {
+      "type": "string"
+    },
+    "submittedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "terminalAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resumeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "consentSnapshotId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "version": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "jobId",
+    "orgId",
+    "candidateAccountId",
+    "state",
+    "stageKey",
+    "submittedAt",
+    "consentSnapshotId",
+    "version"
+  ],
+  "$defs": {}
+}

@@ -1,0 +1,4544 @@
+# Generated from the event definition source of truth; keep in sync with EVENT_CATALOG.md rows.
+asyncapi: 3.0.0
+info:
+  title: TalentSphere Domain Events
+  version: 1.0.0-draft
+  description: Target design contract [TARGET]. Events are written to outbox_event in the producing transaction and delivered
+    at-least-once through the Postgres-backed job engine (ADR-T05, ADR-T09). Consumers dedupe on event_id. Not implemented;
+    design only.
+defaultContentType: application/json
+servers:
+  outbox:
+    host: postgres-outbox.internal
+    protocol: postgres-outbox
+    description: 'Logical server: outbox_event table + background_job fan-out (not a network broker). Protocol string is descriptive.'
+channels:
+  accountRegistered:
+    address: account.registered
+    messages:
+      AccountRegistered:
+        $ref: '#/components/messages/AccountRegistered'
+  accountEmailVerified:
+    address: account.email_verified
+    messages:
+      AccountEmailVerified:
+        $ref: '#/components/messages/AccountEmailVerified'
+  sessionRevoked:
+    address: session.revoked
+    messages:
+      SessionRevoked:
+        $ref: '#/components/messages/SessionRevoked'
+  passwordChanged:
+    address: password.changed
+    messages:
+      PasswordChanged:
+        $ref: '#/components/messages/PasswordChanged'
+  passkeyRegistered:
+    address: passkey.registered
+    messages:
+      PasskeyRegistered:
+        $ref: '#/components/messages/PasskeyRegistered'
+  accountLocked:
+    address: account.locked
+    messages:
+      AccountLocked:
+        $ref: '#/components/messages/AccountLocked'
+  accountDeactivated:
+    address: account.deactivated
+    messages:
+      AccountDeactivated:
+        $ref: '#/components/messages/AccountDeactivated'
+  orgCreated:
+    address: org.created
+    messages:
+      OrgCreated:
+        $ref: '#/components/messages/OrgCreated'
+  orgMemberAdded:
+    address: org.member.added
+    messages:
+      OrgMemberAdded:
+        $ref: '#/components/messages/OrgMemberAdded'
+  orgMemberRoleChanged:
+    address: org.member.role_changed
+    messages:
+      OrgMemberRoleChanged:
+        $ref: '#/components/messages/OrgMemberRoleChanged'
+  orgMemberRemoved:
+    address: org.member.removed
+    messages:
+      OrgMemberRemoved:
+        $ref: '#/components/messages/OrgMemberRemoved'
+  orgSsoConfigured:
+    address: org.sso.configured
+    messages:
+      OrgSsoConfigured:
+        $ref: '#/components/messages/OrgSsoConfigured'
+  profileUpdated:
+    address: profile.updated
+    messages:
+      ProfileUpdated:
+        $ref: '#/components/messages/ProfileUpdated'
+  profileVisibilityChanged:
+    address: profile.visibility_changed
+    messages:
+      ProfileVisibilityChanged:
+        $ref: '#/components/messages/ProfileVisibilityChanged'
+  skillCreated:
+    address: skill.created
+    messages:
+      SkillCreated:
+        $ref: '#/components/messages/SkillCreated'
+  skillMerged:
+    address: skill.merged
+    messages:
+      SkillMerged:
+        $ref: '#/components/messages/SkillMerged'
+  evidenceCreated:
+    address: evidence.created
+    messages:
+      EvidenceCreated:
+        $ref: '#/components/messages/EvidenceCreated'
+  evidenceUpdated:
+    address: evidence.updated
+    messages:
+      EvidenceUpdated:
+        $ref: '#/components/messages/EvidenceUpdated'
+  evidenceArtifactScanned:
+    address: evidence.artifact.scanned
+    messages:
+      EvidenceArtifactScanned:
+        $ref: '#/components/messages/EvidenceArtifactScanned'
+  evidenceVerificationRequested:
+    address: evidence.verification_requested
+    messages:
+      EvidenceVerificationRequested:
+        $ref: '#/components/messages/EvidenceVerificationRequested'
+  evidenceVerified:
+    address: evidence.verified
+    messages:
+      EvidenceVerified:
+        $ref: '#/components/messages/EvidenceVerified'
+  evidenceRevoked:
+    address: evidence.revoked
+    messages:
+      EvidenceRevoked:
+        $ref: '#/components/messages/EvidenceRevoked'
+  credentialIssued:
+    address: credential.issued
+    messages:
+      CredentialIssued:
+        $ref: '#/components/messages/CredentialIssued'
+  credentialRevoked:
+    address: credential.revoked
+    messages:
+      CredentialRevoked:
+        $ref: '#/components/messages/CredentialRevoked'
+  verificationRequested:
+    address: verification.requested
+    messages:
+      VerificationRequested:
+        $ref: '#/components/messages/VerificationRequested'
+  verificationCompleted:
+    address: verification.completed
+    messages:
+      VerificationCompleted:
+        $ref: '#/components/messages/VerificationCompleted'
+  referenceRequested:
+    address: reference.requested
+    messages:
+      ReferenceRequested:
+        $ref: '#/components/messages/ReferenceRequested'
+  referenceResponded:
+    address: reference.responded
+    messages:
+      ReferenceResponded:
+        $ref: '#/components/messages/ReferenceResponded'
+  referenceExpired:
+    address: reference.expired
+    messages:
+      ReferenceExpired:
+        $ref: '#/components/messages/ReferenceExpired'
+  workclaimEmployerEmailConfirmed:
+    address: workclaim.employer_email_confirmed
+    messages:
+      WorkclaimEmployerEmailConfirmed:
+        $ref: '#/components/messages/WorkclaimEmployerEmailConfirmed'
+  verificationDisputed:
+    address: verification.disputed
+    messages:
+      VerificationDisputed:
+        $ref: '#/components/messages/VerificationDisputed'
+  attemptStarted:
+    address: attempt.started
+    messages:
+      AttemptStarted:
+        $ref: '#/components/messages/AttemptStarted'
+  attemptSubmitted:
+    address: attempt.submitted
+    messages:
+      AttemptSubmitted:
+        $ref: '#/components/messages/AttemptSubmitted'
+  assessmentPassed:
+    address: assessment.passed
+    messages:
+      AssessmentPassed:
+        $ref: '#/components/messages/AssessmentPassed'
+  assessmentFailed:
+    address: assessment.failed
+    messages:
+      AssessmentFailed:
+        $ref: '#/components/messages/AssessmentFailed'
+  integrityFlagRaised:
+    address: integrity.flag.raised
+    messages:
+      IntegrityFlagRaised:
+        $ref: '#/components/messages/IntegrityFlagRaised'
+  integrityFlagReviewed:
+    address: integrity.flag.reviewed
+    messages:
+      IntegrityFlagReviewed:
+        $ref: '#/components/messages/IntegrityFlagReviewed'
+  attemptAppealed:
+    address: attempt.appealed
+    messages:
+      AttemptAppealed:
+        $ref: '#/components/messages/AttemptAppealed'
+  enrollmentCreated:
+    address: enrollment.created
+    messages:
+      EnrollmentCreated:
+        $ref: '#/components/messages/EnrollmentCreated'
+  courseCompleted:
+    address: course.completed
+    messages:
+      CourseCompleted:
+        $ref: '#/components/messages/CourseCompleted'
+  coursePublished:
+    address: course.published
+    messages:
+      CoursePublished:
+        $ref: '#/components/messages/CoursePublished'
+  jobPublished:
+    address: job.published
+    messages:
+      JobPublished:
+        $ref: '#/components/messages/JobPublished'
+  jobUpdated:
+    address: job.updated
+    messages:
+      JobUpdated:
+        $ref: '#/components/messages/JobUpdated'
+  jobClosed:
+    address: job.closed
+    messages:
+      JobClosed:
+        $ref: '#/components/messages/JobClosed'
+  jobExpired:
+    address: job.expired
+    messages:
+      JobExpired:
+        $ref: '#/components/messages/JobExpired'
+  applicationSubmitted:
+    address: application.submitted
+    messages:
+      ApplicationSubmitted:
+        $ref: '#/components/messages/ApplicationSubmitted'
+  applicationWithdrawn:
+    address: application.withdrawn
+    messages:
+      ApplicationWithdrawn:
+        $ref: '#/components/messages/ApplicationWithdrawn'
+  applicationStageChanged:
+    address: application.stage.changed
+    messages:
+      ApplicationStageChanged:
+        $ref: '#/components/messages/ApplicationStageChanged'
+  interviewScheduled:
+    address: interview.scheduled
+    messages:
+      InterviewScheduled:
+        $ref: '#/components/messages/InterviewScheduled'
+  interviewCompleted:
+    address: interview.completed
+    messages:
+      InterviewCompleted:
+        $ref: '#/components/messages/InterviewCompleted'
+  conversationCreated:
+    address: conversation.created
+    messages:
+      ConversationCreated:
+        $ref: '#/components/messages/ConversationCreated'
+  messageSent:
+    address: message.sent
+    messages:
+      MessageSent:
+        $ref: '#/components/messages/MessageSent'
+  notificationEmailBounced:
+    address: notification.email.bounced
+    messages:
+      NotificationEmailBounced:
+        $ref: '#/components/messages/NotificationEmailBounced'
+  notificationDelivered:
+    address: notification.delivered
+    messages:
+      NotificationDelivered:
+        $ref: '#/components/messages/NotificationDelivered'
+  subscriptionChanged:
+    address: subscription.changed
+    messages:
+      SubscriptionChanged:
+        $ref: '#/components/messages/SubscriptionChanged'
+  entitlementChanged:
+    address: entitlement.changed
+    messages:
+      EntitlementChanged:
+        $ref: '#/components/messages/EntitlementChanged'
+  paymentFailed:
+    address: payment.failed
+    messages:
+      PaymentFailed:
+        $ref: '#/components/messages/PaymentFailed'
+  invoicePaid:
+    address: invoice.paid
+    messages:
+      InvoicePaid:
+        $ref: '#/components/messages/InvoicePaid'
+  aiRequestCompleted:
+    address: ai.request.completed
+    messages:
+      AiRequestCompleted:
+        $ref: '#/components/messages/AiRequestCompleted'
+  aiBudgetExceeded:
+    address: ai.budget.exceeded
+    messages:
+      AiBudgetExceeded:
+        $ref: '#/components/messages/AiBudgetExceeded'
+  credentialIssuedByInstitution:
+    address: credential.issued_by_institution
+    messages:
+      CredentialIssuedByInstitution:
+        $ref: '#/components/messages/CredentialIssuedByInstitution'
+  reportFiled:
+    address: report.filed
+    messages:
+      ReportFiled:
+        $ref: '#/components/messages/ReportFiled'
+  caseResolved:
+    address: case.resolved
+    messages:
+      CaseResolved:
+        $ref: '#/components/messages/CaseResolved'
+  supportAccessGranted:
+    address: support_access.granted
+    messages:
+      SupportAccessGranted:
+        $ref: '#/components/messages/SupportAccessGranted'
+  supportAccessExpired:
+    address: support_access.expired
+    messages:
+      SupportAccessExpired:
+        $ref: '#/components/messages/SupportAccessExpired'
+  featureFlagChanged:
+    address: feature_flag.changed
+    messages:
+      FeatureFlagChanged:
+        $ref: '#/components/messages/FeatureFlagChanged'
+  consentChanged:
+    address: consent.changed
+    messages:
+      ConsentChanged:
+        $ref: '#/components/messages/ConsentChanged'
+  dataexportReady:
+    address: dataexport.ready
+    messages:
+      DataexportReady:
+        $ref: '#/components/messages/DataexportReady'
+  erasureRequested:
+    address: erasure.requested
+    messages:
+      ErasureRequested:
+        $ref: '#/components/messages/ErasureRequested'
+  erasureModuleCompleted:
+    address: erasure.module_completed
+    messages:
+      ErasureModuleCompleted:
+        $ref: '#/components/messages/ErasureModuleCompleted'
+  erasureCompleted:
+    address: erasure.completed
+    messages:
+      ErasureCompleted:
+        $ref: '#/components/messages/ErasureCompleted'
+  importCompleted:
+    address: import.completed
+    messages:
+      ImportCompleted:
+        $ref: '#/components/messages/ImportCompleted'
+  fileScanned:
+    address: file.scanned
+    messages:
+      FileScanned:
+        $ref: '#/components/messages/FileScanned'
+  jobDeadLettered:
+    address: job.dead_lettered
+    messages:
+      JobDeadLettered:
+        $ref: '#/components/messages/JobDeadLettered'
+operations:
+  publishAccountRegistered:
+    action: send
+    channel:
+      $ref: '#/channels/accountRegistered'
+    summary: identity publishes account.registered via transactional outbox
+    messages:
+    - $ref: '#/channels/accountRegistered/messages/AccountRegistered'
+    x-consumers:
+    - notify
+    - privacy
+    - analytics
+  receiveAccountRegisteredByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/accountRegistered'
+    summary: notify consumes account.registered (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/accountRegistered/messages/AccountRegistered'
+  receiveAccountRegisteredByPrivacy:
+    action: receive
+    channel:
+      $ref: '#/channels/accountRegistered'
+    summary: privacy consumes account.registered (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/accountRegistered/messages/AccountRegistered'
+  receiveAccountRegisteredByAnalytics:
+    action: receive
+    channel:
+      $ref: '#/channels/accountRegistered'
+    summary: analytics consumes account.registered (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/accountRegistered/messages/AccountRegistered'
+  publishAccountEmailVerified:
+    action: send
+    channel:
+      $ref: '#/channels/accountEmailVerified'
+    summary: identity publishes account.email_verified via transactional outbox
+    messages:
+    - $ref: '#/channels/accountEmailVerified/messages/AccountEmailVerified'
+    x-consumers:
+    - profile
+    - notify
+  publishSessionRevoked:
+    action: send
+    channel:
+      $ref: '#/channels/sessionRevoked'
+    summary: identity publishes session.revoked via transactional outbox
+    messages:
+    - $ref: '#/channels/sessionRevoked/messages/SessionRevoked'
+    x-consumers:
+    - notify
+    - safety
+  publishPasswordChanged:
+    action: send
+    channel:
+      $ref: '#/channels/passwordChanged'
+    summary: identity publishes password.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/passwordChanged/messages/PasswordChanged'
+    x-consumers:
+    - notify
+  publishPasskeyRegistered:
+    action: send
+    channel:
+      $ref: '#/channels/passkeyRegistered'
+    summary: identity publishes passkey.registered via transactional outbox
+    messages:
+    - $ref: '#/channels/passkeyRegistered/messages/PasskeyRegistered'
+    x-consumers:
+    - notify
+  publishAccountLocked:
+    action: send
+    channel:
+      $ref: '#/channels/accountLocked'
+    summary: identity publishes account.locked via transactional outbox
+    messages:
+    - $ref: '#/channels/accountLocked/messages/AccountLocked'
+    x-consumers:
+    - notify
+    - safety
+  publishAccountDeactivated:
+    action: send
+    channel:
+      $ref: '#/channels/accountDeactivated'
+    summary: identity publishes account.deactivated via transactional outbox
+    messages:
+    - $ref: '#/channels/accountDeactivated/messages/AccountDeactivated'
+    x-consumers:
+    - profile
+    - search
+    - matching
+    - messaging
+  publishOrgCreated:
+    action: send
+    channel:
+      $ref: '#/channels/orgCreated'
+    summary: orgs publishes org.created via transactional outbox
+    messages:
+    - $ref: '#/channels/orgCreated/messages/OrgCreated'
+    x-consumers:
+    - billing
+    - analytics
+  publishOrgMemberAdded:
+    action: send
+    channel:
+      $ref: '#/channels/orgMemberAdded'
+    summary: orgs publishes org.member.added via transactional outbox
+    messages:
+    - $ref: '#/channels/orgMemberAdded/messages/OrgMemberAdded'
+    x-consumers:
+    - notify
+    - billing
+    - policy-cache
+  publishOrgMemberRoleChanged:
+    action: send
+    channel:
+      $ref: '#/channels/orgMemberRoleChanged'
+    summary: orgs publishes org.member.role_changed via transactional outbox
+    messages:
+    - $ref: '#/channels/orgMemberRoleChanged/messages/OrgMemberRoleChanged'
+    x-consumers:
+    - notify
+    - applications
+  publishOrgMemberRemoved:
+    action: send
+    channel:
+      $ref: '#/channels/orgMemberRemoved'
+    summary: orgs publishes org.member.removed via transactional outbox
+    messages:
+    - $ref: '#/channels/orgMemberRemoved/messages/OrgMemberRemoved'
+    x-consumers:
+    - applications
+    - billing
+    - messaging
+  publishOrgSsoConfigured:
+    action: send
+    channel:
+      $ref: '#/channels/orgSsoConfigured'
+    summary: orgs publishes org.sso.configured via transactional outbox
+    messages:
+    - $ref: '#/channels/orgSsoConfigured/messages/OrgSsoConfigured'
+    x-consumers:
+    - identity
+    - audit
+  publishProfileUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/profileUpdated'
+    summary: profile publishes profile.updated via transactional outbox
+    messages:
+    - $ref: '#/channels/profileUpdated/messages/ProfileUpdated'
+    x-consumers:
+    - search
+    - matching
+    - careerintel
+  publishProfileVisibilityChanged:
+    action: send
+    channel:
+      $ref: '#/channels/profileVisibilityChanged'
+    summary: profile publishes profile.visibility_changed via transactional outbox
+    messages:
+    - $ref: '#/channels/profileVisibilityChanged/messages/ProfileVisibilityChanged'
+    x-consumers:
+    - search
+    - matching
+  publishSkillCreated:
+    action: send
+    channel:
+      $ref: '#/channels/skillCreated'
+    summary: skills publishes skill.created via transactional outbox
+    messages:
+    - $ref: '#/channels/skillCreated/messages/SkillCreated'
+    x-consumers:
+    - search
+    - matching
+  publishSkillMerged:
+    action: send
+    channel:
+      $ref: '#/channels/skillMerged'
+    summary: skills publishes skill.merged via transactional outbox
+    messages:
+    - $ref: '#/channels/skillMerged/messages/SkillMerged'
+    x-consumers:
+    - evidence
+    - jobs
+    - search
+    - matching
+    - careerintel
+  publishEvidenceCreated:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceCreated'
+    summary: evidence publishes evidence.created via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceCreated/messages/EvidenceCreated'
+    x-consumers:
+    - verification
+    - search
+    - careerintel
+  receiveEvidenceCreatedByVerification:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceCreated'
+    summary: verification consumes evidence.created (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceCreated/messages/EvidenceCreated'
+  receiveEvidenceCreatedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceCreated'
+    summary: search consumes evidence.created (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceCreated/messages/EvidenceCreated'
+  receiveEvidenceCreatedByCareerintel:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceCreated'
+    summary: careerintel consumes evidence.created (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceCreated/messages/EvidenceCreated'
+  publishEvidenceUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceUpdated'
+    summary: evidence publishes evidence.updated via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceUpdated/messages/EvidenceUpdated'
+    x-consumers:
+    - verification
+    - search
+  publishEvidenceArtifactScanned:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceArtifactScanned'
+    summary: evidence publishes evidence.artifact.scanned via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceArtifactScanned/messages/EvidenceArtifactScanned'
+    x-consumers:
+    - notify
+    - search
+  publishEvidenceVerificationRequested:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceVerificationRequested'
+    summary: evidence publishes evidence.verification_requested via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceVerificationRequested/messages/EvidenceVerificationRequested'
+    x-consumers:
+    - verification
+  publishEvidenceVerified:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: evidence publishes evidence.verified via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+    x-consumers:
+    - matching
+    - search
+    - careerintel
+    - notify
+    - applications
+    - skills
+  receiveEvidenceVerifiedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: matching consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  receiveEvidenceVerifiedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: search consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  receiveEvidenceVerifiedByCareerintel:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: careerintel consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  receiveEvidenceVerifiedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: notify consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  receiveEvidenceVerifiedByApplications:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: applications consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  receiveEvidenceVerifiedBySkills:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceVerified'
+    summary: skills consumes evidence.verified (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceVerified/messages/EvidenceVerified'
+  publishEvidenceRevoked:
+    action: send
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: evidence publishes evidence.revoked via transactional outbox
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+    x-consumers:
+    - skills
+    - matching
+    - applications
+    - notify
+    - search
+  receiveEvidenceRevokedBySkills:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: skills consumes evidence.revoked (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+  receiveEvidenceRevokedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: matching consumes evidence.revoked (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+  receiveEvidenceRevokedByApplications:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: applications consumes evidence.revoked (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+  receiveEvidenceRevokedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: notify consumes evidence.revoked (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+  receiveEvidenceRevokedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/evidenceRevoked'
+    summary: search consumes evidence.revoked (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/evidenceRevoked/messages/EvidenceRevoked'
+  publishCredentialIssued:
+    action: send
+    channel:
+      $ref: '#/channels/credentialIssued'
+    summary: evidence publishes credential.issued via transactional outbox
+    messages:
+    - $ref: '#/channels/credentialIssued/messages/CredentialIssued'
+    x-consumers:
+    - notify
+  publishCredentialRevoked:
+    action: send
+    channel:
+      $ref: '#/channels/credentialRevoked'
+    summary: evidence publishes credential.revoked via transactional outbox
+    messages:
+    - $ref: '#/channels/credentialRevoked/messages/CredentialRevoked'
+    x-consumers:
+    - notify
+    - search
+  publishVerificationRequested:
+    action: send
+    channel:
+      $ref: '#/channels/verificationRequested'
+    summary: verification publishes verification.requested via transactional outbox
+    messages:
+    - $ref: '#/channels/verificationRequested/messages/VerificationRequested'
+    x-consumers:
+    - notify
+    - admin
+  publishVerificationCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/verificationCompleted'
+    summary: verification publishes verification.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/verificationCompleted/messages/VerificationCompleted'
+    x-consumers:
+    - evidence
+    - notify
+  receiveVerificationCompletedByEvidence:
+    action: receive
+    channel:
+      $ref: '#/channels/verificationCompleted'
+    summary: evidence consumes verification.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/verificationCompleted/messages/VerificationCompleted'
+  receiveVerificationCompletedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/verificationCompleted'
+    summary: notify consumes verification.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/verificationCompleted/messages/VerificationCompleted'
+  publishReferenceRequested:
+    action: send
+    channel:
+      $ref: '#/channels/referenceRequested'
+    summary: verification publishes reference.requested via transactional outbox
+    messages:
+    - $ref: '#/channels/referenceRequested/messages/ReferenceRequested'
+    x-consumers:
+    - notify
+  publishReferenceResponded:
+    action: send
+    channel:
+      $ref: '#/channels/referenceResponded'
+    summary: verification publishes reference.responded via transactional outbox
+    messages:
+    - $ref: '#/channels/referenceResponded/messages/ReferenceResponded'
+    x-consumers:
+    - verification
+    - notify
+  receiveReferenceRespondedByVerification:
+    action: receive
+    channel:
+      $ref: '#/channels/referenceResponded'
+    summary: verification consumes reference.responded (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/referenceResponded/messages/ReferenceResponded'
+  receiveReferenceRespondedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/referenceResponded'
+    summary: notify consumes reference.responded (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/referenceResponded/messages/ReferenceResponded'
+  publishReferenceExpired:
+    action: send
+    channel:
+      $ref: '#/channels/referenceExpired'
+    summary: verification publishes reference.expired via transactional outbox
+    messages:
+    - $ref: '#/channels/referenceExpired/messages/ReferenceExpired'
+    x-consumers:
+    - evidence
+    - notify
+  publishWorkclaimEmployerEmailConfirmed:
+    action: send
+    channel:
+      $ref: '#/channels/workclaimEmployerEmailConfirmed'
+    summary: verification publishes workclaim.employer_email_confirmed via transactional outbox
+    messages:
+    - $ref: '#/channels/workclaimEmployerEmailConfirmed/messages/WorkclaimEmployerEmailConfirmed'
+    x-consumers:
+    - evidence
+  publishVerificationDisputed:
+    action: send
+    channel:
+      $ref: '#/channels/verificationDisputed'
+    summary: verification publishes verification.disputed via transactional outbox
+    messages:
+    - $ref: '#/channels/verificationDisputed/messages/VerificationDisputed'
+    x-consumers:
+    - safety
+    - evidence
+  publishAttemptStarted:
+    action: send
+    channel:
+      $ref: '#/channels/attemptStarted'
+    summary: assessment publishes attempt.started via transactional outbox
+    messages:
+    - $ref: '#/channels/attemptStarted/messages/AttemptStarted'
+    x-consumers:
+    - analytics
+    - ai
+  publishAttemptSubmitted:
+    action: send
+    channel:
+      $ref: '#/channels/attemptSubmitted'
+    summary: assessment publishes attempt.submitted via transactional outbox
+    messages:
+    - $ref: '#/channels/attemptSubmitted/messages/AttemptSubmitted'
+    x-consumers:
+    - notify
+  publishAssessmentPassed:
+    action: send
+    channel:
+      $ref: '#/channels/assessmentPassed'
+    summary: assessment publishes assessment.passed via transactional outbox
+    messages:
+    - $ref: '#/channels/assessmentPassed/messages/AssessmentPassed'
+    x-consumers:
+    - evidence
+    - learning
+    - notify
+  receiveAssessmentPassedByEvidence:
+    action: receive
+    channel:
+      $ref: '#/channels/assessmentPassed'
+    summary: evidence consumes assessment.passed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/assessmentPassed/messages/AssessmentPassed'
+  receiveAssessmentPassedByLearning:
+    action: receive
+    channel:
+      $ref: '#/channels/assessmentPassed'
+    summary: learning consumes assessment.passed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/assessmentPassed/messages/AssessmentPassed'
+  receiveAssessmentPassedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/assessmentPassed'
+    summary: notify consumes assessment.passed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/assessmentPassed/messages/AssessmentPassed'
+  publishAssessmentFailed:
+    action: send
+    channel:
+      $ref: '#/channels/assessmentFailed'
+    summary: assessment publishes assessment.failed via transactional outbox
+    messages:
+    - $ref: '#/channels/assessmentFailed/messages/AssessmentFailed'
+    x-consumers:
+    - notify
+  publishIntegrityFlagRaised:
+    action: send
+    channel:
+      $ref: '#/channels/integrityFlagRaised'
+    summary: assessment publishes integrity.flag.raised via transactional outbox
+    messages:
+    - $ref: '#/channels/integrityFlagRaised/messages/IntegrityFlagRaised'
+    x-consumers:
+    - safety
+  publishIntegrityFlagReviewed:
+    action: send
+    channel:
+      $ref: '#/channels/integrityFlagReviewed'
+    summary: assessment publishes integrity.flag.reviewed via transactional outbox
+    messages:
+    - $ref: '#/channels/integrityFlagReviewed/messages/IntegrityFlagReviewed'
+    x-consumers:
+    - notify
+  publishAttemptAppealed:
+    action: send
+    channel:
+      $ref: '#/channels/attemptAppealed'
+    summary: assessment publishes attempt.appealed via transactional outbox
+    messages:
+    - $ref: '#/channels/attemptAppealed/messages/AttemptAppealed'
+    x-consumers:
+    - safety
+    - notify
+  publishEnrollmentCreated:
+    action: send
+    channel:
+      $ref: '#/channels/enrollmentCreated'
+    summary: learning publishes enrollment.created via transactional outbox
+    messages:
+    - $ref: '#/channels/enrollmentCreated/messages/EnrollmentCreated'
+    x-consumers:
+    - analytics
+    - notify
+  publishCourseCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/courseCompleted'
+    summary: learning publishes course.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/courseCompleted/messages/CourseCompleted'
+    x-consumers:
+    - evidence
+    - notify
+    - careerintel
+  receiveCourseCompletedByEvidence:
+    action: receive
+    channel:
+      $ref: '#/channels/courseCompleted'
+    summary: evidence consumes course.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/courseCompleted/messages/CourseCompleted'
+  receiveCourseCompletedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/courseCompleted'
+    summary: notify consumes course.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/courseCompleted/messages/CourseCompleted'
+  receiveCourseCompletedByCareerintel:
+    action: receive
+    channel:
+      $ref: '#/channels/courseCompleted'
+    summary: careerintel consumes course.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/courseCompleted/messages/CourseCompleted'
+  publishCoursePublished:
+    action: send
+    channel:
+      $ref: '#/channels/coursePublished'
+    summary: learning publishes course.published via transactional outbox
+    messages:
+    - $ref: '#/channels/coursePublished/messages/CoursePublished'
+    x-consumers:
+    - search
+  publishJobPublished:
+    action: send
+    channel:
+      $ref: '#/channels/jobPublished'
+    summary: jobs publishes job.published via transactional outbox
+    messages:
+    - $ref: '#/channels/jobPublished/messages/JobPublished'
+    x-consumers:
+    - search
+    - matching
+    - notify
+    - applications
+  receiveJobPublishedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/jobPublished'
+    summary: search consumes job.published (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobPublished/messages/JobPublished'
+  receiveJobPublishedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/jobPublished'
+    summary: matching consumes job.published (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobPublished/messages/JobPublished'
+  receiveJobPublishedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/jobPublished'
+    summary: notify consumes job.published (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobPublished/messages/JobPublished'
+  receiveJobPublishedByApplications:
+    action: receive
+    channel:
+      $ref: '#/channels/jobPublished'
+    summary: applications consumes job.published (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobPublished/messages/JobPublished'
+  publishJobUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/jobUpdated'
+    summary: jobs publishes job.updated via transactional outbox
+    messages:
+    - $ref: '#/channels/jobUpdated/messages/JobUpdated'
+    x-consumers:
+    - search
+    - matching
+  publishJobClosed:
+    action: send
+    channel:
+      $ref: '#/channels/jobClosed'
+    summary: jobs publishes job.closed via transactional outbox
+    messages:
+    - $ref: '#/channels/jobClosed/messages/JobClosed'
+    x-consumers:
+    - applications
+    - search
+    - matching
+    - notify
+  receiveJobClosedByApplications:
+    action: receive
+    channel:
+      $ref: '#/channels/jobClosed'
+    summary: applications consumes job.closed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobClosed/messages/JobClosed'
+  receiveJobClosedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/jobClosed'
+    summary: search consumes job.closed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobClosed/messages/JobClosed'
+  receiveJobClosedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/jobClosed'
+    summary: matching consumes job.closed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobClosed/messages/JobClosed'
+  receiveJobClosedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/jobClosed'
+    summary: notify consumes job.closed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/jobClosed/messages/JobClosed'
+  publishJobExpired:
+    action: send
+    channel:
+      $ref: '#/channels/jobExpired'
+    summary: jobs publishes job.expired via transactional outbox
+    messages:
+    - $ref: '#/channels/jobExpired/messages/JobExpired'
+    x-consumers:
+    - search
+    - notify
+  publishApplicationSubmitted:
+    action: send
+    channel:
+      $ref: '#/channels/applicationSubmitted'
+    summary: applications publishes application.submitted via transactional outbox
+    messages:
+    - $ref: '#/channels/applicationSubmitted/messages/ApplicationSubmitted'
+    x-consumers:
+    - notify
+    - matching
+    - analytics
+    - messaging
+  receiveApplicationSubmittedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationSubmitted'
+    summary: notify consumes application.submitted (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationSubmitted/messages/ApplicationSubmitted'
+  receiveApplicationSubmittedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationSubmitted'
+    summary: matching consumes application.submitted (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationSubmitted/messages/ApplicationSubmitted'
+  receiveApplicationSubmittedByAnalytics:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationSubmitted'
+    summary: analytics consumes application.submitted (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationSubmitted/messages/ApplicationSubmitted'
+  receiveApplicationSubmittedByMessaging:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationSubmitted'
+    summary: messaging consumes application.submitted (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationSubmitted/messages/ApplicationSubmitted'
+  publishApplicationWithdrawn:
+    action: send
+    channel:
+      $ref: '#/channels/applicationWithdrawn'
+    summary: applications publishes application.withdrawn via transactional outbox
+    messages:
+    - $ref: '#/channels/applicationWithdrawn/messages/ApplicationWithdrawn'
+    x-consumers:
+    - notify
+    - analytics
+    - messaging
+  publishApplicationStageChanged:
+    action: send
+    channel:
+      $ref: '#/channels/applicationStageChanged'
+    summary: applications publishes application.stage.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/applicationStageChanged/messages/ApplicationStageChanged'
+    x-consumers:
+    - notify
+    - analytics
+    - messaging
+  receiveApplicationStageChangedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationStageChanged'
+    summary: notify consumes application.stage.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationStageChanged/messages/ApplicationStageChanged'
+  receiveApplicationStageChangedByAnalytics:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationStageChanged'
+    summary: analytics consumes application.stage.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationStageChanged/messages/ApplicationStageChanged'
+  receiveApplicationStageChangedByMessaging:
+    action: receive
+    channel:
+      $ref: '#/channels/applicationStageChanged'
+    summary: messaging consumes application.stage.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/applicationStageChanged/messages/ApplicationStageChanged'
+  publishInterviewScheduled:
+    action: send
+    channel:
+      $ref: '#/channels/interviewScheduled'
+    summary: applications publishes interview.scheduled via transactional outbox
+    messages:
+    - $ref: '#/channels/interviewScheduled/messages/InterviewScheduled'
+    x-consumers:
+    - notify
+    - messaging
+  publishInterviewCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/interviewCompleted'
+    summary: applications publishes interview.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/interviewCompleted/messages/InterviewCompleted'
+    x-consumers:
+    - notify
+  publishConversationCreated:
+    action: send
+    channel:
+      $ref: '#/channels/conversationCreated'
+    summary: messaging publishes conversation.created via transactional outbox
+    messages:
+    - $ref: '#/channels/conversationCreated/messages/ConversationCreated'
+    x-consumers:
+    - notify
+  publishMessageSent:
+    action: send
+    channel:
+      $ref: '#/channels/messageSent'
+    summary: messaging publishes message.sent via transactional outbox
+    messages:
+    - $ref: '#/channels/messageSent/messages/MessageSent'
+    x-consumers:
+    - notify
+    - safety
+    - analytics
+  publishNotificationEmailBounced:
+    action: send
+    channel:
+      $ref: '#/channels/notificationEmailBounced'
+    summary: notify publishes notification.email.bounced via transactional outbox
+    messages:
+    - $ref: '#/channels/notificationEmailBounced/messages/NotificationEmailBounced'
+    x-consumers:
+    - identity
+    - notify
+  publishNotificationDelivered:
+    action: send
+    channel:
+      $ref: '#/channels/notificationDelivered'
+    summary: notify publishes notification.delivered via transactional outbox
+    messages:
+    - $ref: '#/channels/notificationDelivered/messages/NotificationDelivered'
+    x-consumers:
+    - analytics
+  publishSubscriptionChanged:
+    action: send
+    channel:
+      $ref: '#/channels/subscriptionChanged'
+    summary: billing publishes subscription.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/subscriptionChanged/messages/SubscriptionChanged'
+    x-consumers:
+    - notify
+    - orgs
+  publishEntitlementChanged:
+    action: send
+    channel:
+      $ref: '#/channels/entitlementChanged'
+    summary: billing publishes entitlement.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/entitlementChanged/messages/EntitlementChanged'
+    x-consumers:
+    - jobs
+    - search
+    - ai
+    - notify
+  receiveEntitlementChangedByJobs:
+    action: receive
+    channel:
+      $ref: '#/channels/entitlementChanged'
+    summary: jobs consumes entitlement.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/entitlementChanged/messages/EntitlementChanged'
+  receiveEntitlementChangedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/entitlementChanged'
+    summary: search consumes entitlement.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/entitlementChanged/messages/EntitlementChanged'
+  receiveEntitlementChangedByAi:
+    action: receive
+    channel:
+      $ref: '#/channels/entitlementChanged'
+    summary: ai consumes entitlement.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/entitlementChanged/messages/EntitlementChanged'
+  receiveEntitlementChangedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/entitlementChanged'
+    summary: notify consumes entitlement.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/entitlementChanged/messages/EntitlementChanged'
+  publishPaymentFailed:
+    action: send
+    channel:
+      $ref: '#/channels/paymentFailed'
+    summary: billing publishes payment.failed via transactional outbox
+    messages:
+    - $ref: '#/channels/paymentFailed/messages/PaymentFailed'
+    x-consumers:
+    - notify
+  publishInvoicePaid:
+    action: send
+    channel:
+      $ref: '#/channels/invoicePaid'
+    summary: billing publishes invoice.paid via transactional outbox
+    messages:
+    - $ref: '#/channels/invoicePaid/messages/InvoicePaid'
+    x-consumers:
+    - notify
+  publishAiRequestCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/aiRequestCompleted'
+    summary: ai publishes ai.request.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/aiRequestCompleted/messages/AiRequestCompleted'
+    x-consumers:
+    - billing
+    - analytics
+  publishAiBudgetExceeded:
+    action: send
+    channel:
+      $ref: '#/channels/aiBudgetExceeded'
+    summary: ai publishes ai.budget.exceeded via transactional outbox
+    messages:
+    - $ref: '#/channels/aiBudgetExceeded/messages/AiBudgetExceeded'
+    x-consumers:
+    - notify
+  publishCredentialIssuedByInstitution:
+    action: send
+    channel:
+      $ref: '#/channels/credentialIssuedByInstitution'
+    summary: institutions publishes credential.issued_by_institution via transactional outbox
+    messages:
+    - $ref: '#/channels/credentialIssuedByInstitution/messages/CredentialIssuedByInstitution'
+    x-consumers:
+    - evidence
+    - notify
+  publishReportFiled:
+    action: send
+    channel:
+      $ref: '#/channels/reportFiled'
+    summary: safety publishes report.filed via transactional outbox
+    messages:
+    - $ref: '#/channels/reportFiled/messages/ReportFiled'
+    x-consumers:
+    - safety
+  publishCaseResolved:
+    action: send
+    channel:
+      $ref: '#/channels/caseResolved'
+    summary: safety publishes case.resolved via transactional outbox
+    messages:
+    - $ref: '#/channels/caseResolved/messages/CaseResolved'
+    x-consumers:
+    - notify
+    - profile
+    - jobs
+    - messaging
+  publishSupportAccessGranted:
+    action: send
+    channel:
+      $ref: '#/channels/supportAccessGranted'
+    summary: admin publishes support_access.granted via transactional outbox
+    messages:
+    - $ref: '#/channels/supportAccessGranted/messages/SupportAccessGranted'
+    x-consumers:
+    - audit
+    - notify
+  publishSupportAccessExpired:
+    action: send
+    channel:
+      $ref: '#/channels/supportAccessExpired'
+    summary: admin publishes support_access.expired via transactional outbox
+    messages:
+    - $ref: '#/channels/supportAccessExpired/messages/SupportAccessExpired'
+    x-consumers:
+    - audit
+  publishFeatureFlagChanged:
+    action: send
+    channel:
+      $ref: '#/channels/featureFlagChanged'
+    summary: admin publishes feature_flag.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/featureFlagChanged/messages/FeatureFlagChanged'
+    x-consumers:
+    - audit
+  publishConsentChanged:
+    action: send
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: privacy publishes consent.changed via transactional outbox
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+    x-consumers:
+    - search
+    - matching
+    - applications
+    - ai
+    - analytics
+    - notify
+  receiveConsentChangedBySearch:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: search consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  receiveConsentChangedByMatching:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: matching consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  receiveConsentChangedByApplications:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: applications consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  receiveConsentChangedByAi:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: ai consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  receiveConsentChangedByAnalytics:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: analytics consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  receiveConsentChangedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/consentChanged'
+    summary: notify consumes consent.changed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/consentChanged/messages/ConsentChanged'
+  publishDataexportReady:
+    action: send
+    channel:
+      $ref: '#/channels/dataexportReady'
+    summary: privacy publishes dataexport.ready via transactional outbox
+    messages:
+    - $ref: '#/channels/dataexportReady/messages/DataexportReady'
+    x-consumers:
+    - notify
+  publishErasureRequested:
+    action: send
+    channel:
+      $ref: '#/channels/erasureRequested'
+    summary: privacy publishes erasure.requested via transactional outbox
+    messages:
+    - $ref: '#/channels/erasureRequested/messages/ErasureRequested'
+    x-consumers:
+    - identity
+    - profile
+    - evidence
+    - verification
+    - assessment
+    - learning
+    - applications
+    - messaging
+    - notify
+    - billing
+    - ai
+    - analytics
+    - search
+    - matching
+    - platform
+  publishErasureModuleCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/erasureModuleCompleted'
+    summary: each-module publishes erasure.module_completed via transactional outbox
+    messages:
+    - $ref: '#/channels/erasureModuleCompleted/messages/ErasureModuleCompleted'
+    x-consumers:
+    - privacy
+  publishErasureCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/erasureCompleted'
+    summary: privacy publishes erasure.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/erasureCompleted/messages/ErasureCompleted'
+    x-consumers:
+    - notify
+    - audit
+  receiveErasureCompletedByNotify:
+    action: receive
+    channel:
+      $ref: '#/channels/erasureCompleted'
+    summary: notify consumes erasure.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/erasureCompleted/messages/ErasureCompleted'
+  receiveErasureCompletedByAudit:
+    action: receive
+    channel:
+      $ref: '#/channels/erasureCompleted'
+    summary: audit consumes erasure.completed (idempotent via consumer_inbox)
+    messages:
+    - $ref: '#/channels/erasureCompleted/messages/ErasureCompleted'
+  publishImportCompleted:
+    action: send
+    channel:
+      $ref: '#/channels/importCompleted'
+    summary: integrations publishes import.completed via transactional outbox
+    messages:
+    - $ref: '#/channels/importCompleted/messages/ImportCompleted'
+    x-consumers:
+    - notify
+  publishFileScanned:
+    action: send
+    channel:
+      $ref: '#/channels/fileScanned'
+    summary: platform publishes file.scanned via transactional outbox
+    messages:
+    - $ref: '#/channels/fileScanned/messages/FileScanned'
+    x-consumers:
+    - evidence
+    - profile
+    - learning
+  publishJobDeadLettered:
+    action: send
+    channel:
+      $ref: '#/channels/jobDeadLettered'
+    summary: platform publishes job.dead_lettered via transactional outbox
+    messages:
+    - $ref: '#/channels/jobDeadLettered/messages/JobDeadLettered'
+    x-consumers:
+    - admin
+components:
+  messages:
+    AccountRegistered:
+      name: account.registered
+      title: EVT-01-01 account.registered
+      contentType: application/json
+      summary: account.registered v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: account.registered
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AccountRegisteredData'
+      x-event-id: EVT-01-01
+      x-core: true
+      x-delivery-class: EC-STD
+    AccountEmailVerified:
+      name: account.email_verified
+      title: EVT-01-02 account.email_verified
+      contentType: application/json
+      summary: account.email_verified v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: account.email_verified
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AccountEmailVerifiedData'
+      x-event-id: EVT-01-02
+      x-core: false
+      x-delivery-class: EC-STD
+    SessionRevoked:
+      name: session.revoked
+      title: EVT-01-03 session.revoked
+      contentType: application/json
+      summary: session.revoked v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: session.revoked
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SessionRevokedData'
+      x-event-id: EVT-01-03
+      x-core: false
+      x-delivery-class: EC-STD
+    PasswordChanged:
+      name: password.changed
+      title: EVT-01-04 password.changed
+      contentType: application/json
+      summary: password.changed v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: password.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/PasswordChangedData'
+      x-event-id: EVT-01-04
+      x-core: false
+      x-delivery-class: EC-STD
+    PasskeyRegistered:
+      name: passkey.registered
+      title: EVT-01-05 passkey.registered
+      contentType: application/json
+      summary: passkey.registered v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: passkey.registered
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/PasskeyRegisteredData'
+      x-event-id: EVT-01-05
+      x-core: false
+      x-delivery-class: EC-STD
+    AccountLocked:
+      name: account.locked
+      title: EVT-01-06 account.locked
+      contentType: application/json
+      summary: account.locked v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: account.locked
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AccountLockedData'
+      x-event-id: EVT-01-06
+      x-core: false
+      x-delivery-class: EC-STD
+    AccountDeactivated:
+      name: account.deactivated
+      title: EVT-01-07 account.deactivated
+      contentType: application/json
+      summary: account.deactivated v1 produced by identity
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: account.deactivated
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AccountDeactivatedData'
+      x-event-id: EVT-01-07
+      x-core: false
+      x-delivery-class: EC-STD
+    OrgCreated:
+      name: org.created
+      title: EVT-02-01 org.created
+      contentType: application/json
+      summary: org.created v1 produced by orgs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: org.created
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/OrgCreatedData'
+      x-event-id: EVT-02-01
+      x-core: false
+      x-delivery-class: EC-ORD
+    OrgMemberAdded:
+      name: org.member.added
+      title: EVT-02-02 org.member.added
+      contentType: application/json
+      summary: org.member.added v1 produced by orgs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: org.member.added
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/OrgMemberAddedData'
+      x-event-id: EVT-02-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    OrgMemberRoleChanged:
+      name: org.member.role_changed
+      title: EVT-02-03 org.member.role_changed
+      contentType: application/json
+      summary: org.member.role_changed v1 produced by orgs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: org.member.role_changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/OrgMemberRoleChangedData'
+      x-event-id: EVT-02-03
+      x-core: false
+      x-delivery-class: EC-ORD
+    OrgMemberRemoved:
+      name: org.member.removed
+      title: EVT-02-04 org.member.removed
+      contentType: application/json
+      summary: org.member.removed v1 produced by orgs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: org.member.removed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/OrgMemberRemovedData'
+      x-event-id: EVT-02-04
+      x-core: false
+      x-delivery-class: EC-ORD
+    OrgSsoConfigured:
+      name: org.sso.configured
+      title: EVT-02-05 org.sso.configured
+      contentType: application/json
+      summary: org.sso.configured v1 produced by orgs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: org.sso.configured
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/OrgSsoConfiguredData'
+      x-event-id: EVT-02-05
+      x-core: false
+      x-delivery-class: EC-ORD
+    ProfileUpdated:
+      name: profile.updated
+      title: EVT-03-01 profile.updated
+      contentType: application/json
+      summary: profile.updated v1 produced by profile
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: profile.updated
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ProfileUpdatedData'
+      x-event-id: EVT-03-01
+      x-core: false
+      x-delivery-class: EC-ORD
+    ProfileVisibilityChanged:
+      name: profile.visibility_changed
+      title: EVT-03-02 profile.visibility_changed
+      contentType: application/json
+      summary: profile.visibility_changed v1 produced by profile
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: profile.visibility_changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ProfileVisibilityChangedData'
+      x-event-id: EVT-03-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    SkillCreated:
+      name: skill.created
+      title: EVT-04-01 skill.created
+      contentType: application/json
+      summary: skill.created v1 produced by skills
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: skill.created
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SkillCreatedData'
+      x-event-id: EVT-04-01
+      x-core: false
+      x-delivery-class: EC-ORD
+    SkillMerged:
+      name: skill.merged
+      title: EVT-04-02 skill.merged
+      contentType: application/json
+      summary: skill.merged v1 produced by skills
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: skill.merged
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SkillMergedData'
+      x-event-id: EVT-04-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    EvidenceCreated:
+      name: evidence.created
+      title: EVT-05-01 evidence.created
+      contentType: application/json
+      summary: evidence.created v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.created
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceCreatedData'
+      x-event-id: EVT-05-01
+      x-core: true
+      x-delivery-class: EC-ORD
+    EvidenceUpdated:
+      name: evidence.updated
+      title: EVT-05-02 evidence.updated
+      contentType: application/json
+      summary: evidence.updated v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.updated
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceUpdatedData'
+      x-event-id: EVT-05-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    EvidenceArtifactScanned:
+      name: evidence.artifact.scanned
+      title: EVT-05-03 evidence.artifact.scanned
+      contentType: application/json
+      summary: evidence.artifact.scanned v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.artifact.scanned
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceArtifactScannedData'
+      x-event-id: EVT-05-03
+      x-core: false
+      x-delivery-class: EC-ORD
+    EvidenceVerificationRequested:
+      name: evidence.verification_requested
+      title: EVT-05-04 evidence.verification_requested
+      contentType: application/json
+      summary: evidence.verification_requested v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.verification_requested
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceVerificationRequestedData'
+      x-event-id: EVT-05-04
+      x-core: false
+      x-delivery-class: EC-ORD
+    EvidenceVerified:
+      name: evidence.verified
+      title: EVT-05-05 evidence.verified
+      contentType: application/json
+      summary: evidence.verified v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.verified
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceVerifiedData'
+      x-event-id: EVT-05-05
+      x-core: true
+      x-delivery-class: EC-ORD
+    EvidenceRevoked:
+      name: evidence.revoked
+      title: EVT-05-06 evidence.revoked
+      contentType: application/json
+      summary: evidence.revoked v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: evidence.revoked
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EvidenceRevokedData'
+      x-event-id: EVT-05-06
+      x-core: true
+      x-delivery-class: EC-ORD+EC-CRIT
+    CredentialIssued:
+      name: credential.issued
+      title: EVT-05-07 credential.issued
+      contentType: application/json
+      summary: credential.issued v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: credential.issued
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CredentialIssuedData'
+      x-event-id: EVT-05-07
+      x-core: false
+      x-delivery-class: EC-STD
+    CredentialRevoked:
+      name: credential.revoked
+      title: EVT-05-08 credential.revoked
+      contentType: application/json
+      summary: credential.revoked v1 produced by evidence
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: credential.revoked
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CredentialRevokedData'
+      x-event-id: EVT-05-08
+      x-core: false
+      x-delivery-class: EC-STD
+    VerificationRequested:
+      name: verification.requested
+      title: EVT-06-01 verification.requested
+      contentType: application/json
+      summary: verification.requested v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: verification.requested
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/VerificationRequestedData'
+      x-event-id: EVT-06-01
+      x-core: false
+      x-delivery-class: EC-STD
+    VerificationCompleted:
+      name: verification.completed
+      title: EVT-06-02 verification.completed
+      contentType: application/json
+      summary: verification.completed v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: verification.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/VerificationCompletedData'
+      x-event-id: EVT-06-02
+      x-core: true
+      x-delivery-class: EC-CRIT
+    ReferenceRequested:
+      name: reference.requested
+      title: EVT-06-03 reference.requested
+      contentType: application/json
+      summary: reference.requested v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: reference.requested
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ReferenceRequestedData'
+      x-event-id: EVT-06-03
+      x-core: false
+      x-delivery-class: EC-STD
+    ReferenceResponded:
+      name: reference.responded
+      title: EVT-06-04 reference.responded
+      contentType: application/json
+      summary: reference.responded v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: reference.responded
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ReferenceRespondedData'
+      x-event-id: EVT-06-04
+      x-core: true
+      x-delivery-class: EC-STD
+    ReferenceExpired:
+      name: reference.expired
+      title: EVT-06-05 reference.expired
+      contentType: application/json
+      summary: reference.expired v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: reference.expired
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ReferenceExpiredData'
+      x-event-id: EVT-06-05
+      x-core: false
+      x-delivery-class: EC-STD
+    WorkclaimEmployerEmailConfirmed:
+      name: workclaim.employer_email_confirmed
+      title: EVT-06-06 workclaim.employer_email_confirmed
+      contentType: application/json
+      summary: workclaim.employer_email_confirmed v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: workclaim.employer_email_confirmed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/WorkclaimEmployerEmailConfirmedData'
+      x-event-id: EVT-06-06
+      x-core: false
+      x-delivery-class: EC-STD
+    VerificationDisputed:
+      name: verification.disputed
+      title: EVT-06-07 verification.disputed
+      contentType: application/json
+      summary: verification.disputed v1 produced by verification
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: verification.disputed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/VerificationDisputedData'
+      x-event-id: EVT-06-07
+      x-core: false
+      x-delivery-class: EC-STD
+    AttemptStarted:
+      name: attempt.started
+      title: EVT-07-01 attempt.started
+      contentType: application/json
+      summary: attempt.started v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: attempt.started
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AttemptStartedData'
+      x-event-id: EVT-07-01
+      x-core: false
+      x-delivery-class: EC-STD
+    AttemptSubmitted:
+      name: attempt.submitted
+      title: EVT-07-02 attempt.submitted
+      contentType: application/json
+      summary: attempt.submitted v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: attempt.submitted
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AttemptSubmittedData'
+      x-event-id: EVT-07-02
+      x-core: false
+      x-delivery-class: EC-STD
+    AssessmentPassed:
+      name: assessment.passed
+      title: EVT-07-03 assessment.passed
+      contentType: application/json
+      summary: assessment.passed v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: assessment.passed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AssessmentPassedData'
+      x-event-id: EVT-07-03
+      x-core: true
+      x-delivery-class: EC-CRIT
+    AssessmentFailed:
+      name: assessment.failed
+      title: EVT-07-04 assessment.failed
+      contentType: application/json
+      summary: assessment.failed v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: assessment.failed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AssessmentFailedData'
+      x-event-id: EVT-07-04
+      x-core: false
+      x-delivery-class: EC-STD
+    IntegrityFlagRaised:
+      name: integrity.flag.raised
+      title: EVT-07-05 integrity.flag.raised
+      contentType: application/json
+      summary: integrity.flag.raised v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: integrity.flag.raised
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/IntegrityFlagRaisedData'
+      x-event-id: EVT-07-05
+      x-core: false
+      x-delivery-class: EC-STD
+    IntegrityFlagReviewed:
+      name: integrity.flag.reviewed
+      title: EVT-07-06 integrity.flag.reviewed
+      contentType: application/json
+      summary: integrity.flag.reviewed v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: integrity.flag.reviewed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/IntegrityFlagReviewedData'
+      x-event-id: EVT-07-06
+      x-core: false
+      x-delivery-class: EC-STD
+    AttemptAppealed:
+      name: attempt.appealed
+      title: EVT-07-07 attempt.appealed
+      contentType: application/json
+      summary: attempt.appealed v1 produced by assessment
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: attempt.appealed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AttemptAppealedData'
+      x-event-id: EVT-07-07
+      x-core: false
+      x-delivery-class: EC-STD
+    EnrollmentCreated:
+      name: enrollment.created
+      title: EVT-08-01 enrollment.created
+      contentType: application/json
+      summary: enrollment.created v1 produced by learning
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: enrollment.created
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EnrollmentCreatedData'
+      x-event-id: EVT-08-01
+      x-core: false
+      x-delivery-class: EC-STD
+    CourseCompleted:
+      name: course.completed
+      title: EVT-08-02 course.completed
+      contentType: application/json
+      summary: course.completed v1 produced by learning
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: course.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CourseCompletedData'
+      x-event-id: EVT-08-02
+      x-core: true
+      x-delivery-class: EC-STD
+    CoursePublished:
+      name: course.published
+      title: EVT-08-03 course.published
+      contentType: application/json
+      summary: course.published v1 produced by learning
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: course.published
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CoursePublishedData'
+      x-event-id: EVT-08-03
+      x-core: false
+      x-delivery-class: EC-STD
+    JobPublished:
+      name: job.published
+      title: EVT-09-01 job.published
+      contentType: application/json
+      summary: job.published v1 produced by jobs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: job.published
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/JobPublishedData'
+      x-event-id: EVT-09-01
+      x-core: true
+      x-delivery-class: EC-ORD
+    JobUpdated:
+      name: job.updated
+      title: EVT-09-02 job.updated
+      contentType: application/json
+      summary: job.updated v1 produced by jobs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: job.updated
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/JobUpdatedData'
+      x-event-id: EVT-09-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    JobClosed:
+      name: job.closed
+      title: EVT-09-03 job.closed
+      contentType: application/json
+      summary: job.closed v1 produced by jobs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: job.closed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/JobClosedData'
+      x-event-id: EVT-09-03
+      x-core: true
+      x-delivery-class: EC-ORD
+    JobExpired:
+      name: job.expired
+      title: EVT-09-04 job.expired
+      contentType: application/json
+      summary: job.expired v1 produced by jobs
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: job.expired
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/JobExpiredData'
+      x-event-id: EVT-09-04
+      x-core: false
+      x-delivery-class: EC-ORD
+    ApplicationSubmitted:
+      name: application.submitted
+      title: EVT-10-01 application.submitted
+      contentType: application/json
+      summary: application.submitted v1 produced by applications
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: application.submitted
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ApplicationSubmittedData'
+      x-event-id: EVT-10-01
+      x-core: true
+      x-delivery-class: EC-ORD
+    ApplicationWithdrawn:
+      name: application.withdrawn
+      title: EVT-10-02 application.withdrawn
+      contentType: application/json
+      summary: application.withdrawn v1 produced by applications
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: application.withdrawn
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ApplicationWithdrawnData'
+      x-event-id: EVT-10-02
+      x-core: false
+      x-delivery-class: EC-ORD
+    ApplicationStageChanged:
+      name: application.stage.changed
+      title: EVT-10-03 application.stage.changed
+      contentType: application/json
+      summary: application.stage.changed v1 produced by applications
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: application.stage.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ApplicationStageChangedData'
+      x-event-id: EVT-10-03
+      x-core: true
+      x-delivery-class: EC-ORD
+    InterviewScheduled:
+      name: interview.scheduled
+      title: EVT-10-04 interview.scheduled
+      contentType: application/json
+      summary: interview.scheduled v1 produced by applications
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: interview.scheduled
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/InterviewScheduledData'
+      x-event-id: EVT-10-04
+      x-core: false
+      x-delivery-class: EC-STD
+    InterviewCompleted:
+      name: interview.completed
+      title: EVT-10-05 interview.completed
+      contentType: application/json
+      summary: interview.completed v1 produced by applications
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: interview.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/InterviewCompletedData'
+      x-event-id: EVT-10-05
+      x-core: false
+      x-delivery-class: EC-STD
+    ConversationCreated:
+      name: conversation.created
+      title: EVT-13-01 conversation.created
+      contentType: application/json
+      summary: conversation.created v1 produced by messaging
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: conversation.created
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ConversationCreatedData'
+      x-event-id: EVT-13-01
+      x-core: false
+      x-delivery-class: EC-STD
+    MessageSent:
+      name: message.sent
+      title: EVT-13-02 message.sent
+      contentType: application/json
+      summary: message.sent v1 produced by messaging
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: message.sent
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/MessageSentData'
+      x-event-id: EVT-13-02
+      x-core: false
+      x-delivery-class: EC-STD
+    NotificationEmailBounced:
+      name: notification.email.bounced
+      title: EVT-15-01 notification.email.bounced
+      contentType: application/json
+      summary: notification.email.bounced v1 produced by notify
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: notification.email.bounced
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/NotificationEmailBouncedData'
+      x-event-id: EVT-15-01
+      x-core: false
+      x-delivery-class: EC-STD
+    NotificationDelivered:
+      name: notification.delivered
+      title: EVT-15-02 notification.delivered
+      contentType: application/json
+      summary: notification.delivered v1 produced by notify
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: notification.delivered
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/NotificationDeliveredData'
+      x-event-id: EVT-15-02
+      x-core: false
+      x-delivery-class: EC-STD
+    SubscriptionChanged:
+      name: subscription.changed
+      title: EVT-16-01 subscription.changed
+      contentType: application/json
+      summary: subscription.changed v1 produced by billing
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: subscription.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SubscriptionChangedData'
+      x-event-id: EVT-16-01
+      x-core: false
+      x-delivery-class: EC-ORD+EC-CRIT
+    EntitlementChanged:
+      name: entitlement.changed
+      title: EVT-16-02 entitlement.changed
+      contentType: application/json
+      summary: entitlement.changed v1 produced by billing
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: entitlement.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/EntitlementChangedData'
+      x-event-id: EVT-16-02
+      x-core: true
+      x-delivery-class: EC-ORD+EC-CRIT
+    PaymentFailed:
+      name: payment.failed
+      title: EVT-16-03 payment.failed
+      contentType: application/json
+      summary: payment.failed v1 produced by billing
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: payment.failed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/PaymentFailedData'
+      x-event-id: EVT-16-03
+      x-core: false
+      x-delivery-class: EC-STD
+    InvoicePaid:
+      name: invoice.paid
+      title: EVT-16-04 invoice.paid
+      contentType: application/json
+      summary: invoice.paid v1 produced by billing
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: invoice.paid
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/InvoicePaidData'
+      x-event-id: EVT-16-04
+      x-core: false
+      x-delivery-class: EC-STD
+    AiRequestCompleted:
+      name: ai.request.completed
+      title: EVT-17-01 ai.request.completed
+      contentType: application/json
+      summary: ai.request.completed v1 produced by ai
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: ai.request.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AiRequestCompletedData'
+      x-event-id: EVT-17-01
+      x-core: false
+      x-delivery-class: EC-STD
+    AiBudgetExceeded:
+      name: ai.budget.exceeded
+      title: EVT-17-02 ai.budget.exceeded
+      contentType: application/json
+      summary: ai.budget.exceeded v1 produced by ai
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: ai.budget.exceeded
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/AiBudgetExceededData'
+      x-event-id: EVT-17-02
+      x-core: false
+      x-delivery-class: EC-STD
+    CredentialIssuedByInstitution:
+      name: credential.issued_by_institution
+      title: EVT-18-01 credential.issued_by_institution
+      contentType: application/json
+      summary: credential.issued_by_institution v1 produced by institutions
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: credential.issued_by_institution
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CredentialIssuedByInstitutionData'
+      x-event-id: EVT-18-01
+      x-core: false
+      x-delivery-class: EC-STD
+    ReportFiled:
+      name: report.filed
+      title: EVT-19-01 report.filed
+      contentType: application/json
+      summary: report.filed v1 produced by safety
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: report.filed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ReportFiledData'
+      x-event-id: EVT-19-01
+      x-core: false
+      x-delivery-class: EC-STD
+    CaseResolved:
+      name: case.resolved
+      title: EVT-19-02 case.resolved
+      contentType: application/json
+      summary: case.resolved v1 produced by safety
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: case.resolved
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/CaseResolvedData'
+      x-event-id: EVT-19-02
+      x-core: false
+      x-delivery-class: EC-STD
+    SupportAccessGranted:
+      name: support_access.granted
+      title: EVT-20-01 support_access.granted
+      contentType: application/json
+      summary: support_access.granted v1 produced by admin
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: support_access.granted
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SupportAccessGrantedData'
+      x-event-id: EVT-20-01
+      x-core: false
+      x-delivery-class: EC-STD
+    SupportAccessExpired:
+      name: support_access.expired
+      title: EVT-20-02 support_access.expired
+      contentType: application/json
+      summary: support_access.expired v1 produced by admin
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: support_access.expired
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/SupportAccessExpiredData'
+      x-event-id: EVT-20-02
+      x-core: false
+      x-delivery-class: EC-STD
+    FeatureFlagChanged:
+      name: feature_flag.changed
+      title: EVT-20-03 feature_flag.changed
+      contentType: application/json
+      summary: feature_flag.changed v1 produced by admin
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: feature_flag.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/FeatureFlagChangedData'
+      x-event-id: EVT-20-03
+      x-core: false
+      x-delivery-class: EC-STD
+    ConsentChanged:
+      name: consent.changed
+      title: EVT-22-01 consent.changed
+      contentType: application/json
+      summary: consent.changed v1 produced by privacy
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: consent.changed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ConsentChangedData'
+      x-event-id: EVT-22-01
+      x-core: true
+      x-delivery-class: EC-ORD
+    DataexportReady:
+      name: dataexport.ready
+      title: EVT-22-02 dataexport.ready
+      contentType: application/json
+      summary: dataexport.ready v1 produced by privacy
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: dataexport.ready
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/DataexportReadyData'
+      x-event-id: EVT-22-02
+      x-core: false
+      x-delivery-class: EC-STD
+    ErasureRequested:
+      name: erasure.requested
+      title: EVT-22-03 erasure.requested
+      contentType: application/json
+      summary: erasure.requested v1 produced by privacy
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: erasure.requested
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ErasureRequestedData'
+      x-event-id: EVT-22-03
+      x-core: false
+      x-delivery-class: EC-CRIT
+    ErasureModuleCompleted:
+      name: erasure.module_completed
+      title: EVT-22-04 erasure.module_completed
+      contentType: application/json
+      summary: erasure.module_completed v1 produced by each-module
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: erasure.module_completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ErasureModuleCompletedData'
+      x-event-id: EVT-22-04
+      x-core: false
+      x-delivery-class: EC-CRIT
+    ErasureCompleted:
+      name: erasure.completed
+      title: EVT-22-05 erasure.completed
+      contentType: application/json
+      summary: erasure.completed v1 produced by privacy
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: erasure.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ErasureCompletedData'
+      x-event-id: EVT-22-05
+      x-core: true
+      x-delivery-class: EC-CRIT
+    ImportCompleted:
+      name: import.completed
+      title: EVT-23-01 import.completed
+      contentType: application/json
+      summary: import.completed v1 produced by integrations
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: import.completed
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/ImportCompletedData'
+      x-event-id: EVT-23-01
+      x-core: false
+      x-delivery-class: EC-STD
+    FileScanned:
+      name: file.scanned
+      title: EVT-24-01 file.scanned
+      contentType: application/json
+      summary: file.scanned v1 produced by platform
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: file.scanned
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/FileScannedData'
+      x-event-id: EVT-24-01
+      x-core: false
+      x-delivery-class: EC-STD
+    JobDeadLettered:
+      name: job.dead_lettered
+      title: EVT-24-02 job.dead_lettered
+      contentType: application/json
+      summary: job.dead_lettered v1 produced by platform
+      payload:
+        allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            type:
+              const: job.dead_lettered
+            version:
+              const: 1
+            data:
+              $ref: '#/components/schemas/JobDeadLetteredData'
+      x-event-id: EVT-24-02
+      x-core: false
+      x-delivery-class: EC-ORD
+  schemas:
+    EventEnvelope:
+      title: EventEnvelope
+      description: Envelope for every domain event written to outbox_event and delivered at-least-once (BE-01 section 6).
+        Envelope fields mirror outbox columns (snake_case); data fields mirror REST DTOs (camelCase). Consumers MUST dedupe
+        on event_id.
+      type: object
+      additionalProperties: false
+      required:
+      - event_id
+      - type
+      - version
+      - occurred_at
+      - trace_id
+      - tenant
+      - aggregate
+      - data
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: UUIDv7; dedupe key for consumer_inbox
+        type:
+          type: string
+          pattern: ^[a-z][a-z_]*(\.[a-z_]+)+$
+          description: Dotted lowercase event type, e.g. evidence.verified
+        version:
+          type: integer
+          minimum: 1
+          description: Schema version of data for this type
+        occurred_at:
+          type: string
+          format: date-time
+        trace_id:
+          type: string
+          pattern: ^[0-9a-f]{32}$
+          description: W3C trace-id hex of the originating request
+        tenant:
+          type: object
+          additionalProperties: false
+          properties:
+            org_id:
+              type:
+              - string
+              - 'null'
+              format: uuid
+            institution_id:
+              type:
+              - string
+              - 'null'
+              format: uuid
+          description: Both null for tenant-less (self-scoped or platform) events. Consumers MUST NOT widen scope beyond this
+            tenant (INV-T03).
+        aggregate:
+          type: object
+          additionalProperties: false
+          required:
+          - type
+          - id
+          - seq
+          properties:
+            type:
+              type: string
+            id:
+              type: string
+              format: uuid
+            seq:
+              type: integer
+              minimum: 1
+              description: Per-aggregate monotonic sequence (best-effort ordering)
+        actor:
+          type: object
+          additionalProperties: false
+          required:
+          - kind
+          properties:
+            kind:
+              type: string
+              enum:
+              - user
+              - service
+              - system
+              - support
+              - referee
+            account_id:
+              type:
+              - string
+              - 'null'
+              format: uuid
+        correlation_id:
+          type:
+          - string
+          - 'null'
+          description: Request id that started the causal chain
+        causation_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: event_id of the event that caused this one, if any
+        data:
+          type: object
+          description: Type-specific payload; no direct personal data beyond ids (consumers fetch through owner interfaces
+            under policy)
+    AccountRegisteredData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        intendedUse:
+          type: string
+          enum:
+          - candidate
+          - employer
+          - instructor
+          - institution
+        termsVersion:
+          type: string
+        locale:
+          type: string
+      required:
+      - accountId
+      - intendedUse
+      - termsVersion
+      additionalProperties: false
+    AccountEmailVerifiedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+      required:
+      - accountId
+      - verifiedAt
+      additionalProperties: false
+    SessionRevokedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+          - user
+          - admin
+          - password_change
+          - reuse_detected
+          - expiry
+          - erasure
+        familyRevoked:
+          type: boolean
+      required:
+      - accountId
+      - sessionId
+      - reason
+      - familyRevoked
+      additionalProperties: false
+    PasswordChangedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        method:
+          type: string
+          enum:
+          - change
+          - reset
+        changedAt:
+          type: string
+          format: date-time
+      required:
+      - accountId
+      - method
+      - changedAt
+      additionalProperties: false
+    PasskeyRegisteredData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        passkeyId:
+          type: string
+          format: uuid
+      required:
+      - accountId
+      - passkeyId
+      additionalProperties: false
+    AccountLockedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+          - credential_stuffing
+          - admin
+          - risk
+        until:
+          type: string
+          format: date-time
+      required:
+      - accountId
+      - reason
+      additionalProperties: false
+    AccountDeactivatedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        deactivatedAt:
+          type: string
+          format: date-time
+      required:
+      - accountId
+      - deactivatedAt
+      additionalProperties: false
+    OrgCreatedData:
+      type: object
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - employer
+          - institution
+        createdBy:
+          type: string
+          format: uuid
+      required:
+      - orgId
+      - kind
+      - createdBy
+      additionalProperties: false
+    OrgMemberAddedData:
+      type: object
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        role:
+          type: string
+      required:
+      - orgId
+      - memberId
+      - accountId
+      - role
+      additionalProperties: false
+    OrgMemberRoleChangedData:
+      type: object
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        fromRole:
+          type: string
+        toRole:
+          type: string
+      required:
+      - orgId
+      - memberId
+      - accountId
+      - fromRole
+      - toRole
+      additionalProperties: false
+    OrgMemberRemovedData:
+      type: object
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        memberId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+      required:
+      - orgId
+      - memberId
+      - accountId
+      additionalProperties: false
+    OrgSsoConfiguredData:
+      type: object
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        protocol:
+          type: string
+          enum:
+          - oidc
+          - saml
+        enforced:
+          type: boolean
+      required:
+      - orgId
+      - protocol
+      - enforced
+      additionalProperties: false
+    ProfileUpdatedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        changedFields:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+      required:
+      - accountId
+      - changedFields
+      - version
+      additionalProperties: false
+    ProfileVisibilityChangedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        visibility:
+          type: string
+          enum:
+          - private
+          - members
+          - public
+      required:
+      - accountId
+      - visibility
+      additionalProperties: false
+    SkillCreatedData:
+      type: object
+      properties:
+        skillId:
+          type: string
+          format: uuid
+        slug:
+          type: string
+      required:
+      - skillId
+      - slug
+      additionalProperties: false
+    SkillMergedData:
+      type: object
+      properties:
+        fromSkillId:
+          type: string
+          format: uuid
+        intoSkillId:
+          type: string
+          format: uuid
+      required:
+      - fromSkillId
+      - intoSkillId
+      additionalProperties: false
+    EvidenceCreatedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        ownerAccountId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        source:
+          type: string
+          enum:
+          - self
+          - course
+          - assessment
+          - institution
+          - import
+        rung:
+          type: string
+          enum:
+          - claimed
+          - artifact_backed
+          - peer_attested
+          - authority_verified
+      required:
+      - evidenceId
+      - ownerAccountId
+      - kind
+      - source
+      - rung
+      additionalProperties: false
+    EvidenceUpdatedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        ownerAccountId:
+          type: string
+          format: uuid
+        changedFields:
+          type: array
+          items:
+            type: string
+        rungBefore:
+          type: string
+        rungAfter:
+          type: string
+      required:
+      - evidenceId
+      - ownerAccountId
+      - changedFields
+      - rungBefore
+      - rungAfter
+      additionalProperties: false
+    EvidenceArtifactScannedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        fileId:
+          type: string
+          format: uuid
+        result:
+          type: string
+          enum:
+          - clean
+          - infected
+          - rejected
+      required:
+      - evidenceId
+      - fileId
+      - result
+      additionalProperties: false
+    EvidenceVerificationRequestedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        verificationRequestId:
+          type: string
+          format: uuid
+        method:
+          type: string
+      required:
+      - evidenceId
+      - verificationRequestId
+      - method
+      additionalProperties: false
+    EvidenceVerifiedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        ownerAccountId:
+          type: string
+          format: uuid
+        rung:
+          type: string
+          enum:
+          - artifact_backed
+          - peer_attested
+          - authority_verified
+        attestationId:
+          type: string
+          format: uuid
+        method:
+          type: string
+      required:
+      - evidenceId
+      - ownerAccountId
+      - rung
+      - attestationId
+      - method
+      additionalProperties: false
+    EvidenceRevokedData:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          format: uuid
+        ownerAccountId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        revokedByKind:
+          type: string
+          enum:
+          - owner
+          - authority
+          - moderator
+          - admin
+      required:
+      - evidenceId
+      - ownerAccountId
+      - reason
+      - revokedByKind
+      additionalProperties: false
+    CredentialIssuedData:
+      type: object
+      properties:
+        credentialId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+        issuerKind:
+          type: string
+          enum:
+          - platform
+          - institution
+          - external
+      required:
+      - credentialId
+      - evidenceId
+      - issuerKind
+      additionalProperties: false
+    CredentialRevokedData:
+      type: object
+      properties:
+        credentialId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+      required:
+      - credentialId
+      - evidenceId
+      - reason
+      additionalProperties: false
+    VerificationRequestedData:
+      type: object
+      properties:
+        verificationRequestId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+        method:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - verificationRequestId
+      - evidenceId
+      - method
+      additionalProperties: false
+    VerificationCompletedData:
+      type: object
+      properties:
+        verificationRequestId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+          x-state-machine: SM-VERIFICATION
+          description: Terminal SM-VERIFICATION state reached (revocation is a separate event, evidence.revoked).
+          enum:
+          - verified
+          - failed
+          - expired
+          - cancelled
+        method:
+          type: string
+        decidedByKind:
+          type: string
+          enum:
+          - system
+          - referee
+          - authority
+          - platform_reviewer
+      required:
+      - verificationRequestId
+      - evidenceId
+      - decision
+      - method
+      - decidedByKind
+      additionalProperties: false
+    ReferenceRequestedData:
+      type: object
+      properties:
+        referenceRequestId:
+          type: string
+          format: uuid
+        verificationRequestId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - referenceRequestId
+      - verificationRequestId
+      - expiresAt
+      additionalProperties: false
+    ReferenceRespondedData:
+      type: object
+      properties:
+        referenceRequestId:
+          type: string
+          format: uuid
+        verificationRequestId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          description: SM-REFERENCE outcome recorded with state submitted (t3); DT-04 maps it to the rung effect.
+          enum:
+          - confirm
+          - dispute
+          - decline
+          - unknown_candidate
+      required:
+      - referenceRequestId
+      - verificationRequestId
+      - outcome
+      additionalProperties: false
+    ReferenceExpiredData:
+      type: object
+      properties:
+        referenceRequestId:
+          type: string
+          format: uuid
+        verificationRequestId:
+          type: string
+          format: uuid
+      required:
+      - referenceRequestId
+      - verificationRequestId
+      additionalProperties: false
+    WorkclaimEmployerEmailConfirmedData:
+      type: object
+      properties:
+        workClaimId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+        employerDomain:
+          type: string
+      required:
+      - workClaimId
+      - evidenceId
+      - employerDomain
+      additionalProperties: false
+    VerificationDisputedData:
+      type: object
+      properties:
+        disputeId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+      required:
+      - disputeId
+      - evidenceId
+      additionalProperties: false
+    AttemptStartedData:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        assessmentId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        aiMode:
+          type: string
+          enum:
+          - AI_PROHIBITED
+          - AI_RESTRICTED
+          - AI_ALLOWED
+      required:
+      - attemptId
+      - assessmentId
+      - accountId
+      - aiMode
+      additionalProperties: false
+    AttemptSubmittedData:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        assessmentId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        requiresRunner:
+          type: boolean
+      required:
+      - attemptId
+      - assessmentId
+      - accountId
+      - requiresRunner
+      additionalProperties: false
+    AssessmentPassedData:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        assessmentId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        score:
+          type: number
+        verificationBasis:
+          type: string
+          enum:
+          - auto_graded_objective
+          - runner_verified
+          - human_graded
+      required:
+      - attemptId
+      - assessmentId
+      - accountId
+      - score
+      - verificationBasis
+      additionalProperties: false
+    AssessmentFailedData:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        assessmentId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        score:
+          type: number
+      required:
+      - attemptId
+      - assessmentId
+      - accountId
+      additionalProperties: false
+    IntegrityFlagRaisedData:
+      type: object
+      properties:
+        flagId:
+          type: string
+          format: uuid
+        attemptId:
+          type: string
+          format: uuid
+        severity:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+        signalKinds:
+          type: array
+          items:
+            type: string
+      required:
+      - flagId
+      - attemptId
+      - severity
+      - signalKinds
+      additionalProperties: false
+    IntegrityFlagReviewedData:
+      type: object
+      properties:
+        flagId:
+          type: string
+          format: uuid
+        attemptId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          enum:
+          - cleared
+          - confirmed
+        reviewedBy:
+          type: string
+          format: uuid
+      required:
+      - flagId
+      - attemptId
+      - outcome
+      - reviewedBy
+      additionalProperties: false
+    AttemptAppealedData:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        appealId:
+          type: string
+          format: uuid
+      required:
+      - attemptId
+      - appealId
+      additionalProperties: false
+    EnrollmentCreatedData:
+      type: object
+      properties:
+        enrollmentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+      required:
+      - enrollmentId
+      - courseId
+      - accountId
+      additionalProperties: false
+    CourseCompletedData:
+      type: object
+      properties:
+        enrollmentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+      required:
+      - enrollmentId
+      - courseId
+      - accountId
+      - completedAt
+      additionalProperties: false
+    CoursePublishedData:
+      type: object
+      properties:
+        courseId:
+          type: string
+          format: uuid
+        instructorAccountId:
+          type: string
+          format: uuid
+      required:
+      - courseId
+      - instructorAccountId
+      additionalProperties: false
+    JobPublishedData:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        publishedAt:
+          type: string
+          format: date-time
+        skillIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - jobId
+      - orgId
+      - publishedAt
+      - skillIds
+      additionalProperties: false
+    JobUpdatedData:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        changedFields:
+          type: array
+          items:
+            type: string
+      required:
+      - jobId
+      - orgId
+      - version
+      - changedFields
+      additionalProperties: false
+    JobClosedData:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          description: filled, cancelled and expired are SM-JOB close_reason values (state closed, t8). taken_down is the SM-JOB state reached by t9 and is announced here because the job leaves the public feed.
+          enum:
+          - filled
+          - cancelled
+          - expired
+          - taken_down
+      required:
+      - jobId
+      - orgId
+      - reason
+      additionalProperties: false
+    JobExpiredData:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+      required:
+      - jobId
+      - orgId
+      additionalProperties: false
+    ApplicationSubmittedData:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        candidateAccountId:
+          type: string
+          format: uuid
+        evidenceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        consentSnapshotId:
+          type: string
+          format: uuid
+      required:
+      - applicationId
+      - jobId
+      - orgId
+      - candidateAccountId
+      - evidenceIds
+      - consentSnapshotId
+      additionalProperties: false
+    ApplicationWithdrawnData:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        candidateAccountId:
+          type: string
+          format: uuid
+      required:
+      - applicationId
+      - jobId
+      - orgId
+      - candidateAccountId
+      additionalProperties: false
+    ApplicationStageChangedData:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        fromStage:
+          type: string
+        toStage:
+          type: string
+        fromState:
+          type: string
+          x-state-machine: SM-APPLICATION
+          enum:
+          - submitted
+          - in_review
+          - shortlisted
+          - interviewing
+          - offer_extended
+          - hired
+          - rejected
+          - withdrawn
+          - offer_declined
+        toState:
+          type: string
+          x-state-machine: SM-APPLICATION
+          enum:
+          - submitted
+          - in_review
+          - shortlisted
+          - interviewing
+          - offer_extended
+          - hired
+          - rejected
+          - withdrawn
+          - offer_declined
+        actorAccountId:
+          type: string
+          format: uuid
+      required:
+      - applicationId
+      - jobId
+      - orgId
+      - fromStage
+      - toStage
+      - fromState
+      - toState
+      - actorAccountId
+      additionalProperties: false
+    InterviewScheduledData:
+      type: object
+      properties:
+        interviewId:
+          type: string
+          format: uuid
+        applicationId:
+          type: string
+          format: uuid
+        scheduledAt:
+          type: string
+          format: date-time
+      required:
+      - interviewId
+      - applicationId
+      - scheduledAt
+      additionalProperties: false
+    InterviewCompletedData:
+      type: object
+      properties:
+        interviewId:
+          type: string
+          format: uuid
+        applicationId:
+          type: string
+          format: uuid
+      required:
+      - interviewId
+      - applicationId
+      additionalProperties: false
+    ConversationCreatedData:
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum:
+          - direct
+          - application
+          - outreach
+        participantIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - conversationId
+      - kind
+      - participantIds
+      additionalProperties: false
+    MessageSentData:
+      type: object
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        conversationId:
+          type: string
+          format: uuid
+        senderAccountId:
+          type: string
+          format: uuid
+      required:
+      - messageId
+      - conversationId
+      - senderAccountId
+      additionalProperties: false
+    NotificationEmailBouncedData:
+      type: object
+      properties:
+        emailHash:
+          type: string
+        reason:
+          type: string
+          enum:
+          - bounce
+          - complaint
+        providerEventId:
+          type: string
+      required:
+      - emailHash
+      - reason
+      - providerEventId
+      additionalProperties: false
+    NotificationDeliveredData:
+      type: object
+      properties:
+        notificationId:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          enum:
+          - in_app
+          - email
+          - push
+      required:
+      - notificationId
+      - channel
+      additionalProperties: false
+    SubscriptionChangedData:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          format: uuid
+        subjectKind:
+          type: string
+          enum:
+          - account
+          - org
+        subjectId:
+          type: string
+          format: uuid
+        state:
+          type: string
+          x-state-machine: SM-SUBSCRIPTION
+          enum:
+          - incomplete
+          - active
+          - canceling
+          - past_due
+          - unpaid
+          - canceled
+          - incomplete_expired
+        planKey:
+          type: string
+        stripeEventId:
+          type: string
+      required:
+      - subscriptionId
+      - subjectKind
+      - subjectId
+      - state
+      - planKey
+      - stripeEventId
+      additionalProperties: false
+    EntitlementChangedData:
+      type: object
+      properties:
+        subjectKind:
+          type: string
+          enum:
+          - account
+          - org
+        subjectId:
+          type: string
+          format: uuid
+        changedKeys:
+          type: array
+          items:
+            type: string
+        computedAt:
+          type: string
+          format: date-time
+      required:
+      - subjectKind
+      - subjectId
+      - changedKeys
+      - computedAt
+      additionalProperties: false
+    PaymentFailedData:
+      type: object
+      properties:
+        subscriptionId:
+          type: string
+          format: uuid
+        subjectKind:
+          type: string
+        subjectId:
+          type: string
+          format: uuid
+        attempt:
+          type: integer
+      required:
+      - subscriptionId
+      - subjectKind
+      - subjectId
+      additionalProperties: false
+    InvoicePaidData:
+      type: object
+      properties:
+        invoiceId:
+          type: string
+          format: uuid
+        subjectKind:
+          type: string
+        subjectId:
+          type: string
+          format: uuid
+        amountPaidMinor:
+          type: integer
+        currency:
+          type: string
+      required:
+      - invoiceId
+      - subjectKind
+      - subjectId
+      - amountPaidMinor
+      - currency
+      additionalProperties: false
+    AiRequestCompletedData:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+        model:
+          type: string
+        costMicros:
+          type: integer
+      required:
+      - requestId
+      - accountId
+      - purpose
+      - model
+      - costMicros
+      additionalProperties: false
+    AiBudgetExceededData:
+      type: object
+      properties:
+        scope:
+          type: string
+          enum:
+          - global
+          - plan
+          - org
+          - account
+        scopeKey:
+          type: string
+        period:
+          type: string
+          enum:
+          - day
+          - month
+      required:
+      - scope
+      - scopeKey
+      - period
+      additionalProperties: false
+    CredentialIssuedByInstitutionData:
+      type: object
+      properties:
+        institutionId:
+          type: string
+          format: uuid
+        cohortId:
+          type: string
+          format: uuid
+        subjectAccountId:
+          type: string
+          format: uuid
+        evidenceId:
+          type: string
+          format: uuid
+      required:
+      - institutionId
+      - subjectAccountId
+      - evidenceId
+      additionalProperties: false
+    ReportFiledData:
+      type: object
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        subjectType:
+          type: string
+        subjectId:
+          type: string
+          format: uuid
+        reasonCode:
+          type: string
+      required:
+      - reportId
+      - subjectType
+      - subjectId
+      - reasonCode
+      additionalProperties: false
+    CaseResolvedData:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        subjectType:
+          type: string
+        subjectId:
+          type: string
+          format: uuid
+        action:
+          type: string
+        appealable:
+          type: boolean
+      required:
+      - caseId
+      - subjectType
+      - subjectId
+      - action
+      - appealable
+      additionalProperties: false
+    SupportAccessGrantedData:
+      type: object
+      properties:
+        grantId:
+          type: string
+          format: uuid
+        granteeAccountId:
+          type: string
+          format: uuid
+        subjectAccountId:
+          type: string
+          format: uuid
+        scope:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - grantId
+      - granteeAccountId
+      - subjectAccountId
+      - scope
+      - expiresAt
+      additionalProperties: false
+    SupportAccessExpiredData:
+      type: object
+      properties:
+        grantId:
+          type: string
+          format: uuid
+      required:
+      - grantId
+      additionalProperties: false
+    FeatureFlagChangedData:
+      type: object
+      properties:
+        flagKey:
+          type: string
+        enabled:
+          type: boolean
+        changedBy:
+          type: string
+          format: uuid
+      required:
+      - flagKey
+      - enabled
+      - changedBy
+      additionalProperties: false
+    ConsentChangedData:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        scope:
+          description: Canonical consent scope id (00_CONTROL_CENTRE/CONSENT_SCOPE_CATALOGUE.md); same enum as openapi ConsentScope.
+          type: string
+        granted:
+          type: boolean
+        targetType:
+          type: string
+        targetId:
+          type: string
+          format: uuid
+        granteeType:
+          type: string
+        granteeId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+        policyVersion:
+          type: string
+        consentEpoch:
+          type: integer
+      required:
+      - accountId
+      - scope
+      - granted
+      - policyVersion
+      - consentEpoch
+      additionalProperties: false
+    DataexportReadyData:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - requestId
+      - accountId
+      - expiresAt
+      additionalProperties: false
+    ErasureRequestedData:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        scheduledFor:
+          type: string
+          format: date-time
+      required:
+      - requestId
+      - accountId
+      - scheduledFor
+      additionalProperties: false
+    ErasureModuleCompletedData:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        module:
+          type: string
+        outcome:
+          type: string
+          enum:
+          - done
+          - retained
+          - failed
+        retainedReason:
+          type: string
+      required:
+      - requestId
+      - module
+      - outcome
+      additionalProperties: false
+    ErasureCompletedData:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        erasedAccountId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        retainedCategories:
+          type: array
+          items:
+            type: string
+      required:
+      - requestId
+      - erasedAccountId
+      - completedAt
+      - retainedCategories
+      additionalProperties: false
+    ImportCompletedData:
+      type: object
+      properties:
+        importJobId:
+          type: string
+          format: uuid
+        adapterKey:
+          type: string
+        created:
+          type: integer
+        failed:
+          type: integer
+      required:
+      - importJobId
+      - adapterKey
+      - created
+      - failed
+      additionalProperties: false
+    FileScannedData:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+        result:
+          type: string
+          enum:
+          - clean
+          - infected
+          - rejected
+        purpose:
+          type: string
+      required:
+      - fileId
+      - result
+      - purpose
+      additionalProperties: false
+    JobDeadLetteredData:
+      type: object
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        attempts:
+          type: integer
+      required:
+      - jobId
+      - kind
+      - attempts
+      additionalProperties: false

@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/domain/Evidence.schema.json",
+  "title": "Evidence",
+  "description": "Evidence item as returned by the API. rung/lifecycle/source are server-owned: no client request schema contains them (INV-T04). source has no 'ai' member (INV-T08).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ownerAccountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "project",
+        "work_experience",
+        "education",
+        "certification",
+        "publication",
+        "assessment_result",
+        "course_completion",
+        "other"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "self",
+        "course",
+        "assessment",
+        "institution",
+        "import"
+      ]
+    },
+    "rung": {
+      "type": "string",
+      "enum": [
+        "claimed",
+        "artifact_backed",
+        "peer_attested",
+        "authority_verified"
+      ]
+    },
+    "lifecycle": {
+      "type": "string",
+      "enum": [
+        "active",
+        "withdrawn",
+        "revoked"
+      ]
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "private",
+        "share_on_request",
+        "public"
+      ]
+    },
+    "occurredFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "occurredTo": {
+      "type": "string",
+      "format": "date"
+    },
+    "externalUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SkillRef"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      }
+    },
+    "attestationSummary": {
+      "$ref": "#/$defs/AttestationSummary"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "ownerAccountId",
+    "kind",
+    "title",
+    "source",
+    "rung",
+    "lifecycle",
+    "visibility",
+    "createdAt",
+    "updatedAt",
+    "version"
+  ],
+  "$defs": {
+    "EvidenceArtifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "fileId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "label": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "scanState": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "clean",
+            "rejected"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "fileId",
+        "contentType",
+        "sizeBytes",
+        "scanState",
+        "createdAt"
+      ]
+    },
+    "SkillRef": {
+      "type": "object",
+      "properties": {
+        "skillId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "skillId",
+        "slug",
+        "name"
+      ]
+    },
+    "AttestationSummary": {
+      "type": "object",
+      "properties": {
+        "highestValidRung": {
+          "type": "string",
+          "enum": [
+            "claimed",
+            "artifact_backed",
+            "peer_attested",
+            "authority_verified"
+          ]
+        },
+        "validCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "highestValidRung",
+        "validCount"
+      ]
+    }
+  }
+}

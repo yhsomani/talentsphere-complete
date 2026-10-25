@@ -1,0 +1,76 @@
+{
+  "agents": [
+    {
+      "agent_id": "a9139dd88a602c6ef",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T12:51:53.417Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-25T12:54:10.578Z",
+      "duration_ms": 137161
+    },
+    {
+      "agent_id": "a1ca891f75c1ea515",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T12:51:55.652Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-25T12:52:24.807Z",
+      "duration_ms": 29155
+    },
+    {
+      "agent_id": "aebfcdc4f062be1b9",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T12:53:46.386Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-25T13:20:56.411Z",
+      "duration_ms": 1630025
+    },
+    {
+      "agent_id": "ad0bc48e53013943d",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T13:29:22.558Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-25T13:50:45.550Z",
+      "duration_ms": 1282992
+    },
+    {
+      "agent_id": "aa8c0b0bca5f9e29d",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T13:52:11.732Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-25T13:52:11.732Z",
+      "synthetic": true,
+      "telemetry_status": "unmatched_stop",
+      "telemetry_note": "SubagentStop arrived without a matching SubagentStart; native Agent/Task start telemetry was not observed."
+    },
+    {
+      "agent_id": "a6bff22df03b311ed",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T14:54:13.558Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "aa19f5fc888f63641",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T14:54:24.677Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "a35f5256e3e84fcd7",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-25T14:54:35.461Z",
+      "parent_mode": "none",
+      "status": "running"
+    }
+  ],
+  "total_spawned": 7,
+  "total_completed": 6,
+  "total_failed": 0,
+  "last_updated": "2026-10-25T14:54:35.786Z"
+}
