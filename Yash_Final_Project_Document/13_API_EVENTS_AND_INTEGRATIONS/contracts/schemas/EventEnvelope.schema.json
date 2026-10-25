@@ -88,7 +88,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "kind"
+        "kind",
+        "human"
       ],
       "properties": {
         "kind": {
@@ -101,6 +102,10 @@
             "referee"
           ]
         },
+        "human": {
+          "type": "boolean",
+          "description": "Derived by the producer, never supplied by a client: true when a person caused the event (kind user, support or referee), false for service and system. SM-00 U6 / INV-T09 'human actor' means human=true and kind in (user, support); a referee is human but is never an authorised decider (REVW-44)"
+        },
         "account_id": {
           "type": [
             "string",
@@ -108,7 +113,35 @@
           ],
           "format": "uuid"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "service",
+                  "system"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "human": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "human": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
     },
     "correlation_id": {
       "type": [

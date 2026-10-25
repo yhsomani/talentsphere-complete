@@ -14,6 +14,8 @@ Supersedes nothing; linked from the folder index and `MASTER_INDEX` (and from `0
 | Failure/recovery | Each journey lists the failures most likely to break the goal and the designed recovery. Global failure classes (offline, validation, 401/403/412/429/5xx, remote outage) are in `ACTION_REGISTRY.md` §0 and `PROGRESSIVE_UX_AND_FEEDBACK.md`. |
 | Honesty constraints | Journeys never show a claim as verified before a server verification transition (INV-T04); never make an adverse decision without a human (INV-T09); never auto-grant data access (INV-T15). |
 
+Historical source-to-target candidates are maintained in the [journey crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_JOURNEY_EVIDENCE_CROSSWALK.csv). Source `J-*` and target `UJ-*` identities remain distinct; the map does not approve equivalence or verify implementation.
+
 ### Journey index
 
 | UJ | Journey | Primary role | Persona | Loop stage | Goal link | Diagram |
@@ -563,6 +565,12 @@ flowchart TD
 | Moderator | UJ-19 |
 | Platform admin | UJ-20 |
 | Diagrams (≥ 8) | 14 Mermaid diagrams: journey charts for UJ-01, 02, 05, 06; flowcharts for UJ-03, 04, 08, 09, 11, 16, 17, 18, 19, 20 |
+
+### Root SSOT journey identity crosswalk (candidate; OPEN-45)
+
+The protected root `SSOT.md` defines 28 canonical `J-*` journeys. This target document defines 20 `UJ-*` journeys; their identifiers and counts are not interchangeable. The row-level candidate comparison, residuals and historical verification limits are maintained in the [historical audit journey crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_JOURNEY_EVIDENCE_CROSSWALK.csv). It now records 22 partial candidates and 6 journeys with no direct match in this target catalog; neither category approves adoption or claims implementation.
+
+The root SSOT also enumerates 19 persona rows (P-A…P-T with P-P absent); USR-01 currently has five hypothetical personas. Persona and journey reductions remain explicit coverage gaps for OPEN-45 review, not an approved retirement of those user segments.
 
 ## Open items
 

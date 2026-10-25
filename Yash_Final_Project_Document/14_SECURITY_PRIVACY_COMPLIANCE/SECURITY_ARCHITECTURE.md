@@ -52,7 +52,7 @@ Tags: **[TARGET]** design · **[OPEN]** open · **[REF]** reference. Numeric par
 | Layer | Control |
 |---|---|
 | Route | Every route declares a policy action; `packages/policy` evaluates `can(principal, action, resource)`; deny by default; resource loaded then authorised (INV-T01/T02); registry lint (FF-01) |
-| Function-level | Admin/support/moderator actions require platform role grants **and** step-up/MFA; admin remote is not delivered to non-admin sessions (defence in depth) |
+| Function-level | Admin/support/moderator actions require platform role grants **and** step-up/MFA. Client-side route or chunk visibility is not an authorization control; APIs enforce role and resource permissions. |
 | Object-level | Owner/org/institution/participant/consent relations in the policy; non-visible objects return 404 |
 | Tenant | `org_id`/`institution_id` on tenant rows, RLS FORCE, tenant context per transaction, worker tenant pinning (INV-T03, DB-02 §5-6) |
 | Consent | `require_consent` obligations resolved before data leaves the module (INV-T15) |

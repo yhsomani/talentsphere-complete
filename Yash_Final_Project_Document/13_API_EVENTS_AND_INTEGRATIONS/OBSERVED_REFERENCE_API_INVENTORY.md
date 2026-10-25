@@ -1,0 +1,7 @@
+# Observed Reference API Inventory
+
+Doc ID: API-REF-01 | Status: Source-preservation inventory; path-level candidate comparison available, semantic mapping pending | Date: 2026-10-25
+
+The [CSV inventory](OBSERVED_REFERENCE_API_INVENTORY.csv) transcribes all 278 unique method/path pairs from the static endpoint index in `docs/engineering/API_CONTRACTS.md`, preserving its request-schema/validation label, `P`/`S`/`E` registry label, and source snapshot anchor. The row-level [observed route-to-target crosswalk](OBSERVED_ROUTE_TARGET_CROSSWALK.csv) compares those routes with the 230-entry target [API catalog](API_CATALOG.md).
+
+The crosswalk finds 9 name-preserving method-and-path overlaps and 4 additional same-name-path overlaps with a different HTTP method. Of the 265 routes without a name-preserving target path, 6 have parameter-agnostic route-shape candidates (5 same method, 1 method mismatch), leaving 259 with no matching path shape. Primary comparison removes the source `/api/vN` prefix and normalizes `:param` to `{param}` while preserving parameter names; a separate shape check ignores names and exposes candidates in distinct CSV fields. It does not compare schemas, authorization, policy, errors, idempotency, persistence, lifecycle, or ownership semantics. No path-shape match is limited to this target catalog and does not establish feature absence. All links are candidates pending owner review under OPEN-46/OPEN-50.

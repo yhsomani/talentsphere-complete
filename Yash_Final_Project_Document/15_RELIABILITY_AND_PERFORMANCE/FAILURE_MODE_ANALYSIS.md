@@ -6,7 +6,7 @@ Scope: failures of the target system (shell, remotes, API modules, worker, Postg
 
 ## 1. Method
 
-Failure modes were derived by walking each box in OPS-DEP's topology and each arrow (call or event) with the questions: stops, slows, lies (wrong data), duplicates, reorders, partially completes. Federation adds failure modes with no analogue in a monolithic SPA (version skew, shared dependency conflicts, stale service worker).
+Failure modes were derived by walking each box in OPS-DEP's topology and each arrow (call or event) with the questions: stops, slows, lies (wrong data), duplicates, reorders, partially completes. Federation adds conditional failure modes with no analogue in bundled delivery (version skew, shared dependency conflicts, remote registry failure).
 
 ## 2. Resilience policy (referenced by every row)
 
@@ -42,6 +42,8 @@ stateDiagram-v2
 Each rung is controlled by named feature flags (kill switches) with runbook owners (RB-24, RB-03).
 
 ## 3. Failure modes — shell, federation and client
+
+Registry, manifest, remote-version, and per-remote rollback behavior in this section applies only if federated runtime is activated under ADR-T23. Bundled mode still uses route-level lazy loading and error boundaries, but a module release rolls back with the shell.
 
 | ID | Failure | Detection | Containment | Degraded behaviour | Recovery | Verification |
 |---|---|---|---|---|---|---|

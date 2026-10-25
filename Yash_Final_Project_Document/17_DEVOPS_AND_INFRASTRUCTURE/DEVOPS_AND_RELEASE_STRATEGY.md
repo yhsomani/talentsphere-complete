@@ -6,7 +6,7 @@ All tool names are **options** unless an ADR fixes them. **[REF]** marks referen
 
 ## 1. Principles
 
-1. Independent deployability with explicit compatibility: any remote, the shell, the API or the worker can deploy alone if the compatibility matrix allows (ADR-T18, FF-08; federation mechanics in MFA-01/VCD-01).
+1. Compatibility-aware delivery: API and worker may deploy independently when contracts allow. Browser domain modules ship together in the proposed bundled baseline; independently deployed remotes require ADR-T23 federation activation and the compatibility gates in MFA-01/VCD-01.
 2. Artefacts are built once, signed, and promoted unchanged through environments; configuration varies, binaries do not.
 3. Every deployment is reversible or has a documented forward-fix; irreversible steps (contract migrations) are isolated in their own release.
 4. Fitness functions are release gates, not advice (FF-01…FF-10 mapped in §9.4).
@@ -24,7 +24,7 @@ flowchart TB
   root --> tools["tools/ (lint rules, manifest validator, catalog lint)"]
   root --> docs["docs/ (ADRs, runbooks as code)"]
   apps --> shell["apps/shell (MOD-SHELL host)"]
-  apps --> remotes["apps/remotes/* (mf-candidate, mf-learning, mf-opportunities, mf-hiring, mf-messaging, mf-account, mf-admin)"]
+  apps --> remotes["domain modules (bundled by default; independent remote deploys only if federation is activated)"]
   apps --> api["apps/api (modular monolith)"]
   apps --> worker["apps/worker (BMOD-WORKER)"]
   packages --> contracts["packages/contracts (Zod, OpenAPI, AsyncAPI)"]
@@ -41,11 +41,13 @@ flowchart TB
 | Remotes depend on `host-contract`, `contracts`, `ui`, `observability` only — never on each other | dependency-cruiser (FF-03) |
 | API modules expose only `index.ts` | dependency-cruiser (FF-02) |
 | Contract packages are semver'd; breaking change = major | oasdiff (FF-06) + changeset requirement |
-| Shared dependencies (React, router, query lib) have one pinned singleton range in a single file consumed by shell and remotes | manifest validator (FF-04) |
+| Bundled mode uses workspace dependency rules; singleton ranges and the manifest validator (FF-04) apply only if federation is activated | workspace checks; FF-04 conditional |
 | Code ownership | CODEOWNERS per app/module/package; Security owns `packages/policy` and `infra/` security modules |
 | Lockfile and tool versions pinned; renovate-style updates via PR with the full gate set | CI |
 
 ## 3. CI/CD pipelines per deployable
+
+The bundled baseline builds domain modules as lazy chunks in the shell release. The separately published remote pipeline below is conditional on ADR-T23 federation activation; it is not a baseline deployable.
 
 ```mermaid
 flowchart LR
@@ -65,8 +67,8 @@ flowchart LR
 
 | Deployable | Build output | Pipeline specifics | Deploy action | Verification |
 |---|---|---|---|---|
-| Shell | Static assets, content-hashed; embedded boot registry snapshot and trust anchors | Host-contract semver bump rules; SW generation with versioned precache (excludes `/mf/**`); must pass a compatibility run against every currently published remote entry (inverse of FF-08) | Upload hashed assets to CDN origin (additive), then switch `index`/SW entry and `/version.json` | TEST-DEP-008, TEST-PWA-001 |
-| Each remote | Static assets with content-hashed files, published to immutable `/mf/<name>/<version>/`, plus a registry entry | Federation validators (FF-04), compat check vs current shell + registry + API range (FF-08), headless contract-smoke against the staging registry, bundle-size budget (MFA-01 release flow) | Publish immutable assets, then **sign the entry (KMS key, `sequence`+1, `rollbackTo` = current stable) and put the registry document** on the canary channel; promotion to stable is a second signed put (the only mutable steps) | TEST-FED-003, TEST-FED-012 |
+| Shell (bundled baseline) | Static assets and local lazy module chunks, content-hashed | Host-contract checks; SW generation for shell and local chunks; no runtime registry or trust anchors | Upload hashed assets and switch `index`/SW entry and `/version.json` | TEST-DEP-008, TEST-PWA-001 |
+| Federated remote (conditional) | Static assets with content-hashed files at immutable `/mf/<name>/<version>/`, plus a registry entry | Federation validators (FF-04), compat check vs current shell + registry + API range (FF-08), headless contract-smoke against the staging registry, bundle-size budget (MFA-01 release flow) | Only after federation activation: publish immutable assets, then **sign the entry (KMS key, `sequence`+1, `rollbackTo` = current stable) and put the registry document** on the canary channel; promotion to stable is a second signed put | TEST-FED-003, TEST-FED-012 |
 | API | OCI image (multi-arch if needed) | OpenAPI diff, authz matrix, tenant canary on ephemeral DB | Rolling/canary replicas; readiness gating | Health/readiness, TEST-DEP-001 |
 | Worker | OCI image | Job-handler idempotency tests; fencing tests | Rolling; drain in-flight leases before stop | TEST-REL-005 |
 | Migrations | Versioned SQL bundle | Migration lint (FF-10), expand-compat test, lock budget | Run as a separate gated step before API roll-out (expand) / after (contract) | TEST-DAT-002/003 |
@@ -74,7 +76,7 @@ flowchart LR
 
 **Affected-only builds:** the task runner computes the affected set from the workspace graph and changed files; changes to `contracts`, `host-contract`, `policy`, `domain` or `ui` rebuild and retest every dependent (TEST-DEP-006). A scheduled full build (nightly) catches graph blind spots.
 
-**Caching:** remote build caches keyed by lockfile + source hash; cache poisoning protection by signing cache entries or restricting cache writes to protected branches.
+**Caching:** module build caches keyed by lockfile + source hash; cache poisoning protection by signing cache entries or restricting cache writes to protected branches.
 
 ## 4. Environments
 

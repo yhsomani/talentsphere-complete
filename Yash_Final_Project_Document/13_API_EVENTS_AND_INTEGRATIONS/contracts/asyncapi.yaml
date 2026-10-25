@@ -3011,6 +3011,7 @@ components:
           additionalProperties: false
           required:
           - kind
+          - human
           properties:
             kind:
               type: string
@@ -3020,6 +3021,9 @@ components:
               - system
               - support
               - referee
+            human:
+              type: boolean
+              description: 'Derived by the producer, never client-supplied: true for kind user, support, referee; false for service, system. SM-00 U6 / INV-T09 "human actor" = human true and kind in (user, support) (REVW-44)'
             account_id:
               type:
               - string

@@ -12,9 +12,11 @@ All rows are **[TARGET]** unless tagged. Disposition is judged against the refer
 
 **Disposition legend:** Keep · Improve (same idea, better) · Redesign (new shape) · Merge (absorbs ≥2 reference features) · Split · Replace (different mechanism) · Remove (deliberately not built; reason recorded) · Introduce (no reference equivalent) · Defer (wanted, later, gated by a trigger).
 
-**Priority:** P0 loop cannot function / safety-critical · P1 important · P2 nice or later. **Phase:** 1 core loop MVP (Learn→Prove→Showcase→Match→Apply→minimal Hire) · 2 hiring + learning depth · 3 institutions + intelligence · 4 community/optional. `—` phase = not built.
+**Priority:** P0 loop cannot function / safety-critical; P1 important; P2 nice or later. **Phase:** these Ph0-Ph4 tags are proposed product sequencing, not the canonical SSOT phase numbers or release approval. Ph1 is a pre-GA pilot; Ph2 is the complete-loop GA candidate. The feature-to-work-package crosswalk remains open under REVW-10 and OPEN-42. `-` phase = not built.
 
-**Phase-1 note [TARGET]:** to avoid a cold-start dead loop, Phase 1 includes a *minimal* employer path (one org, owner + recruiter roles, job post, basic pipeline). Teams, approvals, scorecards, interview scheduling and billing arrive in Phase 2.
+**Phase-1 note [PROPOSED]:** Phase 1 includes a minimum candidate path and job/application foundation, but not the full hiring workflow. It is pre-GA and any production exposure is a bounded pilot only. Phase 2 must add human interview and outcome recording plus candidate-controlled new evidence before GA; feature-to-WP phase reconciliation and owner review remain open (OPEN-42).
+
+**Portfolio identity [OPEN]:** root `SSOT.md` section 7 defines 173 canonical `F-*` feature identities. This document's 253 `FEAT-*` rows are a separate, more decomposed hierarchy and are not a one-to-one replacement. A candidate, owner-unapproved mapping is in [SSOT_FEATURE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md); it explicitly records unmatched items and partial overlaps. Do not report the crosswalk as approved or 253 as the canonical portfolio count. Reconcile stable IDs and traceability before claiming portfolio coverage (REVW-17/36; OPEN-41).
 
 Backend names: `api/identity`, `api/orgs`, `api/profile`, `api/skills`, `api/evidence`, `api/verification`, `api/assessment`, `api/learning`, `api/jobs`, `api/applications`, `api/search`, `api/matching`, `api/careerintel`, `api/messaging`, `api/network`, `api/notify`, `api/billing`, `api/ai`, `api/institutions`, `api/safety`, `api/admin`, `api/analytics`, `api/privacy`, `api/integrations`, `api/platform`, `apps/worker` (BMOD-WORKER), `packages/policy` (BMOD-POLICY).
 
@@ -230,17 +232,17 @@ Column key: **Feature (micro-features)** lists `.k` micro-features inline. **Own
 
 | FEAT | CAP | Feature (micro-features) | Owner | Disp | Rationale | P | Ph |
 |---|---|---|---|---|---|---|---|
-| FEAT-07-01 | 07-1 | Assessment catalogue & detail — .1 mode badges (auto-graded/code/manual) .2 AI policy label shown before start | MOD-LRN · api/assessment | Merge | Merges challenges + skill certification + contests | P0 | 1 |
-| FEAT-07-02 | 07-2 | Assessment attempt — .1 answer autosave .2 server-authoritative timer .3 resume interrupted attempt .4 accommodation (extra time) | MOD-LRN · api/assessment | Redesign | Fair delivery; no client-trusted time | P0 | 1 |
+| FEAT-07-01 | 07-1 | Assessment catalogue & detail — .1 mode badges (auto-graded/code/manual) .2 AI policy label shown before start | MOD-LRN · api/assessment | Merge | Merges challenges + skill certification + contests | P0 | 2 |
+| FEAT-07-02 | 07-2 | Assessment attempt — .1 answer autosave .2 server-authoritative timer .3 resume interrupted attempt .4 accommodation (extra time) | MOD-LRN · api/assessment | Redesign | Fair delivery; no client-trusted time | P0 | 2 |
 | FEAT-07-03 | 07-3 | Code sandbox runner — .1 network-less isolation .2 resource/time limits .3 deterministic test harness | api/assessment · apps/worker | Introduce | ADR-T13 | P0 | 2 |
-| FEAT-07-04 | 07-3 | Unverified-submission fallback — .1 `unverified` label .2 no verified evidence minted .3 re-grade when runner available | api/assessment | Introduce | Replaces simulated pass [REF] | P0 | 1 |
+| FEAT-07-04 | 07-3 | Unverified-submission fallback — .1 `unverified` label .2 no verified evidence minted .3 re-grade when runner available | api/assessment | Introduce | Replaces simulated pass [REF] | P0 | 2 |
 | FEAT-07-05 | 07-2 | AI_PROHIBITED session policy — .1 gateway block header .2 UI banner .3 violation log | api/assessment · api/ai | Introduce | INV-T06 | P0 | 1 |
-| FEAT-07-06 | 07-3 | Scoring, pass threshold & evidence minting — .1 rubric scoring .2 pass threshold .3 evidence mint on pass | api/assessment · api/evidence | Redesign | Pass → authority-verified only when auto-graded | P0 | 1 |
+| FEAT-07-06 | 07-3 | Scoring, pass threshold & evidence minting — .1 rubric scoring .2 pass threshold .3 evidence mint on pass | api/assessment · api/evidence | Redesign | Pass → authority-verified only when auto-graded | P0 | 2 |
 | FEAT-07-07 | 07-4 | Integrity signals & human review — .1 disclosed signals (focus loss, paste) .2 reviewer queue .3 appeal | MOD-ADM · api/safety | Introduce | INV-T20 | P1 | 2 |
-| FEAT-07-08 | 07-2 | Retake policy — .1 cooldown .2 attempt cap per window | api/assessment | Introduce | Anti-gaming | P1 | 1 |
+| FEAT-07-08 | 07-2 | Retake policy — .1 cooldown .2 attempt cap per window | api/assessment | Introduce | Anti-gaming | P1 | 2 |
 | FEAT-07-09 | 07-1 | Question bank & assessment authoring | MOD-LRN · api/assessment | Improve | Instructors/orgs author | P1 | 2 |
 | FEAT-07-10 | 07-5 | Employer-set screening assessment on a job | MOD-HIR · api/assessment | Introduce | Opt-in, never auto-reject | P2 | 3 |
-| FEAT-07-11 | 07-5 | Practice mode (non-evidence) | MOD-LRN · api/assessment | Keep | Safe rehearsal | P2 | 2 |
+| FEAT-07-11 | 07-5 | Practice mode (non-evidence) | MOD-LRN · api/assessment | Keep | Safe rehearsal | P2 | 1 |
 | FEAT-07-12 | 07-4 | Remote proctoring | api/assessment | Defer | Vendor-gated | P2 | 4 |
 | FEAT-07-13 | 07-5 | Contests & leaderboards | MOD-LRN · api/assessment | Defer | Community feature, no loop impact | P2 | 4 |
 
@@ -284,9 +286,9 @@ Column key: **Feature (micro-features)** lists `.k` micro-features inline. **Own
 | FEAT-10-01 | 10-1 | Application draft & autosave — .1 offline draft queue .2 draft conflict handling .3 draft expiry 30 days | MOD-OPP · api/applications | Introduce | ADR-T10 queued-write tier | P0 | 1 |
 | FEAT-10-02 | 10-1 | Application submit (idempotent, one-active rule) — .1 pre-submit checklist .2 duplicate-click protection .3 confirmation receipt | MOD-OPP · api/applications | Redesign | BR-T001, INV-T10 | P0 | 1 |
 | FEAT-10-03 | 10-1 | Withdraw & re-apply policy | MOD-OPP · api/applications | Improve | Candidate agency | P0 | 1 |
-| FEAT-10-04 | 10-2 | Application status tracker — .1 stage timeline .2 plain-language reason | MOD-OPP · api/applications | Improve | Transparency | P0 | 1 |
-| FEAT-10-05 | 10-3 | Pipeline board & stage change — .1 optimistic concurrency (If-Match) .2 stage reason note .3 move audit | MOD-HIR · api/applications | Redesign | SM-APPLICATION only (BR-T002) | P0 | 1 |
-| FEAT-10-06 | 10-3 | Rejection with human confirmation & feedback template — .1 two-step confirm .2 optional feedback to candidate | MOD-HIR · api/applications | Introduce | INV-T09 | P0 | 1 |
+| FEAT-10-04 | 10-2 | Application status tracker — .1 stage timeline .2 plain-language reason | MOD-OPP · api/applications | Improve | Transparency | P0 | 2 |
+| FEAT-10-05 | 10-3 | Pipeline board & stage change — .1 optimistic concurrency (If-Match) .2 stage reason note .3 move audit | MOD-HIR · api/applications | Redesign | SM-APPLICATION only (BR-T002) | P0 | 2 |
+| FEAT-10-06 | 10-3 | Rejection with human confirmation & feedback template — .1 two-step confirm .2 optional feedback to candidate | MOD-HIR · api/applications | Introduce | INV-T09 | P0 | 2 |
 | FEAT-10-07 | 10-4 | Interview scheduling — .1 slot proposal .2 reschedule .3 cancel .4 calendar invite (ICS) .5 timezone-safe display | MOD-HIR, MOD-OPP · api/applications | Redesign | Concurrency-safe slots | P1 | 2 |
 | FEAT-10-08 | 10-4 | Scorecards & structured feedback — .1 criteria templates .2 blind-until-submitted | MOD-HIR · api/applications | Introduce | Reduces bias | P1 | 2 |
 | FEAT-10-09 | 10-3 | Hiring-team notes & mentions | MOD-HIR · api/applications | Improve | Collaboration, never visible to candidate | P1 | 2 |
@@ -394,9 +396,9 @@ Column key: **Feature (micro-features)** lists `.k` micro-features inline. **Own
 
 | FEAT | CAP | Feature (micro-features) | Owner | Disp | Rationale | P | Ph |
 |---|---|---|---|---|---|---|---|
-| FEAT-17-01 | 17-1 | Gateway single path & routing — .1 model routing .2 request/response redaction | api/ai | Introduce | ADR-T12 | P0 | 1 |
-| FEAT-17-02 | 17-2 | Budget & quota enforcement — .1 per-user/org budget .2 free-tier hard block | api/ai · api/billing | Introduce | INV-T07 | P0 | 1 |
-| FEAT-17-03 | 17-1 | Policy blocks (AI_PROHIBITED etc.) | api/ai | Introduce | INV-T06 | P0 | 1 |
+| FEAT-17-01 | 17-1 | Gateway single path & routing — .1 model routing .2 request/response redaction | api/ai | Introduce | ADR-T12 | P0 | 0 |
+| FEAT-17-02 | 17-2 | Budget & quota enforcement — .1 per-user/org budget .2 free-tier hard block | api/ai · api/billing | Introduce | INV-T07 | P0 | 0 |
+| FEAT-17-03 | 17-1 | Policy blocks (AI_PROHIBITED etc.) | api/ai | Introduce | INV-T06 | P0 | 0 |
 | FEAT-17-04 | 17-3 | Profile/resume suggestions (draft only) — .1 per-field accept/reject | MOD-CAND · api/ai | Improve | Human gate (INV-T09) | P1 | 2 |
 | FEAT-17-05 | 17-3 | Job-description drafting assist | MOD-HIR · api/ai | Improve | Efficiency; recruiter confirms | P2 | 2 |
 | FEAT-17-06 | 17-3 | Career coach chat | MOD-CAND · api/ai | Improve | Output never evidence (INV-T08) | P2 | 3 |
@@ -425,8 +427,8 @@ Column key: **Feature (micro-features)** lists `.k` micro-features inline. **Own
 
 | FEAT | CAP | Feature (micro-features) | Owner | Disp | Rationale | P | Ph |
 |---|---|---|---|---|---|---|---|
-| FEAT-19-01 | 19-1 | Report content/user — .1 context snapshot attach .2 report category | all MOD · api/safety | Improve | Entry to safety loop | P0 | 1 |
-| FEAT-19-02 | 19-1 | Moderation queue & case management — .1 triage priority .2 SLA timers .3 case notes | MOD-ADM · api/safety | Redesign | SM-MODCASE | P0 | 1 |
+| FEAT-19-01 | 19-1 | Report content/user — .1 context snapshot attach .2 report category | all MOD · api/safety | Improve | Entry to safety loop | P0 | 2 |
+| FEAT-19-02 | 19-1 | Moderation queue & case management — .1 triage priority .2 SLA timers .3 case notes | MOD-ADM · api/safety | Redesign | SM-MODCASE | P0 | 2 |
 | FEAT-19-03 | 19-2 | Takedown with notice & appeal (jobs, courses, profiles) | MOD-ADM · api/safety | Introduce | Due process | P1 | 2 |
 | FEAT-19-04 | 19-4 | Scam/fraud signals → human review | api/safety | Introduce | Flags only (INV-T09) | P1 | 2 |
 | FEAT-19-05 | 19-2 | Integrity-case review (assessment anomalies) | MOD-ADM · api/safety | Introduce | INV-T20 | P1 | 2 |
@@ -510,20 +512,20 @@ Column key: **Feature (micro-features)** lists `.k` micro-features inline. **Own
 
 ## 3. Counts
 
-Counted from the tables above (253 features, 318 micro-features, **571 addressable items**; 97 capabilities across 24 domains).
+Counted from the tables above (108 capabilities, 253 local features, 318 micro-features; **571 FEAT + micro-feature addressable items** across 24 domains). Capability rows are counted separately and are not included in the 571 total.
 
 | Dimension | Counts |
 |---|---|
 | Disposition | Introduce 122 · Improve 56 · Defer 32 · Redesign 26 · Remove 7 · Keep 6 · Merge 3 · Replace 1 · Split 0 (none warranted: no reference feature needs two) |
 | Priority | P0 92 · P1 84 · P2 77 |
-| Phase | Ph1 94 · Ph2 78 · Ph3 42 · Ph4 32 · not built (Remove) 7 |
+| Phase | Ph0 3; Ph1 82; Ph2 87; Ph3 42; Ph4 32; not built (Remove) 7 |
 | Features per domain | 01:13 · 02:9 · 03:10 · 04:7 · 05:12 · 06:10 · 07:13 · 08:12 · 09:11 · 10:17 · 11:11 · 12:7 · 13:10 · 14:9 · 15:10 · 16:14 · 17:10 · 18:11 · 19:10 · 20:10 · 21:7 · 22:10 · 23:8 · 24:12 |
 
-Reading the numbers: *Introduce* dominates because the reference product lacked the trust machinery (policy, outbox, consent, referee, sandbox). Phase 1 is 94 features, which is deliberately large because most are small enabling or safety items (INV-T01…T20 plumbing); the user-visible Phase-1 surface is the spine in §4 item 1.
+Reading the numbers: *Introduce* dominates because the reference product lacked the trust machinery (policy, outbox, consent, referee, sandbox). These proposed phase counts include three foundational Ph0 AI-policy features; Ph1/Ph2 counts remain provisional until the feature-to-work-package reconciliation recorded under REVW-10 is complete. That sequencing task is separate from canonical F-to-FEAT mapping under OPEN-41.
 
 ## 4. Cross-domain observations
 
-1. **Phase-1 spine** (feature chain that must exist for one candidate to complete Learn→Prove→Showcase→Match→Apply and one recruiter to receive and move the application): FEAT-01-01..06, FEAT-03-01/02/07, FEAT-04-01/02/04, FEAT-05-01/02/04/05/07/12, FEAT-06-01/02/03/10, FEAT-07-02/04/05/06, FEAT-08-01..04, FEAT-09-01..03/05, FEAT-10-01..06/14, FEAT-11-01..03/07, FEAT-22-01..03, FEAT-24-01..09, FEAT-02-01..03/07.
+1. **Phase-1 pre-GA pilot spine** (candidate learning/practice, evidence, verification, discovery, match and apply; no full hiring outcome): FEAT-01-01..06, FEAT-03-01/02/07, FEAT-04-01/02/04, FEAT-05-01/02/04/05/07/12, FEAT-06-01/02/03/10, FEAT-07-05/11, FEAT-08-01..04, FEAT-09-01..03/05, FEAT-10-01..03/14, FEAT-11-01..03/07, FEAT-22-01..03, FEAT-24-01..09, FEAT-02-01..03/07. The SSOT-required interview, outcome, and new-evidence closure belongs to the Phase-2 GA gate.
 2. **Features removed on principle:** FEAT-09-11 (pay-to-rank), FEAT-10-17 (auto-reject), FEAT-14-05/08/09 (non-goals), FEAT-13-08 (legacy), FEAT-20-07 (impersonation).
 3. **Features whose Phase differs from their domain's headline phase** (e.g. billing in Ph2 though DOM-16 is Supporting) are deliberate: Phase 1 is free-tier only; entitlements default to the free plan until FEAT-16-04 ships. **[OPEN-05]** pricing.
 4. **Ownership clarity:** every FEAT has exactly one *accountable* backend module (the first backend named); additional backend names are collaborators reached via public interfaces (FF-02) or outbox events.

@@ -2,37 +2,13 @@
   "version": 1,
   "entries": {
     "79a93d4a2f8f50b95f852280616242fee1855dc99a3c75211917f55e72e95fae": {
-      "last_emitted_at_ms": 1792940598974,
+      "last_emitted_at_ms": 1792950913189,
       "message": "Use parallel execution for independent tasks. Use run_in_background for long operations (npm install, builds, tests)."
     },
     "445ed27a3872b681d98190bae61ccb84954e1bc4e140df5370be958dee776b3a": {
-      "last_emitted_at_ms": 1792940407407,
+      "last_emitted_at_ms": 1792950889171,
       "message": "Verify changes work after editing. Test functionality before marking complete."
-    },
-    "466399dafa2d20f60587180bad0a07358eb7f2bce724df0ff682f038ad33f5ad": {
-      "last_emitted_at_ms": 1792940373739,
-      "message": "Read multiple files in parallel when possible for faster analysis."
-    },
-    "ef380187064e28ac570e96cec598ca4d0791894bd36a7ea38b59dc830dd783d7": {
-      "last_emitted_at_ms": 1792940080862,
-      "message": "Spawning agent: general-purpose (sonnet) | Task: Fix pass: ops, QA, cost, migration | Active agents: 3"
-    },
-    "5e25141c06e9d87660b4694445cfda409e1d6293ceab64fc1cc214a4d42c08ba": {
-      "last_emitted_at_ms": 1792940072648,
-      "message": "Spawning agent: general-purpose (sonnet) | Task: Fix pass: backend, data, API, security | Active agents: 2"
-    },
-    "459c54e5f35d6a58dcd90d2aecc21fa6d1f35d241bc5b134c506f87dc7b6d67b": {
-      "last_emitted_at_ms": 1792940068924,
-      "message": "Combine searches in parallel when investigating multiple patterns."
-    },
-    "6c09acf43a745b5e92550207994d502f2a92c4148fbe4eb929a8ab0c4fb5816e": {
-      "last_emitted_at_ms": 1792940062447,
-      "message": "Spawning agent: general-purpose (sonnet) | Task: Fix pass: product, rules, roadmap | Active agents: 1"
-    },
-    "dab91e82329ada2e81c362ecd5600402a0c66d5636c4c6802b6d1d57487f0f39": {
-      "last_emitted_at_ms": 1792940052439,
-      "message": "Spawning agent: general-purpose (sonnet) | Task: Fix pass: frontend, PWA, federation"
     }
   },
-  "updated_at": "2026-10-25T15:03:18.974Z"
+  "updated_at": "2026-10-25T17:55:13.189Z"
 }

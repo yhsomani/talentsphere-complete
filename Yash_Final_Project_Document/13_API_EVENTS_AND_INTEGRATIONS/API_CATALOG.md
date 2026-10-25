@@ -4,6 +4,10 @@ Doc ID: APIC-01 · Owner: Backend Architecture Team · Version 1.0 · Status: Un
 
 Tags: **[TARGET]** design; nothing is implemented. This catalog lists **230** endpoints across 24 domains; **109** have full OpenAPI 3.1 path and schema definitions in `contracts/openapi.yaml` (identity, evidence, verification, jobs, applications, billing, privacy, plus the file-upload and capabilities routes they depend on). For the others the request/response schema names are reserved [TARGET] and their schemas are authored when the owning module is specified (tracked as the "OpenAPI" column).
 
+The candidate source mapping for root SSOT `SCI-01…SCI-54` is in [SSOT_SERVICE_CONTRACT_CROSSWALK](SSOT_SERVICE_CONTRACT_CROSSWALK.md) and its [row-level CSV](SSOT_SERVICE_CONTRACT_CROSSWALK.csv). It is not an approved API contract or implementation coverage claim; owner disposition remains open under OPEN-46/50.
+
+The [278-row observed route-to-target crosswalk](OBSERVED_ROUTE_TARGET_CROSSWALK.csv) records 9 name-preserving method/path overlaps and 4 same-name-path method mismatches. Among the remaining 265 source routes, 6 have parameter-agnostic path-shape candidates (5 same method, 1 different method) and 259 have no target path-shape match. Parameter-name-insensitive candidates are explicitly separate from direct path matches; no source/target semantic equivalence or implementation coverage is asserted (OPEN-46/50).
+
 All paths are relative to `/api/v1`. Reference-project routes (`API_CONTRACTS.md`) are **[REF]** only and were not copied.
 
 ## Legend

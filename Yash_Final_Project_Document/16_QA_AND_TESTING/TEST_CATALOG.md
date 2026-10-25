@@ -10,6 +10,7 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 - **Links:** `AC-<DOM>-<NN>-<NN>` acceptance criteria (scheme in QA-AC), `FEAT-*`, `INV-T*`, `BR-T*`, `FF-*`, `ADR-T*`.
 - **Links to feature acceptance criteria:** `AC-<DOM>-<NN>-<NN>` ids are the real ids defined in `05_FEATURE_SPECIFICATIONS/SPEC_G1…G4` (reconciled 2026-10-25). Where the feature exists in `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` but no AC has been written yet, the link reads `FEAT-xx-yy (AC pending)` — each is a **specification gap** to close (listed in §15). `AC-00-*` are platform (cross-cutting) criteria defined in QA-AC §9. Links to INV/FF/BR/ADR are canonical.
 - **Statuses:** all tests are *specified*, none implemented. This catalog does not claim any test exists in code. Reference-project tests are [REF] only.
+- **Conditional tags (REVW-07, REVW-24):** **[COND-FED]** = runs only once federated runtime is activated (`MF_MODE=federated`, ADR-T03a: OPEN-03 closed with at least 3 named independent frontend teams and a recorded WP-FED-SPIKE result). In the default `bundled` mode these tests are not run and do not gate Phase 1 exit. **[COND-OUTBOX]** = runs only once the offline outbox subsystem is activated on the ADR-T10 trigger (telemetry or research shows need); Phase 1 offline is read cache plus local unsent drafts, no outbox (TEST-PWA-013).
 - **Special verifications (mandatory):** tagged `★` and indexed in §14.
 
 ## 2. Security and authorization (SEC)
@@ -29,8 +30,8 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-SEC-010 | Given login, when cookies are inspected, then session cookie is httpOnly, Secure, SameSite=Lax; no token in localStorage/sessionStorage/JS-readable storage | E | AC-01-02-01, ADR-T06, INV-T14 | A1 |
 | TEST-SEC-011 | Given a refresh token used twice, when reuse is detected, then the whole family is revoked; concurrent-tab rotation race is tolerated within the grace rule | I | AC-01-04-02, BR-T050 | A1 |
 | TEST-SEC-012 ★ | Given a remote's code, when it attempts to read cookies/tokens/storage or import another remote, then static scan fails the build and the runtime probe finds no credential access | X/E | INV-T16, FF-03 | A1 |
-| TEST-SEC-013 | Given a remote asset with wrong SRI/hash or violating CSP, when loaded, then it is blocked and the shell falls back to last-known-good | F | ADR-T19, FF-04 | A2 |
-| TEST-SEC-014 | Given a tampered or unsigned manifest, when the shell fetches it, then it is rejected; a rotated signing key works during the dual-key window | F | ADR-T19 | A2 |
+| TEST-SEC-013 | **[COND-FED]** Given a remote asset with wrong SRI/hash or violating CSP, when loaded, then it is blocked and the shell falls back to last-known-good | F | ADR-T19, FF-04 | A2 |
+| TEST-SEC-014 | **[COND-FED]** Given a tampered or unsigned manifest, when the shell fetches it, then it is rejected; a rotated signing key works during the dual-key window | F | ADR-T19 | A2 |
 | TEST-SEC-015 | Given repository, build artefacts and client bundles, when secret scanning runs, then no secrets are found; canary secret in env never appears in output | X | INV-T14 | A1 |
 | TEST-SEC-016 | Given canary PII/secret strings in requests, when logs, traces and error reports are searched, then none appear unredacted | I | AC-00-01-03, AC-06-01-01, INV-T14, INV-T43 | A1 |
 | TEST-SEC-017 | Given cookie auth, when a cross-site request mutates state without the CSRF defence, then it is rejected | S | AC-00-01-08, ADR-T06 | A1 |
@@ -112,7 +113,7 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 |---|---|---|---|---|
 | TEST-API-001 | Given an OpenAPI change, when diffed against the released version, then breaking changes fail unless the major version bumps | K | FF-06, ADR-T08 | A1 |
 | TEST-API-002 ★ | Given each remote's recorded API expectations, when run against the API candidate (and the reverse), then incompatible pairs fail the compatibility gate | K | FF-08, ADR-T18 | A1 |
-| TEST-API-003 | Given every unsafe-mutation route, when linted, then it declares `Idempotency-Key` support | X | FF-07 | A1 |
+| TEST-API-003 | Given every unsafe-mutation route, when linted, then it accepts `Idempotency-Key` or declares a natural key (REVW-14, FF-07 as reworded) | X | FF-07 | A1 |
 | TEST-API-004 | Given all error paths, when triggered, then responses are RFC 9457 problem+json with stable `type` codes | K | AC-00-01-04, ADR-T08 | A1 |
 | TEST-API-005 | Given cursor pagination under concurrent inserts/deletes, when paged, then no duplicates/gaps within contract and tampered cursors are rejected | I | AC-00-01-05, AC-11-01-06, ADR-T08 | A1 |
 | TEST-API-006 | Given import graph, when a module imports another module's internals, then dependency-cruiser fails | X | FF-02 | A1 |
@@ -124,26 +125,30 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-API-012 | Given each declared SM-*, when exhaustively tested (table-driven), then only declared transitions pass | U | INV-T11 | A1 |
 | TEST-API-013 | Given consequential side effects, when performed, then an audit event with actor, resource, reason and request id is written | I | INV-T10, AC-00-01-06, INV-T36 | A1 |
 | TEST-API-014 | Given `GET /me/capabilities`, when compared with server enforcement for every action, then UI hints never exceed server allowance | I | FEAT-01-09 (AC pending), INV-T01 | A1 |
+| TEST-API-015 | Given the route registry, when linted, then every unsafe mutation route either accepts `Idempotency-Key` or declares a natural key; queued-operation routes retain idempotency records for at least the outbox TTL (14 d) | X/I | FF-07, REVW-14, BR-T114 | A1 |
+| TEST-API-016 | Given the state vocabulary, when linted, then every state name used in OpenAPI, AsyncAPI, SQL enums and UI maps comes from `STATE_MACHINES.md` | X | FF-11 | A1 |
 
 ## 8. Federation (FED)
 
 | TEST-ID | Verifies | Lvl | Links | Auto |
 |---|---|---|---|---|
-| TEST-FED-001 ★ | Given a remote returning 404 or timing out, when its route is opened, then a fallback panel appears; shell navigation and other remotes keep working | F/E | AC-00-02-01, ADR-T03, FM-01 | A2 |
-| TEST-FED-002 | Given a slow remote entry, when the load timeout elapses, then last-known-good is used and the user is informed | F | AC-00-02-02, ADR-T18 | A2 |
-| TEST-FED-003 ★ | Given a remote whose `hostContract` range excludes the shell version, when activated, then it is rejected and last-known-good pinned | F | AC-00-02-03, ADR-T18, FF-08 | A1 |
-| TEST-FED-004 | Given a remote whose `apiRange` excludes the deployed API, when activated, then it is not mounted | F | AC-00-02-04, ADR-T18 | A1 |
-| TEST-FED-005 ★ | Given two remotes requiring conflicting versions of a singleton dependency, when validated in CI and at runtime, then the build/promotion fails or the offending remote is not mounted | F | FF-04, FM-03 | A1 |
-| TEST-FED-006 | Given a federation dependency graph with a cycle, when validated, then CI fails | X | FF-04 | A1 |
-| TEST-FED-007 | Given a remote importing another remote's source, when linted, then CI fails | X | FF-03 | A1 |
-| TEST-FED-008 | Given a remote throwing during render, when mounted, then its error boundary contains it and shell state survives | C/E | AC-00-02-05, FM-04 | A1 |
-| TEST-FED-009 ★ | Given a deploy of a new remote version while old tabs are open, when new navigation occurs, then new version loads without breaking old sessions and manifest TTL is honoured | F/E | ADR-T18, FM-05 | A2 |
-| TEST-FED-010 | Given `MF_MODE=bundled`, when the critical e2e suite runs, then results equal federated mode | E | ADR-T03, OPEN-03 | A2 |
+| TEST-FED-001 ★ | **[COND-FED]** Given a remote returning 404 or timing out, when its route is opened, then a fallback panel appears; shell navigation and other remotes keep working | F/E | AC-00-02-01, ADR-T03, FM-01 | A2 |
+| TEST-FED-002 | **[COND-FED]** Given a slow remote entry, when the load timeout elapses, then last-known-good is used and the user is informed | F | AC-00-02-02, ADR-T18 | A2 |
+| TEST-FED-003 ★ | **[COND-FED]** Given a remote whose `hostContract` range excludes the shell version, when activated, then it is rejected and last-known-good pinned | F | AC-00-02-03, ADR-T18, FF-08 | A1 |
+| TEST-FED-004 | **[COND-FED]** Given a remote whose `apiRange` excludes the deployed API, when activated, then it is not mounted | F | AC-00-02-04, ADR-T18 | A1 |
+| TEST-FED-005 ★ | **[COND-FED]** Given two remotes requiring conflicting versions of a singleton dependency, when validated in CI and at runtime, then the build/promotion fails or the offending remote is not mounted | F | FF-04, FM-03 | A1 |
+| TEST-FED-006 | **[COND-FED]** Given a federation dependency graph with a cycle, when validated, then CI fails | X | FF-04 | A1 |
+| TEST-FED-007 | **[COND-FED]** Given a remote importing another remote's source, when linted, then CI fails | X | FF-03 | A1 |
+| TEST-FED-008 | **[COND-FED]** Given a remote throwing during render, when mounted, then its error boundary contains it and shell state survives | C/E | AC-00-02-05, FM-04 | A1 |
+| TEST-FED-009 ★ | **[COND-FED]** Given a deploy of a new remote version while old tabs are open, when new navigation occurs, then new version loads without breaking old sessions and manifest TTL is honoured | F/E | ADR-T18, FM-05 | A2 |
+| TEST-FED-010 | Given the default `MF_MODE=bundled`, when the critical e2e suite runs, then it passes in bundled mode on every PR (this is the Phase 1 gate); **[COND-FED]** once federated runtime is activated, results must also equal federated mode | E | ADR-T03a, REVW-07, OPEN-03 | A1 |
 | TEST-FED-011 | Given a user action in a remote, when it reaches API and worker, then one W3C trace spans shell → remote → API → worker | I | ADR-T16, AC-00-03-01 | A3 |
-| TEST-FED-012 | Given a build, when remote asset paths are inspected, then they sit under immutable `/mf/<name>/<version>/` paths with content-hashed files, are served `immutable`, and only the signed registry document is mutable | D | OPS-DEP §3 | A1 |
-| TEST-FED-013 ★ | Given a shared/third-party dependency or its CDN unavailable, when the app loads, then critical path still functions or fails into the documented fallback | F/R | FM-11, AC-00-02-06 | A2 |
-| TEST-FED-014 | Given a rollback of remote A (higher-sequence entry or `rollbackTo`), when performed, then remote B and the shell are unaffected, anti-rollback is not violated, and no data migration is required | D | OPS-REL §10, ADR-T18 | A2 |
-| TEST-FED-015 | Given a remote slot, when the remote mounts, then layout shift stays within the CLS budget (reserved space) | P | SLO-15 | A1 |
+| TEST-FED-012 | **[COND-FED]** Given a build, when remote asset paths are inspected, then they sit under immutable `/mf/<name>/<version>/` paths with content-hashed files, are served `immutable`, and only the signed registry document is mutable | D | OPS-DEP §3 | A1 |
+| TEST-FED-013 ★ | **[COND-FED]** Given a shared/third-party dependency or its CDN unavailable, when the app loads, then critical path still functions or fails into the documented fallback | F/R | FM-11, AC-00-02-06 | A2 |
+| TEST-FED-014 | **[COND-FED]** Given a rollback of remote A (higher-sequence entry or `rollbackTo`), when performed, then remote B and the shell are unaffected, anti-rollback is not violated, and no data migration is required | D | OPS-REL §10, ADR-T18 | A2 |
+| TEST-FED-015 | **[COND-FED]** Given a remote slot, when the remote mounts, then layout shift stays within the CLS budget (reserved space) | P | SLO-15 | A1 |
+| TEST-FED-016 | Given the default `MF_MODE=bundled` build, when artefacts are inspected, then each of the 8 modules is a lazily loaded chunk behind the typed module contract, the contract and boundary lint (FF-03) pass, and back-office chunks (MOD-ADM) are served only behind the authenticated edge rule so customer sessions cannot download them | D | REVW-07, REVW-08, FD-09, FF-03 | A1 |
+| TEST-FED-017 | Given a production release candidate with `MF_MODE=federated`, when the release lint runs, then it fails unless an activation record exists (OPEN-03 closed with at least 3 named independent frontend teams and a recorded WP-FED-SPIKE result) | D/X | REVW-07, ADR-T03a, OPEN-03 | A1 |
 
 ## 9. PWA, service worker and offline (PWA)
 
@@ -153,14 +158,17 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-PWA-002 | Given user A logged out and user B logged in on one device, when B browses, then no cached response from A's session is ever served | O | AC-00-04-02, INV-T13, INV-T14 | A1 |
 | TEST-PWA-003 | Given logout, when it completes, then caches and IndexedDB owner data are cleared | O | AC-00-04-05, INV-T14 | A1 |
 | TEST-PWA-004 | Given offline mode, when cached data is shown, then it is labelled stale and no consequential state (e.g. verified) is asserted from cache | O | AC-00-04-03, INV-T13 | A1 |
-| TEST-PWA-005 ★ | Given a queued profile edit and a newer server version, when reconnected, then an ETag conflict is shown and nothing is overwritten silently | O | AC-03-08-02, AC-03-08-01, ADR-T10 | A2 |
-| TEST-PWA-006 | Given a queued draft whose permission was revoked while offline, when replayed, then the server rejects it and the user is told | O | AC-10-01-03, INV-T13 | A2 |
+| TEST-PWA-005 ★ | **[COND-OUTBOX]** Given a queued profile edit and a newer server version, when reconnected, then an ETag conflict is shown and nothing is overwritten silently | O | AC-03-08-02, AC-03-08-01, ADR-T10 | A2 |
+| TEST-PWA-006 | **[COND-OUTBOX]** Given a queued draft whose permission was revoked while offline, when replayed, then the server rejects it and the user is told | O | AC-10-01-03, INV-T13 | A2 |
 | TEST-PWA-007 | Given offline mode, when the user tries a consequential action (submit application, withdraw, pay), then it is blocked with explanation | O | AC-10-02-11, AC-00-04-04, ADR-T10 | A1 |
-| TEST-PWA-008 ★ | Given a queued message sent twice on reconnect, when replayed, then one message results (idempotent) | O | FEAT-13-03 (AC pending), INV-T10 | A2 |
+| TEST-PWA-008 ★ | **[COND-OUTBOX]** Given a queued message sent twice on reconnect, when replayed, then one message results (idempotent) | O | FEAT-13-03 (AC pending), INV-T10 | A2 |
 | TEST-PWA-009 | Given the SW kill-switch flag, when set, then clients unregister the SW and clear caches on next load | O/D | RB-09, FM-06 | A3 |
 | TEST-PWA-010 | Given each PWA capability, when run in WebKit, then a feature-detected fallback works and is listed in the platform matrix | E | FF-09 | A1 |
 | TEST-PWA-011 | Given iOS, when requesting push permission, then it is requested only after a user gesture in an installed app | M | FEAT-15-04 (AC pending), ADR-T02, OPEN-12 | M |
 | TEST-PWA-012 | Given simulated storage eviction, when the app starts, then it recovers from the network without errors | O | AC-24-07-01, FM-09, ADR-T10 | A2 |
+| TEST-PWA-013 | Given Phase 1 offline scope (REVW-24), when a user types an unsent draft and goes offline or reloads, then the draft is restored locally, is never auto-submitted, must be reviewed and sent online, and the IndexedDB schema contains no outbox store | O | REVW-24, ADR-T10, OFF-01 | A1 |
+| TEST-PWA-014 **[COND-OUTBOX]** | Given lesson progress queued while offline, when replayed after reconnect, then it is accepted idempotently with conflict resolution by max sequence, and entries past the single expiry in the OFF-01 table are dropped with notice | O | AC-08-03-03, REVW-15, ADR-T10 | A2 |
+| TEST-PWA-015 | Given an assessment attempt, when the network drops, then no item or answer is stored in the service-worker cache, IndexedDB or any web storage, submission is blocked with an explanation, and nothing is replayed on reconnect (assessment answers are online-only) | O | REVW-15, ADR-T10, OFF-01, AC-00-04-04 | A1 |
 
 ## 10. Billing (BIL)
 
@@ -215,10 +223,11 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-REL-010 | Given clock skew within and beyond tolerance, when tokens/signed URLs are used, then behaviour matches policy | R | FM-20 | A2 |
 | TEST-REL-011 | Given a manifest cache invalidation after deploy, when thousands of clients refetch, then jittered refresh keeps origin load bounded | L | OPS-CAP §5 | A3 |
 | TEST-REL-012 | Given a scheduled game day, when failure modes are injected, then measured detection/containment/recovery are recorded vs OPS-FMEA | R | OPS-FMEA §9 | S |
+| TEST-REL-013 | Given a database failover that truncates the UNLOGGED `rate_limit_bucket`, when a credential-stuffing burst follows, then edge-layer limits still apply and auth-class limits do not reset to full | R | REVW-41, BR-T052, OPEN-B1, FM-24 | A2 |
 | TEST-PER-001 | Given baseline load, when run, then each API class meets p95/p99 (OPS-SLO §5) | L | SLO-01, AC-00-06-01 | A2 |
 | TEST-PER-002 | Given the target corpus, when searching, then p95 ≤ 400 ms (ADR-T11 trigger) | L | ADR-T11, C5 | A2 |
 | TEST-PER-003 | Given each route on RMP-1, when audited, then LCP/TBT/CLS and JS budgets hold | P | SLO-13…SLO-19 | A1 |
-| TEST-PER-004 | Given federated vs bundled builds, when measured, then Δ_F ≤ budget (SLO-17) | P | SLO-17, OPEN-03 | A2 |
+| TEST-PER-004 | **[COND-FED]** Given federated vs bundled builds, when measured, then Δ_F ≤ budget (SLO-17) | P | SLO-17, OPEN-03 | A2 |
 | TEST-PER-005 | Given a job burst, when run, then queue ages meet SLO-20…25 and tenant fair share holds | L | TP-01, OPS-CAP §4 | A2 |
 | TEST-PER-006 | Given a long soak, when completed, then no memory/connection/bloat trend breaches thresholds | L | OPS-CAP §5 | A2 |
 | TEST-PER-007 | Given a traffic spike and a noisy tenant, when applied, then shedding/quotas protect core classes and recover | L | FM-13 | A2 |
@@ -260,6 +269,7 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-MSG-003 | Given faculty in an institution cohort, when viewing, then non-consented private job-search data is invisible | I | FEAT-18-04 (AC pending), INV-T15, INV-T03, INV-T41 | A1 |
 | TEST-SRC-001 | Given the relevance regression set, when search runs, then quality metrics do not fall below threshold [OPEN-15] | I | AC-11-01-01 | A2 |
 | TEST-SRC-002 | Given FTS operators and special characters in queries, when searched, then input is sanitised and no injection or errors occur | S | AC-11-01-07 | A1 |
+| TEST-SRC-003 | Given a candidate whose consent is revoked, when a recruiter runs a candidate search before the index entry is removed, then the candidate is absent or masked at query time (authorization at read time, no consent cache) | I | REVW-25, INV-T15, INV-T29, BR-T063 | A1 |
 
 ## 13A. Domain-invariant tests (INV-T21 … INV-T45, from `06_BUSINESS_PROCESSES/PRODUCT_INVARIANT_REGISTRY.md`)
 
@@ -269,6 +279,9 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-EVD-013 | Infected-fixture test: an evidence item with an artefact cannot be `active` unless its latest scan verdict is clean (DB check + state machine) | I | AC-05-12-01, AC-05-12-02, INV-T23 | A1 |
 | TEST-EVD-014 | Referee token consumed under row lock: concurrent submits store exactly one response; after submit, expiry, cancel or bounce the token authorises nothing | I | AC-06-02-03, AC-06-02-07, INV-T24 | A1 |
 | TEST-EVD-015 | Revoke an item, stop the recompute worker, read the item: the displayed rung already reflects the revocation | I | AC-05-05-07, INV-T25 | A1 |
+| TEST-EVD-016 | Given a course whose instructor account equals the learner, or shares a session, device or payment-instrument signal with the learner, when the instructor signs off, then the attestation is rejected and no `authority_verified` rung is minted | I | REVW-12, BR-T011, DT-06, ADR-T14 | A1 |
+| TEST-EVD-017 | Given an instructor-issued attestation, when the evidence is rendered in the API and each client surface, then `issuer_class` is present and displayed, the badge is never labelled platform-verified, and matching weights differ by class | I | REVW-12, DT-06, ADR-T14 | A1 |
+| TEST-EVD-018 | Given an instructor attestation that is revoked (or its issuer fails an independence check), when revocation commits, then the rung drops, dependent matches recompute within SLO-23, and the candidate is notified | I | REVW-12, BR-T005, SLO-23 | A2 |
 | TEST-ASM-012 | An attempt in `unverified`, `voided` or `under_review` has no linked `authority_verified` evidence (cross-effects, incl. integrity hold) | I | AC-07-04-01, AC-07-07-02, AC-07-06-05, INV-T26 | A1 |
 | TEST-ASM-013 | Replay of the mint job: evidence minted at most once per attempt and only from `passed` attempts | I | AC-07-06-03, AC-07-06-04, INV-T27 | A1 |
 | TEST-HIR-012 | Application evidence snapshot is immutable after submit: row-level UPDATE denied; later evidence edits leave the snapshot hash unchanged | I | AC-10-14-01, AC-10-14-02, INV-T28 | A1 |
@@ -279,15 +292,25 @@ Doc ID: QA-CAT · Owner: QA Architect · Version 1.0 · Status: Draft for Review
 | TEST-HIR-017 | Submit racing with job pause/close/takedown at the commit instant: no application is created on a non-`published` job | I | AC-10-02-06, INV-T44 | A1 |
 | TEST-HIR-018 | Same inputs recompute to the same score and `inputHash`; stored explanation derives from exactly those inputs | I | AC-11-02-02, INV-T45 | A1 |
 | TEST-BIL-008 | Property test: entitlements are a pure function of (subscription state, plan version, admin grants); caches are derived and rebuilt equal | U | FEAT-16-04 (AC pending), INV-T32 | A1 |
+| TEST-BIL-009 | Given Phase 2, when the course catalogue and checkout are exercised, then only first-party (platform-sold) course SKUs are purchasable; no seller-of-record, payout, connected-account or instructor-pricing code path is reachable | I | REVW-30, ADR-T15, COM-OPS section 13A | A1 |
 | TEST-SEC-029 | Concurrent refreshes: at most one valid refresh generation exists per family (plus the unused-successor leeway) | I | AC-01-04-02, INV-T33 | A1 |
 | TEST-SEC-030 | Concurrent registrations differing only in case yield one account; unique normalised email among non-erased accounts | I | AC-01-01-08, AC-01-01-02, INV-T34 | A1 |
 | TEST-SEC-031 | With fake time, every expiring credential (code, reset token, invite, referee token, export link) is invalid after server-clock expiry; raw values never appear in logs or events | I | AC-01-06-02, AC-06-01-03, AC-06-10-02, INV-T43 | A1 |
+| TEST-SEC-032 | Given the deployed configuration (REVW-32), when the user-content origin and the app origin are compared, then they differ in registrable domain (public-suffix aware), the CSP names only the content origin, and no app cookie is scoped to a domain that covers it | S | REVW-32, SEC-02 section 6.1, INV-T14 | A1 |
+| TEST-SEC-033 | Given a refresh token and a `__Host-` access cookie carrying a session id, when the refresh is presented with a cookie whose session id differs (or none), then it is rejected, the family is flagged, and no new access cookie is issued | I | REVW-32, BR-T050, SM-SESSION | A1 |
+| TEST-SEC-034 | Given a cookie with the same name set from a sibling subdomain (cookie tossing), when the app reads session cookies, then the `__Host-` cookie wins or the request is rejected, and a tossed `__Secure-` cookie never authenticates | S | REVW-32, THREAT_MODEL (cookie-tossing STRIDE row) | A2 |
+| TEST-SEC-035 | Given the unauthenticated telemetry proxy (`/otlp`), when flooded, sent oversize or malformed payloads, or sent forged identifiers, then it rate-limits, rejects, stores no attacker-controlled field as an identity, and cannot be used as an open relay | S | REVW-32, THREAT_MODEL (telemetry-endpoint row) | A2 |
 | TEST-PRV-007 | Consent ledger is append-only: UPDATE/DELETE denied for the app role; current consent equals the fold of the ledger | I | AC-22-01-05, INV-T35 | A1 |
 | TEST-PRV-008 | After erasure, the post-erasure scanner finds no personal data in DB, search, caches or object storage; only tombstone and retained-record list remain | I | FEAT-22-03 (AC pending), INV-T38 | A2 |
 | TEST-OBS-005 | The audit anchor verifier job detects a tampered or removed audit row (row hash, Merkle root and row count no longer match the signed anchor) | I | FEAT-20-03 (AC pending), INV-T36 | A2 |
 | TEST-OBS-006 | Batch anchor verification: the `audit.anchor` job seals a closed window with a KMS-signed Merkle root and `prev_anchor_root`; the verifier recomputes every root and signature and passes; it fails on (a) a modified row, (b) a deleted row or truncated tail, (c) a row inserted into a sealed window, (d) a missing or altered anchor, compared against the write-once archive copy; a second runner cannot seal the same window | I | DB-02 §4.2, INV-T36, REVW-06 | A2 |
+| TEST-OBS-007 | Given a user who declines analytics consent, when client SLOs are evaluated, then SLO-13 to SLO-16 are computed from synthetic probes only; the RUM pipeline emits no event for that user; and the report states the consented-sample coverage and its bias | I | REVW-31, SLO-13, PUR-14 | A3 |
+| TEST-OBS-008 | Given operational telemetry (errors, latency, version beacons), when payloads are inspected, then they carry only the allowlisted fields of the operational class (no user id, no free text) and are separable from `analytics.product` events | I | REVW-31, OPEN-08, DATA-033 | A1 |
 | TEST-PRV-009 | Erase a fixture subject, then verify the integrity chain: history rows (audit, consent, evidence events, stage transitions) of the subject are byte-identical before and after; the aggregate chains and every `audit_anchor` covering them still verify; the `subject_identity_map` row and wrapped key are gone; the refs no longer resolve to any account; the app role still cannot UPDATE/DELETE the history tables | I | AC-22-03-13, INV-T35, INV-T36, INV-T38, REVW-04 | A2 |
 | TEST-PRV-010 | No direct identifiers in append-only tables: schema lint fails on any column in `audit_event`, `consent_record`, `evidence_event`, `stage_transition`, `outbox_event`, `integrity_signal` that is an account-id FK, email, name or unregistered free-text/JSONB; a canary-identifier test (email, name, account id, display name) writes through every use case and finds none of the values in those tables or their JSONB payloads | X/I | DB-02 §4.1, INV-T38, INV-T14, REVW-04 | A1 |
+| TEST-PRV-011 | Given an application-scoped consent that reached its end, when the retention job runs, then identifiable candidate data held by the organisation is pseudonymised at consent end (or the documented basis in OPEN-08 is recorded) and no read path returns identifiers afterwards | I | REVW-26, BR-T062, DATA-021, OPEN-08 | A2 |
+| TEST-PRV-012 | Given registration, when no self-declared minimum-age attestation is supplied, or the declared age is below the counsel-set value (OPEN-09), then the account is not activated and the attempt is logged without storing the date of birth beyond policy | I | REVW-29, BR-T106, OPEN-09 | A1 |
+| TEST-PRV-013 | Given the consent scope vocabulary, when linted, then every scope string in code, OpenAPI and UI comes from `CONSENT_SCOPE_CATALOGUE.md` | X | FF-12 | A1 |
 | TEST-MSG-004 | Institution principals can read learner data only as aggregates with k >= 5 or as institution-issued-credential records | I | FEAT-18-04 (AC pending), INV-T41 | A1 |
 | TEST-MSG-005 | Outreach quota counter equals the number of first-contact messages in the period (derived, not independently incremented) | I | FEAT-13-02 (AC pending), INV-T42 | A1 |
 
@@ -311,9 +334,11 @@ INV-T37 (idempotent consumers) is covered by TEST-API-009; INV-T21 by TEST-HIR-0
 
 ## 15. Counts and coverage
 
-Counts computed from this document by script: SEC 31, TEN 7, EVD 15, ASM 13, HIR 18, API 14, FED 15, PWA 12, BIL 8, PRV 10, DAT 9, REL 12, PER 10, A11 7, MOB 6, DEP 8, REC 5, OBS 6, MSG 5, SRC 2 = **213 tests**, all unique IDs.
+Counts computed from this document by script: SEC 32, TEN 7, EVD 15, ASM 13, HIR 18, API 14, FED 15, PWA 12, BIL 8, PRV 10, DAT 9, REL 12, PER 10, A11 7, MOB 6, DEP 8, REC 5, OBS 6, MSG 5, SRC 2 = **214 specified tests**, all unique IDs. SEC includes the separate `TEST-SEC-NEG-01` negative control.
 
-Coverage rules enforced by catalog lint (to be built under `WP-QA-TRACE`): every INV-T01…T45 and FF-01…FF-10 appears in >= 1 TEST (checked by hand at this version: yes); every AC links to >= 1 TEST; no TEST without a link; automation `M`/`S` tests have a named owner and cadence.
+Coverage rules planned for catalog lint under `WP-QA-TRACE` (lint is not implemented): manually reported checks say every INV-T01…T45 and FF-01…FF-10 appears in at least one TEST; the AC-link rule is not satisfied yet. The current exact-reference matrix finds 125 of 389 defined ACs directly cited by a catalog test; 264 have no direct AC-ID link. A missing direct link is a traceability gap, not proof that no broader feature/invariant test exists. No TEST without a link and named owners/cadence for M/S automation still need machine-checkable validation.
+
+See [AC_TEST_TRACEABILITY_MATRIX](../28_TRACEABILITY_AND_COVERAGE/AC_TEST_TRACEABILITY_MATRIX.md) for each criterion, its definition source, and any catalog test IDs that explicitly cite it.
 
 **Specification gaps surfaced by this mapping (features with no AC yet in `05_FEATURE_SPECIFICATIONS`, tests linked at FEAT level):** FEAT-01-08, 01-09, 02-07, 06-01 (concurrent verification requests), 11-05, 11-09, 13-01, 13-02, 13-03, 15-02, 15-04, 16-02, 16-03, 16-04, 16-07, 16-10, 17-01, 17-02, 18-04, 19-01, 20-02, 20-03, 20-04, 21-01, 22-02, 22-03. Requirements owners should write ACs; TEST ids do not change (OPEN-29 tracks this).
 

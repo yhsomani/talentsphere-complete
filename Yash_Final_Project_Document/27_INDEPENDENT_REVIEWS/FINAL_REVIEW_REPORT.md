@@ -1,15 +1,43 @@
 # Independent Final Review Report
 
-Doc ID: REV-FINAL · Owner: Independent Review Council · Version 1.0 · Status: Draft, all findings open · Date: 2026-10-25
+Doc ID: REV-FINAL · Owner: Independent Review Council · Version 1.5 · Status: Draft; 34 open, 6 partial, 6 closed · Date: 2026-10-25
 Supersedes nothing. Linked from `00_CONTROL_CENTRE/MASTER_INDEX.md`, `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` and `28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md`. Companion to `SCENARIO_SIMULATIONS.md` (REV-SIM, paper walk-throughs).
 
 This is a review of documentation. Nothing here asserts that any feature is built, tested, compliant or certified. The reviewer did not write the reviewed documents.
 
 ## 0. Verdict in brief
 
-**Overall status: Revision Required. No area is Ready for Implementation.** The blueprint is unusually honest about what it does not know (tagging, hypotheses, "not a benchmark" language, hedged compliance matrix), and its core patterns (outbox, fenced leases, deny-by-default policy, evidence ladder, explainable matching) are coherent. The defects are of a different kind: the parallel teams produced **incompatible vocabularies for the same things** (state names, consent scopes, session cookies, API names), a **permission matrix that contradicts the rules it is meant to implement**, **two invariants that cannot both hold** (append-only audit versus erasure), and an **architecture default (federation) that is not supported by the documents' own evidence**. 45 findings: 4 Critical, 13 High, 16 Medium, 12 Low.
+**Overall status: Revision Required. No area is Ready for Implementation.** At initial review time, the defects included incompatible state/consent/session vocabularies, a permission-matrix contradiction, and an append-only/erasure conflict. The current documentation disposition closes REVW-01..05 and 46; REVW-06, 07, 10, 11, 17 and 36 are partial, and 34 findings remain open. The original 45 findings comprised 4 Critical, 13 High, 16 Medium, and 12 Low.
+
+## Post-review disposition (2026-10-25)
+
+This table records a document-level recheck after the original review. It does not claim implementation, generator, test, or production verification.
+
+| ID | Current status | Evidence / limitation |
+|---|---|---|
+| REVW-01 | Closed in documentation | USR-01 now defers to DT-01/BR-T100/BR-T105/INV-T41, marks its matrix non-normative, and includes a negative-control test requirement. Policy generation and execution of the deny test remain unverified. |
+| REVW-02 | Closed in documentation | CSC is the canonical 14-scope catalogue; DB, OpenAPI and policy references identify it as authority. Full value-by-value generated-artifact parity has not been independently checked. |
+| REVW-03 | Closed in documentation | SM-00 declares vocabulary authority and OpenAPI/DB mappings were updated. Specialist spot checks confirmed ACCOUNT, JOB, APPLICATION and SUBSCRIPTION enum alignment; full 14-machine/constraint parity remains unverified. |
+| REVW-04 | Closed in documentation | Opaque subject references and erasable identity mapping avoid rewriting append-only rows; batch anchoring replaces the inline global hash-chain lock. Erasure, key destruction and chain verification are design assertions, not executed tests; legal retention is still open. |
+| REVW-05 | Closed in documentation | The API/session contract now specifies `__Host-ts_at`, `__Secure-ts_rt` at `/api/v1/auth/refresh`, and `X-CSRF-Token`; `/bff` was removed from the frontend contract. Browser behavior was not verified. |
+| REVW-06 | Partial | Audit-lock serialisation was replaced with batch anchoring and a write-budget skeleton. Job-per-subscriber, idempotency, and rate-limit write amplification remain open. |
+| REVW-07 | Partial | ADR-T23 proposes bundled delivery until team and spike criteria are met. ADR-T03, OPEN-03, and federation docs now reflect that proposal; ARB ratification and spike evidence are outstanding. |
+| REVW-08 | Open | Threat/security docs no longer claim client asset secrecy as a control. MOD-ADM still combines back-office and institution audiences; the proposed MOD-INS split is not registered or approved, and no authenticated asset-delivery control has been specified or tested. |
+| REVW-10 | Partial | Roadmap now labels Phase 1 pre-GA pilot and places the full SSOT loop through interview, outcome and new evidence behind a Phase-2 GA gate. Learning, non-graded practice and candidate matching have Phase-1 packages. Feature-to-phase/WP coverage and acceptance criteria remain partially mapped; product-owner review is still needed. |
+| REVW-11 | Partial | Work-package dependencies and graph include notification/outbox, consent, entitlement, safety and analytics foundations. A reference scan corrected invalid/mis-scoped AC citations and found no undefined roadmap AC IDs against the feature specs/guide; it does not prove semantic coverage or that each TEST fits the package. Missing ACs are explicitly pending. Numeric free-tier limits remain OPEN-05/19. |
+| REVW-17 | Partial | Added a generated direct-reference matrix: 125/389 defined ACs are named in catalog tests (96/359 feature ACs and 29/30 shared platform ACs); 264 have no direct AC-ID link. The BR-to-AC-to-TEST matrix, semantic test sufficiency, P0 feature/AC gap review, and missing long-form specs remain unresolved. This is a mechanical link count, not executed test coverage. |
+| REVW-36 | Partial | The capability map and master blueprint now report 108 `CAP-*` rows; a current extraction found 108 unique IDs. The test catalog and master summary now report 214 unique specified test IDs, including `TEST-SEC-NEG-01`, and TRC-01's current count is corrected. No automated count generator was added, so repeatability remains a limitation. |
+| REVW-46 | Closed in documentation | THREAT_MODEL C2 and AC-24 now follow OFF-01 §7: no app-layer encryption at launch; minimizing data, TTL, purge, shared-device mode and OS disk encryption remain target controls. OPEN-FE-14 security review remains open; no device test was run. |
+
+Current totals: **46 findings; 6 closed, 6 partial, 34 open** (0 Critical open, 7 High open, 5 High partial, 16 Medium open, 11 Low open, 1 Low partial). Closing a finding here means only that the documentation contradiction was reconciled; all verification limits above remain in force. ADR-T23 is a proposal; no Architecture Review Board decision or approval is claimed.
+
+Supplemental source-of-truth reconciliation, discovered after the original review and **not included in the 46-finding count**: root `SSOT.md` §7 defines 173 canonical `F-*` portfolio identities, while this blueprint's capability map contains 253 `FEAT-*` rows. A candidate mapping is now recorded in `28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md`; it is not owner-approved or implementation evidence. OPEN-41 remains open, and neither row count can be used as proof of canonical portfolio coverage until it closes.
+
+Supplemental phase audit of the current target documents, also **not included in the 46-finding count**: the roadmap now correctly labels Phase 1 a bounded pre-GA pilot and gates the complete SSOT career loop on Phase 2 GA; Phase 1 learning and candidate matching packages are present. The remaining capability-to-work-package mismatches are assessment attempt/scoring rows (FEAT-07-02/04/05/06), pipeline/rejection rows (FEAT-10-05/06), moderation intake/case rows (FEAT-19-01/02), and public API (FEAT-23-01): their local phase tags do not match the roadmap package phases. AI policy enforcement also spans Phase 0 foundation work and later provider-backed behavior, while the capability rows use a single proposed phase. OPEN-42 tracks owner reconciliation; the audit does not choose product phases. Dependencies for notifications/workers, referee route hosting, consent, and job-slot entitlement still need complete AC and contract traceability. These are owner/product and QA decisions, not evidence of implementation.
 
 What may start now: the Phase 0 spikes (WP-FED-SPIKE, WP-IOS-DEVICE-LAB, WP-ASSESS-RUNNER decision, WP-LOADBASE method) because they retire unknowns and do not depend on the contradicted contracts. Nothing that writes schema, policy, API contracts or consent code should start before the Critical findings close.
+
+That restriction described the initial review snapshot. The four Critical findings have since been reconciled in documentation, but implementation work still depends on owner review and the remaining High findings; no schema, policy, API, or consent implementation is asserted ready here.
 
 ## 1. Scope and method
 
@@ -37,7 +65,7 @@ Consequence: findings are strongest where two documents were both read (cross-do
 | `API_CATALOG.md` parsed | 230 rows, 109 marked `Y` (47%); 131 unsafe rows, 26 marked "n/a" for idempotency |
 | `REMOTE_MANIFEST` and `REMOTE_REGISTRY` JSON Schemas | Both meta-valid (draft 2020-12); `REMOTE_REGISTRY.example.json` validates with 0 errors. Ed25519 signatures **not** re-verified |
 | `asyncapi.yaml` parsed | 74 channels, 74 messages, 128 operations; no personal-data field names in payload schemas |
-| Test catalog coverage | Every INV-T01 to T45 and FF-01 to FF-10 is cited by at least one TEST. Only 8 of 108 BRs and 95 of 358 long-form ACs are cited by any TEST row (REVW-17) |
+| Test catalog coverage (original review snapshot; updated AC recount recorded above) | Original scan reported every INV-T01 to T45 and FF-01 to FF-10 cited by at least one TEST, 8 of 108 BRs and 95 of 358 feature ACs cited. The current exact-reference recount is 125/389 total ACs and 96/359 feature ACs; see the matrix and REVW-17 partial status. |
 | Roadmap and capability map cross-check | Phase conflicts quantified (REVW-10) |
 | Overclaim scan (compliant, certified, guarantee, production-ready, 100%, zero) | No assertion of compliance or certification found; see Q14 |
 
@@ -46,6 +74,7 @@ Not run: Mermaid rendering; Redocly and AsyncAPI CLI lint (PROJECT_MASTER §11 s
 ### 1.3 Method limits stated plainly
 
 - One reviewer applied seven lenses (product, architecture, security, data integrity, failure modes, cost and complexity, requirements consistency). This is not seven independent reviews.
+- After the initial review, two actual read-only specialist passes checked contracts/state/consent and security/offline/operations. They spot-checked rather than re-audited all 46 findings. The post-review table identifies which conclusions they support and what remains unverified.
 - The 22 final review questions: the brief's text was not available to the reviewer. Only the first ("Are any important domains missing?") and last ("Is any architectural complexity unnecessary?") were quoted. Questions 2 to 21 in §4 are the council's reconstruction from the review lenses it was told to apply. Whoever owns the brief should map them.
 - Severity scale: **Critical** = as written, an implementation would breach a stated safety, privacy or integrity invariant, or two invariants cannot both hold. **High** = cross-document contradiction or gap in a core contract that causes rework or a defect if built as written. **Medium** = inconsistency, unsupported claim or missing definition with a bounded blast radius. **Low** = clarity, hygiene or labelling.
 
@@ -96,7 +125,7 @@ Every finding cites the sections or IDs that let a reader verify it in under fiv
 | REVW-14 | High | BR-T114 and BE-01 §8 (idempotency retained 24 h; 7 d payment); DATA-036; OFF-01 §8.4 and OPEN-FE-12 (retention must be >= 14 d); FF-07; BE-01 §8 ("natural routes still accept the header"); API_CATALOG idempotency column; OpenAPI; HC-01 L112 (`idempotencyKey?: 'auto'`); ACTION_REGISTRY L11 | (a) A queued write may be flushed up to 14 days later, but the server forgets keys after 24 hours: any queued operation without a natural key can duplicate. (b) FF-07 and BE-01 say every unsafe route accepts `Idempotency-Key`; the catalog marks 26 unsafe operations "n/a" and 25 of the 65 unsafe OpenAPI operations lack the parameter, including `PATCH /me`, `PUT /me/application-drafts/{jobId}`, `PATCH /jobs/{jobId}`, `PUT /evidence/{id}/skills`: the contract fails the fitness function it defines. (c) HC-01 lets the host inject a fresh key per call when the remote passes none, which defeats retry safety; ACTION_REGISTRY and OFF-01 assume one key per user intent. | Set retention to the outbox TTL for queued-op routes or require natural-key routes; reword FF-07 to "accepts a key or declares a natural key" and make the lint accordingly; require a mutation-scoped key in `host.api` (no per-call `auto`). | Backend Architect, Frontend Platform Lead |
 | REVW-15 | High | ADR-T10; OFF-01 §2 rows 20 to 22 and §7; versus SPEC-G3 L76, L209, L256, AC-08-03-03; SM-ATTEMPT "Recovery"; SM-ENROLMENT "Recovery"; MICRO FEAT-08-03.2; PROGRESSIVE_UX §6.2 and OPEN-UX-14 | Offline scope is contradicted. SPEC-G3 caches assessment answers locally and replays them after reconnect, and queues lesson progress (downloadable video "OPEN"); SM-ATTEMPT and SM-ENROLMENT repeat this. OFF-01 marks assessments and lesson progress online-only, forbids caching assessment items and answers, and ADR-T10 lists only four queued classes. Queue expiry is 14 days (OFF-01) versus 30 days (PROGRESSIVE_UX); retry backoff 1/2/4/8/30 s (UX) versus 2 s x 2^n capped at 5 min (OFF-01). | Decide per class; amend ADR-T10 or the specs; one expiry and backoff table in OFF-01 cited by the UX docs. | Frontend Platform Lead, Assessment owner |
 | REVW-16 | High | COST_MODEL (header: "No price, rate, volume or cost figure appears"); OPS-CAP formulas; GOAL-07; OPEN-05; ADR-T04/T05/T09/T11 rationales ("ops cost"); DEPLOYMENT_ARCHITECTURE | The cost evidence needed to judge the architecture does not exist. The design carries cost-bearing components (HA Postgres with PITR and replicas, KMS signing and key custody, three deployables, virus-scan fleet, sandbox runner, CDN and registry, device lab, observability stack) with no coarse envelope. ADR rationales cite ops cost but none is quantified; GOAL-07 is unmeasurable. | Before Ph0 exit, add a coarse envelope: three volume scenarios times component list, with dated vendor quotes; use it to settle REVW-07 and the Ph1 scope. | Finance Lead, SRE Lead |
-| REVW-17 | High | TEST_CATALOG §15 rule "every AC links to >= 1 TEST"; TRC-01 §2, §3; PROJECT_MASTER §4/§11; SPEC README §2 index; ROADMAP WP rows | Traceability is thinner than reported. 263 of the 358 long-form ACs (73%) are cited by no TEST row; only 8 of 108 BRs appear in any TEST row (the rest only via AC); 158 of 253 features have no AC carrying their own FEAT number (31 in Phase 1, 27 of them P0: FEAT-02-01/02-07 tenancy, 04-01/04-02 taxonomy, 15-01/03/06/07 notifications, 17-01/02/03 AI gateway, 19-02, 20-01/03, 24-01/02/04/05/08/09/11 platform plumbing) versus "26 features without ACs" in TEST_CATALOG §15, TRC-01 and PROJECT_MASTER. Some are covered indirectly by AC-00-* platform criteria, but that is not demonstrated. No long-form spec exists for DOM-02, 04, 12, 14, 17, 19, 20, 21, 23, 24. | Generate AC-to-TEST and BR-to-AC-to-TEST matrices; treat a P0 feature with no AC and no test as a blocker to Ready; correct the headline numbers; write specs for DOM-02, 17, 19, 20, 24 first (tenancy, AI gateway, moderation, admin, platform plumbing). | QA Architect, Requirements lead |
+| REVW-17 | High | TEST_CATALOG section 15; TRC-01 sections 2 and 3; SPEC index; `28_TRACEABILITY_AND_COVERAGE/AC_TEST_TRACEABILITY_MATRIX.md`; roadmap WP rows | Initial review reported 263/358 feature ACs without a TEST citation. A current exact-ID recount finds 389 defined ACs (359 feature + 30 shared platform): 125 directly cited by catalog tests (96 feature, 29 shared) and 264 without a direct AC-ID link. Only 8/108 BRs are directly cited by a TEST in the review scan; 158/253 FEATs have no AC carrying their own FEAT number, while the catalog separately identifies 26 features with no AC row. Those measures use different mapping rules and remain unreconciled. The matrix is mechanical: it does not prove test execution, semantic sufficiency, or absence of broader feature/invariant tests. No long-form specs exist for DOM-02, 04, 12, 14, 17, 19, 20, 21, 23, 24. | AC-to-TEST direct-reference matrix created. Still produce BR-to-AC-to-TEST traceability; reconcile feature-AC gap definitions; require each P0 feature to have explicit behavior and adequate tests before readiness; add the highest-priority missing long-form domain specs. | QA Architect, Requirements lead |
 
 ### 3.3 Medium
 
@@ -136,7 +165,26 @@ Every finding cites the sections or IDs that let a reader verify it in under fiv
 | REVW-44 | Low | EventEnvelope `actor.kind` (user, service, system, support, referee); INV-T31; SM-00 U6 (`actor.kind = human`) | The envelope has no `human` kind. | Align the vocabulary. | Backend Architecture Team |
 | REVW-45 | Low | DB-02 §4 (`SECURITY DEFINER evidence_apply_transition`, same for attempt and application); SM-00 U1 | Transition rules exist twice (PL/pgSQL and `packages/domain`) with no test tying them together. | Generate the SQL from the SM tables or add parity tests. | Data Architect |
 
+### 3.5 Additional specialist finding
+
+| ID | Sev | Docs and cites | Problem | Recommended fix | Owner |
+|---|---|---|---|---|---|
+| REVW-46 | Medium · Closed in documentation | OFF-01 §7 and THREAT_MODEL.md §4 / AC-24 | OFF-01 says launch IndexedDB records have no application-layer encryption because a same-origin key does not protect against same-origin XSS. The threat model and its acceptance criterion claimed IndexedDB payload encryption with a non-extractable WebCrypto key. | Aligned C2 and AC-24 to OFF-01. Revisit only if a threat model establishes a benefit against a threat outside same-origin compromise; OPEN-FE-14 remains the review dependency. | Security Architect + PWA Architect |
+
+### 3.6 Read-only validation recheck (2026-10-25)
+
+| Check | Result | Limit |
+|---|---|---|
+| Relative Markdown links under the documentation root | 159 checked; 0 missing | Anchors and rendered Markdown behavior were not checked. |
+| JSON syntax | 12 files parsed; 0 invalid | This is syntax validation, not contract correctness. |
+| YAML syntax | 2 files parsed; 0 invalid | OpenAPI/AsyncAPI semantic lint was not rerun. |
+| Federation JSON Schema 2020-12 | Both schemas meta-valid; example registry has 0 validation errors with the local manifest reference registered | Ed25519 signatures were not reverified. |
+
+The checks above are read-only. No build, source-code test, browser, device, production, legal, or signature-validation command was run in this recheck.
+
 ## 4. Answers to the 22 final review questions
+
+The answers below describe the original review snapshot. Apply the post-review disposition above when assessing current status; other findings remain open.
 
 (Questions 1 and 22 are quoted from the brief; 2 to 21 are reconstructed, §1.3.)
 
@@ -158,7 +206,7 @@ Every finding cites the sections or IDs that let a reader verify it in under fiv
 | 14 | Do any statements imply compliance, certification or implementation? | **No such assertion found.** Compliance matrix is hedged row by row; WCAG is "design target, not measured"; every folder states "[TARGET]/not built". Residual: binary goals read like claims (REVW-39); the iOS summary line lacks its marker (REVW-37). PROJECT_MASTER §11 lists validations that ran; two were independently reproduced here (schema validation, scoring arithmetic); lints were not re-run. |
 | 15 | Are SLOs and performance budgets consistent and feasible? | **Partly.** Honestly labelled hypotheses with formulas. Internal contradiction in client budgets (REVW-23); SLO measurement depends on consent-gated RUM (REVW-31); per-remote availability allowance lower than the API's (REVW-07). |
 | 16 | Are failure modes, reliability and operations adequately covered? | **Broad on paper (48 FMs, 30 fault-isolation scenarios, 37 runbooks, 50 risks) but untested and partly unowned.** Hosting and on-call are undecided (OPEN-14, OPEN-39) and RISK-34 rates small-team burden likely. I did not read all 48 FM rows; the audit-lock and unlogged-throttle behaviours (REVW-06, 41) were not found in the sampled rows. |
-| 17 | Is the test strategy sufficient and traceable? | **Invariant coverage yes, requirement coverage no.** Every INV and FF is cited by a test; 73% of ACs, 92% of BRs and about 62% of features lack direct test or AC linkage (REVW-17). |
+| 17 | Is the test strategy sufficient and traceable? | **Direct-reference coverage is incomplete.** The current matrix shows 264/389 ACs (68%) have no direct AC-ID test link; among the 359 feature ACs, 263 (73%) have no direct link. Only 8/108 BRs and about 62% of features lack direct test or AC linkage in the original scan (REVW-17); semantic sufficiency and indirect coverage remain unverified. |
 | 18 | Are cost and commercial assumptions evidenced? | **No.** The cost model contains no figures by design; GOAL-07 is unmeasurable; payout and tax mechanics are open (REVW-16, 30). |
 | 19 | Is the roadmap correctly sequenced against dependencies? | **No.** Phase conflicts with the capability map (REVW-10) and missing dependency edges (REVW-11). Phase 1 as scoped (94 features, 18 WPs after 13 Ph0 WPs) is large relative to the evidence for team capacity (REVW-07, 24). |
 | 20 | Are risks and open decisions complete, owned and numbered? | **Partly.** 50 risks with owners; the register lacks risks for the front/back contract split, write-path serialisation and universal minimum age. Open items are fragmented (REVW-33). |
@@ -193,7 +241,7 @@ Status vocabulary: Discovery, Draft, Under Review, Revision Required, Ready for 
 | 19_BUSINESS_AND_COMMERCIAL_OPERATIONS | Draft | REVW-30; OPEN-06, 18, 19, 33 |
 | 20_ANALYTICS_AND_MEASUREMENT | Under Review | REVW-31, 39 |
 | 21_COST_AND_FINOPS | Draft | REVW-16 (no figures) |
-| 22_IMPLEMENTATION_ROADMAP | Revision Required | REVW-10, 11, 24 |
+| 22_IMPLEMENTATION_ROADMAP | Revision Required | Capability-map phase alignment and feature/AC coverage (REVW-10); invalid AC references and numeric entitlement policy (REVW-11); scope and sequencing (REVW-24) |
 | 23_MIGRATION_AND_EVOLUTION | Blocked | OPEN-17 (does the reference system hold real data); vocabulary reconciliation (REVW-03) |
 | 24_RISKS_AND_DECISIONS | Revision Required | REVW-33; ADR-T03 amendment (REVW-07); ADR-T14 amendment (REVW-12); missing risks (Q20) |
 | 25_DIAGRAM_LIBRARY | Under Review | Not reviewed; Mermaid not validated |

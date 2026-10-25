@@ -75,3 +75,5 @@ Format: steps are numbered inline; **Ex** lists the exception paths (every one m
 | Processes touching data subjects have audit steps | BP-27…29, 33 |
 
 **Total:** 38 processes (BP-01…BP-38).
+
+**Root SSOT identity traceability:** a candidate mapping of all 66 `WF-*` workflows and 25 `WIT-*` integrity traces to these BP records is in [SSOT_WORKFLOW_CROSSWALK](SSOT_WORKFLOW_CROSSWALK.md) and its [CSV](SSOT_WORKFLOW_CROSSWALK.csv). It identifies 33 partial workflow matches, 33 unmatched workflows, 18 partial integrity-trace matches, and 7 unmatched integrity traces. OPEN-45 remains open for owner review and the separate state-machine mapping.

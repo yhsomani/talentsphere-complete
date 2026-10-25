@@ -8,10 +8,10 @@ Logical architecture is a **[TARGET]**; the hosting realisation is **[OPEN-14]**
 
 ```mermaid
 flowchart TB
-  user["Browser / installed PWA"] --> cdn["CDN / edge, same origin: shell, /mf/name/version/ immutable assets, /mf/registry.json (no-cache + ETag)"]
+  user["Browser / installed PWA"] --> cdn["CDN / edge, same origin: shell and bundled chunks; /mf/** only if federated"]
   user --> lb["Load balancer / WAF / TLS termination"]
   cdn -. cache miss .-> assets["Static origin (object storage bucket)"]
-  cdn -. registry .-> reg["Signed registry document per channel (stable, canary) in object store"]
+  cdn -. if federation is activated .-> reg["Optional signed registry document per channel (stable, canary)"]
   lb --> api["API replicas x N (stateless modular monolith)"]
   api --> pool["Connection pooler"]
   pool --> pg["Postgres primary"]
@@ -43,9 +43,9 @@ flowchart TB
 
 | Component | Role | Scaling unit | State | HA approach | Failure notes (OPS-FMEA) |
 |---|---|---|---|---|---|
-| CDN / edge | Serve shell + remote assets; cache; WAF optional | Provider | none (cache) | Provider redundancy; origin fallback | FM-01, FM-10 |
+| CDN / edge | Serve shell + bundled chunks; federated remote assets only if activated; cache; WAF optional | Provider | none (cache) | Provider redundancy; origin fallback | FM-01, FM-10 |
 | Static origin | Authoritative hashed assets; additive-only | Bucket | files | Versioned bucket; second copy optional | FM-01 |
-| Signed registry document | Maps remote → current entry, `rollbackTo`, channel, kill switches (MFA-01 section 5) | Static object served by the CDN; written by the release pipeline | one JSON per channel | No runtime service to fail; origin fallback + embedded boot snapshot in the shell | FM-05 |
+| Signed registry document (conditional) | In federated mode, maps remote → current entry, `rollbackTo`, channel, kill switches (MFA-01 section 5) | Static object served by the CDN; written by the release pipeline | one JSON per channel | Not present in bundled baseline; if activated, origin fallback + embedded boot snapshot | FM-05 |
 | Load balancer / WAF | TLS, routing, rate limiting, request IDs | Provider | none | Provider | FM-45 |
 | API replicas | Policy, domain modules, BFF auth routes | Replica count N | none | ≥ 2, spread across zones | FM-12…FM-23 |
 | Worker | Outbox dispatcher, job classes with per-class queues | Worker count W | none (fenced leases in DB) | ≥ 2 | FM-35…FM-38 |
@@ -55,13 +55,13 @@ flowchart TB
 | Malware scanner | Scans uploads before visibility (BR-T003) | Scanner count | none | ≥ 1, scalable | FM-32 |
 | Sandbox runner | Isolated code execution, no network (ADR-T13) | Slot pool | none | Optional until built | FM-43 |
 | Observability stack | Signals, alerts | Collector + backends | telemetry | Separate from app failure domain where feasible | FM-23 |
-| Secret manager / KMS | Secrets, signing keys | Provider | secrets | Provider HA | FM-48 |
+| Secret manager / KMS | Secrets; federated registry signing keys only if activated | Provider | secrets | Provider HA | FM-48 |
 
 Queue is Postgres (outbox + `background_jobs` style tables, ADR-T05/T09); no separate broker at launch. Revisit trigger: outbox throughput beyond Postgres budget (ADR-T09).
 
-## 3. Frontend delivery: CDN, immutable paths and signed registry
+## 3. Frontend delivery: bundled baseline and optional federated mode
 
-This section implements the federation design in `09_MODULE_FEDERATION` (MFA-01 FD-03/FD-04/FD-11, VCD-01 VC-01…VC-12) from the operations side; where wording differs, MFA-01/VCD-01 govern.
+The bundled baseline serves local lazy modules with the shell and needs no runtime remote registry. The CDN, immutable remote paths, manifest signing, registry fallback, and per-remote release controls below apply only if ADR-T23 is ratified and federation activation gates pass. When active, MFA-01/VCD-01 govern these federated-mode details.
 
 | Item | Design | Rationale |
 |---|---|---|
@@ -76,7 +76,7 @@ This section implements the federation design in `09_MODULE_FEDERATION` (MFA-01 
 | Canary | Shell flag selects `?ch=canary` for a cohort; MFA-01 defaults (5% cohort, 30 min soak) are [TARGET] to be confirmed against baseline traffic (OPEN-15) | Progressive delivery (OPS-REL §9.2) |
 | API responses | `Cache-Control: private, no-store` by default; any public caching is explicit per route (TEST-TEN-006) | Prevent cross-user leakage |
 | Compatibility gate at promotion | Registry-publish step requires the FF-08 compat result (shell × remote × API range) and a headless contract-smoke against the staging registry | Prevent skew |
-| Bundled mode | `MF_MODE=bundled` produces a single deployable; the registry becomes trivial | OPEN-03 fallback |
+| Bundled mode | `MF_MODE=bundled` produces a single deployable with local lazy modules; no runtime remote registry or signing pipeline is required | Proposed initial baseline under ADR-T23; not yet ARB-ratified |
 
 Cache-control policy summary:
 
@@ -93,7 +93,7 @@ Cache-control policy summary:
 | Zone | Contents | Ingress | Egress |
 |---|---|---|---|
 | Public edge | CDN, WAF, LB | Internet | To API, origin |
-| App | API, worker, scanner, registry | From edge/LB only | To DB, object storage, listed provider endpoints (egress allowlist) |
+| App | API, worker, scanner; registry writer only if federation is activated | From edge/LB only | To DB, object storage, listed provider endpoints (egress allowlist) |
 | Data | Postgres, pooler, backups | From App only | WAL archive destination |
 | Isolated execution | Sandbox runner | From API job dispatch only | **None** (ADR-T13) |
 | Ops | Observability, CI runners, bastion/break-glass | Authenticated, audited | Restricted |
@@ -142,7 +142,7 @@ Provisional position **[TARGET, not decided]:** use D or F-class managed contain
 
 | Control | Detail | Verified by |
 |---|---|---|
-| Backup scope | Postgres (base + WAL), object storage (versioning + replica/copy), IaC state, secrets (re-creatable), manifest registry (rebuildable from release records), search index (rebuildable) | REC-001…003 |
+| Backup scope | Postgres (base + WAL), object storage (versioning + replica/copy), IaC state, secrets (re-creatable), manifest registry if federation is activated (rebuildable from release records), search index (rebuildable) | REC-001…003 |
 | Backup monitoring | "Last successful backup/WAL age" is an SLI with alert; silent failure is FM-34 | TEST-OBS-001 |
 | Encryption and access | Encrypted at rest with separate key; restore rights restricted; access audited | audit review |
 | Retention | Per OPEN-08; ties to erasure: erasure applies to live data immediately and to backups by expiry; restores re-apply erasure log (tombstone list) before serving | TEST-PRV-003, TEST-REC-001 |

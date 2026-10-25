@@ -6,7 +6,7 @@ Doc ID: STR-01 · Owner: CPO · Version 1.0 · Status: Under Review · Relates: 
 Hiring and career progression run on **claims** (résumés, profiles, certificates) that are expensive to check. Candidates cannot cheaply prove skill or work history; recruiters cannot cheaply trust it; learners get credentials that do not translate to outcomes; institutions cannot show what graduates can do. The cost sits in screening time, bad hires, and unfair filtering.
 
 ## 2. Vision [TARGET]
-One ecosystem where a person's skills and work history are **backed by evidence of graded strength**, and every step — learn, prove, showcase, match, apply, hire, grow — consumes and produces that evidence.
+One ecosystem where a person's skills and work history are **backed by evidence of graded strength**, and every step — learn, prove, showcase, match, apply, hire, grow — consumes and produces that evidence. The product's durable asset is the connected **Talent Graph + Evidence Graph**: capabilities, goals, experience, proof, learning, opportunities, and outcomes remain attributable and user-controlled. This preserves the root SSOT's product framing while leaving detailed model boundaries to the domain and data specifications.
 
 Loop: **Learn → Prove → Showcase → Match → Apply → Hire → Grow → (Learn)**.
 
@@ -51,6 +51,8 @@ Out of scope: generic social-media clone, ad network, payroll/HRIS, crypto/block
 - Never expose a person's data across tenants or beyond consent.
 - Never rank by payment.
 - Never require native install to use core functions.
+
+**Design principles retained from the root SSOT as target guidance:** progressive disclosure; one shared semantic model; observable behavior; accessibility by default; simplicity before scale; evidence over popularity; contextual rather than universal reputation; and no deterministic career promises. These are design principles, not measured outcomes or implementation claims.
 
 ## 8. Success measures (definitions in `20_ANALYTICS_AND_MEASUREMENT`)
 Activation (first evidence item within 7 days), evidence quality, qualified applications, interview rate, hire rate, retention (W4/W12), employer time-to-shortlist, support tickets per 1k MAU, AI cost per MAU, availability, accessibility defects.

@@ -217,7 +217,7 @@ Evidence rule that applies in both phases (REVW-12): a course's `authority_verif
 | Question 7: data protection | Controller and processor roles between platform, instructor and provider; what learner data an instructor sees (aggregate only unless consented) |
 | Options to compare | A: stay first-party only (status quo, no ADR needed). B: provider-hosted connected accounts. C: merchant-of-record provider. D: manual payouts. Each option carries cost row E18 and an operations-load estimate from Finance Lead |
 | Evidence required before acceptance | Counsel opinion (OPEN-08, OPEN-18); dated provider quotes in FIN-COST section 11; a fraud and abuse threat model entry (14_*/THREAT_MODEL); Ph2 first-party operating data on refunds, disputes and reconciliation breaks (MET-032) |
-| Consequences to size | New SM-ENROLMENT and SM-SUBSCRIPTION transitions or a payout state machine; new BRs; new webhook handlers; reconciliation rows (section 7); tests TEST-BIL-009 onward; support runbooks (RB-34 successors) |
+| Consequences to size | New SM-ENROLMENT and SM-SUBSCRIPTION transitions or a payout state machine; new BRs; new webhook handlers; reconciliation rows (section 7); additional billing/payout tests beyond the current TEST-BIL-001…008 catalog (future IDs unassigned); support runbooks (RB-34 successors) |
 | Gate | Ph3 marketplace work package starts only after the ADR is accepted by the Architecture Review Board |
 
 Until the ADR is accepted, any feature, screen, API or test that assumes instructor payouts, seller-of-record logic for third parties or instructor-set pricing is out of scope and must not appear in Phase 1 or Phase 2 launch registries.
@@ -233,3 +233,20 @@ Until the ADR is accepted, any feature, screen, API or test that assumes instruc
 | Sub-processors and DPAs | OPEN-34 |
 | Email separation/providers | OPEN-26 |
 | Contractual SLA | OPEN-31 |
+
+## 15. Reference implementation snapshot (2026-10-24) [REF]
+
+This dated snapshot comes from `docs/PRICING.md` and describes a tested/code-referenced state of the existing application, not target pricing or a market recommendation. The source itself says prices await founder sign-off and lack market research or cost support. Target values in §§2–14 remain `[OPEN]` until approved; do not import this table as target policy.
+
+| As-coded plan | Audience | Monthly / annual USD | AI quota per day | Active jobs |
+|---|---|---:|---:|---:|
+| Free | Candidates | $0 / $0 | 5 requests / 5,000 tokens | n/a |
+| Candidate Pro | Professionals | $19.99 / $199.90 | 50 requests / 100,000 tokens | n/a |
+| Recruiter Starter | Small hiring teams | $99 / $990 | 25 requests / 50,000 tokens | 5 |
+| Recruiter Enterprise | High-volume hiring | $299 / $2,990 | 200 requests / 500,000 tokens | 1,000 |
+
+The source reports these enforcement and limitations: AI quota follows the acting user's stored subscription; Starter job caps are enforced per organization on create/status-change; failed/unpaid/canceled subscriptions map to free access; free recruiters can post without a cap; advertised advanced analytics, resume variations, showcase visibility, workspace seats and Deep Talent Graph were not gated or implemented. AI usage metering is in process memory and resets on restart; publish serialization is process-local; downgrade does not unpublish existing jobs. Live payment/checkout/webhook delivery was not exercised, and the webhook route was not registered pending a public HTTPS API URL. Source-named integration tests are recorded there but were not re-run for this blueprint.
+
+The six Stripe `price_*` and three `prod_*` identifiers listed in the source are test-mode configuration evidence only; they are intentionally not reproduced here because they are account-specific and are not part of the target product contract. The source says no live products were created. Plan changes in that implementation use new immutable Stripe prices, update environment mappings, archive old prices, and add domain/API-level enforcement tests.
+
+OPEN-19 covers pricing/quotas/grace, while organization-versus-acting-user billing ownership remains an explicit unresolved design question. The snapshot does not resolve either decision or override the proposed first-party-only Phase 2 scope.

@@ -311,7 +311,7 @@ Tombstone for `account`: `email := 'erased-<id>@erased.invalid'`, `display_name 
 | Observability | Slow-query log, lock waits, queue depth (outbox/job age), partition horizon, replication lag, unused indexes, RLS-policy-count drift check |
 
 ## 15. Reference-schema contrast [REF]
-The reference migrations (`supabase/migrations`, 55 files, ~113 `CREATE TABLE` statements) use `gen_random_uuid()` keys, `VARCHAR` enums with CHECKs, Supabase `auth.users` FKs (repointed to `public.users` in migration 54), RLS written per migration, a `background_jobs` table with `lock_expires_at` but no fencing token, and plaintext referee tokens/emails. The target keeps the good parts (CHECK-based enums, RLS everywhere, SKIP LOCKED claim) and replaces the rest as described above; data continuity is in MIG-DATA-01.
+The reference migrations (`supabase/migrations`, 55 files, ~113 `CREATE TABLE` statements) use `gen_random_uuid()` keys, `VARCHAR` enums with CHECKs, Supabase `auth.users` FKs (repointed to `public.users` in migration 54), RLS written per migration, and a `background_jobs` table with `lock_expires_at` but no fencing token. Migration 00041 initially stored a referee bearer token and referee email; migration 00043 backfilled the token to SHA-256 `token_hash` and dropped the raw token column. The referee email remains a separate personal-data field; the source docs also say queued delivery credentials are stripped on terminal job transitions. Treat the migration history and current schema separately. The target keeps the good parts (CHECK-based enums, RLS on product tables, SKIP LOCKED claim) and replaces the rest as described above; data continuity is in MIG-DATA-01.
 
 ## 16. Open items
 | ID | Item |

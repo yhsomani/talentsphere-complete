@@ -2,6 +2,8 @@
 
 Version 1.0 · Under Review. Full matrix of mission families A–X: [DOMAIN_ARCHITECTURE §4](../03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md). Features per domain: [hierarchy](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md).
 
+Portfolio identity is not yet crosswalked: root `SSOT.md` §7 owns 173 canonical `F-*` IDs, while the hierarchy contains 253 decomposed `FEAT-*` rows. Domain-family coverage does not prove one-to-one or one-to-many feature coverage; OPEN-41 blocks a complete portfolio-coverage claim.
+
 | Family | Covered by | Depth |
 |---|---|---|
 | Identity, orgs, profile, skills, evidence, verification, assessment, learning, jobs, applications, matching | DOM-01…11 | Full specs, rules, state machines, screens, APIs |

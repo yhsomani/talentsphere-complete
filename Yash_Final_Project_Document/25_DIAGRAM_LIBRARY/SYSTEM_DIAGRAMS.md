@@ -1,6 +1,6 @@
 # System Diagram Library
 
-Doc ID: DGM-01 · Owner: Architecture · Version 1.0 · Status: Draft (Mermaid syntax not machine-validated — see 28_*/VALIDATION_REPORT.md for what was checked)
+Doc ID: DGM-01 · Owner: Architecture · Version 1.0 · Status: Draft (Mermaid syntax not machine-validated — see `28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md` for documented checks)
 
 ## 1. Ecosystem / system context
 ```mermaid
@@ -24,13 +24,13 @@ flowchart TB
   subgraph Browser
     SW[Service Worker + Cache/IndexedDB]
     Shell[Host Shell]
-    R1[mf-candidate]
-    R2[mf-learning]
-    R3[mf-opportunities]
-    R4[mf-hiring]
-    R5[mf-messaging]
-    R6[mf-account]
-    R7[mf-admin]
+    R1[Candidate module]
+    R2[Learning module]
+    R3[Opportunities module]
+    R4[Hiring module]
+    R5[Messaging module]
+    R6[Account module]
+    R7[Admin module]
     Shell --> R1
     Shell --> R2
     Shell --> R3
@@ -40,14 +40,14 @@ flowchart TB
     Shell --> R7
     Shell --- SW
   end
-  CDN[CDN: immutable remote assets + signed manifest registry]
+  CDN[Optional federated mode: remote assets + signed manifest registry]
   BFF[BFF / session routes - cookies]
   API[API replicas - modular monolith]
   W[Worker - outbox dispatcher + jobs]
   SBX[Sandbox runner - isolated, no network]
   PG[(PostgreSQL + RLS + pgvector)]
   OBJ[(Object storage - signed URLs, AV scan)]
-  Browser --> CDN
+  Shell -. only if federation is activated .-> CDN
   Browser --> BFF
   BFF --> API
   API --> PG
@@ -76,7 +76,7 @@ flowchart LR
     Cache[SW caches / IndexedDB]
   end
   subgraph Edge[Edge]
-    CSP[CSP + SRI + signed manifests]
+    CSP[CSP + server auth; SRI and signed manifests only if federated]
   end
   subgraph Trusted[Trusted server zone]
     BFF2[BFF] --> Policy[policy: can]

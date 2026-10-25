@@ -15,6 +15,8 @@ Targets are deliberately absent: values come from baseline measurement after lau
 
 ## 2. North star and input metrics
 
+**Source reconciliation (OPEN-51):** `docs/product/PRD.md` §9 names **Verifiable Career Progress** as the primary metric; this target document proposes **Evidence-Backed Hiring Conversations per week (EBHC)** as the north star. The measures have different outcome scopes. Neither is treated as an approved replacement for the other until the Product Director and Analytics Lead choose one or define their hierarchy.
+
 **North star [TARGET]: Evidence-Backed Hiring Conversations per week (EBHC)** — the number of distinct (candidate, job) pairs per week where (a) an employer-side human opened at least one evidence item at rung ≥ artifact-backed under live consent, and (b) a conversation (message exchange or scheduled interview) followed. It requires both sides of the marketplace and the product's differentiator (verified evidence) to be present, and cannot be inflated by registrations or page views. Counter-metrics guard against gaming (§7).
 
 ```mermaid

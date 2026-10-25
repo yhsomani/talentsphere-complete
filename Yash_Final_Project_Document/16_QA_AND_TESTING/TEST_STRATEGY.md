@@ -18,7 +18,7 @@ Doc ID: QA-STRAT · Owner: QA Architect · Version 1.0 · Status: Draft for Revi
 ```mermaid
 flowchart TB
   subgraph Top["Few, slow, high-confidence"]
-    E2E["E2E critical journeys (federated and bundled) + device lab"]
+    E2E["E2E critical journeys (bundled baseline; federated variant only when evaluated/activated) + device lab"]
     PROD["Production synthetics and RUM"]
   end
   subgraph Mid["Moderate"]
@@ -33,7 +33,9 @@ flowchart TB
     UNIT["Unit and state-machine tables (packages/domain, packages/policy)"]
     STATIC["Static: lint, types, route registry, dependency-cruiser, migration lint"]
   end
-  STATIC --> UNIT --> CMP --> INT --> CON --> FEDT --> E2E --> PROD
+  STATIC --> UNIT --> CMP --> INT --> CON
+  CON -. only when evaluated or activated .-> FEDT --> E2E
+  CON --> E2E
   SECT -.-> INT
   PERF -.-> E2E
 ```
@@ -49,7 +51,7 @@ Proportion guidance (qualitative): most checks are static/unit/table-driven beca
 | Component | UI states per design-system component incl. ladder badges, error boundaries, a11y props | Render tests with accessibility queries | Testing Library-class + axe | PR | Frontend | EVD-008, FED-008, A11-004 |
 | Integration | API + real Postgres (RLS on) + worker + outbox | Ephemeral DB per run; transactional fixtures | Test containers or CI service DB | PR | Backend | TEN-002, API-008 |
 | Contract | API stability, remote↔API compatibility, event schemas | oasdiff; consumer-driven pact-style recordings from each remote; AsyncAPI diff | oasdiff, Pact-class, Schemathesis-class fuzz | PR + release | Platform + Remote owners | API-001, API-002, API-007 |
-| E2E | Critical journeys in real browsers incl. WebKit | Playwright-class on Chromium/Firefox/WebKit; federated and bundled mode | Playwright | PR (smoke), nightly (full) | QA | FED-010, PWA-001 |
+| E2E | Critical journeys in real browsers incl. WebKit | Playwright-class on Chromium/Firefox/WebKit; bundled baseline, federated variant only in WP-FED-SPIKE or after activation | Playwright | PR (smoke), nightly (full) | QA | FED-010, PWA-001 |
 | Security | Authz, IDOR, tenancy, injection, SSRF, uploads, session | Generated matrix tests + targeted abuse tests + DAST on staging | Custom generated suites, ZAP-class DAST | PR + release | Security Eng | SEC-*, TEN-* |
 | Accessibility | WCAG 2.2 AA | Automated scan + keyboard + screen reader manual | axe-class, manual AT | PR + release | Design System + QA | A11-* |
 | Performance | Budgets per route on RMP-1; API class latency | Lighthouse CI per PR; load scenarios | Lighthouse CI, k6-class | PR (lab), nightly (load) | Perf Eng | PER-* |
@@ -57,7 +59,7 @@ Proportion guidance (qualitative): most checks are static/unit/table-driven beca
 | Resilience / chaos | Failure modes in OPS-FMEA | Fault injection in staging; limited production game days | Toxiproxy-class, fault-injection scripts | Nightly + game days | SRE | REL-* |
 | Offline / SW | Cache correctness, conflicts, kill-switch | Playwright with SW and network control; WebKit; device lab | Playwright | Nightly + release | Frontend Platform | PWA-* |
 | Android / iOS | Device behaviours emulation misses | Real devices via device lab (`WP-IOS-DEVICE-LAB`, OPEN-12) | BrowserStack-class cloud or own lab (OPEN-12) | Release (PWA/push changes) | QA | MOB-* |
-| Federation | Skew, shared deps, outage, rollback independence | Build matrix of (shell version × remote version × API version) | Custom manifest validator + Playwright | PR + release | Frontend Platform | FED-* |
+| Federation (conditional) | Skew, shared deps, outage, rollback independence | Build matrix of (shell version × remote version × API version) when evaluated or activated | Custom manifest validator + Playwright | WP-FED-SPIKE; PR + release after activation | Frontend Platform | FED-* |
 | Deployment | Smoke, canary guardrails, rollback, config failure | Post-deploy synthetic + canary analysis | Synthetic runner, rollout controller | Every deploy | Release Eng | DEP-* |
 | Migration | Expand/contract, lock time, backfills, rollback | Production-sized synthetic copy | SQL harness | PR (lint) + pre-release | Data Eng | DAT-* |
 | Recovery | Backup/restore, PITR, DR | Scheduled drills in isolated env | Scripts + runbooks | Scheduled + pre-major-release | SRE | REC-* |
@@ -69,14 +71,14 @@ Proportion guidance (qualitative): most checks are static/unit/table-driven beca
 | Local | Dev loop; ephemeral Postgres | Synthetic seed | Same migrations; MF_MODE switchable | Developer | none |
 | CI ephemeral | PR checks; per-PR DB | Synthetic | Same Postgres major version and extensions (pg_trgm, pgvector) | CI | PR gates RG-01…RG-05 |
 | PR preview (remote-scoped) | Visual/e2e of one remote against staging API | Synthetic | Real shell contract | CI | RG-05 |
-| Integration/Staging | Full topology (CDN path, manifest registry, API replicas, worker, HA-like DB) | Synthetic + seeded tenant canaries; **never production PII** | Same IaC modules as production, smaller sizes | Release pipeline | RG-06…RG-12 |
+| Integration/Staging | Bundled host, API replicas, worker and HA-like DB; add CDN/manifest registry only if federation is activated | Synthetic + seeded tenant canaries; **never production PII** | Same IaC modules as production, smaller sizes | Release pipeline | RG-06…RG-12 |
 | Perf/Load (can be staging) | Load/soak | Generated at forecast scale | Same instance classes for the measured component | SRE | Nightly |
 | Production | Canary then progressive rollout | Real | — | Release pipeline | RG-11, RG-12 |
 | Production synthetic | Black-box journeys with test tenants | Dedicated test tenants and accounts, flagged and excluded from analytics | — | SRE | continuous |
 
 ## 5. Critical journeys (E2E scope)
 
-J1 sign-up/sign-in/session refresh and logout (cache clear) · J2 create profile and add evidence (upload → scan → visible; rung display) · J3 request work-history verification and referee completes it with no account · J4 search/browse jobs, see match explanation, apply (idempotent) · J5 recruiter posts job, views consented evidence, moves pipeline stage (human action only) · J6 take assessment (AI prohibited honoured) · J7 enrol in course and complete → evidence · J8 checkout → webhook → entitlement · J9 consent revoke → recruiter access ends · J10 data export and erasure request · J11 support access grant lifecycle · J12 offline: edit profile draft offline → reconnect → conflict handling · J13 remote outage and fallback · J14 SW update flow. Each journey runs in federated mode and (nightly) bundled mode (ADR-T03 `MF_MODE`, OPEN-03).
+J1 sign-up/sign-in/session refresh and logout (cache clear) · J2 create profile and add evidence (upload → scan → visible; rung display) · J3 request work-history verification and referee completes it with no account · J4 search/browse jobs, see match explanation, apply (idempotent) · J5 recruiter posts job, views consented evidence, moves pipeline stage (human action only) · J6 take assessment (AI prohibited honoured) · J7 enrol in course and complete → evidence · J8 checkout → webhook → entitlement · J9 consent revoke → recruiter access ends · J10 data export and erasure request · J11 support access grant lifecycle · J12 offline: edit profile draft offline → reconnect → conflict handling · J13 remote outage and fallback (federation only) · J14 SW update flow. The bundled mode is the baseline for routine journeys. Run federated variants only in WP-FED-SPIKE before activation, or in the release pipeline after ADR-T23/OPEN-03 gates pass.
 
 ## 6. Test data strategy
 
@@ -119,14 +121,14 @@ Federation, SW and offline changes are always at least R2 and add FED/PWA tests.
 | Gate | Checks | Blocking | Evidence artefact |
 |---|---|---|---|
 | RG-01 Static | lint, types, FF-01 route registry, FF-02 module boundaries, FF-03 remote isolation, FF-07 idempotency lint, FF-10 migration lint | Yes | CI report |
-| RG-02 Contracts | FF-06 OpenAPI diff, FF-08 compat matrix (shell × remote × API), AsyncAPI compat | Yes | Compat matrix |
+| RG-02 Contracts | FF-06 OpenAPI diff and AsyncAPI compat; shell × remote × API matrix only when federation is evaluated/activated | Yes for applicable contract checks | Contract report |
 | RG-03 Integration/Security | Authz matrix, IDOR suite, FF-05 tenant canary, state-machine tables, outbox/idempotency | Yes | Test report |
 | RG-04 Supply chain | Secret scan, dependency + container scan, SBOM generated, artefact signed | Yes | SBOM + signature |
 | RG-05 E2E | Critical journeys J1–J14 (smoke on PR, full nightly) | Yes | Playwright traces |
 | RG-06 Accessibility | axe scan clean on routes; manual AT for changed critical flows | Yes | A11y report |
 | RG-07 Performance | RMP-1 budgets (LCP/TBT/CLS/JS size), API class regression guard | Yes (budget breach) | Lighthouse CI report |
 | RG-08 Migration | FF-10; expand compatibility with N-1 API; lock-time budget on sized copy | Yes | Migration report |
-| RG-09 Federation | FF-04 acyclic graph + singleton ranges; remote outage/skew tests (FED-001…005) | Yes | Manifest validation |
+| RG-09 Federation (conditional) | FF-04 acyclic graph + singleton ranges; remote outage/skew tests (FED-001…005) | Yes when evaluating/activating federation; not a bundled-release gate | Manifest validation |
 | RG-10 Resilience | Nightly REL subset green in the last cycle; no open Sev-2 resilience defects | Yes (for releases touching infra/API core) | REL report |
 | RG-11 Canary | Guardrails: error ratio, latency vs SLO, INP, business proxy (e.g. successful apply rate) | Yes | Canary analysis |
 | RG-12 Readiness | Rollback plan stated; runbook/alert updated; flags and kill-switches listed; DoD complete; docs updated; observability dashboards cover change | Yes | Release checklist |
@@ -137,7 +139,7 @@ A waiver requires the owner of the failed gate plus Security (for RG-03/04) and 
 
 ## 10. Special verification catalogue
 
-The eleven mandatory verifications (remote unavailable, version mismatch, shared dependency conflict, stale service worker, offline conflicts, duplicate requests, concurrent actions, IDOR, partial operations, rollback, shared dependency outage) are indexed in QA-CAT §14 with test IDs and automation levels. Each must run in the pipeline stage shown there; a missing one blocks the associated release gate (RG-02, RG-03, RG-09, RG-10, RG-12).
+The eleven mandatory verifications (remote unavailable, version mismatch, shared dependency conflict, stale service worker, offline conflicts, duplicate requests, concurrent actions, IDOR, partial operations, rollback, shared dependency outage) are indexed in QA-CAT §14 with test IDs and automation levels. Federation-only cases run in WP-FED-SPIKE before activation and in RG-09 after activation; they do not block a bundled release. Other cases block their associated release gates (RG-02, RG-03, RG-10, RG-12) as applicable.
 
 ## 11. Traceability and reporting
 

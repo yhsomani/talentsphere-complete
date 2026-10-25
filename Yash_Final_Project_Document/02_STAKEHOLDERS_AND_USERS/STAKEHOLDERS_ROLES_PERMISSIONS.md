@@ -24,7 +24,9 @@ Personas below are **hypothetical** (no real research conducted) — validate vi
 - **P5 Sam, support operator (ROLE-SUP):** needs scoped, time-boxed access to a user's data with audit.
 
 ## 3. Role model
-Roles are **scoped grants**: `(principal, role, scope)` where scope ∈ {platform, org:<id>, institution:<id>, self}. A principal may hold several grants. Org roles: `org_owner`, `org_admin`, `recruiter`, `hiring_manager`, `viewer`. Institution roles: `inst_admin`, `faculty`, `proctor`. Platform roles: `moderator`, `support`, `admin`, `auditor`.
+**[TARGET, OPEN-44]** Roles are proposed as scoped grants: `(principal, role, scope)` where scope ∈ {platform, org:<id>, institution:<id>, self}. A principal may hold several grants. Org roles: `org_owner`, `org_admin`, `recruiter`, `hiring_manager`, `viewer`. Institution roles: `inst_admin`, `faculty`, `proctor`. Platform roles: `moderator`, `support`, `admin`, `auditor`.
+
+**Authority and implementation reconciliation:** root `SSOT.md` v6.0 §§5–7 specifies Tier-1 `ROLE_USER`, `ROLE_RECRUITER`, and `ROLE_ADMIN` plus 24 contextual roles and a resolution order. The inspected implementation instead defines a 10-value `Role` union in `packages/domain/src/core.ts`; it does not evidence the SSOT hierarchy or this target scoped-grant model. No owner-approved mapping between these models is recorded. The SSOT remains protected canonical intent; this scoped-grant design remains a proposal pending OPEN-44. Do not treat UI visibility or the role union alone as authorization evidence.
 
 ## 4. Permission matrix
 Legend: C create · R read · U update · D delete/withdraw · A approve/act · `*` own only · `O` within own org/institution · `S` scoped, time-boxed, reason-coded, audited · `—` none. Columns: ANON, CAND, INST (instructor), REC, HM, ORGADM, INSTADM, FAC, MOD, SUP, ADM, AUD.
@@ -47,12 +49,12 @@ Legend: C create · R read · U update · D delete/withdraw · A approve/act · 
 | Moderation queue | — | — | — | — | — | — | — | — | CRUD | R | CRUD | R |
 | Data-rights requests | — | CR* | CR* | — | — | — (org-owned data via org settings, not personal DSR) | — | — | — | A (assist) | A | R |
 
-**Normative source:** this table is a summary. Where it differs from DT-01 (`06_BUSINESS_PROCESSES/DECISION_TABLES.md`), BR-T100/BR-T105 or INV-T41, those win; `packages/policy` holds the matrix as data derived from DT-01, and a negative-control test fails if INSTADM/FAC can read an individual evidence item (REVW-01).
+**Normative target:** this table is a summary. Where it differs from DT-01 (`06_BUSINESS_PROCESSES/DECISION_TABLES.md`), BR-T100/BR-T105 or INV-T41, those target contracts govern after OPEN-44 is resolved. The target policy package is proposed to derive its matrix from DT-01; it is not present in the inspected workspace. A negative-control test is specified to fail if INSTADM/FAC can read an individual evidence item (REVW-01); test execution is not asserted here.
 
 Rules: deny by default (INV-T01); candidate **consent scopes** gate every recruiter read of evidence; support/admin access to personal data is **time-boxed, reason-coded, logged** (BR-T041). Referee permissions exist only as a single-use, expiring token bound to one request (INV-T05).
 
-## 5. Capability endpoint
-`GET /api/v1/me/capabilities` returns the evaluated permission set for the current principal/scope; UI uses it for visibility only, never enforcement (INV-T01).
+## 5. Target capability endpoint
+**[TARGET, OPEN-44; not observed as implemented]** `GET /api/v1/me/capabilities` is proposed to return the evaluated permission set for the current principal/scope; UI uses it for visibility only, never enforcement (INV-T01). A read-only inspection found no `packages/policy` directory or matching `/api/v1/me/capabilities` route in the inspected workspace. The endpoint and policy package are target requirements, not current implementation claims.
 
 ## 6. Access reviews
 Org owners review member roles quarterly (prompted); platform privileged roles reviewed monthly by Security; dormant privileged grants auto-expire after 60 days.

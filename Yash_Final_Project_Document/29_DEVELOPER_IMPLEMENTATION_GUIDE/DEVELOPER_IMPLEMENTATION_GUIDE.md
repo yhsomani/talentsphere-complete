@@ -13,12 +13,12 @@ Doc ID: DEV-01 · Owner: Developer Experience · Version 1.0 · Status: Draft ·
 ## 2. What to build first (dependency order; detail in `22_IMPLEMENTATION_ROADMAP/ROADMAP.md`)
 | Step | Work | Why first | Gate |
 |---|---|---|---|
-| 0 | Spikes: Module Federation + Vite (OPEN-11), iOS/Android device lab (OPEN-12), assessment runner decision | Retire biggest unknowns; fall back to `MF_MODE=bundled` if spike fails | Spike report accepted by ARB |
+| 0 | iOS/Android device lab (OPEN-12), assessment runner decision; evaluate Module Federation + Vite only if the ARB seeks activation (OPEN-03/11) | Retire platform and assessment unknowns; bundled delivery remains the proposed baseline whether or not federation is evaluated | Device matrix and runner decision; federation spike/ARB decision only if pursued |
 | 1 | Monorepo, CI with FF-01..FF-10 checks, OpenAPI generation, design-system package | Fitness functions must exist before features | CI green on empty modules |
 | 2 | Postgres schema core (identity, org, audit, outbox, idempotency), policy module, BFF sessions | Everything depends on authz + sessions + outbox | INV-T01/02/03/12 tests |
-| 3 | Shell + host contract + one remote (`mf-candidate`) | Proves federation, error boundaries, version compat | Fault-isolation tests |
+| 3 | Shell + typed `RemoteModule`/`HostApi` contract + one bundled domain module | Proves module boundaries, routing, error boundaries and server authorization without requiring federation | Bundled route and module-contract tests |
 | 4 | Core loop MVP: profile → evidence → verification (referee) → jobs → apply | Value loop | Phase 1 release gate |
-| 5 | Hiring remote, learning, assessments (with runner), billing | Phase 2 | Per roadmap |
+| 5 | Hiring and learning modules, assessments (with runner), billing | Phase 2 | Per roadmap; no independent remote deployment unless federation is activated |
 | 6+ | Institutions, intelligence, community (Phase 3/4) | Conditional value | Per roadmap |
 
 ## 3. Rules every developer follows

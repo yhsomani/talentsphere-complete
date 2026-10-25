@@ -42,6 +42,8 @@ flowchart LR
 ```
 Integration style: synchronous calls only through each module's **public service interface** (`api/<module>/index.ts`); cross-domain reactions via **outbox events** (ADR-T05/T09). No module reads another module's tables (fitness function FF-02).
 
+**Source-boundary reconciliation (OPEN-47):** root `SSOT.md` §§12 and 21 describes a domain-oriented modular monolith with explicit cross-domain interfaces and no direct table coupling. This target context map consolidates and repartitions some of those source domains and the target frontend retains optional runtime federation. The boundary changes are proposed, not owner-approved supersessions; reconcile ownership, synchronous interfaces, event boundaries, and release coupling before architecture readiness is claimed.
+
 ## 3. Context ownership summary
 | Context | Aggregate roots | Publishes (examples) | Consumes |
 |---|---|---|---|

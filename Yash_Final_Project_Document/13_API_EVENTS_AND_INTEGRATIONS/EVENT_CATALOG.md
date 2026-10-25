@@ -14,7 +14,7 @@ Tags: **[TARGET]** design. Nothing here is implemented. 74 events; 15 flagged **
 | `trace_id` | 32 hex | W3C trace id, restored by worker (ADR-T16) |
 | `tenant` | `{org_id?, institution_id?}` | Tenancy scope; consumers must not widen it (INV-T03) |
 | `aggregate` | `{type, id, seq}` | Ordering key and per-aggregate sequence |
-| `actor` | `{kind, account_id?}` | Who caused it (user/service/system/support/referee) |
+| `actor` | `{kind, human, account_id?}` | Who caused it. `kind` ∈ user/service/system/support/referee; `human` is derived by the producer (true for user, support, referee; false for service, system). "Human actor" in SM-00 U6 and INV-T09 means `human = true` and `kind ∈ {user, support}`; a referee is human but never an authorised decider (REVW-44) |
 | `correlation_id`, `causation_id` | string / uuid | Causal chain |
 | `data` | object | Type-specific payload (ids and facts; no free-text personal data; consumers fetch details through owner interfaces under `policy.can`) |
 
