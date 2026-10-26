@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/frontend/remote-registry/1.1.json",
+  "title": "TalentSphere Remote Registry Document (REV2)",
+  "description": "REV2 of SCH-02. Supersedes REMOTE_REGISTRY.schema.json as a relationship only. Eight remotes (MOD-INS added). Doc ID SCH-02 (09_MODULE_FEDERATION). The document served at /mf/registry.json: one signed RemoteEntry (REMOTE_MANIFEST.schema.json) per remote plus registry-level metadata. Trust anchors (public keys) are NOT in this document; they are embedded in the shell build so a compromised registry store cannot mint trust (ADR-T19).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "registrySchema",
+    "environment",
+    "generatedAt",
+    "registrySequence",
+    "ttlSeconds",
+    "killSwitch",
+    "remotes"
+  ],
+  "properties": {
+    "registrySchema": {
+      "const": 1
+    },
+    "environment": {
+      "enum": [
+        "production",
+        "staging",
+        "preview"
+      ]
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "registrySequence": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic registry publication counter (diagnostics; per-remote 'sequence' is the security control)."
+    },
+    "ttlSeconds": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 3600,
+      "description": "Client revalidation interval while the app is open."
+    },
+    "killSwitch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global",
+        "modules"
+      ],
+      "properties": {
+        "global": {
+          "type": "boolean",
+          "description": "true = shell loads no remotes (maintenance); shell chrome and online-only notice remain."
+        },
+        "modules": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://schemas.talentsphere.example/frontend/remote-manifest/1.1.json#/$defs/moduleId"
+          }
+        }
+      }
+    },
+    "remotes": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^MOD-(CAND|LRN|OPP|HIR|MSG|ACC|ADM|INS)$": {
+          "$ref": "https://schemas.talentsphere.example/frontend/remote-manifest/1.1.json"
+        }
+      },
+      "minProperties": 1
+    }
+  }
+}

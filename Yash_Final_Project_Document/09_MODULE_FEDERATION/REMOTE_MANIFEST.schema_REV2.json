@@ -1,0 +1,715 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/frontend/remote-manifest/1.1.json",
+  "title": "TalentSphere Remote Registry Entry (REV2)",
+  "description": "REV2 of SCH-01 (09_MODULE_FEDERATION). Supersedes REMOTE_MANIFEST.schema.json as a relationship only; the original file is unchanged. Changes: moduleId adds MOD-INS (REVW-08 split of MOD-ADM); opType adds lesson.progress.put (ADR-T10a, REVW-15); optional 'access' object states the delivery audience and edge rule for privileged remotes (FD-14). manifestSchema stays 1: all changes are additive enum values or an optional property. Applies only when MF_MODE=federated (default is bundled, ADR-T23). Doc ID SCH-01 (09_MODULE_FEDERATION). One signed entry per remote in the runtime registry (ADR-T03, ADR-T18, FF-04, FF-08). The browser-side MF manifest (mf-manifest.json) produced by @module-federation/vite is referenced by 'entry'; this entry adds compatibility ranges, integrity, signature, healthcheck and rollback. Semver range strings are shape-checked here and semantically checked by the registry validator (node-semver). Signature covers the RFC 8785 (JCS) canonical JSON of this object with 'signature' removed.",
+  "$comment": "Hash and signature values in this schema are format checks only; verification is performed by the shell and by the CI registry publisher.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestSchema",
+    "moduleId",
+    "remoteName",
+    "version",
+    "buildId",
+    "status",
+    "sequence",
+    "issuedAt",
+    "notAfter",
+    "entry",
+    "hostContract",
+    "apiRange",
+    "dataSchema",
+    "shared",
+    "exposes",
+    "routes",
+    "assets",
+    "integrity",
+    "signature",
+    "healthcheck",
+    "rollbackTo",
+    "owner"
+  ],
+  "properties": {
+    "manifestSchema": {
+      "const": 1,
+      "description": "Schema major. Bumping requires shell support for both during the deprecation window (VCD-01 VC-10)."
+    },
+    "moduleId": {
+      "$ref": "#/$defs/moduleId"
+    },
+    "remoteName": {
+      "type": "string",
+      "pattern": "^mf_[a-z][a-z0-9_]{1,30}$",
+      "description": "Module Federation container name (valid JS identifier)."
+    },
+    "version": {
+      "$ref": "#/$defs/semver"
+    },
+    "buildId": {
+      "type": "string",
+      "pattern": "^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{7,40}$",
+      "description": "UTC build time + git sha; immutable per artefact set."
+    },
+    "channel": {
+      "enum": [
+        "stable",
+        "canary",
+        "preview"
+      ],
+      "default": "stable"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "degraded",
+        "disabled",
+        "retired"
+      ],
+      "description": "disabled = shell must not load it (kill switch, FAULT FI-15); degraded = load but show service-notice; retired = routes removed."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic per remote. Shell rejects a lower sequence than its stored last-known-good unless referenced by a valid higher-sequence entry's rollbackTo (anti-rollback)."
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notAfter": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Entry expiry; shell treats an expired entry as stale and prefers last-known-good within its own notAfter grace (VC-03)."
+    },
+    "minShell": {
+      "$ref": "#/$defs/semver",
+      "description": "Lowest shell build that may load this entry (optional hard floor beyond hostContract)."
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestUrl",
+        "remoteEntryUrl"
+      ],
+      "properties": {
+        "manifestUrl": {
+          "$ref": "#/$defs/mfPath"
+        },
+        "remoteEntryUrl": {
+          "$ref": "#/$defs/mfPath"
+        },
+        "publicPath": {
+          "type": "string",
+          "pattern": "^/mf/mf-[a-z-]+/[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?/$"
+        }
+      }
+    },
+    "hostContract": {
+      "$ref": "#/$defs/semverRange",
+      "description": "Host Contract versions this build supports, e.g. '^1.2.0' (HC-01). Checked against the shell's HOST_CONTRACT_VERSION."
+    },
+    "apiRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basePath",
+        "openapi"
+      ],
+      "properties": {
+        "basePath": {
+          "enum": [
+            "/api/v1"
+          ],
+          "description": "Major API surface the remote calls (ADR-T08). Adding /api/v2 requires a schema update."
+        },
+        "openapi": {
+          "$ref": "#/$defs/semverRange",
+          "description": "Range of the published OpenAPI document version (FF-06 oasdiff-governed) the generated client was built against."
+        }
+      }
+    },
+    "dataSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localSchemaMin",
+        "localSchemaMax",
+        "opSchemas"
+      ],
+      "properties": {
+        "localSchemaMin": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "localSchemaMax": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "opSchemas": {
+          "type": "array",
+          "description": "Outbox opSchema versions this remote emits (OFF-01 s4/s11).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "opType",
+              "version"
+            ],
+            "properties": {
+              "opType": {
+                "$ref": "#/$defs/opType"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "shared": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/sharedDep"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "const": "react"
+              },
+              "singleton": {
+                "const": true
+              }
+            },
+            "required": [
+              "name",
+              "singleton"
+            ]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "const": "react-router"
+              },
+              "singleton": {
+                "const": true
+              }
+            },
+            "required": [
+              "name",
+              "singleton"
+            ]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "const": "@ts/ui"
+              },
+              "singleton": {
+                "const": true
+              }
+            },
+            "required": [
+              "name",
+              "singleton"
+            ]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "const": "@ts/host-sdk"
+              },
+              "singleton": {
+                "const": true
+              }
+            },
+            "required": [
+              "name",
+              "singleton"
+            ]
+          }
+        }
+      ],
+      "description": "Shared singleton policy (FF-04): the four contract singletons are mandatory and must be singleton:true."
+    },
+    "exposes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^\\./[a-z][a-zA-Z0-9-]*$"
+          },
+          "kind": {
+            "enum": [
+              "module",
+              "widget",
+              "testkit"
+            ]
+          },
+          "contract": {
+            "type": "string",
+            "pattern": "^@ts/host-sdk#RemoteModule@[0-9]+$"
+          }
+        }
+      },
+      "contains": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "const": "./module"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "description": "Every remote exposes './module' (the RemoteModule default export). Other exposes are allowlisted widgets; exposing internals to other remotes is forbidden (FF-03)."
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^/[a-z][a-z0-9-]*$"
+      },
+      "description": "Top-level path prefixes owned by this remote; must match ID_REGISTRY ownership (validator cross-check)."
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "type",
+          "integrity",
+          "size"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "#/$defs/mfPath"
+          },
+          "type": {
+            "enum": [
+              "js",
+              "css",
+              "font",
+              "image",
+              "json",
+              "wasm"
+            ]
+          },
+          "integrity": {
+            "$ref": "#/$defs/sri"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5242880
+          },
+          "critical": {
+            "type": "boolean",
+            "default": false
+          },
+          "preload": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "manifest",
+        "assetsDigest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha384"
+        },
+        "manifest": {
+          "$ref": "#/$defs/sri",
+          "description": "SRI of the mf-manifest.json file at entry.manifestUrl."
+        },
+        "remoteEntry": {
+          "$ref": "#/$defs/sri",
+          "description": "SRI of the remoteEntry file."
+        },
+        "assetsDigest": {
+          "$ref": "#/$defs/sri",
+          "description": "SHA-384 over the newline-joined sorted '<path> <integrity>' lines of 'assets' (cheap whole-set check)."
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alg",
+        "keyId",
+        "canonicalization",
+        "value"
+      ],
+      "properties": {
+        "alg": {
+          "const": "Ed25519"
+        },
+        "keyId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{2,40}$",
+          "description": "Resolved against trustedKeys embedded in the shell build (not fetched from the same store as the entry)."
+        },
+        "canonicalization": {
+          "const": "RFC8785-JCS"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{86}$",
+          "description": "base64url (no padding) of the 64-byte Ed25519 signature."
+        }
+      }
+    },
+    "healthcheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "expectStatus",
+        "timeoutMs",
+        "intervalSec",
+        "probe"
+      ],
+      "properties": {
+        "url": {
+          "$ref": "#/$defs/mfPath"
+        },
+        "expectStatus": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 299
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 30000
+        },
+        "intervalSec": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 3600
+        },
+        "probe": {
+          "enum": [
+            "asset-reachability",
+            "contract-smoke"
+          ],
+          "description": "asset-reachability: HEAD all critical assets and compare integrity; contract-smoke: load './module' in a headless host and run RemoteModule.selfCheck()."
+        },
+        "expectBuildId": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "rollbackTo": {
+      "description": "Pre-declared safe target; null only for the first release of a remote.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "version",
+            "sequence",
+            "entryUrl",
+            "entryIntegrity"
+          ],
+          "properties": {
+            "version": {
+              "$ref": "#/$defs/semver"
+            },
+            "sequence": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "entryUrl": {
+              "$ref": "#/$defs/mfPath",
+              "description": "URL of the previous, itself signed, registry entry."
+            },
+            "entryIntegrity": {
+              "$ref": "#/$defs/sri"
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        }
+      ]
+    },
+    "queueableOps": {
+      "type": "array",
+      "description": "Allowlist for host.sync.enqueue (ADR-T10). Empty/absent means the remote queues nothing.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "opType",
+          "method",
+          "pathTemplate"
+        ],
+        "properties": {
+          "opType": {
+            "$ref": "#/$defs/opType"
+          },
+          "method": {
+            "enum": [
+              "PUT",
+              "PATCH"
+            ]
+          },
+          "pathTemplate": {
+            "type": "string",
+            "pattern": "^/api/v1/[A-Za-z0-9/{}_-]+$"
+          },
+          "maxBodyBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 262144,
+            "default": 65536
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$"
+      },
+      "description": "Capability keys from GET /me/capabilities that gate nav/routes (UI hint only; INV-T01)."
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publishes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uiTopic"
+          }
+        },
+        "subscribes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/uiTopic"
+          }
+        }
+      }
+    },
+    "flags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_.-]{2,60}$"
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serviceName"
+      ],
+      "properties": {
+        "serviceName": {
+          "type": "string",
+          "pattern": "^ts-web-[a-z-]+$"
+        },
+        "sampleRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "bundledFallback": {
+      "type": "boolean",
+      "description": "true if the module can also be built into the shell (MF_MODE=bundled, ADR-T03)."
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "team",
+        "escalation"
+      ],
+      "properties": {
+        "team": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "escalation": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "On-call rotation key (no personal data in the registry)."
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audience"
+      ],
+      "description": "Delivery audience of this remote's assets (FD-14). 'privileged' = served only behind an authenticated edge rule that requires a valid session and requiredCapability; otherwise the edge answers 404. Controls who can obtain the code; it is not bundle confidentiality and not an authorisation control (ADR-T19). Absent = 'public'.",
+      "properties": {
+        "audience": {
+          "enum": [
+            "public",
+            "privileged"
+          ]
+        },
+        "edgeRule": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{2,40}$",
+          "description": "Identifier of the edge rule in the release infrastructure."
+        },
+        "requiredCapability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$"
+        }
+      },
+      "if": {
+        "properties": {
+          "audience": {
+            "const": "privileged"
+          }
+        },
+        "required": [
+          "audience"
+        ]
+      },
+      "then": {
+        "required": [
+          "edgeRule",
+          "requiredCapability"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "moduleId": {
+      "enum": [
+        "MOD-CAND",
+        "MOD-LRN",
+        "MOD-OPP",
+        "MOD-HIR",
+        "MOD-MSG",
+        "MOD-ACC",
+        "MOD-ADM",
+        "MOD-INS"
+      ]
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "semverRange": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[0-9xX*^~<>=|. \\-+A-Za-z]+$",
+      "$comment": "Shape only; semantic validity checked by node-semver in the registry publisher and the shell."
+    },
+    "sri": {
+      "type": "string",
+      "pattern": "^sha384-[A-Za-z0-9+/]{64}$"
+    },
+    "mfPath": {
+      "type": "string",
+      "pattern": "^/mf/[A-Za-z0-9._/-]+$",
+      "description": "Same-origin path only; no scheme, host or query (FD-03)."
+    },
+    "opType": {
+      "enum": [
+        "profile.patch",
+        "application.draft.put",
+        "message.put",
+        "note.put",
+        "lesson.progress.put"
+      ]
+    },
+    "uiTopic": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z-]+){1,3}@[1-9][0-9]*$",
+      "description": "Typed UI event topic with payload schema major, e.g. profile.updated@1."
+    },
+    "sharedDep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "singleton",
+        "requiredVersion"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^(@[a-z0-9-]+/)?[a-z0-9._-]+$"
+        },
+        "singleton": {
+          "type": "boolean"
+        },
+        "requiredVersion": {
+          "$ref": "#/$defs/semverRange"
+        },
+        "strictVersion": {
+          "type": "boolean",
+          "default": false
+        },
+        "import": {
+          "type": "boolean",
+          "default": true,
+          "description": "false = remote ships no fallback copy and requires the host to provide it (used for singletons)."
+        }
+      }
+    }
+  }
+}

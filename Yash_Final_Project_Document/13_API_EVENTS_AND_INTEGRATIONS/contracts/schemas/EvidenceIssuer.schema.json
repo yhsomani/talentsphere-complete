@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.talentsphere.example/domain/EvidenceIssuer.schema.json",
+  "title": "EvidenceIssuer",
+  "description": "Issuer of an authority_verified rung (REV-RES REVW-12). Additive companion to Evidence.schema.json: it supersedes nothing and is intended to be merged as the optional property `issuer` of Evidence at the next contract revision. Server-owned: no client request schema contains it (INV-T04). Present exactly when rung = authority_verified, null otherwise. The UI always shows issuerClass on the badge; matching weights differ by class; instructor-issued attestations require instructor != learner (no shared account or device signal), pass issuer independence checks and are revocable; instructor sign-off is never counted as platform-verified.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["issuerClass", "issuerLabel", "issuedAt"],
+  "properties": {
+    "issuerClass": {
+      "type": "string",
+      "enum": ["platform", "institution", "employer_org", "instructor"]
+    },
+    "issuerId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Institution, employer organization or instructor account that issued it; null for platform"
+    },
+    "issuerLabel": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Display name shown beside the class"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revokedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "issuerClass": { "const": "platform" } } },
+      "then": { "properties": { "issuerId": { "type": "null" } } }
+    }
+  ]
+}

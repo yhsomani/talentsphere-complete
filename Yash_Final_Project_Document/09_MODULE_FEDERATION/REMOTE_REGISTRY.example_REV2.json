@@ -1,0 +1,1466 @@
+{
+  "registrySchema": 1,
+  "environment": "production",
+  "generatedAt": "2026-10-25T08:00:30Z",
+  "registrySequence": 4173,
+  "ttlSeconds": 300,
+  "killSwitch": {
+    "global": false,
+    "modules": []
+  },
+  "remotes": {
+    "MOD-CAND": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-CAND",
+      "remoteName": "mf_candidate",
+      "version": "1.4.2",
+      "buildId": "20261020T101500Z-6fb4f7d83",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 40,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-candidate/1.4.2/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-candidate/1.4.2/remoteEntry.js",
+        "publicPath": "/mf/mf-candidate/1.4.2/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": [
+          {
+            "opType": "profile.patch",
+            "version": 1
+          },
+          {
+            "opType": "note.put",
+            "version": 1
+          }
+        ]
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/me"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-candidate/1.4.2/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-l9z+1wgQ15xnh5Wc8aYxSHOb94u2IDHBGOc50DijBf5L6dwrupY3A4cyycFl68Il",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-candidate/1.4.2/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-QQPgDe0567uTMccvQI3qXabIU5bqCey/l8KRKKU+zGOunt4Zl92ARZTce9TiWYQr",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-candidate/1.4.2/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-6Tb0Hv/1B/wbEyvh4iUiGoaRFEPgE2qtH97UsvIydLYrxnQgaQ/DBEPRFjq9A+o/",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-candidate/1.4.2/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-MamhrMOfFDyyNNiMxPa4HlVnCoIM0j81VkBNfrk0/9AeaPAU8sAD4dTydtK8kRdq",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-MamhrMOfFDyyNNiMxPa4HlVnCoIM0j81VkBNfrk0/9AeaPAU8sAD4dTydtK8kRdq",
+        "remoteEntry": "sha384-l9z+1wgQ15xnh5Wc8aYxSHOb94u2IDHBGOc50DijBf5L6dwrupY3A4cyycFl68Il",
+        "assetsDigest": "sha384-nx2lQGwT6XGYgIa+12G8bp27LsWiQ9WmGD84f3RiuGZuhUIlYYcZgR9S6FwwXHF6"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-candidate/1.4.2/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.4.1",
+        "sequence": 39,
+        "entryUrl": "/mf/registry/entries/mf-candidate-1.4.1.json",
+        "entryIntegrity": "sha384-okKkLYrJBwe+/Uy24U1THVf1hpzh1HnZI3UprgRFD1z5dvXPAiNUIyvy5orI8jep",
+        "reason": "previous stable release"
+      },
+      "queueableOps": [
+        {
+          "opType": "profile.patch",
+          "method": "PATCH",
+          "pathTemplate": "/api/v1/profile",
+          "maxBodyBytes": 65536
+        },
+        {
+          "opType": "note.put",
+          "method": "PUT",
+          "pathTemplate": "/api/v1/notes/{noteId}",
+          "maxBodyBytes": 65536
+        }
+      ],
+      "capabilities": [
+        "candidate.profile",
+        "candidate.evidence"
+      ],
+      "events": {
+        "publishes": [
+          "profile.updated@1",
+          "evidence.changed@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "sync.item-resolved@1"
+        ]
+      },
+      "flags": [
+        "cand.evidence_ladder_v2"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-candidate",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Candidate Experience",
+        "escalation": "fe-candidate"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "P-JXhXb-Onqe3hJiF8GpuKAq_68_EU--1i78AHqG_hTx2fIxJqVlZlkBLo53p2vFTb7kXzD2J5VeMH44zcFfBA"
+      }
+    },
+    "MOD-LRN": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-LRN",
+      "remoteName": "mf_learning",
+      "version": "1.3.0",
+      "buildId": "20261020T101500Z-dc4109814",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 41,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-learning/1.3.0/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-learning/1.3.0/remoteEntry.js",
+        "publicPath": "/mf/mf-learning/1.3.0/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": []
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/learn"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-learning/1.3.0/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-LdKn8693HRwMXdmI35XCt/vdQuOOJ2JAP8CyBrWAqTd3LwxwouPBuQLIdmnM4CV/",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-learning/1.3.0/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-H58xQf6YDHt2TjPfWxxOYoefnZGQ8mcF8JMYvahjOLYaISCIWatJY+vEdi5JHByk",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-learning/1.3.0/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-I/xzwsBPmddn0GwcfiDIXNRN7Nfzvs9dTzbHmPFsF4ndH7eH/AWAHxVP6PK7h8ge",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-learning/1.3.0/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-2E8553ozvcuEHBdcIFmPYKUsb57kIwdpHkPiPLyy7Zf2mBQMFmJW2IwK3JaafAJq",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-2E8553ozvcuEHBdcIFmPYKUsb57kIwdpHkPiPLyy7Zf2mBQMFmJW2IwK3JaafAJq",
+        "remoteEntry": "sha384-LdKn8693HRwMXdmI35XCt/vdQuOOJ2JAP8CyBrWAqTd3LwxwouPBuQLIdmnM4CV/",
+        "assetsDigest": "sha384-udn19Lh/ZaC3y8h4mkk3SCoT857AqzEoXfG+q7yXLaHibFQiQexb4xy8ISAtTXKk"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-learning/1.3.0/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.2.5",
+        "sequence": 40,
+        "entryUrl": "/mf/registry/entries/mf-learning-1.2.5.json",
+        "entryIntegrity": "sha384-GQuExPmlqDsLruGUjp5VRD4OkIVy0c8iI+guwDklM2Dxa6JyIqB4qSidjAEzEWnm",
+        "reason": "previous stable release"
+      },
+      "capabilities": [
+        "learner.courses",
+        "learner.assessments"
+      ],
+      "events": {
+        "publishes": [
+          "course.progressed@1",
+          "assessment.attempt-started@1"
+        ],
+        "subscribes": [
+          "session.changed@1"
+        ]
+      },
+      "flags": [
+        "lrn.challenges_enabled"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-learning",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Learning & Assessment",
+        "escalation": "fe-learning"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "I18lKEGWk0--6UyEqy3mC-vVNpdh5mq61saUiTva644S48n0tUw56ouDi3H21PMBBrb6zmy22l_TYrkaALL9BQ"
+      }
+    },
+    "MOD-OPP": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-OPP",
+      "remoteName": "mf_opportunities",
+      "version": "1.5.1",
+      "buildId": "20261020T101500Z-901acdbac",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 42,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-opportunities/1.5.1/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-opportunities/1.5.1/remoteEntry.js",
+        "publicPath": "/mf/mf-opportunities/1.5.1/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": [
+          {
+            "opType": "application.draft.put",
+            "version": 1
+          },
+          {
+            "opType": "note.put",
+            "version": 1
+          }
+        ]
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/jobs",
+        "/applications"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-opportunities/1.5.1/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-AikOU5AGOraIC3LtbQ66jW7J4ILaT4/lgOa00UNDesjFb0yrdKUwxyuDZPsPvr6y",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-opportunities/1.5.1/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-+LEHYXIg6r0RSgZha6xyI24K1Lre6tgvrMTd2xxjTdaGoJGcVsHuUDO41jonymKX",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-opportunities/1.5.1/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-p7+K7Wq69hDVDVuHaxHfV+fcP9xfYrWr+xZKWauAy8zCGI2/NMKIYuaaSUp0sTgN",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-opportunities/1.5.1/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-XaozBC+z50cEYAGDkb/HP0rvDUmiQ0wqu+SkNY3IzjljJobA6pFEo8GtVIKbPMdZ",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-XaozBC+z50cEYAGDkb/HP0rvDUmiQ0wqu+SkNY3IzjljJobA6pFEo8GtVIKbPMdZ",
+        "remoteEntry": "sha384-AikOU5AGOraIC3LtbQ66jW7J4ILaT4/lgOa00UNDesjFb0yrdKUwxyuDZPsPvr6y",
+        "assetsDigest": "sha384-6A7xIj62UrG8xMHNTn8PTom73Tpm/+eYu81YibPRYMK1EJi4LkPw/0fQ22sNFTgn"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-opportunities/1.5.1/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.5.0",
+        "sequence": 41,
+        "entryUrl": "/mf/registry/entries/mf-opportunities-1.5.0.json",
+        "entryIntegrity": "sha384-VX1jLvgkr7zedfHBiairVTRQ6NUZBqaDvVuu/xODZDsSXWdx2tW20SOgbgYO/ns4",
+        "reason": "previous stable release"
+      },
+      "queueableOps": [
+        {
+          "opType": "application.draft.put",
+          "method": "PUT",
+          "pathTemplate": "/api/v1/applications/drafts/{draftId}",
+          "maxBodyBytes": 65536
+        },
+        {
+          "opType": "note.put",
+          "method": "PUT",
+          "pathTemplate": "/api/v1/notes/{noteId}",
+          "maxBodyBytes": 65536
+        }
+      ],
+      "capabilities": [
+        "candidate.jobs",
+        "candidate.applications"
+      ],
+      "events": {
+        "publishes": [
+          "application.submitted@1",
+          "job.saved@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "sync.item-resolved@1"
+        ]
+      },
+      "flags": [
+        "opp.match_explanations"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-opportunities",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Opportunities & Applications",
+        "escalation": "fe-opportunities"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "ULxFDpTSIPFm_AhMuqP1MqFFg5TF_ny33w_kul0aHmofvd4sXqm0nSZHp0vVcnePfpcUIJTgpWatQlLOWTdxDg"
+      }
+    },
+    "MOD-HIR": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-HIR",
+      "remoteName": "mf_hiring",
+      "version": "1.2.4",
+      "buildId": "20261020T101500Z-0163f61bd",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 43,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-hiring/1.2.4/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-hiring/1.2.4/remoteEntry.js",
+        "publicPath": "/mf/mf-hiring/1.2.4/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": [
+          {
+            "opType": "note.put",
+            "version": 1
+          }
+        ]
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/hiring"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-hiring/1.2.4/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-d5lDRyEhgql40URfCofJVjmdC3Al/uzAQ12zNtI88d+8NUdIJzDuhxjLkDErUX3K",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-hiring/1.2.4/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-4vWDAD+k9h0N/o1rXww8yCDCQ59vsN/0RN/Y1cRahNq4gxBYrnmr3fGQwhQw4Ww2",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-hiring/1.2.4/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-HH+0mflvub1r48I44T0Q+YQZEUw83n3t0Ce2neVI0Vcb0P9gR3DETEFYIEx63cds",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-hiring/1.2.4/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-P0rY5Rh7ssnX0MTEB0xLYHgoQX2/igLlB7xtBeQEpDltIzgXbdbaQqwonesL4w4v",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-P0rY5Rh7ssnX0MTEB0xLYHgoQX2/igLlB7xtBeQEpDltIzgXbdbaQqwonesL4w4v",
+        "remoteEntry": "sha384-d5lDRyEhgql40URfCofJVjmdC3Al/uzAQ12zNtI88d+8NUdIJzDuhxjLkDErUX3K",
+        "assetsDigest": "sha384-aT3pvfl7hS9EpAbSlI5uSiMwnOYyVHUmyrF1vlb64nvyYD3ovpDAzssexUKRk4Dq"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-hiring/1.2.4/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.2.3",
+        "sequence": 42,
+        "entryUrl": "/mf/registry/entries/mf-hiring-1.2.3.json",
+        "entryIntegrity": "sha384-UjRWCGNW/q4k1gEMq1H6jIqWYiBJh04Fcwm4JRvIYTQMigPTkWXRbJP9g1EQ4FV2",
+        "reason": "previous stable release"
+      },
+      "queueableOps": [
+        {
+          "opType": "note.put",
+          "method": "PUT",
+          "pathTemplate": "/api/v1/notes/{noteId}",
+          "maxBodyBytes": 65536
+        }
+      ],
+      "capabilities": [
+        "org.hiring",
+        "org.jobs-manage"
+      ],
+      "events": {
+        "publishes": [
+          "pipeline.stage-changed@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "org.context-changed@1"
+        ]
+      },
+      "flags": [
+        "hir.pipeline_bulk_actions"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-hiring",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Hiring Workspace",
+        "escalation": "fe-hiring"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "c2OQ3KRsvZjRsZ6nvI3zRy0CEuxbW9FcFO4c5RIU56tcAy7wesQ5ShRoOuwdpCoHWIqDY_1x7SVmzjpdWByyBg"
+      }
+    },
+    "MOD-MSG": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-MSG",
+      "remoteName": "mf_messaging",
+      "version": "1.1.0",
+      "buildId": "20261020T101500Z-9d6d4f3ba",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 44,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-messaging/1.1.0/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-messaging/1.1.0/remoteEntry.js",
+        "publicPath": "/mf/mf-messaging/1.1.0/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": [
+          {
+            "opType": "message.put",
+            "version": 1
+          }
+        ]
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/messages",
+        "/network",
+        "/notifications"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-messaging/1.1.0/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-Ewa/XB9oSlRs3cAJXJ6v7E+kuQTAKIjh06+wKVUn2gv5h+nczs2neh+oB4LQT0Zn",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-messaging/1.1.0/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-7fIr/HdDT/Aql8EcqB/aPtqqR6a0/e5vBB03B3dAL1wvk5HJNiworvq/mpYrI4pz",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-messaging/1.1.0/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-rpasUMity8ichZXRDU7isxifJktDEAPK1Uluvb4+SGL//zsTvf5F0vOtCThGmqjA",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-messaging/1.1.0/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-SBQjJx0bQMjzyf7H7iW49s4zP8JOkVICWc6xA9SVzm0pWgJvTFTKjyWA693yrBgW",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-SBQjJx0bQMjzyf7H7iW49s4zP8JOkVICWc6xA9SVzm0pWgJvTFTKjyWA693yrBgW",
+        "remoteEntry": "sha384-Ewa/XB9oSlRs3cAJXJ6v7E+kuQTAKIjh06+wKVUn2gv5h+nczs2neh+oB4LQT0Zn",
+        "assetsDigest": "sha384-AVpe1cpXfQBGbEmuqaNrKTqShrVgrC9FDhvUwM5q+pplRZWpOROZVvyKx+aXmG3D"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-messaging/1.1.0/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.0.9",
+        "sequence": 43,
+        "entryUrl": "/mf/registry/entries/mf-messaging-1.0.9.json",
+        "entryIntegrity": "sha384-BROiaA02O0EEzl9xgWQMu0Gb+7rWDsaFpbOtTWUzd9+RSUe/QikT0Nt2NjYUoV7Q",
+        "reason": "previous stable release"
+      },
+      "queueableOps": [
+        {
+          "opType": "message.put",
+          "method": "PUT",
+          "pathTemplate": "/api/v1/conversations/{conversationId}/messages/{messageId}",
+          "maxBodyBytes": 65536
+        }
+      ],
+      "capabilities": [
+        "messaging.use"
+      ],
+      "events": {
+        "publishes": [
+          "notification.count-changed@1",
+          "message.sent@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "sync.item-resolved@1"
+        ]
+      },
+      "flags": [
+        "msg.realtime_sse"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-messaging",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Collaboration & Notifications",
+        "escalation": "fe-collab"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "FeFa-ItmTFvaczRwZFmoPZ5EymvoyRtFFhwQ1Vy0JdHnkGbdHI-dEVPbxxyabcBxWJ17HpKjc1B520zgN1cVCw"
+      }
+    },
+    "MOD-ACC": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-ACC",
+      "remoteName": "mf_account",
+      "version": "1.2.0",
+      "buildId": "20261020T101500Z-820b134fd",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 45,
+      "issuedAt": "2026-10-21T08:00:00Z",
+      "notAfter": "2026-11-20T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-account/1.2.0/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-account/1.2.0/remoteEntry.js",
+        "publicPath": "/mf/mf-account/1.2.0/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": []
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/settings",
+        "/billing",
+        "/privacy"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-account/1.2.0/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-hDjF2A4kzAubpkBu3atYoXen/9PeampgkkzVvg6lbeYnSh4WpxcOOr2KELQ0/UMP",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-account/1.2.0/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-zp/Jn4kEuC3vJxqL0G8mVQCsrjr0K2pdHeQlfPAAs36rggQ5rYDf231R6k/sHPUE",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-account/1.2.0/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-obxXKZyFboBw6+7VrS4ty+t3dXcXi2+U2EiZ6mqduvUSqLIfA+PxzN7rEO0QHpXW",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-account/1.2.0/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-YB0cRXTTSoO0gynaoaiYfNKnWxz3BTQUKdO8UKJdqxrr4kZdMW6xae2ZllH+m3da",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-YB0cRXTTSoO0gynaoaiYfNKnWxz3BTQUKdO8UKJdqxrr4kZdMW6xae2ZllH+m3da",
+        "remoteEntry": "sha384-hDjF2A4kzAubpkBu3atYoXen/9PeampgkkzVvg6lbeYnSh4WpxcOOr2KELQ0/UMP",
+        "assetsDigest": "sha384-P+GfUNUw7zpoQf9IV53cw1JJYCHaCQoT7Y98IhhOAsqJM2TliWQF1OBef6J92fOA"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-account/1.2.0/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.1.2",
+        "sequence": 44,
+        "entryUrl": "/mf/registry/entries/mf-account-1.1.2.json",
+        "entryIntegrity": "sha384-jPEXollZXqp08MHHfQPUlo8pNw1ajx/tixdrXj7mT2c3cxEzgjzWpYQo5XGrMO3Y",
+        "reason": "previous stable release"
+      },
+      "capabilities": [
+        "account.settings",
+        "account.privacy"
+      ],
+      "events": {
+        "publishes": [
+          "consent.changed@1",
+          "entitlement.refresh-requested@1"
+        ],
+        "subscribes": [
+          "session.changed@1"
+        ]
+      },
+      "flags": [
+        "acc.passkey_management"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-account",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Account & Trust",
+        "escalation": "fe-account"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "pSGSm-3rL9MMn45fD6pHG2U-q_5az36vuzHWWsj8ADmO6-8U4P8pcCSpxxnhNqUTqgdWQEwzp2uPhV4tfJraDQ"
+      }
+    },
+    "MOD-ADM": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-ADM",
+      "remoteName": "mf_admin",
+      "version": "1.1.0",
+      "buildId": "20261025T070000Z-b17c5d2e4",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 47,
+      "issuedAt": "2026-10-25T08:00:00Z",
+      "notAfter": "2026-11-24T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-admin/1.1.0/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-admin/1.1.0/remoteEntry.js",
+        "publicPath": "/mf/mf-admin/1.1.0/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": []
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/admin"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-admin/1.1.0/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-qQcfkMdz6fKggmzkDbjeZeWpSSkGUBXwVemA1wA+f1ZFrt82xzMq7u3/GGkhxOGT",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-admin/1.1.0/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-pJtdsISHwJmBkaiz+6o+Z6XrMOZDL38qz/0x9ETs+c9hkqvEW1nArU8VwhatYP2m",
+          "size": 98304,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-admin/1.1.0/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-t55PcFBH4JXnCneQC7BOrjPZ5wyFWvbarVmX2igivy7BZEodTpqLWm+wsoRDlvZX",
+          "size": 14336,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-admin/1.1.0/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-nG2jyThIFHTB9gpWm3QUB3Jd6LpG83VSVC/rFgCHyB+vKwVJn8C/J10JPw/HQbct",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-nG2jyThIFHTB9gpWm3QUB3Jd6LpG83VSVC/rFgCHyB+vKwVJn8C/J10JPw/HQbct",
+        "remoteEntry": "sha384-qQcfkMdz6fKggmzkDbjeZeWpSSkGUBXwVemA1wA+f1ZFrt82xzMq7u3/GGkhxOGT",
+        "assetsDigest": "sha384-vB+ekotNP/bZRpsjq5xIdtd38IzB743rF7upw2KJF/E96eIXIKKBdQTKFw1FmBPO"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-admin/1.1.0/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": {
+        "version": "1.0.0",
+        "sequence": 46,
+        "entryUrl": "/mf/mf-admin/1.0.0/entry.json",
+        "entryIntegrity": "sha384-Zfnl2wy6Ty+A0B7bB5ph5Eo6r4Ch2VzprXjZARpwfSqz4wV4JgU9bifhLjL8NFSq",
+        "reason": "Pre-split bundle that also contained institution screens"
+      },
+      "capabilities": [
+        "admin.console"
+      ],
+      "events": {
+        "publishes": [
+          "admin.context-changed@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "org.context-changed@1"
+        ]
+      },
+      "flags": [
+        "adm.support_access_grants"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-admin",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Platform Back-office",
+        "escalation": "fe-backoffice"
+      },
+      "access": {
+        "audience": "privileged",
+        "edgeRule": "bo-admin-console",
+        "requiredCapability": "admin.console"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "hBL0vNdh_59kVrL_rML7h7_V_XbSWBMQfpK07C5NlqUac_6CfqHw73Xe-1jlr7KyiLIjC1gB64AhynPMjLoRAg"
+      }
+    },
+    "MOD-INS": {
+      "manifestSchema": 1,
+      "moduleId": "MOD-INS",
+      "remoteName": "mf_institution",
+      "version": "1.0.0",
+      "buildId": "20261025T070500Z-3c9d1e2a7",
+      "channel": "stable",
+      "status": "active",
+      "sequence": 1,
+      "issuedAt": "2026-10-25T08:00:00Z",
+      "notAfter": "2026-11-24T08:00:00Z",
+      "minShell": "1.0.0",
+      "entry": {
+        "manifestUrl": "/mf/mf-institution/1.0.0/mf-manifest.json",
+        "remoteEntryUrl": "/mf/mf-institution/1.0.0/remoteEntry.js",
+        "publicPath": "/mf/mf-institution/1.0.0/"
+      },
+      "hostContract": "^1.0.0",
+      "apiRange": {
+        "basePath": "/api/v1",
+        "openapi": ">=1.0.0 <2.0.0"
+      },
+      "dataSchema": {
+        "localSchemaMin": 1,
+        "localSchemaMax": 2,
+        "opSchemas": []
+      },
+      "shared": [
+        {
+          "name": "react",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-dom",
+          "singleton": true,
+          "requiredVersion": "^19.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "react-router",
+          "singleton": true,
+          "requiredVersion": "^7.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@tanstack/react-query",
+          "singleton": true,
+          "requiredVersion": "^5.0.0",
+          "strictVersion": true,
+          "import": false
+        },
+        {
+          "name": "@ts/ui",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": false,
+          "import": false
+        },
+        {
+          "name": "@ts/host-sdk",
+          "singleton": true,
+          "requiredVersion": "^1.0.0",
+          "strictVersion": true,
+          "import": false
+        }
+      ],
+      "exposes": [
+        {
+          "name": "./module",
+          "kind": "module",
+          "contract": "@ts/host-sdk#RemoteModule@1"
+        },
+        {
+          "name": "./testkit",
+          "kind": "testkit"
+        }
+      ],
+      "routes": [
+        "/institution"
+      ],
+      "assets": [
+        {
+          "path": "/mf/mf-institution/1.0.0/remoteEntry.js",
+          "type": "js",
+          "integrity": "sha384-rp96qShIZA4zL5agNaw3iwkIJU63Fe7TOBhArRHhaPmupEtmlBCtBgHAONy8OrrH",
+          "size": 9216,
+          "critical": true,
+          "preload": true
+        },
+        {
+          "path": "/mf/mf-institution/1.0.0/assets/main-4f2a9c1e.js",
+          "type": "js",
+          "integrity": "sha384-EuuM1reteUglkmhA5dj3G+RBhXMphYJENhxOkTPeykyFYSBanc3A7hxenDQRbYhD",
+          "size": 90112,
+          "critical": true,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-institution/1.0.0/assets/main-7b1d3e5a.css",
+          "type": "css",
+          "integrity": "sha384-lteqACIoJ74xhrA4yLxTCFymOTT90QaXgU1xyPcFEfi+xRJ2qstTshrUxQKAkoCm",
+          "size": 12288,
+          "critical": false,
+          "preload": false
+        },
+        {
+          "path": "/mf/mf-institution/1.0.0/mf-manifest.json",
+          "type": "json",
+          "integrity": "sha384-R8gdBegzeC8uLhCZEdnxlsTeJOn6S9pVUv1sXpofTdLlQpYDrXUdqOb4v0snLOU8",
+          "size": 2048,
+          "critical": true,
+          "preload": false
+        }
+      ],
+      "integrity": {
+        "algorithm": "sha384",
+        "manifest": "sha384-R8gdBegzeC8uLhCZEdnxlsTeJOn6S9pVUv1sXpofTdLlQpYDrXUdqOb4v0snLOU8",
+        "remoteEntry": "sha384-rp96qShIZA4zL5agNaw3iwkIJU63Fe7TOBhArRHhaPmupEtmlBCtBgHAONy8OrrH",
+        "assetsDigest": "sha384-SG99G8SYrXxZ6hlewwhdxrVp+OQOnGtHP4UhGpukC6mk/PKz6UzK6QRB+nMDnn1s"
+      },
+      "healthcheck": {
+        "url": "/mf/mf-institution/1.0.0/health.json",
+        "expectStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSec": 60,
+        "probe": "contract-smoke",
+        "expectBuildId": true
+      },
+      "rollbackTo": null,
+      "capabilities": [
+        "institution.workspace"
+      ],
+      "events": {
+        "publishes": [
+          "institution.context-changed@1"
+        ],
+        "subscribes": [
+          "session.changed@1",
+          "org.context-changed@1",
+          "consent.changed@1"
+        ]
+      },
+      "flags": [
+        "ins.cohort_coverage_view"
+      ],
+      "telemetry": {
+        "serviceName": "ts-web-institution",
+        "sampleRate": 0.1
+      },
+      "bundledFallback": true,
+      "owner": {
+        "team": "Institutions",
+        "escalation": "fe-institutions"
+      },
+      "signature": {
+        "alg": "Ed25519",
+        "keyId": "ts-registry-2026-a",
+        "canonicalization": "RFC8785-JCS",
+        "value": "aWkUFAkyh3cfm1StCfmdq-0B6AU1ysRIWEMZsjLw7RPp8b5Wct80KvthukOBQKg62VeHKq71LB9KTW3Vvb8GDA"
+      }
+    }
+  }
+}
