@@ -3,7 +3,7 @@
 Audience: developers, release owners and on-call operators.
 Companion: `03-DEVELOPMENT-GUIDE.md` (setup, env vars, conventions). Architecture, data, API and security: docs 01, 02, 04, 05, 06, 08.
 
-Written 2026-10-26 on branch `docs/consolidation-2026-10-26`. **No test, build, migration, backup, restore or deployment was run while writing this document.** Every command below was checked against `package.json`, `scripts/*`, `.github/workflows/*`, `deploy/*` and tool configs by reading them.
+Written 2026-10-26 on branch `docs/consolidation-2026-10-26`. **Execution disclosure:** no test, build, migration, backup, restore, container or deployment was run by the author of this document. The only repository script executed was the read-only `node scripts/check-new-hosted-migrations.mjs` (exit code 1, see section 3); an independent validator ran the same script with the same result. Every other command below was checked against `package.json`, `scripts/*`, `.github/workflows/*`, `deploy/*` and tool configs by reading them. Other documents in this set make their own execution statements (for example doc 06 records a two-process token probe); each document's statement covers only itself.
 
 ## 0. Evidence labels and ground rules
 
@@ -45,13 +45,13 @@ All commands Verified-by-config (root `package.json` scripts unless stated). Run
 | Security | `pnpm test:security` = `vitest run --dir tests/security` | authz, injection, session, RLS-shaped tests | 5 | - | cache |
 | Durability / real PostgreSQL | `pnpm test:pg` = `vitest run --config vitest.pg.config.ts` | `vitest.pg.config.ts`: `tests/pg/**`, 60 s test and 120 s hook timeouts, no file parallelism | 13 tests + `test-db.ts` | `TEST_DATABASE_URL` with a role that can create and drop databases | cache |
 | Migration-history helper | `node --test scripts/tests/migration-integrity.test.mjs` | Node test runner | 1 | - | no |
-| E2E (Chromium) | `pnpm test:e2e` (alias `pnpm test:playwright`) = `playwright test` | `playwright.config.ts`: `tests/e2e`, 1 worker, `fullyParallel: false`, `retries: 0`, timeout 30 s, base URL `http://127.0.0.1:4173` | 58 `*.spec.ts` (+ `content.ts`, `fixtures.ts` helpers) | Built `apps/api/dist` and `apps/web/dist`; Chromium | traces, `test-results/` |
+| E2E (Chromium) | `pnpm test:e2e` (alias `pnpm test:playwright`) = `playwright test` | `playwright.config.ts`: `tests/e2e`, 1 worker, `fullyParallel: false`, `retries: 0`, timeout 30 s, base URL `http://127.0.0.1:4173` | 58 `*.spec.ts` (+ `content.ts`, `fixtures.ts` helpers) | Built `apps/api/dist` and `apps/web/dist`; Chromium | `test-results/` (the `trace: 'on-first-retry'` setting never records a trace because `retries` is 0) |
 | Accessibility | `pnpm test:a11y` = `playwright test tests/e2e/accessibility.spec.ts` | real Chromium | 1 spec | as E2E | as E2E |
 | Performance baseline | `pnpm test:performance` = `playwright test tests/e2e/performance.spec.ts` | writes percentiles to `test-results/performance/*.json` | 1 spec | as E2E | `test-results/` |
 | Lint | `pnpm lint` = `prettier --check "**/*.{ts,tsx,js,json,md}"` | `.prettierrc`, `.prettierignore` | - | - | no |
 | Typecheck | `pnpm typecheck` = `tsc -b && tsc -p tests` | project references; `tests/tsconfig.json` is `noEmit` | - | - | **writes** (`dist`, `tsbuildinfo`) |
 | Static hosted-migration audit | `node scripts/audit-hosted-supabase-migrations.mjs` | static SQL scan, no DB | - | - | no (stdout JSON) |
-| Static new-migration check | `node scripts/check-new-hosted-migrations.mjs` | fails if a migration after 00051 references `auth.*` | - | - | no |
+| Static new-migration check | `node scripts/check-new-hosted-migrations.mjs` | fails if a migration after 00051 references `auth.*`. **It exits 1 on the current tree** ("Unreviewed platform Auth reference in new migration: 00054_repoint_auth_users_foreign_keys.sql"; 00054 legitimately mentions `auth.users` to repoint keys). | - | - | no |
 | Bundle secret scan | `node scripts/check-client-secrets.mjs` | scans `apps/web/dist` for sentinel server secrets | built web | **sentinel env vars** set | no |
 | Schema / migration-ledger preflight | `node scripts/release-preflight.mjs --mode=schema` | read-only transaction | - | `DATABASE_URL` | no |
 
@@ -117,7 +117,7 @@ Other workflows:
 
 | Workflow | Trigger | Gate |
 | --- | --- | --- |
-| `hosted-supabase-audit.yml` | PR touching `supabase/migrations/**`, the audit script, or itself; manual | Runs the static audit, uploads its JSON, runs `scripts/check-new-hosted-migrations.mjs` (blocks new `auth.*` dependencies in migrations 00052+) |
+| `hosted-supabase-audit.yml` | PR touching `supabase/migrations/**`, the audit script, or itself; manual | Runs the static audit, uploads its JSON, runs `scripts/check-new-hosted-migrations.mjs` (blocks new `auth.*` dependencies in migrations 00052+). **Known red guard:** the script scans every file numbered above 51, not only the PR's files, and 00054 matches, so this workflow fails for every PR that touches `supabase/migrations/**` until the script or 00054's handling is changed (script is protected; ask first). Do not read a red result here as caused by your new migration without checking which file it names. |
 | `oracle-staging.yml` | PR touching `deploy/oracle/**`, `.dockerignore`, itself; manual | `docker compose config --quiet` with synthetic env; fails if the `db` or `api` service publishes any host port |
 
 Notes: `docs/quality/TESTING.md` section 10 lists a shorter, older CI sequence (no migration, pg, bundle-scan or ordering after `build`). `ci.yml` is the truth. No deploy job, no image build, no dependency or container vulnerability scan, no SBOM, no coverage threshold and no secret-scan of git history exist in CI (Verified-by-config by absence in `ci.yml`).
@@ -174,7 +174,7 @@ docker compose --env-file deploy/oracle/.env -f deploy/oracle/compose.yaml ps
 
 Container start is not readiness. After start verify: HTTPS and certificate, sign-up/login, worker heartbeat, migration ledger, a browser journey, tenant isolation, resource use, outbound mail if enabled (section 6).
 
-Managed-database variant (`compose.supabase.yaml`): `DATABASE_URL` is server-only; the API refuses a URL that does not match `SUPABASE_PROJECT_REF` or lacks `sslmode=verify-full`. **`pnpm db:migrate` is blocked on hosted Supabase**; the hosted adapter (doc 03 section 7, `supabase/hosted/README.md`) and full RLS verification are release gates. `deploy/oracle/NEW_SUPABASE_PROJECT.md` states the compose file "is not a functioning application deployment by itself".
+Managed-database variant (`compose.supabase.yaml`): `DATABASE_URL` is server-only; the API refuses a URL that does not match `SUPABASE_PROJECT_REF` or lacks `sslmode=verify-full`. **`pnpm db:migrate` is blocked on hosted Supabase**; the hosted adapter (doc 03 section 7, `supabase/hosted/README.md`) and full RLS verification are release gates. `deploy/oracle/NEW_SUPABASE_PROJECT.md` states the compose file "is not a functioning application deployment by itself". That file names the hosted project `talentsphere-production` (region `ap-south-1`, Mumbai) while this document says no production environment exists: the name is a project label, not evidence of a production release. Connection notes from it: the direct endpoint may be IPv6-only; if the Oracle network cannot reach it, use the Supabase session pooler, whose database username is `postgres.<project ref>`; the API validates the project ref and requires TLS certificate and hostname verification (`sslmode=verify-full`). No previous Supabase project is configured or supported by this profile.
 
 ### 5.3 Coolify (from `deploy/coolify/compose.yaml` header; Unverified in practice)
 
@@ -193,6 +193,9 @@ Create a Docker Compose build-pack application with compose path `deploy/coolify
 2. `deploy/coolify/compose.yaml` passes no email variables to the worker; the API's email section is a comment.
 3. `deploy/oracle/compose.yaml` has no `api`, `worker` or `web` healthchecks; Coolify has api and web only.
 4. `.claude/launch.json` lists port 3000 for the preview server; the web dev server uses 5173.
+5. **Oracle default configuration likely does not boot the API.** `deploy/oracle/.env.example` ships `EMAIL_FROM=` empty, and `deploy/oracle/compose.yaml` (api and worker) and `compose.supabase.yaml` pass `EMAIL_FROM: ${EMAIL_FROM:-}`, so the container receives an empty string. `ServerEnvSchema.EMAIL_FROM` is `z.string().email().optional()` (`packages/config/src/env.ts`), and an empty string fails validation, so `validateServerEnv()` throws at API start ("Invalid server environment configuration"). The worker trims empty values to undefined and is not affected. Workaround without editing a protected file: in your private, gitignored `deploy/oracle/.env` set `EMAIL_FROM` to a syntactically valid address you control (removing the line does not help, because the compose default `:-` also yields an empty string). The permanent fix is a change to the protected compose files (pass the variable only when set). Not run in a container; derived from reading the schema and compose files (Unverified).
+6. **`/health` is not reachable through the Caddy front end.** Both Caddyfiles proxy only `/api/*` to the API; any other path (including `/health`) falls through to the SPA `index.html` and returns 200 with HTML. External checks must use `/api/v1/health`. The Coolify `api` healthcheck works because it calls `127.0.0.1:4000/health` inside the container.
+7. The `hosted-supabase-audit.yml` guard is red for every migration PR (section 3).
 
 ### 5.6 Proposed delivery model (not built; `17_DEVOPS_AND_INFRASTRUCTURE`)
 
@@ -204,7 +207,7 @@ Verified-by-config (`apps/api/src/server.ts`, `packages/domain`, `apps/api/src/s
 
 | Check | What it proves | Not proof of |
 | --- | --- | --- |
-| `GET /health` | API process liveness. Body `status`, `timestamp`, `version`. Exempt from rate limiting. | Database, worker, email, billing |
+| `GET /health` | API process liveness. Body `status`, `timestamp`, `version`. Exempt from rate limiting. Reachable only directly on port 4000 (container-internal checks); through the Oracle/Coolify Caddy it returns the SPA page, so use `/api/v1/health` externally. | Database, worker, email, billing |
 | `GET /api/v1/health` | Same plus `environment`. Exempt from rate limiting. | same |
 | `GET /api/v1/admin/health-diagnostics` (platform admin) | Storage mode, live database round trip, queue status and active job count, durable-versus-ephemeral route split, worker liveness from the database heartbeat | Delivery receipts |
 | Worker heartbeat | Worker writes `public.worker_health.last_seen_at` between claim cycles when 10 s elapsed. Admin diagnostics mark the queue degraded when the heartbeat is missing or older than 45 s. | Throughput (long batches delay the write) |
@@ -239,13 +242,16 @@ Built (Verified-by-config; **never executed** per `deploy/oracle/RECOVERY.md`):
 
 Missing before real users (stated by `RECOVERY.md` and `deploy/oracle/README.md`): encrypted off-VM destination, retention, scheduler, missed-backup alert, separate-host restore drill, documented RPO/RTO, verification of application data and workflows after restore, point-in-time recovery, volume (`db_data`, `caddy_data`) backup, secret/config backup, worker/job-queue recovery procedure.
 
-Restore guidance (derived; Unverified):
+Restore-to-live procedure for `deploy/oracle/compose.yaml` (derived from `backup.sh`, `verify-restore.sh` and the compose file; **Unverified, never executed**). `C` below means `docker compose --env-file deploy/oracle/.env -f deploy/oracle/compose.yaml`; run from the repo root on the host; the dump is custom format from `pg_dump -Fc`.
 
-1. Stop the API and worker (single-writer rule; do not let them write mid-restore).
-2. Restore into a new database, run `node scripts/release-preflight.mjs --mode=schema` against it, and `--mode=operational` once the worker runs.
-3. Re-point `DATABASE_URL`, start the API (one process), start the worker, confirm heartbeat and sign-in.
-4. Restart the API after any manual SQL change; the core read model hydrates at boot.
-5. Re-apply any erasure that occurred after the backup time (a restore can resurrect erased data; no tombstone mechanism is documented as built). Treat dumps as personal data: encrypt, restrict, never commit or upload.
+1. **Rehearse first.** `bash deploy/oracle/verify-restore.sh <dump>` into a throwaway database. Do not restore to live if this fails.
+2. **Stop writers.** `C stop api worker web` (single-writer rule; nothing may write during the restore). Keep `db` running.
+3. **Safety copy.** `bash deploy/oracle/backup.sh` (dump the current state, even if damaged) and keep it.
+4. **Replace the database.** `C exec -T db dropdb -U talentsphere talentsphere`, then `C exec -T db createdb -U talentsphere talentsphere`, then `C exec -T db pg_restore --exit-on-error --no-owner --no-acl -U talentsphere -d talentsphere < <dump>`. The `--no-owner --no-acl` flags and role names are copied from `verify-restore.sh`; grants and roles set outside the dump are not restored.
+5. **Check the schema.** Run `node scripts/release-preflight.mjs --mode=schema` with `DATABASE_URL` pointing at the restored database (from a host or container that can reach `db`; `db` publishes no port, so use `C run --rm --no-deps api node scripts/release-preflight.mjs --mode=schema`).
+6. **Start services.** `C up -d api`, then `worker`, then `web`. Exactly one API. Confirm `/api/v1/health` over HTTPS, a sign-in, and `--mode=operational` once the worker heartbeat is fresh.
+7. **Reconcile.** Data written after the dump time is lost (RPO equals the age of the dump; no RPO or RTO is defined). Re-apply any account erasure requested after the dump time: a restore can bring erased data back and no tombstone mechanism is documented as built (check `public.data_erasure_requests` in the safety copy). Reconcile Stripe-derived billing state against the provider if billing was on. Restart the API after any manual SQL, because the core read model hydrates at boot.
+8. Treat dumps as personal data: encrypt, restrict, never commit or upload. For the Coolify variant the same steps apply with that compose file; for managed Supabase use the provider's backup and restore tooling (not documented in the repo).
 
 Proposed targets (`15_*/SLO_AND_PERFORMANCE_TARGETS.md` section 8, `17_*/DEPLOYMENT_ARCHITECTURE.md` section 7; placeholders, not commitments): single-node failure RPO about 0 and RTO under 5 minutes with a synchronous replica; logical corruption via point-in-time recovery with RPO under 5 minutes and RTO under 1 hour; encrypted backups with a separate key; drills before first launch, after any backup-system change and on a schedule; off-site restore on a separate host; erasure tombstone replay after restore; DR tiers T1 to T5. Object storage, region loss and DR values are explicitly open decisions.
 
@@ -316,14 +322,14 @@ Before deploy (manual; sources `docs/quality/OPERATIONS.md` sections 8-9, `deplo
 
 After deploy:
 
-- [ ] `GET /health` ok over HTTPS; TLS certificate valid.
+- [ ] `GET /api/v1/health` ok over HTTPS (not `/health`: through Caddy that path returns the SPA page, section 5.5 item 6); TLS certificate valid.
 - [ ] Sign-up, login, one core journey (profile, evidence, apply) by hand or Reticle.
 - [ ] `release-preflight --mode=operational` passes (worker heartbeat fresh, no overdue or dead jobs).
 - [ ] Admin health diagnostics show DB reachable and queue healthy.
 - [ ] Error-level log lines reviewed.
 - [ ] If email enabled: real-mailbox delivery test recorded. If Stripe enabled: test-mode checkout, webhook receipt and reconciliation recorded (production refuses test keys).
 
-Public-launch blockers (not checklist items: they are open work, from `deploy/oracle/README.md`, `NEW_SUPABASE_PROJECT.md`, `docs/quality/OPERATIONS.md`): #44 email delivery proven, #45 privacy and legal deletion timeframes, #46 migrations on hosted Supabase and populated-upgrade proof, #47 operations (encrypted off-site backups, restore drill, RPO/RTO, monitoring and alerting), #48 persistence of long-tail modules, #49 interview and assessment integrity (scoring is simulated), #50 billing (live acceptance). Also required: two-user/two-organization isolation tests against SQL and the API, hardened runtime images with pinned digests and scans, resource limits, service healthchecks.
+Public-launch blockers (not checklist items: they are open work, from `deploy/oracle/README.md`, `NEW_SUPABASE_PROJECT.md`, `docs/quality/OPERATIONS.md`): #44 email delivery proven, #45 privacy and legal deletion timeframes, #46 migrations on hosted Supabase and populated-upgrade proof, #47 operations (encrypted off-site backups, restore drill, RPO/RTO, monitoring and alerting), #48 persistence of long-tail modules, #49 interview and assessment integrity (challenge code is not executed; see docs 04 and 08), #50 billing (live acceptance). Also required: two-user/two-organization isolation tests against SQL and the API, hardened runtime images with pinned digests and scans, resource limits, service healthchecks.
 
 Proposed release gates RG-01 to RG-14 (`16_*/TEST_STRATEGY.md` section 9) and fitness functions FF-01 to FF-10 are the target model, not current practice.
 
@@ -332,8 +338,8 @@ Proposed release gates RG-01 to RG-14 (`16_*/TEST_STRATEGY.md` section 9) and fi
 Testing
 
 - No automated check that documentation matches code.
-- Assessment/challenge evaluation is simulated; the assessment suite accepts simulated scoring. `tests/security/injection-defenses.test.ts` can pass when its external `grep` command is missing (2026-10-21 finding, around line 210).
-- `pnpm test:pg` was not run in any dated report listed above; its CI run is the only recorded execution path.
+- Challenge code is not executed: submissions are recorded as `submitted` with `executed: false` and are unscored (commits 3e9bedbf and 77cb8bd6 replaced the earlier fake `passed`/100; see docs 04 and 08). Tests that asserted simulated scoring were a 2026-10-21 finding; recheck any assessment test against the intended requirement. The 2026-10-21 `grep` false-green in `tests/security/injection-defenses.test.ts` was fixed (commit 52705d34; the file now contains no grep call).
+- `pnpm test:pg` is not in the three dated local-run records in section 2.3; doc 01 cites a 2026-10-23 CI run with 50 PG tests in 11 files, which is the only recorded execution path (the tree now has 13 pg test files). Not reproduced here.
 - Accessibility: no contrast automation, no screen-reader testing. Performance: no SLO, no DB or queue metrics. No Firefox or WebKit, no real-device tests, no load or soak tests, no DAST, no dependency/container/secret-history scanning in CI.
 - Worker duplicate execution under two workers was reproduced on 2026-10-21 (six jobs executed nine times); batch leases and multi-store erasure have unresolved recovery risks.
 - Hostile-input E2E exists (`hostile-user.spec.ts`, `ui-sweep.spec.ts`) but multi-organization IDOR on hiring and pagination at scale were listed as untested in the 2026-10-21 audit.
@@ -356,3 +362,32 @@ Documentation
 
 - Section 2.3 counts come from dated reports and were not reproduced. File counts in section 2 were taken by listing `tests/` on 2026-10-26 (68 unit, 54 integration, 5 security, 13 pg, 58 e2e specs).
 - Sources read only in part: `docs/reports/*` (grepped and sampled, not read in full), `Yash_Final_Project_Document` folders 15, 16, 17, 18, 23, 29 (headings plus selected sections).
+
+## 12. Requirements preserved from `docs/quality/` (intent; most not built)
+
+Carried here so the originals can be retired later. Each is a stated requirement in `docs/quality/TESTING.md` or `OPERATIONS.md`, not evidence of coverage. Check section 2 for what actually runs.
+
+Coverage ownership per layer (`TESTING.md` section 3): unit = domain rules, pure transformations, scoring, matching explanations, state transitions; component = UI states, forms, validation, accessibility behaviour (no dedicated component suite exists); integration = database, RLS, queues, provider adapters, transactional workflows; API = authorization, schema validation, pagination, errors, idempotency, rate limits; E2E = critical journeys; security = authorization fuzzing, RLS deny tests, tenant isolation, SSRF, upload, webhook replay, secrets; accessibility = keyboard, focus, semantics, screen reader, zoom, contrast, reduced motion; performance = route startup, interaction latency, API p95/p99, DB queries, queue age.
+
+Critical E2E journeys (`TESTING.md` section 5):
+- Candidate: sign-up, goal, skills, learning, assessment, evidence, job, apply.
+- Recruiter: organization, job, search, review, message, interview, decision.
+- Institution: tenant, learner, learning, assessment, credential, verification.
+
+Assessment-security tests to have (section 6): session binding, timing, submission idempotency, answer protection, `AI_PROHIBITED` enforcement, closure of AI escape routes, suspicious-event capture, retry behaviour, replay resistance.
+
+AI tests to have (section 7): prompt injection, data-boundary enforcement, provider fallback, free-user cost gate, provenance, malformed model output, policy denial, context minimisation, groundedness evaluation where applicable. No external model provider is connected today.
+
+Data-integrity tests to have (section 8): unique and foreign-key constraints, state-transition validity, audit records, evidence-revocation impact, tenant isolation, migration verification (partly covered by `tests/pg` and the migration-history guard).
+
+Flaky tests: owner, reason and removal deadline are mandatory before any quarantine of a critical test.
+
+Operating model (`OPERATIONS.md` sections 1-8, target):
+- Environments `local, CI, preview, staging, production`, each with separate secrets and configuration (no preview environment exists).
+- Critical trace: request, user, tenant, feature, API, DB or queue, provider, result; structured logs, metrics, traces, audit events, business dashboards (only logs and request ids exist).
+- Alert on: error rate, latency or SLO breach, queue age and backlog, database saturation, auth failures, tenant-isolation signals, payment and webhook failures, AI policy and cost anomalies, assessment-integrity anomalies (none are wired).
+- Backups and DR must prove restore, point-in-time recovery where supported, storage recovery, queue recovery, configuration restoration and rollback.
+- Incident lifecycle: detect, contain, assess, recover, communicate, post-mortem.
+- Runbooks required at minimum for: database incident, auth, RLS or tenant isolation, storage, queue, provider outage, payments, AI provider or policy, assessment integrity, privacy request, rollback, disaster recovery (none written; see section 9.2).
+- No release without: security gate, critical E2E, accessibility evidence, migration proof, rollback path, observability, business acceptance.
+- Post-deploy smoke tests cover authentication, authorization, a critical API, database connectivity, queue health, storage, observability and a critical user journey.

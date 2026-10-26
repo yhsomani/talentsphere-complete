@@ -2,7 +2,7 @@
 
 Canonical home for: authentication and sessions, authorization, tenancy and RLS, secrets rules, rate limiting/CORS/headers, input security, data protection and privacy, Stripe billing architecture, email, the AI scaffold, other integrations, and the threat and gap register. Feature behaviour, roles and state machines are in [04-FEATURES-AND-WORKFLOWS.md](04-FEATURES-AND-WORKFLOWS.md). Plan prices and limits are in [`docs/PRICING.md`](../PRICING.md) and are not repeated.
 
-Evidence basis: repository HEAD `40ee2de3`, read 2026-10-26. Statements marked **Confirmed** come from reading the code in this pass; **Reproduced** means a small probe was run in this pass; **Doc claim** means taken from another document without re-reading; **Not verified** means nothing was run. No deployed system, live Stripe or Brevo account, PostgreSQL instance or browser was exercised. This is not a security certification.
+Evidence basis: repository HEAD `40ee2de3`, read 2026-10-26. Labels map to the single status definition in [01-PRODUCT-REQUIREMENTS.md](01-PRODUCT-REQUIREMENTS.md) section 0.1: **Confirmed** = source read in this pass (Implemented-unverified, code-read; never Implemented-verified, which needs tests plus a recorded PG/browser pass); **Reproduced** = the command in section 2.1 was run in this pass; **Doc claim** = historical claim, unverified; **Not verified** = nothing was run. No deployed system, live Stripe or Brevo account, PostgreSQL instance or browser was exercised. This is not a security certification.
 
 ## 1. Architecture of trust (as built)
 
@@ -37,7 +37,18 @@ There is no global authentication middleware. Every protected handler calls `ext
 
 ### 2.1 Candidate defect: `.env` file does not supply `TOKEN_SECRET` to the session code (Reproduced)
 
-`packages/domain/src/auth.ts` reads `process.env.TOKEN_SECRET` once, when the module is first loaded. `apps/api/src/index.ts` statically imports the server (which imports the domain package) and only afterwards calls `process.loadEnvFile('.env')` inside the module body. A probe in this pass (token minted by a process whose `TOKEN_SECRET` came only from a `.env` file, then verified by a process with the same value in its real environment) **failed verification**: the `.env` value was not used for signing. `validateServerEnv()` runs after the load and therefore reports the secret as present, so `productionConfigProblems` does not catch it. Effect: if a deployment supplies `TOKEN_SECRET` only through an `.env` file, every restart invalidates all sessions and replicas reject each other's tokens, silently. Deployments that inject real environment variables (Compose `environment`/`env_file`, a platform secret store) are not affected. The compiled `apps/api/dist/index.js` has the same order (import of `./server.js` first, `loadEnvFile` after); the full API entry was not started. The worker has the same load pattern but does not sign tokens.
+`packages/domain/src/auth.ts` reads `process.env.TOKEN_SECRET` once, when the module is first loaded. `apps/api/src/index.ts` statically imports the server (which imports the domain package) and only afterwards calls `process.loadEnvFile('.env')` inside the module body. Reproduction (bash, from `packages/domain`, built `dist` present; no script file needed). The first command signs and verifies with the secret as a real environment variable (control, prints `true`); the second signs in a process whose secret comes only from a `.env` file loaded after the domain import, as `apps/api/src/index.ts` does, then verifies with the real variable (prints `false`):
+
+```bash
+S=0123456789abcdef0123456789abcdef0123456789
+T=$(TOKEN_SECRET=$S node --input-type=module -e "import {createSessionToken as c} from './dist/auth.js'; console.log(c('u','e@x.y',['candidate']))")
+TOKEN_SECRET=$S node --input-type=module -e "import {verifySessionToken as v} from './dist/auth.js'; console.log(v('$T')!==null)"
+echo "TOKEN_SECRET=$S" > .env.probe
+T=$(node --input-type=module -e "import {createSessionToken as c} from './dist/auth.js'; process.loadEnvFile('.env.probe'); console.log(c('u','e@x.y',['candidate']))"); rm .env.probe
+TOKEN_SECRET=$S node --input-type=module -e "import {verifySessionToken as v} from './dist/auth.js'; console.log(v('$T')!==null)"
+```
+
+The secret above is a throwaway test string, not a real credential. Result when last run (2026-10-26, Windows Git Bash, Node 24): `true` then `false`. `validateServerEnv()` runs after the load and therefore reports the secret as present, so `productionConfigProblems` does not catch it. Effect: if a deployment supplies `TOKEN_SECRET` only through an `.env` file, every restart invalidates all sessions and replicas reject each other's tokens, silently. Deployments that inject real environment variables (Compose `environment`/`env_file`, a platform secret store) are not affected. The compiled `apps/api/dist/index.js` has the same order (import of `./server.js` first, `loadEnvFile` after); the full API entry was not started. The worker has the same load pattern but does not sign tokens.
 
 ## 3. Authorization model
 
@@ -202,7 +213,7 @@ Severity is a judgement for a small beta with one API writer. "Status" is the st
 
 | ID | Threat / gap | Sev | Status | Mitigation present | Needed |
 |---|---|---|---|---|---|
-| T-01 | `.env`-only `TOKEN_SECRET` ignored by session code (2.1) | High if deployed that way | Reproduced (domain module); entry not run | Compose env injection avoids it | Load env before importing the domain package, or read the secret lazily; add a startup self-check that the signing key is the configured one. Protected build/source change: ask owner. |
+| T-01 | `.env`-only `TOKEN_SECRET` ignored by session code (2.1) | High if deployed that way | Reproduced (command in 2.1; full API entry not started) | Compose env injection avoids it | Load env before importing the domain package, or read the secret lazily; add a startup self-check that the signing key is the configured one. Protected build/source change: ask owner. |
 | T-02 | XSS can steal bearer tokens from `localStorage`; no CSP or HSTS on the SPA | High | Confirmed | React escaping | CSP and HSTS in the static host; consider cookie sessions (target design) |
 | T-03 | Course completion mints authority-verified evidence without an assessment (04 G-03) | High for trust claims | Confirmed Open | Instructor cannot enroll in own course | Final-assessment gate or lower evidence level; separate issuer identity |
 | T-04 | Certificate revocation leaves linked evidence verified and publicly verifiable | Medium | Confirmed Open | none | Cascade revocation (owner decision) |
@@ -240,3 +251,47 @@ Not implemented. The greenfield blueprint in `Yash_Final_Project_Document/14_SEC
 | System model 06: free AI quota 20 requests/day | 5 per day per `billing.ts`. |
 | SECURITY.md section 8: "At rest in the job queue: every terminal transition strips token and code" | Code defines `SECRET_PAYLOAD_KEYS = ['token','code']`; consistent, but queued and running jobs and the dev outbox log still carry them. |
 | `ARCHITECTURE.md` INVARIANT-006: tokens signed with `TOKEN_SECRET` or a random key | True, except that an `.env` file does not reach the signer (2.1). |
+
+## 16. Policy content carried from `docs/quality/SECURITY.md` (requirements and targets, not built behaviour)
+
+These items are the parts of `SECURITY.md` (sections 2, 4 boundaries, 5, 6, 7, 10, 12, 13, 14) that sections 1 to 15 above do not restate. They are requirements. Where the code already meets one, the section above says so; the rest are Planned-approved or open.
+
+### 16.1 Intended request path and authorization chain
+
+Browser > HTTPS > authentication > session verification > authorization > purpose/privacy policy > domain validation > database constraints and RLS > audit. Authorization is meant to follow identity > role > permission > resource ownership > tenant > purpose > policy, and never trusts client-supplied role or tenant ids. Built: session verification, role and ownership checks, domain validation, database constraints. Not built as designed: purpose/privacy policy as a distinct layer, RLS in the request path (section 4), and durable audit of non-admin events (section 8).
+
+### 16.2 Threat model (primary threats named by the project)
+
+Broken object-level authorization; broken function-level authorization; account or session compromise; tenant isolation failure; SSRF; XSS and CSRF; unsafe file upload; webhook replay; rate-limit bypass; secret leakage; supply-chain compromise; prompt injection; AI data leakage; assessment cheating; billing replay or double effects. Mapping to this document: object and function level authorization (sections 3, A-1 to A-9), session compromise (2, T-01, T-02), tenant isolation (4), SSRF (no user-supplied outbound URL exists; the unwired helper is T-13), XSS (T-02), CSRF (not applicable to bearer headers), upload (no upload feature, 16.4), webhook replay (9), rate limits (6, T-11), secrets (5), supply chain (T-18), prompt injection (11), AI leakage (no model call exists), assessment cheating (04 G-01, G-02), billing replay (9). A fuller STRIDE-style model exists only in the Proposed-only blueprint (section 14).
+
+### 16.3 Sensitive-data classes
+
+Intended classes: PUBLIC, INTERNAL, PRIVATE, SENSITIVE, RESTRICTED, NEVER-EXTERNAL. Assessment answer keys, provider secrets, access tokens and security internals are never to be sent to an external AI. Built: hidden test cases are stripped from candidate views of challenges and interviews; no external AI call exists. No data-class labelling exists in code or schema.
+
+### 16.4 File security pipeline (target; no upload feature exists)
+
+Intended: upload > validate size and type > MIME and content inspection > malware scan where needed > isolated storage > access policy > signed delivery > lifecycle. The Supabase storage bucket names in the environment schema are unused. Any future upload feature must implement this whole chain before shipping.
+
+### 16.5 API security checklist (SECURITY.md section 8)
+
+Zod validation at the boundary (built, section 7); allow-listed filters and sorts (partly; `PaginationQuerySchema` exists but no route uses it); rate limiting (built, section 6); idempotency (only on checkout, work history, reference request); CSRF strategy aligned to auth transport (n/a for bearer headers); secure headers (API built, SPA not); CORS allow-list (built); no stack traces to clients (built in deployed environments).
+
+### 16.6 AI security sequence (SECURITY.md section 10)
+
+Before any provider call: authenticate; resolve entitlement; classify data; inspect assessment context; evaluate policy; minimize context; invoke provider; validate output; record provenance. Built for chat: authenticate, entitlement and quota, assessment context, prompt firewall, local response with provenance fields. Not built: data classification, consent check, minimization, output validation (no provider exists). Assessment rule: AI restrictions are inherited by every AI route (`ASSESSMENT_AI_PROHIBITED`); protected answers are never returned to clients.
+
+### 16.7 Deployment safety boundaries recorded 2026-10-18
+
+Interview code execution is a development/test simulation, not a sandbox; the API returns `SERVICE_UNAVAILABLE` in staging and production until a real isolated executor and abuse controls exist. Work-history badge scoring counts only independently endorsed skills, not skills the candidate typed; changing that trust policy needs owner review. Public privacy and security inbox addresses are set only through build-time `VITE_PRIVACY_EMAIL` / `VITE_SECURITY_EMAIL` after ownership and monitoring are verified; no response SLA is advertised; the legal pages remain unapproved drafts and pass no launch gate merely because addresses exist. Do not enable direct database access to clients just because the RLS tests pass: verify production grants, every additional permissive policy, function ownership and the real identity mapping first.
+
+### 16.8 Testing baseline
+
+Verification frameworks named by the project: OWASP ASVS 5.0 and the OWASP API Security Top 10. Existing security tests (names only, not run here): `tests/security/api-security.test.ts` (signing key, signed webhook), `core-authz.test.ts` (account state, object-level checks), `session-sign-out.test.ts`, `injection-defenses.test.ts` (the unwired module), `private-data-rls.test.ts`, plus `tests/pg/*` for concurrency, billing and RLS. No ASVS conformance statement exists.
+
+### 16.9 Incident response outline
+
+Detect > contain > preserve > assess > eradicate > recover > notify > learn. Only the outline exists in the repository; there is no runbook for key rotation, token revocation of all sessions (the practical lever today is changing `TOKEN_SECRET`, which invalidates every token), or Stripe/Brevo credential rotation. Operational procedures are owned by the testing and operations document.
+
+### 16.10 Privacy programme statement
+
+Privacy controls are to be implemented against applicable legal requirements. For India the project intends to map the programme to the DPDP Act and Rules and their staged commencement; no legal compliance is claimed without implementation evidence, and none exists here. The blueprint's compliance matrix marks every regime as applicability to be confirmed by counsel.

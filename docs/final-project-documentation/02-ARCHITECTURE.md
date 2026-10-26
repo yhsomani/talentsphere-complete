@@ -273,7 +273,7 @@ Namespace warning: `SSOT.md` ADR-001..013, `docs/engineering/TARGET_ARCHITECTURE
 | R5 | Bearer token in `localStorage` (XSS-readable); no refresh flow; 24 h lifetime | `apps/web/src/lib/session.ts` | Implemented-verified |
 | R6 | Worker handlers are not abortable; side effects can repeat; reclaim has no attempts cap | `claim.ts`, `background-jobs.ts` | Implemented-verified |
 | R7 | `server.ts` is one 13.4k-line closure with 145 Maps; every change risks unrelated routes; no per-module tests of the wiring beyond integration tests | file size | Implemented-verified |
-| R8 | Assessment honesty: challenge and interview code is never executed; course completion can mint authority-verified evidence without the final assessment (per `ARCHITECTURE.md`; not re-traced here) | `server.ts` ~4675, ~3645 | Partial / Implemented-unverified |
+| R8 | Assessment honesty: challenge and interview code is never executed; completing all lessons of a course mints evidence with `verificationLevel = 'authority_verified'` and status `verified` without any final assessment (`POST /lessons/:id/complete` handler, `evidence.verificationLevel = 'authority_verified'` at `server.ts` line 5285; confirmed by reading, and by the independent validator) | `server.ts` ~4675 (challenge submit), ~3645 (interview code), 5285 (course completion) | Implemented-verified (course completion); Partial (code execution) |
 | R9 | Erasure executes immediately, ignores the 30-day grace period, is multi-stage non-atomic (now resumable) | `server.ts` ~10201 | Implemented-verified |
 | R10 | Billing: concurrent Checkout sessions can both be paid; disputes and voided invoices unsupported; webhook shares the global rate limit | `docs/system-model/03` CF-30 | Reported |
 | R11 | No metrics, tracing or alert backend; liveness endpoints do not prove database reachability | section 10 | Implemented-verified |
@@ -322,3 +322,187 @@ Data-migration implication: the target schema uses different entity names (`acco
 ## 17. Sources read for this document
 
 Code and config (read): `apps/api/src/{server.ts (lifecycle, auth, errors, persist, boot, routes by pattern; handlers sampled),index.ts,durability.ts,billing-stripe.ts (head and webhook),storage/index.ts,storage/core-store.ts (types, commit, error mapping)}`, `apps/worker/src/{index.ts,claim.ts,email/config.ts}`, `packages/config/src/env.ts`, `packages/observability/src/*`, `packages/domain/src/{index.ts,auth.ts,core.ts,background-jobs.ts}`, `apps/web/src/{App.tsx,lib/api.ts,vite.config.ts}`. Documents: `ARCHITECTURE.md`, `docs/engineering/{DATABASE,API_CONTRACTS,TRD,TARGET_ARCHITECTURE}.md` and ADR-015/016, `docs/system-model/{00,01 (partial),02 (partial),03,06}`, and the target-design files named in section 16 (read in part). Not read in full: `server.ts` handler bodies (13k lines), `stripe-gateway.ts`, `billing-store.ts`, most domain modules, `docs/system-model/04,05`, `13_*/contracts/*.yaml`, `12_*/CONCEPTUAL_AND_LOGICAL_MODEL.md`, `10_*/FRONTEND_ARCHITECTURE.md` sections 6-19.
+
+## Appendix A. Responsibility owners, extension points, escalation, testing architecture
+
+Carried from root `ARCHITECTURE.md` sections 5, 10, 11, 22, 27 and 28, corrected against current code. Nothing here is new policy.
+
+### A.1 Reuse these owners; do not create parallel ones
+
+| Concern | Existing owner |
+| --- | --- |
+| Password hashing and verification | `hashPassword`, `verifyPassword`, `passwordNeedsRehash` (`packages/domain/src/auth.ts`) |
+| Session tokens | `createSessionToken`, `verifySessionToken` (same file) |
+| API identity | `extractUser`, `maybeExtractUser`, `resolveSession` (`server.ts`) |
+| Application state changes | `ALLOWED_APPLICATION_TRANSITIONS` / `canTransitionApplication` (`core.ts`) |
+| Evidence rules | `packages/domain/src/evidence.ts` |
+| Billing plans and Stripe reconciliation | `PLATFORM_PLANS` (`billing.ts`), `reconcileStripeSubscription` (`stripe-billing.ts`), `billing-stripe.ts` |
+| Request shapes | `packages/contracts/src/index.ts` |
+| Errors | the global handler in `buildApp` (`DomainError` / `ZodError`) |
+| Core writes | `persist` plus `PgCoreStore`; dedicated stores own their own transactions |
+| Runtime job processing | `runClaimCycle` (not `JobQueueEngine`) |
+| Browser session state | `SessionProvider` and `lib/session.ts`; common request and error behavior in `apiFetch` / `apiJson` |
+| Shared web components | `apps/web/src/components/ui` primitives |
+
+### A.2 Where each kind of change goes
+
+| Change | Home |
+| --- | --- |
+| Domain rule or state machine | The owning `packages/domain/src/<context>.ts` plus unit tests |
+| API route | Existing feature block in `server.ts`, or the injected billing module |
+| Payload shape | A Zod schema in contracts, parsed in the route |
+| Persistent record | The owning storage interface and implementation, plus an additive numbered migration (needs owner approval when it changes a populated schema) |
+| Async effect | Add the kind to `DISPATCH_EVENT_KINDS` and a handler in `apps/worker/src/index.ts`; never acknowledge undelivered work |
+| Notification | Domain notification type and preferences; core notification op inside the same `persist()` transaction |
+| Browser page or component | `apps/web/src/pages`, `App.tsx`, existing navigation and `components/ui` |
+| Environment variable | `packages/config/src/env.ts` and `.env.example` (subject to the protected-file rule, see 03) |
+| Email provider | A new adapter that passes `tests/unit/email/provider-contract.ts`, registered in `buildProvider` and `SUPPORTED_EMAIL_PROVIDERS`; call sites do not change |
+| Database technology, broker, provider SDK, auth provider | Only through a recorded human decision (invariant 011) |
+
+### A.3 Escalation (from `AGENTS.md`, summarized)
+
+Escalate to the owner before: schema-breaking design, security architecture changes, AI provider or entitlement changes, pricing, major API versioning, or any consequential decision. Identify affected owners and propose a bounded change. Ordinary fixes inside established boundaries need no extra approval. Protected build files (`package.json`, lockfiles, `tsconfig*`, `vite*`, `vitest*`, `playwright.config.*`, `.github/`, `deploy/`, Dockerfiles, Prettier and git ignore files) stay read-only for agents unless the user explicitly authorizes the change.
+
+### A.4 Testing architecture (what the layers prove)
+
+| Layer | Proves | Caveat |
+| --- | --- | --- |
+| Unit (`tests/unit`) | Domain rules, config, helpers; imports **source** | A stale `dist` of workspace packages makes the API disagree with tests; shared test signing keys keep copies compatible but do not prove matching source |
+| Integration (`tests/integration`) | Routes in memory mode | Memory mode cannot prove durability |
+| Security (`tests/security`) | Authorization, injection defenses, config refusals | |
+| PostgreSQL (`tests/pg`, needs `TEST_DATABASE_URL`) | Durability, concurrency, RLS two-user isolation | SQL-text tests (`database-migrations.test.ts`) do not execute SQL |
+| Playwright (`tests/e2e`) | Built web + API in a browser | Uses built artifacts, not source |
+| Reticle | A driven real flow with a verdict | Required for user-visible changes; not run for this documentation |
+
+Command details and CI are in 07.
+
+### A.5 Agent quick reference and evidence vocabulary
+
+Read `AGENTS.md`, `SSOT.md` (intent, not status), then the relevant requirement, contract, security and testing rules; locate the existing owner before changing code; trace callers, validation, side effects and tests; preserve the architecture and the build-file restriction; report contradictions instead of silently changing policy; do not copy demo fallbacks, add parallel systems, or call documentation "implemented".
+
+Evidence vocabulary used across the repository: source presence is "implemented"; incomplete contract coverage is "partial"; explicit future scope is "planned"; absence from inspected sources is "not implemented"; missing proof is "unverified". Runtime or production claims need separately recorded execution evidence. This file's labels (section 0) refine that vocabulary.
+
+## Appendix B. Target architecture reference (Proposed-only)
+
+Carried from `docs/engineering/TARGET_ARCHITECTURE.md` v6.0 (sections 2-5, 12, 20, 21). That file states it describes intent, not the running code, and overlaps `SSOT.md` Part VI. Its ADR numbering conflicts with the implemented register (section 13). Everything below is Proposed-only; where it conflicts with sections 1-12 of this file, the earlier sections describe what exists.
+
+### B.1 Target runtime architecture
+
+```mermaid
+flowchart TB
+    B[Browser / Installed PWA] --> UI[React Feature UI]
+    UI --> Q[TanStack Query / Client State]
+    Q --> API[Fastify HTTP API]
+    API --> APP[Application Use Cases]
+    APP --> POL[Authorization / Privacy / AI Policy]
+    APP --> DOM[Domain Modules]
+    DOM --> DB[(PostgreSQL)]
+    DB --> RLS[RLS / Grants]
+    DOM --> ST[Storage]
+    APP --> QUE[Supabase Queues]
+    QUE --> W[Worker]
+    APP --> RT[Selective Realtime]
+    APP --> EXT[Integration Adapters]
+    EXT --> PAY[Payment]
+    EXT --> MAIL[Email]
+    EXT --> VID[Media]
+    EXT --> AI[AI Providers]
+```
+
+Differences from what is built: no TanStack Query, no Supabase Queues or Realtime, no storage or media adapters, no central policy layer, no remote AI providers.
+
+### B.2 Target logical layers
+
+| Layer | Contents | Technology |
+| --- | --- | --- |
+| Presentation | Web app, extension, PWA, admin | React + TypeScript + Vite |
+| Application | HTTP application APIs, route handlers, use cases | TypeScript strict |
+| Domain | Aggregates, entities, value objects, domain events, rules | Pure TypeScript |
+| Infrastructure | Repositories and adapters | Supabase, Stripe, providers |
+| Data | PostgreSQL with RLS, storage buckets, realtime channels | Supabase |
+| External | AI, payment, media, email, identity verification | Integration layer |
+
+### B.3 Target bounded contexts (7 plus shared kernel)
+
+| Context | Contents | Aggregates |
+| --- | --- | --- |
+| `identity` | Auth, profiles, orgs, tenancy, managed learners, instructor approval | User, Profile, Organization, Membership |
+| `marketplace` | Jobs, requisitions, applications, offers, interviews, employer insights | Job, Application, Offer, CompanyReview |
+| `learning` | Courses, lessons, media, enrolments, progress, quizzes, paths, certificates, XP, contests | Course, Enrolment, Assessment, XPLedger, Contest |
+| `community` | Connections, posts, groups, events, messaging, notifications | Thread, Post, Community |
+| `billing` | Subscriptions, entitlements, orders, refunds, licence pools, payouts | Subscription, Order, LicencePool, Payout |
+| `governance` | Admin, moderation, trust, audit, flags, verification | Report, ModerationAction, FeatureFlag |
+| `analytics` | Event tracking, KPIs, experimentation | AnalyticsEvent, KPISnapshot |
+| Shared kernel | Event backbone, media engine, integrations, AI service, UI kit, types | DomainEvent, MediaSource, ProviderAdapter |
+
+Boundary rules: domain pure TypeScript; application layer orchestrates and HTTP APIs are thin; infrastructure implements domain ports; cross-feature imports through `index.ts` barrels only; cross-context calls via events or application-service interfaces; zero circular dependencies; routes are thin composition. The current code follows only the first and last of these loosely (section 5).
+
+### B.4 Intra-package barrel rule (enforced by convention today)
+
+`packages/domain/src/index.ts` is a barrel that declares nothing. A module inside a package must never import its own package barrel (the barrel re-exports the importer, forming a cycle such as `auth.ts -> index.ts -> auth.ts`); it imports the module that declares the symbol. `core.ts` is the import-free leaf holding shared primitives (`Role`, `User`, `Profile`, `Evidence` types, `ApplicationState`, `ALLOWED_APPLICATION_TRANSITIONS`, `canTransitionApplication`, assessment policy, `DomainError`). Feature modules import from `core.ts` or from the specific sibling that owns a symbol. Outside the package, import `@talentsphere/domain`. `tsc` does not detect cycles; no automated check exists (section 5).
+
+### B.5 Target authentication flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant W as Web App
+    participant S as Supabase Auth
+    participant MW as Edge Middleware
+    participant D as Database
+    U->>W: Credentials / OAuth
+    W->>S: Authenticate
+    S-->>W: JWT + refresh token
+    W->>MW: Request with JWT
+    MW->>MW: Verify + normalize role claims
+    MW->>D: Set local app.user_id
+    D->>D: Apply RLS policies
+    D-->>W: Authorized data
+    W-->>U: Rendered page
+```
+
+This is the older Supabase-Auth design and conflicts with the built self-issued session model (decision D4) and with the newer target design in section 16 (cookie sessions through the Fastify API). The TARGET_ARCHITECTURE "V6 corrections" already say browser mutations use the Fastify application API and that RLS is the database boundary, not the whole authorization model.
+
+### B.6 Target AI safety flow
+
+```mermaid
+flowchart TD
+    A[User Input] --> B[PII Detection]
+    B --> C[Redaction]
+    C --> D[Prompt Construction + canary + user_content fencing]
+    D --> E[AI Provider]
+    E --> F[Output Validation Zod]
+    F --> G{Canary leaked?}
+    G -->|Yes| H[Drop response + alert + flag account]
+    G -->|No| I{Confidence}
+    I -->|below 0.5| J[Suppress]
+    I -->|0.5 to 0.7| K[Show with disclaimer]
+    I -->|0.7 or more| L[Show with evidence]
+    K --> M{Human review required?}
+    L --> M
+    M -->|Yes| N[Human Gate]
+    M -->|No| O[User sees draft]
+    N --> O
+```
+
+Not built: the current assistant is a local heuristic with a prompt firewall (`sanitizePromptInput`) and no provider, canary, confidence or human gate.
+
+### B.7 Target ADR text (TARGET_ARCHITECTURE section 21.3, "locked at 13")
+
+| ID | Decision |
+| --- | --- |
+| ADR-001 | Supabase Auth sole session authority (contradicted by the built system) |
+| ADR-002 | Modular monolith (React/Vite + Supabase + managed hosting) |
+| ADR-003 | 50 canonical tables + RLS deny-by-default (the schema has 112 tables) |
+| ADR-004 | Supabase Realtime messaging authority |
+| ADR-005 | Stripe webhook idempotency + demo stubs |
+| ADR-006 | Chrome extension local-first |
+| ADR-007 | Provider-agnostic media |
+| ADR-008 | Institutional tenancy |
+| ADR-009 | Dual-queue boundary (Postgres queue built; heavy queue not selected) |
+| ADR-010 | RLS policy template generator |
+| ADR-011 | Media model is the authority for lesson content |
+| ADR-012 | DDD + feature-based + atomic design |
+| ADR-013 | Cross-domain via events or application-service interfaces only |
+
+Scale evolution path (TRD section 4): modular monolith, worker scaling, cache, search extraction, replicas, selective service extraction. Extraction needs measured load or latency evidence, domain ownership, a failure-isolation need, operational readiness and a migration plan. Realtime must not be the only path for payment state, authorization, assessment scoring, credential issuance or audit persistence.

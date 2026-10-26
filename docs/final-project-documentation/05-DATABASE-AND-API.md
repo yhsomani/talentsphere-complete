@@ -124,8 +124,8 @@ Other `UNIQUE` pairs exist on LMS, connections, portfolio, gamification and draf
 
 ## A6. Row-level security and grants
 
-- Every one of the 112 tables has `ENABLE ROW LEVEL SECURITY` somewhere in the migration history (final state after 00055). About 160 `CREATE POLICY` statements exist (some later dropped and recreated by 00047 and 00048); 24 tables have RLS but no policy, which denies non-privileged roles by design (examples: `background_jobs`, `revoked_sessions`, `worker_health`, `admin_audit_logs`, `stripe_customers`, `work_history_email_challenges`, `organizations`, `org_memberships`). Counts are from SQL text and approximate. Implemented-verified.
-- Policies are written for direct Supabase JWT access (`auth.uid()`, 206 uses) and are not what protects API calls: the API authorizes in code with its own session tokens. Local databases get a compatibility shim (`auth.uid()` reading `request.jwt.claim.sub`). Hosted Supabase `auth.uid()` does not recognize the API's tokens. Implemented-verified.
+- Every one of the 112 tables has `ENABLE ROW LEVEL SECURITY` somewhere in the migration history (final state after 00055). 181 `CREATE POLICY` and 12 `DROP POLICY` statements exist in non-comment SQL (00047 and 00048 drop and recreate some, so about 169 remain in effect); 24 tables have RLS but no policy, which denies non-privileged roles by design (examples: `background_jobs`, `revoked_sessions`, `worker_health`, `admin_audit_logs`, `stripe_customers`, `work_history_email_challenges`, `organizations`, `org_memberships`). Counts are from non-comment SQL text (118 `ENABLE ROW LEVEL SECURITY` statements cover the 112 tables, some repeated by hardening migrations). Implemented-verified.
+- Policies are written for direct Supabase JWT access (`auth.uid()`, 202 uses in non-comment SQL) and are not what protects API calls: the API authorizes in code with its own session tokens. Local databases get a compatibility shim (`auth.uid()` reading `request.jwt.claim.sub`). Hosted Supabase `auth.uid()` does not recognize the API's tokens. Implemented-verified.
 - 00047/00048 repaired profile-owned policies (messages, notifications, preferences) that had compared profile ids with a user id; the thread participant helper is `SECURITY DEFINER` with `search_path = ''`, takes a thread id (never a user id), and self-joining a thread by a client is blocked by revoking `INSERT`. Implemented-verified.
 - 00053 revokes client-role writes on billing tables and all access to `stripe_customers`; 00055 enables RLS on `certificate_revocations` and revokes client access (00021 had created it without RLS). Implemented-verified.
 - Hosted Supabase: `supabase/hosted/02_data_api_lockdown.sql` revokes all privileges from `anon` and `authenticated` on current and future tables, sequences and functions; RLS stays on as a second layer. Applied state is Unknown (section A11).
@@ -158,6 +158,68 @@ Migration history by range:
 | 00052-00053 | Billing persistence and Stripe linkage; client-role grants hardening |
 | 00054 | Repoint `auth.users` foreign keys to `public.users` |
 | 00055 | RLS on `certificate_revocations` |
+
+### Per-migration inventory
+
+Generated from the `CREATE TABLE` statements and read headers of the 55 files (112 distinct table names; `feature_flags` is created twice). Presence in SQL does not establish applied state or runtime use (section A2). Column-level detail, bounds, foreign keys and indexes are in the SQL files themselves, which are the only definition.
+
+| Migration | Created tables and other effects |
+| --- | --- |
+| `00001_core_schema.sql` | `users`, `profiles`, `evidence`, `organizations`, `org_memberships`, `jobs`, `job_applications`, `audit_logs`, `feature_flags` |
+| `00002_evidence_skills_schema.sql` | `skills`, `skill_relationships`, `evidence_skills` |
+| `00003_jobs_applications_schema.sql` | `job_skills`, `application_evidence` |
+| `00004_challenges_assessment_schema.sql` | `challenges`, `assessment_sessions`, `challenge_submissions`, `xp_transactions` |
+| `00005_lms_courses_schema.sql` | `courses`, `course_modules`, `lessons`, `course_enrollments`, `lesson_progress`, `course_certificates`, `course_skills` |
+| `00006_messaging_schema.sql` | `message_threads`, `thread_participants`, `messages` |
+| `00007_notifications_schema.sql` | `notifications`, `notification_preferences` |
+| `00008_ai_gateway_schema.sql` | `ai_conversations`, `ai_messages`, `ai_usage_meters` |
+| `00009_resumes_schema.sql` | `resumes`, `resume_exports` |
+| `00010_networking_connections_schema.sql` | `connections` |
+| `00011_portfolio_showcase_schema.sql` | `portfolio_projects`, `portfolio_project_skills`, `portfolio_project_media`, `portfolio_project_evidence` |
+| `00012_gamification_xp_ledger_schema.sql` | `user_gamification_profiles`, `gamification_badges`, `user_badges` |
+| `00013_account_settings_privacy_schema.sql` | `user_settings`, `data_erasure_requests`, `data_export_requests` |
+| `00014_billing_subscriptions_schema.sql` | `subscriptions`, `invoices`, `entitlements`, `billing_events` |
+| `00015_admin_governance_schema.sql` | `platform_config` |
+| `00016_search_discovery_schema.sql` | `search_history` |
+| `00017_moderation_trust_safety_schema.sql` | `moderation_reports`, `moderation_appeals` |
+| `00018_saved_searches_job_alerts_schema.sql` | `saved_searches`, `job_alerts`, `saved_jobs` |
+| `00019_application_drafts_schema.sql` | `application_drafts`, `application_draft_versions` |
+| `00020_product_analytics_schema.sql` | `analytics_events`, `analytics_daily_kpis` |
+| `00021_certificate_verification_schema.sql` | `certificate_revocations` |
+| `00022_job_templates_schema.sql` | `job_templates` |
+| `00023_salary_intelligence_schema.sql` | `salary_reports`, `salary_aggregates` |
+| `00024_application_feedback_schema.sql` | `feedback_templates`, `application_feedback` |
+| `00025_skill_decay_schema.sql` | `skill_freshness`, `skill_freshness_history` |
+| `00026_technical_interview_platform_schema.sql` | `interview_questions`, `interview_assessments`, `interview_scorecards`, `interview_ai_feedbacks` |
+| `00027_reputation_engine_schema.sql` | `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_recovery_plans` |
+| `00028_warm_introductions_schema.sql` | `warm_introduction_preferences`, `warm_introduction_requests` |
+| `00029_referral_requests_schema.sql` | `referral_requests`, `referral_outcomes` |
+| `00030_activity_contributions_schema.sql` | `activity_events`, `contribution_scores` |
+| `00031_instructor_reputation_schema.sql` | `instructor_reputation_breakdown`, `instructor_endorsements` |
+| `00032_peer_credibility_schema.sql` | `skill_endorsements`, `endorsement_weights` |
+| `00033_alumni_networks_schema.sql` | `alumni_affiliations`, `alumni_groups`, `alumni_group_members`, `alumni_mentorship` |
+| `00034_employer_reputation_schema.sql` | `employer_reputation_breakdown`, `employer_reviews` |
+| `00035_skill_forecasting_schema.sql` | `skill_market_signals`, `skill_forecasts` |
+| `00036_career_trajectory_schema.sql` | `career_transitions`, `progression_benchmarks`, `career_milestone_evaluations` |
+| `00037_learning_impact_schema.sql` | `learning_outcomes`, `learning_impact_metrics` |
+| `00038_talent_pool_intelligence_schema.sql` | `talent_pools`, `talent_pool_members` |
+| `00039_behavioral_talent_discovery_schema.sql` | `behavioral_talent_profiles` |
+| `00040_talent_segmentation_schema.sql` | `candidate_segmentations` |
+| `00041_verified_work_history_schema.sql` | `verified_work_histories`, `employment_references` |
+| `00042_background_jobs_schema.sql` | `background_jobs` |
+| `00043_core_persistence_alignment.sql` | `work_history_email_challenges`; also: evidence `conflict_state`; job work-mode/type/salary columns and CHECKs; application columns and partial unique index `uq_job_applications_one_active`; FK repoint of work-history tables to `users`; `token_hash`; `uq_users_email_lower` |
+| `00044_notifications_persistence.sql` | alterations only: `notifications_type_check` (18 types), index `idx_notifications_recipient_created` |
+| `00045_session_revocation.sql` | alteration only: `users.sessions_valid_after` |
+| `00046_session_sign_out.sql` | `revoked_sessions` |
+| `00047_private_data_rls_hardening.sql` | policies and grants only: `is_message_thread_participant()`, messaging/notification/preference policies, revokes |
+| `00048_notification_preferences_rls_scope.sql` | policies only: notification preference policies re-scoped to the outer row |
+| `00049_worker_liveness.sql` | `worker_health` |
+| `00050_admin_audit_logs.sql` | `admin_audit_logs` |
+| `00051_feature_flags.sql` | `feature_flags` (second `IF NOT EXISTS` creation, so a no-op after 00001) plus the five seed flags |
+| `00052_billing_persistence_and_stripe.sql` | `stripe_customers`; also Stripe columns on `subscriptions` and `invoices`, provider-event columns on `billing_events`, and the unique indexes `uq_subscriptions_user`, `uq_subscriptions_stripe`, `uq_invoices_user_idempotency`, `uq_invoices_stripe`, `uq_billing_events_provider_event` |
+| `00053_billing_role_grants_hardening.sql` | grants only: revokes client-role writes on billing tables and all access to `stripe_customers` |
+| `00054_repoint_auth_users_foreign_keys.sql` | DO block: repoints every `auth.users` foreign key in `public` to `public.users` |
+| `00055_certificate_revocations_rls.sql` | RLS only: enables RLS on `certificate_revocations`, revokes client access |
 
 ## A8. Persistence honesty
 
@@ -674,6 +736,29 @@ Legend: **Dur** = `P` durable (listed in `DURABLE_ROUTES`), `E` ephemeral (label
 | `GET /api/v1/analytics/events` | Session + platform admin | E | handler |
 | `GET /api/v1/analytics/kpis` | Session + platform admin | E | handler |
 
+
+### B8a. Representative requests and effects
+
+Paths are under `/api/v1`. Exact optional fields and limits live in the named schemas in `packages/contracts/src/index.ts`; this table is not a second schema definition. Carried from `docs/engineering/API_CONTRACTS.md` and re-checked against the route list above.
+
+| Request | Input and success body | Rules and side effects |
+| --- | --- | --- |
+| `POST /auth/register` | `RegisterInputSchema`: email, password (8-256), fullName, role `candidate` or `recruiter`; returns token, user, profile (201) | Persists account and profile in one transaction; elevated roles cannot be self-registered; duplicate email is 409 |
+| `POST /auth/login` | `LoginInputSchema`; token, user, profile | Password check with decoy hash for unknown email; legacy or weak hash upgraded; limited to 10 attempts per 15 min per address and email |
+| `GET /auth/session` | Bearer token; user, profile, memberships | Uses current account roles, status, revocation and issuance cut-off |
+| `POST /auth/password` | `ChangePasswordInputSchema` | Verifies current password; advances the session cut-off so older tokens die |
+| `POST /evidence` | `CreateEvidenceInputSchema`; evidence | Uses the caller's profile; validates all skill ids, then one transaction for evidence and skill links |
+| `POST /evidence/:id/verify` | `VerifyEvidenceInputSchema`; evidence | Verification level requires the matching authority; guarded state update |
+| `POST /jobs/:id/apply` | `SubmitApplicationInputSchema`: optional `coverLetter`, `attachedEvidenceIds`; application (201) | Evidence ownership, published job, one active application per job and candidate (database partial unique index, 409 on duplicate) |
+| `POST /applications/:id/transition` | `TransitionApplicationInputSchema` | Party authorization and `ALLOWED_APPLICATION_TRANSITIONS`; persisted before the response |
+| `POST /billing/checkout` | `{ "planTier": "candidate_pro", "billingCycle": "monthly", "idempotencyKey": "purchase-1" }`; 201 `{ "url": "..." }` | Server chooses the Stripe price; role eligibility and existing live subscription checked; 503 outside Stripe mode |
+| `POST /billing/portal` | Session; 200 `{ "url": "..." }` | Requires a linked Stripe customer (404 otherwise) |
+| `POST /billing/stripe-webhook` | Raw JSON plus `stripe-signature`; `{status: processed|replayed|ignored}` | SDK signature verification on the raw body; atomic event record and state change |
+| `POST /ai/career-assistant/chat` | `AIChatInputSchema` (`prompt`, optional `conversationId`); `conversationId`, message, provenance | Assessment prohibition, prompt firewall, quota from plan entitlements, heuristic answer; state in memory |
+| `POST /ai/assistant/query` | `AIAssistantQueryInputSchema`; `answer`, `disclaimer` | Echo-style scaffold; assessment check only, no quota or firewall |
+| `POST /settings/erasure/execute` | Session (an interrupted run may resume with the same still-valid token) | Immediate multi-stage erasure; does not enforce the 30-day grace period |
+
+Example: a signed-in client applies with `POST /api/v1/jobs/<jobId>/apply`, header `Content-Type: application/json`, body `{"coverLetter":"I would like to apply."}`. The job id is in the path. A second active application to the same job is a 409 `CONFLICT`, not a second success. Test: `tests/integration/jobs-applications.test.ts`.
 
 ## B9. API discrepancies found
 

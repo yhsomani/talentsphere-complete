@@ -25,6 +25,8 @@ This folder is the consolidated, evidence-checked documentation set. It was buil
 - `docs/PRICING.md`: `tests/unit/pricing-consistency.test.ts` reads it at runtime.
 - `docs/registries/FEATURE_REGISTRY.md`: read by `.agents/teamwork/explorer_features_1/extract_audit_data.cjs`.
 - `SSOT.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `RETICLE.md`, `README.md`, `.github/**`, `deploy/**`: tool, agent and release files.
+- Linked from root files (`AGENTS.md`, `RETICLE.md`, `ARCHITECTURE.md`, `SSOT.md`) and therefore kept: `docs/INDEX.md`, `docs/engineering/{API_CONTRACTS,CODE_STYLE,DATABASE,HOSTED_SUPABASE_MIGRATION_GATE}.md`, `docs/engineering/adr/ADR-015-*.md`, `docs/engineering/adr/ADR-016-*.md`, `docs/experience/APP_FLOW.md`, `docs/quality/{OPERATIONS,SECURITY,TESTING}.md`, `docs/reports/FEATURE_STATUS_2026-10-21.md`, `docs/system-model/{01,02,03,06}-*.md`. They are also source evidence for the canonical files here; do not delete them without first repointing every link.
+- `Yash_Final_Project_Document/`: proposed target design with open review findings; kept as a whole.
 
 ## Maintenance rules
 Search before creating a document. Update the canonical file instead of adding a new one. Do not create `FINAL`, `V2`, `NEW` or per-task Markdown files. Link, do not copy. Update the status label when behaviour changes. Keep scratch and agent logs out of the permanent tree.

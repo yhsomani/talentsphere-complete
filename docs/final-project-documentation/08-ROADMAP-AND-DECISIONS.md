@@ -9,7 +9,7 @@ As-of 2026-10-26. Item statuses marked "code-checked 2026-10-26" were confirmed 
 
 | Fact | Evidence |
 |---|---|
-| Fastify modular monolith + React PWA + Postgres worker; core career loop (accounts, profiles, orgs, jobs, applications, evidence, work history, references, notifications, messaging, revoked sessions) persisted through `persist()` with an in-process read model; ~220 other routes in-memory and labelled `x-talentsphere-durability: ephemeral` | ADR-015; `apps/api/src/durability.ts` |
+| Fastify modular monolith + React PWA + Postgres worker; core career loop (accounts, profiles, orgs, jobs, applications, evidence, work history, references, notifications, messaging, revoked sessions) persisted through `persist()` with an in-process read model; 197 of 278 unique routes (71%; 78 durable + 3 stateless, counted from `durability.ts` and the route registrations) in-memory and labelled `x-talentsphere-durability: ephemeral` | ADR-015; `apps/api/src/durability.ts` |
 | One API writer per database (advisory lock); horizontal scale blocked | ADR-015 |
 | Verdict of every audit: not production-ready; ready for a closed developer-run demonstration of the core loop. A restricted owner-approved beta is recommended by the 2026-10-21 plan but not approved | IMPROVEMENT_PROGRAM I; FEATURE_STATUS A; re-audit 2026-10-23 |
 | Production gate open: no live email proof, no live billing proof, no legal sign-off, no restore/rollback drill, no deployed single-writer topology evidence, no pen test | audits; `docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md` |
@@ -31,14 +31,14 @@ Status codes: OPEN, FIXED-SRC (fix visible in source, live proof pending), DECIS
 | D-06 / #46 / #47 | No exact-SHA CI/PG/browser acceptance, populated migration, hosted RLS, restore/rollback/load evidence | BLOCKED | audits |
 | D-07 | Windows secret-scan test passed on shell failure | FIXED-SRC per commit 52705d34 "fail-closed secret scan" (not re-read) | |
 | D-08 | Prettier gate red on 7 files (incl. `graphify-out/`) | PARTLY: `.prettierignore` now excludes `graphify-out/`, `.agents/teamwork/`, `docs/`, `BRAIN/` (code-checked); other files not re-measured | |
-| D-09 | LMS certificate/evidence minted by lesson completion without the BR-048 final-assessment threshold; completion mutated before durable write | OPEN (code-checked: completion block mints `authority_verified` evidence with no assessment read) | `apps/api/src/server.ts` ~5254-5290 |
+| D-09 | LMS certificate/evidence minted by lesson completion without the BR-048 final-assessment threshold; completion mutated before durable write | OPEN (code-checked: completion block mints `authority_verified` evidence with no assessment read) | lesson-completion route in `apps/api/src/server.ts` (block that sets `authority_verified`) |
 | D-10 | Certificate revocation and evidence revocation independent | OPEN (not re-read); migration 00055 adds RLS for revocations only | FEATURE_STATUS F |
 | O-01 / K-11 | ADR-015 and migration 00043 not ratified | DECISION | ADR-015 |
 | O-02 / #50 | Beta vs GA scope; free-only vs paid | DECISION; code supports `BILLING_MODE=stripe`, default disabled | K-02, K-12 |
 | O-03 / #49 | Trust, sessions (cookie vs localStorage), real executor, badge scoring | DECISION | K-19 |
-| SEC-01 / BL-001 | Corporate-email code hashed with plain SHA-256 over public id (`sha256Hex(\`${id}:${code}\`)`) | OPEN (code-checked `server.ts` ~12491) | rainbow table over 10^6 codes if DB read leaks |
+| SEC-01 / BL-001 | Corporate-email code hashed with plain SHA-256 over public id (`sha256Hex(\`${id}:${code}\`)`) | OPEN (code-checked: corporate-email challenge creation in `server.ts` stores `codeHash` from `sha256Hex` over `id:code`) | rainbow table over 10^6 codes if DB read leaks |
 | SEC-02 / BL-002 | Referee token indefinite | FIXED-SRC (code-checked): `REFERENCE_LINK_TTL_MS` 30 days from `requestedAt`; view returns 404, submit 403; no `expires_at` column and BL-002's 410 contract was not adopted | CF-10 |
-| SEC-03 | ~217-220 ephemeral routes | OPEN (see D-05) | |
+| SEC-03 | 197 of 278 unique routes (71%) ephemeral (older reports: 217-220 of 274) | OPEN (see D-05) | |
 | SEC-04 | API connection bypasses RLS | OPEN by design; tenant isolation is app-layer | |
 | SEC-05 / BL-009 | `AI_PROHIBITED` assessment sessions in memory | OPEN (code-checked `assessmentSessionsById` Map) | |
 | SEC-06 / BL-010 | AI tier hardcoded free | PARTLY (code-checked): tier now derives from entitlements via `aiTierForPlan`; usage meter still in memory | PRICING review notes |
@@ -47,7 +47,7 @@ Status codes: OPEN, FIXED-SRC (fix visible in source, live proof pending), DECIS
 | BL-007 | `test:security` uses `--dir` | OPEN (code-checked `package.json` line 17); protected build file | |
 | BL-008 | `.prettierignore` entries | DONE (code-checked) | |
 | R2-01 | CI failure `account-security.spec.ts:127` (aborted navigation) | Fix proposed in review branch; CI confirmation unknown | |
-| R2-02 / CF-13 | Hosted Supabase: custom HMAC identity vs `auth.users`; hosted project had 0 app tables (2026-10-23) | BLOCKED; hosted README records a later partial apply through 00038 and a manual adapter now exists; live state unknown | HOSTED_SUPABASE_MIGRATION_GATE |
+| R2-02 / CF-13 | Hosted Supabase: custom HMAC identity vs `auth.users`; hosted project had 0 app tables (2026-10-23) | BLOCKED; `supabase/hosted/README.md` records 00001-00055, alias views and the Data API lockdown applied 2026-10-23 to the named project with all tables empty and a ledger row per file; caveat: 00001-00038 were applied in grouped batches so their checksums record repo files, not proof of byte-identical SQL; hosted two-user RLS test and restore drill unproven; current live state not re-observed | HOSTED_SUPABASE_MIGRATION_GATE |
 | R2-03 | Stripe test account: 0 webhook endpoints; webhook endpoint not registered until public HTTPS URL | OPEN (manual configuration) | PRICING; STRIPE audit |
 | R2-04 | `CheckoutPage.tsx` comment/copy said free-only | Partly addressed by 2026-10-24 web work (plan table, meter); live paid CTA only when server reports Stripe checkout enabled | PRICING |
 | R2-06 / O-2 | `charge.dispute.created`, `invoice.voided` unhandled | OPEN (refund handling decided 2026-10-23) | STRIPE audit |
@@ -120,8 +120,8 @@ SSOT MVP exit (7 criteria) and institutional exit (5 criteria): 01 section 7 (Re
 
 | Debt | Impact | Direction (not decided) |
 |---|---|---|
-| `apps/api/src/server.ts` ~13.4k lines, ~150 Maps, ~274 routes | Review cost, hidden coupling, inline authorization | Split per context sharing injected stores; no rewrite justified by size alone (FEATURE_STATUS E; roadmap P2) |
-| Ephemeral long tail (~80% of routes) | State lost on restart | Per-slice persistence via `persist()` (ADR-015 pattern) |
+| `apps/api/src/server.ts` 13,416 lines, 145 `new Map`, 278 unique routes (code-checked) | Review cost, hidden coupling, inline authorization | Split per context sharing injected stores; no rewrite justified by size alone (FEATURE_STATUS E; roadmap P2) |
+| Ephemeral long tail (197 of 278 routes, 71%) | State lost on restart | Per-slice persistence via `persist()` (ADR-015 pattern) |
 | In-process read model + O(N) boot hydration + single writer | Scale ceiling, stale reads after out-of-band SQL | Move reads to SQL per module, delete Maps; required before a second replica |
 | API DB role bypasses RLS | Policies untested by the app path | Restricted role or documented boundary (SEC-04) |
 | Inline / inconsistent authorization; org role not checked | IDOR/privilege risk | Central policy (blueprint ADR-T07) or per-handler audit (`docs/system-model/06-route-authorization.md`) |
@@ -302,7 +302,7 @@ Conflicts are preserved, not resolved. "Governs" states only which source the re
 | K-12 | Monetisation: SSOT OD-34 Premium Candidate price TBD / F-61 gated; BR-07 billing for recruiters; PRICING.md codes Candidate Pro $19.99 plus recruiter tiers; free AI quota 20/day (MEMORY, SEC-06) vs 5 req/5k tokens (PRICING after 2026-10-24 alignment); outreach caps BR-130 (Pro/Team/Enterprise) vs 4 coded plans; refund policy OD-29 (30 days pro-rated) vs coded rule (full refund of current-period charge ends access) | SSOT, PRICING, STRIPE audit | Code + PRICING.md govern what exists; prices are unapproved recommendations |
 | K-13 | 50 canonical tables + ~185 operational (SSOT 24) vs 111 measured `CREATE TABLE` names and 130 RLS statements | DATABASE, GAP C-17 | Banner exists; owner chooses |
 | K-14 | About 30 routes in APP_FLOW not built; `App.tsx` defines its own set; six built routes unlinked | C-18, CF-28 | Source governs |
-| K-15 | Metrics/inventory numbers drift (route counts 269/274/278 unique pairs, pages 19/20/29, migrations) | multiple | Re-measure in 02/05/07; do not copy |
+| K-15 | Metrics/inventory numbers drift (route counts 269/274/277/278 (current code: 278 unique, 281 registrations), pages 19/20/29, migrations) | multiple | Re-measure in 02/05/07; do not copy |
 | K-16 | Primary north-star: Verifiable Career Progress (PRD) vs Evidence-Backed Hiring Conversations (blueprint METRICS_CATALOG) | OPEN-51 | PRD governs; unresolved |
 | K-17 | Owner of the 173-feature register: SSOT 7 vs FEATURE_REGISTRY (identical except headings) | C-20 | SSOT is detail source; pick one |
 | K-18 | Persistence: single-writer hydrated read model (ADR-015) vs SQL-only reads with outbox (ADR-T05); blueprint OPEN-52 | | Built governs; bridge needs approval, hosted-schema adaptation, second-writer exit gate |
@@ -328,9 +328,9 @@ The blueprint is a greenfield redesign produced 2026-10-25 with "no application 
 | Dimension | Built (code) | Intended (SSOT) | Blueprint proposal (Proposed-only) |
 |---|---|---|---|
 | Identity/session | HMAC token in localStorage, PBKDF2 210k, revocation table | Supabase Auth JWT, httpOnly cookie | Cookie sessions, rotating refresh, passkeys, optional SSO, CSRF |
-| Persistence/reads | Postgres writes via `persist()`; Map read model; ~80% routes ephemeral | Postgres + RLS everywhere | SQL only, outbox, no Maps, replicas |
+| Persistence/reads | Postgres writes via `persist()`; Map read model; 197 of 278 routes (71%) ephemeral | Postgres + RLS everywhere | SQL only, outbox, no Maps, replicas |
 | Async | `background_jobs` + claim loop, two mail handlers, fenced acks | Supabase Queues + workers + dual queue | Outbox + fenced leases, at-least-once, consumer dedupe |
-| API | ~274 routes in one file, Zod, error envelope, no OpenAPI | REST + OpenAPI, `{success,data,meta}` | OpenAPI 3.1 generated from Zod, RFC 9457 problems, idempotency keys, ETags |
+| API | 278 unique routes in one file, Zod, error envelope, no OpenAPI | REST + OpenAPI, `{success,data,meta}` | OpenAPI 3.1 generated from Zod, RFC 9457 problems, idempotency keys, ETags |
 | Authorization | per-handler checks, 10 roles | two-tier 3+24 roles | central `packages/policy` deny-by-default, scoped grants, `/me/capabilities` |
 | Evidence model | evidence + verification levels; references with hashed tokens; corporate-email proof | claim vs evidence vs verification, append-only lineage | 4-rung ladder with `issuer_class`; mailbox proof lower badge unless employer-bound |
 | Frontend | React 19, router, plain state, no service worker | React PWA, TanStack Query, offline contract | host shell + typed modules, bundled baseline, optional federation, read-cache offline |
@@ -351,7 +351,7 @@ Use of the blueprint: take design ideas as candidates (e.g. fenced leases, centr
 |---|---|---|
 | Local migrations | Custom runner `pnpm db:migrate`; sequential files 00001-00055; ledger with checksums; honesty and idempotency tests; contiguous numbering (INVARIANT-009); CI applies to empty PG16 twice. Do not use `supabase db push` | ARCHITECTURE 23 |
 | Populated database | 00043: case-insensitive unique email (fails on case-duplicates), partial unique index replaces `UNIQUE(job_id, candidate_id)`, drops plaintext `employment_references.token` after hashing, repoints FKs to `users(id)`; 00054 repoints `auth.users` FKs. Needs owner ratification, snapshot rehearsal, rollback/restore path, hosted grants/RLS proof | ADR-015; X-08; K-11 |
-| Hosted Supabase | Manual adapter in `supabase/hosted/`, exact-checksum ledger, Data API lockdown; `pnpm db:migrate` forbidden; Fastify tokens are not Supabase identities; hosted state unknown (empty on 2026-10-23, partial through 00038 per hosted README); CI workflow `hosted-supabase-audit.yml` | HOSTED_SUPABASE_MIGRATION_GATE |
+| Hosted Supabase | Manual adapter in `supabase/hosted/`, exact-checksum ledger, Data API lockdown; `pnpm db:migrate` forbidden; Fastify tokens are not Supabase identities; hosted README records 00001-00055 applied on 2026-10-23 with all tables empty (checksum caveat on 00001-00038); `scripts/check-new-hosted-migrations.mjs` exits 1 on the current tree because it flags 00054's platform Auth reference, so any PR touching `supabase/migrations/` fails the hosted audit workflow until the guard or its allow-list is decided (validator-run, read-only); CI workflow `hosted-supabase-audit.yml` | HOSTED_SUPABASE_MIGRATION_GATE |
 | Ephemeral to durable | One vertical slice at a time through `persist()`: schema, repository, restart/race/erasure PG tests, UI limits made explicit; update `durability.ts`; avoid blanket rewrite; each slice needs erasure coverage and removal of its Maps | X-01; ADR-015 exit path |
 | Read model to SQL | Per module delete Maps; required before second API replica or large data; boot-time hydration unmeasured at volume | ADR-015; OPS-01 |
 | Stack alignment | If SSOT stack (Supabase Auth, Queues) is re-adopted: identity abstraction, token migration, session invalidation plan; if blueprint adopted: strangler migration with routing facade, single writer per domain, shadow reads, no dual writes; evidence status never upgraded by migration; timestamp-only email verification stays low rung; MIG-01 plan decision tree starts from OPEN-17 (do real users/data exist? repo evidence suggests staging only) | MIG-01 plan; REFERENCE_TO_TARGET_DATA_MIGRATION |
