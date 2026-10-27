@@ -1,6 +1,8 @@
 # Frontend Delivery - Review Fixes (federation, CDN, registry wording)
 
 Doc ID: OPS-FE-REV2 (covers the frontend delivery parts of DEPLOYMENT_ARCHITECTURE, DEVOPS_AND_RELEASE_STRATEGY and OBSERVABILITY_DESIGN) · Owner: Platform Engineering / Frontend Platform · Version 2.0 · Status: Under Review
+
+> **Folded into `DEVOPS_AND_RELEASE_STRATEGY.md` on 2026-10-27.** Change record only; edit the original.
 Relates: ADR-T23 (proposed), ADR-T24 (proposed in FEA-01-REV2), ADR-T19 · REVW-07, REVW-08, REVW-13 · REV-RES · MFA-01-REV2, FEA-01-REV2, PWA-01-REV2
 
 Tags: [TARGET] [OPEN] [FED]. This file is **additive**; the three original documents in this folder are unchanged by this revision. Another editor already reworded DEPLOYMENT_ARCHITECTURE section 3 and DEVOPS_AND_RELEASE_STRATEGY to a bundled baseline with a conditional federated mode (ADR-T23); that wording stands and is not restated. This file adds only what those edits do not cover. No cost, traffic or capacity number is asserted.
