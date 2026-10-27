@@ -79,3 +79,50 @@ The records contain historical conflicts: 217 vs 220 ephemeral routes in one aud
 Thirteen related non-text artifacts (six scripts, six JSON files, one JavaScript file) are listed as `DOC-000192`–`DOC-000204` in the CSV. Their dependencies and contents were not inspected. They are explicitly out of scope for documentation cleanup and remain untouched. Because the archive contains mixed projects, workflow history, unique findings, and these uninspected artifacts, no individual entry is cleared for deletion in this checkpoint.
 
 
+
+
+## Part 66.3 Preservation metrics with honest denominators (added 2026-10-27)
+
+Evidence label for every number: VERIFIED by command on 2026-10-27 unless stated. Counts describe documentation state only. `tests_executed = 0` (no test, linter, validator, renderer or build was run in this round). `deletions = 0` (no file deleted, moved or renamed). `moves = 0`.
+
+### 66.3.1 Status vocabulary: terminal versus temporary
+
+| Class | Statuses | Meaning |
+|---|---|---|
+| Terminal (three only) | `MIGRATED_VERIFIED`, `SUPERSEDED_JUSTIFIED`, `EXCLUDED_JUSTIFIED` | A row may leave the work queue only with one of these plus recorded destination or justification evidence |
+| Temporary (everything else) | `Read but partially processed`, `Not yet inspected`, `Unreadable`, `Unresolved`, `Preserved without migration`, `Retained as historical evidence`, `Out of scope` (until a justification is recorded), `Protected from deletion` | Work remains; cleanup stays forbidden |
+
+Mapping of the current CSV to the terminal set: **0 of 132 rows are terminal.** The 9 `Out of scope` rows are candidates for `EXCLUDED_JUSTIFIED`, but their per-row justification is only the shared classification text, so they are not counted as terminal. The CSV currently uses the older vocabulary above; the three terminal labels exist in no CSV row yet (OPEN: owner to approve the vocabulary change and migrate the column).
+
+### 66.3.2 Counts and the denominators they use
+
+| Metric | Value | Denominator and basis |
+|---|---:|---|
+| Files under `Yash_Final_Project_Document/` at the "before" scan | 267 | all files, including 17 under the root `.omc/`; 10,873,287 bytes (scratch scan, read-only) |
+| Files at write time | 270 | `find . -type f`; 27 of them are under `.omc/` paths (tool state, not documents). Three files appeared after the scan (other agents' work in progress) |
+| Document files excluding `.omc/` tool state | 243 | 270 minus 27 |
+| Markdown files | 202 | at the before scan |
+| Manifest CSV rows | 132 | 123 `Read but partially processed`, 9 `Out of scope` |
+| Manifest narrative total (Processing snapshot, 2026-10-25) | 204 | 174 partial, 28 out of scope, 1 fully processed, 1 retained historical |
+| Terminal rows | 0 | of 132 (CSV) and of 204 (narrative) |
+| Protected baseline rows | 113 | `PROTECTED_DOCUMENT_TREE_BASELINE.csv`; the folder now holds many more files, so the baseline is a floor, not a census |
+| Files not linked from `MASTER_INDEX.md` before this round | 112 | before scan; 25 of the 112 were `.omc/` tool-state files, which are excluded from indexing |
+| Broken relative markdown links | 158 of 639 checked | before scan; classified in `DOCUMENT_STATUS.md` |
+| Files flagged by the secret-pattern scan | 1 | path in `DOCUMENT_STATUS.md`; value never printed; human review |
+| Deletions / moves / renames | 0 / 0 / 0 | |
+| Tests, validators, renderers executed | 0 | |
+
+### 66.3.3 Stale snapshot and denominator disagreements (listed, not silently reconciled)
+
+| # | Disagreement | Sources | State |
+|---|---|---|---|
+| D1 | 204 source records (narrative, Processing snapshot, `SOURCE_DOCUMENT_INVENTORY`) versus 132 rows in the CSV: the CSV lacks 72 rows. `MASTER_INDEX_V9_ADDENDUM_3` already flags this. The narrative breakdown (190 text docs plus 1 JSON plus 13 non-text) cannot be reproduced from the 132 rows, whose classes are 117 agent-workflow records, 7 tool instructions, 5 project docs, 3 operational docs | manifest md, CSV, inventory | OPEN: rebuild the CSV or correct the narrative; owner Documentation Architect |
+| D2 | The Processing snapshot is dated 2026-10-25 and was never recomputed ("recompute from the CSV whenever statuses change"). The CSV says 123 partial / 9 out of scope; the narrative says 174 / 28 / 1 / 1 | manifest md | STALE: the narrative figures are retained as historical; CSV figures are the current ones |
+| D3 | `SOURCE_DOCUMENT_INVENTORY` says 158 files in the folder (2026-10-25); the scan found 267 and then 270 | inventory | STALE: historical count, kept |
+| D4 | `LEGACY_MERGE_LEDGER_D` audits 50 archive files (26 FULL, 24 PARTIAL) and cites paths such as `31_LEGACY_ARCHIVE/BRAIN/MEMORY.md`; `31_LEGACY_ARCHIVE/` on this branch holds only 2 files (`README.md`, `docs/reports/AUDIT_EVIDENCE_2026-10-21.json`). The quoted source files are outside this folder (git branch `main` or the repository root), so the ledger's source paths are not resolvable from this folder | ledger D, filesystem | OPEN: state the real source location in the ledger (owner of ledger D) |
+| D5 | Ledger D says "Remaining missing ids: 0" while the CSV shows no row terminal; the two measure different things (named ids quoted versus per-source disposition) | ledger D, CSV | Different denominators: ids (36 closed) versus sources (132 or 204) |
+| D6 | The index addendum 3 says 132 CSV rows; manifest narrative says 204; inventory says 190 text plus 1 JSON plus 13 non-text; baseline says 113 | various | Listed above; no figure is preferred until D1 is closed |
+
+### 66.3.4 What is and is not claimed
+
+Claimed: the counts above are what the commands returned. Not claimed: that any source has been migrated, that any legacy file is eligible for cleanup (still 0), or that the three terminal labels have been applied. No source was read again in this round; no CSV row was changed.

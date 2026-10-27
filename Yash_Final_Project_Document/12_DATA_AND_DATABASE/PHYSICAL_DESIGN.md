@@ -540,3 +540,39 @@ Remaining single writer by design: the `audit.anchor` job (off the request path,
 | OPEN-B58 | Measured fill of section 9 and calibration of its ceilings (WP-LOADBASE, TEST-PER-010) |
 | OPEN-B59 | Whether `top_issuer_class` stays a denormalised column or becomes a view; decided by the first matching-weight query plan |
 | DATA ids | Proposed new entity ids for governance to assign: `auth_throttle`, `idempotency_short`/`idempotency_queued` (replacing DATA-E2403), `sm_edge`/`sm_terminal`, `first_contact_request`, `account_block` |
+
+# PATCH 2026-10-27: Distributed correctness (PROPOSED)
+IDs: DC-01..DC-10. Values are [TARGET]; none measured. Verification needed: load test (WP-LOADBASE), replica-lag measurement, ARB ratification.
+
+## DC-A. Clock and timezone rules
+| ID | Rule |
+|---|---|
+| DC-01 | Persist all instants as `timestamptz` in UTC; server clock (DB `now()`) is authoritative for ordering, expiry and tokens; client clocks never decide validity. |
+| DC-02 | Date-only business values (deadlines, start/end) stored as `date` plus IANA zone id (`Europe/London` style, never offsets or abbreviations) on the owning record; display converts at the edge. Deadline "end of day" resolves in the record's zone. PROPOSED, needs product decision. |
+| DC-03 | Tolerance window for cross-node skew per FM-20; monotonic ordering uses DB sequences/`version`, not wall clock. |
+
+## DC-B. Consistency windows per read model (PROPOSED starting values)
+| Read model | Source | Window | Rule |
+|---|---|---|---|
+| Authz, entitlements, consent | primary | 0 (strong) | never from replica or cache (FM-26) |
+| Own writes (profile, evidence, applications) | primary then replica | read-your-writes for a short window [TARGET 5 s] | route to primary after write |
+| Lists, dashboards | replica | <= replica lag budget [TARGET 5 s] | labelled "as of" when stale |
+| Search index | outbox-fed | <= index lag budget [TARGET 60 s] | rebuildable (FM-33) |
+| Matching/recommendations | job-computed | <= recompute interval [TARGET 15 min] | explanation shows compute time |
+| Notifications / counters | outbox consumers | <= consumer lag [TARGET 30 s] | eventually consistent, deduped by `event_id` |
+| Analytics / reports | batch | daily [TARGET] | not for decisions needing freshness |
+
+## DC-C. Idempotency lifetime and outcome discovery
+| ID | Rule |
+|---|---|
+| DC-04 | Key lifetime: `short` class 24 h, `queued` class 14 days (section 2 of Revision 2 above); key + request fingerprint + stored response; same key different body = 422 `idempotency-key-reuse`; in flight = 409 `idempotency-in-flight` (already in API_DESIGN_STANDARDS). Expired key = treated as new request; therefore natural keys are required for consequential ops. |
+| DC-05 | **Lost-response outcome discovery** (PROPOSED, not in OpenAPI): `GET /api/v1/idempotency/{key}` (owner-scoped; same user only) returns `{state: in_flight|succeeded|failed|unknown, status, resourceRef, completedAt}` without replaying body. Client uses it before re-sending after a timeout. Existing `GET /operations/{operationId}` (API-24-11) covers async operations only. Needs API owner decision and contract addition. |
+| DC-06 | Operator view (PROPOSED): support/admin read-only lookup by `request_id` or key hash returning state, actor, route, attempt count, linked outbox events; audited, PII-minimised, no body. Runbook link to be added by 18_*. |
+
+## DC-D. Poison messages, DLQ, reconciliation
+| ID | Rule |
+|---|---|
+| DC-07 | Outbox/job poison: per-event attempt cap [TARGET 12 for email class, 5 default], exponential backoff with jitter, then DLQ with payload hash, last error, first-seen; dispatcher continues past poison (FM-30, FM-37). DLQ depth and age alert; owner triages within the runbook SLA. |
+| DC-08 | DLQ replay is manual or scripted, idempotent by `event_id`, rate-limited, and audited; replaying never bypasses current authz or consent checks. |
+| DC-09 | Reconciliation jobs (read-only detect, separate fix step): Stripe subscription state vs entitlements (FM-41); outbox events vs consumer-applied markers; search index vs source counts; evidence file rows vs object store; orphaned pending uploads. Output = drift report with count and sample ids; auto-fix only for derived data. |
+| DC-10 | Cadence and thresholds for reconciliation are [OPEN-15]; first measured baseline sets alert levels. |

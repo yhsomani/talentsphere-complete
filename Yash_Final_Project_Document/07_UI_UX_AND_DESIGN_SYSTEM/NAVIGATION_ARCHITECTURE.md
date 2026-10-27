@@ -457,3 +457,46 @@ Widgets are rendered by the owning remote from its own APIs (no cross-remote dat
 | OPEN-UX-20 | Whether users may customise dashboard widgets. |
 | OPEN-UX-21 | Small-cell suppression threshold for institution aggregates. |
 | OPEN-UX-33 | Public pages `/p/:handle` and `/c/:credentialId` are placed in MOD-SHELL (ID registry assigns "public pages" to the shell) while their data owners are DOM-03/DOM-05 (`mf-candidate`); confirm the shell renders them from public read APIs without importing remote code (FF-03), or move them to MOD-CAND with an anonymous-allowed route policy. |
+
+
+
+
+# Patch 2026-10-27: Unsaved-change guards, focus and scroll restoration
+
+**[TARGET].** Extends section 7 (RD-01..RD-18 above; new rows continue at RD-19). Mechanism for the browser history API and service-worker updates is owned by [10_FRONTEND_ARCHITECTURE](../10_FRONTEND_ARCHITECTURE/) and [08_PWA_AND_MOBILE](../08_PWA_AND_MOBILE/) (pending patch); this section fixes the user-visible rules. Action-level behaviour is in ACTION_REGISTRY ACT-ATOM-04, 05, 09.
+
+## Additional redirect and guard rows
+
+| ID | Condition | Rule |
+|---|---|---|
+| RD-19 | In-app navigation (link, nav item, command palette, breadcrumb) away from a dirty form | Guard dialog: Keep editing (default focus) / Save draft (only where a draft exists) / Discard. Route does not change until a choice is made. |
+| RD-20 | Browser back/forward, reload or tab close with a dirty form | Browser-native `beforeunload` prompt only (custom text is not possible). Back/forward inside the app is intercepted like RD-19; if the guard is dismissed, history position is restored. |
+| RD-21 | Workspace switch with dirty form or in-flight mutation | Guard dialog per UXH-02; draft is saved locally under the origin workspace id before switching. |
+| RD-22 | Session expiry while dirty | RD-07 overlay; no guard dialog (nothing is leaving); form state preserved in memory and local draft. |
+| RD-23 | Deep link to a route needing a different workspace | Offer workspace switch (RD-08 hint) and keep the target path; after the switch, land on the target, not on home. |
+| RD-24 | Navigation blocked by a running assessment attempt (SCR-LRN-09) | Leave attempt dialog follows ACT-ASM-06 rules; the guard never silently submits. |
+
+## Guard rules
+
+| ID | Rule |
+|---|---|
+| NAV-GRD-01 | "Dirty" means a user-entered difference from the last saved or loaded value. Autofill and defaults loaded by the app are not dirty. Autosaving forms (ACT-PRO-01, ACT-APP-02) are dirty only while a save is pending or failed. |
+| NAV-GRD-02 | Guards are registered per form by the owning screen and removed on unmount; a remote that fails to mount cannot leave a stale guard (shell clears guards on remote error, RD-10). |
+| NAV-GRD-03 | The dialog states what will be lost, in plain words, and names buttons by verb ("Discard changes", "Keep editing"). Escape and backdrop click mean Keep editing. |
+| NAV-GRD-04 | A guard never blocks sign-out (ACT-AUTH-09), security redirects (RD-06, RD-07, RD-11) or navigation forced by a revoked grant; in those cases the draft is stored locally first. |
+| NAV-GRD-05 | Discard never deletes data that was already saved server-side; it drops only the unsent difference. Local drafts have a retention limit (30 d PROPOSED) and are listed in ACT-ACC-07 "Clear saved data". |
+
+## Focus and scroll restoration
+
+| ID | Rule |
+|---|---|
+| NAV-FOC-01 | After a route change, focus moves to the page `h1` (tabindex -1) and the title is announced once; focus does not move to the skip link or the first nav item. |
+| NAV-FOC-02 | Back/forward restores the scroll position and the previously focused control when it still exists; if the record has changed or loads late, restore scroll first and focus the `h1`. Scroll is restored after skeletons resolve to final height (no jump). |
+| NAV-FOC-03 | Opening a dialog or drawer moves focus inside it (first field or safest control); closing returns focus to the opener; if the opener was removed, focus goes to the nearest following heading. |
+| NAV-FOC-04 | After a destructive action removes the focused row, focus goes to the next row, else the previous, else the list heading. |
+| NAV-FOC-05 | After a failed submit, focus goes to the error summary (first invalid field in single-field forms); entered values are preserved. |
+| NAV-FOC-06 | Wizard step change focuses the step heading; browser Back inside a wizard goes to the previous step, not out of the wizard. |
+| NAV-FOC-07 | Pagination or "Load more" keeps focus on the first newly loaded item, announced once; infinite scroll is not used for primary tasks (PROGRESSIVE sec 3). |
+| NAV-FOC-08 | In-page tab/segment changes do not move scroll; if URL-addressable they use `replace`, not `push`, so Back leaves the page. |
+| NAV-FOC-09 | Tab switch between workspaces restores each workspace's last route and scroll in memory for the session (not persisted across reload). |
+| NAV-FOC-10 | With `prefers-reduced-motion`, scroll restoration and focus movement are instant (no smooth scroll). |

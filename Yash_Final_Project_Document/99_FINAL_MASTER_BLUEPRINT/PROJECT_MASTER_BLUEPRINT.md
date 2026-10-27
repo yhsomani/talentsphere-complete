@@ -39,25 +39,66 @@ SLO hypotheses and failure modes: [15](../15_RELIABILITY_AND_PERFORMANCE/SLO_AND
 60 work packages across 5 phases, including 3 conditional migration packages; no dates or staffing: [roadmap](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md). Migration from the reference system (plan only): [23](../23_MIGRATION_AND_EVOLUTION/MIGRATION_AND_EVOLUTION_PLAN.md). Developer guide: [29](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md).
 
 ## 9. Risks and open decisions
-50 risks: [register](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md). Blocking open decisions include hosting OPEN-14, SLO calibration OPEN-15, support model OPEN-16, legal/retention OPEN-08, sub-processors OPEN-34, on-call OPEN-39, sandbox build-vs-buy OPEN-27, federation spike OPEN-11, device lab OPEN-12, source-rule disposition OPEN-43, authorization OPEN-44, journey/workflow/state traceability OPEN-45, API contract alignment OPEN-46, and domain/federation boundaries OPEN-47. All: [OPEN_DECISIONS](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md).
+56 distinct risk ids (RISK-01..56; the register file has 63 table rows because the folded Revision 2 section repeats RISK-32 and RISK-51..56): [register](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md). Blocking open decisions include hosting OPEN-14, SLO calibration OPEN-15, support model OPEN-16, legal/retention OPEN-08, sub-processors OPEN-34, on-call OPEN-39, sandbox build-vs-buy OPEN-27, federation spike OPEN-11, device lab OPEN-12, source-rule disposition OPEN-43, authorization OPEN-44, journey/workflow/state traceability OPEN-45, API contract alignment OPEN-46, and domain/federation boundaries OPEN-47. All: [OPEN_DECISIONS](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md).
 
-## 10. The 40 acceptance questions (pointers)
-| # | Question | Where |
-|---|---|---|
-| 1–3 | What / why / who | §1, §2 |
-| 4–6 | Domains, capabilities, features | §3 |
-| 7–8 | Feature behaviour, micro-features | §4 |
-| 9–10 | Rules, actors/permissions | §4, §2 |
-| 11–14 | Navigation, screens, actions, states | §5, 06 state machines |
-| 15–16 | Data, ownership | 12, DOMAIN_ARCHITECTURE §3 |
-| 17–18 | APIs/events, transactions | 13, 11 (outbox) |
-| 19–24 | Federation interaction, deploy, versions, failure, shared deps, containment | 09 |
-| 25–28 | PWA, offline, sync, conflicts | 08 |
-| 29–31 | Permission enforcement, security, data protection | 11 policy, 14 |
-| 32–35 | Performance, monitoring, deploy, recovery | 15, 17, 18 |
-| 36 | Requirement testing | 16, [traceability](../28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md) |
-| 37–39 | Build first, delivery order, release approvals | 29 §2, 22 |
-| 40 | Unresolved decisions | §9 |
+## 10. The 50 acceptance questions (each with a deep link)
+
+Status words: ANSWERED = answered in the documents (design only, unratified; says nothing about implementation); PARTIAL = answered with named gaps; OPEN = not answerable from evidence in this folder. Questions 1 to 40 keep the numbering of the earlier pointer table. The wording of questions 41 to 50 is RECONSTRUCTED (the original prompt text is not stored in the repository); the owner must confirm it. Totals: 19 ANSWERED, 29 PARTIAL, 2 OPEN, of 50.
+
+| # | Question | Where | Status |
+|---:|---|---|---|
+| 1 | What is TalentSphere (target)? | §1; [vision](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md) | ANSWERED |
+| 2 | Why does it exist; what problem and business model? | §1; [vision and business model](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md) | PARTIAL: no user research; OPEN-05/06/07 |
+| 3 | Who are the users and stakeholders? | §2; [roles](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md), [journeys](../02_STAKEHOLDERS_AND_USERS/USER_JOURNEYS.md) | PARTIAL: personas unvalidated; OPEN-44/45 |
+| 4 | Which business domains exist? | §3; [DOMAIN_ARCHITECTURE](../03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md) | PARTIAL: OPEN-47 |
+| 5 | Which capabilities exist? | §3; [capability map](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md) | PARTIAL: phases unreconciled, OPEN-42 |
+| 6 | Which features exist and how do they trace to SSOT F-ids? | §3; [SSOT_FEATURE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md) | PARTIAL: candidate map, OPEN-41 |
+| 7 | How does each feature behave? | §4; [feature specs](../05_FEATURE_SPECIFICATIONS/README.md) | PARTIAL: 26 features lack ACs (COVERAGE_MATRICES §5.1) |
+| 8 | What are the micro-features? | §4; [MICRO_FEATURE_SPECS](../05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md) | ANSWERED (65 specs, unratified) |
+| 9 | Which business rules govern behaviour? | §4; [BUSINESS_RULES_REGISTRY](../06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md) | PARTIAL: 171 source rules unmatched, OPEN-43 |
+| 10 | Who may do what (actors and permissions)? | §2; [permission matrix](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md) | PARTIAL: OPEN-44 |
+| 11 | How does navigation work? | §5; [NAVIGATION_ARCHITECTURE](../07_UI_UX_AND_DESIGN_SYSTEM/NAVIGATION_ARCHITECTURE.md) | ANSWERED (design) |
+| 12 | Which screens exist? | §5; [SCREEN_REGISTRY](../07_UI_UX_AND_DESIGN_SYSTEM/SCREEN_REGISTRY.md) | ANSWERED (130 screens; key specs only) |
+| 13 | Which actions exist and what do they call? | §5; [ACTION_REGISTRY](../07_UI_UX_AND_DESIGN_SYSTEM/ACTION_REGISTRY.md), [ACTION_TO_OPERATION_MAP](../13_API_EVENTS_AND_INTEGRATIONS/ACTION_TO_OPERATION_MAP.md) | PARTIAL: action-to-API map incomplete |
+| 14 | What states and transitions exist? | [STATE_MACHINES](../06_BUSINESS_PROCESSES/STATE_MACHINES.md) | PARTIAL: source state mapping OPEN-45 |
+| 15 | What data exists? | [logical model](../12_DATA_AND_DATABASE/CONCEPTUAL_AND_LOGICAL_MODEL.md), [physical](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md) | ANSWERED (design; no SQL executed) |
+| 16 | Who owns each datum? | [DOMAIN_ARCHITECTURE](../03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md) §3 | ANSWERED |
+| 17 | Which APIs and events exist? | [API catalog](../13_API_EVENTS_AND_INTEGRATIONS/API_CATALOG.md), [EVENT_CATALOG](../13_API_EVENTS_AND_INTEGRATIONS/EVENT_CATALOG.md) | PARTIAL: OPEN-46, OPEN-X06, OPEN-P01 |
+| 18 | How are transactions and consistency handled? | [BACKEND_ARCHITECTURE](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md) (outbox), [PHYSICAL_DESIGN](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md) DC-01..10 | ANSWERED (design); OPEN-52 persistence bridge |
+| 19 | How do federated modules interact? | [FEDERATION_ARCHITECTURE](../09_MODULE_FEDERATION/FEDERATION_ARCHITECTURE.md), [contracts](../09_MODULE_FEDERATION/HOST_CONTRACT_AND_REMOTE_CONTRACTS.md) | PARTIAL: federation optional; spike not run, OPEN-03/11 |
+| 20 | How are modules deployed? | [FEDERATION_ARCHITECTURE](../09_MODULE_FEDERATION/FEDERATION_ARCHITECTURE.md), [DEPLOYMENT_ARCHITECTURE](../17_DEVOPS_AND_INFRASTRUCTURE/DEPLOYMENT_ARCHITECTURE.md) | PARTIAL: hosting undecided, OPEN-14 |
+| 21 | How are versions kept compatible? | [VERSION_COMPATIBILITY_DESIGN](../09_MODULE_FEDERATION/VERSION_COMPATIBILITY_DESIGN.md) | ANSWERED (design; FED-RT-01..10 PROPOSED) |
+| 22 | What happens when a module fails? | [FAULT_ISOLATION_MATRIX](../09_MODULE_FEDERATION/FAULT_ISOLATION_MATRIX.md) | ANSWERED (design; chaos tests not in catalog, OPEN-P02) |
+| 23 | How are shared dependencies handled? | [VERSION_COMPATIBILITY_DESIGN](../09_MODULE_FEDERATION/VERSION_COMPATIBILITY_DESIGN.md), [FRONTEND_ARCHITECTURE](../10_FRONTEND_ARCHITECTURE/FRONTEND_ARCHITECTURE.md) | ANSWERED (design) |
+| 24 | How are failures contained? | [FAULT_ISOLATION_MATRIX](../09_MODULE_FEDERATION/FAULT_ISOLATION_MATRIX.md); ADR-T19 (fault containment, not security isolation) | ANSWERED (design) |
+| 25 | How does the PWA behave? | [PWA_ARCHITECTURE](../08_PWA_AND_MOBILE/PWA_ARCHITECTURE.md), [platform matrix](../08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md) | PARTIAL: no iOS or Android device verification, OPEN-12 |
+| 26 | How does offline work? | [OFFLINE_AND_SYNC_DESIGN](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md) | PARTIAL: OPEN-40; cache values unmeasured |
+| 27 | How does sync work? | [OFFLINE_AND_SYNC_DESIGN](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md) | ANSWERED (design) |
+| 28 | How are conflicts resolved? | [OFFLINE_AND_SYNC_DESIGN](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md), [API_DESIGN_STANDARDS](../13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md) (ETag, 412) | ANSWERED (design) |
+| 29 | How are permissions enforced? | [BACKEND_ARCHITECTURE](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md) (policy module), [SECURITY_ARCHITECTURE](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md) | PARTIAL: revocation values OPEN-X02 |
+| 30 | How is the system secured? | [THREAT_MODEL](../14_SECURITY_PRIVACY_COMPLIANCE/THREAT_MODEL.md), [SECURITY_ARCHITECTURE](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md) | PARTIAL: no penetration test; OPEN-48 |
+| 31 | How is data protected and its lifecycle governed? | [PRIVACY_AND_DATA_LIFECYCLE_DESIGN](../14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md), [DATA_GOVERNANCE_AND_LIFECYCLE](../12_DATA_AND_DATABASE/DATA_GOVERNANCE_AND_LIFECYCLE.md) | PARTIAL: counsel review absent, OPEN-08, OPEN-X03 |
+| 32 | What are the performance targets? | [SLO_AND_PERFORMANCE_TARGETS](../15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md) | PARTIAL: hypotheses only, no benchmark, OPEN-15 |
+| 33 | How is the system monitored? | [OBSERVABILITY_DESIGN](../17_DEVOPS_AND_INFRASTRUCTURE/OBSERVABILITY_DESIGN.md) | ANSWERED (design) |
+| 34 | How is it deployed and released? | [DEVOPS_AND_RELEASE_STRATEGY](../17_DEVOPS_AND_INFRASTRUCTURE/DEVOPS_AND_RELEASE_STRATEGY.md) | PARTIAL: hosting OPEN-14 |
+| 35 | How is it recovered after failure? | [FAILURE_MODE_ANALYSIS](../15_RELIABILITY_AND_PERFORMANCE/FAILURE_MODE_ANALYSIS.md), [RUNBOOK_INDEX](../18_OPERATIONS_AND_SUPPORT/RUNBOOK_INDEX.md) | PARTIAL: restore drill not run (RG-14) |
+| 36 | How is each requirement tested? | [TEST_STRATEGY](../16_QA_AND_TESTING/TEST_STRATEGY.md), [traceability](../28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md), [COVERAGE_MATRICES](../28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md) | PARTIAL: 125 of 389 ACs cited; tests_executed = 0 |
+| 37 | What is built first? | [DEVELOPER_IMPLEMENTATION_GUIDE](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) §2 | ANSWERED (plan) |
+| 38 | In what order is it delivered? | [ROADMAP](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) | ANSWERED (60 WPs, no dates by design) |
+| 39 | Who approves releases? | [ROADMAP](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) §7 release gates; [ADR_REGISTER](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md) | PARTIAL: approvers are roles; ARB not convened |
+| 40 | What is unresolved? | §9; [OPEN_DECISIONS](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md) §6 | ANSWERED (registered) |
+| 41 | Can a new engineer start from the docs alone (cold start)? | [DEVELOPER_IMPLEMENTATION_GUIDE](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) §6 rehearsal | PARTIAL: rehearsal is paper-only, not executed; several FAIL and PARTIAL rows |
+| 42 | Is every source item preserved or dispositioned? | [KNOWLEDGE_PRESERVATION_MANIFEST](../00_CONTROL_CENTRE/KNOWLEDGE_PRESERVATION_MANIFEST.md) Part 66.3 | PARTIAL: 0 of 132 rows terminal; 0 deletions |
+| 43 | Have the specifications been validated by tools? | [DOCUMENT_STATUS](../00_CONTROL_CENTRE/DOCUMENT_STATUS.md) verification notes | PARTIAL: Redocly and AsyncAPI results are agent-reported; spec validation, Mermaid and SQL not run in this round |
+| 44 | Is behaviour verified on real Android and iOS devices? | [PLATFORM_COMPATIBILITY_MATRIX](../08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md) | OPEN: no device tested (OPEN-12) |
+| 45 | How do identifiers and traces link end to end? | [ID_REGISTRY](../00_CONTROL_CENTRE/ID_REGISTRY.md), [TRACEABILITY_AND_VALIDATION](../28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md) | PARTIAL: crosswalks are candidates |
+| 46 | What is designed versus implemented? | [IMPLEMENTATION_READINESS](IMPLEMENTATION_READINESS.md), [DOCUMENT_STATUS](../00_CONTROL_CENTRE/DOCUMENT_STATUS.md) | ANSWERED: nothing here is implemented or tested |
+| 47 | What will it cost and what is the commercial model? | [COST_MODEL](../21_COST_AND_FINOPS/COST_MODEL.md), [COMMERCIAL_OPERATIONS](../19_BUSINESS_AND_COMMERCIAL_OPERATIONS/COMMERCIAL_OPERATIONS.md) | OPEN: no price or cost data |
+| 48 | How are AI features governed? | [SECURITY_ARCHITECTURE](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md) (AI gateway, INV-T08/T14); [ADR_REGISTER](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md) ADR-T12 | PARTIAL: log retention OPEN-X03; TEST-AI-001..006 not run |
+| 49 | What are the top risks? | [RISK_REGISTER](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md) | ANSWERED (56 risks; P1 list in the register) |
+| 50 | Who reviewed this and how independent is the review? | [FINAL_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md), [SECOND_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md), [PROJECT_SCOPE](../00_CONTROL_CENTRE/PROJECT_SCOPE.md) (model policy) | PARTIAL: same model family; effort setting not verified; model-policy enforcement unverified |
 
 ## 11. Honest limits
 No user research, device testing, legal review, cost/price data, executed tests or benchmarks. Agent-written documents were not cross-checked line by line; the independent review lists contradictions found. Federation tooling stability must be proven by spike before commitment. In this documentation pass, roadmap package counts, registered AC references, and 159 local Markdown links were checked; `git diff --check` passed. A later audit pass (2026-10-27) rescanned 636 local Markdown links outside code fences: 232 were dead (all in five `LEGACY_*` merge files that kept source-relative paths); 153 were repointed to files that exist in the repo and 79 became plain references to absent files; the rescan found 0 dead links. Mermaid rendering, machine-readable schema validation, and application tests were not rerun.
+
+2026-10-27 patch round: the 50-question table above was expanded (questions 41 to 50 are reconstructed wording), ID families and open items were registered, and link and orphan scans were rerun read-only (726 links, 158 outside-folder repository references, 0 genuinely broken). No test, validator, renderer or build was run; `tests_executed = 0`. Model-policy enforcement (Sonnet or Haiku only) is unverified.

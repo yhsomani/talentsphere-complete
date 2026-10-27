@@ -249,3 +249,45 @@ Metric owners review definitions on a regular cadence [OPEN-15]. Adding a metric
 ## Merged from legacy: `31_LEGACY_ARCHIVE/docs/product/PRD.md` section 9 (product metrics)
 
 The prior PRD named **Verifiable Career Progress** as the primary metric (conflict with MET-001 recorded as OPEN-51) and listed supporting metrics: activation; goal creation; skill coverage; evidence creation; verified evidence; learning completion; assessment improvement; qualified applications; interviews; offers; hires; outcome feedback; retention; and business metrics: paid conversion, recurring revenue, gross margin, infrastructure cost, AI cost by capability, enterprise expansion, support burden. Metrics with **no dedicated MET-* entry** at merge time: goal creation, skill coverage, offers extended/accepted, outcome-feedback delivery (legacy rule BR-218: feedback within 7 days of decision), enterprise expansion (MET-031 is the nearest). Candidate additions are tracked as OPEN-LGA-10 in `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`; see `../01_EXECUTIVE_AND_STRATEGY/LEGACY_PRD_PRODUCT_REQUIREMENTS.md` section 9. Prior privacy thresholds for aggregate metrics (k >= 5 vs k >= 10, legacy conflict C-8) are tracked as OPEN-LGA-01 and relate to OPEN-25.
+
+
+## 9. Metric schema extension and signal separation (patch 2026-10-27, PROPOSED)
+
+### 9.1 Added schema columns
+
+Every metric row in section 3 gains six attributes. Until a row states its own value the **family default** below applies; a row that differs must say so in its Purpose / decision cell. Review cadence values are not asserted (OPEN-15). Nothing here is measured.
+
+| Column | Meaning |
+|---|---|
+| Dimensions | Allowed breakdowns; anything not listed is not allowed (guards small-cell and fairness risk) |
+| Consent basis | Basis for collecting the underlying signal: operational (PUR-24), contract/service, or consent `analytics.product` (PUR-14); legal basis confirmed by counsel (OPEN-08) |
+| Dedup | Key that stops double counting |
+| Review cadence | How often the owner re-checks definition and relevance |
+| Integrity check | Reconciliation or test that detects a wrong number |
+| Decision supported | The decision the number exists to change |
+
+| Family (section 3) | Dimensions | Consent basis | Dedup | Review cadence | Integrity check | Decision supported |
+|---|---|---|---|---|---|---|
+| 3.1 North star, activation, evidence | plan tier, cohort week, persona; no demographic | Product analytics consent for person-keyed funnels; counts from service records need no analytics consent | `event_id`; distinct `actor_pseudo_id` per period | [OPEN-15] | Reconcile to source tables (evidence, accounts) | Where onboarding and evidence creation break |
+| 3.2 Hiring, matching, fairness | job, stage, org (own-tenant only); fairness cuts only via the P3 store | Service records; fairness data voluntary and separate (6.4) | application id; one row per application-stage | [OPEN-15] | Row count equals source (INV-T52 spirit); small-cell suppression test | Whether matching and pipelines help candidates fairly |
+| 3.3 Learning, institutions | course, cohort; cohort k-threshold (OPEN-25) | Institution agreement + student consent for private data | enrollment id | [OPEN-15] | Reconcile to enrollments | Content and cohort investment |
+| 3.4 Engagement, retention | week, platform (PWA/web), notification type | Consent `analytics.product`; push needs opt-in | `actor_pseudo_id` per period | [OPEN-15] | Compare to session records; bot filter | Whether engagement features earn their cost |
+| 3.5 Business, cost | plan, region (coarse), AI feature | Contract/billing records; forecast vs measured labelled | invoice id, provider event id | [OPEN-15] | Reconcile with billing provider and cloud invoices (COST_MODEL) | Pricing, margin, AI budget |
+| 3.6 Support, reliability, delivery | severity, service, release | Operational (PUR-24), no person id | ticket id, alert id, deploy id | [OPEN-15] | Compare to source tool exports | Staffing, SLO, release policy |
+
+### 9.2 Analytics versus telemetry versus audit log
+
+Three different signals. They must not be merged, share a store by default, or be used for each other's purpose. Sources: SEC-02 Revision 2 section 4, PRIVACY 3.1, SEC-02 section 8.
+
+| Property | Product analytics | Operational telemetry | Audit log |
+|---|---|---|---|
+| Purpose | Product decisions | Reliability and debugging | Accountability and evidence of who did what |
+| Content | Pseudonymous behavioural events (allowlisted props) | Metrics, logs, traces, coarse client beacons; no person id | Actor, action, resource, outcome, reason; opaque `subject_ref` |
+| Identity | `actor_pseudo_id` (rotating) | None | Yes, for actors; subject mapping deletable |
+| Basis | Consent `analytics.product` | Operational basis (PUR-24; counsel check OPEN-08) | Legal/security obligation and legitimate interest (OPEN-08) |
+| Store | Warehouse (OPEN-25) | Observability backend | Append-only DB table, tamper-evident |
+| Retention | Raw [OPEN-08], aggregates longer | 30 d logs / 7 d traces [TARGET] | Policy [OPEN-08]; not shortened by analytics opt-out |
+| Access | Analysts, pseudonymous views | Engineers/on-call | Auditor/admin; subject sees own access log |
+| Loss tolerated? | Yes (sampling, consent drops) | Some (sampling) | **No**; write failure fails the audited action |
+| Erasure | De-identify | Expiry | Mapping deleted, rows kept |
+| Joins | Never joined to telemetry; identity join only in restricted zone | Never carries user id | Not used for product metrics |

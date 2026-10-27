@@ -226,3 +226,28 @@ Dispositions against canonical docs: all 24 domains have at least one screen exc
 | OPEN-UX-22 | Reconcile placeholder `API-<module>-<verb>` names with the real API contract catalogue. |
 | OPEN-UX-23 | Approval policy for support-access grants (single operator vs two-person); BR-T041 fixes only ≤ 4 h and reason. |
 | OPEN-UX-24 | Final state names from the state-machine registry (SM-APPLICATION, SM-JOB, SM-EVIDENCE, SM-VERIFICATION). |
+
+
+
+
+# Patch 2026-10-27: Responsive class matrix (primary screens)
+
+**[TARGET].** Adds the missing responsive-class column for the primary screens without rewriting the section tables above. Classes: **compact** = `xs`/`sm` (under 768 px, bottom nav), **medium** = `md` (768 to 1023, icon rail), **expanded** = `lg`/`xl`/`2xl` (1024 px and up, sidebar, optional detail pane); breakpoints are DESIGN_SYSTEM sec 6. R-codes are the legend codes in section 0 (R1..R7). Behaviour at each class is a design requirement, not a measured result.
+
+| Screen | Compact | Medium | Expanded | R-code |
+|---|---|---|---|---|
+| SCR-SHELL-02 `/login` | Single column, full-width fields, passkey button first | Centered card 480 px | Same card, optional side panel with no required content | R6 |
+| SCR-CAND-02 onboarding | One step per screen, sticky ActionBar, progress text | Same, wider card | Same plus "Why we ask" side panel | R2 |
+| SCR-CAND-03 `/me/profile` | Sections stacked, per-section edit | Two-column form | Form plus live preview pane (xl) | R2 |
+| SCR-CAND-08 evidence create | Single column, sticky Save, file picker over drag-drop | Single column wide | Form left, rung/consent explainer right | R2 |
+| SCR-CAND-09 evidence detail | Stacked; provenance panel collapsed by default | Stacked, panel expanded | Master-detail with ProvenancePanel in pane | R3 |
+| SCR-OPP-01 `/jobs` | Card list, filters in full-screen sheet, "Load more" | Card list, filters in drawer | List plus persistent filter column; detail pane at xl | R1, R3 |
+| SCR-OPP-02 job detail | Stacked, sticky Apply bar, match panel collapsed | Stacked, match panel expanded | Two-column, Apply in aside | R3 |
+| SCR-OPP-06 application form | Stepper as "Step 2 of 5" text, sticky bar | Same | Stepper vertical left | R2 |
+| SCR-HIR-05 pipeline | Column tabs or list default; move via menu | Horizontal columns scroll | Full board, drag plus menu | R4 |
+| SCR-HIR-06 candidate review | Tabs for evidence, notes, scorecard, timeline | Two columns | Three regions with sticky decision bar | R3 |
+| SCR-LRN-09 assessment runner | Focus layout, no nav, timer pinned top | Same | Question left, navigator right | R6 |
+| SCR-ACC-08 plans | Stacked plan cards, comparison as accordion | Two-up | Comparison table | R5 |
+| SCR-ACC-09 consent manager | List with detail pushed on tap | List plus drawer | Master-detail | R3 |
+
+Rules for all rows: no information or action exists only in one class (the compact class must reach every action); touch targets 44 px or larger on compact and medium; layout survives 320 CSS px reflow and 200 % zoom; orientation never locked; container queries decide card layout inside panes.

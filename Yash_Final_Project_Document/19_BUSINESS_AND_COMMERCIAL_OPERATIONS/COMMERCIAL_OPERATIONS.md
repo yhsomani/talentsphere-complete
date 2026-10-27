@@ -254,3 +254,12 @@ OPEN-19 covers pricing/quotas/grace, while organization-versus-acting-user billi
 ## Merged from legacy: `31_LEGACY_ARCHIVE/docs/PRICING.md` (full data in `LEGACY_PRICING_PRIOR_ATTEMPT.md`)
 
 The complete prior plan table (four plans, monthly/yearly prices, AI quotas, active-job limits), the six `STRIPE_PRICE_*` variable names with their prior test-mode identifiers, the enforcement list, the safe plan-change procedure and the prior review notes are preserved in `LEGACY_PRICING_PRIOR_ATTEMPT.md` (COM-LEG-01). The paragraph above that omits the Stripe identifiers is not contradicted: COM-LEG-01 keeps them as reference data only, with a warning that they belong to a prior account. Open items: OPEN-19, OPEN-LGA-17, OPEN-LGA-18.
+
+
+## 16. Tax scope and entitlement enforcement (patch 2026-10-27, PROPOSED)
+
+| Statement | Detail |
+|---|---|
+| Tax rules are out of scope and unverified | This documentation states no tax rate, threshold, registration rule, invoice format or remittance duty, and none should be inferred from it. Seller of record, jurisdictions, calculation and invoicing are open (OPEN-18, section 6) and need a qualified tax advisor and counsel verification before any price is shown or charged |
+| Entitlement is enforced server-side | Plan, quota and feature access are decided by the API and billing state machine from durable billing state, never by hiding or showing UI. A client that is modified, cached offline or replaying an old response gains nothing. Actions that spend money or quota or export data read entitlement from the primary (0 s staleness; see `../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` R3-2); read-only gating may use a short cache. Webhook handling is idempotent (TEST-BIL-010). The UI mirrors entitlement for clarity only |
+| AI is not an enforcer | Pricing, refund, entitlement and tax outcomes are deterministic code; AI may draft explanations only (SECURITY_ARCHITECTURE.md R3-7) |

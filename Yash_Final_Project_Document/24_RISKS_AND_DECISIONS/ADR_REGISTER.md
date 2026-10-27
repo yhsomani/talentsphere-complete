@@ -58,3 +58,61 @@ Add MOD-INS (`/institution/*`); shell prefixes `/r/*`, `/invite/*`, `/p/*`, `/lo
 
 ## 5. New files to link from the master index
 See [MASTER_INDEX_V9_ADDENDUM_2](../00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_2.md).
+
+# Decision analysis (PATCH 2026-10-27, PROPOSED; closes audit gap on option analysis)
+Expands ADR-T04, T05, T02/T03, T19 and rendering ADR-T24 with drivers, options, cost, operations demand and residual risk. Cost is relative (L/M/H), not a quote. Nothing here is measured; assumptions need ARB ratification and, where noted, external verification. Microservices are analysed and not adopted for now, on stated re-evaluation conditions.
+
+## D-01 Modular monolith vs services (ADR-T04)
+| Item | Analysis |
+|---|---|
+| Drivers | Small team; strong transactional needs (evidence, applications, billing); outbox correctness; low ops budget; trust-critical consistency. |
+| Options | A. Modular monolith + worker (chosen). B. Monolith plus a few extracted services (sandbox, AI gateway, search). C. Full microservices. |
+| Tradeoffs | A: simplest transactions and testing, one failure domain. B: isolates risky or differently scaled parts, adds network contracts and tracing. C: independent scale and teams, distributed transactions, high cost. |
+| Cost | A low, B medium, C high. |
+| Ops demand | A one deployable plus worker; B 2-4 services with own SLOs; C needs a platform team. |
+| Residual risk (A) | Shared fate (FMEA SF-02, SF-03); boundary erosion; one module's load affects all. Controlled by FF-02 import graph and pool slices. |
+| Re-evaluation trigger | A module needs independent scaling/SLA, distinct residency or isolation (sandbox, AI), release contention between teams, or p95 targets unmet after tuning. First candidate step is B. |
+
+## D-02 Rendering strategy (ADR-T24, frontend)
+| Item | Analysis |
+|---|---|
+| Drivers | Authenticated app behind login; public job/profile pages need SEO and fast first paint; PWA offline shell; small team. |
+| Options | A. SPA only. B. SPA plus edge prerender for public pages (proposed). C. Full SSR framework. |
+| Tradeoffs | A: simplest, weak SEO. B: SEO for public pages, app stays SPA, adds prerender pipeline and invalidation. C: best first paint, needs server runtime, harder offline/PWA fit, framework migration. |
+| Cost | A low, B medium, C high. |
+| Ops demand | B needs prerender job, sitemap and invalidation on publish/withdraw. |
+| Residual risk | Stale prerendered pages exposing withdrawn data; SEO benefit unverified. |
+| Re-evaluation trigger | Measured organic-acquisition or LCP shortfall on public pages; need for personalised SSR. |
+
+## D-03 Database choice (ADR-T05, T11)
+| Item | Analysis |
+|---|---|
+| Drivers | Relational integrity, RLS, transactional outbox, FTS and vector in one place, low ops. |
+| Options | A. PostgreSQL only (chosen; FTS + pg_trgm + pgvector). B. Postgres plus dedicated search (OpenSearch). C. Polyglot or document store. |
+| Tradeoffs | A: one backup, one consistency model, limits at search scale and write throughput. B: better relevance and scale, dual-write and index lag. C: flexibility but loses constraints and joins central to evidence and tenancy. |
+| Cost | A low, B medium-high, C high. |
+| Ops demand | A: HA, backups with restore drills, partitioning, pooler. B adds cluster ops. |
+| Residual risk | Single system of record (SF-02); search relevance ceiling; managed-provider limits unverified. |
+| Re-evaluation trigger | p95 search > 400 ms at target corpus; sustained primary write saturation after tuning; residency need for a dedicated DB (ADR-T21). |
+
+## D-04 PWA wrapper vs native (ADR-T02)
+| Item | Analysis |
+|---|---|
+| Drivers | One codebase, installability, push reach, store-distribution need (unconfirmed), iOS PWA limits. |
+| Options | A. PWA only (chosen). B. PWA plus TWA (Android) or Capacitor wrapper. C. Native apps. |
+| Tradeoffs | A: cheapest; iOS push needs Home-Screen install; limited storage guarantees. B: store presence and native push, review overhead, bridge code. C: best device access, separate codebases. |
+| Cost | A low, B medium, C high. |
+| Ops demand | B adds store accounts, signing, release cadence; C needs a mobile team. |
+| Residual risk | iOS web push and storage eviction behaviour are secondary-source claims, not device-verified (needs real-device testing). |
+| Re-evaluation trigger | >15% iOS users blocked on push/install, confirmed store-distribution requirement, or a needed capability the web lacks. First step is B. |
+
+## D-05 Iframe / worker isolation vs same-runtime remote (ADR-T19, T23)
+| Item | Analysis |
+|---|---|
+| Drivers | Trust level of code; independent team ownership; performance; shared auth and UI context. |
+| Options | A. Bundled modules (baseline, no runtime isolation). B. Federated remotes in the same JS realm. C. Sandboxed cross-origin iframe per remote. D. Web Worker for non-UI logic. |
+| Tradeoffs | A/B: fast, shared state, no security boundary. C: strong isolation, postMessage contracts, layout/a11y/auth friction, extra load. D: isolates compute only, no DOM. |
+| Cost | A low, B medium, C high, D medium. |
+| Ops demand | B needs registry, signing, release train (FED-RT-01..10 in `09_MODULE_FEDERATION/VERSION_COMPATIBILITY_DESIGN.md`); C needs per-origin hosting and messaging contracts. |
+| Residual risk | B shares fate and trust with the shell (FED-RT-10, SF-01). |
+| Re-evaluation trigger | Any third-party or untrusted code, a compromised-remote incident, or a compliance demand for isolation moves that code to C; federation activation follows ADR-T23 criteria. |

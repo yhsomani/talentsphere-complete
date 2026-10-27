@@ -69,3 +69,49 @@ Consent scopes use dotted ids `<area>.<purpose>` (regex `^[a-z]+\.[a-z_]+(\.[a-z
 EVD-003061 through EVD-003072 map 12 major claim groups from the 2026-10-22 architecture durability report DOC-000158 to target blueprint locations and later evidence, preserving historical revision, contradictions and validation limits. TRC-17 identifies this candidate crosswalk; source findings are not promoted as current defects or approved target requirements.
 
 EVD-003073 through EVD-003082 map 10 major claim groups from source ADR-015 (DOC-000133) to target ADR-T05, data/migration design and later evidence. TRC-18 identifies this candidate crosswalk; OPEN-52 records the unresolved persistence bridge and owner/evidence gate.
+
+
+## Identifier families added by the 2026-10-27 patch round (registered here)
+
+Evidence labels: SOURCE (quoted from a repo source), VERIFIED (checked by a command in this round), TARGET_APPROVED (owner/ARB approved; none yet), PROPOSED (written in the docs, not ratified), OPEN (unresolved). Every row below was confirmed present by `grep` in the named file on 2026-10-27 (VERIFIED for existence only; content is PROPOSED). No ID here is implemented or tested; no test has been executed.
+
+| Family | Range | Defined in | Label | Meaning |
+|---|---|---|---|---|
+| ACT-ATOM | 01..12 | 07 `ACTION_REGISTRY.md` (patch block "atomic action contracts") | PROPOSED | Atomic action contracts (idempotency, completion criterion, audit event per action) |
+| UXH | 01..08 | 07 `PROGRESSIVE_UX_AND_FEEDBACK.md`; cited in 06 BP/SM and 07 ACT/NAV | PROPOSED | UX honesty/feedback rules |
+| TEST-UXH | 001..004 | 07 `PROGRESSIVE_UX_AND_FEEDBACK.md` | PROPOSED | Tests for UXH rules (not in TEST_CATALOG yet; OPEN-UX-36 style gap) |
+| CSV | 01..12, R1..R5 | 06 `STATE_MACHINES.md` (+ BP, SSOT_WORKFLOW_CROSSWALK) | PROPOSED | Cross-state-machine vocabulary rows and rules. Not a file extension; write `CSV-nn` with the hyphen |
+| RD | 19..24 (01..18 older) | 07 `NAVIGATION_ARCHITECTURE.md` | PROPOSED | Route decisions |
+| NAV-GRD | 01..05 | 07 `NAVIGATION_ARCHITECTURE.md`, `ACTION_REGISTRY.md` | PROPOSED | Navigation guard rules |
+| NAV-FOC | 01..10 | 07 `NAVIGATION_ARCHITECTURE.md` | PROPOSED | Focus-management rules |
+| FLD | FLD-AUTH/EVD/ORG/PIPE/PRO/REF/APP/MSG-nn (20 ids found) | 07 `SCREEN_SPECIFICATIONS_KEY.md`, 06 `SSOT_WORKFLOW_CROSSWALK.md` | PROPOSED | Field-level specs |
+| DS-N | 01..05 | 07 `DESIGN_SYSTEM.md` | PROPOSED | Design-system numeric/normalisation rules |
+| EDG | 01..14 | 06 `BUSINESS_PROCESS_INVENTORY.md` | PROPOSED | Process edge cases |
+| XT | 01..06 | 06 `SSOT_WORKFLOW_CROSSWALK.md` | PROPOSED | Workflow crosswalk exceptions |
+| TEST-ACT | 001..012 | 07 `ACTION_REGISTRY.md` | PROPOSED | Tests for ACT-ATOM (not in TEST_CATALOG) |
+| OPEN-UX | 34..36 (04..33 existing) | 06 `SSOT_WORKFLOW_CROSSWALK.md`, 07 `SCREEN_SPECIFICATIONS_KEY.md` | OPEN | Open UX items; see OPEN_DECISIONS section 6 |
+| D (ADR decision records) | D-01..D-05 | 24 `ADR_REGISTER.md` | PROPOSED | Decision records for ADR-T04, T24, T05/T11, T02, T19/T23. Always write `ADR-REG D-nn`; bare `D-nn` is also used for decision-table and ledger labels elsewhere |
+| FED-RT | 01..10 | 09 `VERSION_COMPATIBILITY_DESIGN.md`, cited by ADR_REGISTER | PROPOSED | Federation runtime rules. Remote load timeout 10000 ms is PROPOSED (09 `HOST_CONTRACT_AND_REMOTE_CONTRACTS.md`) |
+| PWA-PT | 01..10 | 08 `OFFLINE_AND_SYNC_DESIGN.md` | PROPOSED | PWA/offline policy tables |
+| DC | 01..10 | 12 `PHYSICAL_DESIGN.md`, 13 `API_DESIGN_STANDARDS.md` | PROPOSED | Data/consistency contracts. DC-05 `GET /api/v1/idempotency/{key}` is PROPOSED and not in OpenAPI (OPEN) |
+| SF | 01..10 | 15 `FAILURE_MODE_ANALYSIS.md` section 10, ADR_REGISTER | PROPOSED | Safe-failure rules |
+| R3 | 1..10 | 14 `SECURITY_ARCHITECTURE.md` (cited in 03, 16, 18, 19) | PROPOSED | Round-3 security/trust findings |
+| PROC | 16 (PROC-16: regulator/law-enforcement requests) | 14, 18 `OPERATIONS_AND_SUPPORT_PROCESSES.md`, `INCIDENT_MANAGEMENT.md` | PROPOSED | Counsel owner not named (OPEN-X04) |
+| TEST-SEC | 036..041 | 16 `TEST_CATALOG.md`, 14 | PROPOSED | Security tests |
+| TEST-TEN | 008..013 | 16 `TEST_CATALOG.md` | PROPOSED | Tenancy tests |
+| TEST-DEP | 009 | 16 `TEST_CATALOG.md` | PROPOSED | Deployment test |
+| TEST-BIL | 010 | 16 `TEST_CATALOG.md` | PROPOSED | Billing test |
+| TEST-REL | 014..016 | 16 `TEST_CATALOG.md` | PROPOSED | Reliability tests |
+| TEST-AI | 001..006 | 16 `TEST_CATALOG.md` | PROPOSED | AI-gateway tests |
+| audit.* events | 48 distinct dotted names found (for example `audit.auth.login_succeeded`, `audit.privacy.erasure_requested`, `audit.impersonation.started`) in 07, 14, 16, 18, 19 | 14 `SECURITY_ARCHITECTURE.md` and others | PROPOSED | The task brief said about 17 new events; the grep found 48 distinct names in total, so the new/old split is not verifiable here. A single event list is OPEN (see OPEN-X06 below). The EVENT_CATALOG / AsyncAPI do not yet list them |
+| OPEN-X | X01..X05 | 14 `SECURITY_ARCHITECTURE.md` (table), cited in 16, 18 | OPEN | Device trust, cache staleness values, AI log retention, PROC-16 counsel owner, "view as user" |
+
+### Known ID collisions and handling (2026-10-27)
+
+| Collision | Resolution (no renumbering done) |
+|---|---|
+| `OPEN-UX-nn`, `OPEN-FE-nn`, `OPEN-B*`, `OPEN-CS-nn`, `OPEN-X0n` are separate namespaces from global `OPEN-NN` (01..52) | No numeric collision. All are now listed in one place: `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` section 6 (the single register). Earlier collision `SCENARIO_SIMULATIONS.md` OPEN-14 stays recorded in OPEN_DECISIONS section 1 |
+| `D-01..D-05` (ADR decision records) vs `D-nn` in USER_JOURNEYS, ACTION_REGISTRY, NAVIGATION and the "gap closure D-01.." labels of LEGACY_MERGE_LEDGER_D | Qualify as `ADR-REG D-nn` in new text. Not renumbered, because the other uses are in files owned by other groups |
+| `CSV-nn` vs the `.csv` file type | Always written with a numeric suffix; no action |
+| `R3-n` (single digit, 1..10) vs sorting | Keep as is; cite as `R3-1` .. `R3-10` |
+| OPEN numbering gap: `OPEN-01`, `02`, `04` reserved unused | Unchanged; still to be retired or assigned (see OPEN_DECISIONS) |

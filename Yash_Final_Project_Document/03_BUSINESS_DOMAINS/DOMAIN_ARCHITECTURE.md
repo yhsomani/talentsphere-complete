@@ -101,3 +101,19 @@ Primary: **HR/recruitment + education marketplace**, B2B SaaS + B2C. Specialised
 - **Remove:** legacy chat/stub services, sponsored content, business-development graph.
 - **Defer:** groups/events/articles (DOM-14 phase 3), video interview recording + AI feedback, identity verification (OPEN-10), proctoring (vendor-gated).
 - **Introduce:** policy module, outbox, referee flow as first-class, consent scopes, capability endpoint, sandbox runner.
+
+
+# Revision 3 additions (patch 2026-10-27, audit gap closure)
+
+## Cross-cutting product rules: applicability
+
+PROPOSED rules, not implemented. Where a rule applies only to some domains the table says so; elsewhere it is N/A with the reason. Legal effect of any rule (for example date handling in contracts) needs counsel verification.
+
+| Rule | Applies? | PROPOSED rule | Domains | Test |
+|---|---|---|---|---|
+| Timezone and DST scheduling | **Yes**: interviews, assessment windows, deadlines, notification times, reports | Store instants in **UTC**; store the user's/event's **IANA zone id** (a region/city name, not a fixed offset) next to any human-scheduled time; render in the viewer's zone and show the zone name; recurring items are stored as local wall time + zone and expanded per occurrence so DST shifts keep the intended local hour; nonexistent local times (spring gap) are rejected, ambiguous ones (autumn overlap) are disambiguated explicitly; deadlines state their zone; zone-database updates are a dependency-update task | DOM-10, DOM-07, DOM-09, DOM-15, DOM-21 | TEST-REL-015 |
+| Concurrent-edit policy | **Yes**, for shared editable records (job posts, pipeline notes and stages, org settings, profile on several devices incl. offline PWA) | Optimistic concurrency: each editable record carries a version; a write with a stale version is rejected as a conflict and nothing is silently overwritten; the UI offers reload or manual merge; real-time co-editing is N/A in v1 (no evidenced need); offline edits follow INV-T13 and the offline conflict metric MET-045 | DOM-03, DOM-09, DOM-10, DOM-02 | TEST-REL-016 |
+| Version history | **Partly** | Yes for evidence, resume versions and consent records (append-only revisions, INV-T11; erasure tombstoning per PRIVACY 6.1); audit trail for org/role/stage changes (events in security doc R3-3). **N/A** for messages (edit/delete policy is a DOM-13 decision) and for general profile fields (current value + audit only) | DOM-05, DOM-03, DOM-22 | existing evidence and consent tests |
+| Moderation | **Yes** where user-generated content is visible to others (reported messages, public profile text, course reviews, job posts); **N/A** for private drafts and unshared private evidence | Human decisions only; automated detectors advisory (INV-T09); action ladder, notice with reason, appeal | DOM-19, DOM-13, DOM-14, DOM-09 | existing moderation/appeal tests; PROC-05, PROC-15 in `../18_OPERATIONS_AND_SUPPORT/OPERATIONS_AND_SUPPORT_PROCESSES.md` |
+
+Links: security rules `../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` R3; tests `../16_QA_AND_TESTING/TEST_CATALOG.md` Revision 3.

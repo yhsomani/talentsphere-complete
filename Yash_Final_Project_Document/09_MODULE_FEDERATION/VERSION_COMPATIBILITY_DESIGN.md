@@ -187,3 +187,19 @@ CI runs T1–T10 and T13–T21 on every shell/contract change and a subset (cont
 
 ## 11. Open items
 OPEN-FE-23 hosting of `/version.json` and canary query param vs cohort header (CDN Vary behaviour) · OPEN-FE-16 signing custody · OPEN-FE-12 API conventions · windows (90 d, 14 d grace, 0.5%/14 d) [TARGET] pending client-age telemetry.
+
+## 12. Compatibility and release-train rules (PATCH 2026-10-27, PROPOSED; applies only if federation is activated per ADR-T23)
+IDs: FED-RT-01..10. Validation needed: WP-FED-SPIKE, real-device matrix, security review of manifest signing.
+
+| ID | Topic | Rule (PROPOSED) |
+|---|---|---|
+| FED-RT-01 | Shared dependency ranges | Six singletons pinned with `requiredVersion` caret range on the host major; remote build fails CI (FF-04) if its range does not intersect the host's. Singleton major bump follows section 6.6 (dual-build window, never mixed realms). |
+| FED-RT-02 | Public contract version | Host Contract semver is the only public surface; remote declares `hostContract` range; minor = additive only, major = breaking with a >= 1 release-train overlap. Supported minors tested by MockHost contract tests. |
+| FED-RT-03 | Manifest provenance, integrity, origin | Registry entry signed (Ed25519, dual-key rotation window per FM-48); each asset carries SRI hash; assets load only from the allowed same-origin `/mf/<name>/<version>/` path; CSP `script-src` allow-list matches; unsigned, hash-mismatched or off-origin entry is rejected and treated as FM-05. Monotonic `sequence` blocks rollback-attacks. |
+| FED-RT-04 | Incompatible client | Client outside `[minShell, maxShell]` or Host Contract range keeps its LKG remote; if none, shows "Update required" and forces SW update at a safe point (no mid-form reload). Never loads a remote it cannot validate. |
+| FED-RT-05 | Rollback | Registry `rollbackTo` publishes previous signed entry with a new higher `sequence` (no sequence reuse); target <= 5 min to propagate is a [TARGET], unmeasured. Bad build marked bad client-side for 24 h (FI-03). |
+| FED-RT-06 | Cache invalidation | Registry `no-cache` + ETag; remote assets immutable content-hashed; SW precache keyed by shell version; on rollback the registry change is the invalidator, assets are never mutated in place. |
+| FED-RT-07 | Feature flags | Flags gate behaviour inside a remote, not remote identity; flag defaults safe when flag service unreachable; flag state included in telemetry. A release pairs each remote version with an explicit kill-switch flag. |
+| FED-RT-08 | Log correlation | W3C trace-context from shell to remote to API (ADR-T16); every log/RUM event carries `shell_ver`, `hc_version`, `remote_name`, `remote_ver`, `flag_set_hash`, `request_id`. |
+| FED-RT-09 | Release train | Fixed cadence [TARGET, owner to set]: contract freeze, canary cohort, promote or auto-halt on guardrails (FM-07); a remote may skip a train but must stay inside the supported Host Contract window. |
+| FED-RT-10 | **Residual risk: shared JS runtime** | Remotes share one realm with the shell. Not mitigated by this design: prototype pollution, global monkey-patching, DOM/storage access, CPU/memory hogging, and a compromised remote reading anything the shell page can read. Controls reduce likelihood only (signing, SRI, CSP, review, no client-held secrets, server-side authz). Untrusted/third-party code must use iframe sandbox or worker isolation (see `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` "Decision analysis" D-05). Accepted residual: owned first-party remotes only. |

@@ -72,3 +72,16 @@ The scenario values come from the product forecast (OPEN-05) and `WP-LOADBASE`. 
 | Hosting cost model inputs (changes E01 to E05) | OPEN-14 |
 | Observability backend choice (changes E15, E16) | OPEN-20 |
 | Instructor revenue share (E18, Phase 3 only) | OPEN-06 |
+
+
+## Forecast versus measured labelling (patch 2026-10-27, PROPOSED)
+
+Every cost figure, volume, unit price or margin that is ever entered in this document or in a dashboard fed by it must carry exactly one label.
+
+| Label | Meaning | Required with it |
+|---|---|---|
+| FORECAST | An estimate or scenario; not observed | Scenario name, assumptions, author, date; never shown as actual |
+| QUOTED | Vendor quote | Vendor, quote reference, quote date (existing rule) |
+| MEASURED | Observed from an invoice, billing export or metering record | Source system, period, extraction date; reconciled to invoice |
+
+Rules: no unlabelled number; a FORECAST is not promoted to MEASURED by rounding or editing, only by replacement from a source; mixed totals show the label of their least certain component; the current state of this document is that **no figure of any label exists** (structure only), and nothing here is a measurement. Cost metrics MET-028 to MET-030 inherit the label of their inputs (`../20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` section 9).

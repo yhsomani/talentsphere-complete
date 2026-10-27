@@ -240,3 +240,16 @@ Scenario values come from the product forecast (OPEN-05) and `WP-LOADBASE`; unti
 | Cost of the HA, DR and observability footprint with its SLO justification | §6 "Cost of reliability" | SRE Lead | empty |
 | Cost per MAU (`M_var`, §4) per scenario | §4 formula over E01..E25 | Finance Lead | empty |
 | Gate | Ph0 exit requires: every Ph1-active row has a quote reference and a quote date no older than the review cadence set by Finance (value [OPEN]) | Architecture Review Board | **blocker** |
+
+
+## Forecast versus measured labelling (patch 2026-10-27, PROPOSED)
+
+Every cost figure, volume, unit price or margin that is ever entered in this document or in a dashboard fed by it must carry exactly one label.
+
+| Label | Meaning | Required with it |
+|---|---|---|
+| FORECAST | An estimate or scenario; not observed | Scenario name, assumptions, author, date; never shown as actual |
+| QUOTED | Vendor quote | Vendor, quote reference, quote date (existing rule) |
+| MEASURED | Observed from an invoice, billing export or metering record | Source system, period, extraction date; reconciled to invoice |
+
+Rules: no unlabelled number; a FORECAST is not promoted to MEASURED by rounding or editing, only by replacement from a source; mixed totals show the label of their least certain component; the current state of this document is that **no figure of any label exists** (structure only), and nothing here is a measurement. Cost metrics MET-028 to MET-030 inherit the label of their inputs (`../20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` section 9).

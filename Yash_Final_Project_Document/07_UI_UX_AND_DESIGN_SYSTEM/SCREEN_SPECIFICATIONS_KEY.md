@@ -744,3 +744,54 @@ Banner present on every route during a grant (shell-level); countdown coarse and
 | OPEN-UX-28 | Whether a "view as user" mode is ever allowed to support operators (design excludes it; matrix grants S(R) read only). |
 | OPEN-UX-29 | Referee disclosure level: full candidate name vs first name only; default proposed: full name, with candidate option to limit. |
 | OPEN-UX-30 | Telemetry for integrity "page-leave" notes — scope, retention, and legal review before building. |
+
+
+
+
+# Patch 2026-10-27: Field-level validation matrix (FLD-*)
+
+**[TARGET].** Limits are copied from the action rows in ACTION_REGISTRY (cited per row); where this table adds a rule it is marked PROPOSED. Server is always authoritative (INV-T11); the client rule is a convenience and must never be stricter than the server except for obvious typing aids.
+
+## Template (copy for each new field)
+
+| Column | Meaning |
+|---|---|
+| FLD id / screen / ACT | Stable id `FLD-<area>-NN`, owning SCR-*, and the ACT that submits it |
+| Type | Input component (DESIGN_SYSTEM 7.2) |
+| Req | Yes / No / Conditional (state the condition) |
+| Limits | Min/max length or range, with unit (code points, bytes, items) |
+| Normalisation | Applied before validation and storage |
+| Authority | C = client convenience only, S = server only, C+S = both; server decides |
+| Error wording | Exact visible message pattern (what is wrong, how to fix; no blame) |
+| Focus on error | Where focus goes (error summary for forms, field for single-field) |
+| Preserve | What is kept after failure (all values except secrets) |
+| Boundary test | min-1, min, max, max+1, and one hostile value |
+
+**Global normalisation (PROPOSED):** Unicode NFC; trim leading/trailing whitespace; strip control characters except newline in multi-line fields; length counted in Unicode code points after normalisation (the same count shown by the character counter); emails lower-cased on the domain part only; no silent truncation, over-limit input is rejected with a message. Passwords are never trimmed, normalised, truncated or logged.
+
+## Filled rows (top forms)
+
+| FLD | Screen · ACT | Field | Type | Req | Limits | Normalisation | Authority | Error wording | Focus on error | Preserve | Boundary test |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| FLD-AUTH-01 | SHELL-03 · ACT-AUTH-01 | Email | email TextField | Yes | RFC-valid, <=254 | trim; domain lower-case | C+S | "Enter an email like name@example.com" | Summary, then field | Email | 254 ok / 255 reject; `a@b`; mixed-case domain; leading space |
+| FLD-AUTH-02 | SHELL-03 · ACT-AUTH-01 | Password | password with show/hide | Yes (or passkey) | >=12 chars; breach-list check; no composition rules; paste allowed | none | C+S (breach check S) | "Use at least 12 characters" / "This password appeared in a data breach. Choose another" | Field | Nothing (cleared) | 11 reject / 12 ok; known breached value; 1,000-char value; emoji |
+| FLD-AUTH-03 | SHELL-04 · ACT-AUTH-02 | Confirmation code | OtpField | Yes | 6 digits | strip spaces, accept paste | C+S | "Code didn't match. 3 attempts left" | Field | Email context | 5 / 6 / 7 digits; letters; expired code |
+| FLD-PRO-01 | CAND-03 · ACT-PRO-01 | Headline | TextField | No | <=120 | NFC, trim | C+S | "Headline is 3 characters too long" | Field | Entered text | 120 / 121; combining-mark string; RTL text |
+| FLD-PRO-02 | CAND-03 · ACT-PRO-01 | Summary | TextArea | No | <=2000 | NFC, trim, keep newlines | C+S | as above | Field | Entered text | 2000 / 2001; 3-byte and 4-byte characters at limit |
+| FLD-PRO-03 | CAND-03 · ACT-PRO-01 | Links | repeating URL | No | https only, <=5, each <=2048 | trim; punycode shown decoded with domain displayed | C+S | "Links must start with https://" | Field | All links | 5 / 6 links; `http://`; `javascript:`; IDN homograph |
+| FLD-EVD-01 | CAND-08 · ACT-EVD-01 | Title | TextField | Yes | 3-120 | NFC, trim | C+S | "Add a title of at least 3 characters" | Summary | All fields | 2 / 3 / 120 / 121; whitespace-only |
+| FLD-EVD-02 | CAND-08 · ACT-EVD-01 | Description | TextArea | Yes | 10-2000 | NFC, trim | C+S | "Describe what you did in at least 10 characters" | Summary | All fields | 9 / 10 / 2000 / 2001 |
+| FLD-EVD-03 | CAND-08 · ACT-EVD-01 | Start/end date | DatePicker | Yes (start); end optional | end >= start, <= today (user-local day) | stored as date (no time) | C+S | "End date can't be before the start date" | Field | Dates | end = start; end = today; end = tomorrow; start after end |
+| FLD-EVD-04 | CAND-08 · ACT-EVD-02 | File | FileDrop | No | <=10 files; pdf, docx, png, jpg, md, zip; <=25 MB each | filename sanitised; type sniffed on server | S authoritative, C pre-check | "report.pdf is over 25 MB. Choose a smaller file" | Summary | Other files and form | 25 MB / 25 MB + 1 byte; renamed `.exe`; zero-byte; 11th file |
+| FLD-EVD-05 | CAND-08 · ACT-EVD-03 | Link | URL | No | https, <=2048, <=10 | trim | C+S | "Enter a link that starts with https://" | Field | Entered URL | 2048 / 2049; `javascript:`; private IP host (S rejects, SSRF guard) |
+| FLD-APP-01 | OPP-06 · ACT-APP-03 | Evidence to attach | multi-select | No | <=10 own items | n/a | S | "You can share up to 10 items" | Field | Selection | 10 / 11; item revoked meanwhile |
+| FLD-REF-01 | CAND-12 · ACT-VER-02 | Referee name | TextField | Yes | 2-80 | NFC, trim | C+S | "Enter the referee's name" | Summary | All fields | 1 / 2 / 80 / 81; single-name; non-Latin script |
+| FLD-REF-02 | CAND-12 · ACT-VER-02 | Referee email | email | Yes | valid, not own email | as FLD-AUTH-01 | C+S | "Use an email that is not your own" | Summary | All fields | own email; own email with different case; plus-addressing |
+| FLD-REF-03 | CAND-12 · ACT-VER-02 | Message | TextArea | No | <=500 | NFC, trim | C+S | counter text | Field | Entered text | 500 / 501 |
+| FLD-MSG-01 | MSG-02 · ACT-MSG-01 | Message text | TextArea | Yes | 1-4000 | NFC; trim trailing | C+S | "Message is too long by N characters" | Field | Text and attachments | 4000 / 4001; whitespace-only; 4th attachment |
+| FLD-PIPE-01 | HIR-06 · ACT-PIPE-08 | Note | TextArea | Yes | 1-5000 | NFC, trim | C+S | counter text | Field | Text | 5000 / 5001; sensitive-attribute hint shown, never blocks |
+| FLD-PIPE-02 | HIR-06 · ACT-PIPE-05 | Reason category | Select | Yes | list | n/a | S | "Choose a reason" | Field | Note text | none selected; value not in list (S) |
+| FLD-ORG-01 | HIR-15 · ACT-ORG-01 | Invitee emails | multi-entry | Yes | 1-50, valid, seats available | per FLD-AUTH-01; duplicates removed with notice | C+S | "3 addresses are not valid" with list | Field | Valid entries | 50 / 51; duplicate; seat limit |
+| FLD-ORG-02 | HIR-16 · ACT-ORG-08 | Accent colour | colour | No | text contrast >= 4.5:1 on white | hex normalised | S | "This colour is too light. Try #xxxxxx" | Field | Choice | 4.49 / 4.5 ratio |
+
+Open items: **OPEN-UX-34** (PROPOSED): code-point vs grapheme-cluster counting for limits shown to people (emoji sequences). **OPEN-UX-35** (PROPOSED): whether `N` normalisation (NFC) is applied to names displayed on credentials, where exact source spelling may matter.

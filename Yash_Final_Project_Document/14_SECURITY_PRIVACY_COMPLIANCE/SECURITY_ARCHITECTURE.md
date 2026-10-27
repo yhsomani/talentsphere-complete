@@ -257,3 +257,168 @@ Authorization reads consent from the primary at read time (CONST-S13); no layer 
 | ADR-T06 amendment | Refresh bound to the `__Host-` session id; `__Host-ts_at` lifetime = refresh window; duplicate-cookie rejection |
 | FF additions | Cookie-scope tests (mismatched `sid`, duplicate cookie, no `Domain=<apex>`), beacon-schema lint, retired-literal doc lint |
 | SEC-01 | AC-33, AC-34, C15, C16, RR-8 (present in the file already) |
+
+# Revision 3 additions (patch 2026-10-27, audit gap closure)
+
+Status of everything below: **PROPOSED** design for review; nothing is implemented or verified, and no test named here has been executed. Legal applicability of any item needs counsel verification (OPEN-08). New open decisions use the scoped prefix `OPEN-X##` (listed in R3-10) pending registration by governance in `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md`. Other-team consumers: UX uses R3-1, R3-2 and R3-3 (`../07_UI_UX_AND_DESIGN_SYSTEM/`); the platform team owns the cache partition design (`../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md`, `../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md`); this document only states the isolation requirement.
+
+## R3-1. Identity and organisation lifecycle rules
+
+| Topic | PROPOSED rule | Test |
+|---|---|---|
+| Org switching (user with several memberships) | Exactly one **active org context** per request, held server-side (`org_id` chosen by an explicit switch, never inferred from a URL or client header alone). What the user sees: org name and role in the shell; page data reloads under the new context; lists, caches, drafts, notifications and search results from the previous org are cleared client-side. Candidate-owned (personal) data is its own context, not an org. Each switch emits `audit.session.org_context_switched` | TEST-SEC-040 |
+| In-flight operations at switch | A mutating request is bound to the org context it was **issued under** (idempotency key + `org_id`); it completes or fails under that org, never under the new one. Unsent drafts are kept per org and never auto-submitted after a switch. Long jobs keep their original tenant pin (INV-T03). The UI shows a pending result against the org it belongs to | TEST-SEC-040 |
+| Device trust ("trusted device" skips MFA) | **Out of scope for v1.** Rationale: it adds a long-lived bypass credential and a device-binding store with no evidenced need; step-up (CONST-S06) and the "shared device" session cap already cover the risk. Revisit only with a recorded need and threat review (OPEN-X01). Users still see and revoke their session list | N/A |
+| Org offboarding: export and handover | Org owner (with step-up) requests an **org export** (members, job posts, pipeline records the org owns, audit extract) via PROC-02/PROC-09; delivered as a time-limited owner-only link (CONST-S11). **Handover** to another admin precedes closure; an org cannot close with zero owners. Candidate-owned content is **not** exported to the org beyond what the candidate consented to. Retention after close follows R3-6; legal hold overrides deletion. Events: `audit.org.export_requested/delivered`, `audit.org.ownership_transferred`, `audit.org.offboarded` | TEST-TEN-012 |
+| Collaborator removed mid-workflow | Access ends for **new requests** on the next permission check (R3-2 bounds). Items assigned to the removed member (stage assignments, interview slots, pending approvals) move to a **needs-reassignment** state visible to org admins; nothing is silently dropped or auto-approved. Drafts and comments authored by the member remain, attributed to a tombstoned display name. A pending approval cannot be completed by the removed user | TEST-TEN-007 (existing), TEST-TEN-013 |
+| Notification when a recipient's access changes | Org admins are notified when a member is removed or downgraded and items need reassignment. The affected member is told of the removal (in-app/email per preference). Where a candidate shared a document **to** a user whose access later ends, the candidate's share list shows that recipient as "no longer has access"; nothing is re-sent. Events: `audit.org.member_removed`, `audit.share.recipient_access_ended` | TEST-TEN-013 |
+
+## R3-2. Permission cache staleness and revocation timing
+
+Existing design (section 2.3, BE-01): grants cached per account by `grants_version` (TTL <= 15 s [TARGET]); revoked `sid` denylist for the access-token TTL (<= 15 min); consent never cached (CONST-S13). R3 extends this to **every** cache holding an authorization-relevant fact.
+
+| Cache / fact | PROPOSED maximum staleness | Rationale | Fail mode |
+|---|---|---|---|
+| Role/grants per account (`grants_version`) | <= 15 s (keeps BE-01 [TARGET]) | Removal feels immediate; absorbs read load | Version mismatch forces DB reload |
+| Org membership and org role | <= 15 s, same cache entry as grants | Removing a collaborator is a security event | Reload from primary on mismatch |
+| Session revocation (`sid` denylist) | Checked on every request; denylist propagation target <= 5 s; hard outer bound stays the 15 min token TTL | The 15 min figure is a ceiling, not the goal | Denylist store unreachable: **fail closed** for step-up-gated and admin actions; fall back to DB lookup for others |
+| Entitlement / plan | <= 60 s for read-only feature gating; **0 s (primary read)** for any action that spends money or quota or exports data | Billing webhooks lag; server must not over-grant on spend | Primary read; deny if unavailable |
+| Feature flags | <= 60 s | Flags are not an authorization source | Last known good |
+| Search/index ACL | Visibility re-checked at query time against live relations; index entries carry `org_id`, not decision results | Avoid stale visibility in results | Drop the hit if the re-check fails |
+| Support/privileged grants | **0 s** (primary read on each use); expiry enforced server-side | Time-boxed access must end on time (INV-T18) | Deny |
+| Consent | 0 s (CONST-S13, unchanged) | Existing rule | Deny |
+| Client caches (browser, PWA, service worker) | Never authoritative (INV-T13); authenticated API responses `Cache-Control: private, no-store` unless an ADR says otherwise | Offline/back-button replay must not expose revoked data | Re-fetch on focus; 401/403 clears local caches |
+
+**Revocation propagation (design targets UX may quote, not guarantees):** role/org removal effective for new requests within 15 s; session revoke typically within 5 s, worst case 15 min; consent and privileged-grant revocation on the next read. Values to be confirmed by load tests (OPEN-X02). **Test for stale permission cache:** TEST-SEC-036 (R3-9).
+
+## R3-3. Audit event names per critical action (reference list for UX and support)
+
+Pattern follows existing `audit.<domain>.<verb>` names in OPS-PROC. All carry actor, resource, outcome, reason code, request/trace id (section 8). Names are PROPOSED unless already in OPS-PROC.
+
+| Critical action | Event name(s) |
+|---|---|
+| Sign-in, MFA/passkey change | `audit.auth.login_succeeded/failed`, `audit.auth.mfa_changed`, `audit.auth.passkey_changed` |
+| Session revoke, org switch, refresh reuse | `audit.session.revoked`, `audit.session.org_context_switched`, `audit.session.refresh_reuse_detected` |
+| Step-up | `audit.auth.step_up_completed/failed` |
+| Role change, member add/remove | `audit.org.role_changed`, `audit.org.member_added/removed` (existing) |
+| Support grant | `audit.grant.requested/approved/used/expired/revoked` |
+| View-as / impersonation | `audit.impersonation.started/ended/action_blocked` |
+| Data export, erasure | `audit.privacy.export_requested/delivered`, `audit.privacy.erasure_requested/completed` |
+| Consent | `audit.consent.granted/revoked` |
+| Evidence, verification | `audit.evidence.status_changed`, `audit.verification.decided` |
+| Application stage | `audit.application.stage_changed` |
+| Billing | `audit.billing.plan_changed`, `audit.billing.refund_issued`, `audit.billing.webhook_rejected` |
+| Admin job, flag change | `audit.admin.job_run`, `audit.change.flag_changed` (existing) |
+| AI output accepted/rejected | `audit.ai.output_accepted/rejected` |
+| Regulator or law-enforcement request | `audit.legal.request_received/reviewed/answered/declined` (PROC-16) |
+| Org lifecycle | `audit.org.created/offboarded/ownership_transferred/export_requested` |
+| Share to recipient ended | `audit.share.recipient_access_ended` |
+| Application submit, draft sync (ACT-ATOM-02, 03) PROPOSED | `audit.application.submitted`, `audit.application.draft_synced` |
+| Evidence created (ACT-ATOM-04) PROPOSED | `audit.evidence.created` |
+| Bulk application move (ACT-ATOM-07) PROPOSED | `audit.application.bulk_move_completed/bulk_move_cancelled` |
+| Assessment attempt submit (ACT-ATOM-08) PROPOSED | `audit.assessment.attempt_submitted` |
+| Remote rollback (ACT-ATOM-09) PROPOSED | `audit.remote.rollback_executed` |
+| Billing checkout confirmed (ACT-ATOM-11) PROPOSED | `audit.billing.subscription_confirmed` |
+| Account preferences updated (ACT-ATOM-12) PROPOSED | `audit.account.preferences_updated` |
+
+ACT-ATOM-01, 05, 06 and 10 reuse `audit.auth.login_succeeded/failed`, `audit.session.org_context_switched`, `audit.application.stage_changed` and `audit.org.role_changed` above.
+
+## R3-4. Impersonation safeguards (one table)
+
+Current design has **support grants** (time-boxed, scoped, subject-visible log). "View as user" and write-impersonation are **not specified as built**. PROPOSED safeguards if any view-as capability is added (OPEN-X05):
+
+| Safeguard | Rule |
+|---|---|
+| Default | **View-as is read-only.** No write impersonation; a needed write is done by the user or as a separate audited admin action |
+| Authorisation | Active support grant (PROC-04) + MFA/step-up; requester != approver; scope limited to the ticket's resource |
+| Time | Grant <= 4 h (section 3); session ends at grant expiry; dormant grants expire at 60 days |
+| Visibility | Persistent banner for the operator; subject sees it in `GET /me/access-log` |
+| Blocked actions | No credential/MFA/payment-method changes, messaging, consent changes, export, erasure, or approving own grants; no message bodies without a specific grant |
+| Data | Masked fields stay masked; sensitive classes in R3-6 stay denied |
+| Audit | `audit.impersonation.started/ended/action_blocked`; tokens carry an on-behalf-of (`act`) claim so downstream logs name the operator |
+| Review | Monthly sample review by Security Lead; anomalies alert (section 8) |
+
+Test: TEST-SEC-041.
+
+## R3-5. Tenant isolation matrix
+
+Platform team defines the concrete cache/key partition; this table states the requirement and the test that must exist. No test is executed.
+
+| Layer | Isolation requirement | Mechanism | Test |
+|---|---|---|---|
+| API | Resource loaded then authorised; non-visible = 404 | `packages/policy`, INV-T01/T02 | TEST-TEN-001 |
+| DB | RLS FORCE with per-transaction tenant context; no context = zero rows | INV-T03, DB-02 | TEST-TEN-002 |
+| Cache (server) | Keys include `org_id`/principal scope; no shared key for tenant data | PROPOSED, platform team | TEST-TEN-008 |
+| HTTP/CDN cache | Authenticated responses private, `Vary` correct | existing | TEST-TEN-006 |
+| Search / recommendations | `org_id` filter applied inside the query, not post-filtered | existing | TEST-TEN-004 |
+| Jobs / worker | Payload pins tenant; worker cannot read outside it | existing | TEST-TEN-003 |
+| Logs / traces | Lines carry tenant id; tenant users cannot query logs; redaction (INV-T14) | PROPOSED tenant-id field | TEST-TEN-009 |
+| Object storage | Keys prefixed by tenant; signed URLs bound to object + principal, short expiry; UGC domain cookieless | PROPOSED | TEST-TEN-010 |
+| Analytics | Tenant users see own-tenant aggregates; small-cell suppression; no cross-tenant joins in pseudonymous views | existing (ANL-MET section 5) | TEST-TEN-005 |
+| ID swap (any layer) | A valid ID of another tenant in path/body/query/header returns 404, no side effect | PROPOSED generated suite | TEST-TEN-011 |
+
+## R3-6. Sensitive data class table
+
+Retention values are not asserted; they are `[OPEN-08]` unless set in `PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md`. Residency is unresolved (OPEN-30). Breach role = who leads response (see `../18_OPERATIONS_AND_SUPPORT/INCIDENT_MANAGEMENT.md` roles).
+
+| Class (examples) | Purpose | Access | Encryption | Retention | Deletion | Export | Residency | Breach role |
+|---|---|---|---|---|---|---|---|---|
+| Credentials and secrets (password/refresh hashes, API keys) | Authentication | Auth service only; never support | Hashed (Argon2id/SHA-256) or KMS-wrapped; TLS | Account lifetime; revoked rows short [OPEN-08] | Erased with account | Never | [OPEN-30] | Security lead |
+| Government/financial identifiers (identity verification deferred, OPEN-10) | Verification/billing | Provider-held where possible; not stored raw | Provider-held; field-level if stored | Minimum, provider rules | On request unless legal duty | Provider receipt only | [OPEN-30] | Security lead + Legal |
+| Candidate personal data (profile, resume, contact) | Core service | Owner; consented recruiters; support by grant | At rest by platform; TLS | Account lifetime + [OPEN-08] | PROC-09 erasure | Self-export | [OPEN-30] | Privacy lead |
+| Evidence, work history, referee data | Verification | Owner; consented viewers; referee via token | As above | Per evidence lifecycle; history tombstoned (PRIVACY 6.1) | Erasure with tombstoned history | Self-export | [OPEN-30] | Privacy lead |
+| Messages and applications | Collaboration/hiring | Participants only; admin needs specific grant | As above | [OPEN-08] | Erasure; legal hold overrides | Participant export | [OPEN-30] | Privacy lead |
+| Fairness self-identification (P3) | Fairness audit only | Audit job only; never recruiters | Separate store and key | Purpose-limited [OPEN-08] | On revoke | Self-export | [OPEN-30] | Privacy lead |
+| Payment data | Billing | Stripe holds card data; platform holds ids/state | Provider-held; TLS | Financial-record rules via counsel | Legal duty overrides | Invoices only | [OPEN-30] | Finance + Security |
+| Audit events | Accountability | Auditor/admin; subject sees own access log | At rest; opaque `subject_ref` | Policy [OPEN-08] | Mapping deleted on erasure; rows kept | Own access log | [OPEN-30] | Security lead |
+| Operational telemetry (no person id) | Reliability | Engineers | Redacted | 30 d logs / 7 d traces [TARGET] | Expiry | None | [OPEN-30] | SRE lead |
+| Product analytics (P1/P2) | Product decisions | Pseudonymous views | Warehouse encryption | Raw [OPEN-08] | De-identify on erasure | Attributable events | [OPEN-30] | Privacy lead |
+
+## R3-7. AI governance (DOM-17 gateway and any model use)
+
+Binding sources: INV-T06 to T09, INV-T19, ADR-T12, `../21_COST_AND_FINOPS/COST_MODEL.md` section 5. This section consolidates; it adds no capability.
+
+| Topic | Rule |
+|---|---|
+| Suitability | AI may assist drafting, summarising, explaining and suggesting. It is not a source of truth for evidence, verification, identity, eligibility or payments (INV-T08). Each AI feature records purpose, data used and a non-AI fallback before launch |
+| Prohibited actions | No autonomous consequential decision (hire/reject, exclusionary ranking, suspend, takedown, refund, role change, deletion) (INV-T09); no AI-generated evidence or verification status; no protected or inferred attributes; no provider training on user content; no C3+ or secret data sent to a provider outside consent scope |
+| Prompt-injection and grounding defences | User, resume, job-post, message and retrieved text is **data, never instructions**; system and data channels separated; output schema-validated; no model output executed as code or passed as a tool argument unvalidated; grounding only on consented, permission-filtered records fetched by the server for that principal; claims about a person must cite a source record or are suppressed |
+| Human approval | Any AI output that changes state, or is shown to a third party about a person, needs explicit confirmation by an authorised user; audited (`audit.ai.output_accepted/rejected`) |
+| Tool least privilege | Model-invoked tools are a per-feature allowlist, read-only by default, run with the **calling principal's** permissions (never a service superuser), tenant-pinned, with argument validation and per-call audit; no tool that sends messages, spends money or deletes data |
+| Cost and rate limits | Budget and quota enforced at the gateway before the provider call (BR-T111, COST_MODEL section 5); per-principal rate limits; hard stop, no silent overage; circuit breaker on provider errors |
+| Non-AI fallback | Each AI feature degrades to a deterministic path (templates, rules, manual entry) when disabled, over budget, consent-denied or the provider is down; core flows never depend on a model |
+| Invariant | **AI is never the sole enforcer of a financial, security or legal invariant.** Enforcement is deterministic server code (policy, RLS, billing state machine, consent checks). A model may flag or recommend; it cannot grant, deny, charge, refund or decide compliance |
+| Logging | Prompts and outputs kept at the minimum needed, redacted (INV-T14); retention OPEN-X03 |
+
+Tests: TEST-AI-001 to TEST-AI-006 (R3-9).
+
+## R3-8. Regulator and law-enforcement requests
+
+The procedure is **PROC-16** in `../18_OPERATIONS_AND_SUPPORT/OPERATIONS_AND_SUPPORT_PROCESSES.md`. Security requirement: no disclosure path exists outside PROC-16; engineers and support cannot export user data on a request letter; scope-limited extracts are produced only on a counsel-approved, logged instruction.
+
+## R3-9. Threat to test pairs
+
+**None of these tests has been written or executed.** Status is `Specified (not executed)`. Full rows: `../16_QA_AND_TESTING/TEST_CATALOG.md` (Revision 3 additions).
+
+| Threat | TEST id | Key assertion |
+|---|---|---|
+| Stale permission cache | TEST-SEC-036 | After role removal commit, request past the staleness bound is denied; primary-read actions denied at once |
+| Unsafe remote artifact (federated remote or uploaded file) | TEST-SEC-037, TEST-SEC-038 | Hash/signature mismatch refused; uploaded artifact served inert from UGC domain |
+| Backup restore | TEST-DEP-009 | Restore into an isolated environment passes integrity and tenant-isolation checks |
+| Cross-tenant ID swap | TEST-TEN-011 | Foreign ID returns 404, no side effect |
+| Duplicate webhook | TEST-BIL-010 | Replayed event applied once |
+| Token leakage | TEST-SEC-039 | Tokens absent from logs, URLs, error bodies, analytics |
+| Prompt injection | TEST-AI-001 | Injected instructions inside data are not obeyed |
+| Network interruption | TEST-REL-014 | Interrupted mutation retried safely: no duplicate, no lost write |
+
+## R3-10. Open decisions raised
+
+| ID | Decision | Owner role |
+|---|---|---|
+| OPEN-X01 | Device trust: confirm out of scope for v1 | Security Architect |
+| OPEN-X02 | Confirm permission-cache staleness and denylist propagation values against load tests | Security Architect + SRE Lead |
+| OPEN-X03 | AI prompt/output log retention | Privacy Lead + AI owner |
+| OPEN-X04 | Counsel review owner for regulator/law-enforcement requests (PROC-16) | Executive sponsor (to name) |
+| OPEN-X05 | Whether any "view as user" capability is built at all (R3-4) | Product + Security |
+
+OPEN-X01..X05 mirror the entries in OPEN_DECISIONS.md section 6, which is the register of record.

@@ -269,3 +269,29 @@ UX-07 section 7 "Remote-load failure UX" applies to chunk-load failures in bundl
 
 ## 7. Items for the governance pass
 ID_REGISTRY: SCR-INS prefix and aliases; USER_JOURNEYS (folder 02) cites SCR-ADM-17..22 (resolved by aliases, edit optional); OPEN-UX-13 (evidence drafts) remains open; renumber OPEN-UX-* into the global register (REVW-33). Registry totals: MOD-ADM 16, MOD-INS 6, sum 130.
+
+
+
+# Patch 2026-10-27: Interaction hazards (UXH-01..UXH-08)
+
+**[TARGET]**, thresholds marked PROPOSED are unmeasured. Each hazard names the rule the UI follows and the action contracts that exercise it ([ACTION_REGISTRY](ACTION_REGISTRY.md) ACT-ATOM-*). Platform mechanisms (idempotency key and status-query endpoint, queue and multi-tab leader election, service-worker update flow) are owned by [13_API_EVENTS_AND_INTEGRATIONS](../13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md) and [08_PWA_AND_MOBILE](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN_REV2.md) (pending patch); this section defines only what the person sees.
+
+| ID | Hazard | Rule | Exercised by |
+|---|---|---|---|
+| UXH-01 | Late response after navigation | Every request is tied to a screen-instance token. A response that arrives after the screen unmounted updates the shared cache only: no toast, no focus move, no announcement. Mutations are NOT cancelled by navigation (the server may already have committed); the outcome appears where the person is now only if it needs attention (failure or conflict) via the notification centre, with a link back. Reads may be aborted with `AbortSignal`. | ATOM-06, 08 |
+| UXH-02 | Workspace switch mid-operation | Each mutation carries its origin workspace id. Switching with a dirty form or in-flight mutation shows a guard dialog (Finish here / Switch and keep draft / Cancel). Queued writes keep their origin workspace and flush under it; if the grant was lost meanwhile, the item becomes `needs-attention` with reason, never silently re-targeted to the new workspace. Cached data is keyed by workspace id; no cross-workspace cache reads. | ATOM-05 |
+| UXH-03 | Multi-tab | One tab flushes the write queue (leader chosen by the platform mechanism); other tabs show queue state read-only and never flush. Leader tab closing hands over without duplicating sends (mutation ids make replay a no-op). Sign-out, workspace switch and role change broadcast to all tabs; a non-leader tab shows a banner "Signed out in another tab" and clears its drafts according to ACT-AUTH-09. Two tabs editing one record use ETag conflict flow, not last-write-wins. | ATOM-03, 05 |
+| UXH-04 | Remote reload / version skew | A new remote or shell version is never applied while the page holds a dirty form, a running attempt (SCR-LRN-09), an open upload or a non-empty queue. Show a status banner "Update ready" and apply at the next route change with a clean state. Forced reload only when the compatibility check fails (ADR-T18) and then only after saving local drafts. | ATOM-09 |
+| UXH-05 | Low bandwidth / low memory | Honour `saveData` and the Network Information API where present (progressive enhancement, not a gate): no prefetch, no autoplay, smaller image variants, list pages of 20 not 50 (PROPOSED). Skeletons are fixed height to prevent layout shift. Large lists virtualise (DESIGN_SYSTEM 7.4); evidence previews load on demand; a screen that fails to render for memory reasons falls back to the plain list view, never a blank page. Budgets are owned by 15_RELIABILITY_AND_PERFORMANCE. | all list screens |
+| UXH-06 | Announcement noise limits | Live regions: at most one polite announcement per user action; batched results (sync flush, bulk operation, upload set) produce ONE summary, not one per item; progress announcements at most every 5 s or 10 items (PROPOSED); `assertive` only for session expiry and data-loss risk; timers never announce each second (use fixed warning thresholds); repeated identical messages are suppressed for 10 s (PROPOSED). Toasts that carry only an announcement are not also focusable. | ATOM-03, 07, 08 |
+| UXH-07 | Retry scope must not duplicate mutations | Retry reuses the SAME idempotency key (one per intent, created at form open). After a timeout or lost response the UI first asks the status query ("Checking...") and only re-sends when the server confirms it never saw the key. "Retry failed" in a batch re-sends only failed item keys. Editing the form after a failure creates a NEW intent and key. Automatic retry applies only to reads and `N`/`K` actions; never to a click on a consequential action without the person's confirmation. | ATOM-02, 07, 11 |
+| UXH-08 | Success with lost response | If the response is lost but the server committed, the status query returns the committed result and the UI shows success once. If status cannot be reached, show "We could not confirm this. Check your applications before trying again" with a link to the list; do not offer a plain "Submit again". | ATOM-02, 11 |
+
+## Interaction-hazard acceptance (PROPOSED test hooks)
+
+| Test | Check |
+|---|---|
+| TEST-UXH-001 | Navigate away during a pending mutation: no toast on the new screen; outcome visible in notifications. |
+| TEST-UXH-002 | Two tabs, offline then online: each queued mutation id sent exactly once. |
+| TEST-UXH-003 | Screen reader run of a 50-item bulk move produces at most 2 announcements besides the final summary. |
+| TEST-UXH-004 | Simulate lost response on submit: exactly one application exists afterwards. |

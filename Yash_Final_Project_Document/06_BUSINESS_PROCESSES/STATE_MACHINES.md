@@ -1187,3 +1187,44 @@ Further columns implied: `evidence_attestation.issuer_class` and `.domain_bindin
 
 Each new or amended machine gets the SM-00 obligations (one test per allowed transition, one per forbidden state × event pair, terminal immutability, concurrency for row-lock guards). Specific cases: instructor equals learner cannot reach `authority_verified` (INV-T47); an `unbound` domain proof leaves the rung at `claimed` (INV-T48); a suspended account with an open case cannot enter `pending_erasure` (INV-T49); a withdrawn application re-applied inside the cooldown returns `409 reapply_cooldown`; a manual plus system reminder pair never exceeds two (INV-T51); organization `v5` pauses every live job but the oldest in the same transaction (INV-T30); SM-BGJOB claim-attempt counting matches BE-01 section 7.2.
 
+
+
+
+
+# Patch 2026-10-27: Completion-state vocabulary (CSV-01..CSV-12)
+
+**Scope.** Describes the lifecycle of one *user intent* across client, API and workers. It does NOT add states to any SM-* machine: persisted state names stay exactly as defined in the machines above and in SM-00 "Vocabulary authority". Each completion word is a *position* in the intent lifecycle; the machine state it maps to is shown where one exists. **[TARGET]**, owners are roles PROPOSED for confirmation.
+
+| ID | Word | Meaning | Owner (who may set it) | Persisted? | UI may claim success? |
+|---|---|---|---|---|---|
+| CSV-01 | draft | Local or server draft; nothing sent as an intent. (SM-APPLICATION `draft` is stored in `application_draft`) | Client; server for stored drafts | Local / draft table | No. Shows "Draft" / "Saved as draft" only |
+| CSV-02 | queued | Accepted into the client write queue (ADR-T10 set only); not yet sent | Client queue | Local (IndexedDB) | No. "Waiting to sync"; messages show "Not sent yet" |
+| CSV-03 | submitted | Request left the client; outcome unknown until response or status query | Client | No | No. "Sending..." / "Checking..." |
+| CSV-04 | accepted | Server validated, authorised and recorded the intent (idempotency key bound); work may still be pending | API | Idempotency record | Only for the narrow claim "We received it". Never "done" |
+| CSV-05 | processing | Async work running after acceptance (scan, export build, job claim: SM-FILE `scanning`, SM-EXPORT `building`, SM-BGJOB `running`) | Worker | Yes (those machines) | No. Indeterminate progress with honest text |
+| CSV-06 | committed | The authoritative state transition is durable in the owning machine (e.g. application `submitted`, evidence row exists) | Owning API module, in the transaction (INV-T11) | Yes | Yes, for effects that live inside our system |
+| CSV-07 | externally-confirmed | A third party confirmed (payment webhook, SSO IdP assertion, employer-domain email proof, delivery provider) | Verified inbound event only (INV-T17) | Yes | Yes, and only now for anything that depends on the third party (money, entitlement, "verified"). A redirect return is not confirmation |
+| CSV-08 | canceled | Intent stopped before commit by the person or system; no effect remains. Spelling: `cancelled` for platform machines, `canceled` only in SM-SUBSCRIPTION (SM-00 naming rule 2) | Initiator or system | Machine-dependent | Yes: "Cancelled. Nothing was changed" |
+| CSV-09 | compensated | Commit was reversed by a defined compensating step (refund, seat returned, soft-delete); original record kept for audit | Owning module via a new transition, never by editing history | Yes (new event/row) | Yes, with wording that states what was undone and what was not |
+| CSV-10 | failed | Terminal failure with no effect, or effect rolled back automatically | API / worker (`dead`, `rejected`...) | Yes | No success; shows cause, trace id, safe retry per UXH-07 |
+| CSV-11 | partial | Batch or multi-part intent where some items committed and some did not | Bulk-operation record | Yes (per-item results) | Per item only. Header says "42 moved, 3 skipped, 5 not started"; never a single green tick |
+| CSV-12 | stale | Client view older than server (ETag mismatch, cache expiry, revoked grant) | Server (412/409/403) | No | No. Offer refresh or conflict flow; the action is not retried silently |
+
+## Rules
+
+| ID | Rule |
+|---|---|
+| CSV-R1 | The client may show a persistent success only at `committed` or `externally-confirmed`, whichever the action's contract names as its completion criterion ([ACTION_REGISTRY](../07_UI_UX_AND_DESIGN_SYSTEM/ACTION_REGISTRY.md) ACT-ATOM-*). |
+| CSV-R2 | Optimistic UI (UI-07 6.1) may display the *expected* result but must label it as pending until `committed`, and revert on `failed` or `stale`. |
+| CSV-R3 | A word moves forward only: draft, queued, submitted, accepted, processing, then one of committed, externally-confirmed, failed, canceled, compensated, partial. `stale` can interrupt any position before commit. |
+| CSV-R4 | A UI string never says "sent", "paid", "verified", "published" or "approved" before the owning machine has the matching persisted state. |
+| CSV-R5 | A lost response is resolved by status query (CSV-03 to CSV-06/10), never by a second submit with a new key (UXH-07, UXH-08). |
+
+## Mapping examples
+
+| Action | draft | queued | submitted/accepted | processing | committed | externally-confirmed |
+|---|---|---|---|---|---|---|
+| ACT-APP-03 Submit application | `application_draft` | n/a (online-only) | request in flight | match/notify jobs | `application.state = submitted` | n/a |
+| ACT-MSG-01 Send message | compose box | Not sent yet | accepted | delivery job | stored in thread | provider delivery receipt (email channel only) |
+| ACT-BIL-01 Choose plan | plan selected | n/a | checkout created | webhook pending | n/a | `SM-SUBSCRIPTION` active via verified webhook |
+| ACT-EVD-02 Add file | file picked | n/a | upload init accepted | `scanning` | `clean` | n/a |

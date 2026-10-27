@@ -97,3 +97,43 @@ OPEN-08, OPEN-14, OPEN-15 (committed SLOs), OPEN-16, OPEN-34, OPEN-39 must be re
 | OPEN-51 | What is the primary product outcome metric, and how does Verifiable Career Progress relate to Evidence-Backed Hiring Conversations? | Select one as the primary north star, or define an owner-approved hierarchy with leading and lagging measures and anti-gaming constraints | Product Director + Analytics Lead | Before metric baselining, roadmap success claims, or external outcome claims | **Yes** for product success measurement | `docs/product/PRD.md` §9 names Verifiable Career Progress as primary; target `METRICS_CATALOG.md` §2 names EBHC. Both are candidate measures, and no owner-approved replacement or hierarchy is recorded. |
 | OPEN-52 | How will the branch persistence decision in source ADR-015 be reconciled with target ADR-T05 before implementation and production scale-out? | Compare (a) an owner-approved, time-bounded single-writer bridge with explicit per-domain exit gates, (b) completing SQL-backed reads before production, and any evidence-based alternative; define identity/schema adaptation, transaction and concurrency acceptance, hosted migration rehearsal, and the gate before a second API writer | Architecture Review Board + Database Architect + API Owner + Platform/SRE | Before persistence architecture approval, populated hosted migration, or second API writer | **Yes** for production persistence and horizontal scale readiness | Source ADR-015 says branch-accepted pending owner ratification, with PostgreSQL writes and boot-hydrated Map reads. Target ADR-T05 specifies SQL-only reads/writes. Current ARCHITECTURE.md describes the hybrid trade-off; later audit records hosted-schema and operational proof blockers. Neither design supersedes the other without owner decision and evidence. See TRC-18. |
 | OPEN-01, 02, 04 | Reserved, unused: retire or assign. | — | Documentation Architect | Ph0 | No |
+
+
+## 6. Consolidated register of namespaced open items (added 2026-10-27; the single register)
+
+This section is the one place that lists every open-item namespace and where its rows live, plus the items raised by the 2026-10-27 patch round. Evidence label for every row: OPEN (nothing is decided or implemented). Numbering check done 2026-10-27 by grep over the whole folder: the global `OPEN-NN` series is 01..52 (01, 02, 04 reserved) and was not renumbered; no namespaced id collides with it. Namespaces are separate by prefix, so there is no renumbering in this round.
+
+### 6.1 Namespaces and where the rows are defined
+
+| Namespace | Distinct ids found | Rows live in | Note |
+|---|---:|---|---|
+| `OPEN-NN` | 52 | this file, sections 2, 3 and the orchestrator table | Global series |
+| `OPEN-LGA-nn` | 21 | `OPEN_DECISIONS_LEGACY_MERGE.md` | Legacy-merge items |
+| `OPEN-UX-nn` | 33 (04..36; 01..03 unused) | `07_UI_UX_AND_DESIGN_SYSTEM/PROGRESSIVE_UX_AND_FEEDBACK.md`, `SCREEN_SPECIFICATIONS_KEY.md`, `06_*/SSOT_WORKFLOW_CROSSWALK.md` | OPEN-UX-34..36 are new, listed in 6.2 |
+| `OPEN-FE-nn` | 32 | `09_MODULE_FEDERATION`, `10_FRONTEND_ARCHITECTURE` | Frontend/federation |
+| `OPEN-B*` | 59 | `11_BACKEND_ARCHITECTURE`, `12_DATA_AND_DATABASE` | Backend/data |
+| `OPEN-CS-nn` | 5 | `00_CONTROL_CENTRE/CONSENT_SCOPE_CATALOGUE.md` | Consent scopes |
+| `OPEN-X0n` | 6 (X01..X05 in 14; X06 added here) | `14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` section R3-10, 6.2 below | Trust/ops round |
+| `OPEN-P0n` | 3 (new, added here) | 6.2 below | Platform items from the patch round |
+
+### 6.2 Items raised by the patch round
+
+| ID | Question | Owner | Needed by | Blocking? | Source |
+|---|---|---|---|---|---|
+| OPEN-UX-34 | Count limits in code points or grapheme clusters for emoji sequences | UX + Frontend | Ph1 | No | 07 `SCREEN_SPECIFICATIONS_KEY.md` |
+| OPEN-UX-35 | Is NFC normalisation applied to names shown on credentials (exact source spelling may matter) | UX + Privacy | Ph1 | No | 07 `SCREEN_SPECIFICATIONS_KEY.md` |
+| OPEN-UX-36 | Register the listed ACT gaps in the Action Registry before the trace rows move from candidate to approved | UX + Documentation Architect | Before trace approval | No | 06 `SSOT_WORKFLOW_CROSSWALK.md` |
+| OPEN-X01 | Device trust ("trusted device" skips MFA): confirm out of scope for v1 | Security Architect | Ph1 | No | 14 R3-10 |
+| OPEN-X02 | Permission-cache staleness and denylist propagation values (15 s / 5 s / 15 min are design targets) confirmed against load tests | Security Architect + SRE Lead | Before SLO commitment | Yes for revocation claims | 14 R3-10 |
+| OPEN-X03 | AI prompt/output log retention | Privacy Lead + AI owner | Before AI launch | Yes for AI launch | 14 R3-10 |
+| OPEN-X04 | Counsel review owner for regulator/law-enforcement requests (PROC-16); executive sponsor to name | Executive sponsor | Before PROC-16 is operational | Yes for PROC-16 | 14, 18 |
+| OPEN-X05 | Whether any "view as user" capability is built (R3-4) | Product + Security | Ph2 | No | 14 R3-10 |
+| OPEN-X06 | One canonical list of `audit.*` event names (48 distinct dotted names found across 07, 14, 16, 18, 19; none is in EVENT_CATALOG/AsyncAPI) | Backend Architect + Security Architect | Before API/event contract freeze | Yes for event contract freeze | grep, this round |
+| OPEN-P01 | Lost-response outcome lookup `GET /api/v1/idempotency/{key}` (DC-05) is PROPOSED and absent from OpenAPI: add or drop | API Owner | Before API contract freeze (OPEN-46) | Yes for DC-05 | 12 `PHYSICAL_DESIGN.md` |
+| OPEN-P02 | Chaos tests `CH-nn` and contract tests `CT-nn` (FAILURE_MODE_ANALYSIS section 10) are not in TEST_CATALOG | QA Architect | Ph1 | No | 15 `FAILURE_MODE_ANALYSIS.md` |
+| OPEN-P03 | Ratify remote-load timeout 10000 ms (cold) with 2 retries (500 ms, 1500 ms); PROPOSED, applies only if federation is activated (ADR-T23) | Frontend Architect + ARB | With ADR-T23 | No (bundled baseline) | 09 `HOST_CONTRACT_AND_REMOTE_CONTRACTS.md` |
+| OPEN-P04 | Add TEST-UXH-001..004 and TEST-ACT-001..012 to TEST_CATALOG (defined in 07 only) | QA Architect | Ph1 | No | 07 |
+
+Reserved and unused global ids OPEN-01, 02, 04 remain to be retired or assigned (Documentation Architect, Ph0).
+
+Already closed or changed by other owners and not re-opened here: ADR decision records D-01..D-05 live in `ADR_REGISTER.md` (PROPOSED; not touched by this round).

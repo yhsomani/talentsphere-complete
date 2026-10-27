@@ -355,3 +355,18 @@ Props are typed by Zod-free TS interfaces; `className` escape hatch is **not** e
 | OPEN-UX-06 | Visual-regression tool and hosting. |
 | OPEN-UX-07 | Org accent-colour branding: allow at all at launch? (adds contrast-validation burden). |
 | OPEN-UX-08 | Final brand identity (logo, name casing) not yet decided; tokens are brand-neutral beyond the primary hue. |
+
+
+
+
+# Patch 2026-10-27: Token versioning, RTL and status-not-by-colour notes
+
+**[TARGET].** Complements sec 2, 9 and 10; nothing above is superseded.
+
+| ID | Topic | Rule |
+|---|---|---|
+| DS-N01 | Token versioning | Tokens carry semver in `@ts/ui` (sec 12). Add or change a value = minor; rename or remove = major with a one-release alias that logs a console deprecation. Remotes declare the token major they were built against; the compatibility check (ADR-T18) refuses a remote built for a major the shell no longer serves. Dark/light themes change together in one version. A token change that moves any contrast pair below the thresholds in sec 2.4 is a defect and fails the visual and contrast checks (OPEN-UX-06). |
+| DS-N02 | Token naming | Semantic names only in feature code (`color.status.success`), never raw hex or primitives; org accent colour (ACT-ORG-08) maps into a single `color.brand` slot and is validated at 4.5:1. |
+| DS-N03 | RTL | Layout logical properties only (start/end), including padding, borders, positioning and text alignment. Directional icons (back, next, chevron) mirror via `data-mirror`; media controls, logos, check marks, charts' time axes and code do not. Mixed-direction user text is wrapped with `<bdi>`. Focus order follows DOM order, which follows reading order under `dir=rtl`. RTL is not released until a pseudo-RTL pass of all primary screens (see responsive matrix in SCREEN_REGISTRY) is clean; English-only at launch (sec 10). |
+| DS-N04 | Status not by colour alone | Every status, error, validation, selection, link-in-text, chart series and diff shows at least one non-colour cue: text label, icon with accessible name, pattern or position (WCAG 1.4.1). StatusBadge always renders its text label; icon-only badges are not allowed for states. Evidence rung badges keep text ("Verified by...") plus shape. Charts use direct labels or distinct markers in addition to hue. Forced-colour mode (sec 2.4) must preserve these cues. |
+| DS-N05 | Motion | State changes must be understandable with motion removed; `prefers-reduced-motion` and the in-app preference (ACT-ACC-06) both disable non-essential animation. |

@@ -1041,3 +1041,72 @@ for fn in ("trace_lib.py", "build_matrices.py", "generate_outputs.py"):
 (ROOT / "28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md").write_text("\n".join(L), encoding="utf-8", newline="\n")
 print("suites", len(suite_rows), len(bru_rows), "ac unc", len(ac_unc), "suite-tied", len(suite_of_ac), "br", dict(st_cnt), "no_ac", len(no_ac), len(p0_no_ac), len(p0_noac_notest), "missing", missing)
 ```
+
+
+## 10. Prompt-section coverage matrix (added 2026-10-27)
+
+Method and limits. One row per section 0..48 of the original mission prompt, plus the cleanup-prompt areas. The prompt text is not stored in this repository, so the section titles below are RECONSTRUCTED from the folder layout, the control documents and the V9 references that survive in the ledgers; the row number is the section number as the owner gave it only if the owner confirms the title (OPEN). Status words: `retained` (content kept as written), `improved` (content extended or corrected in the 2026-10-26/27 patch rounds), `reconciled` (source and target compared and differences recorded), `excluded` (deliberately left out, with reason). `partial` is added where the work is incomplete; a status is a statement about documentation only. Evidence label: PROPOSED for all rows until the owner confirms the mapping.
+
+| Sec | Reconstructed title | Location | Status | Note |
+|---:|---|---|---|---|
+| 0 | Mission, scope, model policy | `00_CONTROL_CENTRE/PROJECT_SCOPE.md`, `EXECUTION_LEDGER_V9_ADDENDUM.md` | retained | **Model policy: Sonnet or Haiku only.** The scope file records orchestrator Sonnet 5.5 and delegated agents invoked with `model: sonnet`; Haiku not used. Runtime enforcement is UNVERIFIED beyond the Agent tool parameter. The first `EXECUTION_LEDGER.md` (2026-10-25) says the runtime identified the primary model family as GPT-6, which contradicts the scope file; the contradiction is OPEN and is not resolved here. This patch round's agents are Sonnet-class by their own statement only |
+| 1 | Source discovery and preservation rules | `KNOWLEDGE_PRESERVATION_MANIFEST.md` | retained, partial | 0 of 132 rows terminal; Part 66.3 metrics added |
+| 2 | Source document inventory | `SOURCE_DOCUMENT_INVENTORY.md`, manifest CSV | reconciled | Denominators disagree (204 / 132 / 158 / 267); recorded in manifest Part 66.3 |
+| 3 | Protected tree and SSOT protection | `PROTECTED_DOCUMENT_TREE_BASELINE.csv` | retained | SSOT.md unchanged per git (2026-10-25 check) |
+| 4 | Product vision and business model | `01_EXECUTIVE_AND_STRATEGY` | retained | REV2 file not indexed before this round |
+| 5 | Stakeholders, roles, permissions | `02_*/STAKEHOLDERS_ROLES_PERMISSIONS.md` | improved | OPEN-44 open |
+| 6 | User journeys | `02_*/USER_JOURNEYS.md`, `LEGACY_JOURNEY_REGISTRY_J01_J28.md` | reconciled | 22 partial, 6 no direct match (OPEN-50) |
+| 7 | Domain architecture | `03_*` | improved | OPEN-47 |
+| 8 | Capability map | `04_*` | retained | 108 CAP |
+| 9 | Feature hierarchy and registry | `04_*`, `SSOT_FEATURE_CROSSWALK.md` | reconciled | 173 F-ids to 253 FEAT is a candidate (OPEN-41) |
+| 10 | Feature specifications | `05_*` | improved | 14 full specs, 359 ACs |
+| 11 | Micro-feature specifications | `05_*/MICRO_FEATURE_SPECS.md` | retained | 65 specs |
+| 12 | Acceptance criteria | `05_*`, `16_*/ACCEPTANCE_CRITERIA_GUIDE.md` | improved | 125 of 389 ACs cited by tests (mechanical) |
+| 13 | Business rules | `06_*/BUSINESS_RULES_REGISTRY.md` | reconciled | 171 source rules unmatched (OPEN-43) |
+| 14 | Invariants and fitness functions | `00_*/CANONICAL_INVARIANTS.md`, `06_*` | retained | Dual authority noted in DOCUMENT_STATUS |
+| 15 | State machines | `06_*/STATE_MACHINES.md` | improved | CSV-01..12 added |
+| 16 | Decision tables | `06_*/DECISION_TABLES.md` | retained | 12 tables |
+| 17 | Business processes | `06_*/BUSINESS_PROCESS_INVENTORY.md` | improved | EDG-01..14 added |
+| 18 | Screens | `07_*/SCREEN_REGISTRY.md`, `SCREEN_SPECIFICATIONS_KEY.md` | improved | FLD-* added |
+| 19 | Actions | `07_*/ACTION_REGISTRY.md` | improved | ACT-ATOM-01..12 |
+| 20 | Navigation | `07_*/NAVIGATION_ARCHITECTURE.md` | improved | NAV-GRD, NAV-FOC, RD-19..24 |
+| 21 | Design system | `07_*/DESIGN_SYSTEM.md` | improved | DS-N01..05 |
+| 22 | Accessibility | `07_*/ACCESSIBILITY_SPEC.md` | retained | WCAG 2.2 AA is a design target, not measured |
+| 23 | Progressive UX and feedback | `07_*/PROGRESSIVE_UX_AND_FEEDBACK.md` | improved | UXH-01..08 |
+| 24 | PWA architecture | `08_*/PWA_ARCHITECTURE.md` | retained | |
+| 25 | Offline and sync | `08_*/OFFLINE_AND_SYNC_DESIGN.md` | improved | PWA-PT-01..10 |
+| 26 | Platform compatibility and distribution | `08_*` | retained, partial | No real-device verification (OPEN-12) |
+| 27 | Module federation | `09_*/FEDERATION_ARCHITECTURE.md` | reconciled | Bundled baseline; federation optional (ADR-T23) |
+| 28 | Versioning and fault isolation | `09_*` | improved | FED-RT-01..10 |
+| 29 | Frontend architecture | `10_*` | retained | |
+| 30 | Backend architecture | `11_*` | improved | REV2 folded |
+| 31 | Conceptual, logical, physical data | `12_*` | improved | DC-01..10 |
+| 32 | Data governance and migration policy | `12_*` | retained | OPEN-52 |
+| 33 | API design and catalog | `13_*` | improved | OPEN-P01 |
+| 34 | Event catalog | `13_*/EVENT_CATALOG.md` | retained, partial | `audit.*` names not in catalog (OPEN-X06) |
+| 35 | Integrations | `13_*/INTEGRATION_ARCHITECTURE.md` | retained | |
+| 36 | Security architecture and threat model | `14_*` | improved | R3-1..R3-10 |
+| 37 | Privacy and consent | `14_*`, `00_*/CONSENT_SCOPE_CATALOGUE.md` | retained | 14 scopes |
+| 38 | Compliance applicability | `14_*` | retained | No counsel review |
+| 39 | Reliability, SLO, failure modes | `15_*` | improved | SF-01..10, section 10 |
+| 40 | Test strategy and catalog | `16_*` | improved | New TEST-SEC/TEN/REL/AI ids; none executed |
+| 41 | DevOps and deployment | `17_*` | retained | Hosting undecided (OPEN-14) |
+| 42 | Observability | `17_*/OBSERVABILITY_DESIGN.md` | retained | |
+| 43 | Operations, runbooks, incidents | `18_*` | improved | PROC-16 |
+| 44 | Commercial, metrics, cost | `19_*`, `20_*`, `21_*` | improved | No price or cost evidence |
+| 45 | Roadmap, migration, risks, decisions | `22_*`, `23_*`, `24_*` | improved | G01..G16 ledger, 56 risks, OPEN section 6 |
+| 46 | Diagrams and research | `25_*`, `26_*` | retained | Mermaid not rendered |
+| 47 | Independent review, traceability, validation | `27_*`, `28_*` | reconciled | Reviews same model family |
+| 48 | Developer guide, final blueprint, 50 acceptance questions | `29_*`, `99_*` | improved | Cold-start rehearsal and 50 question table added |
+
+### 10.1 Cleanup-prompt areas
+
+| Area | Location | Status | Note |
+|---|---|---|---|
+| C1 Legacy archive retention | `31_LEGACY_ARCHIVE`, `CLEANUP_CANDIDATES.md` | retained | 0 eligible; 0 deletions; precedence rule vs 30 in DOCUMENT_STATUS |
+| C2 Duplicates and overlays (`*_REV2`, ROADMAP vs ROADMAP_REV2) | `MASTER_INDEX.md` addendum section, `DOCUMENT_STATUS.md` | reconciled | Linked, precedence stated, none deleted |
+| C3 Secret-pattern scan | `DOCUMENT_STATUS.md` action item | excluded from automatic action | 1 file flagged by pattern; path only; human review; no rotation |
+| C4 Broken links | `DOCUMENT_STATUS.md` link-triage table | reconciled, partial | 158 flagged; owned files fixed; others listed |
+| C5 Orphan files | `MASTER_INDEX.md` | improved | 112 non-indexed files reviewed; tool-state files excluded |
+| C6 Tool state (`.omc/`) | `DOCUMENT_STATUS.md` | excluded | Not documents; not deleted |
+| C7 Cleanup gate | `KNOWLEDGE_PRESERVATION_MANIFEST.md` | retained | Gate unchanged |

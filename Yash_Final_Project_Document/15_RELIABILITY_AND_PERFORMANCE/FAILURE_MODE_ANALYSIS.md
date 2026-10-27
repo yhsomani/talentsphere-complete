@@ -135,3 +135,73 @@ Registry, manifest, remote-version, and per-remote rollback behavior in this sec
 ## 9. Game days
 
 Quarterly-style cadence is a **policy intent**, not a schedule; frequency is [OPEN-15]. Each game day selects ≥ 3 failure modes from this document, injects them in staging (and selected ones in production with approval), and records measured detection time, containment time and recovery time against the tables above. Findings update this document and RISK_REGISTER.
+
+## 10. Ownership, retry, data-loss and chaos extension (PATCH 2026-10-27, PROPOSED)
+Companion columns for FM-01..FM-48 (original tables unchanged). Owners are roles, not named people; retry limits are [TARGET] pending WP-LOADBASE/OPEN-15. Test ids `CH-nn` are PROPOSED chaos tests and `CT-nn` PROPOSED contract tests, not yet in `TEST_CATALOG.md`; existing `TEST-*` ids stay in the Verification column above. No chaos test has been run.
+
+| FM | Owner | Retry limit | Data-loss exposure | Chaos / contract test |
+|---|---|---|---|---|
+| 01 | Frontend lead | 2 (500, 1500 ms) | none | CH-01 block remote origin |
+| 02 | Frontend lead | 0 | none | CT-01 MockHost per Host Contract minor |
+| 03 | Frontend lead | 0 | none | CT-02 duplicate-singleton check |
+| 04 | Frontend lead | 0 | unsaved form state in crashed slot | CH-02 throw in remote |
+| 05 | Platform/SecEng | 3 fetch, then LKG | none | CH-03 tampered manifest |
+| 06 | Frontend lead | 0 | queued entries if wiped wrongly | CH-04 stale SW vs new remote |
+| 07 | Release mgr | 0 | none | CH-05 canary regression halt |
+| 08 | Backend lead | 0 (user decides) | local draft if discarded | CT-03 412 conflict flow |
+| 09 | Frontend lead | 0 | queued drafts/edits/notes | CH-06 clear storage |
+| 10 | SRE | 2 origin fallback | none | CH-07 CDN fail |
+| 11 | Frontend lead | 0 | none | CH-08 block third party |
+| 12 | SRE | LB retry idempotent only, 1 | in-flight request | CH-09 kill replica |
+| 13 | SRE | client per Retry-After | none | CH-10 load spike |
+| 14 | Backend lead | per breaker | none | CH-11 slow dependency |
+| 15 | SecEng | 0 | none (wrong authz = incident) | CT-04 policy matrix |
+| 16 | Backend lead | per idempotency | none | CT-05 replay same key |
+| 17 | Backend lead | 0 | losing writer's edit until refetch | CT-06 concurrent If-Match |
+| 18 | Release mgr | 0 | none | CH-12 bad config boot |
+| 19 | SecEng | 1 | none | CH-13 refresh storm |
+| 20 | SRE | 0 | none | CH-14 skew clock |
+| 21 | SecEng | 0 (fail closed) | none | CH-15 limiter store down |
+| 22 | Backend lead | saga step 3 | partial state until reaper | CH-16 fail mid-saga |
+| 23 | SRE | drop after buffer | telemetry only | CH-17 collector down |
+| 24 | DBA/SRE | 3 pooler | writes in flight at failover (RPO per SLO-30) | CH-18 primary kill |
+| 25 | DBA/SRE | 0 | none | CH-19 pool exhaust |
+| 26 | DBA/SRE | 0 | none (stale reads) | CH-20 lag injection |
+| 27 | DBA | 0 | none | CT-07 migration lock timeout |
+| 28 | DBA | resumable | possible, bounded by backup RPO | CH-21 restore drill |
+| 29 | SecEng | 0 | disclosure (Sev-1) | CT-08 cross-tenant suite |
+| 30 | Backend lead | 5 default, 12 email, then DLQ | none if DLQ kept | CH-22 poison event |
+| 31 | SRE | 2 | in-progress upload | CH-23 storage fail |
+| 32 | SecEng | scanner 3 | none (pending, invisible) | CH-24 scanner down |
+| 33 | Search owner | 1 fallback | none (rebuildable) | CH-25 stale index |
+| 34 | DBA | n/a | total if never restored | CH-26 restore drill |
+| 35 | Backend lead | per job class | none (fenced) | CH-27 kill worker |
+| 36 | Backend lead | 0 | duplicate side effect if unfenced | CT-09 fencing token |
+| 37 | Backend lead | max attempts then DLQ | none if DLQ kept | CH-22 |
+| 38 | Backend lead | 0 | missed/double reminders | CH-28 scheduler double-fire |
+| 39 | Platform | 12 over ~20.5 h | undelivered mail | CH-29 provider 5xx |
+| 40 | Platform | 2 | none (non-critical) | CH-30 410 subscriptions |
+| 41 | Billing owner | webhook redelivery by Stripe | entitlement drift | CH-31 delayed webhook; CT-10 signature |
+| 42 | AI owner | 1 | none | CH-32 provider down |
+| 43 | Assessment owner | 0 | submissions unverified | CH-33 runner down |
+| 44 | SecEng | 0 | none | CH-34 IdP outage |
+| 45 | SRE | n/a | none | CH-35 cert expiry drill |
+| 46 | SRE | n/a | up to RPO (OPEN-23) | CH-36 DR drill |
+| 47 | SRE | 2 | none | CH-37 cache/secret mgr down |
+| 48 | SecEng | n/a | exposure window until rotation | CH-38 key rotation drill |
+
+## 11. Residual shared-failure modes (PATCH 2026-10-27, PROPOSED)
+Failures that the controls above do not isolate because components share a fate. They are accepted residual risks, not solved problems; owners must confirm acceptance in `RISK_REGISTER.md`.
+
+| ID | Shared element | Failure | Blast radius | Mitigation / accepted position |
+|---|---|---|---|---|
+| SF-01 | Single JS realm (federated mode) | One remote's bug or compromise affects shell and other remotes | All users on that page | Boundaries, signing, CSP; untrusted code in iframe (ADR D-05) |
+| SF-02 | Single Postgres | Outage, bad migration or saturation stops API and worker together | Whole product | HA, pool slices, restore drills; accepted until ADR D-01/D-03 trigger |
+| SF-03 | Single API process image | Memory leak or crash loop in one module affects all modules | Whole API | Replicas, limits, canary |
+| SF-04 | Outbox and job tables in the same DB | Backlog competes with request traffic for IO and locks | Latency across API | Separate pool slices, queue caps, shed P3 |
+| SF-05 | Shared CDN/origin | CDN fault hits shell, remotes and assets together | All web clients | Origin fallback [OPEN-36]; SW-cached shell |
+| SF-06 | Shared Service Worker | A bad SW release poisons every cached route | All returning clients | Staged rollout, kill-switch SW, versioned caches |
+| SF-07 | Shared secrets/signing keys | One key compromise affects sessions or manifests | Platform-wide | Dual-key rotation (FM-48) |
+| SF-08 | Third-party concentration | Single email, Stripe or IdP provider | Feature-level | Provider ports; breaker; fallback paths |
+| SF-09 | Shared pipeline and region | CI or hosting-region failure blocks fixes and serving | Release and availability | Manual break-glass deploy, DR plan (needs verification) |
+| SF-10 | Same people detect and recover | Slow response when on-call is thin | Incident duration | Runbooks, escalation; accepted |
