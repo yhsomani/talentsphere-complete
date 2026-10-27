@@ -1,0 +1,387 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1793107246643,
+  "projectRoot": "C:\\Users\\yashs\\OneDrive\\Desktop\\talentsphere-complete",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "deploy": {
+      "path": "deploy",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1793107246467,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1793107246470,
+      "keyFiles": []
+    },
+    "graphify-out": {
+      "path": "graphify-out",
+      "purpose": null,
+      "fileCount": 12,
+      "lastAccessed": 1793107246473,
+      "keyFiles": [
+        "cost.json",
+        "graph.html",
+        "graph.json",
+        "GRAPH_REPORT.md",
+        "manifest.json"
+      ]
+    },
+    "TalentSphere": {
+      "path": "TalentSphere",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1793107246474,
+      "keyFiles": [
+        "create a link.md",
+        "Welcome.md"
+      ]
+    },
+    "Yash_Final_Project_Document": {
+      "path": "Yash_Final_Project_Document",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1793107246475,
+      "keyFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "SSOT.md",
+      "accessCount": 48,
+      "lastAccessed": 1793069856977,
+      "type": "directory"
+    },
+    {
+      "path": "Yash_Final_Project_Document/06_BUSINESS_PROCESSES/STATE_MACHINES.md",
+      "accessCount": 28,
+      "lastAccessed": 1793069662450,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md",
+      "accessCount": 16,
+      "lastAccessed": 1793115586315,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/06_BUSINESS_PROCESSES/DECISION_TABLES.md",
+      "accessCount": 13,
+      "lastAccessed": 1792940180662,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/16_QA_AND_TESTING/TEST_CATALOG.md",
+      "accessCount": 11,
+      "lastAccessed": 1792936289318,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/06_BUSINESS_PROCESSES/PRODUCT_INVARIANT_REGISTRY.md",
+      "accessCount": 7,
+      "lastAccessed": 1792940164156,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md",
+      "accessCount": 6,
+      "lastAccessed": 1792936154632,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md",
+      "accessCount": 6,
+      "lastAccessed": 1793069383653,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md",
+      "accessCount": 4,
+      "lastAccessed": 1792920126002,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/00_CONTROL_CENTRE/ID_REGISTRY.md",
+      "accessCount": 4,
+      "lastAccessed": 1792936119662,
+      "type": "file"
+    },
+    {
+      "path": "docs/reports/FEATURE_STATUS_2026-10-21.md",
+      "accessCount": 3,
+      "lastAccessed": 1792866540170,
+      "type": "file"
+    },
+    {
+      "path": "apps/web/src/components/LandingArt.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1792867797747,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/07_UI_UX_AND_DESIGN_SYSTEM/SCREEN_REGISTRY.md",
+      "accessCount": 3,
+      "lastAccessed": 1792919195396,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/15_RELIABILITY_AND_PERFORMANCE/FAILURE_MODE_ANALYSIS.md",
+      "accessCount": 3,
+      "lastAccessed": 1792920449554,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/17_DEVOPS_AND_INFRASTRUCTURE/OBSERVABILITY_DESIGN.md",
+      "accessCount": 3,
+      "lastAccessed": 1792936232529,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md",
+      "accessCount": 3,
+      "lastAccessed": 1792940621546,
+      "type": "file"
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "accessCount": 3,
+      "lastAccessed": 1793069192362,
+      "type": "file"
+    },
+    {
+      "path": "apps/web/src/pages/LandingPage.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1792867862783,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md",
+      "accessCount": 2,
+      "lastAccessed": 1792918332054,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/16_QA_AND_TESTING/TEST_STRATEGY.md",
+      "accessCount": 2,
+      "lastAccessed": 1792919049219,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/00_CONTROL_CENTRE/EXECUTION_LEDGER.md",
+      "accessCount": 2,
+      "lastAccessed": 1792920409523,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md",
+      "accessCount": 2,
+      "lastAccessed": 1792940181948,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md",
+      "accessCount": 2,
+      "lastAccessed": 1792940547743,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/24_RISKS_AND_DECISIONS/ADR_REGISTER.md",
+      "accessCount": 2,
+      "lastAccessed": 1793069011163,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1792866526122,
+      "type": "file"
+    },
+    {
+      "path": "packages/ui/src/tokens.ts",
+      "accessCount": 1,
+      "lastAccessed": 1792867668268,
+      "type": "file"
+    },
+    {
+      "path": "tests/e2e/web-ui.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1792867715399,
+      "type": "file"
+    },
+    {
+      "path": "apps/web/src",
+      "accessCount": 1,
+      "lastAccessed": 1792867756262,
+      "type": "directory"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1792867807477,
+      "type": "directory"
+    },
+    {
+      "path": "apps/web/src/styles/landing.css",
+      "accessCount": 1,
+      "lastAccessed": 1792867814291,
+      "type": "file"
+    },
+    {
+      "path": ".playwright-mcp/landing-desktop.png",
+      "accessCount": 1,
+      "lastAccessed": 1792867925259,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/26_RESEARCH_AND_REFERENCES/RESEARCH_LOG.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918268983,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918276479,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/00_CONTROL_CENTRE/PROJECT_SCOPE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918401176,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918486088,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/27_INDEPENDENT_REVIEWS/SCENARIO_SIMULATIONS.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918496790,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/07_UI_UX_AND_DESIGN_SYSTEM/DESIGN_SYSTEM.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918706478,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/26_RESEARCH_AND_REFERENCES/RESEARCH_LOG_FRONTEND.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918792079,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/07_UI_UX_AND_DESIGN_SYSTEM/ACCESSIBILITY_SPEC.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918792776,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/15_RELIABILITY_AND_PERFORMANCE/CAPACITY_AND_SCALING.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918818671,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/07_UI_UX_AND_DESIGN_SYSTEM/PROGRESSIVE_UX_AND_FEEDBACK.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918868333,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/08_PWA_AND_MOBILE/PWA_ARCHITECTURE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918883525,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md",
+      "accessCount": 1,
+      "lastAccessed": 1792918938662,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/16_QA_AND_TESTING/ACCEPTANCE_CRITERIA_GUIDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919037458,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/07_UI_UX_AND_DESIGN_SYSTEM/NAVIGATION_ARCHITECTURE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919045358,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919055523,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/08_PWA_AND_MOBILE/MOBILE_DISTRIBUTION_DECISION.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919089340,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/17_DEVOPS_AND_INFRASTRUCTURE/DEVOPS_AND_RELEASE_STRATEGY.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919113460,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/17_DEVOPS_AND_INFRASTRUCTURE/DEPLOYMENT_ARCHITECTURE.md",
+      "accessCount": 1,
+      "lastAccessed": 1792919169597,
+      "type": "file"
+    },
+    {
+      "path": "Yash_Final_Project_Document/09_MODULE_FEDERATION/REMOTE_MANIFEST.schema.json",
+      "accessCount": 1,
+      "lastAccessed": 1792919170411,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
