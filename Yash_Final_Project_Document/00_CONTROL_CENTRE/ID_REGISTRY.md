@@ -37,7 +37,7 @@ Classification tags used everywhere: **[REF]** reference, **[CONF]** confirmed r
 
 | ID | Module | Kind | Route prefix |
 |---|---|---|---|
-| MOD-SHELL | Host shell | host | `/`, `/login`, `/signup`, public pages |
+| MOD-SHELL | Host shell | host | `/`, `/auth`, `/login`, `/signup`, `/workspaces`, `/help`, `/legal`, `/offline`, `/error`, `/invite`, `/c` (public credential), `/p` (public profile), `/r` (referee request); source: SCREEN_REGISTRY SCR-SHELL-* (REVW-35) |
 | MOD-CAND | `mf-candidate` | remote | `/me/*` (profile, portfolio, evidence, resumes, career) |
 | MOD-LRN | `mf-learning` | remote | `/learn/*` (courses, assessments, challenges, instructor studio) |
 | MOD-OPP | `mf-opportunities` | remote | `/jobs/*`, `/applications/*` |

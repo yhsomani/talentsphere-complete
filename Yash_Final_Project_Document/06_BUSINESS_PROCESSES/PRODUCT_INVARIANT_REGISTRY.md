@@ -2,6 +2,8 @@
 
 Doc ID: INV-REG · Owner: Architecture Review Board + Product Director · Version 1.0 · Status: Under Review · Relates: CC-INV (INV-T01…INV-T20 are defined there and not restated), BR-REG, SM-00, DT-00
 
+> **Revision 2 folded in (2026-10-27).** Amended rows, new rules/tables/machines from `PRODUCT_INVARIANT_REGISTRY_REV2.md` are now part of this file. The REV2 file stays as the change record. Status is unchanged: proposals still need owner/ARB ratification.
+
 An invariant is a statement that must be true **at every committed instant**, enforced by construction (type, constraint, state machine, policy), not by convention. Business rules (BR-T) describe policy and may have exceptions; invariants have none. **[TARGET]**
 
 ## 1. Canonical invariants (defined in `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md`)
@@ -62,6 +64,13 @@ Severity: **S1** privacy/security breach or false verified status · **S2** data
 | INV-T43 | Expiring credentials (verification code, reset token, invite, referee token, export link) are never valid after server-clock expiry, and their raw values appear in no log or event. | DOM + log redaction | clock tests, log scan | S1 | BR-T016, T020, T054, T064 |
 | INV-T44 | No application can be submitted to a job that is not `published` at the commit instant. | submit transaction checks job state under share lock | race IT | S2 | BR-T038; FEAT-10-02 |
 | INV-T45 | A stored match explanation is generated from exactly the inputs that produced its score (input hash stored); no post-hoc rationale. | matching module single compute path | explanation-hash test | S2 | BR-T071; FEAT-11-02 |
+| INV-T46 | Every provenance record that supports the `authority_verified` rung carries an `issuer_class` ∈ {platform, institution, employer_org, instructor}, derived server-side from the issuing record; no write API accepts the class from a client. | DB NOT NULL + CHECK on `evidence_attestation.issuer_class`; DOM `computeRung()` | PROP: class equals the class of the issuing record for all items; SEC: client-supplied class ignored | S1 | BR-T118; ADR-T14a; FEAT-05-04 |
+| INV-T47 | An `instructor`-class authority record exists only if the instructor account differs from the learner account and the independence checks of BR-T119 passed at issuance; an `instructor` record never satisfies a platform-verified predicate (UI filter, matching weight, badge). | DOM sign-off guard; DB check `instructor_account_id <> learner_account_id`; POL | SEC: self-enrolment and alternate-account negative controls; UT: predicate excludes the class | S1 | BR-T119, BR-T011; FEAT-08-04 |
+| INV-T48 | A work claim sits at rung `artifact_backed` through employer-domain proof only while the proof's domain is bound to a verified `org_domain` of an organization in `verification_state = verified`; losing the binding invalidates the proof and the rung is recomputed. | DOM `computeRung()` reads binding validity at read time; SM-ORG v5 effect | IT: un-verify the org and observe the downgrade; UT: unbound proof stays `claimed` | S1 | BR-T017, BR-T123; DT-06 |
+| INV-T49 | An account that is `suspended`, or is the subject of an open moderation case, is not in `pending_erasure` or `erased`. | SM-ACCOUNT t7 guard; SM-DSR t4/t7 | IT: suspended account requests erasure and is parked `on_hold` | S1 | BR-T124, BR-T045; SM-ACCOUNT |
+| INV-T50 | No account is `active` without a recorded minimum-age attestation (`min_age_attested_at` and the policy version). | SM-ACCOUNT t1 guard; DB check on `status = 'active'` | UT, SEC bypass tests | S2 | BR-T120; FEAT-01-01 |
+| INV-T51 | A reference request has at most 2 reminders in total across system and manual senders. | `reference_request.reminder_count` CHECK ≤ 2; DOM | UT clock; IT mixed sequence | S3 | BR-T121, BR-T004 |
+| INV-T52 | The recruiter "Suggested order" view returns every applicant of the job: its row count equals the job's applicant count, whatever the score or filter state, and no applicant is hidden by score. | POL + query without a score predicate | IT: count assertion with a mix of scores | S1 | BR-T072, INV-T09; FEAT-11-10 |
 
 ## 3. Using invariants
 

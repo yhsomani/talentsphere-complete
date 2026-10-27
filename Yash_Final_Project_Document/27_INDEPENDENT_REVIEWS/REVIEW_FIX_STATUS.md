@@ -40,8 +40,8 @@ Source of these statuses: the fix agents' own reports plus this session's script
 | 32 cookie tossing / UGC domain | Addressed in REV2 | `SECURITY_REV2.md` |
 | 33 OPEN register | **Open** | no consolidated register yet; proposed rules in `GOVERNANCE_REGISTRATIONS_REV2.md` |
 | 34 networking phases | Partial | roadmap/API addenda |
-| 35 registries / route prefixes | **Open** | prefixes listed in REV2 files; `ID_REGISTRY` unchanged (V9: no in-place edit) |
-| 36 headline counts | **Open** | corrected counts computed in `COVERAGE_MATRICES.md` (e.g. 108 CAP not 97; 236 individual tests); originals still stale |
+| 35 registries / route prefixes | Fixed in docs (2026-10-27, in place) | `ID_REGISTRY` MOD-SHELL row now lists the shell route prefixes from SCREEN_REGISTRY. The second invariant registry (CC-INV vs INV-REG) is not merged. |
+| 36 headline counts | Fixed in docs | No live document states "97 capabilities" (grep 2026-10-27; only historical review and ledger text); 108 CAP rows is the stated figure. Counts are still not script-generated. |
 | 37 iOS push markers | Addressed in REV2 | `PWA_MOBILE_REVIEW_FIXES.md` |
 | 38 referee reminder cap | Addressed in REV2 (unverified) | BR REV2 |
 | 39 binary goals | Addressed in REV2 | `PRODUCT_VISION_GOALS_REV2.md` (folder owner to confirm) |

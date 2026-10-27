@@ -2,6 +2,8 @@
 
 Doc ID: BR-REG · Owner: Business Analyst Lead + Product Director · Version 1.0 · Status: Under Review · Relates: CC-INV (seed BR-T001, T002, T003, T004, T005, T041, T050, T060), INV-T01…INV-T45, SM-00, DT-00, FEAT-* (see `04_PRODUCT_CAPABILITIES`)
 
+> **Revision 2 folded in (2026-10-27).** Amended rows, new rules/tables/machines from `BUSINESS_RULES_REGISTRY_REV2.md` are now part of this file. The REV2 file stays as the change record. Status is unchanged: proposals still need owner/ARB ratification.
+
 **Numbering blocks:** T001–T040 core loop (evidence, verification, assessment, learning, jobs, applications) · T041–T049 privileged access & safety · T050–T059 identity & sessions · T060–T069 privacy & data rights · T070–T077 matching & search · T080–T087 messaging & notifications · T090–T097 billing & entitlements · T100–T106 institutions · T110–T117 AI & platform. Gaps between blocks are intentional (room to grow). Seeds from `CANONICAL_INVARIANTS.md` are reproduced **verbatim in meaning**; they are marked `seed`.
 
 Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tunables (product default stated; owner may change without changing the rule's shape). Rules touching legal duties are **[OPEN-08]** until counsel review; no legal claim is made.
@@ -13,28 +15,28 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 
 | ID | Scope | Condition | Behavior | Exception | Enforcement | FEAT | Verification |
 |---|---|---|---|---|---|---|---|
-| BR-T001 | Application | Candidate submits to a job | At most one **active** (non-terminal, incl. draft) application per (candidate, job) (seed) | After terminal state, a recruiter-invited reconsideration may create a new linked application | DB partial unique index + DOM | FEAT-10-02 | IT concurrency, UT |
+| BR-T001 | Application | Candidate submits to a job | At most one **active** (non-terminal, incl. draft) application per (candidate, job) (seed) | After terminal state, a recruiter-invited reconsideration may create a new linked application (`reconsidered_from`). **After `withdrawn` only, the candidate may re-apply as a new linked application (`reapplied_from`) once the cooldown has passed (BR-T125)** | DB partial unique index + DOM | FEAT-10-02, FEAT-10-03 | IT concurrency, UT | REVW-27 |
 | BR-T002 | Application | Any stage change | Only transitions in SM-APPLICATION (seed) | None | SM | FEAT-10-05 | SM matrix tests |
 | BR-T003 | Evidence | Artefact uploaded | Not visible/shareable until virus-scan clean (seed) | None | SM-EVIDENCE + WRK | FEAT-05-12 | IT with EICAR-style fixture |
-| BR-T004 | Referee | Reference requested | Expires 14 days after send; max 2 reminders (seed) | None | SM-REFERENCE + WRK | FEAT-06-02, FEAT-06-10 | UT clock, IT |
+| BR-T004 | Referee | Reference requested | Expires 14 days after send; **at most 2 reminders per request in total, shared by system and manual reminders (BR-T121)** (seed) | None | SM-REFERENCE + WRK | FEAT-06-02, FEAT-06-10 | UT clock, IT | REVW-38 |
 | BR-T005 | Evidence | Evidence revoked or downgraded | Dependent skill confidence and match explanations recomputed asynchronously and audited (seed) | None | WRK via outbox | FEAT-05-05, FEAT-11-07 | IT end-to-end |
 | BR-T006 | Evidence | Evidence activated | Requires ≥ 1 canonical skill tag; free-text skills rejected | Draft state allows none | DOM | FEAT-05-01, FEAT-04-02 | UT |
 | BR-T007 | Evidence | Evidence source is AI or AI-generated claim of verification | Rejected if `source=ai`; owner may declare "AI-assisted" which never raises rung | None | DOM schema | FEAT-05-01 | Schema test (INV-T08) |
 | BR-T008 | Evidence | Any rung read/write | Rung is derived from valid provenance; no client field may set it | None | DOM | FEAT-05-02 | SEC, PROP |
 | BR-T009 | Evidence | Link-type evidence | Reaches `artifact_backed` only if liveness check succeeds (≤ 3 redirects, HTTP 200); re-checked every 30 d; failing 14 d ⇒ back to `claimed` | Private-network targets blocked (SSRF) | WRK + DOM | FEAT-05-01 | IT, SEC |
 | BR-T010 | Evidence | Peer attestation | Attester ≠ owner, verified account, one attestation per (attester, item), ≤ 10 attestations/day/attester | Attesters flagged by FEAT-06-09 are held for human review, not rejected | DOM + POL | FEAT-05-03 | UT, IT |
-| BR-T011 | Evidence | `authority_verified` rung | Only from issuer types: platform course rule/instructor sign-off, auto-graded platform assessment, verified institution, verified employer org | None | DOM | FEAT-05-04 | UT per issuer |
+| BR-T011 | Evidence | `authority_verified` rung | Only from issuer classes {platform, institution, employer_org, instructor} (BR-T118), each under its own independence rule (BR-T119 for instructor); instructor sign-off never counts as platform-verified | None | DOM | FEAT-05-04 | UT per issuer class | REVW-12 |
 | BR-T012 | Evidence | Revocation | Human issuer + reason code; holder notified ≤ 24 h with appeal route | Safety emergency: revoke first, notify immediately after | SM + WRK | FEAT-05-05 | IT |
 | BR-T013 | Evidence | Owner withdraws evidence | Live access ends; submitted-application snapshots keep a redacted tombstone | None | SM + DOM | FEAT-05-01, FEAT-10-14 | IT |
 | BR-T014 | Evidence | Upload | Allowlisted types, ≤ {25 MB} per file, ≤ {20} files/item, content-type sniffed | Larger files only via linked evidence | DOM | FEAT-05-12 | UT |
 | BR-T015 | Evidence | Draft not submitted for 90 d | Auto-deleted with 7-day notice | Pinned drafts none | WRK | FEAT-05-01 | IT clock |
 | BR-T016 | Verification | Work-history code | ≥ 6 digits, TTL 15 min, ≤ 5 attempts, ≤ 3 resends/h, stored hashed, never echoed (INV-T05) | None | DOM | FEAT-06-01 | Token tests |
-| BR-T017 | Verification | Work-history proof | Code goes only to an address on the claimed employer domain; free-mail domains rejected | Employer without own domain ⇒ referee route only | DOM | FEAT-06-01 | UT |
+| BR-T017 | Verification | Work-history proof | Code goes only to an address on the claimed employer domain; free-mail domains rejected. The result is `bound` when the domain equals a verified `org_domain` of a verified organization, otherwise `unbound`. `bound`: rung `artifact_backed`, badge "Mailbox verified". `unbound`: rung stays `claimed`, badge "Mailbox verified, employer not confirmed". A later loss of binding invalidates the provenance record and recomputes the rung | Employer without own domain ⇒ referee route only | DOM | FEAT-06-01 | UT, IT | REVW-22 |
 | BR-T018 | Referee | Referee submits | Referee email/account ≠ candidate's; same-session submission by candidate blocked | None | DOM | FEAT-06-02, FEAT-06-09 | UT, SEC |
 | BR-T019 | Referee | Requests per claim | ≤ 3 open requests per work claim; ≤ {10} referee emails per candidate per 24 h | Raised for verified institutions | DOM + rate limit | FEAT-06-02 | IT |
 | BR-T020 | Referee | Token | ≥ 128-bit random, hashed at rest, single-use, TTL 14 d, bound to (request, email) (INV-T05) | None | DOM | FEAT-06-02 | Token tests |
 | BR-T021 | Referee | Outcome `dispute` | No automatic downgrade/flag of candidate; human review, candidate may respond within 7 d | None | DOM + SM | FEAT-06-03, FEAT-06-05 | IT |
-| BR-T022 | Referee | Reminders | Sent only on day 4 and day 9 while unanswered | None | WRK | FEAT-06-10 | UT clock |
+| BR-T022 | Referee | Reminders | System reminders due on day 4 and day 9 while unanswered, subject to the shared cap and 3-day spacing of BR-T121 | None | WRK | FEAT-06-10 | UT clock | REVW-38 |
 | BR-T023 | Referee | Recruiter views attestation | Referee's name shown only if the referee ticked "may be named"; else "attested by a former colleague" | None | DOM | FEAT-06-02, FEAT-06-04 | UT |
 | BR-T024 | Assessment | Attempt timing | Server clock authoritative; deadline auto-submits last autosave | Accommodation multiplies duration (BR-T030) | DOM | FEAT-07-02 | UT, IT |
 | BR-T025 | Assessment | Attempt bound to AI_PROHIBITED | AI gateway denies every call for that principal during the attempt, regardless of caller (INV-T06) | None | GW | FEAT-07-05, FEAT-17-03 | Gateway matrix |
@@ -72,14 +74,14 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 
 | ID | Scope | Condition | Behavior | Exception | Enforcement | FEAT | Verification |
 |---|---|---|---|---|---|---|---|
-| BR-T050 | Session | Refresh token reuse detected | Revoke the whole token family (seed) | 5-second leeway returns the same unused successor | SM-SESSION | FEAT-01-04 | Token reuse tests |
+| BR-T050 | Session | Refresh token reuse detected | Revoke the whole token family (seed); the leeway is CONST-S07 | Leeway returns the same unused successor | SM-SESSION | FEAT-01-04 | Token reuse tests | REVW-18 |
 | BR-T051 | Identity | Password set | ≥ 12 chars, not in breached list, no composition rules; memory-hard hash | Passkey-only accounts have none | DOM | FEAT-01-01, FEAT-01-06 | UT |
 | BR-T052 | Identity | Failed logins | Progressive delay after 5 failures per (account, IP bucket) up to 15 min; identical response for unknown accounts | None | DOM + rate limit | FEAT-01-02 | SEC |
 | BR-T053 | Identity | Email verification code | ≥ 6 digits, TTL 15 min, ≤ 5 attempts, single-use, hashed (INV-T05) | None | DOM | FEAT-01-01 | Token tests |
 | BR-T054 | Identity | Password reset | Token single-use, TTL 30 min; use revokes all other sessions; response never reveals account existence | None | DOM | FEAT-01-06 | SEC |
 | BR-T055 | Identity | Passkeys | ≤ 10 per account; last sign-in method cannot be removed | Verified recovery email counts as a method | DOM | FEAT-01-03 | UT |
-| BR-T056 | Session | Lifetimes | Access 15 min; refresh idle {14} d, absolute {30} d; privileged see BR-T044 | "Remember me" absolute {90} d | SM-SESSION | FEAT-01-04 | Clock tests |
-| BR-T057 | Identity | Sensitive action | Re-auth ≤ 5 min old for: change email/password/passkey, deactivate, erase, download export, billing change | None | POL | FEAT-01-05, FEAT-22-02 | SEC |
+| BR-T056 | Session | Lifetimes | **Values are held in the constants table of section 3 (CONST-S01 to S05); this row cites them** | "Remember me" per CONST-S04 | SM-SESSION | FEAT-01-04 | Clock tests | REVW-18 |
+| BR-T057 | Identity | Sensitive action | Re-auth no older than CONST-S06 for: change email/password/passkey, deactivate, erase, download export, billing change | None | POL | FEAT-01-05, FEAT-22-02 | SEC | REVW-18 |
 | BR-T058 | Identity | Email change | Confirm at new address; notice to old; old address may revert within 7 d | None | DOM | FEAT-01-05 | IT |
 | BR-T059 | Identity | Sign-in from unrecognised device | Holder notified by email; link to revoke | Suppressed for first sign-in after registration | WRK | FEAT-01-02 | IT |
 
@@ -89,7 +91,7 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 |---|---|---|---|---|---|---|---|
 | BR-T060 | Privacy | Erasure request | Completes ≤ 30 days except legally retained audit/billing records (seed; list OPEN-08) | None | SM-DSR + WRK | FEAT-22-03 | IT clock |
 | BR-T061 | Privacy | Consent record | Purpose-bound scope, versioned, timestamped, with grantee; default = none for recruiter access beyond an application | None | DOM | FEAT-22-01 | Consent tests |
-| BR-T062 | Privacy | Candidate applies | Grants the job's hiring team application-scoped consent over the snapshot only, while the application is active and for {12 months} after terminal state [OPEN-08] | Candidate may withdraw earlier | DOM | FEAT-10-14, FEAT-22-01 | IT |
+| BR-T062 | Privacy | Candidate applies | Grants the job's hiring team application-scoped consent over the snapshot only, while the application is active and for {12 months} after terminal state [OPEN-08]; **identifiable data then follows BR-T122** | Candidate may withdraw earlier | DOM | FEAT-10-14, FEAT-22-01 | IT | REVW-26 |
 | BR-T063 | Privacy | Consent revoked | New reads denied on the first read after the revoking transaction commits (read-time check, no consent cache; 60 s is the test timeout, not a tolerated stale window; CSC section 6); search index entry removed ≤ 15 min; access-log entry written; past snapshots keep tombstones | None | DOM + WRK | FEAT-22-01, FEAT-05-07 | IT timing |
 | BR-T064 | Privacy | Export | JSON + files, own data only (no other person's personal data, no internal fraud signals); link expires 7 d; re-auth before download; one export / 24 h | Support may re-issue | WRK | FEAT-22-02 | IT |
 | BR-T065 | Privacy | Erasure execution | Removes from primary store, search, caches, object storage, analytics; backups age out ≤ {35} d [OPEN-08]; append-only audit, consent and transition history is never rewritten: it holds only opaque `subject_ref` tokens and erasure deletes the token-to-identity mapping (DB-02 §4.1); retained records minimised and listed on receipt | Legal hold ⇒ `on_hold` | WRK | FEAT-22-03, FEAT-22-07 | Fan-out test |
@@ -104,7 +106,7 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 |---|---|---|---|---|---|---|---|
 | BR-T070 | Matching | Scoring | Only allowlisted inputs (DT-03); protected attributes and photo never inputs; plan/payment never an input (INV-T19) | None | DOM + allowlist validator | FEAT-11-03 | Allowlist test |
 | BR-T071 | Matching | Match shown | Always with rationale (matched/missing skills, rungs), freshness time and uncertainty band | None | DOM + UI | FEAT-11-02 | Explanation tests |
-| BR-T072 | Matching | Recruiter views applicants | Score is advisory; all applicants remain visible; default order selectable, no hiding by score | None | POL | FEAT-11-10, FEAT-10-17 | UT |
+| BR-T072 | Matching | Recruiter views applicants | Score is advisory; **the view is named "Suggested order", never "shortlist"**; it returns **every** applicant of the job (count equals applicant count, INV-T52); default order selectable, no hiding by score | None | POL | FEAT-11-10, FEAT-10-17 | UT; count assertion | REVW-43 |
 | BR-T073 | Matching | Candidate view | Candidate sees why matched and what would change it; may hide a recommendation category | None | UI + DOM | FEAT-11-08 | UT |
 | BR-T074 | Search | Recruiter candidate search | Returns only discoverable profiles within consented fields; quota counts unique profiles opened | None | POL + DB | FEAT-11-05 | CAN, IT |
 | BR-T075 | Search | Index membership | Excludes accounts not `active`, erased, or restricted (BR-T069) | None | WRK | FEAT-24-12 | IT |
@@ -128,7 +130,7 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 
 | ID | Scope | Condition | Behavior | Exception | Enforcement | FEAT | Verification |
 |---|---|---|---|---|---|---|---|
-| BR-T090 | Billing | Entitlement change | Derived only from subscription state via DT-02; redirects and clients cannot grant (INV-T17) | Admin comp with audit | DOM + POL | FEAT-16-04 | Webhook tests |
+| BR-T090 | Billing | Entitlement change | Derived only from subscription state via DT-02; redirects and clients cannot grant (INV-T17). **Phase 1 stub:** `deriveEntitlements()` returns the free-tier baseline plus audited admin compensation grants (reason, approver, expiry); job slots come from the free-org slot value and compensation (BR-T093); there is no checkout in Phase 1 | Admin comp with audit | DOM + POL | FEAT-16-04 | Webhook tests; stub entitlement matrix | REVW-11 |
 | BR-T091 | Billing | Candidate core loop | Profile, evidence, applying, replying to messages are always free | None | POL | FEAT-16-04 | Entitlement matrix |
 | BR-T092 | Billing | Payment past due | {7}-day grace at full access, then degrade paid features read-only; never delete data | None | SM-SUBSCRIPTION | FEAT-16-07 | IT clock |
 | BR-T093 | Billing | Job slots | Count published + paused jobs; reserved inside the publish transaction | None | DB lock | FEAT-09-02, FEAT-16-04 | Concurrency test |
@@ -157,10 +159,44 @@ Tags: all rules **[TARGET]**. Numeric thresholds in `{braces}` are **[OPEN]** tu
 | BR-T111 | AI | Free-tier user | No paid inference unless budget policy flag; fall back to deterministic behaviour (INV-T07) | None | GW | FEAT-17-02 | Cost-guard tests |
 | BR-T112 | AI | Output shown | Always a labelled draft; applying needs explicit per-field user action | None | UI + DOM | FEAT-17-04, FEAT-03-05 | E2E |
 | BR-T113 | AI | Input to model | Secrets stripped; PII minimised; artefact contents sent only when the user triggers it for that item | None | GW | FEAT-17-01 | Redaction tests |
-| BR-T114 | Platform | Unsafe mutation | `Idempotency-Key` required; retained 24 h; replay returns stored response; same key with different payload ⇒ 422 | Webhooks (own dedupe) | LINT + DOM | FEAT-24-03 | Replay tests |
+| BR-T114 | Platform | Unsafe mutation | `Idempotency-Key` required **or the route declares a natural key**; retained 24 h; **routes that accept queued offline writes retain keys for the outbox TTL (14 d), and routes that cannot hold keys that long must use a natural key**; payment keys 7 d; replay returns stored response; same key with different payload ⇒ 422 | Webhooks (own dedupe) | LINT + DOM | FEAT-24-03 | Replay tests, retention test at day 13 and day 15 | REVW-14 (decision) |
 | BR-T115 | Platform | Rate limits | Per-IP and per-principal; auth endpoints stricter; 429 + `Retry-After` | Verified webhook senders exempt | DOM | FEAT-24-08 | Load test |
 | BR-T116 | Platform | File download | Signed short-lived URL; non-image types forced to attachment | None | DOM | FEAT-24-04 | SEC |
 | BR-T117 | Platform | Queued offline write | Revalidated server-side; newer server version ⇒ conflict UI showing both versions; never silent overwrite (INV-T13) | None | DOM + UI | FEAT-24-07, FEAT-03-08 | Conflict tests |
+| BR-T118 | Evidence | An authority provenance record is created | It carries a mandatory `issuer_class` ∈ {`platform`, `institution`, `employer_org`, `instructor`}, set server-side from the issuing record, never from client input. The UI always shows the class beside the badge. Matching weights differ by class (DT-03 note). An `instructor` record never satisfies a "platform-verified" predicate. All records are revocable by their issuer or a moderator (BR-T012) | None | DOM + DB NOT NULL/CHECK | FEAT-05-04, FEAT-05-02, FEAT-06-04 | UT per class; UI test for class label; PROP: class derived from issuer | REVW-12 |
+| BR-T119 | Evidence / Learning | Instructor sign-off is recorded (`instructorSignoff`) | Valid only if (a) instructor account ≠ learner account; (b) no shared device, session cluster or payment-instrument signal between them; (c) the issuer independence check passes (instructor is an approved instructor with completed conflict-of-interest declaration, and the course is not authored solely for the learner); (d) the instructor has not signed off more than {N} completions for one learner cluster in {period}. A failed check does not reject: the sign-off is held for human review and the enrolment stays `completion_pending_signoff`. Onboarding declaration (COM-OPS) remains but is not the only control | Platform staff acting as `platform` issuer under BR-T118 | DOM + POL | FEAT-05-04, FEAT-08-04, FEAT-06-09 | UT; SEC: self-enrolment and alternate-account negative controls | REVW-12 |
+| BR-T120 | Identity | Registration | The person must confirm they meet the minimum age of {minimum age: **[OPEN-counsel]**} before the account can leave `pending_verification`. Prefer an attestation (checkbox, timestamp and policy version stored as `min_age_attested_at`); a date of birth is collected only if counsel requires it [OPEN-08]. Below the minimum, no account is created and only a hashed rate-limit signal is kept for {24 h}. Age is never a matching input (DT-03). Institution rosters keep BR-T106 | None | DOM | FEAT-01-01 (micro-feature .3), FEAT-01-13 | UT; SEC: bypass attempts | REVW-29 |
+| BR-T121 | Referee | Reminders for one reference request | One cap of 2 reminders per request, counted across system and manual senders. A manual reminder needs at least 3 days since the last send of any kind. A system reminder that is due (day 4, day 9) but falls less than 3 days after the last send is deferred, not dropped. Reminders only while `sent` or `opened` | None | DOM + WRK | FEAT-06-10, FEAT-06-02 | UT clock; IT with mixed manual and system sequence | REVW-38 |
+| BR-T122 | Privacy | Application-scoped consent window ends (BR-T062) | The organization's identifiable copy of the candidate's application data (snapshot content, answers, notes about the candidate, contact details) is deleted or pseudonymised within {30 d}. A minimal hiring record (job id, stage history, reason codes, dates, opaque `subject_ref`) may remain until {24 months} after the terminal state only if counsel confirms a legal basis and the org policy requires it **[OPEN-08]**; DATA-021's 24-month retention applies to that minimal record only, never to identifiable content | Legal hold (SM-DSR `on_hold`) | WRK + DOM | FEAT-10-14, FEAT-22-01, FEAT-22-07 | IT clock at consent end plus {30 d}; scan for identifiers | REVW-26 |
+| BR-T123 | Organization | Verification is revoked (`verified → revoked`, SM-ORG v5) | In one transaction: the oldest live job stays; every other `published` or `scheduled` job moves to `paused` (reason `org_unverified`); new publishes beyond 1 are refused (DT-12 row 2); applications on paused jobs continue; provenance with a `bound` domain of that org is invalidated and rungs recomputed (BR-T005); the public "verified" mark is removed; owner notified with the reason category | None | DOM + SM + WRK | FEAT-02-01, FEAT-09-02 | IT: org with 3 live jobs un-verified | REVW-20 |
+| BR-T124 | Privacy / Safety | Erasure is requested by an account that is `suspended` or is the subject of an open moderation case | The request is accepted and acknowledged but parked `on_hold` (reason `moderation_case_open`, SM-DSR t7); the account does not enter `pending_erasure`; cooling-off starts after the case is `closed`. Append-only audit and consent history is unaffected either way (BR-T065). The 30-day clock treatment is [OPEN-08] | Legal duty requiring immediate erasure [OPEN-08] | SM-DSR + SM-ACCOUNT | FEAT-22-03, FEAT-19-07 | IT: suspended account requests erasure | REVW-21 |
+| BR-T125 | Application | Candidate re-applies after withdrawing | A new application may be created for the same job when the earlier one is `withdrawn`, at least {24 h} (**[OPEN]**) after `withdrawn_at`, the job is `published`, and BR-T001 holds. It carries `reapplied_from`; the hiring team sees the link; the earlier snapshot is not reused. Applications ended by `rejected`, `hired` or `offer_declined` do not qualify. Closes OPEN-B20 | None | DOM + DB | FEAT-10-03, FEAT-10-02 | IT: cooldown `409 reapply_cooldown`, link visible, new snapshot | REVW-27 |
+| BR-T126 | Matching | Recruiter-facing ranking or recommendation by match score (FEAT-11-04, 11-05 ranking, 11-10) or any public matching surface | May not be enabled for a tenant until (1) the baseline adverse-impact audit (BR-T077, WP-FAIRNESS-AUDIT) has run and ROLE-AUD has recorded a review, and (2) the kill switch `matching.recruiter_ranking` exists. The candidate-facing explanation (FEAT-11-02) and plain job search are not gated | None | DOM + feature flag + LINT | FEAT-11-09, FEAT-11-10 | Process test; flag default-off test | REVW-11 |
+| BR-T127 | Messaging | Account suspension, org suspension or revocation of org verification while conversations are open | Existing application threads stay readable by participants; new first-contact requests from the sanctioned org are refused; reports remain possible | Safety escalation by moderator | POL | FEAT-13-01, FEAT-13-05 | IT | REVW-20 (effects) |
+
+## 9a. Constants table: sessions, credentials and retention windows (REVW-18)
+
+
+This table is the **single source** for these values. Other documents cite `CONST-Sxx`; where they differ (SEC-02 section 2.3: refresh idle 30 d / absolute 90 d and step-up 10 min; ACTION_REGISTRY: step-up 15 min; PWA-01 section 10 and OPEN-FE-08/OPEN-FE-10: "not fixed", grace "≤ 10 s") they are superseded once this file is accepted, and the open items OPEN-FE-08 and OPEN-FE-10 close. The backend owner updates SEC-02 to cite this table. Values in `{braces}` are tunables that the owner may change here without changing any rule.
+
+| ID | Constant | Value | Source rule | Notes |
+|---|---|---|---|---|
+| CONST-S01 | Access token lifetime | 15 min | BR-T056 | |
+| CONST-S02 | Refresh token idle timeout | {14 d} | BR-T056 | SEC-02 said 30 d |
+| CONST-S03 | Refresh token absolute lifetime | {30 d} | BR-T056 | SEC-02 said 90 d |
+| CONST-S04 | "Remember me" absolute lifetime | {90 d} | BR-T056 | |
+| CONST-S05 | Privileged roles (moderator, support, admin, auditor): idle / absolute | 30 min / 8 h | BR-T044 | MFA mandatory |
+| CONST-S06 | Step-up (re-auth) freshness | 5 min | BR-T057 | SEC-02 said 10 min, ACTION_REGISTRY 15 min |
+| CONST-S07 | Refresh reuse leeway (same unused successor returned) | 5 s | BR-T050, INV-T33 | PWA-01 "≤ 10 s" retired |
+| CONST-S08 | Email verification code TTL / attempts | 15 min / 5 | BR-T053 | |
+| CONST-S09 | Password reset token TTL | 30 min | BR-T054 | |
+| CONST-S10 | Referee token TTL | 14 d | BR-T020 | |
+| CONST-S11 | Export download link TTL | 7 d | BR-T064 | |
+| CONST-S12 | Idempotency key retention: default / queued-op routes / payment | 24 h / 14 d (outbox TTL) / 7 d | BR-T114 | |
+| CONST-S13 | Consent revocation effect | first read after the revoking commit; no consent cache | BR-T063, INV-T29 | 60 s is a test timeout only |
+| CONST-S14 | Application re-apply cooldown | {24 h} | BR-T125 | [OPEN] |
+| CONST-S15 | Referee reminders cap / spacing | 2 / 3 d | BR-T121 | |
+
 
 ## 10. Summary and open items
 

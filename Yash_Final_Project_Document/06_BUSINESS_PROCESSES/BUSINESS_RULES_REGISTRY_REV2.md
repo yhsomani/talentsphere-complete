@@ -2,6 +2,8 @@
 
 Doc ID: BR-REG-R2 · Owner: Business Analyst Lead + Product Director · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-12, 14 (BR part), 18, 21, 22, 26, 27, 29, 38, 43 and the rule parts of REVW-10/11 · Relates: BR-REG (BR-T001…T117), SM-00-R2, INV-REG-R2, DT-00-R2, ADR-T14a, CSC
 
+> **Folded into `BUSINESS_RULES_REGISTRY.md` on 2026-10-27.** This file is now a change record; edit the original, not this file.
+
 **Relationship (no original file was edited).** This file **supersedes, once accepted by governance**, the rows of `BUSINESS_RULES_REGISTRY.md` listed in section 1 (the rows are replaced as a whole) and **extends** it with BR-T118 to BR-T127 (section 2) and the constants table (section 3). All other rows of BR-REG stand. Until accepted, BR-REG v1.0 remains the text of record. New ids are appended after BR-T117; no id is reused or renumbered. Governance should link this file from `00_CONTROL_CENTRE/MASTER_INDEX.md` and `00_CONTROL_CENTRE/ID_REGISTRY.md`.
 
 Conventions are those of BR-REG: all rules **[TARGET]**; `{braces}` are **[OPEN]** tunables; legal-duty rules are **[OPEN-08]** until counsel review; enforcement and verification vocabularies as in BR-REG. A rule with only `UI` enforcement is invalid (INV-T01).

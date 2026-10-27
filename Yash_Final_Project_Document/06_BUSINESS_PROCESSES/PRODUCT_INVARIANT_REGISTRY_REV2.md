@@ -2,6 +2,8 @@
 
 Doc ID: INV-REG-R2 · Owner: Architecture Review Board + Product Director · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-12, 21, 22, 29, 38, 43 (invariant parts) · Relates: INV-REG (INV-T21…T45), CC-INV, BR-REG-R2, SM-00-R2
 
+> **Folded into `PRODUCT_INVARIANT_REGISTRY.md` on 2026-10-27.** This file is now a change record; edit the original, not this file.
+
 **Relationship (no original file was edited).** This file **extends** `PRODUCT_INVARIANT_REGISTRY.md` with INV-T46 to INV-T52, appended after INV-T45. It supersedes nothing; no existing invariant is relaxed. Governance should link it from `00_CONTROL_CENTRE/MASTER_INDEX.md` and record the range INV-T46…T52 in `ID_REGISTRY.md`. Severity scale and rules for using invariants are those of INV-REG sections 2 and 3: an invariant without a named test is unenforced and blocks release.
 
 | ID | Invariant | Enforced by | Verified by | Sev | Relates |

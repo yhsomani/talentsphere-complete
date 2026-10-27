@@ -2,6 +2,8 @@
 
 Doc ID: APIC-02 · Owner: Backend Architecture Team · Version 1.0 · Status: Under Review · Relates: APIC-01 `API_CATALOG.md`, API-STD, MAP-01 `ACTION_TO_OPERATION_MAP.md`, REVW-08, REVW-09, REVW-12, REVW-14, REVW-34
 
+> **Rows folded into `API_CATALOG.md` on 2026-10-27.** Sections 3-5 (overrides) still apply; the OpenAPI addendum is merged into `contracts/openapi.yaml`.
+
 Supersession: supersedes nothing; it adds rows and states overrides. APIC-01 stays as published; where this addendum states an override, readers apply it. All **[TARGET]**; nothing is implemented.
 
 ## 1. Scope

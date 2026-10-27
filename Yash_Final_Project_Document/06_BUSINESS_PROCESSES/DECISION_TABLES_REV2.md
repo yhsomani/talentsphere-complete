@@ -2,6 +2,8 @@
 
 Doc ID: DT-00-R2 · Owner: Business Analyst Lead · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-12, 22, 27, 20 (decision-table parts) · Relates: DT-00 (DT-01…DT-12), BR-REG-R2, SM-00-R2
 
+> **Folded into `DECISION_TABLES.md` on 2026-10-27.** This file is now a change record; edit the original, not this file.
+
 **Relationship (no original file was edited).** This file **supersedes, once accepted**, DT-06 (Evidence rung computation) and DT-05 row 5 of `DECISION_TABLES.md`, adds DT-05 row 5a, and amends DT-12 row 2 and the DT-03 introduction; all other tables and rows stand. New table ids are appended: DT-13 and DT-14. Hit policies, `*` and `{}` conventions are those of DT-00. All content **[TARGET]**.
 
 ## DT-06 (replacement) Evidence rung computation (hit policy F, highest satisfied rung wins)
