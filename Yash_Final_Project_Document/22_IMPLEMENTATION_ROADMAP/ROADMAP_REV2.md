@@ -2,6 +2,8 @@
 
 Doc ID: RDM-01-R2 · Owner: Program Director (with Architecture Review Board) · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-10, REVW-11, REVW-24 (roadmap part), REVW-30 (roadmap part), REVW-34 (phases); feeds OPEN-42 and OPEN-29 · Relates: RDM-01, PCAP-01-R2, BR-REG-R2, SM-00-R2, ADR-T10, ADR-T14a
 
+> **Folded into `ROADMAP.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (no original file was edited).** This is an **overlay**, not a copy. It **supersedes, once accepted**, only the work-package rows and sentences of `ROADMAP.md` that section 3 names (WP-MESSAGING, WP-FAIRNESS-AUDIT, and the scope text of WP-IDENTITY-SESSIONS, WP-PWA-PLATFORM, WP-APPLY-CORE, WP-BILLING-STRIPE, WP-INSTITUTIONS), the work-package count sentence, and the "Ph2 → GA" gate (extended). Everything else in RDM-01 stands as the roadmap of record, including the concurrent revision that made bundled delivery the baseline and introduced WP-ENTITLEMENT-BASE, WP-ANALYTICS-BASE and WP-AI-GATEWAY-BASE. Governance should link this file from `00_CONTROL_CENTRE/MASTER_INDEX.md`. This file contains no dates, durations or staffing numbers.
 
 ## 1. What the current roadmap already satisfies (checked against REVW-10 and REVW-11)

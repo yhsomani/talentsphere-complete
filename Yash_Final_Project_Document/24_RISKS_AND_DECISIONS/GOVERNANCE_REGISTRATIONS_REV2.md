@@ -2,6 +2,8 @@
 
 Doc ID: DEC-GOV2 · Version 1.0 · 2026-10-25 · Additive; supplements [ADR_REGISTER](ADR_REGISTER.md) and [OPEN_DECISIONS](OPEN_DECISIONS.md) without changing them. Every entry is **Proposed**; nothing here is approved by an ARB or owner.
 
+> **Folded into `ADR_REGISTER.md` on 2026-10-27.** Change record only; edit the original.
+
 ## 1. ADR amendments / new ADRs
 | ID | Proposal | Source |
 |---|---|---|
