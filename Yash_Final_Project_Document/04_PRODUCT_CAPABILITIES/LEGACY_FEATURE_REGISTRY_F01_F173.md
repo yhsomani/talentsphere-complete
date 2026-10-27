@@ -1,6 +1,6 @@
 # Legacy Feature Registry (F-01 to F-173): identity, priority, phase, dependencies
 
-Doc ID: CAP-LEG-01 · Owner: Product Director (with Domain Architect) · Version 1.0 · Status: Draft for Review · Relates: `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` (target FEAT hierarchy), `CAPABILITY_MAP_PHASE_RECONCILIATION_REV2.md`, `../28_TRACEABILITY_AND_COVERAGE/FEATURE_REGISTRY_METADATA_CROSSWALK.md` (OPEN-41), `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
+Doc ID: CAP-LEG-01 · Owner: Product Director (with Domain Architect) · Version 1.0 · Status: Draft for Review · Relates: `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` (target FEAT hierarchy), `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2`, `../28_TRACEABILITY_AND_COVERAGE/FEATURE_REGISTRY_METADATA_CROSSWALK.md` (OPEN-41), `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
 
 Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` and `MASTER_INDEX`. Created under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

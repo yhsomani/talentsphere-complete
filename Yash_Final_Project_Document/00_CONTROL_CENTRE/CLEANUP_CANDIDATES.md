@@ -1,5 +1,8 @@
 # Cleanup Candidate Register (V9 control document)
 
+> **2026-10-27 scoped supersession:** The newer user-authorized consolidation of 23 revision/addendum records is tracked in the [preservation manifest](KNOWLEDGE_PRESERVATION_MANIFEST.md#documentation-consolidation--2026-10-27). The zero-candidate and blanket folder-retention statements below describe the earlier initiative and do not prohibit this explicitly scoped cleanup. All other protections remain.
+
+
 Doc ID: CC-CLN · Version 1.0 · Status: Draft · Additive.
 
 **Eligible for cleanup approval: 0.** No external document has been verified as fully reconciled with nothing unique remaining, so none is a cleanup candidate yet. No file was deleted, moved or renamed by this initiative.

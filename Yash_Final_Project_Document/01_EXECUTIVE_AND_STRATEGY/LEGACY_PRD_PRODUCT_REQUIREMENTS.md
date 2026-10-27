@@ -1,6 +1,6 @@
 # Legacy Product Requirements (prior PRD v6.0) merged into the target strategy
 
-Doc ID: STR-LEG-01 · Owner: CPO (with Product Director) · Version 1.0 · Status: Draft for Review · Relates: `PRODUCT_VISION_AND_BUSINESS_MODEL.md` (STR-01, GOAL-01..08), `PRODUCT_VISION_GOALS_REV2.md`, `../20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` (OPEN-51), `../03_BUSINESS_DOMAINS/LEGACY_BRAIN_CONCEPTUAL_MODEL.md`, `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
+Doc ID: STR-LEG-01 · Owner: CPO (with Product Director) · Version 1.0 · Status: Draft for Review · Relates: `PRODUCT_VISION_AND_BUSINESS_MODEL.md` (STR-01, GOAL-01..08), `PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2`, `../20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` (OPEN-51), `../03_BUSINESS_DOMAINS/LEGACY_BRAIN_CONCEPTUAL_MODEL.md`, `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
 
 Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` and `MASTER_INDEX`. Created under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

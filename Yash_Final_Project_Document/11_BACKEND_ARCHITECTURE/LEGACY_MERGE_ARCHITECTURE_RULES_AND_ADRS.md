@@ -204,7 +204,7 @@ Legacy TRD open question: "Open question: GAP_ANALYSIS conflict C-5" (target sta
 - Offline: each feature declares `READ_OFFLINE`, `WRITE_OFFLINE`, `QUEUE`, `SYNC`, `CONFLICT`, `SERVER_REQUIRED`. No secure assessment or other server-authoritative decision relies on offline authority.
 - Release: CI must run lint/format, typecheck, unit/component, build, migration checks, authorization/RLS tests, API contract tests, security scans, critical E2E, accessibility smoke, performance checks for release-critical paths.
 
-**Target requires:** the six-flag offline declaration per feature is a template input for `../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN_REV2.md`; check that document already uses these or equivalent tiers (ADR-T10) and add the flag names to the feature template if not.
+**Target requires:** the six-flag offline declaration per feature is a template input for `../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md#record-offline-and-sync-design-rev2`; check that document already uses these or equivalent tiers (ADR-T10) and add the flag names to the feature template if not.
 
 ## 6. Legacy CODE_STYLE v6.0 (full text, preserved)
 

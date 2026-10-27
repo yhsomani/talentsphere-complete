@@ -1,6 +1,6 @@
 # Legacy Prior-Attempt Roadmap, Backlog and Lessons (from BRAIN/MEMORY.md) merged
 
-Doc ID: RDM-LEG-01 · Owner: Program Director (with Delivery Lead) · Version 1.0 · Status: Draft for Review · Relates: `ROADMAP.md` (RDM-01), `ROADMAP_REV2.md`, `../30_PRIOR_IMPLEMENTATION_REFERENCE/` (earlier as-built analysis), `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
+Doc ID: RDM-LEG-01 · Owner: Program Director (with Delivery Lead) · Version 1.0 · Status: Draft for Review · Relates: `ROADMAP.md` (RDM-01), `ROADMAP.md#record-roadmap-rev2`, `../30_PRIOR_IMPLEMENTATION_REFERENCE/` (earlier as-built analysis), `../24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
 
 Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` and `MASTER_INDEX`. Created under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

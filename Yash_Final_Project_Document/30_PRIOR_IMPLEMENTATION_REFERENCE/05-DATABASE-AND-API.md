@@ -272,7 +272,7 @@ Generated from the `CREATE TABLE` statements and read headers of the 55 files (1
 
 ## A12. Target design (proposed)
 
-Source: `Yash_Final_Project_Document/12_DATA_AND_DATABASE/` (`CONCEPTUAL_AND_LOGICAL_MODEL.md` DB-01 about 126 entities, `PHYSICAL_DESIGN.md` DB-02 and `PHYSICAL_DESIGN_REV2.md`, `DATA_GOVERNANCE_AND_LIFECYCLE.md`, `MIGRATION_POLICY.md` DB-04), `23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md`. All Proposed-only; nothing below exists in the repository.
+Source: `Yash_Final_Project_Document/12_DATA_AND_DATABASE/` (`CONCEPTUAL_AND_LOGICAL_MODEL.md` DB-01 about 126 entities, `PHYSICAL_DESIGN.md` DB-02 and `PHYSICAL_DESIGN.md#record-physical-design-rev2`, `DATA_GOVERNANCE_AND_LIFECYCLE.md`, `MIGRATION_POLICY.md` DB-04), `23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md`. All Proposed-only; nothing below exists in the repository.
 
 | Area | Proposed | Why it differs from today |
 | --- | --- | --- |
@@ -777,7 +777,7 @@ Example: a signed-in client applies with `POST /api/v1/jobs/<jobId>/apply`, head
 
 ## B10. Target design (proposed)
 
-Source: `Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/` (`API_DESIGN_STANDARDS.md` API-STD, `API_CATALOG.md` 230 endpoints in 24 domains, `API_CATALOG_ADDENDUM.md`, `EVENT_CATALOG.md` 74 events, `INTEGRATION_ARCHITECTURE.md`, `contracts/openapi*.yaml`, `contracts/asyncapi.yaml`, observed-route crosswalk), plus `11_BACKEND_ARCHITECTURE`. Proposed-only; open review findings apply.
+Source: `Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/` (`API_DESIGN_STANDARDS.md` API-STD, `API_CATALOG.md` 230 endpoints in 24 domains, `API_CATALOG.md#record-api-catalog-addendum`, `EVENT_CATALOG.md` 74 events, `INTEGRATION_ARCHITECTURE.md`, `contracts/openapi*.yaml`, `contracts/asyncapi.yaml`, observed-route crosswalk), plus `11_BACKEND_ARCHITECTURE`. Proposed-only; open review findings apply.
 
 | Area | Current | Proposed |
 | --- | --- | --- |
@@ -797,4 +797,4 @@ SSOT interface and service contract crosswalks (`SSOT_INTERFACE_CONTRACT_CROSSWA
 ## B11. Sources read for this document
 
 Read in full or in the relevant parts: `scripts/migrate.mjs`, `scripts/lib/{pg,migration-integrity}.mjs`, `scripts/seed.mjs` (head), all migrations by structure (counts, tables, RLS, policies) and in full 00001, 00014, 00041-00055, `supabase/hosted/README.md` and `02_data_api_lockdown.sql`, `supabase/seed/01_initial_seed.sql`, `apps/api/src/{server.ts (lifecycle, auth, errors, sampled handlers, route registrations by parser), durability.ts, billing-stripe.ts (head, webhook), storage/index.ts, storage/core-store.ts (types, commit, error mapping)}`, `apps/worker/src/index.ts`, `packages/domain/src/{background-jobs,auth,core}.ts`, `packages/config/src/env.ts`, `packages/contracts/src/index.ts` (structure, billing and error schemas), `docs/engineering/{DATABASE,API_CONTRACTS}.md`, ADR-015, `docs/system-model/{03,06}`, and target-design files `11_*/BACKEND_ARCHITECTURE(.md,_REV2.md)`, `12_*/{PHYSICAL_DESIGN_REV2,MIGRATION_POLICY}.md`, `12_*/{CONCEPTUAL_AND_LOGICAL_MODEL,PHYSICAL_DESIGN}.md` (heads and selected sections), `13_*/{API_DESIGN_STANDARDS,API_CATALOG (head),EVENT_CATALOG (head),INTEGRATION_ARCHITECTURE (head),OBSERVED_*}`, `23_*/REFERENCE_TO_TARGET_DATA_MIGRATION.md`, `24_*/ADR_REGISTER.md`, `27_*/REVIEW_FIX_STATUS.md`.
-Not read in full: the 42 feature-schema migrations 00002-00040 beyond structure counts, `server.ts` handler bodies, `billing-store.ts`/`account-store.ts`/`erasure-store.ts` beyond SQL-verb scans, `stripe-gateway.ts`, `contracts/openapi*.yaml` and `asyncapi.yaml` (about 27,000 lines), `DATA_GOVERNANCE_AND_LIFECYCLE.md`, `API_CATALOG_ADDENDUM.md`, `ACTION_TO_OPERATION_MAP.md`, `27_*/FINAL_REVIEW_REPORT.md` and `SECOND_REVIEW_REPORT.md`.
+Not read in full: the 42 feature-schema migrations 00002-00040 beyond structure counts, `server.ts` handler bodies, `billing-store.ts`/`account-store.ts`/`erasure-store.ts` beyond SQL-verb scans, `stripe-gateway.ts`, `contracts/openapi*.yaml` and `asyncapi.yaml` (about 27,000 lines), `DATA_GOVERNANCE_AND_LIFECYCLE.md`, `API_CATALOG.md#record-api-catalog-addendum`, `ACTION_TO_OPERATION_MAP.md`, `27_*/FINAL_REVIEW_REPORT.md` and `SECOND_REVIEW_REPORT.md`.

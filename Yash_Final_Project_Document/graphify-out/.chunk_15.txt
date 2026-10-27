@@ -1,0 +1,9 @@
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\30_PRIOR_IMPLEMENTATION_REFERENCE\07-TESTING-AND-OPERATIONS.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\30_PRIOR_IMPLEMENTATION_REFERENCE\08-ROADMAP-AND-DECISIONS.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\30_PRIOR_IMPLEMENTATION_REFERENCE\MIGRATION_MATRIX.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\31_LEGACY_ARCHIVE\README.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\99_FINAL_MASTER_BLUEPRINT\FINAL_ARCHITECTURE_SUMMARY.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\99_FINAL_MASTER_BLUEPRINT\FINAL_DOMAIN_COVERAGE.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\99_FINAL_MASTER_BLUEPRINT\IMPLEMENTATION_READINESS.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\99_FINAL_MASTER_BLUEPRINT\PROJECT_MASTER_BLUEPRINT.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\README.md

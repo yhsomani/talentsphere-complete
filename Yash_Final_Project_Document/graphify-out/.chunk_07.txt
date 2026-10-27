@@ -1,0 +1,17 @@
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\DATA_GOVERNANCE_AND_LIFECYCLE.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\INDEX.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\LEGACY_MERGE_DATABASE_REFERENCE.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\MIGRATION_POLICY.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\PHYSICAL_DESIGN.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\12_DATA_AND_DATABASE\PHYSICAL_DESIGN_REV2.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\ACTION_TO_OPERATION_MAP.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\API_CATALOG.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\API_CATALOG_ADDENDUM.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\API_DESIGN_STANDARDS.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\EVENT_CATALOG.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\INDEX.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\INTEGRATION_ARCHITECTURE.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\LEGACY_MERGE_API_CONTRACTS.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\OBSERVED_REFERENCE_API_INVENTORY.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\SSOT_INTERFACE_CONTRACT_CROSSWALK.md
+C:\Users\yashs\OneDrive\Desktop\talentsphere-complete\Yash_Final_Project_Document\13_API_EVENTS_AND_INTEGRATIONS\SSOT_SERVICE_CONTRACT_CROSSWALK.md

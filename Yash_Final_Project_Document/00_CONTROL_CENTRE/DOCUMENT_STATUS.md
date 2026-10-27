@@ -88,7 +88,7 @@ Evidence label vocabulary (applies to every statement in this folder): **SOURCE*
 | Item | Finding | Resolution |
 |---|---|---|
 | Risk count | The blueprint said 50 risks; `RISK_REGISTER.md` has 63 table rows. The file has 56 distinct ids (RISK-01..56): 50 original rows plus RISK-51..56 added by the folded Revision 2, and the Revision 2 section repeats RISK-32 and RISK-51..56 (7 repeated rows). 50 + 6 = 56; 56 + 7 = 63 | The blueprint now states 56 distinct ids. The repeated rows are not removed (preservation); the later text governs |
-| ROADMAP vs ROADMAP_REV2 | `ROADMAP_REV2.md` states it is folded into `ROADMAP.md` | `ROADMAP.md` governs; both kept; rule recorded in `MASTER_INDEX.md` precedence section |
+| ROADMAP vs ROADMAP_REV2 | `ROADMAP.md#record-roadmap-rev2` states it is folded into `ROADMAP.md` | `ROADMAP.md` governs; both kept; rule recorded in `MASTER_INDEX.md` precedence section |
 | 30 vs 31 | No rule existed | Precedence rule 2 in `MASTER_INDEX.md` |
 | Model policy | `PROJECT_SCOPE.md` says Sonnet orchestrator and Sonnet delegates, Haiku unused; the first `EXECUTION_LEDGER.md` says the primary model family was reported as GPT-6 | Recorded as a contradiction in `COVERAGE_MATRICES.md` row 0; enforcement UNVERIFIED; OPEN |
 | Denominators for preservation | 204 / 132 / 158 / 50-vs-2 archive files | Listed as D1..D6 in `KNOWLEDGE_PRESERVATION_MANIFEST.md` Part 66.3 |

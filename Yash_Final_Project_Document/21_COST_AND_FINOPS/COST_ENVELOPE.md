@@ -39,7 +39,7 @@ The scenario values come from the product forecast (OPEN-05) and `WP-LOADBASE`. 
 | E13 | Code-execution sandbox runner | Compute | Ph2 (WP-ASSESS-RUNNER); excluded from the Phase 1 envelope | | | | | | | Assessment owner |
 | E14 | AI gateway and model spend | AI tokens | Ph2 (REVW-10); excluded from the Phase 1 envelope | | | | | | | AI owner |
 | E15 | Observability stack (metrics, logs, traces, error reporting) | Observability | Ph1-active | | | | | | | SRE Lead |
-| E16 | Synthetic monitoring from outside the network (primary source for client SLIs, see `SLO_REV2.md`) | Observability | Ph1-active | | | | | | | SRE Lead |
+| E16 | Synthetic monitoring from outside the network (primary source for client SLIs, see `SLO_AND_PERFORMANCE_TARGETS.md#record-slo-rev2`) | Observability | Ph1-active | | | | | | | SRE Lead |
 | E17 | Payments (processor fees, tax product) | Payments, tax | Ph2, first-party courses only (REVW-30) | | | | | | | Finance Lead |
 | E18 | Instructor or seller payouts and seller KYC | Content and instructor payouts | Conditional: Phase 3 marketplace ADR (`19_*/MARKETPLACE_MONEY_FLOW_ADR_PROPOSAL.md`) | | | | | | | Finance Lead |
 | E19 | Helpdesk and CRM seats | Vendor SaaS | Ph1-active (minimal) | | | | | | | Ops |

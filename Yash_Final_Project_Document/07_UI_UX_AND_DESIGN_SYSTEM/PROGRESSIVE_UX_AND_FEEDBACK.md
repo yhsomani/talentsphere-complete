@@ -274,7 +274,7 @@ ID_REGISTRY: SCR-INS prefix and aliases; USER_JOURNEYS (folder 02) cites SCR-ADM
 
 # Patch 2026-10-27: Interaction hazards (UXH-01..UXH-08)
 
-**[TARGET]**, thresholds marked PROPOSED are unmeasured. Each hazard names the rule the UI follows and the action contracts that exercise it ([ACTION_REGISTRY](ACTION_REGISTRY.md) ACT-ATOM-*). Platform mechanisms (idempotency key and status-query endpoint, queue and multi-tab leader election, service-worker update flow) are owned by [13_API_EVENTS_AND_INTEGRATIONS](../13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md) and [08_PWA_AND_MOBILE](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN_REV2.md) (pending patch); this section defines only what the person sees.
+**[TARGET]**, thresholds marked PROPOSED are unmeasured. Each hazard names the rule the UI follows and the action contracts that exercise it ([ACTION_REGISTRY](ACTION_REGISTRY.md) ACT-ATOM-*). Platform mechanisms (idempotency key and status-query endpoint, queue and multi-tab leader election, service-worker update flow) are owned by [13_API_EVENTS_AND_INTEGRATIONS](../13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md) and [08_PWA_AND_MOBILE](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md#record-offline-and-sync-design-rev2) (pending patch); this section defines only what the person sees.
 
 | ID | Hazard | Rule | Exercised by |
 |---|---|---|---|

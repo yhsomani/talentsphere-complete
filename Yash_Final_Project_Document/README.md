@@ -1,5 +1,10 @@
 # Yash Final Project Document — TalentSphere Target Product Blueprint
 
+## Consolidated documentation (2026-10-27)
+
+Revision/addendum records now live as labelled sections of their owning documents, with full source context and updated links. See the [source mapping, recovery revision and preservation checks](00_CONTROL_CENTRE/KNOWLEDGE_PRESERVATION_MANIFEST.md#documentation-consolidation--2026-10-27). The historical status below describes the earlier revision; its “nothing deleted” and separate-file statements do not describe this consolidation. Product approval and implementation status are unchanged.
+
+
 Greenfield redesign documentation. **No application source code was modified.** Existing repo docs are *reference only*.
 
 Start here: [Master index](00_CONTROL_CENTRE/MASTER_INDEX.md) → final authority: [PROJECT_MASTER_BLUEPRINT](99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md).

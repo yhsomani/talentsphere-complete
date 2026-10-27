@@ -8,7 +8,7 @@ Doc ID: TRC-COV - Owner: QA Architect with Documentation Architect - Version 1.0
 
 - Script: Python 3, regex over Markdown tables, source in section 9. Definition position = first cell of a table row.
 - **AC defined:** first cell `AC-dd-ff-nn` in `05_*/SPEC_G1..G5` (long-form, 359) or in `16_*/ACCEPTANCE_CRITERIA_GUIDE.md` (platform `AC-00-*`, 30). Duplicated definitions are merged.
-- **AC to TEST (direct tier):** the AC id appears in any cell after the first of a row in `TEST_CATALOG.md` or `TEST_CATALOG_REV2.md`, **excluding** suite-level tests (`TEST-ACC-*`, `TEST-BRU-*`). Textual match only; semantic adequacy is not judged.
+- **AC to TEST (direct tier):** the AC id appears in any cell after the first of a row in `TEST_CATALOG.md` or `TEST_CATALOG.md#record-test-catalog-rev2`, **excluding** suite-level tests (`TEST-ACC-*`, `TEST-BRU-*`). Textual match only; semantic adequacy is not judged.
 - **AC to FEAT:** `AC-dd-ff-nn` belongs to `FEAT-dd-ff`. This is the same convention as the independent review; an AC filed under a different FEAT number would be missed.
 - **BR to TEST:** A = a direct-tier test row cites the BR. B = an AC row that cites the BR is itself directly tested. C = the BR's FEAT column names a feature whose ACs are directly tested, but no explicit BR link exists (indirect, unproven). D = none of the above.
 - **Priority and phase** come from the last two cells of the FEAT row in the capability map. Those columns are being revised under REVW-10; re-run after the capability map is regenerated from the roadmap.
@@ -66,7 +66,7 @@ Honest reading: only 97 of 359 long-form criteria (27%) are cited by an individu
 
 ## 4. Suite-level coverage rule
 
-A criterion is *covered* for a Ready decision only when an individual test cites it. A criterion tied only by `TEST-ACC-*` is reported as *suite-covered* and may not be counted in the coverage headline. The suites are defined in `TEST_CATALOG_REV2.md` section 3.
+A criterion is *covered* for a Ready decision only when an individual test cites it. A criterion tied only by `TEST-ACC-*` is reported as *suite-covered* and may not be counted in the coverage headline. The suites are defined in `TEST_CATALOG.md#record-test-catalog-rev2` section 3.
 
 ## 5. Per-feature acceptance-criteria counts
 
@@ -658,7 +658,7 @@ def load():
     D["brs"] = brs
     # --- tests
     tests = {}
-    for tcat in ("16_QA_AND_TESTING/TEST_CATALOG.md", "16_QA_AND_TESTING/TEST_CATALOG_REV2.md"):
+    for tcat in ("16_QA_AND_TESTING/TEST_CATALOG.md", "16_QA_AND_TESTING/TEST_CATALOG.md#record-test-catalog-rev2"):
         if not (ROOT / tcat).exists():
             continue
         for c0, cells, line in rows(tcat):
@@ -803,7 +803,7 @@ if __name__ == "__main__":
 ### generate_outputs.py
 
 ```python
-"""Generate 28_*/COVERAGE_MATRICES.md and 16_*/TEST_CATALOG_REV2.md (additive new files). Usage: python generate_outputs.py"""
+"""Generate 28_*/COVERAGE_MATRICES.md and 16_*/TEST_CATALOG.md#record-test-catalog-rev2 (additive new files). Usage: python generate_outputs.py"""
 import re, collections, pathlib, datetime
 import build_matrices as B
 import trace_lib as T
@@ -875,7 +875,7 @@ for lo, hi, name in blocks:
                     % (sid, name, "%d rules" % len(members), ", ".join(members)))
     for b in members: suite_of_br[b] = sid
 
-# ---------- TEST_CATALOG_REV2.md
+# ---------- TEST_CATALOG.md#record-test-catalog-rev2
 cat = (ROOT / "16_QA_AND_TESTING/TEST_CATALOG.md").read_text(encoding="utf-8")
 NEWIDS = ["TEST-SEC-032", "TEST-SEC-033", "TEST-SEC-034", "TEST-SEC-035", "TEST-EVD-016", "TEST-EVD-017", "TEST-EVD-018", "TEST-API-015", "TEST-API-016",
           "TEST-PRV-011", "TEST-PRV-012", "TEST-PRV-013", "TEST-SRC-003", "TEST-REL-013", "TEST-BIL-009", "TEST-OBS-007", "TEST-OBS-008",
@@ -931,7 +931,7 @@ n_new = len(NEWIDS)
 R.append("Individual tests added: %d. Suite-level acceptance tests: %d. Suite-level rule tests: %d. Total additive entries in this file: %d. `TEST_CATALOG.md` (with the in-place rows) holds %d individual tests; unique individual tests across both files: %d.\n"
          % (n_new, len(suite_rows), len(bru_rows), n_new + len(suite_rows) + len(bru_rows), len([t for t in tests if t not in set(NEWIDS) and not is_suite(t)]) + 0, len([t for t in tests if not is_suite(t)])))
 if missing: R.append("Generation warning: missing rows %s\n" % missing)
-(ROOT / "16_QA_AND_TESTING/TEST_CATALOG_REV2.md").write_text("\n".join(R), encoding="utf-8", newline="\n")
+(ROOT / "16_QA_AND_TESTING/TEST_CATALOG.md#record-test-catalog-rev2").write_text("\n".join(R), encoding="utf-8", newline="\n")
 
 # ---------- COVERAGE_MATRICES.md
 H = B.H
@@ -973,7 +973,7 @@ L.append("**Relationship statement:** this file **supersedes nothing**. It suppl
 L.append("## 1. Method\n")
 L.append("- Script: Python 3, regex over Markdown tables, source in section 9. Definition position = first cell of a table row.")
 L.append("- **AC defined:** first cell `AC-dd-ff-nn` in `05_*/SPEC_G1..G5` (long-form, %d) or in `16_*/ACCEPTANCE_CRITERIA_GUIDE.md` (platform `AC-00-*`, %d). Duplicated definitions are merged." % (len(lf), len(a00)))
-L.append("- **AC to TEST (direct tier):** the AC id appears in any cell after the first of a row in `TEST_CATALOG.md` or `TEST_CATALOG_REV2.md`, **excluding** suite-level tests (`TEST-ACC-*`, `TEST-BRU-*`). Textual match only; semantic adequacy is not judged.")
+L.append("- **AC to TEST (direct tier):** the AC id appears in any cell after the first of a row in `TEST_CATALOG.md` or `TEST_CATALOG.md#record-test-catalog-rev2`, **excluding** suite-level tests (`TEST-ACC-*`, `TEST-BRU-*`). Textual match only; semantic adequacy is not judged.")
 L.append("- **AC to FEAT:** `AC-dd-ff-nn` belongs to `FEAT-dd-ff`. This is the same convention as the independent review; an AC filed under a different FEAT number would be missed.")
 L.append("- **BR to TEST:** A = a direct-tier test row cites the BR. B = an AC row that cites the BR is itself directly tested. C = the BR's FEAT column names a feature whose ACs are directly tested, but no explicit BR link exists (indirect, unproven). D = none of the above.")
 L.append("- **Priority and phase** come from the last two cells of the FEAT row in the capability map. Those columns are being revised under REVW-10; re-run after the capability map is regenerated from the roadmap.")
@@ -996,7 +996,7 @@ for p, ph in keys:
     L.append("| %s | %s | %d | %d |" % (p, ph, tier_cnt[(p, ph, "suite")], tier_cnt[(p, ph, "none")]))
 L.append("\nHonest reading: only %d of %d long-form criteria (%.0f%%) are cited by an individual test. The REV2 suites raise tier-2 coverage to %d but they are table-driven placeholders, not authored tests. P1 criteria remain without any test and must be covered before their feature's phase exit.\n" % (len(lf) - len(lf_unc), len(lf), 100.0 * (len(lf) - len(lf_unc)) / len(lf), len(lf) - len(lf_unc) + lf_suite))
 L.append("## 4. Suite-level coverage rule\n")
-L.append("A criterion is *covered* for a Ready decision only when an individual test cites it. A criterion tied only by `TEST-ACC-*` is reported as *suite-covered* and may not be counted in the coverage headline. The suites are defined in `TEST_CATALOG_REV2.md` section 3.\n")
+L.append("A criterion is *covered* for a Ready decision only when an individual test cites it. A criterion tied only by `TEST-ACC-*` is reported as *suite-covered* and may not be counted in the coverage headline. The suites are defined in `TEST_CATALOG.md#record-test-catalog-rev2` section 3.\n")
 L.append("## 5. Per-feature acceptance-criteria counts\n")
 L.append("Columns: AC = criteria whose id carries the feature number; AC tested = of those, directly cited by an individual test; FEAT tests = test rows citing the feature id itself (feature-level link).\n")
 L.append("| Feature | Pri | Ph | AC | AC tested | FEAT tests | Flag |\n|---|---|---|---|---|---|---|")
@@ -1049,7 +1049,7 @@ Method and limits. One row per section 0..48 of the original mission prompt, plu
 
 | Sec | Reconstructed title | Location | Status | Note |
 |---:|---|---|---|---|
-| 0 | Mission, scope, model policy | `00_CONTROL_CENTRE/PROJECT_SCOPE.md`, `EXECUTION_LEDGER_V9_ADDENDUM.md` | retained | **Model policy: Sonnet or Haiku only.** The scope file records orchestrator Sonnet 5.5 and delegated agents invoked with `model: sonnet`; Haiku not used. Runtime enforcement is UNVERIFIED beyond the Agent tool parameter. The first `EXECUTION_LEDGER.md` (2026-10-25) says the runtime identified the primary model family as GPT-6, which contradicts the scope file; the contradiction is OPEN and is not resolved here. This patch round's agents are Sonnet-class by their own statement only |
+| 0 | Mission, scope, model policy | `00_CONTROL_CENTRE/PROJECT_SCOPE.md`, `EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum` | retained | **Model policy: Sonnet or Haiku only.** The scope file records orchestrator Sonnet 5.5 and delegated agents invoked with `model: sonnet`; Haiku not used. Runtime enforcement is UNVERIFIED beyond the Agent tool parameter. The first `EXECUTION_LEDGER.md` (2026-10-25) says the runtime identified the primary model family as GPT-6, which contradicts the scope file; the contradiction is OPEN and is not resolved here. This patch round's agents are Sonnet-class by their own statement only |
 | 1 | Source discovery and preservation rules | `KNOWLEDGE_PRESERVATION_MANIFEST.md` | retained, partial | 0 of 132 source rows (CSV) terminal, 204 per narrative; Part 66.3 metrics added (folder files: 267 at the 2026-10-27 scan) |
 | 2 | Source document inventory | `SOURCE_DOCUMENT_INVENTORY.md`, manifest CSV | reconciled | Denominators disagree: source rows 204 (narrative) / 132 (CSV); folder files 158 (inventory, 2026-10-25) / 267 (scan, 2026-10-27); recorded in manifest Part 66.3 |
 | 3 | Protected tree and SSOT protection | `PROTECTED_DOCUMENT_TREE_BASELINE.csv` | retained | SSOT.md unchanged per git (2026-10-25 check) |

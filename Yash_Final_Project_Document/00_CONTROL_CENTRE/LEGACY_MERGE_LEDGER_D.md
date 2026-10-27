@@ -1,6 +1,6 @@
 # Legacy Merge Ledger D (gap closure after the independent preservation audit)
 
-Doc ID: CC-LEDGER-D · Owner: Documentation Architect · Version 1.0 · Status: Draft for Review · Date: 2026-10-27 · Supersedes nothing · Relates: [`LEGACY_MERGE_LEDGER_A.md`](LEGACY_MERGE_LEDGER_A.md), [`LEGACY_MERGE_LEDGER_B.md`](LEGACY_MERGE_LEDGER_B.md), [`LEGACY_MERGE_LEDGER_C.md`](LEGACY_MERGE_LEDGER_C.md), [`KNOWLEDGE_PRESERVATION_MANIFEST.md`](KNOWLEDGE_PRESERVATION_MANIFEST.md) · Linked from: [`MASTER_INDEX_V9_ADDENDUM_3.md`](MASTER_INDEX_V9_ADDENDUM_3.md)
+Doc ID: CC-LEDGER-D · Owner: Documentation Architect · Version 1.0 · Status: Draft for Review · Date: 2026-10-27 · Supersedes nothing · Relates: [`LEGACY_MERGE_LEDGER_A.md`](LEGACY_MERGE_LEDGER_A.md), [`LEGACY_MERGE_LEDGER_B.md`](LEGACY_MERGE_LEDGER_B.md), [`LEGACY_MERGE_LEDGER_C.md`](LEGACY_MERGE_LEDGER_C.md), [`KNOWLEDGE_PRESERVATION_MANIFEST.md`](KNOWLEDGE_PRESERVATION_MANIFEST.md) · Linked from: [`MASTER_INDEX.md#record-master-index-v9-addendum-3`](MASTER_INDEX.md#record-master-index-v9-addendum-3)
 
 Created under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

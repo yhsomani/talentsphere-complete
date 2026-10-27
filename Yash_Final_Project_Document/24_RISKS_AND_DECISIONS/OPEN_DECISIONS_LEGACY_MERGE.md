@@ -1,6 +1,6 @@
 # Open Decisions, Conflicts, Governance and Lessons Merged from the Legacy Documentation (Group A)
 
-Doc ID: DEC-LGA · Owner: Architecture Review Board secretary (with Documentation Architect) · Version 1.0 · Status: Draft for Review · Relates: `OPEN_DECISIONS.md` (DEC-OPEN, OPEN-01..OPEN-52), `ADR_REGISTER.md`, `RISK_REGISTER.md`, `GOVERNANCE_REGISTRATIONS_REV2.md`, `../06_BUSINESS_PROCESSES/LEGACY_BR_CATALOGUE_BR001_BR248.md`, `../04_PRODUCT_CAPABILITIES/LEGACY_FEATURE_REGISTRY_F01_F173.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
+Doc ID: DEC-LGA · Owner: Architecture Review Board secretary (with Documentation Architect) · Version 1.0 · Status: Draft for Review · Relates: `OPEN_DECISIONS.md` (DEC-OPEN, OPEN-01..OPEN-52), `ADR_REGISTER.md`, `RISK_REGISTER.md`, `ADR_REGISTER.md#record-governance-registrations-rev2`, `../06_BUSINESS_PROCESSES/LEGACY_BR_CATALOGUE_BR001_BR248.md`, `../04_PRODUCT_CAPABILITIES/LEGACY_FEATURE_REGISTRY_F01_F173.md`, `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md`
 
 Supersedes nothing; linked from `../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` and `MASTER_INDEX`. `OPEN_DECISIONS.md` and the ADR register are **not edited** by this file. Created under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

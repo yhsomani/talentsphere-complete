@@ -301,7 +301,7 @@ Namespace warning: `SSOT.md` ADR-001..013, `docs/engineering/TARGET_ARCHITECTURE
 
 ## 16. Target design (proposed, not built)
 
-Source: `Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md` (BE-01) and `BACKEND_ARCHITECTURE_REV2.md` (BE-01-R2), `10_FRONTEND_ARCHITECTURE/*`, `12_DATA_AND_DATABASE/*`, `13_API_EVENTS_AND_INTEGRATIONS/*`, `25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md`, `24_RISKS_AND_DECISIONS/ADR_REGISTER.md`. It is a greenfield redesign that treats this repository as a "reference project", not an evolution plan. The design set carries open independent-review findings (`27_INDEPENDENT_REVIEWS`, `REVIEW_FIX_STATUS.md`: many "Addressed in REV2" items were not independently re-read). Treat everything below as Proposed-only.
+Source: `Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md` (BE-01) and `BACKEND_ARCHITECTURE.md#record-backend-architecture-rev2` (BE-01-R2), `10_FRONTEND_ARCHITECTURE/*`, `12_DATA_AND_DATABASE/*`, `13_API_EVENTS_AND_INTEGRATIONS/*`, `25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md`, `24_RISKS_AND_DECISIONS/ADR_REGISTER.md`. It is a greenfield redesign that treats this repository as a "reference project", not an evolution plan. The design set carries open independent-review findings (`27_INDEPENDENT_REVIEWS`, `REVIEW_FIX_STATUS.md`: many "Addressed in REV2" items were not independently re-read). Treat everything below as Proposed-only.
 
 | Area | Current (built) | Proposed target | Detail |
 | --- | --- | --- | --- |

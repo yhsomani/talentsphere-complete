@@ -44,7 +44,7 @@ Authority: [PROJECT_MASTER_BLUEPRINT](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTE
 |---|---|
 | 00_CONTROL_CENTRE | [LEGACY_MERGE_LEDGER_A.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md) |
 | 00_CONTROL_CENTRE | [LEGACY_MERGE_LEDGER_C.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_C.md) |
-| 00_CONTROL_CENTRE | [MASTER_INDEX_V9_ADDENDUM_3.md](../00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_3.md) |
+| 00_CONTROL_CENTRE | [MASTER_INDEX.md#record-master-index-v9-addendum-3](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-3) |
 | 01_EXECUTIVE_AND_STRATEGY | [LEGACY_PRD_PRODUCT_REQUIREMENTS.md](../01_EXECUTIVE_AND_STRATEGY/LEGACY_PRD_PRODUCT_REQUIREMENTS.md) |
 | 02_STAKEHOLDERS_AND_USERS | [LEGACY_JOURNEY_REGISTRY_J01_J28.md](../02_STAKEHOLDERS_AND_USERS/LEGACY_JOURNEY_REGISTRY_J01_J28.md) |
 | 03_BUSINESS_DOMAINS | [LEGACY_BRAIN_CONCEPTUAL_MODEL.md](../03_BUSINESS_DOMAINS/LEGACY_BRAIN_CONCEPTUAL_MODEL.md) |
@@ -90,39 +90,123 @@ Source of the list: a read-only link scan on 2026-10-27 found 115 files not reac
 Related additions in this revision (all in place, nothing moved): [ID families](ID_REGISTRY.md) · [OPEN_DECISIONS section 6](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md) · [G01..G16 ledger](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) · [prompt coverage matrix](../28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md) · [50 acceptance questions](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md) · [manifest Part 66.3](KNOWLEDGE_PRESERVATION_MANIFEST.md) · [cold-start rehearsal](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) · [link triage and evidence labels](DOCUMENT_STATUS.md).
 
 ### V9 index addenda (read in this order)
-[MASTER_INDEX_V9_ADDENDUM](MASTER_INDEX_V9_ADDENDUM.md) (control documents, review artifacts) → [MASTER_INDEX_V9_ADDENDUM_2](MASTER_INDEX_V9_ADDENDUM_2.md) (review-fix `*_REV2` overlays) → [MASTER_INDEX_V9_ADDENDUM_3](MASTER_INDEX_V9_ADDENDUM_3.md) (second review; ledger D closure). The three are additive companions of this file; this file stays the entry point.
+[MASTER_INDEX_V9_ADDENDUM](MASTER_INDEX.md#record-master-index-v9-addendum) (control documents, review artifacts) → [MASTER_INDEX_V9_ADDENDUM_2](MASTER_INDEX.md#record-master-index-v9-addendum-2) (review-fix `*_REV2` overlays) → [MASTER_INDEX_V9_ADDENDUM_3](MASTER_INDEX.md#record-master-index-v9-addendum-3) (second review; ledger D closure). The three are additive companions of this file; this file stays the entry point.
 
 ### Precedence rules (no file deleted)
-1. **Originals versus `*_REV2` files.** On 2026-10-27 the REV2 content was folded into the originals (see each original's "Revision 2 folded in" banner). Where an original and its REV2 file differ, the original governs. REV2 files are change records and are kept. Example: [ROADMAP](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) governs over [ROADMAP_REV2](../22_IMPLEMENTATION_ROADMAP/ROADMAP_REV2.md); [RISK_REGISTER](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md) over [RISK_REGISTER_REV2](../24_RISKS_AND_DECISIONS/RISK_REGISTER_REV2.md). Exception: where an original has not been folded yet, the REV2 text is a PROPOSED amendment and the original still governs until an owner ratifies.
+1. **Originals versus `*_REV2` files.** On 2026-10-27 the REV2 content was folded into the originals (see each original's "Revision 2 folded in" banner). Where an original and its REV2 file differ, the original governs. REV2 files are change records and are kept. Example: [ROADMAP](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) governs over [ROADMAP_REV2](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#record-roadmap-rev2); [RISK_REGISTER](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md) over [RISK_REGISTER_REV2](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md#record-risk-register-rev2). Exception: where an original has not been folded yet, the REV2 text is a PROPOSED amendment and the original still governs until an owner ratifies.
 2. **`30_PRIOR_IMPLEMENTATION_REFERENCE` versus `31_LEGACY_ARCHIVE`.** Both are reference only and neither is target truth. `31_LEGACY_ARCHIVE` holds unmodified source evidence (dated, commit-bound) and wins on what the prior attempt recorded at that date; `30_PRIOR_IMPLEMENTATION_REFERENCE` is an analysis of it and wins on interpretation and reading order, but must not contradict the archive's facts. If they disagree, cite the archive and record the difference as an OPEN item. Target decisions always live in folders 01 to 29 and `24_RISKS_AND_DECISIONS`.
 3. **Root `SSOT.md`** stays protected founder intent; the blueprint and ADRs record where the target differs.
 
 ### Files previously not indexed
 | Folder | Files |
 |---|---|
-| 00_CONTROL_CENTRE | [CLEANUP_CANDIDATES.md](../00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md) · [EXECUTION_LEDGER_V9_ADDENDUM.md](../00_CONTROL_CENTRE/EXECUTION_LEDGER_V9_ADDENDUM.md) · [INFORMATION_RECONCILIATION_MATRIX.md](../00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md) · [LEGACY_MERGE_LEDGER_D.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_D.md) · [MASTER_INDEX_V9_ADDENDUM.md](../00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM.md) · [MASTER_INDEX_V9_ADDENDUM_2.md](../00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_2.md) · [SOURCE_DOCUMENT_INVENTORY.md](../00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md) |
-| 01_EXECUTIVE_AND_STRATEGY | [PRODUCT_VISION_GOALS_REV2.md](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_GOALS_REV2.md) |
-| 02_STAKEHOLDERS_AND_USERS | [PERMISSION_MATRIX_REV2.md](../02_STAKEHOLDERS_AND_USERS/PERMISSION_MATRIX_REV2.md) |
-| 04_PRODUCT_CAPABILITIES | [CAPABILITY_MAP_PHASE_RECONCILIATION_REV2.md](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_PHASE_RECONCILIATION_REV2.md) |
-| 05_FEATURE_SPECIFICATIONS | [SPEC_ACCEPTANCE_ADDITIONS_REV2.md](../05_FEATURE_SPECIFICATIONS/SPEC_ACCEPTANCE_ADDITIONS_REV2.md) |
-| 06_BUSINESS_PROCESSES | [BUSINESS_RULES_REGISTRY_REV2.md](../06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY_REV2.md) · [DECISION_TABLES_REV2.md](../06_BUSINESS_PROCESSES/DECISION_TABLES_REV2.md) · [PRODUCT_INVARIANT_REGISTRY_REV2.md](../06_BUSINESS_PROCESSES/PRODUCT_INVARIANT_REGISTRY_REV2.md) · [STATE_MACHINES_REV2.md](../06_BUSINESS_PROCESSES/STATE_MACHINES_REV2.md) |
+| 00_CONTROL_CENTRE | [CLEANUP_CANDIDATES.md](../00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md) · [EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum](../00_CONTROL_CENTRE/EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum) · [INFORMATION_RECONCILIATION_MATRIX.md](../00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md) · [LEGACY_MERGE_LEDGER_D.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_D.md) · [MASTER_INDEX.md#record-master-index-v9-addendum](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum) · [MASTER_INDEX.md#record-master-index-v9-addendum-2](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-2) · [SOURCE_DOCUMENT_INVENTORY.md](../00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md) |
+| 01_EXECUTIVE_AND_STRATEGY | [PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2) |
+| 02_STAKEHOLDERS_AND_USERS | [STAKEHOLDERS_ROLES_PERMISSIONS.md#record-permission-matrix-rev2](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md#record-permission-matrix-rev2) |
+| 04_PRODUCT_CAPABILITIES | [CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2) |
+| 05_FEATURE_SPECIFICATIONS | [MICRO_FEATURE_SPECS.md#record-spec-acceptance-additions-rev2](../05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md#record-spec-acceptance-additions-rev2) |
+| 06_BUSINESS_PROCESSES | [BUSINESS_RULES_REGISTRY.md#record-business-rules-registry-rev2](../06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md#record-business-rules-registry-rev2) · [DECISION_TABLES.md#record-decision-tables-rev2](../06_BUSINESS_PROCESSES/DECISION_TABLES.md#record-decision-tables-rev2) · [PRODUCT_INVARIANT_REGISTRY.md#record-product-invariant-registry-rev2](../06_BUSINESS_PROCESSES/PRODUCT_INVARIANT_REGISTRY.md#record-product-invariant-registry-rev2) · [STATE_MACHINES.md#record-state-machines-rev2](../06_BUSINESS_PROCESSES/STATE_MACHINES.md#record-state-machines-rev2) |
 | 07_UI_UX_AND_DESIGN_SYSTEM | [UX_REVIEW_FIXES.md](../07_UI_UX_AND_DESIGN_SYSTEM/UX_REVIEW_FIXES.md) |
-| 08_PWA_AND_MOBILE | [OFFLINE_AND_SYNC_DESIGN_REV2.md](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN_REV2.md) · [PWA_MOBILE_REVIEW_FIXES.md](../08_PWA_AND_MOBILE/PWA_MOBILE_REVIEW_FIXES.md) |
+| 08_PWA_AND_MOBILE | [OFFLINE_AND_SYNC_DESIGN.md#record-offline-and-sync-design-rev2](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md#record-offline-and-sync-design-rev2) · [PWA_MOBILE_REVIEW_FIXES.md](../08_PWA_AND_MOBILE/PWA_MOBILE_REVIEW_FIXES.md) |
 | 09_MODULE_FEDERATION | [FEDERATION_REVIEW_FIXES.md](../09_MODULE_FEDERATION/FEDERATION_REVIEW_FIXES.md) · [REMOTE_MANIFEST.schema.json](../09_MODULE_FEDERATION/REMOTE_MANIFEST.schema.json) · [REMOTE_MANIFEST.schema_REV2.json](../09_MODULE_FEDERATION/REMOTE_MANIFEST.schema_REV2.json) · [REMOTE_REGISTRY.example.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.example.json) · [REMOTE_REGISTRY.example_REV2.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.example_REV2.json) · [REMOTE_REGISTRY.schema.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.schema.json) · [REMOTE_REGISTRY.schema_REV2.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.schema_REV2.json) |
-| 10_FRONTEND_ARCHITECTURE | [FRONTEND_ARCHITECTURE_REV2.md](../10_FRONTEND_ARCHITECTURE/FRONTEND_ARCHITECTURE_REV2.md) |
-| 11_BACKEND_ARCHITECTURE | [BACKEND_ARCHITECTURE_REV2.md](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE_REV2.md) · [LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md) · [LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md) |
-| 12_DATA_AND_DATABASE | [LEGACY_MERGE_DATABASE_REFERENCE.md](../12_DATA_AND_DATABASE/LEGACY_MERGE_DATABASE_REFERENCE.md) · [PHYSICAL_DESIGN_REV2.md](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN_REV2.md) |
-| 13_API_EVENTS_AND_INTEGRATIONS | [ACTION_TO_OPERATION_MAP.md](../13_API_EVENTS_AND_INTEGRATIONS/ACTION_TO_OPERATION_MAP.md) · [API_CATALOG_ADDENDUM.md](../13_API_EVENTS_AND_INTEGRATIONS/API_CATALOG_ADDENDUM.md) · [LEGACY_MERGE_API_CONTRACTS.md](../13_API_EVENTS_AND_INTEGRATIONS/LEGACY_MERGE_API_CONTRACTS.md) · [OBSERVED_REFERENCE_API_INVENTORY.csv](../13_API_EVENTS_AND_INTEGRATIONS/OBSERVED_REFERENCE_API_INVENTORY.csv) · [SSOT_INTERFACE_CONTRACT_CROSSWALK.csv](../13_API_EVENTS_AND_INTEGRATIONS/SSOT_INTERFACE_CONTRACT_CROSSWALK.csv) · [SSOT_SERVICE_CONTRACT_CROSSWALK.csv](../13_API_EVENTS_AND_INTEGRATIONS/SSOT_SERVICE_CONTRACT_CROSSWALK.csv) · [contracts/asyncapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/asyncapi.yaml) · [contracts/openapi.addendum.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/openapi.addendum.yaml) · [contracts/openapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/openapi.yaml) · [contracts/schemas/Application.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/Application.schema.json) · [contracts/schemas/EventEnvelope.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/EventEnvelope.schema.json) · [contracts/schemas/Evidence.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/Evidence.schema.json) · [contracts/schemas/EvidenceIssuer.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/EvidenceIssuer.schema.json) |
-| 14_SECURITY_PRIVACY_COMPLIANCE | [LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md) · [LEGACY_MERGE_SECURITY_CONTROLS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_SECURITY_CONTROLS.md) · [SECURITY_REV2.md](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_REV2.md) |
-| 15_RELIABILITY_AND_PERFORMANCE | [SLO_REV2.md](../15_RELIABILITY_AND_PERFORMANCE/SLO_REV2.md) |
-| 16_QA_AND_TESTING | [TEST_CATALOG_REV2.md](../16_QA_AND_TESTING/TEST_CATALOG_REV2.md) |
+| 10_FRONTEND_ARCHITECTURE | [FRONTEND_ARCHITECTURE.md#record-frontend-architecture-rev2](../10_FRONTEND_ARCHITECTURE/FRONTEND_ARCHITECTURE.md#record-frontend-architecture-rev2) |
+| 11_BACKEND_ARCHITECTURE | [BACKEND_ARCHITECTURE.md#record-backend-architecture-rev2](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md#record-backend-architecture-rev2) · [LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md) · [LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md) |
+| 12_DATA_AND_DATABASE | [LEGACY_MERGE_DATABASE_REFERENCE.md](../12_DATA_AND_DATABASE/LEGACY_MERGE_DATABASE_REFERENCE.md) · [PHYSICAL_DESIGN.md#record-physical-design-rev2](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md#record-physical-design-rev2) |
+| 13_API_EVENTS_AND_INTEGRATIONS | [ACTION_TO_OPERATION_MAP.md](../13_API_EVENTS_AND_INTEGRATIONS/ACTION_TO_OPERATION_MAP.md) · [API_CATALOG.md#record-api-catalog-addendum](../13_API_EVENTS_AND_INTEGRATIONS/API_CATALOG.md#record-api-catalog-addendum) · [LEGACY_MERGE_API_CONTRACTS.md](../13_API_EVENTS_AND_INTEGRATIONS/LEGACY_MERGE_API_CONTRACTS.md) · [OBSERVED_REFERENCE_API_INVENTORY.csv](../13_API_EVENTS_AND_INTEGRATIONS/OBSERVED_REFERENCE_API_INVENTORY.csv) · [SSOT_INTERFACE_CONTRACT_CROSSWALK.csv](../13_API_EVENTS_AND_INTEGRATIONS/SSOT_INTERFACE_CONTRACT_CROSSWALK.csv) · [SSOT_SERVICE_CONTRACT_CROSSWALK.csv](../13_API_EVENTS_AND_INTEGRATIONS/SSOT_SERVICE_CONTRACT_CROSSWALK.csv) · [contracts/asyncapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/asyncapi.yaml) · [contracts/openapi.addendum.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/openapi.addendum.yaml) · [contracts/openapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/openapi.yaml) · [contracts/schemas/Application.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/Application.schema.json) · [contracts/schemas/EventEnvelope.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/EventEnvelope.schema.json) · [contracts/schemas/Evidence.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/Evidence.schema.json) · [contracts/schemas/EvidenceIssuer.schema.json](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas/EvidenceIssuer.schema.json) |
+| 14_SECURITY_PRIVACY_COMPLIANCE | [LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md) · [LEGACY_MERGE_SECURITY_CONTROLS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_SECURITY_CONTROLS.md) · [SECURITY_ARCHITECTURE.md#record-security-rev2](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md#record-security-rev2) |
+| 15_RELIABILITY_AND_PERFORMANCE | [SLO_AND_PERFORMANCE_TARGETS.md#record-slo-rev2](../15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md#record-slo-rev2) |
+| 16_QA_AND_TESTING | [TEST_CATALOG.md#record-test-catalog-rev2](../16_QA_AND_TESTING/TEST_CATALOG.md#record-test-catalog-rev2) |
 | 17_DEVOPS_AND_INFRASTRUCTURE | [FRONTEND_DELIVERY_REVIEW_FIXES.md](../17_DEVOPS_AND_INFRASTRUCTURE/FRONTEND_DELIVERY_REVIEW_FIXES.md) |
 | 19_BUSINESS_AND_COMMERCIAL_OPERATIONS | [MARKETPLACE_MONEY_FLOW_ADR_PROPOSAL.md](../19_BUSINESS_AND_COMMERCIAL_OPERATIONS/MARKETPLACE_MONEY_FLOW_ADR_PROPOSAL.md) |
 | 21_COST_AND_FINOPS | [COST_ENVELOPE.md](../21_COST_AND_FINOPS/COST_ENVELOPE.md) |
-| 22_IMPLEMENTATION_ROADMAP | [ROADMAP_REV2.md](../22_IMPLEMENTATION_ROADMAP/ROADMAP_REV2.md) |
-| 24_RISKS_AND_DECISIONS | [GOVERNANCE_REGISTRATIONS_REV2.md](../24_RISKS_AND_DECISIONS/GOVERNANCE_REGISTRATIONS_REV2.md) · [RISK_REGISTER_REV2.md](../24_RISKS_AND_DECISIONS/RISK_REGISTER_REV2.md) |
+| 22_IMPLEMENTATION_ROADMAP | [ROADMAP.md#record-roadmap-rev2](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#record-roadmap-rev2) |
+| 24_RISKS_AND_DECISIONS | [ADR_REGISTER.md#record-governance-registrations-rev2](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md#record-governance-registrations-rev2) · [RISK_REGISTER.md#record-risk-register-rev2](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md#record-risk-register-rev2) |
 | 27_INDEPENDENT_REVIEWS | [REVIEW_FIX_STATUS.md](../27_INDEPENDENT_REVIEWS/REVIEW_FIX_STATUS.md) · [REVIEW_RESOLUTION_DECISIONS.md](../27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md) · [SECOND_REVIEW_REPORT.md](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md) |
 | 28_TRACEABILITY_AND_COVERAGE | [ADR_015_PERSISTENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ADR_015_PERSISTENCE_CROSSWALK.csv) · [ARCHITECTURE_DURABILITY_REPORT_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ARCHITECTURE_DURABILITY_REPORT_CROSSWALK.csv) · [AUDIT_DOCUMENTATION_CROSSCHECK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_DOCUMENTATION_CROSSCHECK.csv) · [AUDIT_EXTERNAL_ISSUE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_EXTERNAL_ISSUE_EVIDENCE_CROSSWALK.csv) · [AUDIT_INVENTORY_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_INVENTORY_EVIDENCE_CROSSWALK.csv) · [AUDIT_MIGRATION_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_MIGRATION_EVIDENCE_CROSSWALK.csv) · [AUDIT_PROBE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_PROBE_EVIDENCE_CROSSWALK.csv) · [AUDIT_ROUTE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_ROUTE_EVIDENCE_CROSSWALK.csv) · [AUDIT_TEST_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_TEST_EVIDENCE_CROSSWALK.csv) · [COVERAGE_MATRICES.md](../28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md) · [FEATURE_REGISTRY_METADATA_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/FEATURE_REGISTRY_METADATA_CROSSWALK.csv) · [LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv) · [LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv) · [LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md](../28_TRACEABILITY_AND_COVERAGE/LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md) · [OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.csv) · [PHASE_GATE_GOVERNANCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.csv) · [ROUTE_AUTHORIZATION_FINDING_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ROUTE_AUTHORIZATION_FINDING_CROSSWALK.csv) · [UX_PATTERN_SOURCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/UX_PATTERN_SOURCE_CROSSWALK.csv) |
 | 30_PRIOR_IMPLEMENTATION_REFERENCE | [01-PRODUCT-REQUIREMENTS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/01-PRODUCT-REQUIREMENTS.md) · [02-ARCHITECTURE.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/02-ARCHITECTURE.md) · [03-DEVELOPMENT-GUIDE.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/03-DEVELOPMENT-GUIDE.md) · [04-FEATURES-AND-WORKFLOWS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md) · [05-DATABASE-AND-API.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/05-DATABASE-AND-API.md) · [06-SECURITY-AND-INTEGRATIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/06-SECURITY-AND-INTEGRATIONS.md) · [07-TESTING-AND-OPERATIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/07-TESTING-AND-OPERATIONS.md) · [08-ROADMAP-AND-DECISIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md) |
 | 31_LEGACY_ARCHIVE | [README.md](../31_LEGACY_ARCHIVE/README.md) · [docs/reports/AUDIT_EVIDENCE_2026-10-21.json](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json) |
 | (root) | [README.md](../README.md) (root of this document set) |
+
+
+---
+
+<a id="record-master-index-v9-addendum"></a>
+## Preserved source record: MASTER_INDEX_V9_ADDENDUM
+
+> Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM.md -->
+<a id="record-master-index-v9-addendum--master-index--v9-addendum"></a>
+# Master Index — V9 Addendum
+
+Additive companion to [MASTER_INDEX](MASTER_INDEX.md) (left unchanged). Lists control documents added under the V9 preservation rules and the review artifacts not in the original index.
+
+| Document | Purpose |
+|---|---|
+| [SOURCE_DOCUMENT_INVENTORY](SOURCE_DOCUMENT_INVENTORY.md) | Verified preservation checks; where inventory fields live |
+| [KNOWLEDGE_PRESERVATION_MANIFEST](KNOWLEDGE_PRESERVATION_MANIFEST.md) / [.csv](KNOWLEDGE_PRESERVATION_MANIFEST.csv) / [baseline](PROTECTED_DOCUMENT_TREE_BASELINE.csv) | Source records and protected-tree baseline |
+| [INFORMATION_RECONCILIATION_MATRIX](INFORMATION_RECONCILIATION_MATRIX.md) | Source-to-target crosswalk status |
+| [CLEANUP_CANDIDATES](CLEANUP_CANDIDATES.md) | 0 eligible; protections |
+| [EXECUTION_LEDGER_V9_ADDENDUM](EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum) | Current state, disclosure of earlier in-place edits, next actions |
+| [CONSENT_SCOPE_CATALOGUE](CONSENT_SCOPE_CATALOGUE.md) | Canonical consent scopes |
+| [REVIEW_RESOLUTION_DECISIONS](../27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md) | Binding decisions for review findings REVW-06..45 |
+| [FINAL_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md) | Independent review: 45 findings |
+
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM.md -->
+
+
+---
+
+<a id="record-master-index-v9-addendum-2"></a>
+## Preserved source record: MASTER_INDEX_V9_ADDENDUM_2
+
+> Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_2.md -->
+<a id="record-master-index-v9-addendum-2--master-index--v9-addendum-2-review-fix-revisions"></a>
+# Master Index — V9 Addendum 2 (review-fix revisions)
+
+Additive; follows [MASTER_INDEX_V9_ADDENDUM](MASTER_INDEX.md#record-master-index-v9-addendum). Revision files below supersede nothing destructively: each states which original sections it supersedes as a relationship; originals remain in place. Status of all: Proposed / Draft.
+
+| Area | Revision files |
+|---|---|
+| Review tracking | [REVIEW_FIX_STATUS](../27_INDEPENDENT_REVIEWS/REVIEW_FIX_STATUS.md) · [GOVERNANCE_REGISTRATIONS_REV2](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md#record-governance-registrations-rev2) |
+| 01–06 | [Vision goals](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2) · [Permission matrix](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md#record-permission-matrix-rev2) · [Capability phases](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2) · [AC additions](../05_FEATURE_SPECIFICATIONS/MICRO_FEATURE_SPECS.md#record-spec-acceptance-additions-rev2) · [Rules](../06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md#record-business-rules-registry-rev2) · [Invariants](../06_BUSINESS_PROCESSES/PRODUCT_INVARIANT_REGISTRY.md#record-product-invariant-registry-rev2) · [Decision tables](../06_BUSINESS_PROCESSES/DECISION_TABLES.md#record-decision-tables-rev2) · [State machines](../06_BUSINESS_PROCESSES/STATE_MACHINES.md#record-state-machines-rev2) |
+| 07–10 | [UX fixes](../07_UI_UX_AND_DESIGN_SYSTEM/UX_REVIEW_FIXES.md) · [Offline REV2](../08_PWA_AND_MOBILE/OFFLINE_AND_SYNC_DESIGN.md#record-offline-and-sync-design-rev2) · [PWA fixes](../08_PWA_AND_MOBILE/PWA_MOBILE_REVIEW_FIXES.md) · [Federation fixes](../09_MODULE_FEDERATION/FEDERATION_REVIEW_FIXES.md) · [Frontend REV2](../10_FRONTEND_ARCHITECTURE/FRONTEND_ARCHITECTURE.md#record-frontend-architecture-rev2) · `*_REV2.json` schemas/example in 09 |
+| 11–14 | [Backend REV2](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md#record-backend-architecture-rev2) · [Physical design REV2](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md#record-physical-design-rev2) · [Action→operation map](../13_API_EVENTS_AND_INTEGRATIONS/ACTION_TO_OPERATION_MAP.md) · [API catalog addendum](../13_API_EVENTS_AND_INTEGRATIONS/API_CATALOG.md#record-api-catalog-addendum) · `contracts/openapi.addendum.yaml` · [Security REV2](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md#record-security-rev2) |
+| 15–22 | [SLO REV2](../15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md#record-slo-rev2) · [Test catalog REV2](../16_QA_AND_TESTING/TEST_CATALOG.md#record-test-catalog-rev2) · [Frontend delivery fixes](../17_DEVOPS_AND_INFRASTRUCTURE/FRONTEND_DELIVERY_REVIEW_FIXES.md) · [Marketplace money flow](../19_BUSINESS_AND_COMMERCIAL_OPERATIONS/MARKETPLACE_MONEY_FLOW_ADR_PROPOSAL.md) · [Cost envelope](../21_COST_AND_FINOPS/COST_ENVELOPE.md) · [Roadmap REV2](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#record-roadmap-rev2) |
+| 24, 28 | [Risk register REV2](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md#record-risk-register-rev2) · [Coverage matrices](../28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md) |
+
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_2.md -->
+
+
+---
+
+<a id="record-master-index-v9-addendum-3"></a>
+## Preserved source record: MASTER_INDEX_V9_ADDENDUM_3
+
+> Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_3.md -->
+<a id="record-master-index-v9-addendum-3--master-index--v9-addendum-3-second-independent-review"></a>
+# Master Index — V9 Addendum 3 (second independent review)
+
+Additive; follows [MASTER_INDEX_V9_ADDENDUM_2](MASTER_INDEX.md#record-master-index-v9-addendum-2).
+
+| Document | Note |
+|---|---|
+| [SECOND_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md) | Fresh review of originals + REV2 files: 44 findings (0 Critical, 7 High, 23 Medium, 14 Low); of 42 fix claims checked, 33 confirmed, 9 partial, 0 not found. The reviewer reported its reasoning effort as 30, not the requested xhigh, so the effort setting is not verified as applied. Redocly, AsyncAPI, Mermaid and SQL were not run by the reviewer. |
+
+Items the reviewer flagged in this control layer (not yet fixed): no original, README or MASTER_INDEX links to any REV2 file (only the addenda do); `REVIEW_FIX_STATUS.md` says `FINAL_REVIEW_REPORT.md` is unchanged but the reviewer found it edited (v1.5); the manifest CSV has 132 rows versus the 204 stated in its narrative.
+
+
+<a id="record-master-index-v9-addendum-3--legacy-merge-gap-closure-ledger-d-2026-10-27"></a>
+## Legacy merge gap closure (ledger D, 2026-10-27)
+
+| Document | Note |
+|---|---|
+| [LEGACY_MERGE_LEDGER_D](LEGACY_MERGE_LEDGER_D.md) | Records the closure of the preservation audit's gaps: 36 missing ids, 24 partial archive files, 8 partial JSON members. Remaining missing ids: 0. |
+| [LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT](../28_TRACEABILITY_AND_COVERAGE/LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md) | Prior-attempt 173-feature traceability matrix, quoted in full. |
+| [LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv), [LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv) | Per-row judgements exported from the archived evidence JSON. |
+
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_3.md -->
