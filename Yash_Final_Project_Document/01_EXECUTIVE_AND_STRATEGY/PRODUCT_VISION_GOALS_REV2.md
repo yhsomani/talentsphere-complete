@@ -2,6 +2,8 @@
 
 Doc ID: STR-01-R2 · Owner: CPO · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-39 · Relates: STR-01 (`PRODUCT_VISION_AND_BUSINESS_MODEL.md` section 3), MET-013, MET-014, BR-T077, BR-T126, OPS-SLO, OPEN-05, OPEN-08, OPEN-37
 
+> **Folded into `PRODUCT_VISION_AND_BUSINESS_MODEL.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (no original file was edited).** This file **supersedes, once accepted**, the "Measure" column of the GOAL table in section 3 of `PRODUCT_VISION_AND_BUSINESS_MODEL.md` (and the "target 100% by design" wording of MET-013 in the analytics catalogue, which is outside this review's folders). The goal statements themselves, the vision, segments and business model stand. Folder 01 was not assigned to this fix pass's owner list; this file is written there because REVW-39 targets it, and the folder owner should confirm. Governance should link it from `00_CONTROL_CENTRE/MASTER_INDEX.md`.
 
 Reading rule for this table: a **target** is a value the product aims for and measures. It is not a statement that a legal, regulatory or audit standard is met, and it is not a claim that any feature exists. A target without a value is marked **[OPEN]** with an owner; it becomes a commitment only after the baseline of WP-LOADBASE or the pilot has produced a number.

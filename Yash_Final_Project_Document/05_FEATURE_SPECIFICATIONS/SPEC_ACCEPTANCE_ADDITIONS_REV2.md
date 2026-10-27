@@ -2,6 +2,8 @@
 
 Doc ID: SPEC-00-R2 · Owner: Product Director (Functional Spec) · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-12, REVW-17 (P0 feature gaps), REVW-18, REVW-20, REVW-21, REVW-22, REVW-26, REVW-27, REVW-29, REVW-38, REVW-43 (acceptance and spec-text parts) · Relates: SPEC-00 and SPEC-G1 to G5, MICRO-FEAT, QA-AC, BR-REG-R2, INV-REG-R2, SM-00-R2, DT-00-R2
 
+> **Folded into `MICRO_FEATURE_SPECS.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (no original file was edited).** This file **extends** the long-form specifications `SPEC_G1…G5` and `MICRO_FEATURE_SPECS.md` with acceptance criteria and with spec-text deltas. It supersedes nothing. The spec-text deltas in section 3 name the original passages they would replace **once accepted**. Criteria are numbered so they cannot collide with registered ones: for features that already have criteria the new numbers start at 51; for features with none they start at 01. The test catalogue is owned by QA; this file proposes no TEST ids. Governance should link this file from `05_FEATURE_SPECIFICATIONS/README.md` (index) and `00_CONTROL_CENTRE/MASTER_INDEX.md`.
 
 This file registers **95 new criteria** (counted by script over rows that begin `| AC-DD-NN-NN |`; no id collides with a criterion registered in `05_*` or `16_*`). All content **[TARGET]**; nothing here claims anything is built. Table form is that of the long-form specs: `| AC id | Given | When | Then | Category |`.

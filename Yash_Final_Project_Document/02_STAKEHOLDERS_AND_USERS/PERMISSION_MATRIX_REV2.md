@@ -2,6 +2,8 @@
 
 Doc ID: USR-01-R2 · Owner: Product Director + Security Architect · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-28 (and the role parts of REVW-01 residue, REVW-12) · Relates: USR-01 (`STAKEHOLDERS_ROLES_PERMISSIONS.md`), DT-01, BR-T100, BR-T105, INV-T41, ID_REGISTRY roles, OpenAPI `Grant.role`, FEAT-02-03, FEAT-02-06, SM-DSR
 
+> **Folded into `STAKEHOLDERS_ROLES_PERMISSIONS.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (no original file was edited).** This file **supersedes, once accepted**, USR-01 section 3 (role model), the table in section 4 (the matrix), and the "Org members & roles" and "Data-rights requests" rows of that table, **only where they differ from the text below**. The normative note of USR-01 stands: DT-01, BR-T100, BR-T105 and INV-T41 win over this table, and `packages/policy` holds the matrix as data derived from DT-01. Personas and USR-01 sections 1, 2, 5 and 6 stand. Governance should link this file from `00_CONTROL_CENTRE/MASTER_INDEX.md`. All content **[TARGET]**.
 
 ## 1. Role model: one mapping from grants to matrix columns

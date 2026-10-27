@@ -2,6 +2,8 @@
 
 Doc ID: STR-01 · Owner: CPO · Version 1.0 · Status: Under Review · Relates: GOAL-01…GOAL-08, ADR-T01
 
+> **Revision 2 folded in (2026-10-27)** from `PRODUCT_VISION_GOALS_REV2.md`: appended under "Revision 2 additions"; where it differs from text above, the appended text governs. Status unchanged; proposals still need owner/ARB ratification.
+
 ## 1. Problem (first principles)
 Hiring and career progression run on **claims** (résumés, profiles, certificates) that are expensive to check. Candidates cannot cheaply prove skill or work history; recruiters cannot cheaply trust it; learners get credentials that do not translate to outcomes; institutions cannot show what graduates can do. The cost sits in screening time, bad hires, and unfair filtering.
 
@@ -60,3 +62,22 @@ Activation (first evidence item within 7 days), evidence quality, qualified appl
 ## 9. Strategic risks (excerpt; full register in 24_*)
 Cold-start (two-sided marketplace), referee non-response, evidence gaming, AI cost overrun, regulatory exposure for automated employment decisions, over-scoped feature surface.
 Mitigations: seed with institutions, tokenised referee UX, anomaly≠guilt human review, budgets, human-in-the-loop, ADR-T01 scope discipline.
+
+# Revision 2 additions (folded 2026-10-27 from `PRODUCT_VISION_GOALS_REV2.md`)
+
+## Consequential wording changes
+
+| Where | Old wording | New wording |
+|---|---|---|
+| GOAL-03 | "100% of matches show rationale; adverse-impact audit passes quarterly" | Explanation coverage target 100% as a design target; a quarterly review is held and its result recorded; threshold set with counsel; "passes" retired |
+| GOAL-06 | "zero cross-tenant incidents; WCAG 2.2 AA audit pass" | Zero confirmed exposures as a target and outcome measure; target conformance to WCAG 2.2 AA with an independent audit pending (OPEN-37) |
+| MET-013 | "100% by design" | "Design target 100%; measures coverage, not compliance" (owner of folder 20 to adopt) |
+| STR-01 / GOAL-02 | "shortlist-to-interview rate" | "share of applications reaching `interviewing`" (the advisory view is "Suggested order", never "shortlist", BR-T072) |
+
+## Open items
+
+| Item | Question | Owner |
+|---|---|---|
+| Active-candidate definition | Window and activity rule for GOAL-01 | Trust PM |
+| Review threshold for GOAL-03(b) | Value and method, with counsel (OPEN-08) | Responsible-AI Lead |
+| Pilot baselines | When the Phase 1 pilot produces first values for GOAL-01, 02, 04, 05 | Program Director |

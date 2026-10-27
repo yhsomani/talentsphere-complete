@@ -2,6 +2,8 @@
 
 Doc ID: PCAP-01-R2 · Owner: Product Director · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-10, REVW-34 (phases), REVW-36 (counts), REVW-17 (feature/AC gap list); proposes the resolution of OPEN-42 · Relates: PCAP-01, RDM-01 and RDM-01-R2, BR-REG-R2
 
+> **Folded into `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (no original file was edited).** This file **supersedes, once accepted**, the "Ph" column of the feature tables, the "Counts" section (section 3) and the "Phase-1 spine" item of `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` (PCAP-01) **where they differ from the tables below**. All other content of PCAP-01 stands. The roadmap `22_IMPLEMENTATION_ROADMAP/ROADMAP.md` stays the authority for phases (REVW-10): a feature has the phase of the first work package that delivers it. This file records that crosswalk, which PCAP-01 flags as open (OPEN-42). Governance should link it from `00_CONTROL_CENTRE/MASTER_INDEX.md`.
 
 Nothing here claims any feature is built. Phase tags are product sequencing, not delivery commitments. Phase 1 is the pre-GA pilot of RDM-01 section 5.2.
