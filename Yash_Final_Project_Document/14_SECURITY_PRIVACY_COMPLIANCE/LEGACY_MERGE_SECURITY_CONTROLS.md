@@ -127,3 +127,66 @@ Suspended or banned accounts were confined to viewing their reports, appealing, 
 | L-B14-05 | Employer-domain verification rule (legacy CF-11) | Product Director + Security Architect, OPEN-48 |
 | L-B14-06 | Independent-endorsement-only scoring rule as target BR-T | Product Director, OPEN-43 |
 | L-B14-07 | Gateway step order vs SEC-02/BE-01 ordering; incident sequence vs SUP-INC | Security Architect, SRE Lead |
+
+
+<!-- ledger-D D-07 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/quality/SECURITY.md (gap closure D-07)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: 4 external guidance URLs (lines 37, 330, 340), prior test file names `tests/pg/billing.test.ts`, `tests/unit/stripe-billing-domain.test.ts`, the `tests/security/api-security.test.ts` describe block (line 157), and `apps/worker/src/email/brevo.ts` (line 243).
+
+~~~~text
+L37: RLS is required on exposed tables and should be tested with allow/deny assertions. Supabase's current guidance also distinguishes table grants from RLS policies, so both must be designed together. [Supabase Data API security](https://supabase.com/docs/guides/api/securing-your-api)
+[...]
+L155: - Generate a key with:
+L156:   `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
+L157: - Regression coverage: `tests/security/api-security.test.ts`, describe block
+L158:   *"SEC: Session signing key is not a committed constant"*, asserts that a token signed
+L159:   with the former hardcoded literal and with other guessed secrets is rejected.
+[...]
+L243: - **Delivery:** development uses the dev outbox; deployed environments support the opt-in Brevo adapter in `apps/worker/src/email/brevo.ts`. Live mailbox delivery and sender approval remain unverified. Without configured delivery, creation endpoints fail closed. Queue idempotency does not establish exactly-once handler execution; see audit D-02.
+[...]
+L306: Not covered: `scripts/check-client-secrets.mjs` was not extended with Stripe key patterns
+L307: (protected file; ask first). Dispute/refund events are acknowledged but not acted on.
+L308: Coverage: `tests/unit/stripe-billing-domain.test.ts`, `tests/integration/stripe-billing.test.ts`,
+L309: `tests/pg/billing.test.ts`, `tests/unit/production-config.test.ts`.
+L310: 
+[...]
+L330: Use OWASP ASVS 5.0 and OWASP API Security Top 10 as the verification frameworks. [OWASP ASVS](https://asvs.owasp.org/) and [OWASP security projects](https://devguide.owasp.org/en/02-foundations/05-top-ten/)
+[...]
+L340: Implement privacy controls against applicable legal requirements. For India, map the program to the DPDP Act/Rules and their staged commencement timeline; do not claim legal compliance without implementation evidence. [MeitY rules, corrigendum and enforcement documents](https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa)
+~~~~
+
+
+<!-- ledger-D D-09a -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/ARCHITECTURE_DURABILITY_REPORT.md (gap closure D-09a)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: CWE-328 / CWE-916 (SEC-01, line 142) and CWE-613 (SEC-02, line 189) with the full vulnerability text.
+
+| Prior-attempt finding | Severity | CWE | Prior-attempt remedy (target requirement) |
+|---|---|---|---|
+| SEC-01 Insecure challenge hash: `sha256Hex(`${id}:${code}`)` with public work-history UUID and 10^6 code space, no server pepper | High | CWE-328, CWE-916 (hash weakness; insufficient computational effort / no keyed hash) | Key the hash with a server secret: `crypto.createHmac('sha256', env.TOKEN_SECRET)` |
+| SEC-02 Referee voucher tokens never expire (no `expiresAt`) | Medium | CWE-613 (insufficient session/credential expiration) | Add `expires_at TIMESTAMPTZ` with a 30-day TTL and check on lookup and submission |
+
+CWE titles in the CWE column are the standard MITRE names as understood by the merger; the source gives only the ids. Target: both remedies are requirements for this project.
+
+~~~~text
+L141: #### Vulnerability SEC-01: Insecure Challenge Hash (Missing HMAC Key)
+L142: - **Severity**: **High** (CWE-328 / CWE-916)
+L143: - **Finding**: The challenge hash is computed as:
+L144:   ```typescript
+L145:   sha256Hex(`${id}:${code}`) // where id is the public workHistoryId UUID
+L146:   ```
+L147: - **Mechanism**: The work history ID `id` is a known public UUID exposed in API requests and profile graphs. The code space is only $10^6$ combinations ($000000$ to $999999$). There is **no secret server pepper or HMAC key** used in hashing. If an attacker gains read access to `public.work_history_email_challenges` (via SQL injection, database snapshot, or read replica compromise), they can precompute a 1,000,000-entry rainbow table for that specific UUID in less than 50 milliseconds using standard GPU SHA-256 acceleration, completely bypassing mailbox control.
+L148: - **Remediation**: Hash with `crypto.createHmac('sha256', env.TOKEN_SECRET).update(`${id}:${code}`).digest('hex')`.
+[...]
+L188: #### Vulnerability SEC-02: Missing Token Expiration (Indefinite TTL)
+L189: - **Severity**: **Medium** (CWE-613)
+L190: - **Finding**: Referee voucher tokens have **no expiration timestamp**.
+L191: - **Mechanism**: `EmploymentReference` stores `requestedAt` and `submittedAt`, but lacks an `expiresAt` column. Neither domain logic nor API checks token age. An invitation sent to an employee remains valid months or years later, even if the referee leaves the company, changes roles, or becomes adversarial.
+L192: - **Remediation**: Add `expires_at TIMESTAMPTZ` (30 days TTL) to `employment_references` and validate `Date.now() < Date.parse(reference.expiresAt)` upon lookup and submission.
+L193: 
+~~~~

@@ -283,3 +283,210 @@ copy remains in `.agents/teamwork/orchestrator_1/PROJECT.md`.
 | L-B17-02 | Whether to adopt Oracle single-VM Compose as dev/staging (OPS-DEP option A) given the unexecuted prior config | OPEN-14 |
 | L-B17-03 | Preflight modes (schema, operational, pre-import) as RG sub-gates | Release Engineering |
 | L-B17-04 | Strict boolean parsing for all feature flags | Backend (config package) |
+
+
+<!-- ledger-D D-17 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/MAINTENANCE_AUDIT_2026-10-21.md (gap closure D-17)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: the 28 missing test-case ids TC-04..TC-37 (all of TC-01..TC-38 with results and timings are quoted in the 16_QA section), ~113 code tokens (flags `--max-depth`, `--approve-cleanup`, ecosystem markers `build.gradle`, `package-lock.json`, `.nuxt`), detected-projects table, per-candidate size tables, menu numbering, per-test timings.
+
+~~~~text
+L18: ## Detected projects and installation boundary
+L19: 
+L20: There are ten `package.json` files: one workspace root and nine members. `pnpm-workspace.yaml` includes `apps/*` and `packages/*`; the root `pnpm-lock.yaml` records those importers. The declared and locally available manager is `pnpm@11.7.0`. Local Node is v24.19.0; CI and Docker use Node 24. No separate nested installation boundary or competing lockfile was found outside installed dependencies.
+L21: 
+L22: | Project | Technology / purpose | Shared dependencies | Generated output observed |
+L23: |---|---|---|---|
+L24: | `.` | pnpm workspace; Vitest, Playwright, Prettier, TypeScript | Installation owner for all members | Root `node_modules`, `test-results` |
+L25: | `apps/api` | TypeScript, Node, Fastify HTTP API | config, contracts, domain | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L26: | `apps/web` | TypeScript/TSX, React, React Router, Vite | ui | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L27: | `apps/worker` | TypeScript, Node, PostgreSQL worker | domain, observability | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L28: | `packages/config` | TypeScript, Zod environment validation | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L29: | `packages/contracts` | TypeScript, Zod API contracts | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L30: | `packages/domain` | TypeScript domain logic | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L31: | `packages/observability` | TypeScript, Pino | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L32: | `packages/testing` | TypeScript test helpers | domain | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L33: | `packages/ui` | TypeScript shared UI package | Workspace member | `dist`, `tsconfig.tsbuildinfo`, local `node_modules` |
+L34: 
+L35: Each member's manifest and `tsconfig.json` were found. All member TypeScript configs emit to `./dist`; composite compilation writes incremental metadata. Vite also targets `apps/web/dist`. Root TypeScript references list all nine members. Root build scripts compile shared packages before applications.
+L36: 
+L37: Other languages and infrastructure actually present:
+L38: 
+L39: - JavaScript/MJS: database migration/seed tooling, release checks, icon generation, and E2E server bootstrap.
+L40: - Bash: `deploy/oracle/backup.sh` and `deploy/oracle/verify-restore.sh`.
+L41: - SQL: PostgreSQL migrations and seed data under `supabase`; not cleanup candidates.
+L42: - Python: `.audit/shoot.py`, a Playwright screenshot helper. No `pyproject.toml`, requirements file, virtual environment, or Python lockfile was found. Report it as an auxiliary script with unmanaged dependencies; do not install Python or infer a Python project.
+L43: - Docker/Compose/Caddy and GitHub Actions: container build, staging deployment configuration, and CI checks.
+L44: - HTML/CSS, webmanifest, fonts, icons, and screenshots are source/static/evidence assets, not automatically regenerable build output.
+L45: - No Java/Kotlin, .NET, PHP, Ruby, Go, Rust, C/C++, Android, or iOS project manifest was found. The future scanner should recognize their manifest names and report unsupported projects instead of guessing cleanup or install commands.
+L46: 
+L47: ## Cleanup inventory and classification
+L48: 
+L49: Sizes below are approximate `du -sk` readings in KiB at discovery time, not promised reclaimable space. Linked/shared allocations and concurrent development can change them. No candidate was deleted. A regenerable classification is permission to propose a target, not authorization to delete it.
+L50: 
+L51: | Candidate | Category | Approx. KiB | Classification and evidence |
+L52: |---|---|---:|---|
+L53: | `apps/api/dist` | Build | 1164 | Regenerable candidate: configured TypeScript outDir |
+L54: | `apps/web/dist` | Build | 910 | Regenerable candidate: TypeScript and Vite outDir |
+L55: | `apps/worker/dist` | Build | 54 | Regenerable candidate: configured TypeScript outDir |
+L56: | `packages/config/dist` | Build | 40 | Regenerable candidate: configured TypeScript outDir |
+L57: | `packages/contracts/dist` | Build | 268 | Regenerable candidate: configured TypeScript outDir |
+L58: | `packages/domain/dist` | Build | 1330 | Regenerable candidate: configured TypeScript outDir |
+L59: | `packages/observability/dist` | Build | 19 | Regenerable candidate: configured TypeScript outDir |
+L60: | `packages/testing/dist` | Build | 18 | Regenerable candidate: configured TypeScript outDir |
+L61: | `packages/ui/dist` | Build | 21 | Regenerable candidate: configured TypeScript outDir |
+L62: | Nine member `tsconfig.tsbuildinfo` files | Build metadata | 480 combined | Regenerable candidate: composite TypeScript metadata; must clean with output to avoid stale incremental state |
+L63: | Root plus nine member `node_modules` directories | Dependencies | Root 150632; member readings 30–7177 each | Workspace-owned installations: one root frozen restore, not ten installs; linked/shared allocation is not additive |
+L64: | `test-results` | Test output | 11 | Regenerable candidate: Playwright/performance output; warn that diagnostic evidence is lost |
+L65: | `.audit` | Mixed source and evidence | 2528 | Prohibited as a cleanup directory: tracked Python source and baseline screenshots |
+L66: | `.playwright-cli` | Browser evidence | 178 | Preserve: tracked recordings and current-session evidence |
+L67: | `graphify-out/cache` | Tool cache | 764 | Review only: tracked files exist inside despite ignore pattern; no blanket deletion |
+L68: | `graphify-out` excluding cache | Analysis artifacts | Not measured | Review only: tracked reports, graphs, manifests and tool state |
+L69: | `supabase/.temp` | Tool state | 0 | Review only; no verified regeneration contract |
+L70: | `.reticle` and `apps/web/.reticle` | Verification state | Not measured | Preserve recordings, intent, contracts and cloud configuration |
+L71: | `TalentSphere` | Obsidian vault | Not measured | Protected user data, including `.obsidian-mcp` transactions, locks and trash |
+L72: | `BRAIN` | Project memory | Not measured | Protected documentation and execution history |
+L73: | `private-backups` when present | Database backups | Not measured | Always protected; backup scripts may also use an external BACKUP_DIR |
+L74: 
+L75: Git inspection found no tracked `dist` output, `*.tsbuildinfo`, or `test-results` content. The maintenance tool must repeat provenance checks immediately before execution and reject targets containing tracked or staged files, nested repositories, essential data, or symlinks. Ignore rules alone are insufficient evidence of safety.
+L76: 
+L77: Source-adjacent generated JavaScript, declarations, or map files must not be removed by extension alone. Familiar names such as `build`, `dist`, `cache`, `target`, or `vendor` are review-only without a demonstrated project-specific output contract.
+L78: 
+[...]
+L99: Compose owns persistent `db_data`, `caddy_data`, and `caddy_config` volumes. These are never local cleanup targets. `.env*`, key material, database dumps, package manifests, lockfiles, configuration, source, migrations and static/public assets must survive every routine operation.
+[...]
+L105: One root `project-maintenance.sh` contains the reusable Bash functions and interactive menu requested in the brief (scan, build cleanup, dependency removal, cache cleanup, install, clean/reinstall, full maintenance/validation, individual selection, preview, export, exit). The same implementation exposes `--root PATH`, `--scan`, `--dry-run`, and explicit category/check selectors for fixture tests and automation. No shell configuration is sourced or evaluated.
+[...]
+L145: Run `bash -n` and ShellCheck when available, then fixture tests. Apply `chmod +x project-maintenance.sh` without staging unrelated changes. Perform only read-only `--scan` and `--dry-run` against the real repository and preserve output for review. No actual repository cleanup or reinstall is authorized by this implementation request. Native macOS/Linux behavior needs evidence or must remain a stated limitation when verification is limited to Git Bash on Windows.
+[...]
+L172: - [`../engineering/PROJECT_MAINTENANCE.md`](../engineering/PROJECT_MAINTENANCE.md): launch commands, selection flags, supported technology/configuration dialects, recovery, reporting, exit codes and platform limitations.
+L173: - `../superpowers/plans/2026-10-21-project-maintenance.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history): implementation plan based on the approved design.
+[...]
+L179: | Test-first implementation | Initial fixture invocation failed with `requested project-maintenance.sh is missing`; later safety findings were reproduced in disposable fixtures before fixes |
+L180: | Bash syntax | `bash -n project-maintenance.sh` and `bash -n scripts/tests/project-maintenance.test.sh` exit 0 |
+L181: | Executable script | `chmod +x` applied; `test -x project-maintenance.sh` passed in Git Bash |
+L182: | Fixture safety and behavior | Final fixed-content run: 74 assertions, zero failures, exit 0; raw stdout captured in `MAINTENANCE_FIXTURE_TESTS_2026-10-21.log` |
+L183: | Real recursive scan | `--scan` exit 0; ten Node manifests, nine members and one installation owner; raw stdout captured in `MAINTENANCE_SCAN_2026-10-21.log` |
+L184: | Real full preview | `--dry-run --operation full` exit 0; 29 proposed removal targets and 15 proposed commands; raw stdout captured in `MAINTENANCE_DRY_RUN_2026-10-21.log` |
+[...]
+L188: | Native symlink fixtures | Explicitly skipped: this host cannot create native symlinks with the current identity; ordinary Git Bash `ln -s` can silently copy instead |
+[...]
+L192: The final real scan and dry-run were repeated after the safety fixes and both exited 0. No root `maintenance-reports` directory or maintenance lock was created by these read-only invocations. A preceding expanded test run had one exit-code assertion failure while implementation edits were still occurring; that run was not treated as passing. The script and fixture source were then held fixed for a complete rerun, which passed all 74 assertions. All actual application build/type/test commands in the dry-run remain proposals, not executed validation results.
+[...]
+L198: A before/after hash/size/mtime comparison sampled 55 protected existing files. It detected concurrent changes in `apps/web/tsconfig.tsbuildinfo`, `apps/web/vite.audit.config.ts`, and `playwright.audit.config.ts` while other work was active. This task only invoked the real maintenance script with scan/dry-run flags; it did not write those paths. The comparison therefore cannot be cited as proof that the entire shared checkout stayed unchanged. Fixture fingerprints and the implementation's separate read-only paths provide the maintenance-specific evidence; other agents' staged/committed work was left untouched.
+[...]
+L200: Reports produced by the script are timestamped private logs in an excluded `maintenance-reports` directory after confirmation. The raw verification stdout files beside this document are separate audit artifacts captured by the host and may be ignored by the repository's existing `*.log` rule. No credentials or raw package-manager output are stored in them.
+[...]
+L215: ## Archived Bash usage reference
+L216: 
+L217: The following preserves the unique usage/portability details formerly in the engineering guide. It is historical; the named Bash implementation is absent.
+L218: 
+L219: ### Archived Bash guide
+L220: 
+L221: > **Current checkout correction (2026-10-21, `a771a87b`):** `project-maintenance.sh` and `scripts/tests/project-maintenance.test.sh` are absent from both the working tree and tracked-file inventory. Commands and implementation results below are historical/proposed material, not runnable instructions or a verified deliverable in this checkout. Restoring a maintenance tool that changes build files requires explicit authorization under AGENTS.md; this documentation audit does not restore it.
+L222: 
+L223: 
+L224: Run from the repository root in Bash:
+L225: 
+L226: ```bash
+L227: ./project-maintenance.sh
+L228: ```
+L229: 
+L230: If the executable bit was not preserved by the checkout:
+L231: 
+L232: ```bash
+L233: chmod +x project-maintenance.sh
+L234: ./project-maintenance.sh
+L235: ```
+L236: 
+L237: The script opens a menu for scanning, build cleanup, dependency removal, cache cleanup, installation, combined maintenance, individual project selection, dry-run previews and report export. Menu option 11 deletes all recursively discovered *verified* build artifacts and caches; menu option 12 installs frozen dependencies and rebuilds all supported projects. Choosing a mutation shows the exact targets and commands, validates prerequisites, then requires the exact confirmation `APPLY`. Empty input or EOF cancels. Report-only export requires `EXPORT`. Cleanup is irreversible; ignored artifacts have no Git rollback. Stop dev servers/builds before maintenance and keep backups of anything that is not disposable.
+L238: 
+L239: ## Read-only inspection
+L240: 
+L241: ```bash
+L242: ./project-maintenance.sh --scan
+L243: ./project-maintenance.sh --dry-run --operation full
+L244: ./project-maintenance.sh --scan --sizes
+L245: ```
+L246: 
+L247: Scanning and dry-run write nothing to the target repository. Disk measurements are opt-in because traversing dependency installations can be slow; readings are not additive in linked workspaces. `--scan`, `--dry-run` and `--execute` are mutually exclusive. No configuration module or arbitrary project command is executed during discovery.
+L248: 
+L249: ## Selecting operations
+L250: 
+L251: ```bash
+L252: # Review one member's build cleanup, without changing anything.
+L253: ./project-maintenance.sh --dry-run --operation build --project apps/web
+L254: 
+L255: # Restore once at the workspace root, with a fresh confirmation prompt.
+L256: ./project-maintenance.sh --execute --operation install --project .
+L257: 
+L258: # Choose validation commands; order is preserved.
+L259: ./project-maintenance.sh --dry-run --operation validate --check build --check unit --check integration
+L260: 
+L261: # Exclude an exact subtree; exclusions are literal, not shell globs.
+L262: ./project-maintenance.sh --dry-run --operation full --exclude path/to/independent-project
+L263: 
+L264: # Explicitly classify a reviewed, regenerable local cache. Hard protections remain.
+L265: ./project-maintenance.sh --dry-run --operation caches --approve-cleanup caches:tools/generated-cache
+L266: 
+L267: # Explicit report export after a scan; requires typing EXPORT.
+L268: ./project-maintenance.sh --scan --export-report
+L269: ```
+L270: 
+L271: `--root PATH` inspects another explicitly chosen project boundary. Repeat `--project`, `--exclude`, `--approve-cleanup` and `--check` as needed. A selected workspace member cannot remove a shared installation without selecting the workspace owner. A root workspace install installs its members once; a genuinely independent deep project gets its own command. A combined reinstall cleans selected build output and dependency installations before frozen installation; use `--operation rebuild` (menu option 12) to clean verified build/cache output, install frozen dependencies, and rebuild the discovered workspace.
+L272: 
+L273: ## Supported projects
+L274: 
+L275: The script is Bash, with existing Node used only to parse JSON data. Bash 3.2 or newer and standard `find`, Git, `rm`, `mkdir`, `mktemp`, `mv`, `chmod`, `wc`, `date` and `sleep` are required. `du` is optional for `--sizes`. It adds no package dependency.
+L276: 
+L277: - Node projects are discovered recursively outside protected/dependency directories, including independently configured deep subprojects.
+L278: - pnpm workspaces use the repository's simple `packages:` YAML list. npm/Yarn workspace arrays and `{packages: [...]}` are recognized. Literal path components and single-component globs work. Unsupported workspace syntax, negative patterns, recursive `**` patterns and overlapping nested workspace definitions block installation rather than guessing ownership. Commands also refuse workspace scopes containing excluded/protected projects or their pruned ancestors.
+L279: - Manager declarations and lockfiles must agree. Ambiguous managers, missing lockfiles, symlink manifests/locks, unsupported managers and declared-version mismatches block execution before removal. No lockfile is generated or deleted.
+L280: - Frozen restores use `pnpm install --frozen-lockfile --ignore-scripts`, `npm ci --ignore-scripts`, Yarn 1 frozen installs with scripts disabled, or Yarn modern immutable installs with `YARN_ENABLE_SCRIPTS=false`.
+L281: - Lifecycle scripts are deliberately disabled during installation. Review any required native-addon/build approvals and run them manually afterwards. This can prevent an application build until those project-specific steps are completed; restore success alone is not application validation.
+L282: - TypeScript outputs are eligible when a safely parsed `tsconfig.json` explicitly identifies an in-project `outDir`. Composite metadata is paired with that output. Ambiguous JSONC, inherited/dynamic output configuration and Vite-only output conventions remain review-only instead of executing configuration code.
+L283: - Known Playwright `test-results` output is classified when this repository's Playwright config exists. Losing diagnostic output is called out in the plan. Other caches require explicit review/approval.
+L284: - Common Python, JVM, .NET, PHP, Ruby, Go, Rust, C/C++, Swift and Deno manifests are reported as unsupported for execution. The actual repository is a Node monorepo; `.audit/shoot.py` is a preserved auxiliary script without a Python dependency manifest. This tool does not install absent language runtimes or speculate about their cleanup conventions.
+L285: 
+L286: Available check selectors are `lint`, `typecheck`, `unit`, `integration`, `security`, `test`, `build`, `smoke` and `e2e`. Missing scripts are reported as skipped. Only inspected command forms run; unknown scripts and pre/post hooks require manual review and are refused. Recursive pnpm builds also inspect member build scripts/hooks. Formatting checks are supported; formatting writes, migrations, seeding, deployment, Docker cleanup, database tests against an inferred target, global cache purges and automatic server termination are excluded.
+L287: 
+L288: In this repository the root typecheck emits output, API/worker/tests import built shared packages, and Playwright needs Chromium and free server ports. A cleanup or dependency restore alone does not prove the app works. Choose builds before dependent checks, and read failed/skipped results.
+L289: 
+L290: ## Safety and reports
+L291: 
+L292: No directory is deletable merely because it is named `dist`, `build`, `cache`, `target` or `vendor`. Candidate rows show the owner, category, evidence, classification and optional size. Only verified/explicitly approved candidates reach the execution plan; every target is checked again immediately before deletion.
+L293: 
+L294: Hard protections cover source/configuration, environment files and credentials, databases/dumps/migrations, original public assets, documentation, user data, nested repositories, tracked/staged files, excluded descendants, Reticle/browser evidence and the Obsidian vault. Dependency cleanup allows installed package source/configuration but still refuses embedded secrets and data. Symlink roots/ancestors are rejected; dependency symlinks are unlinked with their installation and never traversed. Generated declarations/maps/assets inside verified output directories are distinguished from original source/static input.
+L295: 
+L296: A repository-local `.project-maintenance.lock` serializes approved operations. An existing lock is never overridden automatically; investigate whether a run is active before removing a stale lock manually. This does not synchronize external dev servers or defend against a malicious concurrent filesystem writer. Do not run maintenance across bind mounts or other externally managed storage. Installation and selected validation run trusted repository/tooling code after review; this script is not a sandbox for hostile projects.
+L297: 
+L298: Confirmed execution and explicit export create private timestamped logs under `maintenance-reports/`, excluded from scanning and cleanup. Logs record selected operations, paths, classifications, skipped items, commands, exact exit codes, failures, warnings and final status. Raw command stdout/stderr is captured in a mode-600 temporary file, counted and removed; arbitrary output is withheld from logs to avoid publishing credentials. On failure, rerun the displayed command privately for full diagnostics. No environment dump or `.env` contents are logged. A failed restore/build stops dependent commands, and incomplete work is never reported as a pass. Removed space is not asserted from overlapping/shared allocations.
+L299: 
+L300: SIGINT/SIGTERM stop the invocation-owned command process group, remove private capture files and the lock, retain the report and return 130/143. Deleted artifacts stay deleted. Other errors use 1 for partial failures, 2 for invalid arguments, and 3 for fatal safety/prerequisite/discovery/reporting errors. Cancellation/no-op uses 0; interactive invalid input redisplays the menu.
+L301: 
+L302: ## Tests and portability
+L303: 
+L304: ```bash
+L305: bash -n project-maintenance.sh
+L306: bash -n scripts/tests/project-maintenance.test.sh
+L307: bash scripts/tests/project-maintenance.test.sh
+L308: shellcheck project-maintenance.sh scripts/tests/project-maintenance.test.sh # if installed
+L309: ```
+L310: 
+L311: The tests create disposable temporary repositories, use stub package managers for command outcomes, and never delete real project output or download packages. They cover recursive discovery, spaces, workspace boundaries, dry-run preservation, confirmations, unknown/protected paths, Git provenance, exclusions, restoration failures, hooks, private reports and descendant cancellation. Native symlink and permission-denial checks explicitly skip when the host cannot enforce them.
+L312: 
+L313: The implementation uses portable Bash/Unix forms intended for macOS/Linux; verification in this environment uses Git Bash on Windows. Native macOS/Linux and Bash 3.2 have not been executed here. Git Bash may copy instead of creating native symlinks, and Windows ACLs do not necessarily enforce Unix mode bits. The fixture suite detects these cases instead of presenting a false pass. WSL and ShellCheck are not installed on this host.
+L314: 
+L315: See [the repository audit and validation record](../reports/MAINTENANCE_AUDIT_2026-10-21.md) for detected projects, approximate candidate sizes, verification results and remaining limitations. Existing build files and agent instructions are unchanged by this implementation; real cleanup/reinstallation is an operator action requiring review of the exact current plan.
+L316: 
+L317: 
+[...]
+L339: - Remove build outputs, local dependency folders, and temporary caches according to detected technology (e.g., `node_modules`, `.venv`, `__pycache__`, `.pytest_cache`, `.turbo`, `.next`, `.nuxt`, `dist`, `build`, `bin`, `obj`, `target`, `vendor`).
+L340: - Strict Guardrails: Never delete source files, configuration (`.env*`, `.git`, IDE settings), manifests (`package.json`, `pom.xml`, etc.), or lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `Cargo.lock`, `poetry.lock`, etc.).
+[...]
+L346: - Respect local wrappers (`mvnw`, `gradlew`) when present; detect installed tools via PATH (`where.exe`) and gracefully warn/skip if a tool/runtime is absent without crashing the entire run.
+[...]
+L352: - Supported CLI flags: `--dry-run`, `--clean-only`, `--install-only`, `--build`, `--deep-clean`, `--root <path>`, `--exclude <patterns>`, `--max-depth <int>`, `--continue-on-error`, `--verbose`, `--help`.
+~~~~

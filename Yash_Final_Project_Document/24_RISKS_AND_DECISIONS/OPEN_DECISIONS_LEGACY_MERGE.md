@@ -146,3 +146,159 @@ Rated by the prior attempt as architectural risks or deficiencies; here they are
 ## 9. Source-group conflicts and open items elsewhere
 
 Every merged file in this group registers its own local decisions with OPEN-LGA ids from section 1. If an owner closes one, record the outcome in `OPEN_DECISIONS.md` and strike it here, as the register convention requires.
+
+
+<!-- ledger-D D-02 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/INDEX.md (gap closure D-02)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: the navigation tables ('Start here' and sections 1-8, lines 9-102), the 12 relative link targets, line 3 ('single entry point') and line 106 (same-day reports can describe different source revisions).
+
+~~~~text
+L1: # TalentSphere — Documentation Index
+L2: 
+L3: This is the single entry point to the project's documentation. Links are resolved relative to this file; `../` here reaches the repository root. The index lists files that exist; it does not repeat their content.
+[...]
+L5: ## Start here
+L6: 
+L7: | Need | Read |
+L8: |---|---|
+L9: | Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | [`final-project-documentation/00-INDEX.md`](../../30_PRIOR_IMPLEMENTATION_REFERENCE/00-INDEX.md) |
+L10: | Set up and run the project | [`../README.md`](../../../README.md) |
+L11: | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) |
+L12: | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
+L13: | Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | `../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) |
+L14: | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
+L15: | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
+L16: | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
+L17: | Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
+L18: | Canonical intent | [`../SSOT.md`](../../../SSOT.md) |
+L19: | Coding-agent workflow | [`../AGENTS.md`](../../../AGENTS.md), [`../CLAUDE.md`](../../../CLAUDE.md) |
+L20: | Browser verification with Reticle | [`../RETICLE.md`](../../../RETICLE.md) |
+L21: | Project memory and execution history | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) |
+L22: 
+L23: ## Authority order
+L24: 
+L25: When two documents disagree:
+L26: 
+L27: 1. **What exists today:** the code, then the root `ARCHITECTURE.md`, then the source-scoped `system-model/01-inventory-and-coverage.md`. Dated reports do not override newer source.
+L28: 2. **What is intended:** `SSOT.md`, then the specialised files below (`PRD`, `TRD`, registries, `TARGET_ARCHITECTURE`).
+L29: 3. **History:** dated reports and `BRAIN/MEMORY.md` are evidence of what happened, not current state.
+L30: 
+L31: Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md#documentation-conflicts-open-2026-10-21). They are not resolved by assumption.
+L32: 
+L33: ## 1. Requirements
+L34: 
+L35: | Document | Purpose |
+L36: |---|---|
+L37: | [`../SSOT.md`](../../../SSOT.md) | Canonical project and system definition. Owns intent. |
+L38: | [`product/PRD.md`](product/PRD.md) | Product requirements, personas, capability matrix. |
+L39: | [`engineering/TRD.md`](engineering/TRD.md) | Technical requirements: runtime constraints, latency, security posture. |
+L40: | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
+L41: | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | Business rules BR-001 to BR-248. |
+L42: | `registries/WORKFLOWS_AND_BUSINESS_RULES.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | 66 declared workflow state machines, invariants and transition triggers. |
+L43: | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) | User journeys J-01 to J-28. |
+L44: 
+L45: ## 2. Architecture
+L46: 
+L47: | Document | Purpose |
+L48: |---|---|
+L49: | [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
+L50: | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture.** Intended modular monolith, bounded contexts, flows. Not a description of the running code. |
+L51: | [`engineering/adr/ADR-015-core-loop-persistence.md`](engineering/adr/ADR-015-core-loop-persistence.md) | ADR: persist the core career loop; the API's in-memory maps are a read model. |
+L52: | [`engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`](engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | ADR: measure UI quality in a real browser and test it adversarially. |
+L53: | [`system-model/00-index.md`](system-model/00-index.md) | **System model.** Source inventory, flowcharts, conflict register, rule matrix and dated verification evidence. Coverage limits are explicit. |
+L54: 
+L55: ## 3. Implementation details
+L56: 
+L57: | Document | Purpose |
+L58: |---|---|
+L59: | [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries. |
+L60: | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 278 unique method/path pairs, request-schema locators, response/error semantics and billing retries. |
+L61: | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
+L62: | [`experience/UI_UX_DESIGN_SYSTEM.md`](experience/UI_UX_DESIGN_SYSTEM.md) | Design tokens, components, accessibility (WCAG 2.2 AA). |
+L63: | [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | Routes, navigation guards, state transitions. |
+L64: 
+L65: ## 4. Quality, security and testing
+L66: 
+L67: | Document | Purpose |
+L68: |---|---|
+L69: | [`quality/TESTING.md`](quality/TESTING.md) | Test strategy: Vitest unit and integration, Postgres suite, Playwright. |
+L70: | [`quality/SECURITY.md`](quality/SECURITY.md) | Security architecture, RLS, session handling, AI safety, privacy. |
+L71: | [`quality/OPERATIONS.md`](quality/OPERATIONS.md) | Runbooks, health checks, degradation, backups, observability. |
+L72: 
+L73: ## 5. Setup and deployment
+L74: 
+L75: | Document | Purpose |
+L76: |---|---|
+L77: | [`../README.md`](../../../README.md) | Local setup, commands, test suites, CI. |
+L78: | [`../deploy/oracle/README.md`](../deploy/README.md) | Oracle Always Free staging. Not evidence of a production release. |
+L79: | [`../deploy/oracle/RECOVERY.md`](../deploy/RECOVERY.md) | PostgreSQL backup and restore checks. |
+L80: 
+L81: | [`engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`](engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Hosted adapter, dependency audit and release prerequisites; no live application claim. |
+L82: | [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Current Windows maintenance implementation and safety limits; historical material is archived. |
+L83: 
+L84: ## 6. Agent and tooling instructions
+L85: 
+L86: | Document | Purpose |
+L87: |---|---|
+L88: | [`../AGENTS.md`](../../../AGENTS.md) | Coding-agent rules and workflow. |
+L89: | [`../CLAUDE.md`](../../../CLAUDE.md) | Project instructions loaded into Claude Code, including the Reticle verification block. |
+L90: | [`../RETICLE.md`](../../../RETICLE.md) | Full Reticle verification rules. |
+L91: | [`../.claude/commands/reticle.md`](../../../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
+L92: | [`../BRAIN/BRAIN.md`](../BRAIN/BRAIN.md) | Conceptual model. |
+L93: | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) | Living execution memory and audit log. Historical. |
+L94: 
+L95: ## 7. Governance and planning
+L96: 
+L97: | Document | Purpose |
+L98: |---|---|
+L99: | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) | Authority, change classes, no-duplication rule, status vocabulary. |
+L100: | `governance/IMPLEMENTATION_PLAN.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Phased execution order. |
+L101: | [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md) | Design gaps, verification gaps, and the open documentation-conflicts register. |
+L102: | `governance/SOURCE_RECONCILIATION.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | **Historical** (2026-09-24). Its "greenfield" status is superseded. |
+L103: 
+L104: ## 8. Reports (dated snapshots)
+L105: 
+L106: Each report is a point-in-time record. Even reports dated the same day can describe different source revisions; current code and the implementation inventory govern factual conflicts.
+~~~~
+
+
+<!-- ledger-D D-05 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/governance/GAP_ANALYSIS.md (gap closure D-05)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: the open documentation-conflicts register C-1..C-21 with its full evidence and 'Owner decision needed' columns (lines 64-91), including C-1 SSOT line refs, C-3, C-10 enumeration of removed duplicate sections and C-12 marker names `reticle:begin`/`reticle:end`.
+
+~~~~text
+L64: ## Documentation conflicts (open, 2026-10-21)
+L65: 
+L66: Found during the documentation consolidation. Each needs an owner decision; none was resolved by assumption.
+L67: 
+L68: | # | Conflict | Sources | Evidence | Owner decision needed |
+L69: |---|---|---|---|---|
+L70: | C-1 | `SSOT.md` status said GREENFIELD / 0% verified | `SSOT.md` lines 5, 4192, 5675; `FEATURE_REGISTRY.md` line 5 | Resolved 2026-10-21 as a C1 text change (`GOVERNANCE.md` §3): status lines now cite the code-checked cross-check. No intent changed. SSOT body still describes the target system | Founder: confirm the C1 change, or revert it |
+L71: | C-2 | Feature maturity counts | Current audit and evidence ledger at source `a771a87b` | 6 implemented-unverified, 87 partial, 1 broken/regressed, 75 provisionally not implemented, 4 deprecated/not recommended. No feature newly certified end-to-end verified. Earlier 16/78/75, 47 and 51 counts are superseded | Complete semantic acceptance and journey verification; do not use inventory coverage as release approval |
+L72: | C-3 | Test counts and scope | Current audit at source `a771a87b` | Executed: 1,172 Vitest assertions in 115 files, 5 migration-helper tests, ten non-emitting TypeScript project checks. Lint failed on seven files. Existing built workspace dependencies were reused. PostgreSQL and browser suites were not run | Fresh build, database and browser verification remain required; protected-file restrictions apply |
+L73: | C-4 | SQL migration count | Former index (41), README (46), `supabase/migrations/` | 51 `.sql` files on 2026-10-21 | None; README and index now use 51 |
+L74: | C-5 | Intended stack vs built stack | `SSOT.md`, `docs/engineering/TRD.md`, `docs/engineering/DATABASE.md` (Supabase Auth, TanStack Query, Edge Functions, Stripe, RLS) | Root `ARCHITECTURE.md` §20 and §24: HMAC sessions, plain React state, no provider SDKs | Whether the SSOT stack is still the target, or the built stack replaces it |
+L75: | C-6 | Registry status ownership | FEATURE_REGISTRY Authority section | Registry explicitly delegates implementation status to the current audit; it is an identity inventory | Resolved by existing separation; keep one status tracker |
+L76: | C-7 | Stray Obsidian vault | `TalentSphere/` (`Welcome.md` is the Obsidian template; `create a link.md` is empty) | Personal vault config under `TalentSphere/.obsidian/` | Delete the folder or keep it as the user's own notes |
+L77: | C-8 | Salary and small-cell privacy threshold | `SSOT.md` HDN-026 and the privacy sections say k ≥10 by default; `BUSINESS_RULE_REGISTRY.md` BR-178 says k ≥5 for salary cells and BR-158 says k ≥5 for aggregated career data; SSOT also uses k ≥3 (line ~1890) and k ≥5 (line ~597, ~1300) | Registry and SSOT disagree for salary data; SSOT is internally inconsistent | Owner and legal set one salary threshold and the default |
+L78: | C-9 | Rule reference formatting and semantic mismatch | Canonical registry BR-001..BR-248; SSOT feature prose | Leading zeroes differ, but matching numbers do not prove matching meaning: SSOT F-01 calls BR-001 auth-required and BR-002 role-separation, while registry BR-01 governs job-posting roles and BR-02 application roles. SSOT explicitly declares out-of-range IDs stale and non-authoritative | Reconcile each feature reference by canonical rule meaning. Do not create BR-249+ from historical prose or renumber code/tests as a formatting fix |
+L79: | C-10 | Stale duplicate copies (resolved) | Removed on 2026-10-21. Also removed from `WORKFLOWS_AND_BUSINESS_RULES.md`: a second copy of its journeys, workflows and state machines (no unique lines), a second copy of the business-rule corpus, and the journey register (identical to `JOURNEY_REGISTRY.md`). The business-rule text was identical to `BUSINESS_RULE_REGISTRY.md` for all 248 rules, and its eight MIG rules were moved there. Earlier duplicates, verbatim-older copies of SSOT: `WORKFLOWS_AND_BUSINESS_RULES.md` §11–§26 and Appendices A–D (said 31 journeys and 246 rules), `DATABASE.md` §15–§22 and §31–§32 (said k ≥5 for salary cells), `UI_UX_DESIGN_SYSTEM.md` Appendix D | Diffs showed replacements only, no unique text. The one unique sentence in DATABASE moved to §4 | None. J count is 28 in `JOURNEY_REGISTRY.md` and SSOT |
+L80: | C-11 | Protected file references a deleted index | `.prettierignore` still lists `FINAL_DOCUMENT_INDEX.md`. It is a protected build file under `AGENTS.md` ("Build files are read-only"), so it was not edited | Harmless; the entry matches nothing | Authorise a one-line removal |
+L81: | C-12 | Reticle instructions duplicated | `CLAUDE.md` and `AGENTS.md` carry the same managed Reticle block; `.claude/commands/reticle.md` repeats the "nothing connected" steps, and its step 1 contains a duplicated paragraph with a nested, misnumbered list | The managed block sits between `reticle:begin`/`reticle:end` markers and is rewritten by `reticle init`, so a local edit would be overwritten. Command file not edited: owner unclear | Choose whether Reticle moves the full text to `RETICLE.md` and leaves a pointer, or the duplication stays |
+L82: | C-13 | ADR numbering | Three lists disagree. `TARGET_ARCHITECTURE.md` §11 (21.3) says ADR-001 is "Supabase Auth sole session authority" and ADR-003 is "50 canonical tables"; root `ARCHITECTURE.md` §26 says ADR-001 is "modular monolith" and ADR-004 is HMAC tokens. `SSOT.md` uses ADR-001 to 013; root `ARCHITECTURE.md` §21.3 says "Locked at 13" and §26 uses ADR-001 to 011; ADR-015 supersedes "ADR-003 in ARCHITECTURE §26" | ADR-015 file header | Owner: adopt one ADR register |
+L83: | C-14 | ADR-015 not ratified | `docs/engineering/adr/ADR-015-core-loop-persistence.md` is "Accepted for this branch, pending owner ratification". Migration `00043` changes schema and drops `employment_references.token` | ADR-015 Escalation section; the root `ARCHITECTURE.md` header says it was revised on branch `improvement/core-loop-durability` | Owner ratifies ADR-015 and approves `00043` before any populated database is migrated |
+L84: | C-15 | Feature maturity overstatement | Current feature matrix | F-94 and F-26 are now partial. Resend exists, but live delivery is unverified; portfolio state remains process-local. Earlier implemented labels are historical | No decision needed for this factual correction; acceptance remains open |
+L85: | C-16 | Migration inventory | `supabase/migrations/` and audit evidence ledger | 51 migration files, with recorded hashes. Historical counts are dated snapshots; inventory is not migration execution proof | Verify populated migration and recovery before release |
+L86: | C-17 | Table count vs target model | `DATABASE.md` §3.1 lists 50 canonical tables; §3.2 says about 185 operational tables; the total is about 220 | Measured 2026-10-21: 111 distinct `CREATE TABLE` names across the migrations, and 130 `ENABLE ROW LEVEL SECURITY` statements (per-table coverage not checked here) | Owner: confirm §3 is the target and §3.2 is a plan, or record the migrated schema as the model. Banner added to §3 |
+L87: | C-18 | Routes in target docs but not built | `APP_FLOW.md` §1 lists about 30 routes that `apps/web/src/App.tsx` does not define (for example `/register`, `/courses`, `/recruiter/*`, `/feed`). `App.tsx` defines 30 `<Route>` entries, including layout, index and catch-all | Measured 2026-10-21 | Owner: keep these as planned routes, or drop them. Banner added to `APP_FLOW.md`; the root architecture doc's "9 leaf routes" is now counted directly from source |
+L88: | C-20 | Who owns the 173-feature register | `SSOT.md` §7 says it is the active feature identity and priority index. `docs/product/PRD.md` §11 says the canonical register lives in `FEATURE_REGISTRY.md`. The two inventories are identical except for heading numbers (checked 2026-10-21: 175 of 180 unique lines match, and the 5 others are headings). `FEATURE_STATUS_2026-10-21.md` uses the registry as its source | Measured on the two files | Owner: pick one register. Until then the registry's §9 detail was moved to SSOT, so SSOT is the only detail source |
+L89: | C-21 | Role count | `SSOT.md` §6.1 describes two tiers: three JWT roles (`ROLE_USER`, `ROLE_RECRUITER`, `ROLE_ADMIN`) and 24 contextual roles. The built `Role` union in `packages/domain/src/core.ts` has 10 values (candidate, recruiter, hiring_manager, course_author, instructor, institution_admin, platform_admin, moderator, verification_staff, service_account). `ARCHITECTURE.md` §12 says 10 | Measured 2026-10-21 | Owner: confirm whether the 24-role model is target. Measured role union is 10 |
+L90: 
+L91: 
+~~~~

@@ -213,3 +213,204 @@ The investigators did not search for undocumented behaviour systematically. The 
 | L-B16-03 | Responsive-layout gate range (320-2560) and hostile-use gate not yet explicit as release gates | QA Architect |
 | L-B16-04 | "No-write verification" command set for agent sessions | Documentation Architect (29_) |
 | L-B16-05 | Gap checks: TEST-ids exist for each list in section 3 and section 5 | QA Architect |
+
+
+<!-- ledger-D D-08 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/quality/TESTING.md (gap closure D-08)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: sentences 'No merge if required checks fail. High-risk domain changes require expanded test suites.' (line 193), 'Inspect selected tests' own side effects before running them' (line 43) and the read-only substitute command intro (lines 29, 36).
+
+~~~~text
+L27: were not rerun as application acceptance.
+L28: 
+L29: The root `typecheck` runs `tsc -b`, which emits protected files. A per-project
+L30: read-only substitute, when existing declarations are available, is:
+L31: 
+L32: ```sh
+L33: node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --incremental false --composite false --declaration false --declarationMap false
+L34: ```
+L35: 
+L36: This does not replace the full reference build. For an authorized source check,
+L37: the existing Vitest can avoid config bundling and cache writes:
+L38: 
+L39: ```sh
+L40: node node_modules/vitest/vitest.mjs run --configLoader native --no-cache
+L41: ```
+L42: 
+L43: Inspect selected tests' own side effects before running them. This still imports
+L44: existing built workspace dependencies and cannot certify a fresh build. Default
+L45: Playwright startup uses compiled outputs; installing Chromium, rebuilding outputs
+[...]
+L191: ## 10. CI Gates
+L192: 
+L193: No merge if required checks fail. High-risk domain changes require expanded test suites.
+L194: 
+L195: Enforced by `.github/workflows/ci.yml` on every push and pull request, in order:
+~~~~
+
+
+<!-- ledger-D D-11 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/E2E_AUDIT_2026-10-21.md (gap closure D-11)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: stored-XSS vector `<a href="javascript:alert(1)">` and remedy `safeHref()` (E20, line 60), row N04b raw-id example (line 61), `borderColor` (D90, line 67).
+
+~~~~text
+L58: | ID | Sev. | Defect | Evidence | Fix | Regression test |
+L59: |---|---|---|---|---|---|
+L60: | E20 | **High** | `javascript:`, `data:` and `file:` URLs accepted in portfolio links, organization website, resume website, media and meeting URLs. A portfolio link rendered as `<a href="javascript:alert(1)">`: stored XSS, visible to anyone who may view the project. | E20: 1 `javascript:` anchor on the page | `httpUrl()` in `packages/contracts/src/index.ts` (http/https only) on all six URL fields; `safeHref()` so already-stored values stay inert in `PortfolioPage` | `tests/unit/contracts-url.test.ts` (16) |
+L61: | N04b | Medium | Network page printed raw user ids ("To fe8e6a28-…") and, for the accepting side, printed their own id in "Your connections". | I2: N03b, N04b | `GET /connections` now returns `counterpart` (id, name, headline); `NetworkPage` renders it | `tests/integration/networking.test.ts` (counterpart assertions) |
+L62: | E19b, E23b, E24b, N06 | Medium | Field errors showed "The submitted payload failed schema validation." with no field named (portfolio URL, resume email, member id, job salary). | E2, I2, F05 | `apiJson` builds "Project url: …" from the API's `details` | `tests/unit/web-api-json.test.ts` (11) |
+L63: | G01 | Low–Med | A 5xx response body was shown to the user verbatim, so server internals could leak. | G01 | 5xx (except an explicit 503) always uses the generic wording | same file |
+L64: | G03 | Low | An HTML page served with 200 surfaced "Cannot read properties of null". | G03 | clear "unexpected response" error | same file |
+L65: | E10, G08, A16 | Medium / Low | **Regression from my F-21 work.** Profile and work-history save errors showed a "Try again" that reloads the page and discards edits; a nonexistent job showed "Try again". | E10, G08, A16 | plain notice for action errors; `LoadError` only for load failures; not-found is final | R06, R07 |
+L66: | D20 | Low | A non-admin opening `/admin` got the full admin shell (no data, but no refusal either). | D20 | role gate in `AdminPage`; no admin requests sent | R05 |
+L67: | D90 | Low | React warned on every secondary/outline button hover (`border` shorthand mixed with `borderColor`). | D90 | longhand border properties in `Button.tsx` | R10, R13 |
+L68: 
+~~~~
+
+
+<!-- ledger-D D-17 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/MAINTENANCE_AUDIT_2026-10-21.md (gap closure D-17)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: the 28 missing test-case ids TC-04..TC-37 (all of TC-01..TC-38 with results and timings are quoted in the 16_QA section), ~113 code tokens (flags `--max-depth`, `--approve-cleanup`, ecosystem markers `build.gradle`, `package-lock.json`, `.nuxt`), detected-projects table, per-candidate size tables, menu numbering, per-test timings.
+
+~~~~text
+L373: ## Historical Windows test readiness
+L374: 
+L375: Preserved from root `TEST_READY.md`. This is historical requirements/evidence, not a current execution result or permission to mutate protected build files.
+L376: 
+L377: # Universal Clean & Reinstall — Test Readiness Report (`TEST_READY.md`)
+L378: 
+L379: ## 1. Executive Summary
+L380: The comprehensive, opaque-box, zero-dependency End-to-End (E2E) Test Suite for `clean-reinstall.bat` and `clean-reinstall.ps1` is fully implemented, verified, and operational.
+L381: The test harness runs with standard Windows PowerShell 5.1 and PowerShell Core 7+ with zero external package dependencies (no Pester 5 or npm packages required). All tests execute in isolated, dynamically created hermetic temporary sandboxes (`$env:TEMP\cr-test-*`) and cleanly tear down on completion.
+L382: 
+L383: - **Total Test Cases**: 38
+L384: - **Passed**: 38 (100%)
+L385: - **Failed**: 0 (0%)
+L386: - **Execution Duration**: ~77.13s
+L387: - **Process Exit Code**: 0
+L388: 
+L389: ---
+L390: 
+L391: ## 2. Test Execution Command
+L392: 
+L393: To run the complete test suite:
+L394: ```powershell
+L395: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1
+L396: ```
+L397: 
+L398: To run individual tiers or specific tests:
+L399: ```powershell
+L400: # Run Tier 1 only (Feature Coverage, TC-01..TC-20)
+L401: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 1
+L402: 
+L403: # Run Tier 2 only (Boundary Values & Safety Attack Vectors, TC-21..TC-28)
+L404: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 2
+L405: 
+L406: # Run Tier 3 only (Pairwise Cross-Feature Interactions, TC-29..TC-33)
+L407: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 3
+L408: 
+L409: # Run Tier 4 only (Realistic Polyglot Monorepo Application Scenarios, TC-34..TC-38)
+L410: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -Tier 4
+L411: 
+L412: # Run a specific test case by ID
+L413: powershell.exe -ExecutionPolicy Bypass -NoProfile -File tests/run-tests.ps1 -TestId TC-34
+L414: ```
+L415: 
+L416: ---
+L417: 
+L418: ## 3. Test Suite Architecture & File Inventory
+L419: 
+L420: | File Path | Purpose |
+L421: |:---|:---|
+L422: | `tests/run-tests.ps1` | Zero-dependency native PowerShell test runner supporting `-Tier <1\|2\|3\|4\|all>`, `-TestId <string>`, `-FailFast`, `-VerboseOutput`, stopwatch timing, per-test assertions, and exit code propagation. |
+L423: | `tests/test-fixtures-helper.ps1` | Hermetic mock sandbox engine managing sandbox lifecycle, fixture generators for Node (npm, pnpm, yarn, bun), Python (poetry, uv, pipenv, pip), Rust (Cargo), Java (Maven, Gradle, wrappers), .NET (sln, csproj), NTFS junctions, and assertion primitives. |
+L424: | `tests/test-tier1-feature-coverage.ps1` | Tier 1: 20 isolation tests covering R1-R4 requirements (TC-01 through TC-20). |
+L425: | `tests/test-tier2-boundary-corners.ps1` | Tier 2: 8 boundary and safety-critical attack vector tests (TC-21 through TC-28). |
+L426: | `tests/test-tier3-cross-feature.ps1` | Tier 3: 5 pairwise cross-feature combination tests (TC-29 through TC-33). |
+L427: | `tests/test-tier4-scenarios.ps1` | Tier 4: 5 realistic polyglot monorepo application workloads (TC-34 through TC-38). |
+L428: 
+L429: ---
+L430: 
+L431: ## 4. Test Case Matrix & Verification Results
+L432: 
+L433: ### Tier 1: Feature Coverage (20/20 Passed)
+L434: | Test ID | Feature | Description | Status | Time |
+L435: |:---|:---|:---|:---:|:---:|
+L436: | `TC-01` | Batch Entry Point (`clean-reinstall.bat`) | Verifies command-line forwarding, execution policy bypass, and process exit code preservation. | PASS | ~3.1s |
+L437: | `TC-02` | CLI Parameter Parsing & Aliases | Verifies double-dash kebab-case flags (`--dry-run`, `--clean-only`, `--max-depth`, `--yes`, etc.). | PASS | ~1.4s |
+L438: | `TC-03` | Parameter Validation & Mutex | Verifies immediate exit code 1 when `--clean-only` and `--install-only` are passed simultaneously. | PASS | ~0.7s |
+L439: | `TC-04` | Structured Logging & Secret Redaction | Verifies log creation and regex masking of NPM tokens, GitHub PATs, and passwords. | PASS | ~1.6s |
+L440: | `TC-05` | Path Containment Guard | Blocks execution against root drive (`C:\`) and Windows system directory roots. | PASS | ~2.1s |
+L441: | `TC-06` | Directory Scanner (`--max-depth`) | Verifies discovery up to depth limit (depth 2 found, depth 5 excluded at limit 3). | PASS | ~1.9s |
+L442: | `TC-07` | Traversal Pruning | Verifies scanner prunes `node_modules` and does not discover internal dependencies as standalone projects. | PASS | ~1.8s |
+L443: | `TC-08` | Reparse Point & Junction Security | Verifies junctions pointing outside repository root are safely rejected without traversal. | PASS | ~1.5s |
+L444: | `TC-09` | Multi-Ecosystem: Node | Detects npm (`package-lock.json`), pnpm (`pnpm-lock.yaml`), yarn (`yarn.lock`), and bun (`bun.lockb`). | PASS | ~2.1s |
+L445: | `TC-10` | Multi-Ecosystem: Python & Rust | Detects Poetry (`poetry.lock`), uv (`uv.lock`), pip (`requirements.txt`), and Rust (`Cargo.toml`). | PASS | ~2.3s |
+L446: | `TC-11` | Multi-Ecosystem: Java & .NET | Detects Maven (`pom.xml`), Gradle (`build.gradle`), and .NET (`*.sln` / `*.csproj`). | PASS | ~1.5s |
+L447: | `TC-12` | Monorepo Workspace Resolution | Identifies workspace roots and registers nested packages as workspace members. | PASS | ~1.6s |
+L448: | `TC-13` | Safe Cleanup (Standard Clean) | Purges standard build artifacts: `node_modules`, `dist`, `.venv`, `bin`, `obj`, `target`. | PASS | ~1.8s |
+L449: | `TC-14` | Deep Cleanup (`--deep-clean`) | Purges extended caches: `.turbo`, `.next`, `__pycache__`, `.pytest_cache`. | PASS | ~1.8s |
+L450: | `TC-15` | Absolute Guardrails | Strict preservation of lockfiles (`pnpm-lock.yaml`, `Cargo.lock`), `.env*`, `.git`, and source files. | PASS | ~1.8s |
+L451: | `TC-16` | Dry-Run Simulation (`--dry-run`) | Verifies planned deletion display with zero disk modifications. | PASS | ~1.9s |
+L452: | `TC-17` | Missing Tool PATH Detection | Verifies clean warning and graceful skip when an ecosystem CLI tool is not on PATH. | PASS | ~1.3s |
+L453: | `TC-18` | Local Wrapper Preference | Prioritizes local `mvnw.cmd` / `gradlew.bat` execution over global PATH executables. | PASS | ~1.5s |
+L454: | `TC-19` | Deterministic Reinstall Matrix | Selects frozen lockfile install commands (`npm ci`, `pnpm install --frozen-lockfile`). | PASS | ~1.6s |
+L455: | `TC-20` | Post-Install Rebuild (`--build`) | Schedules build script execution following successful dependency installation. | PASS | ~1.6s |
+L456: 
+L457: ### Tier 2: Boundary Values & Attack Vectors (8/8 Passed)
+L458: | Test ID | Boundary / Attack Vector | Description | Status | Time |
+L459: |:---|:---|:---|:---:|:---:|
+L460: | `TC-21` | Special Characters in Paths | Handles repository paths containing spaces, ampersands (`&`), and parentheses (`(v1.0)`). | PASS | ~1.7s |
+L461: | `TC-22` | Non-Interactive Prompt Guard | Exits cleanly with error code 1 when invoked without flags in non-interactive sessions. | PASS | ~1.5s |
+L462: | `TC-23` | Complex Secret Patterns | Redacts URL credentials (`http://user:pass@host`), AWS keys, and JWT tokens in logs. | PASS | ~1.8s |
+L463: | `TC-24` | Traversal Escape Attack | Verifies containment check strictly prevents deleting paths outside project root. | PASS | ~1.3s |
+L464: | `TC-25` | Exact Max-Depth Boundary | Inclusive discovery at exact `--max-depth 5`, exclusive cutoff at depth 6. | PASS | ~1.4s |
+L465: | `TC-26` | Escaping Junction Security | Prevents deletion of external directory targets linked via NTFS junctions. | PASS | ~1.3s |
+L466: | `TC-27` | Mixed Workspaces | Manages polyglot hierarchy: Node pnpm monorepo alongside a Rust Cargo workspace. | PASS | ~2.2s |
+L467: | `TC-28` | Read-Only Files Resilience | Forcefully clears read-only attributes on cached files and deletes target directories. | PASS | ~1.7s |
+L468: 
+L469: ### Tier 3: Pairwise Cross-Feature Interactions (5/5 Passed)
+L470: | Test ID | Interaction Pair | Description | Status | Time |
+L471: |:---|:---|:---|:---:|:---:|
+L472: | `TC-29` | Monorepo + `--dry-run` + `--yes` | Verifies planned operations for all monorepo members without modifying files on disk. | PASS | ~2.2s |
+L473: | `TC-30` | `--clean-only` + `--deep-clean` | Cleans both standard artifacts and deep caches across polyglot stacks without reinstall. | PASS | ~2.2s |
+L474: | `TC-31` | Safety Containment Under Dry-Run | Confirms drive root and system path guards cannot be bypassed by `--dry-run` or `--deep-clean`. | PASS | ~2.4s |
+L475: | `TC-32` | Monorepo + `--exclude` | Selectively cleans included packages while 100% preserving excluded package artifacts. | PASS | ~2.3s |
+L476: | `TC-33` | `--continue-on-error` Isolation | Continues processing independent projects when one project hits a tool failure. | PASS | ~1.6s |
+L477: 
+L478: ### Tier 4: Realistic Polyglot Monorepo Scenarios (5/5 Passed)
+L479: | Test ID | Scenario | Description | Status | Time |
+L480: |:---|:---|:---|:---:|:---:|
+L481: | `TC-34` | Full Polyglot Monorepo | Next.js frontend + Express API + Rust background worker + Python FastAPI service. Verifies workspace root resolution, member reinstallation skip, and full artifact purge. | PASS | ~3.2s |
+L482: | `TC-35` | Enterprise Nested Submodules | Multi-tier folder hierarchy up to depth 5 with `--max-depth 4` boundary and custom excludes. | PASS | ~1.9s |
+L483: | `TC-36` | Full Pipeline with `--build` | Reinstall and build pipeline executing Maven wrappers and scripts with real-time log streaming. | PASS | ~6.9s |
+L484: | `TC-37` | Safety Attack Vectors in Enterprise Repo | Escaping junctions, read-only cache files, `.env.production` secrets, and lockfiles. | PASS | ~1.8s |
+L485: | `TC-38` | Mega Monorepo Deep Cache Clearance | Large monorepo with `.turbo`, `.next`, `__pycache__`, `.pytest_cache`, and `target` directories. | PASS | ~3.5s |
+L486: 
+L487: ---
+L488: 
+L489: ## 5. Escalation: Implementation Defect Discovered
+L490: 
+L491: During test execution, an implementation defect was identified in `clean-reinstall.ps1`:
+L492: - **Defect Location**: `clean-reinstall.ps1` line 583: `return ,$rawProjects`.
+L493: - **Root Cause**: When a scanned repository contains zero recognized project manifests (e.g. an empty repository or a repository with only non-manifest files), `$rawProjects` is `@()`. The unary comma operator `,$rawProjects` wraps the empty array into a 1-element array whose first element is `@()`.
+L494: - **Symptom**: Calling `$discoveredProjects = @(Get-DiscoveredProjects ...)` yields an array of `Count = 1`, where element 0 has empty properties (`Path = $null`). Subsequent calls to `Resolve-ProjectCleanTargets` evaluate `Join-Path "" $candidate`, resolving candidate artifact directory names against `$PWD` (the host working directory). If any folder exists in `$PWD`, it is added to clean targets; `Test-SafePathContainment` then correctly detects that the target is outside the scanned root and throws a fatal security exception (`exit 1`).
+L495: - **Recommended Fix for Implementing Agent**:
+L496:   In `clean-reinstall.ps1` around line 583, update the return statement:
+L497:   ```powershell
+L498:   if ($rawProjects.Count -eq 0) {
+L499:       return @()
+L500:   }
+L501:   return ,$rawProjects
+L502:   ```
+L503: 
+L504: 
+~~~~

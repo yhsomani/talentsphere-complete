@@ -169,3 +169,26 @@ Conflict list kept visible: **CF-13** (migrations 00016, 00018, 00022, 00023 ref
 | L-B12-03 | Add the six migration-runner behaviours in section 4 to DB-04 on next revision | Database Architecture |
 | OPEN-52 | Hybrid read model vs SQL-only | ARB |
 | OPEN-14 | Hosting platform / managed Postgres | Platform Architect + SRE Lead |
+
+
+<!-- ledger-D D-04 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md (gap closure D-04)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: closing scope sentence (lines 59-60: the dependency-audit document is consolidated; no migration, credential, grant, schema, policy or deployment was changed) and the audit script name `scripts/audit-hosted-supabase-migrations.mjs` (line 30).
+
+~~~~text
+L26: 
+L27: From the repository root:
+L28: 
+L29: ```sh
+L30: node scripts/audit-hosted-supabase-migrations.mjs
+L31: ```
+L32: 
+L33: This reads checked-in migrations without a database connection and writes JSON
+L34: to stdout. Exit 1 is expected while historical SQL refers to `auth.users`,
+[...]
+L59: The historical dependency-audit document is consolidated here. No migration,
+L60: credential, grant, schema, policy or deployment was changed by this audit.
+~~~~

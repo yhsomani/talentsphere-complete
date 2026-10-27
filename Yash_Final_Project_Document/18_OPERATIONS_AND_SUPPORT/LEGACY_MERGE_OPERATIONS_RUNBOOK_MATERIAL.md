@@ -82,3 +82,61 @@ Merged from legacy: `31_LEGACY_ARCHIVE/docs/quality/OPERATIONS.md` v6.0 (15.1 KB
 | L-B18-02 | Email double opt-in, secondary provider, separate transactional/marketing domains | Messaging owner (OPEN-26) |
 | L-B18-03 | Independent worker heartbeat timer and readiness endpoint design | Backend Architecture |
 | L-B18-04 | Export as async signed-download job and its inclusion manifest | Privacy Engineer + Backend |
+
+
+<!-- ledger-D D-06 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/quality/OPERATIONS.md (gap closure D-06)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: sentence 'Legacy plaintext keys, if any, must be remediated explicitly' (line 182), identifier `normalizeEvent` (line 269), and the Stripe configuration/troubleshooting and common-failure tables (lines 258-end) whose rows were reworded.
+
+~~~~text
+L176: ### Account metadata and secret handling
+L177: 
+L178: User settings and export-request history now use existing `user_settings` and
+L179: `data_export_requests` PostgreSQL tables. The BYO AI key uses AES-256-GCM with
+L180: a separate `BYO_AI_KEY_ENCRYPTION_KEY` (64 hex chars); no key means storing a
+L181: BYO secret is refused, not downgraded to plaintext. Rotate only with a tested
+L182: re-encryption plan. Legacy plaintext keys, if any, must be remediated explicitly.
+L183: Account erasure clears those tables and a defined set of in-process private
+L184: maps, but other modules, shared records and backups still require the owner-
+L185: approved full erasure/retention inventory.
+L186: 
+[...]
+L258: ### Stripe configuration and troubleshooting
+L259: 
+L260: `BILLING_MODE=stripe` requires `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and
+L261: at least one distinct configured `STRIPE_PRICE_*` ID. The six optional catalog
+L262: keys cover candidate pro, recruiter starter and recruiter enterprise, monthly
+L263: or yearly. Deployed return links require HTTPS `APP_URL`; production refuses
+L264: Stripe test-mode keys. The server chooses prices and checks plan role eligibility.
+L265: Provider price amounts/currency are external configuration and must be reconciled
+L266: with the domain catalog before release.
+L267: 
+L268: Register the callback path `/api/v1/billing/stripe-webhook` for the events handled
+L269: by `normalizeEvent`: checkout completion, subscription created/updated/deleted,
+L270: invoice paid/payment_failed and charge refunded. The generic `/billing/webhook`
+L271: uses a different signature. Portal setup is external. A checkout redirect alone
+L272: is not subscription confirmation; inspect persisted subscription/events and
+L273: provider logs. Watch superseded subscriptions, webhook throttling and failed
+L274: post-commit event enqueue. Disputes and voided invoices remain unsupported.
+L275: 
+L276: ### Common local failures
+L277: 
+L278: | Symptom | Check |
+L279: | --- | --- |
+L280: | Missing workspace export or stale behavior | API/worker import existing `dist`; operator rebuild required after source changes |
+L281: | Database boot failure | `DATABASE_URL`, schema/ledger and storage mode; no automatic memory fallback |
+L282: | Second API refuses boot | Existing session advisory writer lease; do not launch another writer |
+L283: | Sessions expire after every restart | Stable private `TOKEN_SECRET`; do not use published test keys |
+L284: | Queue degraded despite API liveness | Heartbeat age, long claim batch, database reachability, retry/dead records |
+L285: | Email route returns 503 | Deployed provider configuration and durable enqueue; sender/delivery require separate evidence |
+L286: | Checkout unavailable | Billing mode, server catalog IDs, secrets and account role; never supply a client-controlled price |
+L287: | Changes made directly in SQL do not appear | Restart/re-hydrate the API for core read-model records |
+L288: 
+L289: The environment schema uses `z.coerce.boolean()` for AI flags. String values are
+L290: not a strict true/false parser; do not assume textual `false` disables a flag.
+L291: This is a configuration discrepancy to address in an explicitly scoped code fix.
+L292: The flags do not establish a connected paid model provider.
+~~~~

@@ -109,3 +109,305 @@ Audit master report; feature traceability matrix; architecture-durability report
 | ID | Item |
 |---|---|
 | OPEN-LGA-19 | Place legacy Stages A to F and BL-001..BL-018 in the target roadmap; BL-018 and D-01..D-03 are resolved in the paragraphs above; the remaining backlog detail is in the archive reports. Owner: Program Director. |
+
+
+<!-- ledger-D D-01 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/BRAIN/MEMORY.md (gap closure D-01)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: branch name and memory-control metadata (lines 1-14, 38-41), Next Action (line 53), and the code snippets `deploy/oracle/verify-backup-restore.sh`, `pnpm exec tsc -b`, `pnpm exec tsc -p tests`, `rgb(100, 116, 139)`, `crypto.createHmac('sha256', ...)`.
+
+~~~~text
+L1: # TalentSphere — Project Memory
+L2: 
+L3: ## Audit update — 2026-10-21 (current evidence, not release acceptance)
+L4: 
+L5: - Current audit and roadmap remain in `docs/reports/FEATURE_STATUS_2026-10-21.md`
+L6:   and `docs/reports/FEATURE_PLAN_2026-10-21.md`; supporting source/reference/test
+L7:   records are in `docs/reports/AUDIT_EVIDENCE_2026-10-21.json`.
+L8: - Initial `main` HEAD was `a30b35bf` with 27 staged entries. Another actor committed
+L9:   those entries as `a771a87b` during discovery. The auditor did not commit or alter
+L10:   that product work; all audit changes are documentation/evidence only.
+L11: - Current execution: 1,172 Vitest tests across 115 files passed, zero failed/pending;
+L12:   five migration-history helper tests passed; all ten projects passed non-emitting
+L13:   typechecks. Formatting failed in seven existing paths. Native Vitest config
+L14:   loading and disabled cache avoided protected build writes. Existing compiled
+[...]
+L38: - **Last Updated:** 2026-10-22
+L39: - **Current Branch:** `repository_audit_roadmap` (synchronized with `main` at `83dc7d24`)
+L40: - **Current HEAD:** `83dc7d247efbd3b3c3312bef74ac49978d33e924` (Commit: `update`, author: Yash Somani)
+L41: - **Current Primary Task:** Master Repository Audit & Agile Roadmap Synthesis. Official deliverables published in `docs/reports/` (`AUDIT_MASTER_REPORT.md`, `FEATURE_TRACEABILITY_MATRIX.md`, `ARCHITECTURE_DURABILITY_REPORT.md`, `GIT_RECONCILIATION_REPORT.md`, `RELEASE_SCOPE_AND_BACKLOG.md`).
+[...]
+L49:   - Compilation & Build: `pnpm exec tsc -b` (clean), `pnpm exec tsc -p tests` (clean), `pnpm build` (6 packages + 3 apps clean).
+[...]
+L53: - **Next Action:** Execute Stage A operational gates (Staging email DNS/credentials, Legal counsel terms ratification, SEC-01 email HMAC fix, SEC-02 referee token TTL fix, OPS-02 Caddy `/health` proxying).
+[...]
+L64: - **Frontend:** React 19 + TypeScript + Vite PWA (20 pages, 16 reusable components in `apps/web/src/`). Dynamic candidate, recruiter, and referee journeys on real data. Accessibility verified for keyboard navigation, focus states, and WCAG 3:1 input contrast ratio (`rgb(100, 116, 139)`).
+[...]
+L152: - **PR #56 (`252b03f9`)**: Staging database backup and isolated restore verification drill (`deploy/oracle/verify-backup-restore.sh`).
+[...]
+L189:    - *Remediation:* Key with server `TOKEN_SECRET` via `crypto.createHmac('sha256', ...)`.
+~~~~
+
+
+<!-- ledger-D D-19 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/PRODUCTION_AUDIT_2026-10-03.md (gap closure D-19)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: ids QW-03, QW-05, QW-06 and TD-04 as named items (sections 15 and 16, lines 1070-1175), scorecard arithmetic chains ('30 + 7 = 37', '5 + 2 = 7'), causal-chain strings ('real browser -> real backend -> real database -> ...'), about 78 code/line tokens (`LoginPage.tsx:38`, `CheckoutPage.tsx:331`, `package-lock.json`).
+
+Prior-attempt technical debt and quick wins now carried by id (full text quoted below):
+
+| Id | Prior attempt reported / recommended | Target requirement derived |
+|---|---|---|
+| TD-04 | High debt: demo fallback behavior left inside authentication | No demo or fabricated session path in authentication; failure shows an error with retry (see QW-01) |
+| QW-03 | Make web pages data-driven: replace hard-coded dashboard/jobs/evidence state with API queries | Every screen state comes from server data; no hard-coded product data |
+| QW-05 | Create a real settings surface: exposes already-existing backend functionality with comparatively little conceptual work | A real settings screen backed by the account-settings API |
+| QW-06 | Create the first real messaging UI: the backend foundation already existed, so this gave the API capabilities an actual user value surface | A real messaging UI over the messaging API |
+
+~~~~text
+L15: > - **CI red on `main`:** the latest GitHub Actions run (2026-10-03) failed at the `pnpm typecheck` step (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, before tests/build/E2E ran. A local reproduction of the typecheck failure (`tsc -p apps/web/tsconfig.json --noEmit`) emits the same `TS2307` family for `@talentsphere/ui` (and uninstalled workspace/runtime dependencies), consistent with the CI failure mode. Added as blocker **P0-08**.
+[...]
+L17: > - **Assessment sandbox simulation confirmed:** `apps/web/src/pages/AssessmentsPage.tsx` — `handleRunSandbox` (line 103) emits precomputed PASS logs via `setTimeout` (line 110, ~1.2 s) ending in "Verification Complete"; no real code execution, container isolation, or profiling occurs in the browser journey.
+L18: > - **Additional compliance copy:** beyond "GDPR & CCPA Compliant" (`PrivacyPage.tsx:28`), the footer also asserts **"SOC2 Type II Ready"** (`components/Layout.tsx:493`). Both remain unsupported by executable evidence (finding 22.6).
+L19: > - **Accessibility detail confirmed:** the checkout plan selector uses custom `role="radio"` divs (`CheckoutPage.tsx:331`) without conventional arrow-key radio-group navigation.
+[...]
+L22: > - **In-flight remediation attempt exists but is not merged to `main`:** commit `d1b191e` ("Fix TypeScript CI failures by migrating from pnpm to npm and updating build cache") exists on a feature branch only. It adds `package-lock.json` alongside the retained `pnpm-lock.yaml`, but `.github/workflows/ci.yml` still invokes `pnpm install --frozen-lockfile` / `pnpm typecheck` (lines 40/50), so as authored it would not change the CI failure mode. Until a fix lands on `main`, blocker **P0-08 stands as of 2026-10-03**: no green automated proof beyond lint/install exists on the trunk, and tests/build/E2E remain skipped by the gate.
+[...]
+L27: > - **CI confirmation basis:** the October 3 `main` typecheck failure (`TS2307 @talentsphere/ui`, `@talentsphere/observability`) is consistently reported across all four independent audit passes and was reproduced locally via `tsc`; direct GitHub Actions API access was unavailable from this environment, so the remote-run observation rests on auditor-reported evidence plus local reproduction. Blocker **P0-08 remains open**; the unmerged `d1b191e` attempt still does not update `ci.yml`.
+L28: > - The fourth pass also confirms: 9 routes (`App.tsx:18–27`), demo-token fallback (`LoginPage.tsx:47`), swallowed checkout failure (`CheckoutPage.tsx:117`) and login (`LoginPage.tsx:38`), fake `sha256:` hash (`EvidencePage.tsx:133`), local-state "Application Transmitted" (`JobsPage.tsx:79,82,218`), 147 in-process Maps (`server.ts`), hardcoded free AI tier (`server.ts:5198`), log-only worker delivery (`worker/index.ts:13`), and unsupported compliance copy (`PrivacyPage.tsx:28`, `Layout.tsx:493`). Verdict unchanged: **NOT READY — 4.6/10**.
+[...]
+L44: - the API stores primary state in **in-process `Map` objects**, so the application loses runtime state when the API process restarts (verified: `apps/api/src/server.ts:571` "In-memory repositories for modular monolith runtime state", Maps from line 580 onward);
+[...]
+L46: - checkout can show **"Subscription Confirmed!" even when the backend call fails** (verified: `apps/web/src/pages/CheckoutPage.tsx` lines 105–124, `.catch(() => null)` followed by unconditional `setConfirmedOrder`);
+[...]
+L49: - AI is implemented as a deterministic/domain response path rather than a real external AI-provider flow, with the tier hardcoded (`apps/api/src/server.ts:5198`: `const userTier: AITier = 'free'; // default free tier, strictly metered`);
+[...]
+L51: - the web UI contains substantial hard-coded/demo data (verified: `DashboardPage.tsx` hardcodes `12` verified items and `88%` readiness; `EvidencePage.tsx:133` fabricates hashes via `Math.random()`; `JobsPage.tsx:79-82` sets "Application Transmitted" from local React state with no fetch);
+[...]
+L74: `Landing → Dashboard / Evidence / Jobs / Assessments / Login / Checkout`
+[...]
+L98: `talentsphere_token = demo_token_<timestamp>`
+[...]
+L118: `CheckoutPage.tsx` validates the card fields locally, sends `/api/v1/billing/subscribe`, ignores the response status with `.catch(() => null)`, and then unconditionally creates a local `confirmedOrder`.
+[...]
+L122: `invalid/no API response → local confirmation → "Subscription Confirmed!"`
+[...]
+L152: (`apps/api/src/server.ts:571`) and creates `Map` instances for users, profiles, subscriptions, jobs, applications, messages, notifications, resumes, settings, AI conversations and many additional entities.
+[...]
+L154: Examples include (`apps/api/src/server.ts:580+`):
+[...]
+L156: `usersByEmail`, `subscriptionsByUserId`, `notificationsById`, `resumesById`, `applicationsById`, `messagesById`, `evidenceById`, etc.
+[...]
+L164: `process restart → application state lost`
+[...]
+L200: There is no actual email/push/SMS provider call in that handler (nor in the `evidence.propagate` and `analytics.aggregate` handlers — all three are log-only).
+[...]
+L204: `event → queue → worker → log`
+[...]
+L208: `event → queue → provider → delivery → acknowledgment → retry/dead-letter`
+[...]
+L214: Added in Revision B. `EvidencePage.tsx` derives "verification" from `isEmailVerified: Boolean(email)` (line 130) and fabricates the displayed `sha256:` digest with `Math.random()` (line 133); `JobsPage.tsx` flips local React state (`setAppliedJobs`, lines 79–82) to render "Application Transmitted" (line 218) without any backend application transaction; `AssessmentsPage.tsx` simulates sandbox execution with precomputed PASS logs behind a `setTimeout` (`handleRunSandbox`, line 103). The product's core promises — trustworthy evidence, real applications, proctored assessment — are represented by UI state rather than committed business state.
+[...]
+L220: Added in Revision B and re-confirmed against the live remote in Revision C (third audit pass, 2026-10-03). The latest GitHub Actions run on 2026-10-03 failed at `pnpm typecheck` (`.github/workflows/ci.yml` line 50) with `TS2307: Cannot find module '@talentsphere/ui'` and `TS2307: Cannot find module '@talentsphere/observability'`, so the release gate never reached unit/integration/security tests, build, or E2E (all skipped). A local reproduction of the same failure family was observed in this working tree (`tsc -p apps/web/tsconfig.json --noEmit` reports the `@talentsphere/ui` TS2307 among unresolved modules). This means even the existing automated proof is currently not executing end-to-end on `main`. Note (Revision C): an unmerged feature-branch commit (`d1b191e`) attempts a pnpm→npm migration but does not update `ci.yml`, which still runs `pnpm install --frozen-lockfile` and `pnpm typecheck`; the blocker remains open until a corrected fix lands on `main`.
+[...]
+L265: `browser still has token → token may verify cryptographically → backing user state no longer exists`
+[...]
+L346: - `notifications.send` handler.
+[...]
+L370: - always assigns `userTier = 'free'` (`apps/api/src/server.ts:5198`);
+[...]
+L372: - uses `generateCareerAssistantResponse(...)`;
+[...]
+L379: `AI Assistant guidance for: "${input.prompt}"`
+[...]
+L425: `Select plan → enter card → submit → Subscription Confirmed`
+[...]
+L429: `client validation → best-effort API call → local confirmation`
+[...]
+L433: `payment provider authorization → webhook → reconciled entitlement`
+[...]
+L451: `backend capability ≠ user capability`
+[...]
+L477: `Failure → explain → preserve → retry → alternate path → confirm final state`.
+[...]
+L682: `Goal → Skills → Evidence → Learning`
+[...]
+L752: `strong automated shell checks ≠ complete accessibility conformance`
+[...]
+L850: `React → Fastify → Domain → Worker → Supabase`
+[...]
+L854: `React → Fastify → in-memory Maps → pseudo queue`
+[...]
+L901: `41 SQL migrations`
+[...]
+L905: ### 11.4 Test architecture can create false confidence
+L906: 
+L907: A large number of API tests against `app.inject()` can prove domain behavior while still failing to prove:
+L908: 
+L909: `real browser → real backend → real database → real worker → real provider`
+L910: 
+L911: That exact distinction is visible in the repository's test design.
+L912: 
+[...]
+L937: `identity → profile → goals → skills → evidence → opportunity → persistent application → communication → outcome`
+[...]
+L957: `Enter invalid credentials → API unavailable → demo token → dashboard`
+[...]
+L965: `Enter card → backend request fails → local success state`
+[...]
+L973: `Enter corporate email → browser marks email verified because string exists`
+[...]
+L983: `Click Apply → local React state → "Application Transmitted"`
+[...]
+L993: `Event → queue → worker → log`
+[...]
+L1003: `Create data → restart API → data disappears`
+[...]
+L1070: 
+L1071: ## 15. Technical Debt
+L1072: 
+L1073: ## High
+L1074: 
+L1075: ### TD-01
+L1076: 390 KB single Fastify server file.
+L1077: 
+L1078: ### TD-02
+L1079: In-memory persistence pretending to be production data architecture.
+L1080: 
+L1081: ### TD-03
+L1082: Frontend business state hard-coded.
+L1083: 
+L1084: ### TD-04
+L1085: Demo fallback behavior left inside authentication.
+L1086: 
+L1087: ### TD-05
+L1088: Frontend API failures swallowed.
+L1089: 
+L1090: ### TD-06
+L1091: Billing without provider integration.
+L1092: 
+L1093: ### TD-07
+L1094: Worker handlers that only log completion.
+L1095: 
+L1096: ### TD-08
+L1097: Large divergence between canonical route documentation and actual route implementation.
+L1098: 
+L1099: ### TD-09
+L1100: Duplicate specification/status claims across README, registries and validation reports.
+L1101: 
+L1102: For example, README and FINAL_VALIDATION_REPORT describe different feature/test-count snapshots, which demonstrates documentation synchronization drift. [README.md](../../../../README.md) [FINAL_VALIDATION_REPORT.md](FINAL_VALIDATION_REPORT.md)
+L1103: 
+L1104: ### TD-10
+L1105: Test suites validate many API capabilities that are not reachable through the production web application.
+L1106: 
+L1107: ---
+L1108: 
+L1109: ## 16. Quick Wins
+L1110: 
+L1111: ## QW-01 — Delete demo authentication fallback
+L1112: 
+L1113: Replace:
+L1114: 
+L1115: `API failure → demo login`
+L1116: 
+L1117: with:
+L1118: 
+L1119: `API failure → visible error + retry`
+L1120: 
+L1121: This is the most important quick fix.
+L1122: 
+L1123: ---
+L1124: 
+L1125: ## QW-02 — Make UI success dependent on API success
+L1126: 
+L1127: Every transactional action should require:
+L1128: 
+L1129: `HTTP success + valid response body + state confirmation`
+L1130: 
+L1131: before showing success.
+L1132: 
+L1133: Do this first for:
+L1134: 
+L1135: - login;
+L1136: - checkout;
+L1137: - evidence;
+L1138: - apply.
+L1139: 
+L1140: ---
+L1141: 
+L1142: ## QW-03 — Make web pages data-driven
+L1143: 
+L1144: Replace hard-coded dashboard/jobs/evidence state with API queries.
+L1145: 
+L1146: ---
+L1147: 
+L1148: ## QW-04 — Add route guards
+L1149: 
+L1150: Unauthenticated users should not be able to access authenticated experiences merely by navigating to `/dashboard`.
+L1151: 
+L1152: ---
+L1153: 
+L1154: ## QW-05 — Create a real settings surface
+L1155: 
+L1156: This exposes already-existing backend functionality with comparatively little conceptual work.
+L1157: 
+L1158: ---
+L1159: 
+L1160: ## QW-06 — Create the first real messaging UI
+L1161: 
+L1162: The backend foundation already exists, so this gives the API capabilities an actual user value surface.
+L1163: 
+L1164: ---
+L1165: 
+L1166: ## QW-07 — Remove unsupported compliance claims
+L1167: 
+L1168: Do not say "GDPR & CCPA Compliant" until executable and operational evidence exists.
+L1169: 
+L1170: ---
+L1171: 
+L1172: ## 17. Prioritized Remediation Roadmap
+L1173: 
+L1174: ## Phase 0 — Stop pretending transactions succeeded
+L1175: 
+[...]
+L1195: `API → domain → repository → Supabase/Postgres`
+[...]
+L1231: `Register → Verify → Onboard → Goal → Skills → Evidence → Profile → Jobs → Apply → Track`
+[...]
+L1271: `entitlement → provider selection → AI generation → provenance → cost accounting → human review → action`
+[...]
+L1305: Scores are out of 10.
+L1306: 
+L1307: | Area | Score | Reason |
+L1308: |---|---:|---|
+L1309: | Architecture | **5/10** | Strong modular intent and shared packages, but runtime persistence architecture is not production-grade |
+L1310: | Business Readiness | **2/10** | Core product value cannot yet be reliably completed by end users |
+L1311: | Feature Completeness | **4/10** | Broad backend surface, weak browser coverage and many incomplete flows |
+L1312: | UX | **4/10** | Good visual shell, but state integrity and journey completeness are poor |
+L1313: | Accessibility | **8/10** | Strong automated Chromium accessibility coverage, but contrast/screen-reader verification is absent |
+L1314: | Security | **2/10** | Strong test intent, but fake login, raw card handling and unsigned webhook are critical |
+L1315: | Performance | **5/10** | Fast in-memory demo, insufficient evidence for real production load |
+L1316: | Test Coverage | **7/10** | Large and thoughtful automated suite, but substantial API-vs-browser coverage mismatch |
+L1317: 
+L1318: ### Calculation
+L1319: 
+L1320: `5 + 2 + 4 + 4 + 8 + 2 + 5 + 7`
+L1321: 
+L1322: Digit by digit:
+L1323: 
+L1324: `5 + 2 = 7`
+L1325: `7 + 4 = 11`
+L1326: `11 + 4 = 15`
+L1327: `15 + 8 = 23`
+L1328: `23 + 2 = 25`
+L1329: `25 + 5 = 30`
+L1330: `30 + 7 = 37`
+L1331: 
+L1332: `37 ÷ 8 = 4.625`
+L1333: 
+L1334: Rounded to one decimal:
+L1335: 
+~~~~

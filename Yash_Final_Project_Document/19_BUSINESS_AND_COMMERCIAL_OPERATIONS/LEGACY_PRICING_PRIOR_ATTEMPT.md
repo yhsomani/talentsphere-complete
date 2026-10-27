@@ -105,3 +105,142 @@ Target alignment: matches COM-OPS plan catalogue versioning and grandfathering (
 ## 7. Legacy rules that touch pricing (cross-reference; text in the BR catalogue)
 
 BR-007 (billing actions for recruiters only; conflicts with a candidate plan), BR-032 and BR-115 (subscription and course purchases webhook-owned and idempotent), BR-055 (changes at period boundary or prorated), BR-056 (entitlements from active subscription only), BR-099 (coupon floor), BR-100 (refund 30 days; conflict with target BR-T097, OPEN-33), BR-101 (instructor earnings = 70% of net revenue after platform commission, configurable; target Phase 2 sells first-party courses only, so payouts are deferred), BR-129/BR-130 (outreach credits and weekly caps; conflict with BR-T081), BR-195 (paid expert calls, transparent fee), BR-205 (API access requires enterprise tier).
+
+
+<!-- ledger-D D-03 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/PRICING.md (gap closure D-03)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: prior-code pointers `PaidPlans.tsx`, `plan-limits-domain`, `activeJobPostingLimit`, `packages/domain/src/stripe-billing.ts`, `tests/integration/plan-enforcement.test.ts` (lines 12-14, 32-41, 64-91 including the 'Enforced by' column).
+
+~~~~text
+L8: ## Where plans live (one source)
+L9: 
+L10: | Concern | Location |
+L11: |---|---|
+L12: | Plans, prices (USD minor units), marketing copy, per-plan limits | `packages/domain/src/billing.ts` (`PLATFORM_PLANS`, `getPlanEntitlements`) |
+L13: | Effective access from stored subscription (active/trialing only) | `effectiveEntitlements` in `packages/domain/src/stripe-billing.ts` |
+L14: | AI quota (derived from entitlements, no second table) | `AI_QUOTA_LIMITS`, `aiQuotaForEntitlements` in `ai-gateway.ts` |
+[...]
+L32: ## Enforcement status (verified by tests)
+L33: 
+L34: | Rule | Status |
+L35: |---|---|
+L36: | AI chat quota follows the stored subscription (402 when exceeded) | **Enforced** (`tests/integration/plan-enforcement.test.ts`) |
+L37: | Recruiter Starter: max 5 published jobs per organisation, on create and on status change | **Enforced** (same test, direct API calls) |
+L38: | Paid access only from verified Stripe state; failed/unpaid/canceled = free | **Enforced** (`effectiveEntitlements`, `stripe-billing` tests) |
+L39: | Duplicate / stale / forged Stripe webhooks | **Covered** by `tests/integration/stripe-billing.test.ts` |
+L40: | `hasAdvancedAnalytics`, "unlimited resume variations", "priority showcase visibility", multi-seat workspace, Deep Talent Graph | **Listed in plan copy, not gated or not implemented.** Do not sell until each is implemented and gated. |
+L41: | Free recruiters (no subscription) posting jobs | **Unlimited today.** Policy undecided; `activeJobPostingLimit` deliberately ignores non-recruiter tiers. |
+L42: 
+[...]
+L64: ## Changing a plan safely
+L65: 
+L66: 1. Edit `PLATFORM_PLANS` / `getPlanEntitlements` (limits and copy together; the
+L67:    unit test `plan-limits-domain` fails if AI copy and limits drift).
+L68: 2. Create a **new** Stripe price (prices are immutable), update the env var,
+L69:    archive the old price.
+L70: 3. Enforce any new limit through a domain function called by the route, with an
+L71:    API-level test that bypasses the UI.
+L72: 
+L73: ## Open decisions and not done
+L74: 
+L75: - Founder approval of the prices above; currency is USD only.
+L76: - Free-recruiter posting policy; which advertised features to build or drop.
+L77: - Frontend: `PaidPlans.tsx` (shown only when the server reports Stripe checkout
+L78:   enabled) now lists each plan's features from `/billing/plans` and has a
+L79:   monthly/yearly toggle; the browser sends the plan and cycle only. It also shows the signed-in user's current plan and today's AI usage (read from
+L80:   `/billing/subscription` and `/ai/usage`, display only) with a limit-reached
+L81:   prompt. It has no comparison table yet, and was not exercised in
+L82:   a running app (needs Stripe test config).
+L83: - Stripe: webhook registration, upgrade/downgrade proration, trials.
+L84: - Not verified: any live billing.
+L85: 
+L86: ## Review notes (2026-10-24)
+L87: 
+L88: - AI quota values were aligned to the entitlement table: free 20 to 5, Candidate Pro 500 to 50, Enterprise 5,000 to 200 requests/day (tokens 1M to 500k). This lowers limits that were previously generous; confirm before any paying customer exists.
+L89: - Entitlements follow the **acting user's** subscription, not the organisation's. A free-plan member of a paying organisation is not capped, and downgrades do not unpublish existing jobs. Deciding an organisation-level billing owner is an open product decision.
+L90: - The AI usage meter is in process memory (ephemeral): it resets on restart and is not shared between API instances, so quotas are not durable.
+L91: - Publishes are serialised per organisation in the API process; a second API instance would need a database-level guard.
+~~~~
+
+
+<!-- ledger-D D-22 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md (gap closure D-22)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: access-limit lines 9-10 ('gh' not installed, GitHub connector not authorised, no TODO/FIXME markers found, no credentials used) and the `FIXME` token.
+
+~~~~text
+L7: ## Access limits
+L8: 
+L9: - GitHub issues and PRs: not reachable. `gh` is not installed and the GitHub connector is not authorized. Only commit history, `docs/reports/` and in-code markers were reviewed. No `TODO`/`FIXME` markers were found in `apps`, `packages` or `supabase`.
+L10: - Stripe and Supabase projects: not inspected. No credentials were used. Stripe code ran only against fake gateways.
+L11: - Not run: `pnpm test:pg` (needs `TEST_DATABASE_URL`), Playwright e2e, Reticle (no UI change).
+~~~~
+
+
+<!-- ledger-D D-18 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/PAYMENT_AUDIT_2026-10-23.md (gap closure D-18)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: root-cause cells of P-1..P-6, baseline/after test numbers (4 failed / 5 passed; 42 / 42), the TS2345 text, `billingEventsByIdempotency`, `invoicesById`, `invoicesByUserId`, `${t}.${rawBody}`, evidence limit for P-3..P-5 (line 51).
+
+~~~~text
+L7: ## Scope and what exists
+L8: 
+L9: TalentSphere has **no Stripe or other payment-processor integration** (`CLAUDE.md`, `docs/reports/FEATURE_STATUS_2026-10-21.md`, issue #50). Billing is an in-memory scaffold in `apps/api/src/server.ts` (`/api/v1/billing/*`) over pure rules in `packages/domain/src/billing.ts`, plus an HMAC-signed generic webhook. Supabase Auth is not used (self-issued HMAC session tokens). Tables from `00014_billing_subscriptions_schema.sql` exist, but the API does not read or write them.
+L10: 
+L11: Adding a processor is a product decision (O-02 / X-03) and needs new dependencies in the protected `package.json`, so it was **not** attempted. This audit fixed the defects in the billing code that exists.
+L12: 
+L13: ## Access limits
+L14: 
+L15: - GitHub issues, PRs and discussions: not reachable (the session token is invalid; the issues API needs write-level attachment, which was not requested). Issue #50 is known only from `FEATURE_STATUS_2026-10-21.md`. No other GitHub issue was reviewed.
+L16: - Stripe and Supabase projects: not inspected. No Stripe account or Supabase project is wired into the repo.
+L17: - Not run: `pnpm test:pg` (needs `TEST_DATABASE_URL`), Playwright e2e, and the Reticle browser verification. The changes have no UI surface.
+L18: 
+L19: ## Issue register
+L20: 
+L21: | ID  | Pri | Defect (verified)                                                                                                                                                                                         | Root cause                                                                                                          | Fix                                                                                                                                                                                    | Status                           |
+L22: | --- | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+L23: | P-1 | P1  | `packages/domain` failed `tsc` (`TS2345: '"PAYMENT_REQUIRED"' is not assignable to DomainErrorCode`), breaking `pnpm build`/`typecheck`                                                                    | `createSubscription` threw a code missing from the `DomainErrorCode` union                                          | Added `PAYMENT_REQUIRED` to the union; mapped to HTTP 402 in the API error handler                                                                                                     | Fixed and verified               |
+L24: | P-2 | P1  | `BILLING_MODE=simulated` was broken: `/billing/subscribe` for a paid tier returned 422, so 4 integration tests failed (subscribe, invoices, cancel, worker jobs)                                           | Route allowed simulated paid plans, but the domain constructor refused every paid tier unconditionally              | `createSubscription` takes `allowSimulatedPayment` (default `false`); the route passes it only when `BILLING_MODE === 'simulated'`. Production config still refuses simulated mode    | Fixed and verified               |
+L25: | P-3 | P2  | A subscription scheduled to cancel at period end never ended: paid state and entitlements persisted forever                                                                                               | Nothing applied elapsed time to `cancelAtPeriodEnd`                                                                 | New domain `settleSubscription`; the route settles on `GET /subscription` and `POST /cancel` and drops entitlements to free                                                            | Fixed; unit-verified (see below) |
+L26: | P-4 | P2  | Repeating a period-end cancel overwrote `canceledAt`                                                                                                                                                      | `cancelSubscription` had no idempotency for an already-scheduled cancel                                             | Repeat is a no-op returning the same object; immediate cancel still allowed                                                                                                            | Fixed and verified               |
+L27: | P-5 | P2  | Reusing an idempotency key with a different plan or cycle returned the first request's result as a 200 "duplicate"                                                                                        | Duplicate detection matched the key only                                                                            | Compare the requested catalog amount with the stored invoice; mismatch returns 409 `CONFLICT`                                                                                          | Fixed and verified               |
+L28: | P-6 | P2  | Account erasure left billing data behind: `invoicesById` and `billingEventsByIdempotency` (carrying `userId`) were not purged                                                                             | Erasure deleted `invoicesByUserId` only                                                                             | Erasure now removes the user's invoices from `invoicesById` and their billing events                                                                                                   | Fixed; not covered by a test     |
+L29: 
+L30: ## Reviewed and left unchanged (no defect, or needs a decision)
+L31: 
+L32: - Webhook signature: HMAC-SHA256 over `${t}.${rawBody}` using the raw bytes, 5-minute tolerance, timing-safe compare, and refusal when no secret is configured. Sound for the generic scheme. It is **not** Stripe's `Stripe-Signature` format.
+L33: - Webhook idempotency is in-memory (`billingEventsByIdempotency`), so replays after a restart are reprocessed, and the handler records the event but changes no entitlements. This is acceptable only while billing is disabled. A real integration needs durable `billing_events` writes keyed by the provider event id.
+L34: - `billing_events.idempotency_key` and `invoices.idempotency_key` are globally `UNIQUE` in SQL, while the in-memory check is per-user. Persisting as-is would let two users collide on one key. Scope the key per user when persisting.
+L35: - Webhook `userId` is not checked for existence. This would violate the `billing_events` foreign key once persisted.
+L36: - Plan `targetRole` is not enforced on subscribe, so any role can pick any plan in simulated mode. Left alone: the role-to-plan rule is not defined in the registries, and inventing it would be a new requirement.
+L37: - Entitlements are not consumed outside the billing routes (F-61: "no gating").
+L38: 
+L39: ## Verification (run in a scratch copy, because `AGENTS.md` forbids installs and builds that write protected files in the repo)
+L40: 
+L41: | Check                                                                                  | Result                             |
+L42: | -------------------------------------------------------------------------------------- | ---------------------------------- |
+L43: | Baseline `tests/integration/billing.test.ts`                                           | 4 failed / 5 passed                |
+L44: | Baseline `pnpm --filter ./packages/* build`                                            | `packages/domain` failed (`TS2345`) |
+L45: | After fixes: packages build                                                            | all pass                           |
+L46: | After fixes: `tsc -b` and `tsc -p tests`                                               | pass                               |
+L47: | After fixes: billing integration, billing domain, production-config                    | 42 / 42 pass                       |
+L48: | After fixes: `vitest run` (full)                                                       | 115 files, 1182 tests pass         |
+L49: | Prettier on all changed files                                                          | pass                               |
+L50: 
+L51: Evidence of "fails before, passes after": P-1 and P-2 were observed failing at baseline. P-3, P-4 and P-5 tests were written after the fix and were **not** run against the unfixed code. P-3 is verified at the domain level only; there is no HTTP-level test because the session token would expire under the clock jump needed.
+L52: 
+L53: ## Changed files
+L54: 
+L55: - `packages/domain/src/core.ts`, `packages/domain/src/billing.ts`
+L56: - `apps/api/src/server.ts`
+L57: - `tests/unit/billing-domain.test.ts`, `tests/integration/billing.test.ts`
+L58: 
+L59: No protected build file was modified.
+~~~~

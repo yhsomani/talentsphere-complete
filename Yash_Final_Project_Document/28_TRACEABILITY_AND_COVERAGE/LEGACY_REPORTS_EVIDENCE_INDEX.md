@@ -395,3 +395,303 @@ Each trace is UI, then API and authorization, then domain, then storage and asyn
 Architecture assessment of the same date (condensed): React/Vite to Fastify to shared contracts and domain to PostgreSQL plus an in-process read model, plus a separate PostgreSQL job worker; core operations committed before maps are updated; hydration reads the core dataset at boot (volume limits unmeasured); static route count 274 registrations, 70 durable-registry entries, 3 stateless, 201 ephemeral-header routes, which are labels and not 70 proven durable workflows; 51 SQL files; the AI assistant was a local heuristic and two assistant routes call the assessment-AI check; browser sessions were bearer tokens in storage; no rewrite or route-module split was justified merely by server size; profile measured boot and hot paths before changing the persistence design.
 
 Matrix recommendations of 2026-10-22: the 26 "Full" features formed the closed core loop (identity F-01, 03, 12, 15, 60, 65, 80; skills and evidence F-84, 96, 173; proof of control F-58, 94, 162; marketplace and hiring F-04, 05, 06, 25, 32, 56, 102, 117; communication F-10, 14, 29; resilience F-02, 21); durability migration order for partial features F-08, F-07, F-36, F-26, F-17. Several of those "Full" labels were later rated partial or not implemented (lessons LES-06).
+
+
+<!-- ledger-D D-13 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/FEATURE_STATUS_2026-10-21.md (gap closure D-13)
+
+Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+Named by the preservation audit: 19 code/line tokens (`server.ts:5449`, `background-jobs.ts:441,462`, `apps/worker/src/claim.ts:74,90,93`, `tests/security/injection-defenses.test.ts:210-223`, ...) and the defect register D-01..D-10 rows (lines 298-310). The 173 status/expected/actual rows remain in `AUDIT_FEATURE_EVIDENCE_CROSSWALK.csv`.
+
+~~~~text
+L23: - Started on `main`, HEAD `a30b35bfb01d648632e8df57ab378c00ca9313aa`, with 27 staged entries. These included career/learning/profile/challenge UI, tests, maintenance documentation, deletion of six temporary E2E specs, and deletion of protected `apps/web/vite.audit.config.ts` and `playwright.audit.config.ts`.
+[...]
+L34: | `pnpm.cmd lint` | FAIL: exit 1 | `CareerPaths.tsx`, root `ARCHITECTURE.md`, and five `graphify-out` files listed in JSON. No write-formatting performed. |
+[...]
+L45: The Vitest reporter counts 458 suites including nested `describe` blocks; **115** is the file count. Do not confuse those numbers. The security test in `tests/security/injection-defenses.test.ts:210` catches a failed shell `grep` and substitutes an empty result. `Get-Command grep` found no executable here, so its passing assertion is not reliable secret-scan evidence on this host.
+[...]
+L298: | ID | Finding | Evidence | Severity | Scope/impact | Dependencies | Fix/next action | Verification | Status |
+L299: |---|---|---|---|---|---|---|---|---|
+L300: | D-01 | Unexecuted challenge receives passing score | `packages/domain/src/assessment.ts:97`; API submit at `server.ts:4612`; source probe `this is not executable code` → passed/100, executed=false | P0 before scored assessment exposure | F-08; misleading API assessment result, though evidence stays unverified | #49 trust/execution contract | X-05: submission-only result or fail-closed scoring until isolated executor approved | Arbitrary/wrong/malicious input never reports genuine pass; preserve AI policy and evidence trust tests | Reproduced source evaluator; API wiring statically traced |
+L301: | D-02 | Batch lease expires before sequential jobs run | `apps/worker/src/claim.ts:74,90,93`; `background-jobs.ts:441,462` | P0 for reliable verification delivery | Two workers can execute one claimed job twice; later completion lacks claim-owner fencing | #44/#47 | X-06: claim only executable capacity, then fence acknowledgements; keep mail idempotency | Six jobs, two workers, slow handlers: each claimed execution bounded; stale owner cannot acknowledge newer claim | Reproduced synthetic memory-store probe: 6 jobs, 9 executions, 3 duplicates; PG/provider not tested |
+L302: | D-03 | Erasure commits deactivation before all cleanup succeeds | `server.ts:10423–10495`; `resolveSession` rejects closed account at 829 | P0 privacy/recovery gate | Failure of later metadata/search/request operation leaves partial cleanup and no ordinary user retry | #45 policy; failure-injection test | X-07: durable resumable cleanup or transaction for owned SQL data; visible operator recovery | Inject failure after core commit; restart; complete cleanup exactly once while user remains closed | Static failure-path finding; not runtime reproduced |
+L303: | D-04 | Email and legal readiness missing | mail-provider adapter plus #44/#45 comments | P0 release gate | Verification cannot be accepted without inbox proof; legal/contact/retention acceptance absent | Owner/provider/legal | X-02/X-07: configure existing adapter, approve policy and monitored contacts | Live inbox/token/replay/expiry/retry; counsel/owner record, erasure drill | External evidence/decision gap; not missing-adapter defect |
+L304: | D-05 | Selected visible state remains ephemeral | server Maps, route ledger; network/portfolio/course code | P1, P0 if included as reliable launch promise | F-09/26/07 and drafts/alerts can lose state after restart | #48 and approved scope | X-01: complete one approved vertical slice at a time; retain truthful preview restrictions elsewhere | PG rows/restart/concurrent user/erasure plus full UI outcome | Source-confirmed limitation; restart not run |
+L305: | D-06 | Current release evidence incomplete | CI lookup empty; DB env absent; protected-file build limits | P0 release gate | Green memory tests do not prove deployed product | #46/#47, build authorization/environment | X-00/X-08/X-09: clean permitted environment, populated migration, live drills | Exact-SHA CI, hosted RLS, HTTPS/worker-kill, restore/rollback, load/cold boot | Blocked verification |
+L306: | D-07 | Secret-scan test passes on shell failure | `tests/security/injection-defenses.test.ts:210–223`; no `grep` command found here | P1 quality | A broken scanner can look clean | None for test fix | X-10: portable read-only source scan; fail on execution error | Seed synthetic match and scanner failure; both must fail | Confirmed static test weakness; no leaked secret alleged |
+L307: | D-08 | Formatting gate already red | `pnpm.cmd lint`, seven paths in ledger | P2 locally; gate blocks merging | Existing source/docs/graph artifacts | Owner of pre-existing edits; protected-format controls unchanged | X-10: bounded authorized formatting fixes; do not run repository-wide writer | Prettier read-only check on intended diff then root check | Current command failed; no formatting fixes made |
+L308: | O-01 | ADR-015/schema ratification | ADR status, #46 | P0 before populated migration | Uniqueness/FKs/token backfill semantics | Product/architecture owner | Ratify actual architecture and rehearse snapshot upgrade/rollback | Signed decision plus observed constraints/backfill results | Open decision |
+L309: | O-02 | Beta/GA scope and commercial policy | PRD §8; #50; OD-34/35 | P1, release gating | Free-only vs payment provider; narrow beta vs full loop | Product owner | X-03: explicit free-only or approved paid scope; preserve disabled default | Consistent UI/API entitlement behavior | Open decision; free-only is recommendation |
+L310: | O-03 | Trust, sessions and consequential logic | #49; SSOT E; work-history scorer | P1, release gating where exposed | Badge legacy values, real executor, cookies/CSRF, predictive hiring | Security/product/governance owners | Approve separate designs; no incidental provider/cookie/scoring migration | Adversarial trust/session tests and owner acceptance | Open decision |
+[...]
+L343: (`apps/api/src/server.ts:5449`) replaces three certificate Map entries and appends
+[...]
+L345: revocation (`server.ts:1559`) persists evidence but does not update a linked
+[...]
+L365: **D-01:** call the current source `evaluateChallengeSubmission` with a candidate UUID, allowed language `javascript`, one input/output test case, and code `this is not executable code`. The probe asserted `score === 100` and `evidence.metadata.executed === false`; result was `passed`, verification `unverified`. The source function was transpiled in memory; core/evidence/challenge dependencies came from existing `dist`. Existing integration tests explicitly expect the simulated 100, illustrating why a passing suite alone is insufficient.
+[...]
+L369: **D-03:** the failure injection to implement is a rejection of `accountMetadata.erase()` after `persist(...erasureOps)` succeeds. The account is already deactivated; `resolveSession` rejects the next user request, so recovery must be durable/operator-driven. The source demonstrates the ordering; no DB fault was injected in this audit.
+[...]
+L618: | Registry F-29: scheduled digest | Only an `emailDigestFrequency` preference. The worker has no digest job. |
+[...]
+L641: 5. **Quiz and course reviews (F-68, F-72).** `LessonContentType` already includes `quiz`, and the instructor review pattern can be reused for course ratings.
+~~~~
+
+
+<!-- ledger-D D-14 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/FEATURE_TRACEABILITY_MATRIX.md (gap closure D-14)
+
+Frame: nothing is implemented in this project. The prior attempt's 173-feature traceability matrix (per-feature endpoint lists and UI component names, 174 rows not previously verbatim) and the two notes the earlier merge dropped (repository URL `https://github.com/yhsomani/talentsphere-complete.git` on line 7 and the `storage.core.persist()` migration note on line 258) are now quoted in full, line numbered, in [`LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md`](LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md). Evidence about the prior attempt only.
+
+
+<!-- ledger-D D-24 -->
+## Merged from legacy: 31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json (the 8 partially preserved members, gap closure D-24)
+
+Frame: nothing is implemented in this project. The 1.83 MB JSON is the prior attempt's machine evidence (2026-10-21, source head `a771a87b`). It stays archived and unmodified. The preservation audit found 9 of its 17 top-level members effectively preserved (remote, journeys, routes, migrations, inventory, tests, probes, summaryCounts, documentationCrossCheck) and 8 only partly preserved. This section lists, per partial member, what was not preserved and how to recover it; where the missing content is small it is quoted verbatim below, and where it is per-row it is exported to two CSV files in this folder. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
+
+| # | Member | Not preserved by the earlier merge | Closure now | How to recover the rest |
+|---|---|---|---|---|
+| 2 | `snapshot` | `initialStagedEntries` provenance (27 entries) and 8 paths; `concurrentChange`; `sourceHashComparison.limitation` | Quoted verbatim below | Not needed; complete below |
+| 3 | `method` | the method sentence | Quoted verbatim below | Not needed; complete below |
+| 4 | `features` (173 x 32 fields) | `referenceCandidates` excerpts (688), `testEvidence.association` (375), `subfeatures` text (174), `maturity` (10 dimensions x 173), `nextAction` (173), `verificationLimitation` (173, one distinct value), `previousAssessment` (21 non-empty), `canonicalContract` (46) | `nextAction`, `previousAssessment`, all `maturity.*` dimensions, `verificationLimitation`, `dataLineage` and `releaseDeferralConsequence` exported per feature to [`LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv`](LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv) | `referenceCandidates`, `testEvidence.association`: open the archived JSON, read `features[i].referenceCandidates` / `features[i].testEvidence.association` by `id` (prior-code evidence, not requirements). `subfeatures` and `canonicalContract` derive from `SSOT.md` (retained) and its 46 contract headings (see this index, intended contracts) |
+| 5 | `businessRules` (248) | `references[].excerpt` (1,003 prior-code excerpts), `nextAction` (248), 47 reference line numbers | `nextAction`, `sourceLine`, `status`, `associationWarning` exported per rule to [`LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv`](LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv); ids and rule text already in `06_BUSINESS_PROCESSES/LEGACY_BR_CATALOGUE_BR001_BR248.md` | `references[].excerpt` and line numbers: archived JSON, `businessRules[i].references` by `id` (excerpts of prior code only) |
+| 12 | `inspectionLimitations` | 5 limitation sentences | Quoted verbatim below | Not needed |
+| 13 | `contractInventory` | `source` and `limitation` text | Quoted verbatim below | Not needed |
+| 15 | `artifactValidation` | `checks` and `diffWhitespaceCheck` text | Quoted verbatim below | Not needed |
+| 17 | `focusedContractReviews` | source lines, command, result, observed, limits (defects D-09, D-10) | Quoted verbatim below | Not needed |
+
+Also quoted below because the audit counted a few strings as missing: member 10 `tests` (command, limitations, nonEmittingTypechecks) and member 16 `documentationCrossCheck` (limits sentences, routeCountingScope).
+
+Recovery commands (read-only; run from the repository root against the archived file, do not write into the archive):
+
+~~~~text
+python -I -c "import json,sys;d=json.load(open('Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json',encoding='utf-8'));print(json.dumps(d['features'][0]['referenceCandidates'],indent=1))"
+python -I -c "import json,sys;d=json.load(open('Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json',encoding='utf-8'));print(json.dumps(d['businessRules'][0]['references'],indent=1))"
+~~~~
+
+**method (member 3)**
+
+~~~~json
+"Current static reference inventory with targeted deep traces and memory-mode tests. Candidate associations are not proofs of implementation or requirements coverage."
+~~~~
+
+**snapshot without initialStagedEntries (member 2)**
+
+~~~~json
+{
+ "date": "2026-10-21 America/Los_Angeles",
+ "initialHead": "a30b35bfb01d648632e8df57ab378c00ca9313aa",
+ "finalSourceHead": "a771a87be85869fac4cf30c16cab7f4c715a6178",
+ "branch": "main",
+ "concurrentChange": "Initial staged work committed externally during audit; no commit made by auditor",
+ "node": "24.19.0",
+ "pnpm": "11.7.0",
+ "sourceHashComparison": {
+  "baselineHead": "a771a87be85869fac4cf30c16cab7f4c715a6178",
+  "changedTrackedFiles": [
+   "ARCHITECTURE.md",
+   "BRAIN/MEMORY.md",
+   "SSOT.md",
+   "docs/INDEX.md",
+   "docs/experience/APP_FLOW.md",
+   "docs/governance/IMPLEMENTATION_PLAN.md",
+   "docs/reports/FEATURE_PLAN_2026-10-21.md",
+   "docs/reports/FEATURE_STATUS_2026-10-21.md"
+  ],
+  "productSourceChanged": false,
+  "protectedTrackedFilesChanged": false,
+  "limitation": "Compared tracked-file SHA-256 snapshots after external commit; ignored build caches were not comprehensively hashed. Native config/no-cache/non-emitting commands were used."
+ }
+}
+~~~~
+
+**snapshot.initialStagedEntries (27 entries, `status path | provenance`)**
+
+~~~~text
+M apps/web/src/App.tsx | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/components/CareerPaths.tsx | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/components/SkillsSection.tsx | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/lib/career.ts | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/lib/course.ts | Initial git status recorded same staged path; committed externally during audit
+M apps/web/src/pages/AssessmentsPage.tsx | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/pages/CareerPage.tsx | Initial git status recorded same staged path; committed externally during audit
+A apps/web/src/pages/CoursePage.tsx | Initial git status recorded same staged path; committed externally during audit
+M apps/web/src/pages/LearningPage.tsx | Initial git status recorded same staged path; committed externally during audit
+M apps/web/src/pages/ProfilePage.tsx | Initial git status recorded same staged path; committed externally during audit
+D apps/web/vite.audit.config.ts | Initial git status recorded same staged path; committed externally during audit
+A docs/engineering/PROJECT_MAINTENANCE.md | Initial git status recorded same staged path; committed externally during audit
+M docs/reports/MAINTENANCE_AUDIT_2026-10-21.md | Initial git status recorded same staged path; committed externally during audit
+D playwright.audit.config.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_accessibility.spec.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_account-security.spec.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_auth-profile.spec.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_frontend-fixes.spec.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_portfolio-resumes.spec.ts | Initial git status recorded same staged path; committed externally during audit
+D tests/e2e/_tmp_responsive.spec.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/e2e/career-readiness.spec.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/e2e/challenges.spec.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/e2e/lesson-player.spec.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/e2e/skills-graph.spec.ts | Initial git status recorded same staged path; committed externally during audit
+M tests/e2e/web-ui.spec.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/unit/web-career.test.ts | Initial git status recorded same staged path; committed externally during audit
+A tests/unit/web-course.test.ts | Initial git status recorded same staged path; committed externally during audit
+~~~~
+
+**inspectionLimitations (member 12)**
+
+~~~~json
+[
+ "Not all SSOT/PRD/TRD prose converted to atomic requirements",
+ "Feature references and domain candidates are not full call-graph proofs",
+ "All 28 journeys inventoried, selected subsets traced, none run end to end",
+ "No actual database migration state or provider/deployment acceptance",
+ "No compatible document/presentation template export capability"
+]
+~~~~
+
+**contractInventory (member 13)**
+
+~~~~json
+{
+ "mappedFeatures": 46,
+ "source": "SSOT detailed feature headings",
+ "limitation": "Top-level numbered behavior and declared fields extracted; atomic semantic coverage not certified"
+}
+~~~~
+
+**artifactValidation (member 15)**
+
+~~~~json
+{
+ "features": 173,
+ "businessRules": 248,
+ "journeys": 28,
+ "featureBacklogPackets": 169,
+ "tests": 1172,
+ "testFiles": 115,
+ "checks": "Unique IDs, source/test/UI path existence, line bounds, backlog coverage, all test assertions passed, migration hashes unchanged, tracked changes documentation-only",
+ "passed": true,
+ "diffWhitespaceCheck": "passed after correcting audit-added trailing whitespace; pre-existing formatting failures remain"
+}
+~~~~
+
+**focusedContractReviews (member 17)**
+
+~~~~json
+[
+ {
+  "featureIds": [
+   "F-07",
+   "F-52"
+  ],
+  "finding": "D-09",
+  "canonicalRule": "BR-048",
+  "requirement": "Final assessment >=70% before course completion",
+  "source": "apps/api/src/server.ts:5254",
+  "observed": "Completed lesson count alone triggers completed enrollment, authority_verified evidence and verified certificate.",
+  "test": "tests/integration/lms-courses.test.ts",
+  "command": "node node_modules/vitest/vitest.mjs run tests/integration/lms-courses.test.ts --configLoader native --no-cache --reporter=dot",
+  "result": "6 passed; existing test asserts certificate after three lesson completions without any assessment",
+  "limits": [
+   "Memory mode; existing built workspace dependencies",
+   "No browser or PostgreSQL execution",
+   "Persist-failure retry hazard statically inspected, not fault-injected"
+  ],
+  "backlog": "X-11"
+ },
+ {
+  "featureIds": [
+   "F-52",
+   "F-96"
+  ],
+  "finding": "D-10",
+  "requirement": "SSOT 6.3 dependent signal invalidation; BR-149 append-only history",
+  "source": [
+   "apps/api/src/server.ts:5449",
+   "apps/api/src/server.ts:1559",
+   "apps/worker/src/index.ts:30"
+  ],
+  "observed": "Certificate/evidence revocation updates independent records; verification reads independent hashes; worker only records event.",
+  "verification": "Static source tracing; cross-proof and restart test not executed",
+  "backlog": "X-11"
+ }
+]
+~~~~
+
+**tests without the 115-file list (member 10: command, limitations, nonEmittingTypechecks and totals)**
+
+~~~~json
+{
+ "command": "node node_modules/vitest/vitest.mjs run --configLoader native --no-cache --reporter=json --outputFile=$env:TEMP/talentsphere-audit-vitest.json",
+ "passed": 1172,
+ "failed": 0,
+ "pending": 0,
+ "limitations": "Memory mode; workspace dependencies may resolve pre-existing dist outputs; no clean build or PostgreSQL/browser proof",
+ "migrationHistory": {
+  "passed": 5,
+  "failed": 0
+ },
+ "nonEmittingTypechecks": "All 10 tsconfig projects passed with --noEmit --incremental false --composite false --declaration false --declarationMap false",
+ "lint": {
+  "exitCode": 1,
+  "files": [
+   "apps/web/src/components/CareerPaths.tsx",
+   "ARCHITECTURE.md",
+   "graphify-out/.graphify_labels.json",
+   "graphify-out/cost.json",
+   "graphify-out/GRAPH_REPORT.md",
+   "graphify-out/graph.json",
+   "graphify-out/manifest.json"
+  ]
+ }
+}
+~~~~
+
+**documentationCrossCheck without the 46-document list (member 16: limits, routeCountingScope and counts)**
+
+~~~~json
+{
+ "sourceHead": "a771a87be85869fac4cf30c16cab7f4c715a6178",
+ "trackedMarkdownFilesScanned": 46,
+ "missingRelativeLinkTargets": [],
+ "browserRouteDeclarations": 30,
+ "routeCountingScope": "Includes layout, index and catch-all; not 30 unique user journeys",
+ "missingHistoricalDeliverables": [
+  "project-maintenance.sh",
+  "scripts/tests/project-maintenance.test.sh"
+ ],
+ "changesSinceSourceSnapshot": [
+  "ARCHITECTURE.md",
+  "BRAIN/MEMORY.md",
+  "README.md",
+  "SSOT.md",
+  "docs/INDEX.md",
+  "docs/engineering/API_CONTRACTS.md",
+  "docs/engineering/DATABASE.md",
+  "docs/engineering/PROJECT_MAINTENANCE.md",
+  "docs/experience/APP_FLOW.md",
+  "docs/experience/JOURNEY_REGISTRY.md",
+  "docs/governance/GAP_ANALYSIS.md",
+  "docs/governance/IMPLEMENTATION_PLAN.md",
+  "docs/quality/OPERATIONS.md",
+  "docs/quality/SECURITY.md",
+  "docs/quality/TESTING.md",
+  "docs/registries/BUSINESS_RULE_REGISTRY.md",
+  "docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md",
+  "docs/reports/E2E_AUDIT_2026-10-21.md",
+  "docs/reports/FEATURE_PLAN_2026-10-21.md",
+  "docs/reports/FEATURE_STATUS_2026-10-21.md",
+  "docs/reports/FINAL_VALIDATION_REPORT.md",
+  "docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md",
+  "docs/reports/MAINTENANCE_AUDIT_2026-10-21.md",
+  "docs/superpowers/plans/2026-10-21-project-maintenance.md"
+ ],
+ "nonMarkdownTrackedChangesSinceSourceSnapshot": [],
+ "limits": [
+  "Link scan checks local file existence, not heading anchors or external URLs.",
+  "Document scan is not semantic acceptance of every feature, rule or journey.",
+  "Protected deploy documents were read only. Historical implementation claims are retained with current-checkout corrections."
+ ]
+}
+~~~~
