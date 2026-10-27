@@ -138,8 +138,8 @@
     },
     {
       "path": "Yash_Final_Project_Document/04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md",
-      "accessCount": 4,
-      "lastAccessed": 1792920126002,
+      "accessCount": 5,
+      "lastAccessed": 1793125529491,
       "type": "file"
     },
     {
@@ -239,6 +239,12 @@
       "type": "file"
     },
     {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1793125902965,
+      "type": "directory"
+    },
+    {
       "path": "AGENTS.md",
       "accessCount": 1,
       "lastAccessed": 1792866526122,
@@ -260,12 +266,6 @@
       "path": "apps/web/src",
       "accessCount": 1,
       "lastAccessed": 1792867756262,
-      "type": "directory"
-    },
-    {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1792867807477,
       "type": "directory"
     },
     {
