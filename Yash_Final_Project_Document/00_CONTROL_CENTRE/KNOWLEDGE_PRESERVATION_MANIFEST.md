@@ -172,3 +172,114 @@ Every original heading maps to the same record anchor with `--<original-heading-
 Validation scope: exact complete-record comparison after deterministic reference rewriting and anchor insertion; every source-heading anchor; baseline-versus-current Markdown file/fragment link checks; tracked reference search including non-Markdown artifacts; Git recovery comparison; non-document/protected-file hashes; working-tree and whitespace checks. Existing broken links to absent legacy material are reported separately rather than counted as new regressions. Reticle and application builds/tests are skipped because this changes documentation only. No security policy, database schema, entitlement, application behavior or production system changes; no migrations. No fresh product-completeness or production-readiness claim is made.
 
 Executed results: 23 complete records and 189 source-heading anchors passed; 924 relative Markdown links inspected, 82 pointing to consolidated records; 0 new broken links and 0 stale source links. The scanner reports 37 pre-existing broken-link occurrences before and 37 after; this is a bounded inline-Markdown-link scan, not validation of remote URLs or every Markdown extension. Protected/non-document hash mismatches: 0.
+
+
+## Documentation consolidation — 2026-10-27 (batch 2)
+
+Recovery revision: `9c79504bcda1ad6467b5229f10660e1073e9427e`. Every selected source was tracked and clean against it before consolidation (Gate D, checked by script). Recover any source with `git show 9c79504bcda1ad6467b5229f10660e1073e9427e:Yash_Final_Project_Document/<original-path>` (inspect before restoring). `99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md` is **kept**: the root `SSOT.md` links to it and editing `SSOT.md` was not authorized (Gate C block).
+
+Prose-only mentions of the old file names (review reports, crosswalk CSVs, prior-attempt matrices) are historical evidence and were not rewritten; the table below is the old-path to new-location map. Markdown links were repaired.
+
+| Original path (relative to blueprint root) | Canonical record | Source SHA-256 | Heading units | A/B/C/D/E/F |
+|---|---|---|---:|---|
+| `00_CONTROL_CENTRE/ASSUMPTIONS.md` | [Preserved record](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md#record-assumptions) | `03dbb169aaea2addb52659fd4c655de8c1fd71598348c6d16848539081783f5f` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `00_CONTROL_CENTRE/PROJECT_SCOPE.md` | [Preserved record](EXECUTION_LEDGER.md#record-project-scope) | `300ffe98f845f131e636565b8f9bcd3a3557f87e4f1f94f690f66f8e3b4da86d` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md` | [Preserved record](#record-source-document-inventory) | `221fcec4eb2da7acfc9cf4441e2372217eba04f9804aadbd10e05e801d0ace28` | 4 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md` | [Preserved record](#record-information-reconciliation-matrix) | `0b318a27f1d439d21a860654d1789c1d20795e3c80fdc5c2aaaea1a82c1e9355` | 2 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md` | [Preserved record](#record-cleanup-candidates) | `f34ae6cc0010e020dbf7070c9de071cd73a2428c786f04cf2be4f3655fdcb5b3` | 3 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `11_BACKEND_ARCHITECTURE/INDEX.md` | [Preserved record](MASTER_INDEX.md#record-11-backend-architecture-index) | `a52990617611da77696b478c90ce09dfbcdf9367704413329efa4a96ad3e99b9` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `12_DATA_AND_DATABASE/INDEX.md` | [Preserved record](MASTER_INDEX.md#record-12-data-and-database-index) | `0efe15548d5b4dc136791cf3a92a78b6e4dfae0a90b2a415a15ae0577f6914fb` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `13_API_EVENTS_AND_INTEGRATIONS/INDEX.md` | [Preserved record](MASTER_INDEX.md#record-13-api-events-and-integrations-index) | `0af3deea885791db49cd206df1450bc94f06b51e67ea9d12592ecbd281c9092e` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md` | [Preserved record](MASTER_INDEX.md#record-14-security-privacy-compliance-index) | `42513afbd488561a73ed56cb123bcfdb9de695406245546e0ea6601bb7340ede` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `31_LEGACY_ARCHIVE/README.md` | [Preserved record](MASTER_INDEX.md#record-31-legacy-archive-readme) | `5f0b144c6eae4bda07f7a568912f805f62b19ce455eedb7409a121d813f23db7` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `99_FINAL_MASTER_BLUEPRINT/FINAL_ARCHITECTURE_SUMMARY.md` | [Preserved record](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md#record-final-architecture-summary) | `eacefe97a01f66d7f9691f8ac1b5ada2f75084c5a937626220c0b53135acd238` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `99_FINAL_MASTER_BLUEPRINT/FINAL_DOMAIN_COVERAGE.md` | [Preserved record](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md#record-final-domain-coverage) | `56c0e1c3aee7489dbc50ce732363e8d147d7c1b850e052019646e9b5ba285698` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md` | [Preserved record](../25_DIAGRAM_LIBRARY/LEGACY_MERGE_DIAGRAMS.md#record-system-diagrams) | `d3b2a7b45f00f4b0b5846193a2f25f2b26101181cfdfc94f8d004c3cd0b263ca` | 8 | PASS / PASS / PASS / PASS / PASS / PASS |
+| `26_RESEARCH_AND_REFERENCES/RESEARCH_LOG.md` | [Preserved record](../26_RESEARCH_AND_REFERENCES/RESEARCH_LOG_FRONTEND.md#record-research-log) | `b564a877ab059795b6887a5b0ee2bc313099f4d735d2629a2ddeb9fa5bd7be76` | 1 | PASS / PASS / PASS / PASS / PASS / PASS |
+
+
+
+<a id="record-source-document-inventory"></a>
+## Preserved source record: SOURCE_DOCUMENT_INVENTORY
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md -->
+# Source Document Inventory (V9 control document)
+
+Doc ID: CC-SRC · Version 1.0 · Status: Draft · Added additively; no existing file was changed to create it.
+
+The controlling inventory is already maintained as the machine-readable [KNOWLEDGE_PRESERVATION_MANIFEST.csv](KNOWLEDGE_PRESERVATION_MANIFEST.csv) with narrative in [KNOWLEDGE_PRESERVATION_MANIFEST.md](#) and a protected-tree baseline in [PROTECTED_DOCUMENT_TREE_BASELINE.csv](PROTECTED_DOCUMENT_TREE_BASELINE.csv). This file does not duplicate rows; it records the V9 checks and where each V9 inventory field lives.
+
+## Verified observations (2026-10-25, this session, read-only commands)
+- Repository root: `C:/Users/yashs/OneDrive/Desktop/talentsphere-complete`.
+- `SSOT.md` files found: exactly one (`./SSOT.md`, repo root, excluding `node_modules`). `git status --porcelain -- SSOT.md` returned nothing (no uncommitted change).
+- `git status --porcelain` outside `Yash_Final_Project_Document/` returned nothing: no uncommitted change to application source, config or external docs.
+- Files in `Yash_Final_Project_Document/`: 158, all tracked by git at the time of the check.
+- Markdown files outside the doc root (excluding node_modules, graphify-out, .omc): 187 found by `find`; the manifest records 204 source records (190 text docs, 1 JSON evidence file, 13 non-text utility artifacts).
+
+## Field mapping (V9 §2.4 / §7 → where recorded)
+| V9 field | Location |
+|---|---|
+| Path, type, size/identity | manifest CSV; baseline CSV (bytes only; a SHA-256 exists only where the manifest states one, e.g. SSOT.md) |
+| Inspection / extraction status | manifest CSV status vocabulary; snapshot per manifest md (2026-10-25): 174 partially processed, 1 fully processed, 1 retained historical, 28 out of scope |
+| Target references | manifest CSV destination columns; crosswalks in 06, 13, 28 |
+| Disposition | manifest CSV; none eligible for cleanup |
+
+## Not verified here
+Per-source content extraction for the 174 partially processed records; hash re-computation; unreadable/uninspected lists beyond what the manifest states.
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md -->
+
+
+<a id="record-information-reconciliation-matrix"></a>
+## Preserved source record: INFORMATION_RECONCILIATION_MATRIX
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md -->
+# Information Reconciliation Matrix (V9 control document)
+
+Doc ID: CC-REC · Version 1.0 · Status: Draft · Additive; summarises and links existing candidate crosswalks. Nothing here approves equivalence between a source item and a target item.
+
+| Source area | Target area | Reconciliation artifact | State |
+|---|---|---|---|
+| `SSOT.md` §7 features F-01…F-173 | 04 FEAT hierarchy | [SSOT_FEATURE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md) | Candidate, unapproved (OPEN-41) |
+| `docs/registries/BUSINESS_RULE_REGISTRY.md` + SSOT §19 (BR-001…248, MIG) | 06 BR-T registry | [LEGACY_RULE_CROSSWALK](../06_BUSINESS_PROCESSES/LEGACY_RULE_CROSSWALK.md) + `.csv` | Per manifest: 9 exact, 67 partial, 8 conflicts, 1 superseded, 171 no-match; owner review OPEN-43 |
+| SSOT UX micro-patterns (100) | 07 UX | [UX_PATTERN_SOURCE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/UX_PATTERN_SOURCE_CROSSWALK.md) | Candidate |
+| SSOT phases/gates/governance (69) | 22, 24 | [PHASE_GATE_GOVERNANCE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.md) | Candidate |
+| Observed implementation controls (38) | 11, 14, 17 | [OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.md) | Candidate |
+| Audit evidence JSON 2026-10-21 (173 features, 28 journeys, 274 routes …) | 28 | [AUDIT_EVIDENCE_2026-10-21_INDEX](../28_TRACEABILITY_AND_COVERAGE/AUDIT_EVIDENCE_2026-10-21_INDEX.md) | Partially migrated |
+| SSOT service/interface contracts (SCI 54, CON 16) | 13 | SSOT_SERVICE_CONTRACT_CROSSWALK, SSOT_INTERFACE_CONTRACT_CROSSWALK | Candidate (OPEN-46/50) |
+| Observed routes (278) | 13 | OBSERVED_ROUTE_TARGET_CROSSWALK.csv | 9 candidates, 4 method mismatches, 265 unmatched; semantic mapping open |
+
+## Known unreconciled areas (from the independent review, still open)
+Source/target conflicts: target-vs-built stack, phase vocabularies, privacy thresholds, pricing, role model, ADR-015, feature-register authority. See `27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md` (45 findings) and `REVIEW_RESOLUTION_DECISIONS.md`. REVW-01..05 were fixed in docs earlier; REVW-06..45 are only partly addressed (fix agents were interrupted by a usage limit).
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md -->
+
+
+<a id="record-cleanup-candidates"></a>
+## Preserved source record: CLEANUP_CANDIDATES
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md -->
+# Cleanup Candidate Register (V9 control document)
+
+> **2026-10-27 scoped supersession:** The newer user-authorized consolidation of 23 revision/addendum records is tracked in the [preservation manifest](#documentation-consolidation--2026-10-27). The zero-candidate and blanket folder-retention statements below describe the earlier initiative and do not prohibit this explicitly scoped cleanup. All other protections remain.
+
+
+Doc ID: CC-CLN · Version 1.0 · Status: Draft · Additive.
+
+**Eligible for cleanup approval: 0.** No external document has been verified as fully reconciled with nothing unique remaining, so none is a cleanup candidate yet. No file was deleted, moved or renamed by this initiative.
+
+## Ineligible under every circumstance
+- Every `SSOT.md` (one found: repo root) and every file inside `Yash_Final_Project_Document/`.
+- Application source, config, schemas, tests, deployment, tool/agent instructions (`AGENTS.md`, `CLAUDE.md`, `.claude/**`, `.agents/**`), generated `graphify-out/**`, `TalentSphere/` Obsidian vault (per manifest).
+
+## Candidate list
+| ID | Path | Reason | Canonical target | Reconciliation | SSOT check | Target-folder check | Action | Approval |
+|---|---|---|---|---|---|---|---|---|
+| (none) | — | — | — | — | — | — | — | — |
+
+Process for future entries: the manifest's cleanup gate applies (content reviewed, unique information mapped with evidence, contradictions recorded, dependency checks, individual — never bulk — deletion, then re-check that SSOT.md and baseline files exist). Dispositions available: Keep · Keep as historical reference · Link to canonical documentation · Potentially redundant · Awaiting reconciliation · Requires human review · Eligible for cleanup approval.
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md -->

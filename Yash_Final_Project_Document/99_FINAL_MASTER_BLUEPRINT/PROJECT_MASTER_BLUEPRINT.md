@@ -96,7 +96,7 @@ Status words: ANSWERED = answered in the documents (design only, unratified; say
 | 47 | What will it cost and what is the commercial model? | [COST_MODEL](../21_COST_AND_FINOPS/COST_MODEL.md), [COMMERCIAL_OPERATIONS](../19_BUSINESS_AND_COMMERCIAL_OPERATIONS/COMMERCIAL_OPERATIONS.md) | OPEN: no price or cost data |
 | 48 | How are AI features governed? | [SECURITY_ARCHITECTURE](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md) (AI gateway, INV-T08/T14); [ADR_REGISTER](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md) ADR-T12 | PARTIAL: log retention OPEN-X03; TEST-AI-001..006 not run |
 | 49 | What are the top risks? | [RISK_REGISTER](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md) | ANSWERED (56 risks; P1 list in the register) |
-| 50 | Who reviewed this and how independent is the review? | [FINAL_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md), [SECOND_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md), [PROJECT_SCOPE](../00_CONTROL_CENTRE/PROJECT_SCOPE.md) (model policy) | PARTIAL: same model family; effort setting not verified; model-policy enforcement unverified |
+| 50 | Who reviewed this and how independent is the review? | [FINAL_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md), [SECOND_REVIEW_REPORT](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md), [PROJECT_SCOPE](../00_CONTROL_CENTRE/EXECUTION_LEDGER.md#record-project-scope) (model policy) | PARTIAL: same model family; effort setting not verified; model-policy enforcement unverified |
 
 ## 11. Honest limits
 No user research, device testing, legal review, cost/price data, executed tests or benchmarks. Agent-written documents were not cross-checked line by line; the independent review lists contradictions found. Federation tooling stability must be proven by spike before commitment. In this documentation pass, roadmap package counts and registered AC references were checked; `git diff --check` passed. Mermaid rendering, machine-readable schema validation and application tests were not rerun.
@@ -111,3 +111,47 @@ No user research, device testing, legal review, cost/price data, executed tests 
 The earlier audit-pass figures (159 and 636 links, 232 dead in five `LEGACY_*` files) were from different scopes and are superseded by this table. Model-policy enforcement (Sonnet or Haiku only) is unverified; `tests_executed = 0`.
 
 2026-10-27 patch round: the 50-question table above was expanded (questions 41 to 50 are reconstructed wording), and ID families and open items were registered. No test, validator, renderer or build was run.
+
+
+<a id="record-final-architecture-summary"></a>
+## Preserved source record: FINAL_ARCHITECTURE_SUMMARY
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/FINAL_ARCHITECTURE_SUMMARY.md -->
+# Final Architecture Summary
+
+Version 1.1 · Under Review. This is a target design, not an implementation report. Decision status is governed by the [ADR register](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md); diagrams are in [system diagrams](../25_DIAGRAM_LIBRARY/LEGACY_MERGE_DIAGRAMS.md#record-system-diagrams).
+
+**Browser:** installable PWA with a host shell, cookie-based BFF session, router, design system, and error boundaries. The proposed initial delivery uses bundled lazy domain modules behind the typed `RemoteModule`/`HostApi` contract. Runtime Module Federation 2.0 with Vite is optional and awaits ADR-T23 ratification, OPEN-03 evidence, at least three named independent frontend teams, a demonstrated independent-release need, and a passing WP-FED-SPIKE. The signed registry, per-remote deployment, and last-known-good fallback belong to that gated federated mode; they are not approved or verified runtime controls.
+
+**Server:** proposed Fastify modular monolith with public-interface-only module boundaries, central `can()` policy, worker/outbox processing, PostgreSQL as the system of record with RLS, and external providers behind ports. The sandbox runner and AI gateway remain target components subject to their release gates; this document does not claim they exist.
+
+**Contracts and quality:** REST/OpenAPI and AsyncAPI are specified; fitness functions FF-01…FF-10 and 214 test cases are documented as target checks. The catalog does not establish that these tests or CI gates are implemented or passing.
+
+**Boundaries and open evidence:** offline data is a cache, never authoritative (INV-T13). Modules sharing the browser execution context are not a security boundary (ADR-T19). iOS/Android device behavior remains unverified. Open decisions include federation activation and integrity evidence (OPEN-03, OPEN-11, OPEN-FE-03), hosting/HA (OPEN-14), and sandbox build-vs-buy (OPEN-27).
+<!-- source-record-end: Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/FINAL_ARCHITECTURE_SUMMARY.md -->
+
+
+<a id="record-final-domain-coverage"></a>
+## Preserved source record: FINAL_DOMAIN_COVERAGE
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/FINAL_DOMAIN_COVERAGE.md -->
+# Final Domain Coverage
+
+Version 1.0 · Under Review. Full matrix of mission families A–X: [DOMAIN_ARCHITECTURE §4](../03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md). Features per domain: [hierarchy](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md).
+
+Portfolio identity is not yet crosswalked: root `SSOT.md` §7 owns 173 canonical `F-*` IDs, while the hierarchy contains 253 decomposed `FEAT-*` rows. Domain-family coverage does not prove one-to-one or one-to-many feature coverage; OPEN-41 blocks a complete portfolio-coverage claim.
+
+| Family | Covered by | Depth |
+|---|---|---|
+| Identity, orgs, profile, skills, evidence, verification, assessment, learning, jobs, applications, matching | DOM-01…11 | Full specs, rules, state machines, screens, APIs |
+| Career intelligence, messaging, notifications, billing, privacy, AI gateway | DOM-12/13/15/16/17/22 | Specs + rules + APIs |
+| Institutions, networking/community, integrations | DOM-18/14/23 | Lighter; phased (Ph3/Ph4); community deferred |
+| Safety, admin/support, analytics, platform | DOM-19/20/21/24 | Processes, runbooks, metrics; fewer feature specs |
+| Deliberately not built | generic workflow engine, CRM, payroll, ad network, crypto credentials, native apps at launch | Rationale in DOMAIN_ARCHITECTURE |
+
+Known coverage gaps: 26 features without acceptance criteria; no UI research validation; legal regimes unconfirmed (OPEN-08).
+<!-- source-record-end: Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/FINAL_DOMAIN_COVERAGE.md -->

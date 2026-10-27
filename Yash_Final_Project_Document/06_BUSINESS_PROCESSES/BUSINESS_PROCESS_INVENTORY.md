@@ -83,7 +83,7 @@ Format: steps are numbered inline; **Ex** lists the exception paths (every one m
 
 # Patch 2026-10-27: Edge-case families (EDG-01..EDG-12)
 
-**[TARGET] / PROPOSED.** Cross-cutting families that every process (BP-*) must consider. "Disposition" is the stance for the target design; nothing here is measured. Related contracts: ACTION_REGISTRY ACT-ATOM-*, PROGRESSIVE_UX_AND_FEEDBACK UXH-*, STATE_MACHINES completion vocabulary. Security-owned items (credential and revocation timing, audit names) are in [14_SECURITY_PRIVACY_COMPLIANCE](../14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md) (pending patch); webhook and idempotency mechanics in [13_API_EVENTS_AND_INTEGRATIONS](../13_API_EVENTS_AND_INTEGRATIONS/INDEX.md) (pending patch).
+**[TARGET] / PROPOSED.** Cross-cutting families that every process (BP-*) must consider. "Disposition" is the stance for the target design; nothing here is measured. Related contracts: ACTION_REGISTRY ACT-ATOM-*, PROGRESSIVE_UX_AND_FEEDBACK UXH-*, STATE_MACHINES completion vocabulary. Security-owned items (credential and revocation timing, audit names) are in [14_SECURITY_PRIVACY_COMPLIANCE](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-14-security-privacy-compliance-index) (pending patch); webhook and idempotency mechanics in [13_API_EVENTS_AND_INTEGRATIONS](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-13-api-events-and-integrations-index) (pending patch).
 
 | ID | Family | Cases to cover | Rule / rationale | Disposition |
 |---|---|---|---|---|

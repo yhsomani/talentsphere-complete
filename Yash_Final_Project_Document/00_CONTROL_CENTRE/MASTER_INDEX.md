@@ -4,7 +4,7 @@ Authority: [PROJECT_MASTER_BLUEPRINT](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTE
 
 | Folder | Contents |
 |---|---|
-| 00_CONTROL_CENTRE | [ID_REGISTRY](ID_REGISTRY.md) · [DOCUMENT_STATUS](DOCUMENT_STATUS.md) · [CANONICAL_INVARIANTS](CANONICAL_INVARIANTS.md) · [CONSENT_SCOPE_CATALOGUE](CONSENT_SCOPE_CATALOGUE.md) · [PROJECT_SCOPE](PROJECT_SCOPE.md) · [ASSUMPTIONS](ASSUMPTIONS.md) · [GLOSSARY](GLOSSARY.md) · [EXECUTION_LEDGER](EXECUTION_LEDGER.md) · [Knowledge preservation manifest](KNOWLEDGE_PRESERVATION_MANIFEST.md) · [Source inventory CSV](KNOWLEDGE_PRESERVATION_MANIFEST.csv) · [Protected tree baseline](PROTECTED_DOCUMENT_TREE_BASELINE.csv) |
+| 00_CONTROL_CENTRE | [ID_REGISTRY](ID_REGISTRY.md) · [DOCUMENT_STATUS](DOCUMENT_STATUS.md) · [CANONICAL_INVARIANTS](CANONICAL_INVARIANTS.md) · [CONSENT_SCOPE_CATALOGUE](CONSENT_SCOPE_CATALOGUE.md) · [PROJECT_SCOPE](EXECUTION_LEDGER.md#record-project-scope) · [ASSUMPTIONS](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md#record-assumptions) · [GLOSSARY](GLOSSARY.md) · [EXECUTION_LEDGER](EXECUTION_LEDGER.md) · [Knowledge preservation manifest](KNOWLEDGE_PRESERVATION_MANIFEST.md) · [Source inventory CSV](KNOWLEDGE_PRESERVATION_MANIFEST.csv) · [Protected tree baseline](PROTECTED_DOCUMENT_TREE_BASELINE.csv) |
 | 01 | [Vision & business model](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md) |
 | 02 | [Roles & permissions](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md) · [User journeys](../02_STAKEHOLDERS_AND_USERS/USER_JOURNEYS.md) |
 | 03 | [Domain architecture](../03_BUSINESS_DOMAINS/DOMAIN_ARCHITECTURE.md) |
@@ -26,12 +26,12 @@ Authority: [PROJECT_MASTER_BLUEPRINT](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTE
 | 19–21 | [Commercial](../19_BUSINESS_AND_COMMERCIAL_OPERATIONS/COMMERCIAL_OPERATIONS.md) · [Metrics](../20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md) · [Cost](../21_COST_AND_FINOPS/COST_MODEL.md) |
 | 22–23 | [Roadmap](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) · [Migration plan](../23_MIGRATION_AND_EVOLUTION/MIGRATION_AND_EVOLUTION_PLAN.md) · [Data migration](../23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md) |
 | 24 | [ADRs](../24_RISKS_AND_DECISIONS/ADR_REGISTER.md) · [Risks](../24_RISKS_AND_DECISIONS/RISK_REGISTER.md) · [Open decisions](../24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md) |
-| 25 | [Diagrams](../25_DIAGRAM_LIBRARY/SYSTEM_DIAGRAMS.md) |
-| 26 | [Research](../26_RESEARCH_AND_REFERENCES/RESEARCH_LOG.md) · [Frontend research](../26_RESEARCH_AND_REFERENCES/RESEARCH_LOG_FRONTEND.md) |
+| 25 | [Diagrams](../25_DIAGRAM_LIBRARY/LEGACY_MERGE_DIAGRAMS.md#record-system-diagrams) |
+| 26 | [Research](../26_RESEARCH_AND_REFERENCES/RESEARCH_LOG_FRONTEND.md#record-research-log) · [Frontend research](../26_RESEARCH_AND_REFERENCES/RESEARCH_LOG_FRONTEND.md) |
 | 27 | [Scenario simulations](../27_INDEPENDENT_REVIEWS/SCENARIO_SIMULATIONS.md) · [Final review report](../27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md) (review in progress at time of writing) |
 | 28 | [Traceability & validation](../28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md); [Protected-source reconciliation audit](../28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md); [SSOT feature crosswalk (draft)](../28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md); [Feature registry metadata crosswalk](../28_TRACEABILITY_AND_COVERAGE/FEATURE_REGISTRY_METADATA_CROSSWALK.md); [Route authorization findings](../28_TRACEABILITY_AND_COVERAGE/ROUTE_AUTHORIZATION_FINDING_CROSSWALK.md); [Historical audit evidence index](../28_TRACEABILITY_AND_COVERAGE/AUDIT_EVIDENCE_2026-10-21_INDEX.md); [Historical migration evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_MIGRATION_EVIDENCE_CROSSWALK.md); [Historical test evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_TEST_EVIDENCE_CROSSWALK.md); [Historical probe evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_PROBE_EVIDENCE_CROSSWALK.md); [Historical external issue crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_EXTERNAL_ISSUE_EVIDENCE_CROSSWALK.md); [Historical route evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_ROUTE_EVIDENCE_CROSSWALK.md); [Historical audit inventory crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_INVENTORY_EVIDENCE_CROSSWALK.md); [Historical documentation cross-check](../28_TRACEABILITY_AND_COVERAGE/AUDIT_DOCUMENTATION_CROSSCHECK.md); [Historical journey evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_JOURNEY_EVIDENCE_CROSSWALK.csv); [Architecture durability report crosswalk](../28_TRACEABILITY_AND_COVERAGE/ARCHITECTURE_DURABILITY_REPORT_CROSSWALK.md); [ADR-015 persistence crosswalk](../28_TRACEABILITY_AND_COVERAGE/ADR_015_PERSISTENCE_CROSSWALK.md); [UX pattern source crosswalk](../28_TRACEABILITY_AND_COVERAGE/UX_PATTERN_SOURCE_CROSSWALK.md); [Phase, gate and governance crosswalk](../28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.md); [Observed implementation control crosswalk](../28_TRACEABILITY_AND_COVERAGE/OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.md); [Audit feature-evidence crosswalk](../28_TRACEABILITY_AND_COVERAGE/AUDIT_FEATURE_EVIDENCE_CROSSWALK.csv); [AC-to-test matrix](../28_TRACEABILITY_AND_COVERAGE/AC_TEST_TRACEABILITY_MATRIX.md) |
 | 29 | [Developer guide](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) |
-| 99 | [Master blueprint](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md) · [Architecture summary](../99_FINAL_MASTER_BLUEPRINT/FINAL_ARCHITECTURE_SUMMARY.md) · [Domain coverage](../99_FINAL_MASTER_BLUEPRINT/FINAL_DOMAIN_COVERAGE.md) · [Readiness](../99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md) |
+| 99 | [Master blueprint](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md) · [Architecture summary](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md#record-final-architecture-summary) · [Domain coverage](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md#record-final-domain-coverage) · [Readiness](../99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md) |
 
 ## Final integration (added 2026-10-26): legacy merge, SSOT v6.1, prior-implementation reference
 
@@ -62,10 +62,10 @@ Authority: [PROJECT_MASTER_BLUEPRINT](../99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTE
 | 08_PWA_AND_MOBILE | [LEGACY_MERGE_PWA_AND_OFFLINE.md](../08_PWA_AND_MOBILE/LEGACY_MERGE_PWA_AND_OFFLINE.md) |
 | 09_MODULE_FEDERATION | [LEGACY_MERGE_MODULE_BOUNDARY_RULES.md](../09_MODULE_FEDERATION/LEGACY_MERGE_MODULE_BOUNDARY_RULES.md) |
 | 10_FRONTEND_ARCHITECTURE | [LEGACY_MERGE_FRONTEND_AND_UI_QUALITY.md](../10_FRONTEND_ARCHITECTURE/LEGACY_MERGE_FRONTEND_AND_UI_QUALITY.md) |
-| 11_BACKEND_ARCHITECTURE | [INDEX.md](../11_BACKEND_ARCHITECTURE/INDEX.md) |
-| 12_DATA_AND_DATABASE | [INDEX.md](../12_DATA_AND_DATABASE/INDEX.md) |
-| 13_API_EVENTS_AND_INTEGRATIONS | [INDEX.md](../13_API_EVENTS_AND_INTEGRATIONS/INDEX.md) |
-| 14_SECURITY_PRIVACY_COMPLIANCE | [INDEX.md](../14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md) |
+| 11_BACKEND_ARCHITECTURE | [INDEX.md](#record-11-backend-architecture-index) |
+| 12_DATA_AND_DATABASE | [INDEX.md](#record-12-data-and-database-index) |
+| 13_API_EVENTS_AND_INTEGRATIONS | [INDEX.md](#record-13-api-events-and-integrations-index) |
+| 14_SECURITY_PRIVACY_COMPLIANCE | [INDEX.md](#record-14-security-privacy-compliance-index) |
 | 15_RELIABILITY_AND_PERFORMANCE | [LEGACY_MERGE_RELIABILITY_AND_FAILURE_MODES.md](../15_RELIABILITY_AND_PERFORMANCE/LEGACY_MERGE_RELIABILITY_AND_FAILURE_MODES.md) |
 | 16_QA_AND_TESTING | [LEGACY_MERGE_CONDITION_MATRIX.md](../16_QA_AND_TESTING/LEGACY_MERGE_CONDITION_MATRIX.md) |
 | 16_QA_AND_TESTING | [LEGACY_MERGE_TESTING_STRATEGY.md](../16_QA_AND_TESTING/LEGACY_MERGE_TESTING_STRATEGY.md) |
@@ -100,7 +100,7 @@ Related additions in this revision (all in place, nothing moved): [ID families](
 ### Files previously not indexed
 | Folder | Files |
 |---|---|
-| 00_CONTROL_CENTRE | [CLEANUP_CANDIDATES.md](../00_CONTROL_CENTRE/CLEANUP_CANDIDATES.md) · [EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum](../00_CONTROL_CENTRE/EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum) · [INFORMATION_RECONCILIATION_MATRIX.md](../00_CONTROL_CENTRE/INFORMATION_RECONCILIATION_MATRIX.md) · [LEGACY_MERGE_LEDGER_D.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_D.md) · [MASTER_INDEX.md#record-master-index-v9-addendum](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum) · [MASTER_INDEX.md#record-master-index-v9-addendum-2](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-2) · [SOURCE_DOCUMENT_INVENTORY.md](../00_CONTROL_CENTRE/SOURCE_DOCUMENT_INVENTORY.md) |
+| 00_CONTROL_CENTRE | [CLEANUP_CANDIDATES.md](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-cleanup-candidates) · [EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum](../00_CONTROL_CENTRE/EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum) · [INFORMATION_RECONCILIATION_MATRIX.md](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-information-reconciliation-matrix) · [LEGACY_MERGE_LEDGER_D.md](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_D.md) · [MASTER_INDEX.md#record-master-index-v9-addendum](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum) · [MASTER_INDEX.md#record-master-index-v9-addendum-2](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-2) · [SOURCE_DOCUMENT_INVENTORY.md](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-source-document-inventory) |
 | 01_EXECUTIVE_AND_STRATEGY | [PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2](../01_EXECUTIVE_AND_STRATEGY/PRODUCT_VISION_AND_BUSINESS_MODEL.md#record-product-vision-goals-rev2) |
 | 02_STAKEHOLDERS_AND_USERS | [STAKEHOLDERS_ROLES_PERMISSIONS.md#record-permission-matrix-rev2](../02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md#record-permission-matrix-rev2) |
 | 04_PRODUCT_CAPABILITIES | [CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2](../04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2) |
@@ -124,7 +124,7 @@ Related additions in this revision (all in place, nothing moved): [ID families](
 | 27_INDEPENDENT_REVIEWS | [REVIEW_FIX_STATUS.md](../27_INDEPENDENT_REVIEWS/REVIEW_FIX_STATUS.md) · [REVIEW_RESOLUTION_DECISIONS.md](../27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md) · [SECOND_REVIEW_REPORT.md](../27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md) |
 | 28_TRACEABILITY_AND_COVERAGE | [ADR_015_PERSISTENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ADR_015_PERSISTENCE_CROSSWALK.csv) · [ARCHITECTURE_DURABILITY_REPORT_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ARCHITECTURE_DURABILITY_REPORT_CROSSWALK.csv) · [AUDIT_DOCUMENTATION_CROSSCHECK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_DOCUMENTATION_CROSSCHECK.csv) · [AUDIT_EXTERNAL_ISSUE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_EXTERNAL_ISSUE_EVIDENCE_CROSSWALK.csv) · [AUDIT_INVENTORY_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_INVENTORY_EVIDENCE_CROSSWALK.csv) · [AUDIT_MIGRATION_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_MIGRATION_EVIDENCE_CROSSWALK.csv) · [AUDIT_PROBE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_PROBE_EVIDENCE_CROSSWALK.csv) · [AUDIT_ROUTE_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_ROUTE_EVIDENCE_CROSSWALK.csv) · [AUDIT_TEST_EVIDENCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/AUDIT_TEST_EVIDENCE_CROSSWALK.csv) · [COVERAGE_MATRICES.md](../28_TRACEABILITY_AND_COVERAGE/COVERAGE_MATRICES.md) · [FEATURE_REGISTRY_METADATA_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/FEATURE_REGISTRY_METADATA_CROSSWALK.csv) · [LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv) · [LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv) · [LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md](../28_TRACEABILITY_AND_COVERAGE/LEGACY_TRACEABILITY_MATRIX_ROWS_FROM_PRIOR_ATTEMPT.md) · [OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.csv) · [PHASE_GATE_GOVERNANCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.csv) · [ROUTE_AUTHORIZATION_FINDING_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/ROUTE_AUTHORIZATION_FINDING_CROSSWALK.csv) · [UX_PATTERN_SOURCE_CROSSWALK.csv](../28_TRACEABILITY_AND_COVERAGE/UX_PATTERN_SOURCE_CROSSWALK.csv) |
 | 30_PRIOR_IMPLEMENTATION_REFERENCE | [01-PRODUCT-REQUIREMENTS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/01-PRODUCT-REQUIREMENTS.md) · [02-ARCHITECTURE.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/02-ARCHITECTURE.md) · [03-DEVELOPMENT-GUIDE.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/03-DEVELOPMENT-GUIDE.md) · [04-FEATURES-AND-WORKFLOWS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/04-FEATURES-AND-WORKFLOWS.md) · [05-DATABASE-AND-API.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/05-DATABASE-AND-API.md) · [06-SECURITY-AND-INTEGRATIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/06-SECURITY-AND-INTEGRATIONS.md) · [07-TESTING-AND-OPERATIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/07-TESTING-AND-OPERATIONS.md) · [08-ROADMAP-AND-DECISIONS.md](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md) |
-| 31_LEGACY_ARCHIVE | [README.md](../31_LEGACY_ARCHIVE/README.md) · [docs/reports/AUDIT_EVIDENCE_2026-10-21.json](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json) |
+| 31_LEGACY_ARCHIVE | [README.md](#record-31-legacy-archive-readme) · [docs/reports/AUDIT_EVIDENCE_2026-10-21.json](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json) |
 | (root) | [README.md](../README.md) (root of this document set) |
 
 
@@ -143,10 +143,10 @@ Additive companion to [MASTER_INDEX](MASTER_INDEX.md) (left unchanged). Lists co
 
 | Document | Purpose |
 |---|---|
-| [SOURCE_DOCUMENT_INVENTORY](SOURCE_DOCUMENT_INVENTORY.md) | Verified preservation checks; where inventory fields live |
+| [SOURCE_DOCUMENT_INVENTORY](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-source-document-inventory) | Verified preservation checks; where inventory fields live |
 | [KNOWLEDGE_PRESERVATION_MANIFEST](KNOWLEDGE_PRESERVATION_MANIFEST.md) / [.csv](KNOWLEDGE_PRESERVATION_MANIFEST.csv) / [baseline](PROTECTED_DOCUMENT_TREE_BASELINE.csv) | Source records and protected-tree baseline |
-| [INFORMATION_RECONCILIATION_MATRIX](INFORMATION_RECONCILIATION_MATRIX.md) | Source-to-target crosswalk status |
-| [CLEANUP_CANDIDATES](CLEANUP_CANDIDATES.md) | 0 eligible; protections |
+| [INFORMATION_RECONCILIATION_MATRIX](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-information-reconciliation-matrix) | Source-to-target crosswalk status |
+| [CLEANUP_CANDIDATES](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-cleanup-candidates) | 0 eligible; protections |
 | [EXECUTION_LEDGER_V9_ADDENDUM](EXECUTION_LEDGER.md#record-execution-ledger-v9-addendum) | Current state, disclosure of earlier in-place edits, next actions |
 | [CONSENT_SCOPE_CATALOGUE](CONSENT_SCOPE_CATALOGUE.md) | Canonical consent scopes |
 | [REVIEW_RESOLUTION_DECISIONS](../27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md) | Binding decisions for review findings REVW-06..45 |
@@ -210,3 +210,78 @@ Items the reviewer flagged in this control layer (not yet fixed): no original, R
 | [LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_FEATURE_JUDGEMENTS.csv), [LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv](../28_TRACEABILITY_AND_COVERAGE/LEGACY_AUDIT_JSON_PER_BUSINESS_RULE_JUDGEMENTS.csv) | Per-row judgements exported from the archived evidence JSON. |
 
 <!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX_V9_ADDENDUM_3.md -->
+
+
+<a id="record-11-backend-architecture-index"></a>
+## Preserved source record: INDEX
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/INDEX.md -->
+# 11 Backend Architecture - Index
+Supersedes nothing. Doc ID: IDX-11 · Owner: Backend Architecture Team · Version 1.0 · Status: Under Review · Relates: BE-01
+- [BACKEND_ARCHITECTURE.md](../11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE.md) (BE-01)
+- Legacy merge (Ledger B, supersedes nothing; prior-attempt reference only): [LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_ARCHITECTURE_RULES_AND_ADRS.md) (LGM-B-11A) · [LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md](../11_BACKEND_ARCHITECTURE/LEGACY_MERGE_IMPLEMENTED_TOPOLOGY_LESSONS.md) (LGM-B-11B) · ledger: [../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_B.md](LEGACY_MERGE_LEDGER_B.md)
+<!-- source-record-end: Yash_Final_Project_Document/11_BACKEND_ARCHITECTURE/INDEX.md -->
+
+
+<a id="record-12-data-and-database-index"></a>
+## Preserved source record: INDEX
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/12_DATA_AND_DATABASE/INDEX.md -->
+# 12 Data & Database - Index
+Supersedes nothing. Doc ID: IDX-12 · Owner: Data Architecture · Version 1.0 · Status: Under Review · Relates: DB-01..DB-04
+- [CONCEPTUAL_AND_LOGICAL_MODEL.md](../12_DATA_AND_DATABASE/CONCEPTUAL_AND_LOGICAL_MODEL.md) (DB-01)
+- [PHYSICAL_DESIGN.md](../12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md) (DB-02)
+- [DATA_GOVERNANCE_AND_LIFECYCLE.md](../12_DATA_AND_DATABASE/DATA_GOVERNANCE_AND_LIFECYCLE.md) (DB-03)
+- [MIGRATION_POLICY.md](../12_DATA_AND_DATABASE/MIGRATION_POLICY.md) (DB-04)
+- Reference-to-target data note: [../23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md](../23_MIGRATION_AND_EVOLUTION/REFERENCE_TO_TARGET_DATA_MIGRATION.md) (MIG-DATA-01)
+- Legacy merge (Ledger B, supersedes nothing; prior-attempt reference only): [LEGACY_MERGE_DATABASE_REFERENCE.md](../12_DATA_AND_DATABASE/LEGACY_MERGE_DATABASE_REFERENCE.md) (LGM-B-12) · ledger: [../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_B.md](LEGACY_MERGE_LEDGER_B.md)
+<!-- source-record-end: Yash_Final_Project_Document/12_DATA_AND_DATABASE/INDEX.md -->
+
+
+<a id="record-13-api-events-and-integrations-index"></a>
+## Preserved source record: INDEX
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/INDEX.md -->
+# 13 API, Events & Integrations - Index
+Supersedes nothing. Doc ID: IDX-13 · Owner: Backend Architecture Team · Version 1.0 · Status: Under Review · Relates: API-STD, APIC-01, EVC-01, INT-01
+- [API_DESIGN_STANDARDS.md](../13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md) · [API_CATALOG.md](../13_API_EVENTS_AND_INTEGRATIONS/API_CATALOG.md) · [EVENT_CATALOG.md](../13_API_EVENTS_AND_INTEGRATIONS/EVENT_CATALOG.md) · [INTEGRATION_ARCHITECTURE.md](../13_API_EVENTS_AND_INTEGRATIONS/INTEGRATION_ARCHITECTURE.md)
+- Contracts: [openapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/openapi.yaml) · [asyncapi.yaml](../13_API_EVENTS_AND_INTEGRATIONS/contracts/asyncapi.yaml) · [schemas/](../13_API_EVENTS_AND_INTEGRATIONS/contracts/schemas) (Evidence, Application, EventEnvelope)
+- Legacy merge (Ledger B, supersedes nothing; prior-attempt reference only): [LEGACY_MERGE_API_CONTRACTS.md](../13_API_EVENTS_AND_INTEGRATIONS/LEGACY_MERGE_API_CONTRACTS.md) (LGM-B-13); the legacy 278-route index is preserved row for row in [OBSERVED_REFERENCE_API_INVENTORY.csv](../13_API_EVENTS_AND_INTEGRATIONS/OBSERVED_REFERENCE_API_INVENTORY.csv) · ledger: [../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_B.md](LEGACY_MERGE_LEDGER_B.md)
+<!-- source-record-end: Yash_Final_Project_Document/13_API_EVENTS_AND_INTEGRATIONS/INDEX.md -->
+
+
+<a id="record-14-security-privacy-compliance-index"></a>
+## Preserved source record: INDEX
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md -->
+# 14 Security, Privacy & Compliance - Index
+Supersedes nothing. Doc ID: IDX-14 · Owner: Security Architect · Version 1.0 · Status: Under Review · Relates: SEC-01..SEC-04
+- [THREAT_MODEL.md](../14_SECURITY_PRIVACY_COMPLIANCE/THREAT_MODEL.md) · [SECURITY_ARCHITECTURE.md](../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md) · [PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md](../14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md) · [COMPLIANCE_APPLICABILITY_MATRIX.md](../14_SECURITY_PRIVACY_COMPLIANCE/COMPLIANCE_APPLICABILITY_MATRIX.md)
+- Legacy merge (Ledger B, supersedes nothing; prior-attempt reference only): [LEGACY_MERGE_SECURITY_CONTROLS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_SECURITY_CONTROLS.md) (LGM-B-14A) · [LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md](../14_SECURITY_PRIVACY_COMPLIANCE/LEGACY_MERGE_ROUTE_AUTHORIZATION_FINDINGS.md) (LGM-B-14B) · ledger: [../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_B.md](LEGACY_MERGE_LEDGER_B.md)
+<!-- source-record-end: Yash_Final_Project_Document/14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md -->
+
+
+<a id="record-31-legacy-archive-readme"></a>
+## Preserved source record: README
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/31_LEGACY_ARCHIVE/README.md -->
+# 31_LEGACY_ARCHIVE
+
+The legacy Markdown documents that used to be archived here (`docs/`, `BRAIN/`, `deploy/*.md`) were merged into the final blueprint (see `00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md` to `_D.md`) and removed on 2026-10-27. Every file is recoverable from git commit `85706db0`:
+
+```bash
+git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/<path>
+```
+
+Kept here: `docs/reports/AUDIT_EVIDENCE_2026-10-21.json`, the structured audit evidence of the earlier attempt (indexed in `28_TRACEABILITY_AND_COVERAGE/LEGACY_REPORTS_EVIDENCE_INDEX.md`); about 2,700 detail strings exist only there.
+<!-- source-record-end: Yash_Final_Project_Document/31_LEGACY_ARCHIVE/README.md -->
