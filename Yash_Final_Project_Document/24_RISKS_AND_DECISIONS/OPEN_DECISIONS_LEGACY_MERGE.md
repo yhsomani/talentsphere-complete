@@ -171,7 +171,7 @@ L12: | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`
 L13: | Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | `../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) |
 L14: | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 L15: | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
-L16: | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
+L16: | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | `reports/AUDIT_EVIDENCE_2026-10-21.json` (prior-attempt path `reports/AUDIT_EVIDENCE_2026-10-21.json`, absent on this branch; see git branch `main`) |
 L17: | Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
 L18: | Canonical intent | [`../SSOT.md`](../../../SSOT.md) |
 L19: | Coding-agent workflow | [`../AGENTS.md`](../../../AGENTS.md), [`../CLAUDE.md`](../../../CLAUDE.md) |
@@ -233,8 +233,8 @@ L74:
 L75: | Document | Purpose |
 L76: |---|---|
 L77: | [`../README.md`](../../../README.md) | Local setup, commands, test suites, CI. |
-L78: | [`../deploy/oracle/README.md`](../deploy/README.md) | Oracle Always Free staging. Not evidence of a production release. |
-L79: | [`../deploy/oracle/RECOVERY.md`](../deploy/RECOVERY.md) | PostgreSQL backup and restore checks. |
+L78: | `../deploy/oracle/README.md` (prior-attempt path `deploy/README.md`, absent on this branch; see git branch `main`) | Oracle Always Free staging. Not evidence of a production release. |
+L79: | `../deploy/oracle/RECOVERY.md` (prior-attempt path `deploy/RECOVERY.md`, absent on this branch; see git branch `main`) | PostgreSQL backup and restore checks. |
 L80: 
 L81: | [`engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`](engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Hosted adapter, dependency audit and release prerequisites; no live application claim. |
 L82: | [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Current Windows maintenance implementation and safety limits; historical material is archived. |

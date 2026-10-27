@@ -581,9 +581,9 @@ L330: | [RETICLE.md](../../../../RETICLE.md) | Tooling/agent instruction; retain
 L331: | [SSOT.md](../../../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
 L332: | [TalentSphere/Welcome.md](../../../../TalentSphere/Welcome.md) | Personal vault/template; preserved, outside technical authority |
 L333: | [TalentSphere/create a link.md](../../TalentSphere/create%20a%20link.md) | Personal vault/template; preserved, outside technical authority |
-L334: | [deploy/oracle/NEW_SUPABASE_PROJECT.md](../../deploy/NEW_SUPABASE_PROJECT.md) | Protected deployment reference; read-only, live behavior unverified |
-L335: | [deploy/oracle/README.md](../../deploy/README.md) | Protected deployment reference; read-only, live behavior unverified |
-L336: | [deploy/oracle/RECOVERY.md](../../deploy/RECOVERY.md) | Protected deployment reference; read-only, live behavior unverified |
+L334: | deploy/oracle/NEW_SUPABASE_PROJECT.md (prior-attempt path `deploy/NEW_SUPABASE_PROJECT.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
+L335: | deploy/oracle/README.md (prior-attempt path `deploy/README.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
+L336: | deploy/oracle/RECOVERY.md (prior-attempt path `deploy/RECOVERY.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
 L337: | [docs/INDEX.md](../INDEX.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 L338: | [docs/engineering/API_CONTRACTS.md](../engineering/API_CONTRACTS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 L339: | [docs/engineering/CODE_STYLE.md](../engineering/CODE_STYLE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
@@ -633,7 +633,7 @@ L382: | [docs/system-model/05-audit.md](05-audit.md) | Source model or dated evi
 L383: | [docs/system-model/06-route-authorization.md](06-route-authorization.md) | Source model or dated evidence; coverage/verification limits explicit |
 L384: | [graphify-out/2026-10-23/GRAPH_REPORT.md](../../../../graphify-out/2026-10-23/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
 L385: | [graphify-out/GRAPH_REPORT.md](../../../../graphify-out/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
-L386: | [supabase/hosted/README.md](../../supabase/hosted/README.md) | Manual adapter sequence and historical partial deployment; current applied state unverified |
+L386: | supabase/hosted/README.md (prior-attempt path `supabase/hosted/README.md`, absent on this branch; see git branch `main`) | Manual adapter sequence and historical partial deployment; current applied state unverified |
 L387: 
 L388: 
 ~~~~
