@@ -5,7 +5,7 @@
 Canonical home for: vision, users and roles, scope and non-goals, product principles, business-rule summary, functional and non-functional requirements, constraints.
 Not here: architecture ([02](02-ARCHITECTURE.md)), setup and conventions ([03](03-DEVELOPMENT-GUIDE.md)), per-feature behaviour and workflows ([04](04-FEATURES-AND-WORKFLOWS.md)), schema and API ([05](05-DATABASE-AND-API.md)), security and integrations ([06](06-SECURITY-AND-INTEGRATIONS.md)), tests and operations ([07](07-TESTING-AND-OPERATIONS.md)), outstanding work, ADRs and conflicts ([08](08-ROADMAP-AND-DECISIONS.md)).
 
-As-of 2026-10-26, branch `docs/consolidation-2026-10-26`, 55 SQL migrations in `supabase/migrations` (00001-00055). Plans and prices: [docs/PRICING.md](../31_LEGACY_ARCHIVE/docs/PRICING.md) is the only home for the plan table (a unit test reads it at runtime); this file links to it and does not copy it.
+As-of 2026-10-26, branch `docs/consolidation-2026-10-26`, 55 SQL migrations in `supabase/migrations` (00001-00055). Plans and prices: docs/PRICING.md (`31_LEGACY_ARCHIVE/docs/PRICING.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/PRICING.md`) is the only home for the plan table (a unit test reads it at runtime); this file links to it and does not copy it.
 
 ## 0. How to read this file
 
@@ -182,7 +182,7 @@ Register counts in SSOT 42.1 (P-* 11, U-* 12, INV-* 16, SCOPE-* 8) do not match 
 
 ## 5. Business rules summary
 
-Full text: [docs/registries/BUSINESS_RULE_REGISTRY.md](../31_LEGACY_ARCHIVE/docs/registries/BUSINESS_RULE_REGISTRY.md) (canonical identity and text for BR-01..BR-248 plus MIG-01..MIG-08; recommended to keep as the single rule home and link, not copy). Rule IDs use two digits for BR-01..BR-35 and three digits after (K-09). Change policy: identify journeys/features, data/API impact, security/privacy impact, tests, SSOT update, rationale.
+Full text: docs/registries/BUSINESS_RULE_REGISTRY.md (`31_LEGACY_ARCHIVE/docs/registries/BUSINESS_RULE_REGISTRY.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/registries/BUSINESS_RULE_REGISTRY.md`) (canonical identity and text for BR-01..BR-248 plus MIG-01..MIG-08; recommended to keep as the single rule home and link, not copy). Rule IDs use two digits for BR-01..BR-35 and three digits after (K-09). Change policy: identify journeys/features, data/API impact, security/privacy impact, tests, SSOT update, rationale.
 
 Implementation status: the rule text is inventoried and a subset carries code or test annotations, but no semantic acceptance review was done for the 248 rules (audit task X-00). A matching BR comment or ID is not proof. Known divergences are listed below; everything else is Unknown.
 
@@ -327,7 +327,7 @@ SSOT register NFR-* is stated as 21 items but individual NFR texts are not liste
 
 ## 9. Pricing and entitlement requirements
 
-Plans, prices, limits and enforcement status: [docs/PRICING.md](../31_LEGACY_ARCHIVE/docs/PRICING.md) (single source; code is `PLATFORM_PLANS` in `packages/domain/src/billing.ts`). Requirements that are not in that file:
+Plans, prices, limits and enforcement status: docs/PRICING.md (`31_LEGACY_ARCHIVE/docs/PRICING.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/PRICING.md`) (single source; code is `PLATFORM_PLANS` in `packages/domain/src/billing.ts`). Requirements that are not in that file:
 
 - BR-55: subscription changes at period boundary or prorated. BR-56: entitlements derive from active subscription only. BR-32: subscription state is webhook-owned. Redirect success grants nothing.
 - Owner decision (2026-10-23): a full refund of the charge that paid for the current period ends paid access; partial or older-charge refunds change nothing. Disputes and voided invoices are not handled (open).

@@ -4,7 +4,7 @@ Status: **candidate mapping; no approval established**. This document and the [6
 
 ## Authority and phase vocabularies
 
-The source [SSOT](../../SSOT.md#L5-L23) defines intended behavior; executable evidence determines implementation and readiness. [Governance](../31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md#L3-L22) assigns the implementation plan execution-order responsibility and keeps current architecture separate from intended architecture.
+The source [SSOT](../../SSOT.md#L5-L23) defines intended behavior; executable evidence determines implementation and readiness. Governance (`31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`) assigns the implementation plan execution-order responsibility and keeps current architecture separate from intended architecture.
 
 Keep these three vocabularies separate:
 
@@ -41,11 +41,11 @@ Source anchors are line locators in the named source files at inspection time. T
 
 Every row remains candidate-unapproved, with approval evidence not-established. The target has 60 work packages, 15 initiatives, 15 workstreams and seven release-gate rows; those counts do not substitute for the source's phases, eight universal exit gates or 20 ordered epics.
 
-The seven C classes preserve both the [governance classification](../31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md#L28-L38) and [SSOT approval requirements](../../SSOT.md#L4453-L4463). ADR/ARB escalation in the target developer guide does not establish Founder approval or the source reviewer counts.
+The seven C classes preserve both the governance classification (`31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`) and [SSOT approval requirements](../../SSOT.md#L4453-L4463). ADR/ARB escalation in the target developer guide does not establish Founder approval or the source reviewer counts.
 
 ## Controls outside the 69-row inventory
 
-Retain the [dependency rule](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md#L89-L91): blocking dependencies must be ready or intentionally mocked with a documented exit path. Preserve [register-integrity ratification](../../SSOT.md#L4465-L4468), [documentation sync](../31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md#L67-L69), and [historical-source restrictions](../31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md#L71-L73). The source Ph10 exclusions and Founder gate remain active source requirements.
+Retain the [dependency rule](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md#L89-L91): blocking dependencies must be ready or intentionally mocked with a documented exit path. Preserve [register-integrity ratification](../../SSOT.md#L4465-L4468), documentation sync (`31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`), and historical-source restrictions (`31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`, removed 2026-10-27; recover with `git show 85706db0:Yash_Final_Project_Document/31_LEGACY_ARCHIVE/docs/governance/GOVERNANCE.md`). The source Ph10 exclusions and Founder gate remain active source requirements.
 
 ## Validation and limits
 
