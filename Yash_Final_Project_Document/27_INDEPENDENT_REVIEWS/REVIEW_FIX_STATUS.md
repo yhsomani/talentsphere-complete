@@ -1,6 +1,8 @@
 # Review Fix Status (REVW-01..45)
 
-Doc ID: REV-FIX · Version 1.0 · 2026-10-25 · Additive; supersedes nothing (the original [FINAL_REVIEW_REPORT](FINAL_REVIEW_REPORT.md) is unchanged). Status values: **Fixed in docs** (originals edited earlier), **Addressed in REV2** (a new revision file proposes the fix; originals are not changed, so readers must follow the supersession pointer), **Partial**, **Open**.
+Doc ID: REV-FIX · Version 1.0 · 2026-10-25 · Additive; supersedes nothing (the original [FINAL_REVIEW_REPORT](FINAL_REVIEW_REPORT.md) is unchanged). Status values: **Fixed in docs** (originals edited earlier), **Addressed in REV2** (a new revision file proposed the fix; since 2026-10-27 that text is folded into the original, and the REV2 file is a change record), **Partial**, **Open**.
+
+**Tally after the 2026-10-27 fold (findings 01-45; REVW-46 is separate and closed in documentation):** 10 fixed in docs, 27 addressed in REV2 text that is now folded into the originals (proposed, awaiting owner/ARB ratification), 6 partial (09, 16, 17, 26, 29, 34), 2 open (33, 40). Folded means the text is in the original files, not that it was ratified, implemented or tested. REVW-35 and 36 were closed in place on 2026-10-27. The three REV2 JSON files in `09_MODULE_FEDERATION` are not swapped into the originals, and several appended sections override older text above them rather than replacing it row by row.
 
 Source of these statuses: the fix agents' own reports plus this session's scripts. The orchestrator did **not** re-read every REV2 file; "Addressed" means the agent reports the change, not that it was independently reviewed. A new independent review pass is still needed.
 

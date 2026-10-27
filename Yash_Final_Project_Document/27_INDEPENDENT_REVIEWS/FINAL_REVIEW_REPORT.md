@@ -1,6 +1,6 @@
 # Independent Final Review Report
 
-Doc ID: REV-FINAL · Owner: Independent Review Council · Version 1.5 · Status: Draft; 34 open, 6 partial, 6 closed · Date: 2026-10-25
+Doc ID: REV-FINAL · Owner: Independent Review Council · Version 1.5 · Status: Draft; counts below are the 2026-10-25 snapshot, superseded by the 2026-10-27 tally in REVIEW_FIX_STATUS (10 fixed, 27 addressed and folded but unratified, 6 partial, 2 open) · Date: 2026-10-25
 Supersedes nothing. Linked from `00_CONTROL_CENTRE/MASTER_INDEX.md`, `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` and `28_TRACEABILITY_AND_COVERAGE/TRACEABILITY_AND_VALIDATION.md`. Companion to `SCENARIO_SIMULATIONS.md` (REV-SIM, paper walk-throughs).
 
 This is a review of documentation. Nothing here asserts that any feature is built, tested, compliant or certified. The reviewer did not write the reviewed documents.
@@ -8,6 +8,10 @@ This is a review of documentation. Nothing here asserts that any feature is buil
 ## 0. Verdict in brief
 
 **Overall status: Revision Required. No area is Ready for Implementation.** At initial review time, the defects included incompatible state/consent/session vocabularies, a permission-matrix contradiction, and an append-only/erasure conflict. The current documentation disposition closes REVW-01..05 and 46; REVW-06, 07, 10, 11, 17 and 36 are partial, and 34 findings remain open. The original 45 findings comprised 4 Critical, 13 High, 16 Medium, and 12 Low.
+
+## Disposition update (2026-10-27)
+
+The tables in this report are the 2026-10-25 snapshot and are kept as the review record. Current status of REVW-01..45 is in [REVIEW_FIX_STATUS](REVIEW_FIX_STATUS.md): 10 fixed in documentation, 27 addressed in revision text now folded into the original documents (proposed; no ARB, owner or counsel ratification is claimed), 6 partial (REVW-09, 16, 17, 26, 29, 34) and 2 open (REVW-33 open-item register, REVW-40 tool state in the folder). REVW-46 remains closed in documentation. OPEN-41..47 are owner decisions and remain open. No Critical or High finding is verified closed by execution: nothing was built or tested.
 
 ## Post-review disposition (2026-10-25)
 
