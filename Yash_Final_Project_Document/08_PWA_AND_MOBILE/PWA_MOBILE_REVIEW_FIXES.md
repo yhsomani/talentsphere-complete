@@ -1,6 +1,8 @@
 # PWA and Mobile - Review Fixes (revision overlay)
 
 Doc ID: PWA-01-REV2 · Owner: Frontend/Platform Architecture · Version 2.0 · Status: Under Review
+
+> **Folded into `PWA_ARCHITECTURE.md` on 2026-10-27.** Change record only; edit the original.
 Relates: PWA-01, PLT-01, MOB-01, OFF-01 / OFF-01-REV2, MFA-01, FEA-01 · REVW-05, REVW-07, REVW-08, REVW-24, REVW-37 · REV-RES
 
 This file is **additive**. The originals in this folder are unchanged; where this overlay differs, it governs, and the superseded place is named. Supersession is a relationship, not a deletion. Offline scope, constants and idempotency are in `OFFLINE_AND_SYNC_DESIGN_REV2.md`.

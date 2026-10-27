@@ -1,6 +1,8 @@
 # UI/UX - Review Fixes (revision overlay)
 
 Doc ID: UI-REV2 (covers UI-01 navigation, UI-03 screen specifications, UI-05 design system, UI-07 progressive UX, and the screen and action registries) · Owner: Product Design / Frontend Architecture · Version 2.0 · Status: Under Review
+
+> **Folded into `PROGRESSIVE_UX_AND_FEEDBACK.md` on 2026-10-27.** Change record only; edit the original.
 Relates: REVW-07, REVW-08, REVW-15, REVW-24, REVW-37 · REV-RES · MFA-01-REV2, OFF-01-REV2, PWA-01-REV2
 
 Tags: [TARGET] [OPEN]. This file is **additive**: no other file in this folder is changed. Where it differs from the originals it governs; section 6 lists what it supersedes (relationship only). `ACTION_REGISTRY.md` API-name mapping is owned by the backend pass and is not touched.

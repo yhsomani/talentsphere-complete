@@ -1,6 +1,8 @@
 # Offline and Sync Design - Revision 2 (review fixes)
 
 Doc ID: OFF-01-REV2 · Owner: Frontend/Platform Architecture (PWA engineering) · Version 2.0 · Status: Under Review
+
+> **Folded into `OFFLINE_AND_SYNC_DESIGN.md` on 2026-10-27.** Change record only; edit the original.
 Relates: ADR-T10 (amended by ADR-T10a, proposed), ADR-T08, INV-T10, INV-T13, INV-T15 · REVW-14, REVW-15, REVW-24 · REV-RES · OFF-01, PWA-01, PLT-01, HC-01, MFA-01, PROGRESSIVE_UX_AND_FEEDBACK (UX-07)
 
 Tags: [CONF] [TARGET] [OPEN]. This file is **additive**. `OFFLINE_AND_SYNC_DESIGN.md` (OFF-01) is unchanged and remains the detailed design. Where this revision states a different rule, this revision governs and the superseded OFF-01 section is listed in section 8. Supersession here is a relationship between documents, not a deletion. Numbers are [TARGET] starting values; none is a benchmark.
