@@ -6,6 +6,7 @@ This is the single entry point to the project's documentation. Links are resolve
 
 | Need | Read |
 |---|---|
+| Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | [`final-project-documentation/00-INDEX.md`](final-project-documentation/00-INDEX.md) |
 | Set up and run the project | [`../README.md`](../README.md) |
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
