@@ -62,10 +62,67 @@
       "status": "completed",
       "completed_at": "2026-10-26T04:23:29.786Z",
       "duration_ms": 1833177
+    },
+    {
+      "agent_id": "a9ab4305dfbe619f8",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T14:31:02.273Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-26T14:39:23.531Z",
+      "duration_ms": 501258
+    },
+    {
+      "agent_id": "aec48a3cab4408a61",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T15:20:40.002Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-26T18:54:50.704Z",
+      "duration_ms": 12850702
+    },
+    {
+      "agent_id": "a2b5c16b437ce4427",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T15:20:43.478Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-26T18:55:59.420Z",
+      "duration_ms": 12915942
+    },
+    {
+      "agent_id": "a141e67981a758dd7",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T15:20:47.040Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-26T18:54:53.939Z",
+      "duration_ms": 12846899
+    },
+    {
+      "agent_id": "a999008ffa8192c17",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T15:20:50.628Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "synthetic": true,
+      "telemetry_status": "unmatched_stop",
+      "telemetry_note": "SubagentStop arrived without a matching SubagentStart; native Agent/Task start telemetry was not observed.",
+      "completed_at": "2026-10-26T18:57:12.904Z",
+      "duration_ms": 12982276
+    },
+    {
+      "agent_id": "a9c2a1de3b9882209",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-26T14:59:51.074Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-26T15:20:26.614Z",
+      "duration_ms": 1235540
     }
   ],
-  "total_spawned": 7,
-  "total_completed": 8,
-  "total_failed": 0,
-  "last_updated": "2026-10-26T04:23:29.820Z"
+  "total_spawned": 16,
+  "total_completed": 18,
+  "total_failed": 2,
+  "last_updated": "2026-10-26T18:57:12.940Z"
 }
