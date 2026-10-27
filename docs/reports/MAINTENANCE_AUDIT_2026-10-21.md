@@ -170,7 +170,7 @@ Delivered files:
 - `project-maintenance.sh` (absent in current checkout): executable Bash entry point, reusable functions, menu choices 0–10, explicit CLI selectors, safe discovery, workspace ownership, reviewed cleanup, frozen restoration, configured validation, private reports and interruption handling.
 - `scripts/tests/project-maintenance.test.sh` (absent in current checkout): disposable-fixture suite. Package-manager invocations are stubbed; discovery, command planning, target validation, deletion, reporting and process cancellation execute for real inside temporary fixtures.
 - [`../engineering/PROJECT_MAINTENANCE.md`](../engineering/PROJECT_MAINTENANCE.md): launch commands, selection flags, supported technology/configuration dialects, recovery, reporting, exit codes and platform limitations.
-- [`../superpowers/plans/2026-10-21-project-maintenance.md`](../superpowers/plans/2026-10-21-project-maintenance.md): implementation plan based on the approved design.
+- `../superpowers/plans/2026-10-21-project-maintenance.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history): implementation plan based on the approved design.
 
 Verification completed so far:
 

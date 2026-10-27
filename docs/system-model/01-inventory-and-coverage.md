@@ -326,7 +326,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [CLAUDE.md](../../CLAUDE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [GEMINI.md](../../GEMINI.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [README.md](../../README.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) | Compatibility pointer to retained report; no duplicated report body |
+| REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) | Compatibility pointer to retained report; no duplicated report body |
 | [RETICLE.md](../../RETICLE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
 | [SSOT.md](../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
 | [TalentSphere/Welcome.md](../../TalentSphere/Welcome.md) | Personal vault/template; preserved, outside technical authority |
@@ -349,15 +349,15 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/experience/UI_UX_DESIGN_SYSTEM.md](../experience/UI_UX_DESIGN_SYSTEM.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/governance/GAP_ANALYSIS.md](../governance/GAP_ANALYSIS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/governance/GOVERNANCE.md](../governance/GOVERNANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-| [docs/governance/IMPLEMENTATION_PLAN.md](../governance/IMPLEMENTATION_PLAN.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/governance/SOURCE_RECONCILIATION.md](../governance/SOURCE_RECONCILIATION.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| docs/governance/IMPLEMENTATION_PLAN.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Requirements/design/portfolio intent; retained, not implementation proof |
+| docs/governance/SOURCE_RECONCILIATION.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/product/PRD.md](../product/PRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/quality/OPERATIONS.md](../quality/OPERATIONS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/quality/SECURITY.md](../quality/SECURITY.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/quality/TESTING.md](../quality/TESTING.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 | [docs/registries/BUSINESS_RULE_REGISTRY.md](../registries/BUSINESS_RULE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/registries/FEATURE_REGISTRY.md](../registries/FEATURE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-| [docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md](../registries/WORKFLOWS_AND_BUSINESS_RULES.md) | Requirements/design/portfolio intent; retained, not implementation proof |
+| docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Requirements/design/portfolio intent; retained, not implementation proof |
 | [docs/reports/ARCHITECTURE_DURABILITY_REPORT.md](../reports/ARCHITECTURE_DURABILITY_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/AUDIT_MASTER_REPORT.md](../reports/AUDIT_MASTER_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/E2E_AUDIT_2026-10-21.md](../reports/E2E_AUDIT_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
@@ -373,7 +373,7 @@ provenance; their assertions require source/runtime re-check before reuse.
 | [docs/reports/RELEASE_SCOPE_AND_BACKLOG.md](../reports/RELEASE_SCOPE_AND_BACKLOG.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md](../reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-| [docs/superpowers/plans/2026-10-21-project-maintenance.md](../superpowers/plans/2026-10-21-project-maintenance.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+| docs/superpowers/plans/2026-10-21-project-maintenance.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 | [docs/system-model/00-index.md](00-index.md) | Source model or dated evidence; coverage/verification limits explicit |
 | [docs/system-model/01-inventory-and-coverage.md](01-inventory-and-coverage.md) | Source model or dated evidence; coverage/verification limits explicit |
 | [docs/system-model/02-flows.md](02-flows.md) | Source model or dated evidence; coverage/verification limits explicit |

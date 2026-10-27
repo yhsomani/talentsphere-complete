@@ -359,3 +359,34 @@ Use of the blueprint: take design ideas as candidates (e.g. fenced leases, centr
 | Institutional / graduation | Managed learner to independent candidate keeps verified signals and severs FERPA-restricted records by logical anonymization; never hard-delete rows referenced by aggregates | SSOT 31.4; BR-076 |
 | Erasure vs migration | Any migration/backup restore must replay erasure tombstones; Stripe customer deletion when billing mode toggles; backup retention unresolved | R2-05; blueprint BR-T060 |
 | Documentation | Old dated reports remain evidence; SSOT preserved unchanged; consolidated set supersedes navigation only; `docs/PRICING.md` must remain in place (unit test); registry files are linked, not copied | this set |
+
+## Appendix A — Founder execution order (preserved from the former `docs/governance/IMPLEMENTATION_PLAN.md`)
+
+Status: founder intent (2026-09), not an evidence-based schedule. Current delivery sequencing is in `docs/reports/FEATURE_PLAN_2026-10-21.md` and the sections above. Phase numbering here differs from other vocabularies (see K-06).
+
+| Phase | Title | Scope |
+|---|---|---|
+| 0 | Platform Trust Foundation | Repository, environments, CI/CD, Supabase, Postgres, migrations, Auth, authorization, RLS, API boundary, audit, observability, design system, PWA shell, AI policy engine |
+| 1 | Career Identity | Profile, goals, skills, ontology, experience, education, portfolio |
+| 2 | Evidence & Learning | Evidence, verification foundation, courses, progress, challenges, assessment core |
+| 3 | Opportunity Loop | Jobs, search, applications, recruiter pipeline, messaging, notifications |
+| 4 | Hiring Depth | Interview, scorecards, application feedback, references, career outcomes |
+| 5 | Intelligence | Talent/Evidence/Career graph, matching, recommendations, readiness, market signals |
+| 6 | Trust & Ecosystem | Reputation, moderation, appeals, anti-gaming, mentorship, networking |
+| 7 | Institutional/Enterprise | Institutions, licensing, reporting, procurement, enterprise controls |
+| 8 | Advanced AI | Expanded AI capabilities after gateway/policy/evaluation foundations are proven |
+| 9 | Expansion | Marketplace, advanced analytics, internal mobility, advanced forecasting, external ecosystem |
+| 10 | Scale | Only measured search extraction, cache, replicas, selective service extraction, bounded agents/automation |
+
+Exit gates for every phase: user outcome; architecture integrity; security; accessibility; tests; observability; documentation; rollback/recovery.
+
+First implementation epics (ordered): monorepo/tooling, CI, database/migrations, Auth, authorization/RLS, audit, API contract, PWA shell, design system, observability, profile, ontology, evidence, learning, assessment, jobs, applications, recruiter workflow, career graph, AI Gateway.
+
+Rule: do not start downstream implementation merely because a feature has high priority; blocking dependencies must be ready or intentionally mocked with a documented exit path. The 2026-10-21 baseline note in the original: prioritize honest assessment results, safe worker claims, recoverable erasure and live verification evidence before expanding the portfolio; registry scores stay separate from P0-P3 delivery urgency; persist only admitted journeys one complete increment at a time; reuse existing mail adapters and durable stores.
+
+## Appendix B — Retired historical documents (removed 2026-10-26; recoverable from git history before the removal commit)
+
+- `docs/governance/SOURCE_RECONCILIATION.md` (2026-09-24, v1.0): forensic baseline recorded when the repository was an empty greenfield scaffold ("GREENFIELD - 0% IMPLEMENTATION VERIFIED"). Commit `6774c9c6` ("Deleted project") removed 343 legacy files (62,538 deletions: prototype Next.js components, outdated schema migrations, unverified tests); commit `b3e0a50e` synchronised the document index. Its greenfield status is superseded by the current code; earlier completion claims were classified as historical evidence, not runtime reality.
+- `docs/superpowers/plans/2026-10-21-project-maintenance.md`: implementation plan for an interactive Bash maintenance tool (`project-maintenance.sh`); the tool and its test script are absent from the checkout (approved design: `docs/reports/MAINTENANCE_AUDIT_2026-10-21.md`).
+- `docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md`: pointer document. Where topics live: journeys J-01..J-28 in `docs/experience/JOURNEY_REGISTRY.md`; workflows WF-01..WF-66, integrity traces WIT-001..025 and state machines in `SSOT.md` Part V section 10; business rules BR-001..248 and migration rules MIG-01..08 in `docs/registries/BUSINESS_RULE_REGISTRY.md`; feature-to-rule links in `SSOT.md` feature contracts (reconcile mismatches against the rule registry; BR IDs use two digits for BR-01..35 and three after, see conflict C-9).
+- `REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (root): 141-byte pointer to `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`.

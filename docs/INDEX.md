@@ -9,7 +9,7 @@ This is the single entry point to the project's documentation. Links are resolve
 | Set up and run the project | [`../README.md`](../README.md) |
 | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
-| Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | [`../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`](../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) |
+| Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | `../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
 | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
@@ -38,7 +38,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 | [`engineering/TRD.md`](engineering/TRD.md) | Technical requirements: runtime constraints, latency, security posture. |
 | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
 | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | Business rules BR-001 to BR-248. |
-| [`registries/WORKFLOWS_AND_BUSINESS_RULES.md`](registries/WORKFLOWS_AND_BUSINESS_RULES.md) | 66 declared workflow state machines, invariants and transition triggers. |
+| `registries/WORKFLOWS_AND_BUSINESS_RULES.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | 66 declared workflow state machines, invariants and transition triggers. |
 | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) | User journeys J-01 to J-28. |
 
 ## 2. Architecture
@@ -96,9 +96,9 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 | Document | Purpose |
 |---|---|
 | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) | Authority, change classes, no-duplication rule, status vocabulary. |
-| [`governance/IMPLEMENTATION_PLAN.md`](governance/IMPLEMENTATION_PLAN.md) | Phased execution order. |
+| `governance/IMPLEMENTATION_PLAN.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Phased execution order. |
 | [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md) | Design gaps, verification gaps, and the open documentation-conflicts register. |
-| [`governance/SOURCE_RECONCILIATION.md`](governance/SOURCE_RECONCILIATION.md) | **Historical** (2026-09-24). Its "greenfield" status is superseded. |
+| `governance/SOURCE_RECONCILIATION.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | **Historical** (2026-09-24). Its "greenfield" status is superseded. |
 
 ## 8. Reports (dated snapshots)
 
