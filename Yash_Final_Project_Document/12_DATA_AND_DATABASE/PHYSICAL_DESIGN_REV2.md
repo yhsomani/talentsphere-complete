@@ -2,6 +2,8 @@
 
 Doc ID: DB-02-R2 · Owner: Data Architect + Backend Architecture Team · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-06 (budget and remainder), REVW-14(a) (storage part), REVW-45 · Database part of: REVW-12, REVW-19, REVW-20, REVW-25, REVW-41 · Relates: DB-02, DB-01 `CONCEPTUAL_AND_LOGICAL_MODEL.md`, BE-01-R2 `11_BACKEND_ARCHITECTURE/BACKEND_ARCHITECTURE_REV2.md`, SM-00-R2 `06_BUSINESS_PROCESSES/STATE_MACHINES_REV2.md`, BR-REG-R2
 
+> **Folded into `PHYSICAL_DESIGN.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (state of supersession only).** No original file was edited for this revision. Once governance accepts it, this file **supersedes** these parts of `PHYSICAL_DESIGN.md` (DB-02 v1.0): section 17 (the write-budget skeleton and its "Not resolved here" paragraph); the `idempotency_key` row of section 7 and, in DB-01, entity DATA-E2403 as the single `idempotency_key` table (replaced by the two-table form below); DB-01 entity DATA-E2408 `rate_limit_bucket` (UNLOGGED, replaced by `auth_throttle`). It **supplements** section 4 (adds the transition-edge table of section 5) and DB-01 (adds the columns, tables and CHECKs of sections 6 and 7). Everything else stands. Until accepted, DB-02 v1.0 and DB-01 remain the text of record. Governance should link this file from `12_DATA_AND_DATABASE/INDEX.md`.
 
 All content is **[TARGET]**; DDL is illustrative and is applied through expand/contract migrations (MIGRATION_POLICY, DB-04): every change below is additive (new column, new table, `CHECK ... NOT VALID` then `VALIDATE`).

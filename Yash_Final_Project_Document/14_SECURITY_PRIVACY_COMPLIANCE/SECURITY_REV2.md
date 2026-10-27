@@ -2,6 +2,8 @@
 
 Doc ID: SEC-02-R2 · Owner: Security Architect + Privacy Lead · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-18 (security side), REVW-31, REVW-32 · Security part of: REVW-25, REVW-41, REVW-45 · Relates: SEC-02 `SECURITY_ARCHITECTURE.md`, SEC-01 `THREAT_MODEL.md`, PRIV-01 `PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md`, BE-01-R2, DB-02-R2, BR-REG-R2 section 3 (constants CONST-S01 to CONST-S15)
 
+> **Folded into `SECURITY_ARCHITECTURE.md` on 2026-10-27.** Change record only; edit the original.
+
 **Relationship (state of supersession only).** Before the additive-only rule, six existing files were edited in place in this fix pass; this file restates those edits as one revision so that readers have one place, and it corrects one pointer. In-place edits: `SECURITY_ARCHITECTURE.md` (session rows of section 2.3, CSP and header rows of section 6, the AC range in section 13), `THREAT_MODEL.md` (rows C15, C16, AC-33, AC-34, RR-8, coverage row, trust-boundary wording), `PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md` (PUR-24, section 3.1, cleanup wording in the revocation table). **Pointer correction:** those edits point to "the BR constants table in `BUSINESS_RULES_REGISTRY.md`"; the table exists as **`BUSINESS_RULES_REGISTRY_REV2.md` section 3 (CONST-S01 to CONST-S15)** and is the target of every such pointer. Where SEC-02 v1.0 text and this file differ, this file wins once accepted; until then SEC-02 v1.0 plus the in-place edits stand. Governance should link this file from `14_SECURITY_PRIVACY_COMPLIANCE/INDEX.md`.
 
 All content is **[TARGET]**. No compliance or certification is claimed.
