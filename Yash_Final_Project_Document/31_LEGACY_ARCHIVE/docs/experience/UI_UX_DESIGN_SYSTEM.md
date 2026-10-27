@@ -152,7 +152,7 @@ Do not simply scale a desktop layout down.
 
 ## 10. Detailed Micro-Interaction Corpus
 
-The 100-pattern micro-interaction register is canonical in [`SSOT.md`](../../SSOT.md), Appendix D. The copy that was here has been removed to keep one authority per topic.
+The 100-pattern micro-interaction register is canonical in [`SSOT.md`](../../../../SSOT.md), Appendix D. The copy that was here has been removed to keep one authority per topic.
 
 ## 11. UX Acceptance
 

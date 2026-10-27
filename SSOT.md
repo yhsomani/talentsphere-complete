@@ -1,6 +1,8 @@
 # TalentSphere — SSOT.md v6.0
 ## Final Product, UX, Architecture, Engineering & Operations Source of Truth
 
+> **v6.1 status banner.** This file is the founder-intent SSOT **v6.0**, unchanged in meaning. **v6.1 amendments and reconciliations are recorded in [Appendix F](#appendix-f--v61-amendments-and-reconciliation) at the end of this file.** Nothing in this file is assumed implemented: no application code exists on this branch, and every capability stays **Planned** until executable evidence exists. Target blueprint: [`PROJECT_MASTER_BLUEPRINT.md`](Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md); navigation: [`MASTER_INDEX.md`](Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX.md).
+
 **Date:** 24 September 2026  
 **Implementation reality:** **PARTIALLY IMPLEMENTED; RELEASE READINESS NOT ESTABLISHED**. Current evidence and inspection limits are recorded in `docs/reports/FEATURE_STATUS_2026-10-21.md`; historical counts are not maintained here.
 **Status:** Canonical specification (intent). Implementation status is not recorded here; see `docs/reports/FEATURE_STATUS_2026-10-21.md`  
@@ -30,6 +32,8 @@ A feature cannot be promoted in status because documentation says it exists.
 This section is deliberately short and authoritative. It records only decisions that materially change or clarify the inherited detailed corpus.
 
 ## A. Architecture
+
+> v6.1 amendment: see Appendix F, items F-14 and F-15
 
 1. **Initial application architecture:** React + TypeScript + Vite PWA, Node.js + Fastify + TypeScript modular monolith, PostgreSQL/Supabase.
 2. **API authority:** Browser domain mutations go through the application API. RLS protects database access; it is not the sole business-logic boundary.
@@ -83,6 +87,8 @@ Specification-complete is never equivalent to software production-ready. Product
 TalentSphere is a **PWA-first Career Operating System** built around a **Talent Graph + Evidence Graph**. It connects learning, skills, proof, verification, networking, opportunities, hiring, reputation, and career intelligence into one reinforcing lifecycle.
 
 ### Core loop
+
+> v6.1 amendment: see Appendix F, item F-03
 
 ```text
 CAREER GOAL
@@ -223,6 +229,8 @@ Every journey accounts for incomplete data, mistakes, permission denial, offline
 
 ### 6.1 Two-Tier Authorization
 
+> v6.1 amendment: see Appendix F, item F-05
+
 **Tier 1 (JWT, Supabase Auth):** `ROLE_USER` · `ROLE_RECRUITER` · `ROLE_ADMIN`.
 
 **Tier 2 (24 contextual roles, workspace-scoped):**
@@ -352,6 +360,8 @@ Legend: ✅ full · ✅* consent/context-scoped · ⛔ denied.
 | Trust Signal | Bounded signal used for integrity/confidence analysis. |
 
 ### 6.1 Evidence semantics
+
+> v6.1 amendment: see Appendix F, item F-17
 
 A claim is not verified evidence. Evidence records provenance, source reliability, directness, verification level, recency, lifecycle state, visibility, conflicts, and downstream impact. Confidence is multidimensional rather than an unexplained universal score.
 
@@ -615,6 +625,8 @@ Feature work must declare blocking dependencies, shared primitives, policy prere
 The detailed records below cover the highest-leverage features first. The 173-feature register in §7 remains the complete inventory; this section supplies deeper canonical behavior for priority foundation/core features without redefining their identities.
 
 ### F-01 Authentication & Session
+
+> v6.1 amendment: see Appendix F, items F-13 and F-24
 
 | Attribute | Value |
 |---|---|
@@ -884,6 +896,8 @@ stateDiagram-v2
 
 ### F-96 Skill Evidence & Digital Credentials ★
 
+> v6.1 amendment: see Appendix F, item F-17
+
 | Attribute | Value |
 |---|---|
 | **Feature ID** | F-96 |
@@ -1112,6 +1126,8 @@ stateDiagram-v2
 
 ### F-07 Learning Management System
 
+> v6.1 amendment: see Appendix F, items F-20 and F-21
+
 | Attribute | Value |
 |---|---|
 | **Feature ID** | F-07 |
@@ -1285,6 +1301,8 @@ stateDiagram-v2
 ---
 
 ### F-86 Salary Intelligence
+
+> v6.1 amendment: see Appendix F, item F-04
 
 | Attribute | Value |
 |---|---|
@@ -2181,6 +2199,8 @@ flowchart LR
 
 ### 18.1 Complete State Machine Index
 
+> v6.1 amendment: see Appendix F, items F-11 and F-18
+
 | Entity | Terminal States |
 |---|---|
 | Application | hired, rejected, withdrawn, stale_withdrawn, candidate_unresponsive |
@@ -2401,6 +2421,8 @@ The canonical behavioral registry contains **BR-001 through BR-248** with no gap
 | BR-14 | Saved-search digest runs as service-owned/audited scheduler |
 
 ### 19.3 Application Rules (BR-15..BR-20)
+
+> v6.1 amendment: see Appendix F, item F-23
 
 | ID | Rule |
 |---|---|
@@ -2938,6 +2960,8 @@ flowchart TB
 
 ### 20.3 Authentication Flow
 
+> v6.1 amendment: see Appendix F, item F-13
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -3178,6 +3202,8 @@ src/
 
 ### 23.2 Response Envelope
 
+> v6.1 amendment: see Appendix F, item F-25
+
 ```json
 {
   "success": true,
@@ -3298,6 +3324,8 @@ All external and cross-domain interfaces are contract-first. Public API behavior
 ---
 
 ### 26.1 Integration Register
+
+> v6.1 amendment: see Appendix F, item F-08
 
 | Integration | Direction | Purpose | Phase |
 |---|---|---|---|
@@ -3694,6 +3722,8 @@ LAYER 5 — INFRASTRUCTURE
 
 ### 31.1 GDPR Matrix
 
+> v6.1 amendment: see Appendix F, items F-07 and F-19
+
 | Article | Requirement | Implementation |
 |---|---|---|
 | 5(1)(a) | Lawfulness, fairness, transparency | Privacy policy; explicit consent at sign-up |
@@ -3862,6 +3892,8 @@ AI outputs retain request ID, capability, provider/model, execution mode, timest
 ---
 
 ## 17. Assessment & Exam Integrity
+
+> v6.1 amendment: see Appendix F, item F-22
 
 ### AI modes
 
@@ -4193,6 +4225,8 @@ Implementation started from the greenfield baseline (2026-09-24); status is reco
 
 ### 38.1 Phases (0–10)
 
+> v6.1 amendment: see Appendix F, items F-02, F-20 and F-21
+
 | Phase | Title | Scope | Exit Criteria |
 |---|---|---|---|
 | **Ph0** | Foundation | Supabase setup, React/Vite skeleton (ADR-012 structure), Aura tokens, auth, RLS baseline, CI/CD, test harness | Registration + login working; RLS verified allow+deny; CI green |
@@ -4226,6 +4260,8 @@ flowchart LR
 
 ### 38.3 MVP Exit Criteria (7)
 
+> v6.1 amendment: see Appendix F, item F-20
+
 1. Candidate full loop: enroll → complete course → attempt challenge → earn XP → apply → track
 2. Recruiter full loop: create org → verify → post job → review → shortlist → message → offer
 3. RLS verification suite: 100% of policies tested with allow + deny assertions
@@ -4251,6 +4287,8 @@ flowchart LR
 Every material problem follows: **identify → understand → validate → classify → root cause → options → selected solution → implementation → failure/recovery → tests → acceptance criteria**.
 
 ### 40.1 Resolved Gaps
+
+> v6.1 amendment: see Appendix F, item F-06
 
 | ID | Class | Gap | Disposition |
 |---|---|---|---|
@@ -4316,6 +4354,8 @@ Every material problem follows: **identify → understand → validate → class
 ### Open decisions and blockers
 
 ### 41.1 Complete OD Register (OD-01..OD-53)
+
+> v6.1 amendment: see Appendix F, items F-04, F-08 and F-09
 
 | ID | Decision | Recommended | Owner | Blocks |
 |---|---|---|---|---|
@@ -4419,6 +4459,8 @@ Every material problem follows: **identify → understand → validate → class
 ## §42. Registers
 
 ### 42.1 Locked Register Inventory
+
+> v6.1 amendment: see Appendix F, items F-06 and F-10
 
 | Register | Prefix | Count | Purpose |
 |---|---|---|---|
@@ -5673,3 +5715,78 @@ These facts are external dependencies, not substitutes for implementation eviden
 **TalentSphere is specified as a trust-first, evidence-backed Career Operating System with a PWA-first experience, modular architecture, governed intelligence, strong privacy/security boundaries, and an evidence-driven implementation program.**
 
 **Implementation status:** **PARTIALLY IMPLEMENTED** — 16 features implemented, 78 partial, 75 not started (code-checked 2026-10-21; see `docs/reports/FEATURE_STATUS_2026-10-21.md`).
+
+---
+
+## Appendix F — v6.1 Amendments and Reconciliation
+
+**Purpose.** This appendix records, without editing any v6.0 sentence, (a) contradictions inside this file that were verified by re-reading it, (b) decisions that the target blueprint in `Yash_Final_Project_Document/` proposes to change, and (c) standing rules for reading both. Where an amendment directly supersedes a statement, the affected heading carries the pointer `> v6.1 amendment: see Appendix F, item F-nn`. The v6.0 text stays the founder-intent record until the named owner ratifies the change.
+
+**Reality line.** Nothing in this file or in this appendix is assumed implemented. No application code exists on this branch. Every capability, table, route, job, integration and decision named here is **Planned** (F-29).
+
+**Status values.** `Confirmed` means the discrepancy or rule exists as stated, checked by re-reading the cited SSOT text and the cited source. `Proposed` means a target-blueprint decision or recommendation that no Architecture Review Board (ARB) or product owner has ratified; as of 2026-10-26 none is recorded as ratified. `Confirmed; fix Proposed` means the discrepancy is verified and the stated resolution is a proposal. `Proposed (open)` means the owner decision is still open. `UNVERIFIED` marks anything not checked in this pass.
+
+**Evidence paths** are relative to `Yash_Final_Project_Document/` unless they begin with `SSOT.md`. Target documents are designs whose own status is Draft, Under Review or Proposed; overall readiness is "Revision Required" (`99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md`). Counts below are direct re-counts of SSOT.md v6.0 unless marked UNVERIFIED. Entries from `30_PRIOR_IMPLEMENTATION_REFERENCE/` (the K-nn conflict table in `08-ROADMAP-AND-DECISIONS.md`) and `31_LEGACY_ARCHIVE/` are historical records of an earlier attempt, not status.
+
+**Section citations.** `§N` is the `##` section; `(m.n)` is the printed sub-number; `§13-T1`, `§14-T2`, `§15-T3` are the three feature-tier blocks that share numbers with later sections (F-12). Appendix E does not exist in v6.0 (Appendices A-D only); the label F is used by instruction and E is left unused (UNVERIFIED whether an earlier edition had an Appendix E).
+
+### F.1 Contradictions and gaps inside SSOT v6.0 (verified by re-reading)
+
+| ID | SSOT section (v6.0) | What changes | Why | Evidence | Status |
+|---|---|---|---|---|---|
+| F-01 | Header block ("Implementation reality", "Status"); §23 intro; closing "CANONICAL END STATE" status line | Implementation status is stated three ways: the header says counts are "not maintained here", §23 says implementation "started from the greenfield baseline (2026-09-24)", and the closing line prints "16 features implemented, 78 partial, 75 not started (code-checked 2026-10-21)". Read all three as historical. For this branch every capability is **Planned** and the closing counts must not be quoted as status. The cited `docs/reports/FEATURE_STATUS_2026-10-21.md` does not exist at that path on this branch; a copy is archived at `31_LEGACY_ARCHIVE/docs/reports/FEATURE_STATUS_2026-10-21.md` | No source code exists on this branch; "Reality separation" and Appendix C already forbid promoting status from documentation. The prior reference records at least four incompatible maturity tallies | `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` (opening paragraph); `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-01 | Confirmed |
+| F-02 | §23 (38.1 Phases (0–10)); per-feature "Phase" attributes; Appendix A D-15 | SSOT "Ph0–Ph10" are the **SSOT capability phases**. Other phase scales exist: the founder implementation-plan phases 0–10 (different titles for the same numbers), release stages A–F, epic and sprint codes X-nn and S0–S6 (all recorded in the prior reference; source files UNVERIFIED here), and the target roadmap Ph0–Ph4. Always name the scale, never equate numbers across scales, and treat the mapping as a candidate crosswalk. D-15 ("FC-19 'Phase 3' vs 'Phase 6' → Phase 6 governs") cannot be checked because FC-19 is undefined (F-06) | Readers map "Ph1" to different scopes; the target states that phase numbers must not be equated | `28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.md`; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` §2.3, K-06; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-42, OPEN-50 | Confirmed |
+| F-03 | §1 "Core loop"; Amendment B; §2 (2.3 Flywheels); §23 (38.1 Ph1 exit; 38.3 MVP exit 1) | Five loop formulations: §1 (career goal to update career graph, 12 steps, including Work and Build experience); Amendment B (Goal, Gap, Learn, Practice, Prove, Verify, Discover, Match, Apply, Interview, Outcome, New Evidence); §2.3 career flywheel (learn, prove, showcase, match, apply, hire, grow); Ph1 exit (Learn, Prove, Showcase); MVP exit 1 (enroll, complete course, attempt challenge, earn XP, apply, track). Proposed reading: Amendment B is the GA loop, the §2.3 flywheel is the product loop adopted by the target (ADR-T01), and the others are descriptive views, not competing definitions | Different documents gate scope on different loops | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T01; `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` §1 | Confirmed; reading Proposed |
+| F-04 | §8 (S-07, S-08); §13-T1 F-85, F-86, F-114, F-122; §15-T3 F-75, F-87, F-98, F-152, F-153; §10 (19.12 BR-135; 19.16 BR-158, BR-160; 19.19 BR-178, BR-180; 19.21 BR-189; 19.22 BR-207; 19.24 BR-220); §15 (HDN-026); §24 (OD-38, OD-52); Amendment G | Cohort and small-cell minimums take five different values: k≥3 (F-87, BR-180), k≥5 (S-07, S-08, F-75, F-98, BR-135, and F-86 step 2, which cites BR-178), k≥10 (F-86 acceptance, F-122, BR-158, BR-178, BR-207, BR-220, HDN-026, OD-38, OD-52), ≥20 (F-85, BR-160, F-152) and ≥30 (F-114, F-153, BR-189). BR-178 itself says "policy-defined minimum cohort; k≥10 default", so F-86 step 2 ("k ≥5 threshold per cell (BR-178)") contradicts its own cited rule. Treat every value as a setting of one policy parameter (Amendment G), not an architectural constant. Proposed: k≥10 stays the default for public and sensitive cells, as the rules that already use policy wording (BR-158, BR-178, HDN-026, OD-38, OD-52) say; lower values need an explicit owner and counsel decision | Amendment G says thresholds are policy configuration; no single value is authoritative. The target rule BR-T100 carries a {5} placeholder and the minimum k is open under OPEN-25 | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-25; `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T100; `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md` P2; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-08 | Confirmed; default Proposed |
+| F-05 | §5 (6.1 Two-Tier Authorization; 7.1 Master Permission Matrix); §9 F-01 "Actors" | Three role vocabularies coexist: Tier 1 JWT roles (3), Tier 2 contextual roles (24 by count), and a permission matrix with only 10 role columns and 12 course and social capabilities (neither Candidate nor Recruiter is a column). F-01 lists a further actor set (Anonymous visitor, Candidate, Recruiter, Admin, Institution Admin). The target proposes 15 roles as scoped, deny-by-default grants with server-side policy and a capabilities endpoint; the mapping from the 3+24 model is unapproved. Read the 7.1 matrix as illustrative for its listed capabilities only, and derive authorization from the scoped-grant model once OPEN-44 closes | The "highest wins" resolution in 6.1 is not a deny-by-default policy, and the matrix cannot answer candidate or recruiter permissions | `02_STAKEHOLDERS_AND_USERS/STAKEHOLDERS_ROLES_PERMISSIONS.md`; `02_STAKEHOLDERS_AND_USERS/PERMISSION_MATRIX_REV2.md`; `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T07; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-44 | Confirmed; model Proposed |
+| F-06 | §42 (42.1 Locked Register Inventory); §24 (40.1 Resolved Gaps); Appendix A D-15, D-22; §3 (3.1, 3.2); OD-07, OD-31 | Identifiers cited but not defined anywhere in this file: FC ids up to FC-19 (FC-05 is not cited), TD-01..TD-06 and MVD-01 (23 of the 30 rows of 40.1 cite an FC, TD or MVD id; D-15, D-22 and OD-07 cite FC ids; TD-05 is also cited in F-08 and F-88) and SCOPE-003 (OD-31). The families P-, U-, INV-, SCOPE-, FC-, TD-, VER-, NFR-, FEC-, EC-, R- and EVT- have no table rows; §3.1 lists 12 principles and §3.2 lists 15 unnumbered invariants where 42.1 counts P 11 and INV 16. FC-20..FC-23 and TD-07..TD-26 are counted but never cited. Treat the values behind any FC, TD or MVD id as **Unknown**. A GAP row marked "RESOLVED (FC-nn)" is unresolved until the decision text is recovered or re-decided. Do not mint new FC or TD ids | A decision that cannot be read is not a decision; closing a gap by reference to missing text hides open scope | `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Conflicting counts"); `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-22; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-50 | Confirmed |
+| F-07 | §31 (31.1 GDPR Matrix Art. 17; 31.4 FERPA Severance Pattern; 31.5 DSR Queue); §9 F-01 state diagram; F-96 edge cases; §24 (DOR-017) | "Account deletion with 30-day grace + anonymization" (31.1), "erasure (30d)" as the DSR deadline (31.5), "DEACTIVATED → DELETED: 30-day purge" and "SUSPENDED → DELETED: purge after 30d" (F-01), "credentials anonymized" (F-96) and "never hard-delete rows referenced by aggregates" (31.4) use "30 days" for different clocks and mix anonymization with deletion. DOR-017 (retention and erasure SLAs) is an open pre-production blocker. Read three clocks separately: cancel window, completion deadline, deactivation purge. Target proposal: a 7-day cancellable cooling-off, completion within 30 days of the request (BR-T060), legally retained records excepted (retention list OPEN-08). Any 30-day cancel window needs an explicit owner decision | An implementer cannot tell whether the user may cancel for 7 or 30 days, or whether data is deleted or anonymized | `06_BUSINESS_PROCESSES/STATE_MACHINES.md` SM-ACCOUNT t7-t9, SM-DSR; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` BR-T060; `14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md`; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-07; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-08 | Confirmed; fix Proposed |
+| F-08 | §9 F-01 (step 1, External Dependencies); §12 (20.1 System Context); §13 (26.1 Integration Register); §24 (41.1 OD-10; 40.1 GAP-010) | Transactional email names three different provider sets: Resend (F-01, 20.1), "Resend / Postmark" (26.1) and "Resend primary; SendGrid failover" (OD-10). GAP-010 closes the choice through FC-11, which is undefined (F-06). Read vendor names as examples; the contract is "transactional email behind a provider port". The target proposes Brevo as the default behind a provider-independent port and leaves the wider email stack open | Vendor choice is an architecture and configuration decision (42.2 C5, C6) and the SSOT has no readable decision text | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T20; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-26; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-04 | Confirmed; Brevo default Proposed |
+| F-09 | §9 F-16 (plans Free, Pro, Team, Enterprise; no prices); §10 (BR-130); §16 (16.3, 16.4); §24 (OD-07, OD-28, OD-29, OD-34; GAP-007, GAP-014, GAP-017) | This file fixes **no price and no numeric AI quota**. Numbers it does carry: outreach caps of 20 (Pro) and 50 (Team) per week (BR-130), a 70/30 default revenue share (OD-28) and a 30-day refund window pro-rated after 20% (OD-29). AI quota, free-tier course limits and enterprise billing are closed by reference to FC-03, FC-04 and FC-08 (undefined, F-06), and the OD-34 price is "TBD". Prior-implementation text prints conflicting free-AI-quota and Candidate Pro price figures (UNVERIFIED here: those source documents are not on this branch). Treat every price, quota, allowance and cap as undecided. The only binding AI-cost rule is §16.4 and Amendment C: no paid inference for a free user without an explicit active cost policy | Numeric commercial parameters need Finance and product input and cost evidence; the target keeps them open | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-05, OPEN-19, OPEN-24; `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md` BR-T081, BR-T095; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` INV-T07; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-12 | Confirmed; fix Proposed |
+| F-10 | §42 (42.1 Locked Register Inventory; 42.3); Appendix B; §10 (16.1 Complete Journey Register; 18.1 index); §14 (24.2 Operational Clusters) | Re-counted in v6.0: BR 248 distinct ids plus 8 MIG (matches 42.1; Appendix B says "BR 90 → 246"); J 28 (matches 42.1; Appendix B says "J 17 → 31"); the OD table has 53 rows (42.1 says 58); the 18.1 state-machine index has 45 rows (42.1 says 53; target audits cite 40, not reproduced); EVT is "72 locked + 20 proposed" in 42.1 but "72 (32 locked + 40 proposed)" in Appendix B; operational tables: the 24.2 heading says "~185", the cluster counts listed sum to 168, 42.1 says "~220" and 24.2 closes with "Effective schema ≈ 220" (D-30: 50+2 canonical, plus 168). Do not edit 42.1: 42.3 locks register counts (a C3 change). Quote the measured counts here when they matter | Counts in different places disagree, and one number must not be copied into plans or tests without checking | `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Conflicting counts"); `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-22 | Confirmed |
+| F-11 | §10 (18.1 Complete State Machine Index; 18.2 Canonical State Machines; 18.3); §9 F-01 state diagram | State naming differs inside the file. The Application row of 18.1 lists terminal states hired, rejected, withdrawn, stale_withdrawn and candidate_unresponsive, but the 18.2 diagram ends in hired, rejected, withdrawn and archived (no stale_withdrawn, no candidate_unresponsive). 18.1 treats Offer as its own machine (terminals hired, closed) while 18.2 makes `offer` a state of Application. F-01 writes account states in UPPERCASE (first state `UNVERIFIED`, last `TERMINATED`) while 18.2 uses lower-case snake_case. Read the 18.x names as intent-level; the machine-readable vocabulary is F-18 | Enums and tests cannot be generated from two spellings | `06_BUSINESS_PROCESSES/STATE_MACHINES.md` (Vocabulary authority); `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-45 | Confirmed |
+| F-12 | Heading structure (whole file) | Printed numbers are not unique. Sub-numbers 6.1–6.3 occur under both §5 and §6, 7.1–7.2 under both §5 and §7, and 16.1–16.3 under both §10 and §16; §13, §14 and §15 each name two sections: the feature tiers ("§13. Tier 1 …", "§14. Tier 2 …", "§15. Tier 3-4 …") and the API, Data and Security sections. Sub-numbers such as 20.x–38.x come from earlier editions and sit under different parents (for example 38.1 under §23). No renumbering is made, because it would break stable references. Cite by heading text plus printed number, with the tags defined above | Stable citations are needed for traceability (SSOT §25) and for the target crosswalks | SSOT.md heading outline (`grep '^#'`) | Confirmed |
+
+### F.2 Decisions the target blueprint changes (all pending ratification)
+
+| ID | SSOT section (v6.0) | What changes | Why | Evidence | Status |
+|---|---|---|---|---|---|
+| F-13 | §9 F-01 (steps 3, 5, 6); §12 (20.3 Authentication Flow; 21.3 ADR-001) | SSOT: Supabase Auth issues the JWT (1 h access, 30-day sliding refresh), the session cookie is `sb-access-token` (HttpOnly, Secure, SameSite=Lax) and logout uses a `jti` denylist. Target: first-party cookie sessions through same-origin `/api/v1/auth/*` with `__Host-ts_at`, `__Secure-ts_rt` (Path `/api/v1/auth/refresh`) and an `X-CSRF-Token` header; 15-minute access token; rotating refresh with reuse detection (reuse revokes the token family); refresh idle {14 d} and absolute {30 d} as proposed constants; passkeys and password; optional OIDC and SAML; remotes never read tokens. No browser-readable (localStorage) bearer token is permitted. SSOT never specified one (its only localStorage use is draft autosave, F-04 step 4 and M-24), but the earlier implementation attempt used one. Browser behaviour is not yet tested | Removes XSS-readable tokens and keeps credentials away from remotes | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T06; `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY_REV2.md` CONST-S01..S03; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` INV-T16, BR-T050; `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md` K-19 | Proposed |
+| F-14 | Amendments A.1, A.3; §9 F-01; §12 (21.3 ADR-001, ADR-009; 23.1); §22 (37.4) | SSOT names Supabase for identity, queues, edge functions and backups. Target: plain PostgreSQL as the single system of record behind the API; a transactional outbox plus a worker with fenced leases instead of Supabase Queues and Edge Functions; nothing depends on Supabase Auth or PostgREST; the managed-Postgres vendor and hosting option are undecided. Read Supabase as one candidate host. Consistent and unchanged: API authority (A.2) and TanStack Query (A.6) | Reduces vendor lock-in and removes the duplicate-job risk of unfenced leases | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T04, ADR-T05, ADR-T09; `12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md` (opening paragraph); `17_DEVOPS_AND_INFRASTRUCTURE/DEPLOYMENT_ARCHITECTURE.md`; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-14 | Proposed |
+| F-15 | Amendment A.1; §12 (22.4 Repository Layout; ADR-012) | This file never mentions module federation (a case-insensitive search finds no occurrence). Target: typed host and module contracts with bundled, lazily loaded modules (`MF_MODE=bundled`) as the initial baseline. Runtime federation is optional and may be activated only after the ARB ratifies ADR-T23, with at least three named independent frontend teams, a demonstrated independent-release need and a passing WP-FED-SPIKE. Federation is fault containment, not a security boundary (ADR-T19). Eight remotes are proposed if activated; `ID_REGISTRY` is not yet updated. Do not read federation into the SSOT | Staffing and release evidence does not yet justify the registry, signing and compatibility cost | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T03, ADR-T19, ADR-T23; `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-07, REVW-08; `09_MODULE_FEDERATION/FEDERATION_REVIEW_FIXES.md`; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-03, OPEN-11, OPEN-47 | Proposed |
+| F-16 | §6 (Consent row); §13-T1 F-85, F-86, F-92; §15 ("Privacy by purpose"); Amendment G | SSOT defines consent only as "purpose-bound, versioned permission" and states consent per feature; it has no scope catalogue. Several features set 24-hour windows (F-92 "Candidate consent revocation <24h"; F-85 opt-out and F-86 withdrawal "within 24h"). Target: one catalogue of 14 dotted scope ids (for example `search.discoverable`, `evidence.share_artefact`, `application.share_snapshot`, `ai.assist.process`), an append-only consent ledger with a grain model and optional expiry, legacy `CS-*` ids and `evidence.share_recruiter` retired, and revocation enforced at the first read after the revoking commit with no consent cache. The target is stricter than the SSOT windows | One shared vocabulary lets the database, API, policy and tests agree (lint FF-12) | `00_CONTROL_CENTRE/CONSENT_SCOPE_CATALOGUE.md` §§1–4, 8; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` INV-T15, FF-12; `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY_REV2.md` CONST-S13 | Proposed |
+| F-17 | §6 (6.1 Evidence semantics); §9 F-96 (evidence types, step 6); §10 (19.15 BR-149..BR-156) | SSOT: evidence carries a "verification level" that is never defined; F-96 shows one "Verified by TalentSphere" badge per skill with at least one credential, lists Instructor, Peer and Recruiter as verifiers and weights endorsements. Target: a four-rung ladder (claimed, artifact-backed, peer-attested, authority-verified); verified status only through a server-side transition (INV-T04); the `authority_verified` rung carries a mandatory `issuer_class` (platform, institution, employer_org, instructor) that the UI shows and matching weights differently; instructor attestations need instructor ≠ learner plus independence checks and are revocable; instructor sign-off never counts as platform-verified; employer-domain proof reaches artifact-backed only when the domain is bound to a verified employer organization | A single "verified" flag lets an instructor mint the top rung for a learner; the ladder keeps SSOT principle 3.1 "Verified over claimed" honest | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T14; `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-12, REVW-22; `06_BUSINESS_PROCESSES/STATE_MACHINES_REV2.md` §§2.2–2.3; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` INV-T04. ADR-T14a is not yet in the ADR register, and the original BR-T011 and DT-06 still carry the pre-fix text (`27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md` REVW2-03) | Proposed |
+| F-18 | §10 (18.1, 18.2, 18.3); §9 F-01 state diagram; Appendix A D-2 | One state vocabulary: SM-00 is the only place a state name is defined, and database CHECKs, OpenAPI and AsyncAPI enums and UI status labels derive from it; an enum-vs-SM lint (FF-11) fails on any difference. SM-00 v1.1 is the text of record and the REV2 amendments are Proposed. Known renames from the SSOT diagrams: Application `under_review` → `in_review`, `interview` → `interviewing`, `offer` → `offer_extended` (plus new `offer_declined`; `assessment`, `archived`, `stale_withdrawn` and `candidate_unresponsive` have no SM-APPLICATION state and their disposition is open under OPEN-45); Job `pending_approval` → `pending_review`, while `approved`, `rejected_by_moderation` and `archived` are not states (the target adds `taken_down` and treats `expired` as a close reason); Account: the UPPERCASE F-01 states are replaced by `pending_verification`, `active`, `suspended`, `deactivated`, `pending_erasure`, `erased` and `purged`; `TERMINATED` has no counterpart and lockout is a timestamp, not a state. 18.3 "No state may be skipped" differs from SM-APPLICATION t11, which allows two named forward skips. Job default expiry: D-2 says 60 days, SM-JOB t8 shows 45 days [OPEN] | The same state must not be spelled differently across database, API, UI and events | `06_BUSINESS_PROCESSES/STATE_MACHINES.md` (Vocabulary authority, SM-ACCOUNT, SM-JOB, SM-APPLICATION); `06_BUSINESS_PROCESSES/STATE_MACHINES_REV2.md`; `00_CONTROL_CENTRE/CANONICAL_INVARIANTS.md` FF-11; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-45 | Proposed |
+| F-19 | §31 (31.1 Art. 17 row; 31.4 FERPA Severance Pattern; 31.5); §9 F-96 edge cases | Target erasure design: a person appears in append-only history (audit, consent, evidence events, stage transitions, outbox) only as a random 128-bit opaque `subject_ref`. `subject_identity_map` is the single link to the account and erasure deletes that row, so tamper-evident history is never rewritten or pseudonymised by UPDATE. Mutable records are hard-deleted or tombstoned, backups age out, and a post-erasure sweep checks for residual identifiers. This replaces the SSOT idea of anonymizing rows in place ("hash student id", `status='SEVERED'` in 31.4; "credentials anonymized" in F-96). The graduation (FERPA) severance remains a distinct disposition to preserve | Resolves the conflict between append-only audit and erasure. Whether skeleton records count as anonymous data is a legal question that stays open | `12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md` §4.1; `14_SECURITY_PRIVACY_COMPLIANCE/PRIVACY_AND_DATA_LIFECYCLE_DESIGN.md`; `27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md` REVW-04; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md`; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-08 | Proposed |
+| F-20 | §23 (38.1 Ph1 and Ph2 rows; 38.3 MVP Exit Criteria); §13-T1 F-07, F-08 (Ph1), F-04 (Ph2); §15-T3 F-94 | SSOT Ph1 is Candidate Core: profile, resume, portfolio, courses, challenge arena, XP and levels, Skills Graph foundation, Migration Center v1; jobs and applications and F-96 come in Ph2; verified work history and references (F-94) in Ph3. Target proposal for **target Ph1**: the loop **Prove → Showcase → Apply** with search-based (non-AI) matching and explanation, covering identity, profile, evidence with referee verification, jobs, applications, basic application messaging, email notifications, consent and an audited entitlement stub. Moved to target Ph2: AI gateway features, learning depth, assessments beyond unverified attempts and billing checkout. The roadmap labels target Ph1 a bounded pre-GA pilot and gates the full SSOT loop at target Ph2 (GA gate). Contested: `ROADMAP_REV2` and `CAPABILITY_MAP_PHASE_RECONCILIATION_REV2` keep first-party learning and practice in target Ph1 (85 Ph1 features), so Ph1 scope has three descriptions until OPEN-42 closes | Brings employer-visible value earlier and defers cost-heavy AI | `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-10; `22_IMPLEMENTATION_ROADMAP/ROADMAP_REV2.md`; `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_PHASE_RECONCILIATION_REV2.md`; `27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md` REVW2-30; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-42 | Proposed |
+| F-21 | §23 (38.1 Ph1 and Ph7 rows); §13-T1 F-07; §10 (19.9 Learning Marketplace Rules BR-091..BR-115); §24 (OD-28); Appendix A D-33 | SSOT puts the LMS in Ph1 and the full learning marketplace (Course Studio, course commerce, instructor platform, revenue share) in Ph7. Target proposal: learning commerce in target Ph2 covers **first-party (platform-sold) courses only**. A third-party paid marketplace is deferred to target Ph3 at the earliest and needs its own ADR on seller of record, payouts, tax or VAT, and refunds (number ADR-T25 proposed). The SSOT Ph7 marketplace scope is not cancelled, only gated | Money-flow, payout, tax and refund liabilities have no design or cost evidence yet | `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-30; `22_IMPLEMENTATION_ROADMAP/ROADMAP_REV2.md` (R5, §3.3); `19_BUSINESS_AND_COMMERCIAL_OPERATIONS/MARKETPLACE_MONEY_FLOW_ADR_PROPOSAL.md`; `24_RISKS_AND_DECISIONS/GOVERNANCE_REGISTRATIONS_REV2.md`; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-06 | Proposed |
+| F-22 | §17 (AI modes); §13-T1 F-08; §9 F-96 (`challenge_pass`) | SSOT defines four AI modes (`AI_PROHIBITED`, `AI_RESTRICTED`, `AI_ALLOWED`, `POST_ASSESSMENT_ONLY`). Target documents currently carry two (feature spec) or three (data model) and enforce `AI_PROHIBITED` in the AI gateway regardless of caller; the lifecycle contract must be aligned before assessment AI is claimed (OPEN-48). Code-execution assessments run only in an isolated, network-less runner; until it exists, submissions stay `unverified` and never mint verified evidence, so a `challenge_pass` credential with a "verified score" (F-96, F-08) cannot be issued as verified before the runner decision (OPEN-27) | Prevents a simulated score from becoming verified evidence | `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` ADR-T12, ADR-T13; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Security, privacy, and AI controls"); `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-27, OPEN-48 | Proposed |
+| F-23 | §10 (19.3 BR-15); Appendix A D-3 | SSOT: no duplicate ACTIVE application per user per job, with a partial UNIQUE index and a 90-day cooldown after a terminal state. Target: one active application per candidate and job (BR-T001); only after `withdrawn` may the candidate re-apply as a new linked application (`reapplied_from`) after a cooldown, placeholder {24 h} [OPEN] (BR-T125, SM-APPLICATION t12); `rejected`, `hired` and `offer_declined` never qualify; a recruiter-invited reconsideration uses `reconsidered_from`. The 90-day SSOT value conflicts until the product owner chooses | Re-application after withdrawal was an unresolved gap (OPEN-B20, closed on paper only) | `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY_REV2.md` BR-T125, CONST-S14; `06_BUSINESS_PROCESSES/STATE_MACHINES_REV2.md` §2.5; `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-27 | Proposed |
+| F-24 | §9 F-01 (step 1, acceptance criteria "Age gate blocks <16", AUTH-017) | SSOT fixes the age gate at date of birth ≥16. Target: the minimum-age value is open for counsel; prefer an attestation (checkbox, timestamp, policy version) and collect a date of birth only if counsel requires it (BR-T120). Treat 16 as a provisional value | Minimum age is a legal parameter that varies by jurisdiction and is not yet reviewed | `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY_REV2.md` BR-T120; `27_INDEPENDENT_REVIEWS/REVIEW_FIX_STATUS.md` row 29; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-08 | Proposed |
+| F-25 | §12 (23.1 API Architecture; 23.2 Response Envelope) | SSOT: success envelope `{success,data,meta}`, cursor pagination with default limit 20, deprecation lifecycle of at least 6 months. Target standard: list responses `{items,page}` with default limit 25 (maximum 100) and a minimum 90-day deprecation window; errors as RFC 9457 problem+json, which can coexist with either success shape. Neither is adopted until OPEN-46 closes | Installed PWAs update lazily, so the target argues for its own window; the SSOT value is the founder baseline | `13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md` (opening reconciliation note, pagination and deprecation rows); `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-46 | Proposed (open) |
+| F-26 | §15 (30.5 Vulnerability SLAs); §20 (35.2 Per-Route Budgets); §22 (37.3, 37.4, 37.5); §13 (26.2, VER-021) | SSOT: critical <24 h mitigation plus 72 h patch, high <72 h or 7 d with a blocking control, medium <14 d; route JS budgets of 120–400 KB (search ≤200 KB); rollout 5/25/50 % with automated rollback within 15 s; PostgreSQL RPO ≤15 min and RTO ≤2 h with quarterly drills; an integration-removal drill for every integration-touching release. Target hypotheses: critical 72 h, high 14 d, medium 60 d; PITR RPO ≤5 min and RTO ≤1 h to a verified restored copy; list and search latency of 350/400 ms, route bundles of 220–400 KB, a statistical canary and semiannual game days (the latency, bundle, canary and game-day values are taken from the audit and are UNVERIFIED against the SLO documents). Both sets are kept; neither replaces the other until measured and chosen. Do not report both as one target | Targets differ by evidence and design phase | `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Security, privacy, and AI controls", "Reliability, release, and service operations"); `14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md`; `15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md` SLO-31; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-49 | Proposed (open) |
+| F-27 | §31 (31.3 Data Residency); §22 (37.4) | SSOT fixes primary residency at US-East with an EU partition as a Ph3 target and EU-only AI egress. The target treats the region, the managed-Postgres vendor and the DR scope as undecided, and wants the graduation (FERPA) severance kept as a separate disposition. The v6.0 value stays as founder intent; the target does not adopt it | Region depends on hosting (OPEN-14), counsel (OPEN-08) and customer needs (OPEN-30) | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-14, OPEN-23, OPEN-30; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` | Proposed (open) |
+| F-28 | §2 (2.4 Success metrics) | SSOT names the primary outcome as "career progress with verifiable evidence". The target metrics catalog proposes "Evidence-Backed Hiring Conversations" as the north star. Select one, or define an owner-approved hierarchy, before baselining or making success claims | A single primary metric is needed before outcome claims | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-51; `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md`; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` | Proposed (open) |
+
+### F.3 Standing rules
+
+| ID | SSOT section (v6.0) | What changes | Why | Evidence | Status |
+|---|---|---|---|---|---|
+| F-29 | Header "Reality separation"; Amendment H; Appendix C; §23 intro | Every capability, table, route, job, integration, state machine, scope id and decision in SSOT.md, in `Yash_Final_Project_Document/` and in the archived references stays labelled **Planned** until executable evidence exists in this repository for the branch being described (code, passing tests, migrations, served behaviour). Documentation labels (Draft, Under Review, Proposed, Ratified) never imply implementation. Counts in `30_PRIOR_IMPLEMENTATION_REFERENCE/` and `31_LEGACY_ARCHIVE/` are history, not status. Closing a documentation contradiction is not evidence that a generator, test or runtime behaviour exists | Prevents the DOCUMENTED ≠ IMPLEMENTED confusion behind F-01 | `99_FINAL_MASTER_BLUEPRINT/IMPLEMENTATION_READINESS.md`; `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` §11 | Confirmed |
+| F-30 | §7 (F-* register); §10 (BR-*); §12 (ADR-001..ADR-013); §24 (OD-*); §42 | Identity namespaces coexist and are not interchangeable: SSOT `F-*` (173), `BR-*` (248 + 8 MIG), `ADR-001..013` and `OD-*` against target `CAP-*` (108), `FEAT-*` (253), `BR-T*`, `INV-T*`, `ADR-T*`, `SM-*`, `OPEN-*` and `REVW-*`. The crosswalks are candidate maps awaiting owner approval (OPEN-41, 43, 45, 46, 50) and their row counts are not coverage. SSOT register rows are never renumbered or deleted (42.3). Cite "SSOT ADR-001" and "ADR-T06" explicitly: the SSOT's ADR-001 ("Supabase Auth is the initial identity/session authority") is a different decision from the target's ADR-T06 | Prevents silent loss or double counting of source requirements | `28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md`; `06_BUSINESS_PROCESSES/LEGACY_RULE_CROSSWALK.md`; `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md` §3; `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` | Confirmed |
+| F-31 | §42 (42.2 Change Classes; 42.3 Register-Integrity Invariant); §25 | Every `Proposed` item needs the approval its change class requires before it alters v6.0 intent. Indicative classes (the classification is UNVERIFIED): C6 architecture or provider for F-13, F-14, F-15 and F-08; C7 commercial for F-09 and F-21; C3 schema or data for F-16 to F-19. Appendix F is additive: it changes no locked register count and no v6.0 sentence. Until ratified, read the v6.0 text as founder intent and this appendix as the reconciliation record | 42.2 assigns approval rights; target ADRs remain Under Review and no ARB or founder ratification is recorded. The review notes that the "binding" wording in some target files overstates governance status | SSOT.md §42; `24_RISKS_AND_DECISIONS/ADR_REGISTER.md`; `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md`; `27_INDEPENDENT_REVIEWS/SECOND_REVIEW_REPORT.md` REVW2-07 | Confirmed |
+
+### F.4 Checked and consistent at headline level (not line-checked)
+
+- Amendment A.2 (the API is the authority for domain mutations; RLS is defence in depth) agrees with ADR-T05, ADR-T07 and INV-T01 to INV-T03.
+- Amendment A.6 (TanStack Query) agrees with the target frontend decision FD-F2 in `10_FRONTEND_ARCHITECTURE/FRONTEND_ARCHITECTURE.md`.
+- Amendments C, D and E and §16, §17 and §32 agree with ADR-T12, INV-T06 to INV-T09 and INV-T19.
+- §19 (the offline cache is never authoritative) agrees with ADR-T10. The target is narrower: Ph1 offline is a read cache plus local unsent drafts, and assessment answers are online-only (REVW-15, REVW-24).
+
+### F.5 Not verified in this pass
+
+- Source documents cited only through the prior reference (implementation plan, release scope, feature plan, PRD, pricing, Stripe and E2E audits) are not on this branch; F-02 and F-09 rely on the reference's own statements and are UNVERIFIED against those sources.
+- SSOT.md was read in portions plus targeted searches. Read: the heading outline, the amendments, §§1–7, F-01, F-96, the §15-T3 excerpt, §10 state machines and rules 19.3, 19.5 and 19.15, §12 (20.3, 21.3, 23.1–23.2), 24.2, §§16–17, §19, §22 (37.3–37.5), §23, §24 (40.1), §31, §42, Appendices A–C and the closing lines. Checked by search only: F-85, F-86, F-114, F-122 and the other threshold rows listed in F-04. Not read in full: §11, most of §13–§14 and §18, §20–§21, §25–§26, the remaining feature specifications and Appendix D, so further contradictions may exist.
+- The count of 45 rows in the 18.1 index differs from the figure of 40 in the target audits; the 40 is not reproduced here.
+- The proposed eight remotes (F-15) and the target latency, bundle, canary and game-day values (F-26) were not checked against `ID_REGISTRY.md` or the SLO documents.
+- No test, build or schema check was run; Mermaid diagrams were not rendered.

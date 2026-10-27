@@ -2,7 +2,7 @@
 
 Doc ID: TRC-10 | Status: Historical evidence pointer map; owner review required | Date: 2026-10-25
 
-**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../../docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/migrations` (51 records). The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
+**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/migrations` (51 records). The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
 
 The companion [CSV](AUDIT_MIGRATION_EVIDENCE_CROSSWALK.csv) gives each record a stable evidence ID (EVD-000797 through EVD-000847), source JSON pointer, recorded migration hash, current checkout hash, table names, recorded applied state, and candidate links to the target migration and physical-design documents.
 

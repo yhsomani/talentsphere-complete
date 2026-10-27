@@ -2,7 +2,7 @@
 
 Doc ID: TRC-14 | Status: Historical route pointer map; semantic review required | Date: 2026-10-25
 
-**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../../docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/routes`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
+**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/routes`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
 
 The [CSV](AUDIT_ROUTE_EVIDENCE_CROSSWALK.csv) links all 274 route records (EVD-002055 through EVD-002328) to the exact method/path entry in the 278-row observed API inventory. The recorded durability totals are 70 `registered durable (PG mode)`, 201 `ephemeral header`, and 3 `stateless`.
 

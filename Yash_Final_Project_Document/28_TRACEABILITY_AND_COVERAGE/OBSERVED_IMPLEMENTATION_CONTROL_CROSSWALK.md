@@ -8,10 +8,10 @@ This crosswalk maps dated reference claims in four repository documents to candi
 
 | Source | Manifest record | Source revision | Content SHA-256 | Scope note |
 |---|---|---|---|---|
-| [`docs/engineering/DATABASE.md`](../../docs/engineering/DATABASE.md) | DOC-000137 / EVD-000137 | `431c425a`, 2026-10-23 | `0879ff0703827fa3253380daca3232a45f78407fe5f21e31f92e8706a4915f82` | Static storage, migration, privacy and RLS observations; no live DB proof. |
-| [`docs/quality/OPERATIONS.md`](../../docs/quality/OPERATIONS.md) | DOC-000152 / EVD-000152 | `2aea1085`, 2026-10-24; current-build section checked 2026-10-23 | `f4977e0a82c853064fd27137f03b8ae7fc836cba68955f6fb6b2b01c81627c18` | Sections 1-8 are a target operating model; section 9 is reference implementation/operations. |
-| [`docs/quality/SECURITY.md`](../../docs/quality/SECURITY.md) | DOC-000153 / EVD-000153 | `2aea1085`, 2026-10-24 | `dda6537adf773b945e8fbd2ffae16e050902d0ae76bc392a811df6a100bb7006` | Source limits evidence scope and distinguishes requirements from assurance. |
-| [`docs/quality/TESTING.md`](../../docs/quality/TESTING.md) | DOC-000154 / EVD-000154 | `335e9827`, 2026-10-23 | `fbe7077f12d7ea0893fdc04a3a2d88b35ca3a93a4368e74fc1882df9252b2f11` | Historical baseline is dated 2026-10-21; coverage claims are not current test results. |
+| [`docs/engineering/DATABASE.md`](../31_LEGACY_ARCHIVE/docs/engineering/DATABASE.md) | DOC-000137 / EVD-000137 | `431c425a`, 2026-10-23 | `0879ff0703827fa3253380daca3232a45f78407fe5f21e31f92e8706a4915f82` | Static storage, migration, privacy and RLS observations; no live DB proof. |
+| [`docs/quality/OPERATIONS.md`](../31_LEGACY_ARCHIVE/docs/quality/OPERATIONS.md) | DOC-000152 / EVD-000152 | `2aea1085`, 2026-10-24; current-build section checked 2026-10-23 | `f4977e0a82c853064fd27137f03b8ae7fc836cba68955f6fb6b2b01c81627c18` | Sections 1-8 are a target operating model; section 9 is reference implementation/operations. |
+| [`docs/quality/SECURITY.md`](../31_LEGACY_ARCHIVE/docs/quality/SECURITY.md) | DOC-000153 / EVD-000153 | `2aea1085`, 2026-10-24 | `dda6537adf773b945e8fbd2ffae16e050902d0ae76bc392a811df6a100bb7006` | Source limits evidence scope and distinguishes requirements from assurance. |
+| [`docs/quality/TESTING.md`](../31_LEGACY_ARCHIVE/docs/quality/TESTING.md) | DOC-000154 / EVD-000154 | `335e9827`, 2026-10-23 | `fbe7077f12d7ea0893fdc04a3a2d88b35ca3a93a4368e74fc1882df9252b2f11` | Historical baseline is dated 2026-10-21; coverage claims are not current test results. |
 
 ## Interpretation
 

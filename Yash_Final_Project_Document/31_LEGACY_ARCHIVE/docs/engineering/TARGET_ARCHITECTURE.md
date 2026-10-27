@@ -1,6 +1,6 @@
 # TalentSphere — TARGET_ARCHITECTURE.md v6.0
 
-**Scope:** the intended target architecture. It is not a description of the running code. For what is built today, and for the rules agents must follow before changing it, read the root [`ARCHITECTURE.md`](../../ARCHITECTURE.md). Where the two disagree about what exists, the root file governs.
+**Scope:** the intended target architecture. It is not a description of the running code. For what is built today, and for the rules agents must follow before changing it, read the root [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md). Where the two disagree about what exists, the root file governs.
 
 ## 1. Decision
 

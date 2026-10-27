@@ -2,7 +2,7 @@
 
 Doc ID: TRC-16 | Status: Historical audit-to-manifest pointer map; content review incomplete | Date: 2026-10-25
 
-**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../../docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/documentationCrossCheck`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
+**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/documentationCrossCheck`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
 
 The [CSV](AUDIT_DOCUMENTATION_CROSSCHECK.csv) maps the 46 scanned-document records to their exact manifest DOC IDs and preserves the audit's category, disposition, link-scan flag, semantic-acceptance flag, and whether each path appears in the 24-item changed-since-snapshot list. It also records the two historical missing-deliverable paths, both still absent in the current checkout.
 

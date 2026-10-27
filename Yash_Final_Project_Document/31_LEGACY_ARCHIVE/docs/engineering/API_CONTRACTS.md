@@ -13,7 +13,7 @@ HTTP implementation; it is not a live API or production acceptance result.
 - Persistence: [database reference](DATABASE.md). A route header is not a whole-feature durability guarantee.
 
 The former service, integration, queue, realtime and media target registers are
-canonical in [SSOT section 13](../../SSOT.md#13-api-event-integration-queue-realtime--media-contracts).
+canonical in [SSOT section 13](../../../../SSOT.md#13-api-event-integration-queue-realtime--media-contracts).
 This removes duplicated specifications without changing intent. Those targets
 include OpenAPI 3.1, cursor pagination, general mutation idempotency, circuit
 breakers, heavy workers and realtime; these are not universal implemented contracts.

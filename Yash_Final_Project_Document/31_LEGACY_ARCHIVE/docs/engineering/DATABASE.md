@@ -77,7 +77,7 @@ Requirements remain: explicit constraints, UTC timestamps, integer minor units
 and currency, auditable lifecycle, concurrency policy, and corrections preserving
 evidence lineage. The current evidence code mutates state; do not equate these
 requirements with an implemented append-only version/event system. Target table
-clusters and RLS generator design are in [SSOT](../../SSOT.md), Part VII sections
+clusters and RLS generator design are in [SSOT](../../../../SSOT.md), Part VII sections
 24.1?24.3. They replace the former duplicated 50/~220-table target lists here.
 
 ## Local migrations and hosted Supabase

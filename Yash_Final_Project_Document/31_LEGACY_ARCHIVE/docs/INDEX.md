@@ -6,18 +6,18 @@ This is the single entry point to the project's documentation. Links are resolve
 
 | Need | Read |
 |---|---|
-| Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | [`final-project-documentation/00-INDEX.md`](final-project-documentation/00-INDEX.md) |
-| Set up and run the project | [`../README.md`](../README.md) |
-| What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../ARCHITECTURE.md) |
+| Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | [`final-project-documentation/00-INDEX.md`](../../30_PRIOR_IMPLEMENTATION_REFERENCE/00-INDEX.md) |
+| Set up and run the project | [`../README.md`](../../../README.md) |
+| What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) |
 | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
 | Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | `../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) |
 | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
 | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
 | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | [`reports/AUDIT_EVIDENCE_2026-10-21.json`](reports/AUDIT_EVIDENCE_2026-10-21.json) |
 | Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
-| Canonical intent | [`../SSOT.md`](../SSOT.md) |
-| Coding-agent workflow | [`../AGENTS.md`](../AGENTS.md), [`../CLAUDE.md`](../CLAUDE.md) |
-| Browser verification with Reticle | [`../RETICLE.md`](../RETICLE.md) |
+| Canonical intent | [`../SSOT.md`](../../../SSOT.md) |
+| Coding-agent workflow | [`../AGENTS.md`](../../../AGENTS.md), [`../CLAUDE.md`](../../../CLAUDE.md) |
+| Browser verification with Reticle | [`../RETICLE.md`](../../../RETICLE.md) |
 | Project memory and execution history | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) |
 
 ## Authority order
@@ -34,7 +34,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 
 | Document | Purpose |
 |---|---|
-| [`../SSOT.md`](../SSOT.md) | Canonical project and system definition. Owns intent. |
+| [`../SSOT.md`](../../../SSOT.md) | Canonical project and system definition. Owns intent. |
 | [`product/PRD.md`](product/PRD.md) | Product requirements, personas, capability matrix. |
 | [`engineering/TRD.md`](engineering/TRD.md) | Technical requirements: runtime constraints, latency, security posture. |
 | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
@@ -46,7 +46,7 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 
 | Document | Purpose |
 |---|---|
-| [`../ARCHITECTURE.md`](../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
+| [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
 | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture.** Intended modular monolith, bounded contexts, flows. Not a description of the running code. |
 | [`engineering/adr/ADR-015-core-loop-persistence.md`](engineering/adr/ADR-015-core-loop-persistence.md) | ADR: persist the core career loop; the API's in-memory maps are a read model. |
 | [`engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`](engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | ADR: measure UI quality in a real browser and test it adversarially. |
@@ -74,9 +74,9 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 
 | Document | Purpose |
 |---|---|
-| [`../README.md`](../README.md) | Local setup, commands, test suites, CI. |
-| [`../deploy/oracle/README.md`](../deploy/oracle/README.md) | Oracle Always Free staging. Not evidence of a production release. |
-| [`../deploy/oracle/RECOVERY.md`](../deploy/oracle/RECOVERY.md) | PostgreSQL backup and restore checks. |
+| [`../README.md`](../../../README.md) | Local setup, commands, test suites, CI. |
+| [`../deploy/oracle/README.md`](../deploy/README.md) | Oracle Always Free staging. Not evidence of a production release. |
+| [`../deploy/oracle/RECOVERY.md`](../deploy/RECOVERY.md) | PostgreSQL backup and restore checks. |
 
 | [`engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`](engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Hosted adapter, dependency audit and release prerequisites; no live application claim. |
 | [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Current Windows maintenance implementation and safety limits; historical material is archived. |
@@ -85,10 +85,10 @@ Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP
 
 | Document | Purpose |
 |---|---|
-| [`../AGENTS.md`](../AGENTS.md) | Coding-agent rules and workflow. |
-| [`../CLAUDE.md`](../CLAUDE.md) | Project instructions loaded into Claude Code, including the Reticle verification block. |
-| [`../RETICLE.md`](../RETICLE.md) | Full Reticle verification rules. |
-| [`../.claude/commands/reticle.md`](../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
+| [`../AGENTS.md`](../../../AGENTS.md) | Coding-agent rules and workflow. |
+| [`../CLAUDE.md`](../../../CLAUDE.md) | Project instructions loaded into Claude Code, including the Reticle verification block. |
+| [`../RETICLE.md`](../../../RETICLE.md) | Full Reticle verification rules. |
+| [`../.claude/commands/reticle.md`](../../../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
 | [`../BRAIN/BRAIN.md`](../BRAIN/BRAIN.md) | Conceptual model. |
 | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) | Living execution memory and audit log. Historical. |
 
@@ -118,7 +118,7 @@ Each report is a point-in-time record. Even reports dated the same day can descr
 - Each definition lives in one canonical document. Other documents link to it rather than copying it (see [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) §2).
 - Dated report filenames carry their date. Undated files are living documents.
 - The `TalentSphere/` folder is a personal Obsidian vault, not project documentation.
-- On 2026-10-21, copies of SSOT sections that had drifted were replaced with pointers: `registries/WORKFLOWS_AND_BUSINESS_RULES.md` §11–§26, `engineering/DATABASE.md` §15–§22 and §31–§32, and `experience/UI_UX_DESIGN_SYSTEM.md` Appendix D. Their content is canonical in [`../SSOT.md`](../SSOT.md). Conflicts are in [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md#documentation-conflicts-open-2026-10-21).
+- On 2026-10-21, copies of SSOT sections that had drifted were replaced with pointers: `registries/WORKFLOWS_AND_BUSINESS_RULES.md` §11–§26, `engineering/DATABASE.md` §15–§22 and §31–§32, and `experience/UI_UX_DESIGN_SYSTEM.md` Appendix D. Their content is canonical in [`../SSOT.md`](../../../SSOT.md). Conflicts are in [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md#documentation-conflicts-open-2026-10-21).
 
 
 ## Documentation audit, 2026-10-23

@@ -504,4 +504,4 @@ During test execution, an implementation defect was identified in `clean-reinsta
 
 ## Windows implementation plan location
 
-The former root `PROJECT.md` was byte-identical to the retained [orchestrator plan](../../.agents/teamwork/orchestrator_1/PROJECT.md). Its PLANNED milestones and safety claims are historical. Current source takes precedence.
+The former root `PROJECT.md` was byte-identical to the retained [orchestrator plan](../../../../.agents/teamwork/orchestrator_1/PROJECT.md). Its PLANNED milestones and safety claims are historical. Current source takes precedence.

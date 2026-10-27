@@ -2,7 +2,7 @@
 
 Doc ID: TRC-12 | Status: Historical probe pointer map; verification review required | Date: 2026-10-25
 
-**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../../docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/probes`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
+**Source:** [`docs/reports/AUDIT_EVIDENCE_2026-10-21.json`](../31_LEGACY_ARCHIVE/docs/reports/AUDIT_EVIDENCE_2026-10-21.json), `/probes`. The source JSON remains unchanged; its SHA-256 is `5a851fdce1ceeac241133f3116efa2710f5d6dfb7c3c056abfad4141d8eff2a8`.
 
 The [CSV](AUDIT_PROBE_EVIDENCE_CROSSWALK.csv) preserves both probe records as EVD-002020 and EVD-002021, including method, result, and recorded limits.
 

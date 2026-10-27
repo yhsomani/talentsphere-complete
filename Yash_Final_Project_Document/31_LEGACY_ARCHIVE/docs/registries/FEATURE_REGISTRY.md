@@ -202,7 +202,7 @@ This file contains the canonical 173-feature identity/register and preserves the
 
 ## Detailed feature contracts (moved)
 
-The detailed records for the highest-leverage features (F-01, F-12, F-84 and others) are canonical in [`../../SSOT.md`](../../SSOT.md), §9. The copy that was here was out of date in one place: it described the privacy-preserving proof as a zero-knowledge-style proof, which SSOT corrects (a hash commitment is not zero-knowledge). Only the inventory and the contract template below remain in this file.
+The detailed records for the highest-leverage features (F-01, F-12, F-84 and others) are canonical in [`../../SSOT.md`](../../../../SSOT.md), §9. The copy that was here was out of date in one place: it described the privacy-preserving proof as a zero-knowledge-style proof, which SSOT corrects (a hash commitment is not zero-knowledge). Only the inventory and the contract template below remain in this file.
 
 ## Required contract for every feature
 

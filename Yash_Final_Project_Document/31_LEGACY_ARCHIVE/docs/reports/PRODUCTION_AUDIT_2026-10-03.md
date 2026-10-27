@@ -35,7 +35,7 @@ TalentSphere has a broad and technically ambitious backend/domain foundation, bu
 
 The largest issue is not missing code. It is the gap between **documented/declared capability and what a real end user can actually complete through the product**.
 
-The repository itself explicitly says the golden rule is not to confuse *documented → implemented → verified → production-ready*. [README.md](../../README.md)
+The repository itself explicitly says the golden rule is not to confuse *documented → implemented → verified → production-ready*. [README.md](../../../../README.md)
 
 The current executable reality shows:
 
@@ -1099,7 +1099,7 @@ Large divergence between canonical route documentation and actual route implemen
 ### TD-09
 Duplicate specification/status claims across README, registries and validation reports.
 
-For example, README and FINAL_VALIDATION_REPORT describe different feature/test-count snapshots, which demonstrates documentation synchronization drift. [README.md](../../README.md) [FINAL_VALIDATION_REPORT.md](FINAL_VALIDATION_REPORT.md)
+For example, README and FINAL_VALIDATION_REPORT describe different feature/test-count snapshots, which demonstrates documentation synchronization drift. [README.md](../../../../README.md) [FINAL_VALIDATION_REPORT.md](FINAL_VALIDATION_REPORT.md)
 
 ### TD-10
 Test suites validate many API capabilities that are not reachable through the production web application.
@@ -1400,7 +1400,7 @@ Production auth      ❌
 True end-to-end loop ❌
 ```
 
-That is why the repository's own "Golden Rule" matters: the current artifact demonstrates a lot of engineering effort, but that effort is not yet equivalent to production readiness. [README.md](../../README.md)
+That is why the repository's own "Golden Rule" matters: the current artifact demonstrates a lot of engineering effort, but that effort is not yet equivalent to production readiness. [README.md](../../../../README.md)
 
 ---
 

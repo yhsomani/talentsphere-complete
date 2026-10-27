@@ -250,3 +250,7 @@ The source reports these enforcement and limitations: AI quota follows the actin
 The six Stripe `price_*` and three `prod_*` identifiers listed in the source are test-mode configuration evidence only; they are intentionally not reproduced here because they are account-specific and are not part of the target product contract. The source says no live products were created. Plan changes in that implementation use new immutable Stripe prices, update environment mappings, archive old prices, and add domain/API-level enforcement tests.
 
 OPEN-19 covers pricing/quotas/grace, while organization-versus-acting-user billing ownership remains an explicit unresolved design question. The snapshot does not resolve either decision or override the proposed first-party-only Phase 2 scope.
+
+## Merged from legacy: `31_LEGACY_ARCHIVE/docs/PRICING.md` (full data in `LEGACY_PRICING_PRIOR_ATTEMPT.md`)
+
+The complete prior plan table (four plans, monthly/yearly prices, AI quotas, active-job limits), the six `STRIPE_PRICE_*` variable names with their prior test-mode identifiers, the enforcement list, the safe plan-change procedure and the prior review notes are preserved in `LEGACY_PRICING_PRIOR_ATTEMPT.md` (COM-LEG-01). The paragraph above that omits the Stripe identifiers is not contradicted: COM-LEG-01 keeps them as reference data only, with a warning that they belong to a prior account. Open items: OPEN-19, OPEN-LGA-17, OPEN-LGA-18.

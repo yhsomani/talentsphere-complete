@@ -6,7 +6,7 @@ Translate product requirements into technical requirements without duplicating t
 
 ## 2. Technical Baseline
 
-> **Target baseline.** The built system differs in several places: sessions are self-issued HMAC tokens rather than Supabase Auth, the web app uses plain React state and `fetch` rather than TanStack Query, and background jobs run on Postgres `background_jobs` rather than Supabase Queues. The root [`ARCHITECTURE.md`](../../ARCHITECTURE.md) §20 and §24 record what exists. Open question: [`GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md) conflict C-5.
+> **Target baseline.** The built system differs in several places: sessions are self-issued HMAC tokens rather than Supabase Auth, the web app uses plain React state and `fetch` rather than TanStack Query, and background jobs run on Postgres `background_jobs` rather than Supabase Queues. The root [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md) §20 and §24 record what exists. Open question: [`GAP_ANALYSIS.md`](../governance/GAP_ANALYSIS.md) conflict C-5.
 
 | Area | Standard |
 |---|---|

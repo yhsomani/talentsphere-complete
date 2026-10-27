@@ -391,6 +391,6 @@ The **173 entries below are imported directly from** [`docs/reports/FEATURE_STAT
 - [PR #71: durable Stripe billing](https://github.com/yhsomani/talentsphere-complete/pull/71), [PR #70: billing fixes](https://github.com/yhsomani/talentsphere-complete/pull/70), [PRs #61–#66: hosted migration guards](https://github.com/yhsomani/talentsphere-complete/pulls?q=is%3Apr+is%3Amerged)
 - [Original 173-feature matrix](FEATURE_STATUS_2026-10-21.md), [backlog](FEATURE_PLAN_2026-10-21.md), [docs index](../INDEX.md), [architecture ADR-015](../engineering/adr/ADR-015-core-loop-persistence.md)
 - [Hosted dependency analysis](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md), [hosted migration release gate](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md), [historical payment audit](PAYMENT_AUDIT_2026-10-23.md)
-- [Agent safety and build-file restrictions](../../AGENTS.md), [exact CI workflow](../../.github/workflows/ci.yml), [open issues](https://github.com/yhsomani/talentsphere-complete/issues)
+- [Agent safety and build-file restrictions](../../../../AGENTS.md), [exact CI workflow](../../.github/workflows/ci.yml), [open issues](https://github.com/yhsomani/talentsphere-complete/issues)
 
 **Review boundary:** A GitHub report is a maintainable evidence artifact, not authority to deploy, migrate hosted SQL, run live charges or declare all canonical features verified. Update this report as CI and staging proof become available.

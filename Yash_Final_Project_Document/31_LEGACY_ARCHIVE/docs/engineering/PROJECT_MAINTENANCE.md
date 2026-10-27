@@ -43,7 +43,7 @@ was not exercised here.
   operation flags can execute without another confirmation; do not assume every
   mutation prompts or that `-Yes` is always required.
 - Cleanup/install/build changes generated outputs and dependency directories.
-  Under [AGENTS.md](../../AGENTS.md), agents cannot run these operations without
+  Under [AGENTS.md](../../../../AGENTS.md), agents cannot run these operations without
   explicit authorization for protected build-file changes.
 - Logging redacts selected secret patterns; that is not proof that arbitrary
   installer output cannot contain private data.
