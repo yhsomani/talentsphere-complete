@@ -441,198 +441,198 @@ L190: | `ORIGINAL_REQUEST.md` | Consolidated: original requirements retained in 
 L191: | `PROJECT.md` | Consolidated: byte-identical plan retained in `.agents/teamwork/orchestrator_1/PROJECT.md` |
 L192: | `TEST_READY.md` | Consolidated: historical test evidence retained in maintenance archive |
 L193: | `docs/engineering/HOSTED_SUPABASE_DEPENDENCY_AUDIT.md` | Consolidated: hosted migration gate owns dependency audit |
-L194: | [.agents/skills/autofix/SKILL.md](../../../../.agents/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L195: | [.agents/skills/autofix/github.md](../../../../.agents/skills/autofix/github.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L196: | [.agents/skills/code-review/SKILL.md](../../../../.agents/skills/code-review/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L197: | [.agents/skills/code-review/references/auth-recovery.md](../../../../.agents/skills/code-review/references/auth-recovery.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L198: | [.agents/skills/code-review/references/cli-workflows.md](../../../../.agents/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L199: | [.agents/teamwork/ORIGINAL_REQUEST.md](../../../../.agents/teamwork/ORIGINAL_REQUEST.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L200: | [.agents/teamwork/auditor_1/BRIEFING.md](../../../../.agents/teamwork/auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L201: | [.agents/teamwork/auditor_1/DISPATCH.md](../../../../.agents/teamwork/auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L202: | [.agents/teamwork/auditor_1/context.md](../../../../.agents/teamwork/auditor_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L203: | [.agents/teamwork/auditor_1/handoff.md](../../../../.agents/teamwork/auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L204: | [.agents/teamwork/auditor_1/progress.md](../../../../.agents/teamwork/auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L205: | [.agents/teamwork/auditor_iter2/DISPATCH.md](../../../../.agents/teamwork/auditor_iter2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L206: | [.agents/teamwork/auditor_iter2/context.md](../../../../.agents/teamwork/auditor_iter2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L207: | [.agents/teamwork/challenger_1/BRIEFING.md](../../../../.agents/teamwork/challenger_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L208: | [.agents/teamwork/challenger_1/DISPATCH.md](../../../../.agents/teamwork/challenger_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L209: | [.agents/teamwork/challenger_1/context.md](../../../../.agents/teamwork/challenger_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L210: | [.agents/teamwork/challenger_1/handoff.md](../../../../.agents/teamwork/challenger_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L211: | [.agents/teamwork/challenger_1/progress.md](../../../../.agents/teamwork/challenger_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L212: | [.agents/teamwork/challenger_2/BRIEFING.md](../../../../.agents/teamwork/challenger_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L213: | [.agents/teamwork/challenger_2/DISPATCH.md](../../../../.agents/teamwork/challenger_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L214: | [.agents/teamwork/challenger_2/context.md](../../../../.agents/teamwork/challenger_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L215: | [.agents/teamwork/challenger_2/handoff.md](../../../../.agents/teamwork/challenger_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L216: | [.agents/teamwork/challenger_2/progress.md](../../../../.agents/teamwork/challenger_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L217: | [.agents/teamwork/challenger_iter2_1/DISPATCH.md](../../../../.agents/teamwork/challenger_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L218: | [.agents/teamwork/challenger_iter2_1/context.md](../../../../.agents/teamwork/challenger_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L219: | [.agents/teamwork/challenger_iter2_2/DISPATCH.md](../../../../.agents/teamwork/challenger_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L220: | [.agents/teamwork/challenger_iter2_2/context.md](../../../../.agents/teamwork/challenger_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L221: | [.agents/teamwork/explorer_arch_sec_1/BRIEFING.md](../../../../.agents/teamwork/explorer_arch_sec_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L222: | [.agents/teamwork/explorer_arch_sec_1/DISPATCH.md](../../../../.agents/teamwork/explorer_arch_sec_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L223: | [.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md](../../../../.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L224: | [.agents/teamwork/explorer_arch_sec_1/handoff.md](../../../../.agents/teamwork/explorer_arch_sec_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L225: | [.agents/teamwork/explorer_arch_sec_1/progress.md](../../../../.agents/teamwork/explorer_arch_sec_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L226: | [.agents/teamwork/explorer_features_1/BRIEFING.md](../../../../.agents/teamwork/explorer_features_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L227: | [.agents/teamwork/explorer_features_1/DISPATCH.md](../../../../.agents/teamwork/explorer_features_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L228: | [.agents/teamwork/explorer_features_1/features_audit_report.md](../../../../.agents/teamwork/explorer_features_1/features_audit_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L229: | [.agents/teamwork/explorer_features_1/handoff.md](../../../../.agents/teamwork/explorer_features_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L230: | [.agents/teamwork/explorer_features_1/progress.md](../../../../.agents/teamwork/explorer_features_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L231: | [.agents/teamwork/explorer_git_issues_1/BRIEFING.md](../../../../.agents/teamwork/explorer_git_issues_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L232: | [.agents/teamwork/explorer_git_issues_1/DISPATCH.md](../../../../.agents/teamwork/explorer_git_issues_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L233: | [.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md](../../../../.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L234: | [.agents/teamwork/explorer_git_issues_1/handoff.md](../../../../.agents/teamwork/explorer_git_issues_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L235: | [.agents/teamwork/explorer_git_issues_1/progress.md](../../../../.agents/teamwork/explorer_git_issues_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L236: | [.agents/teamwork/explorer_survey_1/BRIEFING.md](../../../../.agents/teamwork/explorer_survey_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L237: | [.agents/teamwork/explorer_survey_1/DISPATCH.md](../../../../.agents/teamwork/explorer_survey_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L238: | [.agents/teamwork/explorer_survey_1/context.md](../../../../.agents/teamwork/explorer_survey_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L239: | [.agents/teamwork/explorer_survey_1/handoff.md](../../../../.agents/teamwork/explorer_survey_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L240: | [.agents/teamwork/explorer_survey_1/progress.md](../../../../.agents/teamwork/explorer_survey_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L241: | [.agents/teamwork/explorer_survey_2/BRIEFING.md](../../../../.agents/teamwork/explorer_survey_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L242: | [.agents/teamwork/explorer_survey_2/DISPATCH.md](../../../../.agents/teamwork/explorer_survey_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L243: | [.agents/teamwork/explorer_survey_2/context.md](../../../../.agents/teamwork/explorer_survey_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L244: | [.agents/teamwork/explorer_survey_2/handoff.md](../../../../.agents/teamwork/explorer_survey_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L245: | [.agents/teamwork/explorer_survey_2/progress.md](../../../../.agents/teamwork/explorer_survey_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L246: | [.agents/teamwork/explorer_survey_3/BRIEFING.md](../../../../.agents/teamwork/explorer_survey_3/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L247: | [.agents/teamwork/explorer_survey_3/DISPATCH.md](../../../../.agents/teamwork/explorer_survey_3/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L248: | [.agents/teamwork/explorer_survey_3/context.md](../../../../.agents/teamwork/explorer_survey_3/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L249: | [.agents/teamwork/explorer_survey_3/handoff.md](../../../../.agents/teamwork/explorer_survey_3/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L250: | [.agents/teamwork/explorer_survey_3/progress.md](../../../../.agents/teamwork/explorer_survey_3/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L251: | [.agents/teamwork/orchestrator_1/BRIEFING.md](../../../../.agents/teamwork/orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L252: | [.agents/teamwork/orchestrator_1/DISPATCH.md](../../../../.agents/teamwork/orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L253: | [.agents/teamwork/orchestrator_1/GATE_STATUS.md](../../../../.agents/teamwork/orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L254: | [.agents/teamwork/orchestrator_1/PROJECT.md](../../../../.agents/teamwork/orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L255: | [.agents/teamwork/orchestrator_1/TEST_INFRA.md](../../../../.agents/teamwork/orchestrator_1/TEST_INFRA.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L256: | [.agents/teamwork/orchestrator_1/context.md](../../../../.agents/teamwork/orchestrator_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L257: | [.agents/teamwork/orchestrator_1/progress.md](../../../../.agents/teamwork/orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L258: | [.agents/teamwork/reviewer_1/BRIEFING.md](../../../../.agents/teamwork/reviewer_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L259: | [.agents/teamwork/reviewer_1/DISPATCH.md](../../../../.agents/teamwork/reviewer_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L260: | [.agents/teamwork/reviewer_1/context.md](../../../../.agents/teamwork/reviewer_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L261: | [.agents/teamwork/reviewer_1/handoff.md](../../../../.agents/teamwork/reviewer_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L262: | [.agents/teamwork/reviewer_1/progress.md](../../../../.agents/teamwork/reviewer_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L263: | [.agents/teamwork/reviewer_2/BRIEFING.md](../../../../.agents/teamwork/reviewer_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L264: | [.agents/teamwork/reviewer_2/DISPATCH.md](../../../../.agents/teamwork/reviewer_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L265: | [.agents/teamwork/reviewer_2/context.md](../../../../.agents/teamwork/reviewer_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L266: | [.agents/teamwork/reviewer_2/handoff.md](../../../../.agents/teamwork/reviewer_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L267: | [.agents/teamwork/reviewer_2/progress.md](../../../../.agents/teamwork/reviewer_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L268: | [.agents/teamwork/reviewer_audit_1/BRIEFING.md](../../../../.agents/teamwork/reviewer_audit_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L269: | [.agents/teamwork/reviewer_audit_1/DISPATCH.md](../../../../.agents/teamwork/reviewer_audit_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L270: | [.agents/teamwork/reviewer_audit_1/handoff.md](../../../../.agents/teamwork/reviewer_audit_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L271: | [.agents/teamwork/reviewer_audit_1/progress.md](../../../../.agents/teamwork/reviewer_audit_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L272: | [.agents/teamwork/reviewer_iter2_1/DISPATCH.md](../../../../.agents/teamwork/reviewer_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L273: | [.agents/teamwork/reviewer_iter2_1/context.md](../../../../.agents/teamwork/reviewer_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L274: | [.agents/teamwork/reviewer_iter2_2/DISPATCH.md](../../../../.agents/teamwork/reviewer_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L275: | [.agents/teamwork/reviewer_iter2_2/context.md](../../../../.agents/teamwork/reviewer_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L276: | [.agents/teamwork/sentinel/BRIEFING.md](../../../../.agents/teamwork/sentinel/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L277: | [.agents/teamwork/sentinel/handoff.md](../../../../.agents/teamwork/sentinel/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L278: | [.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L279: | [.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L280: | [.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L281: | [.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L282: | [.agents/teamwork/teamwork_preview_orchestrator_1/README.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L283: | [.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L284: | [.agents/teamwork/teamwork_preview_orchestrator_1/plan.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/plan.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L285: | [.agents/teamwork/teamwork_preview_orchestrator_1/progress.md](../../../../.agents/teamwork/teamwork_preview_orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L286: | [.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md](../../../../.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L287: | [.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md](../../../../.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L288: | [.agents/teamwork/teamwork_preview_victory_auditor_1/README.md](../../../../.agents/teamwork/teamwork_preview_victory_auditor_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L289: | [.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md](../../../../.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L290: | [.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md](../../../../.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L291: | [.agents/teamwork/test_writer_e2e_1/BRIEFING.md](../../../../.agents/teamwork/test_writer_e2e_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L292: | [.agents/teamwork/test_writer_e2e_1/DISPATCH.md](../../../../.agents/teamwork/test_writer_e2e_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L293: | [.agents/teamwork/test_writer_e2e_1/context.md](../../../../.agents/teamwork/test_writer_e2e_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L294: | [.agents/teamwork/test_writer_e2e_1/handoff.md](../../../../.agents/teamwork/test_writer_e2e_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L295: | [.agents/teamwork/test_writer_e2e_1/progress.md](../../../../.agents/teamwork/test_writer_e2e_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L296: | [.agents/teamwork/worker_baseline_diag_1/BRIEFING.md](../../../../.agents/teamwork/worker_baseline_diag_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L297: | [.agents/teamwork/worker_baseline_diag_1/DISPATCH.md](../../../../.agents/teamwork/worker_baseline_diag_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L298: | [.agents/teamwork/worker_baseline_diag_1/baseline_report.md](../../../../.agents/teamwork/worker_baseline_diag_1/baseline_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L299: | [.agents/teamwork/worker_baseline_diag_1/handoff.md](../../../../.agents/teamwork/worker_baseline_diag_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L300: | [.agents/teamwork/worker_baseline_diag_1/progress.md](../../../../.agents/teamwork/worker_baseline_diag_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L301: | [.agents/teamwork/worker_impl_1/BRIEFING.md](../../../../.agents/teamwork/worker_impl_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L302: | [.agents/teamwork/worker_impl_1/DISPATCH.md](../../../../.agents/teamwork/worker_impl_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L303: | [.agents/teamwork/worker_impl_1/context.md](../../../../.agents/teamwork/worker_impl_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L304: | [.agents/teamwork/worker_impl_1/handoff.md](../../../../.agents/teamwork/worker_impl_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L305: | [.agents/teamwork/worker_impl_1/progress.md](../../../../.agents/teamwork/worker_impl_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L306: | [.agents/teamwork/worker_impl_2/BRIEFING.md](../../../../.agents/teamwork/worker_impl_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L307: | [.agents/teamwork/worker_impl_2/DISPATCH.md](../../../../.agents/teamwork/worker_impl_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L308: | [.agents/teamwork/worker_impl_2/context.md](../../../../.agents/teamwork/worker_impl_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L309: | [.agents/teamwork/worker_impl_2/handoff.md](../../../../.agents/teamwork/worker_impl_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L310: | [.agents/teamwork/worker_impl_2/progress.md](../../../../.agents/teamwork/worker_impl_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L311: | [.agents/teamwork/worker_synthesis_1/BRIEFING.md](../../../../.agents/teamwork/worker_synthesis_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L312: | [.agents/teamwork/worker_synthesis_1/DISPATCH.md](../../../../.agents/teamwork/worker_synthesis_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L313: | [.agents/teamwork/worker_synthesis_1/handoff.md](../../../../.agents/teamwork/worker_synthesis_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L314: | [.agents/teamwork/worker_synthesis_1/progress.md](../../../../.agents/teamwork/worker_synthesis_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
-L315: | [.claude/commands/reticle.md](../../../../.claude/commands/reticle.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L316: | [.claude/skills/autofix/SKILL.md](../../../../.claude/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L317: | [.claude/skills/autofix/github.md](../../../../.claude/skills/autofix/github.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L318: | [.claude/skills/code-review/SKILL.md](../../../../.claude/skills/code-review/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L319: | [.claude/skills/code-review/references/auth-recovery.md](../../../../.claude/skills/code-review/references/auth-recovery.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L320: | [.claude/skills/code-review/references/cli-workflows.md](../../../../.claude/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L321: | [.github/copilot-instructions.md](../../../../.github/copilot-instructions.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L322: | [AGENTS.md](../../../../AGENTS.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L323: | [ARCHITECTURE.md](../../../../ARCHITECTURE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L324: | [BRAIN/BRAIN.md](../../BRAIN/BRAIN.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L325: | [BRAIN/MEMORY.md](../../BRAIN/MEMORY.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L326: | [CLAUDE.md](../../../../CLAUDE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L327: | [GEMINI.md](../../../../GEMINI.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L328: | [README.md](../../../../README.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L194: | [.agents/skills/autofix/SKILL.md](../../.agents/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L195: | [.agents/skills/autofix/github.md](../../.agents/skills/autofix/github.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L196: | [.agents/skills/code-review/SKILL.md](../../.agents/skills/code-review/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L197: | [.agents/skills/code-review/references/auth-recovery.md](../../.agents/skills/code-review/references/auth-recovery.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L198: | [.agents/skills/code-review/references/cli-workflows.md](../../.agents/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L199: | [.agents/teamwork/ORIGINAL_REQUEST.md](../../.agents/teamwork/ORIGINAL_REQUEST.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L200: | [.agents/teamwork/auditor_1/BRIEFING.md](../../.agents/teamwork/auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L201: | [.agents/teamwork/auditor_1/DISPATCH.md](../../.agents/teamwork/auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L202: | [.agents/teamwork/auditor_1/context.md](../../.agents/teamwork/auditor_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L203: | [.agents/teamwork/auditor_1/handoff.md](../../.agents/teamwork/auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L204: | [.agents/teamwork/auditor_1/progress.md](../../.agents/teamwork/auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L205: | [.agents/teamwork/auditor_iter2/DISPATCH.md](../../.agents/teamwork/auditor_iter2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L206: | [.agents/teamwork/auditor_iter2/context.md](../../.agents/teamwork/auditor_iter2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L207: | [.agents/teamwork/challenger_1/BRIEFING.md](../../.agents/teamwork/challenger_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L208: | [.agents/teamwork/challenger_1/DISPATCH.md](../../.agents/teamwork/challenger_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L209: | [.agents/teamwork/challenger_1/context.md](../../.agents/teamwork/challenger_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L210: | [.agents/teamwork/challenger_1/handoff.md](../../.agents/teamwork/challenger_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L211: | [.agents/teamwork/challenger_1/progress.md](../../.agents/teamwork/challenger_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L212: | [.agents/teamwork/challenger_2/BRIEFING.md](../../.agents/teamwork/challenger_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L213: | [.agents/teamwork/challenger_2/DISPATCH.md](../../.agents/teamwork/challenger_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L214: | [.agents/teamwork/challenger_2/context.md](../../.agents/teamwork/challenger_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L215: | [.agents/teamwork/challenger_2/handoff.md](../../.agents/teamwork/challenger_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L216: | [.agents/teamwork/challenger_2/progress.md](../../.agents/teamwork/challenger_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L217: | [.agents/teamwork/challenger_iter2_1/DISPATCH.md](../../.agents/teamwork/challenger_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L218: | [.agents/teamwork/challenger_iter2_1/context.md](../../.agents/teamwork/challenger_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L219: | [.agents/teamwork/challenger_iter2_2/DISPATCH.md](../../.agents/teamwork/challenger_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L220: | [.agents/teamwork/challenger_iter2_2/context.md](../../.agents/teamwork/challenger_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L221: | [.agents/teamwork/explorer_arch_sec_1/BRIEFING.md](../../.agents/teamwork/explorer_arch_sec_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L222: | [.agents/teamwork/explorer_arch_sec_1/DISPATCH.md](../../.agents/teamwork/explorer_arch_sec_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L223: | [.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md](../../.agents/teamwork/explorer_arch_sec_1/architecture_security_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L224: | [.agents/teamwork/explorer_arch_sec_1/handoff.md](../../.agents/teamwork/explorer_arch_sec_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L225: | [.agents/teamwork/explorer_arch_sec_1/progress.md](../../.agents/teamwork/explorer_arch_sec_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L226: | [.agents/teamwork/explorer_features_1/BRIEFING.md](../../.agents/teamwork/explorer_features_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L227: | [.agents/teamwork/explorer_features_1/DISPATCH.md](../../.agents/teamwork/explorer_features_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L228: | [.agents/teamwork/explorer_features_1/features_audit_report.md](../../.agents/teamwork/explorer_features_1/features_audit_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L229: | [.agents/teamwork/explorer_features_1/handoff.md](../../.agents/teamwork/explorer_features_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L230: | [.agents/teamwork/explorer_features_1/progress.md](../../.agents/teamwork/explorer_features_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L231: | [.agents/teamwork/explorer_git_issues_1/BRIEFING.md](../../.agents/teamwork/explorer_git_issues_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L232: | [.agents/teamwork/explorer_git_issues_1/DISPATCH.md](../../.agents/teamwork/explorer_git_issues_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L233: | [.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md](../../.agents/teamwork/explorer_git_issues_1/git_reconciliation_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L234: | [.agents/teamwork/explorer_git_issues_1/handoff.md](../../.agents/teamwork/explorer_git_issues_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L235: | [.agents/teamwork/explorer_git_issues_1/progress.md](../../.agents/teamwork/explorer_git_issues_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L236: | [.agents/teamwork/explorer_survey_1/BRIEFING.md](../../.agents/teamwork/explorer_survey_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L237: | [.agents/teamwork/explorer_survey_1/DISPATCH.md](../../.agents/teamwork/explorer_survey_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L238: | [.agents/teamwork/explorer_survey_1/context.md](../../.agents/teamwork/explorer_survey_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L239: | [.agents/teamwork/explorer_survey_1/handoff.md](../../.agents/teamwork/explorer_survey_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L240: | [.agents/teamwork/explorer_survey_1/progress.md](../../.agents/teamwork/explorer_survey_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L241: | [.agents/teamwork/explorer_survey_2/BRIEFING.md](../../.agents/teamwork/explorer_survey_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L242: | [.agents/teamwork/explorer_survey_2/DISPATCH.md](../../.agents/teamwork/explorer_survey_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L243: | [.agents/teamwork/explorer_survey_2/context.md](../../.agents/teamwork/explorer_survey_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L244: | [.agents/teamwork/explorer_survey_2/handoff.md](../../.agents/teamwork/explorer_survey_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L245: | [.agents/teamwork/explorer_survey_2/progress.md](../../.agents/teamwork/explorer_survey_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L246: | [.agents/teamwork/explorer_survey_3/BRIEFING.md](../../.agents/teamwork/explorer_survey_3/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L247: | [.agents/teamwork/explorer_survey_3/DISPATCH.md](../../.agents/teamwork/explorer_survey_3/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L248: | [.agents/teamwork/explorer_survey_3/context.md](../../.agents/teamwork/explorer_survey_3/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L249: | [.agents/teamwork/explorer_survey_3/handoff.md](../../.agents/teamwork/explorer_survey_3/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L250: | [.agents/teamwork/explorer_survey_3/progress.md](../../.agents/teamwork/explorer_survey_3/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L251: | [.agents/teamwork/orchestrator_1/BRIEFING.md](../../.agents/teamwork/orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L252: | [.agents/teamwork/orchestrator_1/DISPATCH.md](../../.agents/teamwork/orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L253: | [.agents/teamwork/orchestrator_1/GATE_STATUS.md](../../.agents/teamwork/orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L254: | [.agents/teamwork/orchestrator_1/PROJECT.md](../../.agents/teamwork/orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L255: | [.agents/teamwork/orchestrator_1/TEST_INFRA.md](../../.agents/teamwork/orchestrator_1/TEST_INFRA.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L256: | [.agents/teamwork/orchestrator_1/context.md](../../.agents/teamwork/orchestrator_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L257: | [.agents/teamwork/orchestrator_1/progress.md](../../.agents/teamwork/orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L258: | [.agents/teamwork/reviewer_1/BRIEFING.md](../../.agents/teamwork/reviewer_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L259: | [.agents/teamwork/reviewer_1/DISPATCH.md](../../.agents/teamwork/reviewer_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L260: | [.agents/teamwork/reviewer_1/context.md](../../.agents/teamwork/reviewer_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L261: | [.agents/teamwork/reviewer_1/handoff.md](../../.agents/teamwork/reviewer_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L262: | [.agents/teamwork/reviewer_1/progress.md](../../.agents/teamwork/reviewer_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L263: | [.agents/teamwork/reviewer_2/BRIEFING.md](../../.agents/teamwork/reviewer_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L264: | [.agents/teamwork/reviewer_2/DISPATCH.md](../../.agents/teamwork/reviewer_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L265: | [.agents/teamwork/reviewer_2/context.md](../../.agents/teamwork/reviewer_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L266: | [.agents/teamwork/reviewer_2/handoff.md](../../.agents/teamwork/reviewer_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L267: | [.agents/teamwork/reviewer_2/progress.md](../../.agents/teamwork/reviewer_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L268: | [.agents/teamwork/reviewer_audit_1/BRIEFING.md](../../.agents/teamwork/reviewer_audit_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L269: | [.agents/teamwork/reviewer_audit_1/DISPATCH.md](../../.agents/teamwork/reviewer_audit_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L270: | [.agents/teamwork/reviewer_audit_1/handoff.md](../../.agents/teamwork/reviewer_audit_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L271: | [.agents/teamwork/reviewer_audit_1/progress.md](../../.agents/teamwork/reviewer_audit_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L272: | [.agents/teamwork/reviewer_iter2_1/DISPATCH.md](../../.agents/teamwork/reviewer_iter2_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L273: | [.agents/teamwork/reviewer_iter2_1/context.md](../../.agents/teamwork/reviewer_iter2_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L274: | [.agents/teamwork/reviewer_iter2_2/DISPATCH.md](../../.agents/teamwork/reviewer_iter2_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L275: | [.agents/teamwork/reviewer_iter2_2/context.md](../../.agents/teamwork/reviewer_iter2_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L276: | [.agents/teamwork/sentinel/BRIEFING.md](../../.agents/teamwork/sentinel/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L277: | [.agents/teamwork/sentinel/handoff.md](../../.agents/teamwork/sentinel/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L278: | [.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L279: | [.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L280: | [.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/GATE_STATUS.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L281: | [.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/PROJECT.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L282: | [.agents/teamwork/teamwork_preview_orchestrator_1/README.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L283: | [.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L284: | [.agents/teamwork/teamwork_preview_orchestrator_1/plan.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/plan.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L285: | [.agents/teamwork/teamwork_preview_orchestrator_1/progress.md](../../.agents/teamwork/teamwork_preview_orchestrator_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L286: | [.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L287: | [.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L288: | [.agents/teamwork/teamwork_preview_victory_auditor_1/README.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/README.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L289: | [.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L290: | [.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md](../../.agents/teamwork/teamwork_preview_victory_auditor_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L291: | [.agents/teamwork/test_writer_e2e_1/BRIEFING.md](../../.agents/teamwork/test_writer_e2e_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L292: | [.agents/teamwork/test_writer_e2e_1/DISPATCH.md](../../.agents/teamwork/test_writer_e2e_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L293: | [.agents/teamwork/test_writer_e2e_1/context.md](../../.agents/teamwork/test_writer_e2e_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L294: | [.agents/teamwork/test_writer_e2e_1/handoff.md](../../.agents/teamwork/test_writer_e2e_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L295: | [.agents/teamwork/test_writer_e2e_1/progress.md](../../.agents/teamwork/test_writer_e2e_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L296: | [.agents/teamwork/worker_baseline_diag_1/BRIEFING.md](../../.agents/teamwork/worker_baseline_diag_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L297: | [.agents/teamwork/worker_baseline_diag_1/DISPATCH.md](../../.agents/teamwork/worker_baseline_diag_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L298: | [.agents/teamwork/worker_baseline_diag_1/baseline_report.md](../../.agents/teamwork/worker_baseline_diag_1/baseline_report.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L299: | [.agents/teamwork/worker_baseline_diag_1/handoff.md](../../.agents/teamwork/worker_baseline_diag_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L300: | [.agents/teamwork/worker_baseline_diag_1/progress.md](../../.agents/teamwork/worker_baseline_diag_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L301: | [.agents/teamwork/worker_impl_1/BRIEFING.md](../../.agents/teamwork/worker_impl_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L302: | [.agents/teamwork/worker_impl_1/DISPATCH.md](../../.agents/teamwork/worker_impl_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L303: | [.agents/teamwork/worker_impl_1/context.md](../../.agents/teamwork/worker_impl_1/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L304: | [.agents/teamwork/worker_impl_1/handoff.md](../../.agents/teamwork/worker_impl_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L305: | [.agents/teamwork/worker_impl_1/progress.md](../../.agents/teamwork/worker_impl_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L306: | [.agents/teamwork/worker_impl_2/BRIEFING.md](../../.agents/teamwork/worker_impl_2/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L307: | [.agents/teamwork/worker_impl_2/DISPATCH.md](../../.agents/teamwork/worker_impl_2/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L308: | [.agents/teamwork/worker_impl_2/context.md](../../.agents/teamwork/worker_impl_2/context.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L309: | [.agents/teamwork/worker_impl_2/handoff.md](../../.agents/teamwork/worker_impl_2/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L310: | [.agents/teamwork/worker_impl_2/progress.md](../../.agents/teamwork/worker_impl_2/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L311: | [.agents/teamwork/worker_synthesis_1/BRIEFING.md](../../.agents/teamwork/worker_synthesis_1/BRIEFING.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L312: | [.agents/teamwork/worker_synthesis_1/DISPATCH.md](../../.agents/teamwork/worker_synthesis_1/DISPATCH.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L313: | [.agents/teamwork/worker_synthesis_1/handoff.md](../../.agents/teamwork/worker_synthesis_1/handoff.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L314: | [.agents/teamwork/worker_synthesis_1/progress.md](../../.agents/teamwork/worker_synthesis_1/progress.md) | Historical agent briefing/plan/evidence; retained for provenance |
+L315: | [.claude/commands/reticle.md](../../.claude/commands/reticle.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L316: | [.claude/skills/autofix/SKILL.md](../../.claude/skills/autofix/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L317: | [.claude/skills/autofix/github.md](../../.claude/skills/autofix/github.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L318: | [.claude/skills/code-review/SKILL.md](../../.claude/skills/code-review/SKILL.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L319: | [.claude/skills/code-review/references/auth-recovery.md](../../.claude/skills/code-review/references/auth-recovery.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L320: | [.claude/skills/code-review/references/cli-workflows.md](../../.claude/skills/code-review/references/cli-workflows.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L321: | [.github/copilot-instructions.md](../../.github/copilot-instructions.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L322: | [AGENTS.md](../../AGENTS.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L323: | [ARCHITECTURE.md](../../ARCHITECTURE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L324: | BRAIN/BRAIN.md (`../../BRAIN/BRAIN.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L325: | BRAIN/MEMORY.md (`../../BRAIN/MEMORY.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L326: | [CLAUDE.md](../../CLAUDE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L327: | [GEMINI.md](../../GEMINI.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L328: | [README.md](../../README.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
 L329: | REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) | Compatibility pointer to retained report; no duplicated report body |
-L330: | [RETICLE.md](../../../../RETICLE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
-L331: | [SSOT.md](../../../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
-L332: | [TalentSphere/Welcome.md](../../../../TalentSphere/Welcome.md) | Personal vault/template; preserved, outside technical authority |
-L333: | [TalentSphere/create a link.md](../../TalentSphere/create%20a%20link.md) | Personal vault/template; preserved, outside technical authority |
+L330: | [RETICLE.md](../../RETICLE.md) | Tooling/agent instruction; retained for distinct consumer, not feature status |
+L331: | [SSOT.md](../../SSOT.md) | Canonical intended requirements; preserved byte-for-byte |
+L332: | [TalentSphere/Welcome.md](../../TalentSphere/Welcome.md) | Personal vault/template; preserved, outside technical authority |
+L333: | [TalentSphere/create a link.md](../../TalentSphere/create a link.md) | Personal vault/template; preserved, outside technical authority |
 L334: | deploy/oracle/NEW_SUPABASE_PROJECT.md (prior-attempt path `deploy/NEW_SUPABASE_PROJECT.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
 L335: | deploy/oracle/README.md (prior-attempt path `deploy/README.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
 L336: | deploy/oracle/RECOVERY.md (prior-attempt path `deploy/RECOVERY.md`, absent on this branch; see git branch `main`) | Protected deployment reference; read-only, live behavior unverified |
-L337: | [docs/INDEX.md](../INDEX.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L338: | [docs/engineering/API_CONTRACTS.md](../engineering/API_CONTRACTS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L339: | [docs/engineering/CODE_STYLE.md](../engineering/CODE_STYLE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L340: | [docs/engineering/DATABASE.md](../engineering/DATABASE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L341: | [docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md](../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L342: | [docs/engineering/PROJECT_MAINTENANCE.md](../engineering/PROJECT_MAINTENANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L343: | [docs/engineering/TARGET_ARCHITECTURE.md](../engineering/TARGET_ARCHITECTURE.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L344: | [docs/engineering/TRD.md](../engineering/TRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L345: | [docs/engineering/adr/ADR-015-core-loop-persistence.md](../engineering/adr/ADR-015-core-loop-persistence.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L346: | [docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md](../engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L347: | [docs/experience/APP_FLOW.md](../experience/APP_FLOW.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L348: | [docs/experience/JOURNEY_REGISTRY.md](../experience/JOURNEY_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L349: | [docs/experience/UI_UX_DESIGN_SYSTEM.md](../experience/UI_UX_DESIGN_SYSTEM.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L350: | [docs/governance/GAP_ANALYSIS.md](../governance/GAP_ANALYSIS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L351: | [docs/governance/GOVERNANCE.md](../governance/GOVERNANCE.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L337: | docs/INDEX.md (`../INDEX.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L338: | docs/engineering/API_CONTRACTS.md (`../engineering/API_CONTRACTS.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L339: | docs/engineering/CODE_STYLE.md (`../engineering/CODE_STYLE.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L340: | docs/engineering/DATABASE.md (`../engineering/DATABASE.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L341: | docs/engineering/HOSTED_SUPABASE_MIGRATION_GATE.md (`../engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L342: | docs/engineering/PROJECT_MAINTENANCE.md (`../engineering/PROJECT_MAINTENANCE.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L343: | docs/engineering/TARGET_ARCHITECTURE.md (`../engineering/TARGET_ARCHITECTURE.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L344: | docs/engineering/TRD.md (`../engineering/TRD.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L345: | docs/engineering/adr/ADR-015-core-loop-persistence.md (`../engineering/adr/ADR-015-core-loop-persistence.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L346: | docs/engineering/adr/ADR-016-browser-measured-ui-quality-gates.md (`../engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L347: | docs/experience/APP_FLOW.md (`../experience/APP_FLOW.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L348: | docs/experience/JOURNEY_REGISTRY.md (`../experience/JOURNEY_REGISTRY.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L349: | docs/experience/UI_UX_DESIGN_SYSTEM.md (`../experience/UI_UX_DESIGN_SYSTEM.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L350: | docs/governance/GAP_ANALYSIS.md (`../governance/GAP_ANALYSIS.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L351: | docs/governance/GOVERNANCE.md (`../governance/GOVERNANCE.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
 L352: | docs/governance/IMPLEMENTATION_PLAN.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Requirements/design/portfolio intent; retained, not implementation proof |
 L353: | docs/governance/SOURCE_RECONCILIATION.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L354: | [docs/product/PRD.md](../product/PRD.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L355: | [docs/quality/OPERATIONS.md](../quality/OPERATIONS.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L356: | [docs/quality/SECURITY.md](../quality/SECURITY.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L357: | [docs/quality/TESTING.md](../quality/TESTING.md) | Living navigation/technical/policy reference; retains distinct topic ownership |
-L358: | [docs/registries/BUSINESS_RULE_REGISTRY.md](../registries/BUSINESS_RULE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
-L359: | [docs/registries/FEATURE_REGISTRY.md](../registries/FEATURE_REGISTRY.md) | Requirements/design/portfolio intent; retained, not implementation proof |
+L354: | docs/product/PRD.md (`../product/PRD.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L355: | docs/quality/OPERATIONS.md (`../quality/OPERATIONS.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L356: | docs/quality/SECURITY.md (`../quality/SECURITY.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L357: | docs/quality/TESTING.md (`../quality/TESTING.md`, not present in this tree) | Living navigation/technical/policy reference; retains distinct topic ownership |
+L358: | docs/registries/BUSINESS_RULE_REGISTRY.md (`../registries/BUSINESS_RULE_REGISTRY.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
+L359: | docs/registries/FEATURE_REGISTRY.md (`../registries/FEATURE_REGISTRY.md`, not present in this tree) | Requirements/design/portfolio intent; retained, not implementation proof |
 L360: | docs/registries/WORKFLOWS_AND_BUSINESS_RULES.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Requirements/design/portfolio intent; retained, not implementation proof |
-L361: | [docs/reports/ARCHITECTURE_DURABILITY_REPORT.md](../reports/ARCHITECTURE_DURABILITY_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L362: | [docs/reports/AUDIT_MASTER_REPORT.md](../reports/AUDIT_MASTER_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L363: | [docs/reports/E2E_AUDIT_2026-10-21.md](../reports/E2E_AUDIT_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L364: | [docs/reports/FEATURE_PLAN_2026-10-21.md](../reports/FEATURE_PLAN_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L365: | [docs/reports/FEATURE_STATUS_2026-10-21.md](../reports/FEATURE_STATUS_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L366: | [docs/reports/FEATURE_TRACEABILITY_MATRIX.md](../reports/FEATURE_TRACEABILITY_MATRIX.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L367: | [docs/reports/FINAL_VALIDATION_REPORT.md](../reports/FINAL_VALIDATION_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L368: | [docs/reports/GIT_RECONCILIATION_REPORT.md](../reports/GIT_RECONCILIATION_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L369: | [docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md](../reports/IMPROVEMENT_PROGRAM_2026-10-10.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L370: | [docs/reports/MAINTENANCE_AUDIT_2026-10-21.md](../reports/MAINTENANCE_AUDIT_2026-10-21.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L371: | [docs/reports/PAYMENT_AUDIT_2026-10-23.md](../reports/PAYMENT_AUDIT_2026-10-23.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L372: | [docs/reports/PRODUCTION_AUDIT_2026-10-03.md](../reports/PRODUCTION_AUDIT_2026-10-03.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L373: | [docs/reports/RELEASE_SCOPE_AND_BACKLOG.md](../reports/RELEASE_SCOPE_AND_BACKLOG.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L374: | [docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md](../reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L375: | [docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md](../reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L361: | docs/reports/ARCHITECTURE_DURABILITY_REPORT.md (`../reports/ARCHITECTURE_DURABILITY_REPORT.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L362: | docs/reports/AUDIT_MASTER_REPORT.md (`../reports/AUDIT_MASTER_REPORT.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L363: | docs/reports/E2E_AUDIT_2026-10-21.md (`../reports/E2E_AUDIT_2026-10-21.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L364: | docs/reports/FEATURE_PLAN_2026-10-21.md (`../reports/FEATURE_PLAN_2026-10-21.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L365: | docs/reports/FEATURE_STATUS_2026-10-21.md (`../reports/FEATURE_STATUS_2026-10-21.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L366: | docs/reports/FEATURE_TRACEABILITY_MATRIX.md (`../reports/FEATURE_TRACEABILITY_MATRIX.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L367: | docs/reports/FINAL_VALIDATION_REPORT.md (`../reports/FINAL_VALIDATION_REPORT.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L368: | docs/reports/GIT_RECONCILIATION_REPORT.md (`../reports/GIT_RECONCILIATION_REPORT.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L369: | docs/reports/IMPROVEMENT_PROGRAM_2026-10-10.md (`../reports/IMPROVEMENT_PROGRAM_2026-10-10.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L370: | docs/reports/MAINTENANCE_AUDIT_2026-10-21.md (`../reports/MAINTENANCE_AUDIT_2026-10-21.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L371: | docs/reports/PAYMENT_AUDIT_2026-10-23.md (`../reports/PAYMENT_AUDIT_2026-10-23.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L372: | docs/reports/PRODUCTION_AUDIT_2026-10-03.md (`../reports/PRODUCTION_AUDIT_2026-10-03.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L373: | docs/reports/RELEASE_SCOPE_AND_BACKLOG.md (`../reports/RELEASE_SCOPE_AND_BACKLOG.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L374: | docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md (`../reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
+L375: | docs/reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md (`../reports/STRIPE_SUPABASE_AUDIT_2026-10-23.md`, not present in this tree) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
 L376: | docs/superpowers/plans/2026-10-21-project-maintenance.md (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Historical evidence or proposed plan; runtime assertions unverified by this pass |
-L377: | [docs/system-model/00-index.md](00-index.md) | Source model or dated evidence; coverage/verification limits explicit |
-L378: | [docs/system-model/01-inventory-and-coverage.md](01-inventory-and-coverage.md) | Source model or dated evidence; coverage/verification limits explicit |
-L379: | [docs/system-model/02-flows.md](02-flows.md) | Source model or dated evidence; coverage/verification limits explicit |
-L380: | [docs/system-model/03-conflict-register.md](03-conflict-register.md) | Source model or dated evidence; coverage/verification limits explicit |
-L381: | [docs/system-model/04-conditions.md](04-conditions.md) | Source model or dated evidence; coverage/verification limits explicit |
-L382: | [docs/system-model/05-audit.md](05-audit.md) | Source model or dated evidence; coverage/verification limits explicit |
-L383: | [docs/system-model/06-route-authorization.md](06-route-authorization.md) | Source model or dated evidence; coverage/verification limits explicit |
-L384: | [graphify-out/2026-10-23/GRAPH_REPORT.md](../../../../graphify-out/2026-10-23/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
-L385: | [graphify-out/GRAPH_REPORT.md](../../../../graphify-out/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
+L377: | docs/system-model/00-index.md (`00-index.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L378: | docs/system-model/01-inventory-and-coverage.md (`01-inventory-and-coverage.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L379: | docs/system-model/02-flows.md (`02-flows.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L380: | docs/system-model/03-conflict-register.md (`03-conflict-register.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L381: | docs/system-model/04-conditions.md (`04-conditions.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L382: | docs/system-model/05-audit.md (`05-audit.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L383: | docs/system-model/06-route-authorization.md (`06-route-authorization.md`, not present in this tree) | Source model or dated evidence; coverage/verification limits explicit |
+L384: | [graphify-out/2026-10-23/GRAPH_REPORT.md](../../graphify-out/2026-10-23/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
+L385: | [graphify-out/GRAPH_REPORT.md](../../graphify-out/GRAPH_REPORT.md) | Generated graph snapshot; retained, not implementation acceptance |
 L386: | supabase/hosted/README.md (prior-attempt path `supabase/hosted/README.md`, absent on this branch; see git branch `main`) | Manual adapter sequence and historical partial deployment; current applied state unverified |
 L387: 
 L388: 

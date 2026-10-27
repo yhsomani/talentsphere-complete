@@ -217,8 +217,8 @@ stateDiagram-v2
 ### 7.3 Retries, backoff, dead letter, cancellation
 | Policy | Value [TARGET] | Rationale |
 |---|---|---|
-| Backoff | `delay = min(cap, base * 2^(attempt-1))` with full jitter (`random(0, delay)`); base 5 s, cap 15 min | Avoids synchronised retry storms against a recovering provider |
-| Max attempts | default 8; `email.send`/`webhook.deliver` 12 (spans ~24 h with cap); `ai.*` 3; `assessment.run` 2; `evt:*` 8 | Provider outages of hours should heal without operator action; AI retries cost money |
+| Backoff | `delay = min(cap, base * 2^(attempt-1))` with full jitter (`random(0, delay)`); base 5 s, cap 15 min (`email.send`/`webhook.deliver`: base 60 s, cap 6 h; per-kind table in [REV2 §3.2](BACKEND_ARCHITECTURE_REV2.md)) | Avoids synchronised retry storms against a recovering provider |
+| Max attempts | default 8; `email.send`/`webhook.deliver` 12 (about 20.5 h worst case with the 60 s / 6 h values; the 5 s / 15 min defaults would span only about 66 min); `ai.*` 3; `assessment.run` 2; `evt:*` 8 | Provider outages of hours should heal without operator action; AI retries cost money |
 | Error classes | `transient` (retry), `permanent` (dead immediately: validation, 4xx except 408/429), `rate_limited` (retry honouring `Retry-After`), `cancelled` | Prevents burning attempts on permanent failures |
 | Dead letter | `status='dead'`, `dead_at`, error retained; alert when any dead job of a protected kind (billing, erasure, evidence) exists, or dead count > threshold | Erasure/billing must not silently stall |
 | Cancel | `POST /admin/jobs/{id}/cancellation` sets `cancel_requested_at`; queued jobs flip to `cancelled`; running jobs observe it at heartbeat and abort at the next checkpoint; handlers must be idempotent on resume | Operator control without kill -9 |
@@ -237,7 +237,7 @@ stateDiagram-v2
 | Flow | (1) `INSERT ... ON CONFLICT DO NOTHING` state `in_progress`, `locked_until=now()+30 s`; (2) inserted -> proceed; (3) conflict + `completed` + same `request_hash` -> replay stored status/body (header `Idempotency-Replayed: true`); (4) conflict + different hash/route -> `422 idempotency-key-reuse`; (5) conflict + `in_progress` not expired -> `409 idempotency-in-flight` + `Retry-After`; (6) expired `in_progress` (crash) -> takeover |
 | Atomicity | The `complete` write shares the use-case transaction when the operation is DB-only (response stored at commit). For operations with external effects the middleware stores the result after commit; the use case itself is retry-safe through a natural key, so a crash window yields a replayed execution, never a duplicate effect |
 | Body storage | Success body stored (<=64 KB) with column-level encryption for `C2+` data classes; larger/binary responses store a reference + hash and the replay returns `200` with a fresh representation (documented in API-STD) |
-| TTL | 24 h default; 7 days for payment-adjacent routes (checkout, portal) [TARGET]; purge via partition drop (daily partitions) |
+| TTL | 24 h for online-only routes; 7 days for payment-adjacent routes (checkout, portal); 14 days (= outbox TTL) for any route flagged `queuedOp: true`, since a queued write may flush days after the user acted (CONST-S12, [REV2](BACKEND_ARCHITECTURE_REV2.md)) [TARGET]; purge via partition drop (daily partitions) |
 | Layering with natural keys | Business uniqueness (BR-T001 one active application) is enforced by the DB partial unique index, not by the key; the key only makes retries cheap and responses stable |
 
 ## 9. Concurrency control (ETag / If-Match)
@@ -404,14 +404,14 @@ Defaults are **[TARGET]** starting values chosen from the interactive-vs-backgro
 | Object store | connect 2 s / total 10 s (signing is local) | 2 retries on 5xx/timeouts with jitter | yes | upload start 503; downloads 503 with retry hint; no partial state (state advances only after HEAD verify) |
 | Stripe (outbound API) | 3 s / 10 s | up to 2 retries with the same Stripe idempotency key | yes | checkout creation fails with 503 and message; **entitlements never change on outbound failure or redirect** (INV-T17) |
 | Stripe (inbound webhook) | respond < 5 s: verify signature, insert `stripe_event_inbox`, enqueue, return 200 | Stripe retries delivery; our processing job retries 8x | n/a | If processing is delayed, plan state is stale until reconcile job (`billing.reconcile`, periodic) heals it |
-| Email provider | 3 s / 10 s inside `email.send` job | 12 attempts over ~24 h | yes (pauses sending, queue grows) | Transactional mail delayed; in-app notification still delivered; user can resend verification (rate-limited) |
+| Email provider | 3 s / 10 s inside `email.send` job | 12 attempts over ~20.5 h (60 s base, 6 h cap) | yes (pauses sending, queue grows) | Transactional mail delayed; in-app notification still delivered; user can resend verification (rate-limited) |
 | Web Push services | 3 s / 5 s | 404/410 delete; 429/5xx retry (<= 4, TTL-bounded) | per-endpoint-host | No push; in-app notification unaffected |
 | AI provider | 3 s / 30 s | 1 retry on 5xx/timeout (not on 4xx) | yes | Feature banner "assistant unavailable"; budget reservation released; core flows unaffected |
 | Virus scanner | 5 s / 60 s per file (size-scaled) | 5 attempts | yes | **Fail-closed**: file remains "scanning"; nothing becomes visible |
 | Sandbox runner | 3 s / assessment limit + 30 s | 2 attempts (new `runId`, same attempt) | yes | Attempt shown "awaiting verification"; ends `unverified` if runner is down beyond SLA; never auto-pass |
 | OIDC/SAML IdP | 3 s / 8 s | none | per-IdP | SSO login error; password/passkey fallback only if org policy allows |
 | Breached-password API | 1 s | none | n/a | **Fail-open** (log), because blocking registration on a third party is worse than the marginal risk |
-| Outbound customer webhooks | 3 s / 5 s; SSRF-guarded resolver | 12 attempts / ~24 h, then endpoint auto-paused after sustained failure | per-endpoint | Customer sees delivery log; no impact on core flows |
+| Outbound customer webhooks | 3 s / 5 s; SSRF-guarded resolver | 12 attempts / ~20.5 h, then endpoint auto-paused after sustained failure | per-endpoint | Customer sees delivery log; no impact on core flows |
 | Import sources (URL/file) | 3 s / 15 s; size cap | 3 | per-host | Import job fails with report; no partial publish |
 
 Cross-cutting: every outbound call has a timeout and an `AbortSignal`; no unbounded queues in memory; bulkheads via separate pools/concurrency per dependency; graceful shutdown drains in-flight requests and stops claiming jobs; each request has a deadline propagated to calls (`min(request deadline, dependency timeout)`).

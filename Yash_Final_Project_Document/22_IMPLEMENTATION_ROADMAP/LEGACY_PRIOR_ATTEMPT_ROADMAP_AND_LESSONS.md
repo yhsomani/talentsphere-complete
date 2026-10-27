@@ -298,7 +298,7 @@ L1098:
 L1099: ### TD-09
 L1100: Duplicate specification/status claims across README, registries and validation reports.
 L1101: 
-L1102: For example, README and FINAL_VALIDATION_REPORT describe different feature/test-count snapshots, which demonstrates documentation synchronization drift. [README.md](../../../../README.md) [FINAL_VALIDATION_REPORT.md](FINAL_VALIDATION_REPORT.md)
+L1102: For example, README and FINAL_VALIDATION_REPORT describe different feature/test-count snapshots, which demonstrates documentation synchronization drift. [README.md](../../README.md) FINAL_VALIDATION_REPORT.md (`FINAL_VALIDATION_REPORT.md`, not present in this tree)
 L1103: 
 L1104: ### TD-10
 L1105: Test suites validate many API capabilities that are not reachable through the production web application.

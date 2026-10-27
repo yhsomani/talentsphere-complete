@@ -164,19 +164,19 @@ L5: ## Start here
 L6: 
 L7: | Need | Read |
 L8: |---|---|
-L9: | Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | [`final-project-documentation/00-INDEX.md`](../../30_PRIOR_IMPLEMENTATION_REFERENCE/00-INDEX.md) |
-L10: | Set up and run the project | [`../README.md`](../../../README.md) |
-L11: | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) |
-L12: | Plans, prices, entitlements and what is actually enforced | [`PRICING.md`](PRICING.md) |
+L9: | Consolidated, evidence-checked overview (requirements, architecture, dev guide, features, DB/API, security, testing/ops, roadmap) | `final-project-documentation/00-INDEX.md` (`../../30_PRIOR_IMPLEMENTATION_REFERENCE/00-INDEX.md`, not present in this tree) |
+L10: | Set up and run the project | [`../README.md`](../../README.md) |
+L11: | What is built, and the rules to follow before changing code | [`../ARCHITECTURE.md`](../../ARCHITECTURE.md) |
+L12: | Plans, prices, entitlements and what is actually enforced | `PRICING.md` (`PRICING.md`, not present in this tree) |
 L13: | Second-pass re-audit (2026-10-23) and live Stripe/Supabase release gates | `../REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md` (retired root pointer; the report lives at `docs/reports/REPOSITORY_AUDIT_AND_GITHUB_ISSUE_REPORT.md`) |
-L14: | Current source coverage, status and documentation disposition | [`system-model/01-inventory-and-coverage.md`](system-model/01-inventory-and-coverage.md) |
-L15: | Complete historical 173-feature matrix | [`reports/FEATURE_STATUS_2026-10-21.md`](reports/FEATURE_STATUS_2026-10-21.md) (dated snapshot, not current acceptance) |
+L14: | Current source coverage, status and documentation disposition | `system-model/01-inventory-and-coverage.md` (`system-model/01-inventory-and-coverage.md`, not present in this tree) |
+L15: | Complete historical 173-feature matrix | `reports/FEATURE_STATUS_2026-10-21.md` (`reports/FEATURE_STATUS_2026-10-21.md`, not present in this tree) (dated snapshot, not current acceptance) |
 L16: | Historical evidence ledger: 173 features, 248 rules, 28 journeys, routes and dated tests | `reports/AUDIT_EVIDENCE_2026-10-21.json` (prior-attempt path `reports/AUDIT_EVIDENCE_2026-10-21.json`, absent on this branch; see git branch `main`) |
-L17: | Proposed releases, sprint goals and explicit decision gates | [`reports/FEATURE_PLAN_2026-10-21.md`](reports/FEATURE_PLAN_2026-10-21.md) |
-L18: | Canonical intent | [`../SSOT.md`](../../../SSOT.md) |
-L19: | Coding-agent workflow | [`../AGENTS.md`](../../../AGENTS.md), [`../CLAUDE.md`](../../../CLAUDE.md) |
-L20: | Browser verification with Reticle | [`../RETICLE.md`](../../../RETICLE.md) |
-L21: | Project memory and execution history | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) |
+L17: | Proposed releases, sprint goals and explicit decision gates | `reports/FEATURE_PLAN_2026-10-21.md` (`reports/FEATURE_PLAN_2026-10-21.md`, not present in this tree) |
+L18: | Canonical intent | [`../SSOT.md`](../../SSOT.md) |
+L19: | Coding-agent workflow | [`../AGENTS.md`](../../AGENTS.md), [`../CLAUDE.md`](../../CLAUDE.md) |
+L20: | Browser verification with Reticle | [`../RETICLE.md`](../../RETICLE.md) |
+L21: | Project memory and execution history | `../BRAIN/MEMORY.md` (`../BRAIN/MEMORY.md`, not present in this tree) |
 L22: 
 L23: ## Authority order
 L24: 
@@ -186,77 +186,77 @@ L27: 1. **What exists today:** the code, then the root `ARCHITECTURE.md`, then t
 L28: 2. **What is intended:** `SSOT.md`, then the specialised files below (`PRD`, `TRD`, registries, `TARGET_ARCHITECTURE`).
 L29: 3. **History:** dated reports and `BRAIN/MEMORY.md` are evidence of what happened, not current state.
 L30: 
-L31: Unresolved conflicts are listed in [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md#documentation-conflicts-open-2026-10-21). They are not resolved by assumption.
+L31: Unresolved conflicts are listed in `governance/GAP_ANALYSIS.md` (`governance/GAP_ANALYSIS.md`, not present in this tree). They are not resolved by assumption.
 L32: 
 L33: ## 1. Requirements
 L34: 
 L35: | Document | Purpose |
 L36: |---|---|
-L37: | [`../SSOT.md`](../../../SSOT.md) | Canonical project and system definition. Owns intent. |
-L38: | [`product/PRD.md`](product/PRD.md) | Product requirements, personas, capability matrix. |
-L39: | [`engineering/TRD.md`](engineering/TRD.md) | Technical requirements: runtime constraints, latency, security posture. |
-L40: | [`registries/FEATURE_REGISTRY.md`](registries/FEATURE_REGISTRY.md) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
-L41: | [`registries/BUSINESS_RULE_REGISTRY.md`](registries/BUSINESS_RULE_REGISTRY.md) | Business rules BR-001 to BR-248. |
+L37: | [`../SSOT.md`](../../SSOT.md) | Canonical project and system definition. Owns intent. |
+L38: | `product/PRD.md` (`product/PRD.md`, not present in this tree) | Product requirements, personas, capability matrix. |
+L39: | `engineering/TRD.md` (`engineering/TRD.md`, not present in this tree) | Technical requirements: runtime constraints, latency, security posture. |
+L40: | `registries/FEATURE_REGISTRY.md` (`registries/FEATURE_REGISTRY.md`, not present in this tree) | 173 feature IDs (F-01 to F-173). An inventory, not a status tracker. |
+L41: | `registries/BUSINESS_RULE_REGISTRY.md` (`registries/BUSINESS_RULE_REGISTRY.md`, not present in this tree) | Business rules BR-001 to BR-248. |
 L42: | `registries/WORKFLOWS_AND_BUSINESS_RULES.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | 66 declared workflow state machines, invariants and transition triggers. |
-L43: | [`experience/JOURNEY_REGISTRY.md`](experience/JOURNEY_REGISTRY.md) | User journeys J-01 to J-28. |
+L43: | `experience/JOURNEY_REGISTRY.md` (`experience/JOURNEY_REGISTRY.md`, not present in this tree) | User journeys J-01 to J-28. |
 L44: 
 L45: ## 2. Architecture
 L46: 
 L47: | Document | Purpose |
 L48: |---|---|
-L49: | [`../ARCHITECTURE.md`](../../../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
-L50: | [`engineering/TARGET_ARCHITECTURE.md`](engineering/TARGET_ARCHITECTURE.md) | **Target architecture.** Intended modular monolith, bounded contexts, flows. Not a description of the running code. |
-L51: | [`engineering/adr/ADR-015-core-loop-persistence.md`](engineering/adr/ADR-015-core-loop-persistence.md) | ADR: persist the core career loop; the API's in-memory maps are a read model. |
-L52: | [`engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`](engineering/adr/ADR-016-browser-measured-ui-quality-gates.md) | ADR: measure UI quality in a real browser and test it adversarially. |
-L53: | [`system-model/00-index.md`](system-model/00-index.md) | **System model.** Source inventory, flowcharts, conflict register, rule matrix and dated verification evidence. Coverage limits are explicit. |
+L49: | [`../ARCHITECTURE.md`](../../ARCHITECTURE.md) | **Architecture as built.** Boundaries, invariants, decision register, and what does not exist. Governs what exists. |
+L50: | `engineering/TARGET_ARCHITECTURE.md` (`engineering/TARGET_ARCHITECTURE.md`, not present in this tree) | **Target architecture.** Intended modular monolith, bounded contexts, flows. Not a description of the running code. |
+L51: | `engineering/adr/ADR-015-core-loop-persistence.md` (`engineering/adr/ADR-015-core-loop-persistence.md`, not present in this tree) | ADR: persist the core career loop; the API's in-memory maps are a read model. |
+L52: | `engineering/adr/ADR-016-browser-measured-ui-quality-gates.md` (`engineering/adr/ADR-016-browser-measured-ui-quality-gates.md`, not present in this tree) | ADR: measure UI quality in a real browser and test it adversarially. |
+L53: | `system-model/00-index.md` (`system-model/00-index.md`, not present in this tree) | **System model.** Source inventory, flowcharts, conflict register, rule matrix and dated verification evidence. Coverage limits are explicit. |
 L54: 
 L55: ## 3. Implementation details
 L56: 
 L57: | Document | Purpose |
 L58: |---|---|
-L59: | [`engineering/DATABASE.md`](engineering/DATABASE.md) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries. |
-L60: | [`engineering/API_CONTRACTS.md`](engineering/API_CONTRACTS.md) | All 278 unique method/path pairs, request-schema locators, response/error semantics and billing retries. |
-L61: | [`engineering/CODE_STYLE.md`](engineering/CODE_STYLE.md) | TypeScript conventions, formatting, linting. |
-L62: | [`experience/UI_UX_DESIGN_SYSTEM.md`](experience/UI_UX_DESIGN_SYSTEM.md) | Design tokens, components, accessibility (WCAG 2.2 AA). |
-L63: | [`experience/APP_FLOW.md`](experience/APP_FLOW.md) | Routes, navigation guards, state transitions. |
+L59: | `engineering/DATABASE.md` (`engineering/DATABASE.md`, not present in this tree) | Actual SQL stores, relationships, all 55 migrations, lifecycle and hosted/local boundaries. |
+L60: | `engineering/API_CONTRACTS.md` (`engineering/API_CONTRACTS.md`, not present in this tree) | All 278 unique method/path pairs, request-schema locators, response/error semantics and billing retries. |
+L61: | `engineering/CODE_STYLE.md` (`engineering/CODE_STYLE.md`, not present in this tree) | TypeScript conventions, formatting, linting. |
+L62: | `experience/UI_UX_DESIGN_SYSTEM.md` (`experience/UI_UX_DESIGN_SYSTEM.md`, not present in this tree) | Design tokens, components, accessibility (WCAG 2.2 AA). |
+L63: | `experience/APP_FLOW.md` (`experience/APP_FLOW.md`, not present in this tree) | Routes, navigation guards, state transitions. |
 L64: 
 L65: ## 4. Quality, security and testing
 L66: 
 L67: | Document | Purpose |
 L68: |---|---|
-L69: | [`quality/TESTING.md`](quality/TESTING.md) | Test strategy: Vitest unit and integration, Postgres suite, Playwright. |
-L70: | [`quality/SECURITY.md`](quality/SECURITY.md) | Security architecture, RLS, session handling, AI safety, privacy. |
-L71: | [`quality/OPERATIONS.md`](quality/OPERATIONS.md) | Runbooks, health checks, degradation, backups, observability. |
+L69: | `quality/TESTING.md` (`quality/TESTING.md`, not present in this tree) | Test strategy: Vitest unit and integration, Postgres suite, Playwright. |
+L70: | `quality/SECURITY.md` (`quality/SECURITY.md`, not present in this tree) | Security architecture, RLS, session handling, AI safety, privacy. |
+L71: | `quality/OPERATIONS.md` (`quality/OPERATIONS.md`, not present in this tree) | Runbooks, health checks, degradation, backups, observability. |
 L72: 
 L73: ## 5. Setup and deployment
 L74: 
 L75: | Document | Purpose |
 L76: |---|---|
-L77: | [`../README.md`](../../../README.md) | Local setup, commands, test suites, CI. |
+L77: | [`../README.md`](../../README.md) | Local setup, commands, test suites, CI. |
 L78: | `../deploy/oracle/README.md` (prior-attempt path `deploy/README.md`, absent on this branch; see git branch `main`) | Oracle Always Free staging. Not evidence of a production release. |
 L79: | `../deploy/oracle/RECOVERY.md` (prior-attempt path `deploy/RECOVERY.md`, absent on this branch; see git branch `main`) | PostgreSQL backup and restore checks. |
 L80: 
-L81: | [`engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`](engineering/HOSTED_SUPABASE_MIGRATION_GATE.md) | Hosted adapter, dependency audit and release prerequisites; no live application claim. |
-L82: | [`engineering/PROJECT_MAINTENANCE.md`](engineering/PROJECT_MAINTENANCE.md) | Current Windows maintenance implementation and safety limits; historical material is archived. |
+L81: | `engineering/HOSTED_SUPABASE_MIGRATION_GATE.md` (`engineering/HOSTED_SUPABASE_MIGRATION_GATE.md`, not present in this tree) | Hosted adapter, dependency audit and release prerequisites; no live application claim. |
+L82: | `engineering/PROJECT_MAINTENANCE.md` (`engineering/PROJECT_MAINTENANCE.md`, not present in this tree) | Current Windows maintenance implementation and safety limits; historical material is archived. |
 L83: 
 L84: ## 6. Agent and tooling instructions
 L85: 
 L86: | Document | Purpose |
 L87: |---|---|
-L88: | [`../AGENTS.md`](../../../AGENTS.md) | Coding-agent rules and workflow. |
-L89: | [`../CLAUDE.md`](../../../CLAUDE.md) | Project instructions loaded into Claude Code, including the Reticle verification block. |
-L90: | [`../RETICLE.md`](../../../RETICLE.md) | Full Reticle verification rules. |
-L91: | [`../.claude/commands/reticle.md`](../../../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
-L92: | [`../BRAIN/BRAIN.md`](../BRAIN/BRAIN.md) | Conceptual model. |
-L93: | [`../BRAIN/MEMORY.md`](../BRAIN/MEMORY.md) | Living execution memory and audit log. Historical. |
+L88: | [`../AGENTS.md`](../../AGENTS.md) | Coding-agent rules and workflow. |
+L89: | [`../CLAUDE.md`](../../CLAUDE.md) | Project instructions loaded into Claude Code, including the Reticle verification block. |
+L90: | [`../RETICLE.md`](../../RETICLE.md) | Full Reticle verification rules. |
+L91: | [`../.claude/commands/reticle.md`](../../.claude/commands/reticle.md) | `/reticle` skill: detect, connect, drive one flow, report. |
+L92: | `../BRAIN/BRAIN.md` (`../BRAIN/BRAIN.md`, not present in this tree) | Conceptual model. |
+L93: | `../BRAIN/MEMORY.md` (`../BRAIN/MEMORY.md`, not present in this tree) | Living execution memory and audit log. Historical. |
 L94: 
 L95: ## 7. Governance and planning
 L96: 
 L97: | Document | Purpose |
 L98: |---|---|
-L99: | [`governance/GOVERNANCE.md`](governance/GOVERNANCE.md) | Authority, change classes, no-duplication rule, status vocabulary. |
+L99: | `governance/GOVERNANCE.md` (`governance/GOVERNANCE.md`, not present in this tree) | Authority, change classes, no-duplication rule, status vocabulary. |
 L100: | `governance/IMPLEMENTATION_PLAN.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | Phased execution order. |
-L101: | [`governance/GAP_ANALYSIS.md`](governance/GAP_ANALYSIS.md) | Design gaps, verification gaps, and the open documentation-conflicts register. |
+L101: | `governance/GAP_ANALYSIS.md` (`governance/GAP_ANALYSIS.md`, not present in this tree) | Design gaps, verification gaps, and the open documentation-conflicts register. |
 L102: | `governance/SOURCE_RECONCILIATION.md` (retired 2026-10-26; see `docs/final-project-documentation/08-ROADMAP-AND-DECISIONS.md` Appendix A/B; original in git history) | **Historical** (2026-09-24). Its "greenfield" status is superseded. |
 L103: 
 L104: ## 8. Reports (dated snapshots)

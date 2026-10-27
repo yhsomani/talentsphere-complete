@@ -9,7 +9,7 @@ Source: `31_LEGACY_ARCHIVE/docs/reports/FEATURE_TRACEABILITY_MATRIX.md` (266 lin
 ~~~~text
 L1: # TalentSphere — 173 Canonical Features Master Traceability Matrix
 L2: 
-L3: > Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in [the implementation inventory](../system-model/01-inventory-and-coverage.md). No historical pass is a fresh release certification.
+L3: > Historical report: findings, counts and executed checks below belong to the recorded revision/session. Current source references and inspection limits are in the implementation inventory (`../system-model/01-inventory-and-coverage.md`, not present in this tree). No historical pass is a fresh release certification.
 L4: 
 L5: **Date:** 2026-10-22  
 L6: **Author:** Teamwork Master Synthesis Engineering Group  

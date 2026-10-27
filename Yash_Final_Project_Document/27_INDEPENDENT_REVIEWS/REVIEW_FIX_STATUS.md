@@ -19,12 +19,12 @@ Source of these statuses: the fix agents' own reports plus this session's script
 | 11 dependencies | Addressed in REV2 | `ROADMAP_REV2.md` |
 | 12 instructor rung | Addressed in REV2 | `issuer_class` in BR/DT/INV REV2, `EvidenceIssuer.schema.json`; ADR-T14a to register |
 | 13 SEO | Addressed in REV2 | `FRONTEND_ARCHITECTURE_REV2.md` (ADR-T24 proposal) |
-| 14 idempotency retention | Addressed in REV2 | `OFFLINE_AND_SYNC_DESIGN_REV2.md`, `BACKEND_ARCHITECTURE_REV2.md`; FF-07 reworded only in REV2 text (CANONICAL_INVARIANTS unchanged) |
+| 14 idempotency retention | Addressed in REV2; original backend TTL row aligned 2026-10-27 | `OFFLINE_AND_SYNC_DESIGN_REV2.md`, `BACKEND_ARCHITECTURE_REV2.md`; FF-07 reworded only in REV2 text (CANONICAL_INVARIANTS unchanged) |
 | 15 offline scope | Addressed in REV2 | `OFFLINE_AND_SYNC_DESIGN_REV2.md`; ADR-T10a to register; SPEC-G3/SM wording owner action open |
 | 16 cost evidence | Partial | `COST_ENVELOPE.md` structure only; vendor quotes empty; Ph0-exit blocker remains |
 | 17 traceability | Partial | `COVERAGE_MATRICES.md`: 359 long-form ACs, 97 directly cited by tests, 262 uncited; 168 of 253 features have no AC (review said 158; not reproduced); 36 P0 features without AC, 26 also without test; `SPEC_ACCEPTANCE_ADDITIONS_REV2.md` adds 95 ACs; `TEST_CATALOG_REV2.md` adds 22 tests |
 | 18 session constants | Addressed in REV2 | `BUSINESS_RULES_REGISTRY_REV2.md` CONST-S01..15 |
-| 19 job engine | Addressed in REV2 | `BACKEND_ARCHITECTURE_REV2.md`; open: retry arithmetic (12 retries ≈ 66 min vs "24 h" claim) |
+| 19 job engine | Fixed in docs + REV2 | `BACKEND_ARCHITECTURE_REV2.md` §3.2 (60 s base, 6 h cap, ≈20.5 h, arithmetic rechecked 2026-10-27); original `BACKEND_ARCHITECTURE.md` §7.3 and failure table now agree |
 | 20 missing state machines | Addressed in REV2 | `STATE_MACHINES_REV2.md` |
 | 21 account guard | Addressed in REV2 | `STATE_MACHINES_REV2.md` |
 | 22 employer-domain badge | Addressed in REV2 | `BUSINESS_RULES_REGISTRY_REV2.md` |

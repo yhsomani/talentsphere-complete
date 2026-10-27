@@ -46,3 +46,4 @@
 {"t":0,"agent":"a5a1817","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":14831927}
 {"t":0,"agent":"aeb495f","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
 {"t":0,"agent":"aeb495f","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":578453}
+{"t":0,"agent":"system","event":"keyword_detected","keyword":"ai-slop-cleaner"}
