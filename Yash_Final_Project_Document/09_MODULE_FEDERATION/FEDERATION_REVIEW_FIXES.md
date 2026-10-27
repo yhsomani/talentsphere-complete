@@ -1,6 +1,8 @@
 # Module Federation - Review Fixes (revision overlay)
 
 Doc ID: MFA-01-REV2 (covers MFA-01, DEP-01, FIM-01, HC-01, VCD-01, SCH-01, SCH-02) · Owner: Frontend/Platform Architecture · Version 2.0 · Status: Under Review
+
+> **Folded into `FEDERATION_ARCHITECTURE.md` on 2026-10-27.** Change record only; edit the original.
 Relates: ADR-T03 (amended by ADR-T23, proposed), ADR-T10a (proposed), ADR-T19 · REVW-07, REVW-08, REVW-14, REVW-15 · REV-RES · OPEN-03
 
 Tags: [CONF] [TARGET] [OPEN] [FED] (federated option only). This file is **additive**. The other files in this folder are not modified by this revision; where this file differs it governs, and section 9 names what it supersedes (a relationship, not a deletion). New machine-readable files: `REMOTE_MANIFEST.schema_REV2.json`, `REMOTE_REGISTRY.schema_REV2.json`, `REMOTE_REGISTRY.example_REV2.json`.

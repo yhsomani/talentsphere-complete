@@ -1,6 +1,8 @@
 # Frontend Architecture - Revision 2 (review fixes)
 
 Doc ID: FEA-01-REV2 · Owner: Frontend/Platform Architecture · Version 2.0 · Status: Under Review
+
+> **Folded into `FRONTEND_ARCHITECTURE.md` on 2026-10-27.** Change record only; edit the original.
 Relates: ADR-T02, ADR-T03 (amended by ADR-T23, proposed), ADR-T10a (proposed), ADR-T24 (proposed here) · REVW-07, REVW-13, REVW-14, REVW-23 · REV-RES · FEA-01, MFA-01, MFA-01-REV2 (`09_MODULE_FEDERATION/FEDERATION_REVIEW_FIXES.md`), OFF-01-REV2, OPS-SLO
 
 Tags: [CONF] [TARGET] [OPEN] [FED] (federated option only). This file is **additive**: `FRONTEND_ARCHITECTURE.md` (FEA-01) is unchanged. Where this revision differs, it governs; section 9 lists what it supersedes. Supersession is a relationship, not a deletion. Scores are architect judgement against stated criteria, not measurements. Budgets are hypotheses with a formula and a measurement method.
