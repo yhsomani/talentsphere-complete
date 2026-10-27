@@ -571,3 +571,14 @@ Order: transition service + audit → pipeline UI → rejection flow → intervi
 
 ## 13. Related
 `STATE_MACHINES.md` SM-APPLICATION, SM-INTERVIEW · `BUSINESS_RULES_REGISTRY.md` BR-T002, T040, T086 · `PRODUCT_INVARIANT_REGISTRY.md` INV-T39 · SPEC-09, SPEC-11 (messaging), SPEC-12 (entitlements for scheduling features).
+
+## Contract links (patch 2026-10-27)
+
+Evidence label: PROPOSED mapping. Every id below was grepped in its owner file on 2026-10-27; ids marked "none" do not exist and are OPEN. Owners: ACT-ATOM-nn in 07 ACTION_REGISTRY; FLD-* in 07 SCREEN_SPECIFICATIONS_KEY; EDG-nn in 06 BUSINESS_PROCESS_INVENTORY; XT-nn in 06 SSOT_WORKFLOW_CROSSWALK; UXH-nn in 07 PROGRESSIVE_UX_AND_FEEDBACK; audit.* in 14 SECURITY_ARCHITECTURE and 07; TEST-ACT-nnn in 07 ACTION_REGISTRY (not yet in TEST_CATALOG, OPEN-P04).
+
+| SPEC | ACT-ATOM | Base ACT without atom | FLD | EDG | XT | UXH | audit events | TEST | Contract gap |
+|---|---|---|---|---|---|---|---|---|---|
+| SPEC-07 (FEAT-09-01..09-03, 09-05, 09-08, 02-03) | none | ACT-HIRE-01, -02, -03, -04, -05 | none | EDG-02, EDG-06, EDG-09 | none | UXH-07 | none | none | OPEN-F07: publish, pause and close have no atomic contract, audit event or TEST |
+| SPEC-08 (FEAT-11-01..11-03, 11-07, 11-08, 24-12) | none | ACT-JOB-01, -02, -05 (read-only) | none | EDG-06 | none | UXH-01, UXH-05 | none | none | OPEN-F08: read-only search; decide whether an atomic contract is needed or a UXH-only exemption is recorded |
+| SPEC-09 (FEAT-10-01..10-04, 10-14, 24-03, 24-07) | ACT-ATOM-02 (submit), ACT-ATOM-03 (draft autosave) | ACT-APP-01, -04, -09, -10 | FLD-APP-01 | EDG-06, EDG-07, EDG-10 | none | UXH-03, UXH-07, UXH-08 | `audit.application.submitted`, `audit.application.draft_synced` | TEST-ACT-002, TEST-ACT-003 | none for submit and draft; withdraw (ACT-APP-04) has no atom |
+| SPEC-10 (FEAT-10-05..10-08, 23-03) | ACT-ATOM-06 (stage move), ACT-ATOM-07 (bulk move) | ACT-PIPE-05, -07; ACT-APP-05, -06 | FLD-PIPE-01, FLD-PIPE-02 | EDG-02, EDG-12 | none | UXH-01, UXH-03 | `audit.application.stage_changed`, `audit.application.bulk_move_completed`, `audit.application.bulk_move_cancelled` | TEST-ACT-006, TEST-ACT-007 | OPEN-F09: interview schedule and candidate confirm/reschedule have no atomic contract or audit event |

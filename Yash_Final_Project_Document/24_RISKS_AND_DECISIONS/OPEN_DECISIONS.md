@@ -137,3 +137,23 @@ This section is the one place that lists every open-item namespace and where its
 Reserved and unused global ids OPEN-01, 02, 04 remain to be retired or assigned (Documentation Architect, Ph0).
 
 Already closed or changed by other owners and not re-opened here: ADR decision records D-01..D-05 live in `ADR_REGISTER.md` (PROPOSED; not touched by this round).
+
+### 6.3 Feature-spec contract gaps (OPEN-F)
+
+Source: "Contract links" sections of `05_FEATURE_SPECIFICATIONS/SPEC_G1..G5`. Proposed by those specs; none was registered before this table. No OPEN-F id existed before this table, so none was renumbered or duplicated. Owner is the spec's stated owner, else `Product (unassigned)`.
+
+| ID | Gap | Source SPEC file | Status | Owner |
+|---|---|---|---|---|
+| OPEN-F01 | registration, confirm, passkey, refresh and revoke have no atomic contract | SPEC_G1_IDENTITY_AND_PROFILE.md | OPEN | Identity PM |
+| OPEN-F02 | profile save, visibility and consent grant/withdraw have no atomic contract or TEST | SPEC_G1_IDENTITY_AND_PROFILE.md | OPEN | Profile PM + Privacy PM |
+| OPEN-F03 | revocation impact, dispute and archive have no atomic contract | SPEC_G2_EVIDENCE_AND_TRUST.md | OPEN | Evidence PM |
+| OPEN-F04 | send request, referee submit and decline have no atomic contract or TEST | SPEC_G2_EVIDENCE_AND_TRUST.md | OPEN | Verification PM |
+| OPEN-F05 | start, run code, pause and accommodation have no atomic contract | SPEC_G3_ASSESSMENT_AND_LEARNING.md | OPEN | Assessment PM |
+| OPEN-F06 | enrol, complete and add-to-evidence have no atomic contract, audit event or TEST | SPEC_G3_ASSESSMENT_AND_LEARNING.md | OPEN | Learning PM |
+| OPEN-F07 | publish, pause and close have no atomic contract, audit event or TEST | SPEC_G4_HIRING_LOOP.md | OPEN | Opportunities PM |
+| OPEN-F08 | read-only search; decide whether an atomic contract is needed or a UXH-only exemption is recorded | SPEC_G4_HIRING_LOOP.md | OPEN | Matching PM |
+| OPEN-F09 | interview schedule and candidate confirm/reschedule have no atomic contract or audit event | SPEC_G4_HIRING_LOOP.md | OPEN | Applications PM |
+| OPEN-F10 | send message and outreach have no atomic contract, audit event or TEST | SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md | OPEN | Messaging PM |
+| OPEN-F11 | export, delete and cancel-deletion have no atomic contract or TEST | SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md | OPEN | Privacy PM |
+| OPEN-F12 | cohort create, invite, issue and revoke credential have no atomic contract, audit event or TEST | SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md | OPEN | Institutions PM |
+| OPEN-F13 | cancel plan and change seats (ACT-BIL-04, -05) have no atomic contract | SPEC_G5_ENGAGEMENT_COMMERCE_PRIVACY_INSTITUTIONS.md | OPEN | Monetisation PM |

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-27T17:00:34.616Z",
+  "updatedAt": "2026-10-27T17:17:46.033Z",
   "missions": [
     {
       "id": "session:096c0d46-737d-486c-baea-bda64e389d94:none",
@@ -7,15 +7,15 @@
       "name": "none",
       "objective": "Session mission",
       "createdAt": "2026-10-27T16:58:35.372Z",
-      "updatedAt": "2026-10-27T17:00:34.616Z",
+      "updatedAt": "2026-10-27T17:17:46.033Z",
       "status": "done",
-      "workerCount": 1,
+      "workerCount": 3,
       "taskCounts": {
-        "total": 1,
+        "total": 3,
         "pending": 0,
         "blocked": 0,
         "inProgress": 0,
-        "completed": 1,
+        "completed": 3,
         "failed": 0
       },
       "agents": [
@@ -27,25 +27,77 @@
           "currentStep": null,
           "latestUpdate": "completed",
           "completedSummary": null,
-          "updatedAt": "2026-10-27T17:00:34.616Z"
+          "updatedAt": "2026-10-27T17:16:41.159Z"
+        },
+        {
+          "name": "general-purpose:afcf2cc",
+          "role": "general-purpose",
+          "ownership": "afcf2cc97ad24333f",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-10-27T17:12:44.617Z"
+        },
+        {
+          "name": "general-purpose:adbc3cb",
+          "role": "general-purpose",
+          "ownership": "adbc3cbc67aa31cdf",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-10-27T17:17:46.033Z"
         }
       ],
       "timeline": [
         {
-          "id": "session-start:af60a966826f91a17:2026-10-27T16:58:35.372Z",
-          "at": "2026-10-27T16:58:35.372Z",
-          "kind": "update",
-          "agent": "general-purpose:af60a96",
-          "detail": "started general-purpose:af60a96",
-          "sourceKey": "session-start:af60a966826f91a17"
-        },
-        {
-          "id": "session-stop:af60a966826f91a17:2026-10-27T17:00:34.616Z",
-          "at": "2026-10-27T17:00:34.616Z",
+          "id": "session-stop:a590c6a0b842be214:2026-10-27T17:14:11.114Z",
+          "at": "2026-10-27T17:14:11.114Z",
           "kind": "completion",
           "agent": "general-purpose:af60a96",
           "detail": "completed",
-          "sourceKey": "session-stop:af60a966826f91a17"
+          "sourceKey": "session-stop:a590c6a0b842be214"
+        },
+        {
+          "id": "session-stop:a1f61459dd576f856:2026-10-27T17:14:14.738Z",
+          "at": "2026-10-27T17:14:14.738Z",
+          "kind": "completion",
+          "agent": "general-purpose:af60a96",
+          "detail": "completed",
+          "sourceKey": "session-stop:a1f61459dd576f856"
+        },
+        {
+          "id": "session-start:adbc3cbc67aa31cdf:2026-10-27T17:14:32.399Z",
+          "at": "2026-10-27T17:14:32.399Z",
+          "kind": "update",
+          "agent": "general-purpose:adbc3cb",
+          "detail": "started general-purpose:adbc3cb",
+          "sourceKey": "session-start:adbc3cbc67aa31cdf"
+        },
+        {
+          "id": "session-stop:a29db130b602651ae:2026-10-27T17:15:52.007Z",
+          "at": "2026-10-27T17:15:52.007Z",
+          "kind": "completion",
+          "agent": "general-purpose:af60a96",
+          "detail": "completed",
+          "sourceKey": "session-stop:a29db130b602651ae"
+        },
+        {
+          "id": "session-stop:ad4e9d2426ec650de:2026-10-27T17:16:41.159Z",
+          "at": "2026-10-27T17:16:41.159Z",
+          "kind": "completion",
+          "agent": "general-purpose:af60a96",
+          "detail": "completed",
+          "sourceKey": "session-stop:ad4e9d2426ec650de"
+        },
+        {
+          "id": "session-stop:adbc3cbc67aa31cdf:2026-10-27T17:17:46.033Z",
+          "at": "2026-10-27T17:17:46.033Z",
+          "kind": "completion",
+          "agent": "general-purpose:adbc3cb",
+          "detail": "completed",
+          "sourceKey": "session-stop:adbc3cbc67aa31cdf"
         }
       ]
     }

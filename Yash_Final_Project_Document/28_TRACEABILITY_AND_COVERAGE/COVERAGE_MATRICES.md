@@ -1050,18 +1050,18 @@ Method and limits. One row per section 0..48 of the original mission prompt, plu
 | Sec | Reconstructed title | Location | Status | Note |
 |---:|---|---|---|---|
 | 0 | Mission, scope, model policy | `00_CONTROL_CENTRE/PROJECT_SCOPE.md`, `EXECUTION_LEDGER_V9_ADDENDUM.md` | retained | **Model policy: Sonnet or Haiku only.** The scope file records orchestrator Sonnet 5.5 and delegated agents invoked with `model: sonnet`; Haiku not used. Runtime enforcement is UNVERIFIED beyond the Agent tool parameter. The first `EXECUTION_LEDGER.md` (2026-10-25) says the runtime identified the primary model family as GPT-6, which contradicts the scope file; the contradiction is OPEN and is not resolved here. This patch round's agents are Sonnet-class by their own statement only |
-| 1 | Source discovery and preservation rules | `KNOWLEDGE_PRESERVATION_MANIFEST.md` | retained, partial | 0 of 132 rows terminal; Part 66.3 metrics added |
-| 2 | Source document inventory | `SOURCE_DOCUMENT_INVENTORY.md`, manifest CSV | reconciled | Denominators disagree (204 / 132 / 158 / 267); recorded in manifest Part 66.3 |
+| 1 | Source discovery and preservation rules | `KNOWLEDGE_PRESERVATION_MANIFEST.md` | retained, partial | 0 of 132 source rows (CSV) terminal, 204 per narrative; Part 66.3 metrics added (folder files: 267 at the 2026-10-27 scan) |
+| 2 | Source document inventory | `SOURCE_DOCUMENT_INVENTORY.md`, manifest CSV | reconciled | Denominators disagree: source rows 204 (narrative) / 132 (CSV); folder files 158 (inventory, 2026-10-25) / 267 (scan, 2026-10-27); recorded in manifest Part 66.3 |
 | 3 | Protected tree and SSOT protection | `PROTECTED_DOCUMENT_TREE_BASELINE.csv` | retained | SSOT.md unchanged per git (2026-10-25 check) |
 | 4 | Product vision and business model | `01_EXECUTIVE_AND_STRATEGY` | retained | REV2 file not indexed before this round |
 | 5 | Stakeholders, roles, permissions | `02_*/STAKEHOLDERS_ROLES_PERMISSIONS.md` | improved | OPEN-44 open |
-| 6 | User journeys | `02_*/USER_JOURNEYS.md`, `LEGACY_JOURNEY_REGISTRY_J01_J28.md` | reconciled | 22 partial, 6 no direct match (OPEN-50) |
+| 6 | User journeys | `02_*/USER_JOURNEYS.md`, [`02_*/LEGACY_JOURNEY_REGISTRY_J01_J28.md`](../02_STAKEHOLDERS_AND_USERS/LEGACY_JOURNEY_REGISTRY_J01_J28.md) | reconciled | 22 partial, 6 no direct match (OPEN-50) |
 | 7 | Domain architecture | `03_*` | improved | OPEN-47 |
 | 8 | Capability map | `04_*` | retained | 108 CAP |
 | 9 | Feature hierarchy and registry | `04_*`, `SSOT_FEATURE_CROSSWALK.md` | reconciled | 173 F-ids to 253 FEAT is a candidate (OPEN-41) |
 | 10 | Feature specifications | `05_*` | improved | 14 full specs, 359 ACs |
 | 11 | Micro-feature specifications | `05_*/MICRO_FEATURE_SPECS.md` | retained | 65 specs |
-| 12 | Acceptance criteria | `05_*`, `16_*/ACCEPTANCE_CRITERIA_GUIDE.md` | improved | 125 of 389 ACs cited by tests (mechanical) |
+| 12 | Acceptance criteria | `05_*`, `16_*/ACCEPTANCE_CRITERIA_GUIDE.md` | improved | 126 of 389 ACs cited by tests (mechanical; recounted 2026-10-27 = 97 long-form + 29 platform, see §3; earlier 125 superseded) |
 | 13 | Business rules | `06_*/BUSINESS_RULES_REGISTRY.md` | reconciled | 171 source rules unmatched (OPEN-43) |
 | 14 | Invariants and fitness functions | `00_*/CANONICAL_INVARIANTS.md`, `06_*` | retained | Dual authority noted in DOCUMENT_STATUS |
 | 15 | State machines | `06_*/STATE_MACHINES.md` | improved | CSV-01..12 added |

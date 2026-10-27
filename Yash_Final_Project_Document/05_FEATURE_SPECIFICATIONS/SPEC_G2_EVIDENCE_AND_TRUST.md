@@ -294,3 +294,12 @@ Build order: claims → email proof → referee request/response → DT-04 mappi
 
 ## 13. Related
 `DECISION_TABLES.md` DT-04, DT-06 · `STATE_MACHINES.md` SM-VERIFICATION, SM-REFERENCE · `BUSINESS_RULES_REGISTRY.md` BR-T016…T023 · SPEC-03 · SPEC-13 (referee data in erasure).
+
+## Contract links (patch 2026-10-27)
+
+Evidence label: PROPOSED mapping. Every id below was grepped in its owner file on 2026-10-27; ids marked "none" do not exist and are OPEN. Owners: ACT-ATOM-nn in 07 ACTION_REGISTRY; FLD-* in 07 SCREEN_SPECIFICATIONS_KEY; EDG-nn in 06 BUSINESS_PROCESS_INVENTORY; XT-nn in 06 SSOT_WORKFLOW_CROSSWALK; UXH-nn in 07 PROGRESSIVE_UX_AND_FEEDBACK; audit.* in 14 SECURITY_ARCHITECTURE and 07; TEST-ACT-nnn in 07 ACTION_REGISTRY (not yet in TEST_CATALOG, OPEN-P04).
+
+| SPEC | ACT-ATOM | Base ACT without atom | FLD | EDG | XT | UXH | audit events | TEST | Contract gap |
+|---|---|---|---|---|---|---|---|---|---|
+| SPEC-03 (FEAT-05-01, 05-02, 05-04, 05-05, 05-07, 05-08, 05-12) | ACT-ATOM-04 (save evidence, dirty close) | ACT-EVD-02, -03, -04, -06, -07, -08 | FLD-EVD-01..FLD-EVD-05 | EDG-01, EDG-02, EDG-06 | none | UXH-07 | `audit.evidence.created`, `audit.evidence.status_changed` | TEST-ACT-004 | OPEN-F03: revocation impact, dispute and archive have no atomic contract
+| SPEC-04 (FEAT-03-07, 06-01..06-04, 06-09, 06-10) | none | ACT-VER-01..-04, -07; ACT-REF-01..-03 | FLD-REF-01, FLD-REF-02, FLD-REF-03 | EDG-03, EDG-05, EDG-10 | XT-06 (attestation display) | UXH-08 | `audit.verification.decided` | none | OPEN-F04: send request, referee submit and decline have no atomic contract or TEST

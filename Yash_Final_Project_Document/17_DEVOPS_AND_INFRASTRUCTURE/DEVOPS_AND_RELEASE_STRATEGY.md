@@ -311,3 +311,92 @@ ADR-T24 and the ADR-T23 scope note (8 remotes, FD-14); OPEN items: edge capabili
 | section 2 | Nothing existing; fills the missing mechanism behind "privileged UI is never delivered" (MFA-01 section 4 original claim) |
 | section 3 | Nothing existing; new design for OPEN-FE-17 |
 | section 4 | OBSERVABILITY_DESIGN metric names for bundled mode; OPS-SLO applicability (folder 15, relationship only) |
+
+
+---
+
+# Revision 3 additions (2026-10-27, gap patch; PROPOSED, nothing executed)
+
+Adds only what sections 3, 4, 8, 9 and 10 above lack: one operator checklist, explicit rollback triggers, a compat-check list, ordered independent-remote steps and a named environment matrix. Gate definitions stay owned by [TEST_STRATEGY.md](../16_QA_AND_TESTING/TEST_STRATEGY.md) section 9 (RG-01..RG-14); test IDs are in [TEST_CATALOG.md](../16_QA_AND_TESTING/TEST_CATALOG.md) and [TEST_CATALOG_REV2.md](../16_QA_AND_TESTING/TEST_CATALOG_REV2.md). Federation material: [FEDERATION_ARCHITECTURE.md](../09_MODULE_FEDERATION/FEDERATION_ARCHITECTURE.md), [VERSION_COMPATIBILITY_DESIGN.md](../09_MODULE_FEDERATION/VERSION_COMPATIBILITY_DESIGN.md), [REMOTE_REGISTRY.schema_REV2.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.schema_REV2.json). Status: PROPOSED. Numeric thresholds are [TARGET] pending baseline (OPEN-15). No hosting is chosen (OPEN-14), so no provider commands appear.
+
+## R3-1 Release-gate checklist (operator view; evidence link required per row)
+
+| # | Check | Gate | Evidence | Blocks release |
+|---:|---|---|---|---|
+| 1 | Lint, types, route registry, module boundaries, idempotency lint, migration lint green | RG-01 | CI report | Yes |
+| 2 | OpenAPI/AsyncAPI diff clean (oasdiff); no breaking change inside `/api/v1` | RG-02 | Contract report | Yes |
+| 3 | Authz matrix, IDOR suite, tenant canary (FF-05), state-machine tests green | RG-03 | Test report | Yes |
+| 4 | Secret scan, dependency and container scan clean; SBOM generated; artefacts signed | RG-04 | SBOM + signature | Yes |
+| 5 | Critical journeys J1-J14 pass on staging | RG-05 | Playwright traces | Yes |
+| 6 | Accessibility scan clean; assistive-technology pass if a critical flow changed | RG-06 | A11y report | Yes |
+| 7 | Performance budgets met | RG-07 | Lighthouse CI | Yes |
+| 8 | Migration and compatibility checks R3-3 complete | RG-08 | Migration report | Yes |
+| 9 | Federation checks (only if federation is activated) | RG-09 | Manifest validation | Conditional |
+| 10 | Nightly resilience subset green; no open Sev-2 resilience defect | RG-10 | REL report | Yes if infra/API core touched |
+| 11 | Rollback plan, flags, kill switches, runbook and alert updates, dashboards listed in the release record (section 9.3) | RG-12 | Release checklist | Yes |
+| 12 | Device-lab pass if service worker, push or install code changed (device lab is OPEN-12) | RG-13 | Device report | Conditional |
+| 13 | Restore drill within policy window if schema or storage changed | RG-14 | Drill record | Conditional |
+| 14 | Canary guardrails green for the full bake | RG-11 | Canary analysis | Yes before S3 |
+
+Waivers follow the rule in section 9.4; none is allowed for FF-01, FF-05, INV-T02 or INV-T03.
+
+## R3-2 Rollback triggers (halt and roll back; values [TARGET], OPEN-15)
+
+| Trigger | Condition (parameter) | Action | Runbook / test |
+|---|---|---|---|
+| Error ratio | Canary error ratio above baseline by margin M for window W | Auto-halt, roll back stage | RG-11 |
+| Latency | p95/p99 above SLO for W | Auto-halt, roll back | RG-11, OBSERVABILITY_DESIGN |
+| INP regression | Field INP regression above budget in cohort | Halt; flag off or roll back | RG-07, RG-11 |
+| Auth failures | Auth failure rate above baseline | Halt, roll back at once; page security on-call | RG-03 |
+| Business proxy | Successful apply rate below baseline | Halt, roll back | RG-11 |
+| Tenant isolation signal | Any cross-tenant read in logs or canary | Stop all rollout; Sev-1 incident; kill switch; no waiver | INV-T02/T03 |
+| Burn rate | SLO burn above threshold after S3 | Pause expansion, roll back | OBSERVABILITY_DESIGN |
+| Bad migration | Lock budget exceeded or data-integrity check fails | Stop deploy; forward-fix or data-safe down-migration; PITR repair if data damaged | RB-30, TEST-DEP-003 |
+| Service worker defect | Stale or broken SW detected | Enable SW kill switch (R-4); publish corrected SW | RB-09, TEST-PWA-009 |
+| Worker defect | Dead-letter growth or duplicate effects | Pause queue class; roll back worker | RB-11 |
+| Remote defect (federation only) | Remote error or contract-smoke failure | Publish previous version as higher-`sequence` entry or set `status:"disabled"` (R-7) | TEST-FED-014 |
+
+Parameters M, W and thresholds live in the canary analysis config. Until measured they are unset; the release owner sets conservative values per release and records them in the release record.
+
+## R3-3 Migration and compatibility checks (before deploy; complements section 8)
+
+1. Migration lint (FF-10): append-only, contiguous numbering, rollback or forward-fix note present.
+2. Classify the change as expand, backfill or contract. A contract change must not share a release with the code that stops using the old shape.
+3. Run API N and API N-1 against the post-expand schema (TEST-DAT-002).
+4. Measure lock and statement duration on a sized copy against the budget (TEST-DAT-003).
+5. Confirm the worker still handles queued job payload versions (R-5).
+6. For destructive steps, record a verified backup or PITR marker immediately before (FM-28); confirm RG-14 currency.
+7. Compat matrix: shell x API x schema (add remote only if federation is activated), stored in the release record.
+8. Hosted databases: apply only through the reviewed migration job; never ad-hoc SQL (PROC-08). The prior implementation's local migration runner must not be used on a hosted database (see [29 guide](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) section 7).
+
+## R3-4 Independent remote release (CONDITIONAL on ADR-T23 federation activation; not a baseline procedure)
+
+Under the bundled baseline there is no remote release; domain modules ship with the shell. If federation is activated:
+1. Build once. Run FF-04 validators, FF-08 compat check against the current shell, registry and API range, headless contract-smoke on the staging registry, and the bundle-size budget.
+2. Publish content-hashed assets to immutable `/mf/<name>/<version>/`. Never overwrite.
+3. Create the registry entry: `sequence` +1, `rollbackTo` = current stable, declared `apiRange`, `hostContract`, `minShell`, `dataSchema` (R-2). Sign with the KMS key (custody OPEN-36).
+4. Put the entry on the canary channel only (`?ch=canary`), for a stable-hash cohort.
+5. Watch the R3-2 guardrails for the bake period. Remote errors must not affect the host (see [FAULT_ISOLATION_MATRIX.md](../09_MODULE_FEDERATION/FAULT_ISOLATION_MATRIX.md)).
+6. Promote to stable with a second signed put. Never lower `sequence`.
+7. Verify with the synthetic check and dashboards; record in the release record.
+8. Rollback: publish previous artefacts as a new, higher-`sequence` entry, or disable the entry. Propagation is bounded by registry TTL (<= 300 s [TARGET]).
+
+## R3-5 Environment matrix (names PROPOSED; provider and domains undecided, OPEN-14)
+
+| Env | Promotion in | Config and secrets source | Data | Deploy approval | Gates before leaving |
+|---|---|---|---|---|---|
+| local | none | `.env` copied from `.env.example` (variable names in 29 guide section 7) | synthetic | developer | none |
+| ci | PR | CI variables; ephemeral DB, same Postgres major | synthetic | automatic | RG-01..RG-05 |
+| preview | PR label | staging read-only config | synthetic | label | RG-05 |
+| staging | merge to main | staging secret store (never production values) | synthetic + tenant canaries | automatic | RG-06..RG-12 as applicable |
+| production | release candidate | production secret manager (product OPEN-22) | real | manual until OPEN-15 policy | RG-11 canary, then S3/S4 |
+
+Promotion path: ci -> staging -> production. The same signed artefact digest moves forward; only configuration differs. Production refuses in-memory storage and test-mode payment keys (SOURCE: comments in root `.env.example`; the startup-validation pattern is kept, TEST-DEP-007).
+
+## R3-6 Open items added
+
+| Item | Ref |
+|---|---|
+| Canary parameters M, W, thresholds | OPEN-15 |
+| Secret manager product and environment names | OPEN-22 |
+| Hosting, hence provider-specific deploy and rollback commands | OPEN-14 |

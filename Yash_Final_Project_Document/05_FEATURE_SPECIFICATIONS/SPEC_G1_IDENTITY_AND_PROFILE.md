@@ -312,3 +312,12 @@ Implement `consent_current` as a pure fold of the ledger and test equivalence (P
 
 ## 13. Related
 `DECISION_TABLES.md` DT-01 · `STATE_MACHINES.md` SM-ACCOUNT · `BUSINESS_RULES_REGISTRY.md` BR-T061…T063, T069 · `PRODUCT_INVARIANT_REGISTRY.md` INV-T29, T35, T40 · SPEC-03 (evidence sharing), SPEC-09 (application snapshot), SPEC-13 (export/erasure).
+
+## Contract links (patch 2026-10-27)
+
+Evidence label: PROPOSED mapping. Every id below was grepped in its owner file on 2026-10-27; ids marked "none" do not exist and are OPEN. Owners: ACT-ATOM-nn in 07 ACTION_REGISTRY; FLD-* in 07 SCREEN_SPECIFICATIONS_KEY; EDG-nn in 06 BUSINESS_PROCESS_INVENTORY; XT-nn in 06 SSOT_WORKFLOW_CROSSWALK; UXH-nn in 07 PROGRESSIVE_UX_AND_FEEDBACK; audit.* in 14 SECURITY_ARCHITECTURE and 07; TEST-ACT-nnn in 07 ACTION_REGISTRY (not yet in TEST_CATALOG, OPEN-P04).
+
+| SPEC | ACT-ATOM | Base ACT without atom | FLD | EDG | XT | UXH | audit events | TEST | Contract gap |
+|---|---|---|---|---|---|---|---|---|---|
+| SPEC-01 (FEAT-01-01..01-06, 01-13) | ACT-ATOM-01 (sign in with `next`) | ACT-AUTH-01, -02, -05, -09, -11, -14; ACT-ACC-04, -05 | FLD-AUTH-01, FLD-AUTH-02, FLD-AUTH-03 | EDG-01, EDG-03, EDG-11 | none | UXH-07 | `audit.auth.login_succeeded`, `audit.auth.login_failed`, `audit.auth.passkey_changed`, `audit.session.revoked`, `audit.session.refresh_reuse_detected` | TEST-ACT-001 | OPEN-F01: registration, confirm, passkey, refresh and revoke have no atomic contract |
+| SPEC-02 (FEAT-03-01, 03-02, 03-06, 03-08, 03-09, 22-01) | none | ACT-PRO-01, -03, -04; ACT-PRV-01, -02 | FLD-PRO-01, FLD-PRO-02, FLD-PRO-03 | EDG-01, EDG-06 | none | UXH-07 | `audit.consent.granted` (no consent-withdrawn name exists, see OPEN-X06) | none | OPEN-F02: profile save, visibility and consent grant/withdraw have no atomic contract or TEST
