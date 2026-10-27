@@ -119,10 +119,64 @@
       "status": "completed",
       "completed_at": "2026-10-26T15:20:26.614Z",
       "duration_ms": 1235540
+    },
+    {
+      "agent_id": "a34711d0546e980f0",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T02:42:12.117Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T03:05:08.233Z",
+      "duration_ms": 1376116
+    },
+    {
+      "agent_id": "a5b6427d3e0e8faca",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T02:42:23.374Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T03:01:26.058Z",
+      "duration_ms": 1142684
+    },
+    {
+      "agent_id": "a7018e2aab8e1a5a4",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T02:42:33.116Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T03:12:16.941Z",
+      "duration_ms": 1783825
+    },
+    {
+      "agent_id": "a8561bddcc186bc61",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T02:42:39.310Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T03:10:34.656Z",
+      "duration_ms": 1675346
+    },
+    {
+      "agent_id": "a5a1817359a7721a7",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T03:14:10.552Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T07:21:22.479Z",
+      "duration_ms": 14831927
+    },
+    {
+      "agent_id": "aeb495f9e0bb86531",
+      "agent_type": "general-purpose",
+      "started_at": "2026-10-27T07:21:42.822Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-10-27T07:31:21.275Z",
+      "duration_ms": 578453
     }
   ],
-  "total_spawned": 16,
-  "total_completed": 18,
+  "total_spawned": 22,
+  "total_completed": 24,
   "total_failed": 2,
-  "last_updated": "2026-10-26T18:57:12.940Z"
+  "last_updated": "2026-10-27T07:31:21.317Z"
 }
