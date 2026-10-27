@@ -1,5 +1,7 @@
 # TalentSphere — Canonical Documentation Index
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 This folder is the consolidated, evidence-checked documentation set. It was built on branch `docs/consolidation-2026-10-26` from `SSOT.md`, `ARCHITECTURE.md`, `docs/`, `BRAIN/`, deploy notes, the source code, and the earlier target-design blueprint in `Yash_Final_Project_Document/`.
 
 ## Authority rules

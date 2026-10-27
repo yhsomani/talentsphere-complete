@@ -1,5 +1,7 @@
 # 05 - Database and API
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Audience: a new developer or AI agent who must understand the data model, the migration process, and every HTTP route, and who must know what actually persists.
 Companions: [02-ARCHITECTURE.md](02-ARCHITECTURE.md) (topology, request lifecycle, worker, risks), [03-DEVELOPMENT-GUIDE.md](03-DEVELOPMENT-GUIDE.md) (how to run migrations and the API locally, environment variables), [04-FEATURES-AND-WORKFLOWS.md](04-FEATURES-AND-WORKFLOWS.md) (what each feature does), [06-SECURITY-AND-INTEGRATIONS.md](06-SECURITY-AND-INTEGRATIONS.md) (auth hardening, Stripe, Brevo, privacy, authorization findings), [07-TESTING-AND-OPERATIONS.md](07-TESTING-AND-OPERATIONS.md) (database tests, CI, backup and restore), [08-ROADMAP-AND-DECISIONS.md](08-ROADMAP-AND-DECISIONS.md) (decision register and roadmap).
 

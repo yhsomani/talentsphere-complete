@@ -1,5 +1,7 @@
 # 02 - Architecture and Technical Truth
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Audience: a new developer or AI agent who must understand how TalentSphere is built, what is real, and what is only intended.
 Companions: [01-PRODUCT-REQUIREMENTS.md](01-PRODUCT-REQUIREMENTS.md) (what the product must do), [03-DEVELOPMENT-GUIDE.md](03-DEVELOPMENT-GUIDE.md) (setup, commands, environment variables), [04-FEATURES-AND-WORKFLOWS.md](04-FEATURES-AND-WORKFLOWS.md) (feature status and journeys), [05-DATABASE-AND-API.md](05-DATABASE-AND-API.md) (schema, routes, error envelope), [06-SECURITY-AND-INTEGRATIONS.md](06-SECURITY-AND-INTEGRATIONS.md) (auth hardening, Stripe, Brevo, privacy), [07-TESTING-AND-OPERATIONS.md](07-TESTING-AND-OPERATIONS.md) (tests, CI, deploy, recovery), [08-ROADMAP-AND-DECISIONS.md](08-ROADMAP-AND-DECISIONS.md) (decision register, roadmap).
 

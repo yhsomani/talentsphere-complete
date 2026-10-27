@@ -1,5 +1,7 @@
 # 08 - Roadmap, Debt, Decisions and Open Conflicts
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Canonical home for: outstanding work, technical debt, the decision (ADR/OD) register, open questions and source conflicts, built-versus-target comparison, migration considerations.
 Requirements and status labels: [01](01-PRODUCT-REQUIREMENTS.md) (label legend in 01 section 0.1). Architecture as built: [02](02-ARCHITECTURE.md). Tests and operations: [07](07-TESTING-AND-OPERATIONS.md).
 

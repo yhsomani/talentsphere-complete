@@ -1,5 +1,7 @@
 # 03 - Development Guide
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Audience: a new developer or AI agent who must set up, build, test and change TalentSphere from scratch.
 Companion: `07-TESTING-AND-OPERATIONS.md` (tests, CI, deploy, recovery). Architecture, data model, API and security live in docs 01, 02, 04, 05, 06 and 08; this guide links to them by number and does not repeat them.
 

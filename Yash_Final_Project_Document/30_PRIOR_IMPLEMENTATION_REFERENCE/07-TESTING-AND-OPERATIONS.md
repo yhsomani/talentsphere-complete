@@ -1,5 +1,7 @@
 # 07 - Testing and Operations
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Audience: developers, release owners and on-call operators.
 Companion: `03-DEVELOPMENT-GUIDE.md` (setup, env vars, conventions). Architecture, data, API and security: docs 01, 02, 04, 05, 06, 08.
 

@@ -1,5 +1,7 @@
 # 01 - Product Requirements
 
+> **Reference only — prior attempt.** This file analyses an EARLIER implementation attempt. For this project nothing is assumed implemented: labels such as `Implemented-verified` describe what the prior attempt's code reportedly did, not the state of this project. Target design lives in `Yash_Final_Project_Document/` folders 00-29; founder intent is the root `SSOT.md`.
+
 Canonical home for: vision, users and roles, scope and non-goals, product principles, business-rule summary, functional and non-functional requirements, constraints.
 Not here: architecture ([02](02-ARCHITECTURE.md)), setup and conventions ([03](03-DEVELOPMENT-GUIDE.md)), per-feature behaviour and workflows ([04](04-FEATURES-AND-WORKFLOWS.md)), schema and API ([05](05-DATABASE-AND-API.md)), security and integrations ([06](06-SECURITY-AND-INTEGRATIONS.md)), tests and operations ([07](07-TESTING-AND-OPERATIONS.md)), outstanding work, ADRs and conflicts ([08](08-ROADMAP-AND-DECISIONS.md)).
 
