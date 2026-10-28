@@ -9,3 +9,5 @@
 {"t":0,"agent":"a29db13","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":79608}
 {"t":0,"agent":"ad4e9d2","agent_type":"general-purpose","event":"agent_stop","success":true,"synthetic":true,"telemetry_status":"unmatched_stop","reason":"SubagentStop arrived without a matching SubagentStart; native Agent/Task start telemetry was not observed."}
 {"t":0,"agent":"adbc3cb","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":193634}
+{"t":0,"agent":"af54dab","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"af54dab","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":10430}
