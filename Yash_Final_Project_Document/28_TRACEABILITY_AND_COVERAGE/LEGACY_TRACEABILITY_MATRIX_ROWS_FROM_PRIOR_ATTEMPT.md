@@ -1,6 +1,6 @@
 # Legacy feature traceability matrix rows (verbatim quote from the prior attempt)
 
-Doc ID: TRC-LEGACY-D1 · Status: Draft for Review · Date: 2026-10-27 · Supersedes nothing · Linked from: [`LEGACY_REPORTS_EVIDENCE_INDEX.md`](LEGACY_REPORTS_EVIDENCE_INDEX.md), [`MASTER_INDEX.md#record-master-index-v9-addendum-3`](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-3) and [`LEGACY_MERGE_LEDGER_D.md`](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_D.md)
+Doc ID: TRC-LEGACY-D1 · Status: Draft for Review · Date: 2026-10-27 · Supersedes nothing · Linked from: [`LEGACY_REPORTS_EVIDENCE_INDEX.md`](LEGACY_REPORTS_EVIDENCE_INDEX.md), [`MASTER_INDEX.md#record-master-index-v9-addendum-3`](../00_CONTROL_CENTRE/MASTER_INDEX.md#record-master-index-v9-addendum-3) and [`LEGACY_MERGE_LEDGER_D.md`](../00_CONTROL_CENTRE/LEGACY_MERGE_LEDGER_A.md#record-legacy-merge-ledger-d)
 
 Frame: nothing is implemented in this project. The prior attempt reported or required the items below; earlier merges condensed them away. They are quoted verbatim from the archived source (`L<n>` = source line number) as reference evidence about the prior attempt only. Quoted code paths, commands, hashes, counts and URLs are not facts about this project. Source file stays unchanged in the archive. Closed under the standing instruction: "i dont want to loos information keep everything in use untile it get improved".
 

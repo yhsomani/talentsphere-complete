@@ -12,7 +12,7 @@ The phase systems are not comparable: SSOT §7 uses its own `Ph0`–`Ph10` seque
 
 ## Candidate mapping
 
-The related source registry's category, priority, phase and dependency columns are preserved separately in [FEATURE_REGISTRY_METADATA_CROSSWALK](FEATURE_REGISTRY_METADATA_CROSSWALK.md) and its [row-level CSV](FEATURE_REGISTRY_METADATA_CROSSWALK.csv). Those source fields are not target phase or implementation-status assignments.
+The related source registry's category, priority, phase and dependency columns are preserved separately in [FEATURE_REGISTRY_METADATA_CROSSWALK](TRACEABILITY_AND_VALIDATION.md#record-feature-registry-metadata-crosswalk) and its [row-level CSV](FEATURE_REGISTRY_METADATA_CROSSWALK.csv). Those source fields are not target phase or implementation-status assignments.
 
 | SSOT ID | Canonical feature | Candidate local FEAT IDs | Match |
 |---|---|---|---|
