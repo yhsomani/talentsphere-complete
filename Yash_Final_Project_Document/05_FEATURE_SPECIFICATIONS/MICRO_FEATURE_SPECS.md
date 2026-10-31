@@ -431,3 +431,109 @@ Method and list: `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.m
 | SPEC-G5 retention paragraph for applications; DATA-021 (24 months) | Identifiable content follows BR-T122; the 24-month figure applies only to the minimal record if OPEN-08 allows it |
 
 <!-- source-record-end: Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_ACCEPTANCE_ADDITIONS_REV2.md -->
+
+## P0 acceptance gap closure (finding 17) — 2026-10-27
+
+Scope: review finding 17 (traceability). `COVERAGE_MATRICES.md` rows flag 36 P0 features as "P0 without AC" (the request counted 37; 36 IDs were listed and checked). That matrix predates the REV2 fold: **28 of the 36 already have feature-level ACs** in section 2 of this file ("Criteria for P0 features that had none (REVW-17)"). Of the other 8, six have only micro-level ACs and two are `Remove` features with no AC at all. This section adds ACs for those 8. **Every AC below has status PROPOSED** (not approved, not implemented, not tested). Rows whose Category is OPEN are questions, not criteria; the named document is silent. IDs follow `AC-<feature>-NN` and reuse none of the existing IDs (the micro-level `AC-02-02.1-01`, `AC-02-02.3-01`, `AC-04-04.1-01`, `AC-15-02.1-01`, `AC-15-02.2-01`, `AC-19-01.1-01`, `AC-20-02.3-01`, `AC-24-06.2-01` and `AC-24-06.3-01` stay valid and are cited, not repeated).
+
+### P0.1 Criteria
+
+| AC | Feature | Given | When | Then | Category | Status |
+|---|---|---|---|---|---|---|
+| AC-02-02-01 | FEAT-02-02 | an `org_admin` invites a valid email | the invite is created | the token is stored hashed, expires after 7 d, is single-use and is bound to the invited email (micro FEAT-02-02.1) | Happy | PROPOSED |
+| AC-02-02-02 | FEAT-02-02 | an invite for a@x and an account whose verified email is b@y | b@y accepts | refused; acceptance needs a matching verified email | Security | PROPOSED |
+| AC-02-02-03 | FEAT-02-02 | an invite that was already accepted | the same token is used again | refused (single-use); no second membership | Negative | PROPOSED |
+| AC-02-02-04 | FEAT-02-02 | one pending invite | two accept requests arrive concurrently | exactly one succeeds; the other is refused as used (derived from the single-use token in FEAT-02-02.1; no document states the concurrent case, so this row is unsourced) | Concurrency | PROPOSED |
+| AC-02-02-05 | FEAT-02-02 | OPEN: bulk invite by CSV (FEAT-02-02.2) | an admin uploads a file | OPEN: row limit, dry-run report, duplicate handling and role per row are not specified. `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` names ".2 bulk invite CSV" and no spec defines it (the only CSV rules, SPEC-G5 section 3.2, are for institution rosters) | OPEN | PROPOSED |
+| AC-04-04-01 | FEAT-04-04 | evidence aged 0 y and 3 y | confidence is computed | weights are 1.0 and about 0.37 (decay constant {3}, micro FEAT-04-04.1) | Boundary | PROPOSED |
+| AC-04-04-02 | FEAT-04-04 | evidence that supported a skill is revoked | the outbox event is processed | confidence is recomputed asynchronously, excludes the revoked item and is audited (BR-T005; SPEC-G2 05-05 impact pipeline) | Happy | PROPOSED |
+| AC-04-04-03 | FEAT-04-04 | the same revocation event delivered twice | the recompute job handles both | one effect, same result (consumer dedupe on `event_id`, as AC-24-01-02) | Idempotency | PROPOSED |
+| AC-04-04-04 | FEAT-04-04 | any client or role | tries to set a skill's confidence directly | rejected; confidence derives only from evidence rungs (hierarchy rationale "never self-set") | Negative | PROPOSED |
+| AC-04-04-05 | FEAT-04-04 | OPEN: uncertainty interval (FEAT-04-04.3) | the confidence is shown | OPEN: the interval formula and display bounds. SPEC-G2 and BR-T071 define an uncertainty band only for match display, and the decay constant {3} is unratified | OPEN | PROPOSED |
+| AC-15-02-01 | FEAT-15-02 | default preferences and an engagement notice at 22:00 local | it is routed | deferred to 08:00 (BR-T086; micro FEAT-15-02.1) | Happy | PROPOSED |
+| AC-15-02-02 | FEAT-15-02 | an interview reminder raised during quiet hours | it is routed | sent now; interview reminders are time-critical (BR-T086) | Happy | PROPOSED |
+| AC-15-02-03 | FEAT-15-02 | a security, verification, legal or billing category | the user tries to disable it | refused; shown as locked with a reason (BR-T085; micro FEAT-15-02.2) | Negative | PROPOSED |
+| AC-15-02-04 | FEAT-15-02 | a user who disabled quiet hours | an engagement notice is routed at 22:00 | sent now, not deferred (BR-T086 exception) | Happy | PROPOSED |
+| AC-15-02-05 | FEAT-15-02 | OPEN: digest frequency (FEAT-15-02.3) | the user picks a frequency | OPEN: allowed values. BR-T087 caps digests at 1 per day; the instant/daily/weekly list in micro FEAT-09-06.2 is for job alerts only; no doc lists the values for notification digests. Also OPEN: whether 21:00 and 08:00 themselves are inside quiet hours | OPEN | PROPOSED |
+| AC-19-01-01 | FEAT-19-01 | a report filed, then the reported message deleted | a moderator opens the case | the frozen context snapshot shows the original text (micro FEAT-19-01.1) | Happy | PROPOSED |
+| AC-19-01-02 | FEAT-19-01 | one reporter with {20} reports today | files the 21st | pointer only: the same assertion is AC-19-08-01 (`429` on the 21st, the 20th accepted; BR-T048, limit {20} unratified); not counted as a separate test | Boundary | PROPOSED |
+| AC-19-01-03 | FEAT-19-01 | two reports on one target in one category | the second is filed | merged into the existing open case, no second case (BR-T048; SM-MODCASE t1) | Happy | PROPOSED |
+| AC-19-01-04 | FEAT-19-01 | a report is filed | the subject views any notice or case data | the reporter's identity is not exposed (BR-T048) | Privacy | PROPOSED |
+| AC-19-01-05 | FEAT-19-01 | OPEN: report category (FEAT-19-01.2) | a reporter chooses a category | OPEN: the category list. BR-T048 and SM-MODCASE use "category" for dedupe but no spec or decision table enumerates the values | OPEN | PROPOSED |
+| AC-20-02-01 | FEAT-20-02 | a support operator | creates a grant without a reason code | denied (BR-T041; TEST-SEC-022) | Negative | PROPOSED |
+| AC-20-02-02 | FEAT-20-02 | grants of 4 h and of 4 h + 1 s | each is created | the 4 h grant is allowed; the longer one is denied (BR-T041, at most 4 h) | Boundary | PROPOSED |
+| AC-20-02-03 | FEAT-20-02 | a grant past its expiry | the operator reads the subject's data | denied; the grant is shown as expired; audited (TEST-SEC-022; INV-T18) | Security | PROPOSED |
+| AC-20-02-04 | FEAT-20-02 | an operator with no grant | reads a user's personal data | denied and the attempt is audited (TEST-SEC-023; INV-T18) | Security | PROPOSED |
+| AC-20-02-05a | FEAT-20-02 | a grant for subject A with a ticket id | the operator reads subject B | B denied (BR-T041) | Security | PROPOSED |
+| AC-20-02-05b | FEAT-20-02 | a grant for subject A with a ticket id | the operator writes A's evidence, application or verification state | the write is denied (BR-T043) | Security | PROPOSED |
+| AC-20-02-05c | FEAT-20-02 | a grant for subject A with a ticket id that has expired or needs more time | the operator continues | a new grant is required; every read of A under the original grant was audited (BR-T042) | Security | PROPOSED |
+| AC-24-06-01 | FEAT-24-06 | Android Chrome | the app is installed | installability and the offline shell work (per TEST-MOB-001, Android Chrome case; that test also covers push and is registered to FEAT-15-04, so it is a shared reference, not this feature's own test) | Happy | PROPOSED |
+| AC-24-06-02 | FEAT-24-06 | cached profile, evidence, applications and saved jobs | the user logs out | the offline cache is cleared (micro FEAT-24-06.2) | Privacy | PROPOSED |
+| AC-24-06-03 | FEAT-24-06 | remote and host versions that are incompatible | the update is detected | a forced refresh runs and the unsaved draft is preserved (micro FEAT-24-06.3 edge case) | Failure | PROPOSED |
+| AC-24-06-04 | FEAT-24-06 | an offline cached list that the server has since changed | the device reconnects | the cache is never treated as authoritative; queued writes are revalidated server-side (INV-T13) | Invariant | PROPOSED |
+| AC-24-06-05 | FEAT-24-06 | a platform lacks installability or push (FEAT-24-06.4) | the user opens the app on it | the fallback listed for that capability in `08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md` (PLT-01) section 3 applies, for example the instruction sheet for install or the in-app notification centre plus email for push (ADR-T20); correction 2026-10-27: an earlier version of this row said no document holds the matrix, which an independent review showed was wrong; the matrix is Under Review and its cells are not device-verified (OPEN-FE-01), so ratification is still owner-pending | Compatibility | PROPOSED |
+| AC-10-17-01 | FEAT-10-17 (Remove) | an application whose match score is below any value | scoring completes | the application state is unchanged; nothing moves it to `rejected` automatically (INV-T09; SM universal rule U6) | Negative | PROPOSED |
+| AC-10-17-02 | FEAT-10-17 (Remove) | a rejection | it is recorded | the actor is a human and a `reasonCode` is present (SPEC-G4 rejection rule) | Negative | PROPOSED |
+| AC-10-17-03 | FEAT-10-17 (Remove) | a job with N applicants | the recruiter opens the applicant view | all N are returned; no score cut-off hides any (BR-T072, INV-T52) | Invariant | PROPOSED |
+| AC-20-07-01 | FEAT-20-07 (Remove) | a staff principal of any role | looks for a "log in as user" or impersonation route or role | none exists; no impersonation role is defined (STAKEHOLDERS_ROLES_PERMISSIONS, "removed on principle") | Negative | PROPOSED |
+| AC-20-07-02 | FEAT-20-07 (Remove) | a support operator holding a valid grant | views the subject's data | only a read-only scoped view is served; writes are denied (BR-T043; hierarchy: "replaced by read-only scoped view under grant") | Security | PROPOSED |
+| AC-20-07-03 | FEAT-20-07 (Remove) | OPEN: proof that staff cannot obtain a session as the subject | a test asserts it | OPEN: the mechanism to assert (token issuance guard, route lint). No document specifies how the absence is enforced | OPEN | PROPOSED |
+
+### P0.2 Coverage table (feature to AC)
+
+| Feature | Result | AC ids or location |
+|---|---|---|
+| FEAT-01-09 | already covered | AC-01-09-01..03 (section 2 above) |
+| FEAT-02-01 | already covered | AC-02-01-01..05 (section 1.2 and section 2 above) |
+| FEAT-02-02 | new ACs, one OPEN | AC-02-02-01..04, OPEN AC-02-02-05 |
+| FEAT-02-07 | already covered | AC-02-07-01..03 |
+| FEAT-04-01 | already covered | AC-04-01-01..03 |
+| FEAT-04-02 | already covered | AC-04-02-01..03 |
+| FEAT-04-04 | new ACs, one OPEN | AC-04-04-01..04, OPEN AC-04-04-05 |
+| FEAT-07-01 | already covered | AC-07-01-01 |
+| FEAT-08-01 | already covered | AC-08-01-01..02 |
+| FEAT-10-17 | new ACs | AC-10-17-01..03 |
+| FEAT-15-01 | already covered | AC-15-01-01..02 |
+| FEAT-15-02 | new ACs, one OPEN | AC-15-02-01..04, OPEN AC-15-02-05 |
+| FEAT-15-03 | already covered | AC-15-03-01..02 |
+| FEAT-15-06 | already covered | AC-15-06-01..02 |
+| FEAT-15-07 | already covered | AC-15-07-01..03 |
+| FEAT-16-01 | already covered | AC-16-01-01 |
+| FEAT-17-01 | already covered | AC-17-01-01..02 |
+| FEAT-17-02 | already covered | AC-17-02-01 |
+| FEAT-17-03 | already covered | AC-17-03-01..02 |
+| FEAT-19-01 | new ACs, one OPEN | AC-19-01-01..04, OPEN AC-19-01-05 |
+| FEAT-19-02 | already covered | AC-19-02-01 |
+| FEAT-19-08 | already covered | AC-19-08-01 |
+| FEAT-20-01 | already covered | AC-20-01-01..03 |
+| FEAT-20-02 | new ACs | AC-20-02-01..04, 05a, 05b, 05c (grant notification stays in AC-20-02.3-01) |
+| FEAT-20-03 | already covered | AC-20-03-01..02 |
+| FEAT-20-07 | new ACs, one OPEN | AC-20-07-01..02, OPEN AC-20-07-03 |
+| FEAT-21-01 | already covered | AC-21-01-01..02 |
+| FEAT-22-06 | already covered | AC-22-06-01..02 |
+| FEAT-24-01 | already covered | AC-24-01-01..03 |
+| FEAT-24-02 | already covered | AC-24-02-01..03 |
+| FEAT-24-04 | already covered | AC-24-04-01..02 |
+| FEAT-24-05 | already covered | AC-24-05-01 |
+| FEAT-24-06 | new ACs | AC-24-06-01..05 (05 cites PLT-01 section 3; ratification and device verification pending) |
+| FEAT-24-08 | already covered | AC-24-08-01 |
+| FEAT-24-09 | already covered | AC-24-09-01..02 |
+| FEAT-24-11 | already covered | AC-24-11-01 |
+
+Counts: 36 features checked; 28 already covered; 8 get new ACs (each also carries at least one concrete AC, so none is blocked outright); 38 new AC rows after review fixes, of which 32 are testable (AC-24-06-05 now cites PLT-01 section 3 after a second review caught the earlier wrong "no matrix" claim), 5 are OPEN placeholders and 1 (AC-19-01-02) is a pointer to AC-19-08-01 and not a separate test; all PROPOSED. Independent review (2026-10-27, Sonnet, read-only): PASS-WITH-FIXES; four fixes applied (AC-02-02-04 flagged unsourced, AC-19-01-02 made a pointer, AC-20-02-05 split into 05a/05b/05c, AC-24-06-01 reference corrected). Review limits: 20 of the 28 "already covered" claims were opened and all held; 02-01, 15-03, 15-07, 17-01, 17-03, 24-01, 24-04 and 24-09 were not opened. Weak existing ACs noted by the reviewer: AC-04-02-01 and AC-07-01-01 test little. Documents that still say "AC pending" or flag these features as blockers (COVERAGE_MATRICES.md, TEST_CATALOG.md, ROADMAP.md) are stale relative to this section.
+
+### P0.3 OPEN questions
+
+1. FEAT-02-02.2 bulk invite CSV: row limit, dry run, duplicate handling, role per row. Silent: all feature specs (only the institution roster CSV exists, in SPEC-G5).
+2. FEAT-04-04.3 uncertainty interval: formula and display bounds; ratification of decay constant {3}. Silent: SPEC-G2, BR-REG.
+3. FEAT-15-02.3 digest frequency values, and whether the 21:00 and 08:00 instants are inside quiet hours. Silent: BR-T086, BR-T087, SPEC-G5.
+4. FEAT-19-01.2 report category list. Silent: SPEC-G4/G5, DECISION_TABLES, STATE_MACHINES.
+5. FEAT-24-06.4 platform fallback matrix. RESOLVED on paper 2026-10-27 (this item previously said all documents were silent, which was wrong): `PLATFORM_COMPATIBILITY_MATRIX.md` section 3 holds it. Remaining OPEN: owner ratification and device verification (OPEN-FE-01).
+6. FEAT-20-07 how the absence of impersonation is enforced and tested. Silent: STAKEHOLDERS_ROLES_PERMISSIONS, BUSINESS_RULES_REGISTRY.
+7. Limits in braces ({20} reports per day, {3} decay constant) remain unratified; the ACs cite them as written.
+
+### P0.4 Cross-document findings
+
+- `COVERAGE_MATRICES.md` is stale: it still flags 28 features that section 2 above already covers, and it counts the two `Remove` features (FEAT-10-17, FEAT-20-07) as P0 blockers (already noted as REVW2-26).
+- `TEST_CATALOG.md` and `ROADMAP.md` still say "AC pending" for FEAT-20-02, FEAT-15-02, FEAT-19-01 and FEAT-19-02, although micro-level or section 2 ACs exist.
+- This file holds the REV2 acceptance additions twice (the folded copy and the preserved source record), so every REV2 AC ID appears twice; the two copies agree in the rows checked.

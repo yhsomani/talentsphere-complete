@@ -690,3 +690,101 @@ One suite per business-rule numbering block, covering rules that no individual t
 Individual tests added: 22. Suite-level acceptance tests: 51. Suite-level rule tests: 9. Total additive entries in this file: 82. `TEST_CATALOG.md` (with the in-place rows) holds 214 individual tests; unique individual tests across both files: 236.
 
 <!-- source-record-end: Yash_Final_Project_Document/16_QA_AND_TESTING/TEST_CATALOG_REV2.md -->
+
+## P0 test gap closure (finding 17) — 2026-10-27
+
+Scope: the "P0 without test" half of review finding 17. Input: the 36 P0 features that `COVERAGE_MATRICES.md` flags (sections 5 and 5.1), their ACs in `MICRO_FEATURE_SPECS.md` (section 2 and "P0 acceptance gap closure"), and every TEST row in this file (including the folded REV2 record). The matrix predates the REV2 fold and the new ACs, so each feature was first checked for an existing test. **Every row below is PROPOSED: specified only, not written, not executed, no result exists.** Setup, steps and expected result restate the Given, When and Then of the cited AC and add nothing. Level codes as in section 1. Tool class is quoted from `TEST_STRATEGY.md` section 3 by level and is a class, not a chosen tool: U = Vitest-class runner; C = Testing Library-class + axe; I = real Postgres (test containers or CI service DB); S = custom generated suites; X = TypeScript, ESLint, dependency-cruiser, custom scripts. Limits in braces ({20} reports per day) are unratified in the source and cited as written. New ids continue each category after the highest id found in the blueprint (SEC 042, API 017, MSG 006, HIR 019, EVD 019, ASM 014, AI 007, TEN 014, PRV 014, OBS 009, BIL 011, DAT 010); `ID_REGISTRY.md` does not yet list these ranges.
+
+### G.1 Test-specification rows
+
+| Test id | Feature | AC ids | Lvl | Setup | Steps | Expected result | Tool class | Status |
+|---|---|---|---|---|---|---|---|---|
+| TEST-API-017 | FEAT-01-09 | AC-01-09-01, AC-01-09-03 | I | an authenticated principal with several scoped grants | `GET /me/capabilities` for one scope; change a grant; request again | only that scope's evaluated capability set is returned; the next response reflects the new set (no stale cache) | I | PROPOSED |
+| TEST-HIR-019 | FEAT-02-01 | AC-02-01-01..05 | I | a new organization with `verification_state = unverified`; a verified organization with 3 live jobs; an organization with a correct DNS TXT proof | owner publishes a first then a second job; review completes; a reviewer revokes verification; an automated domain re-check fails | first publish allowed (1 live job); second gives `409 org_verification_required`; `pending -> verified`, `org_domain` usable, audited; on revoke the oldest live job stays, two move to `paused` (reason `org_unverified`) in one transaction, applications continue, owner notified (BR-T123); failed re-check opens a review task and leaves `verification_state` unchanged. Overlap: TEST-HIR-013 covers the one-live-job cap only | I | PROPOSED |
+| TEST-SEC-042 | FEAT-02-02 | AC-02-02-01..04 | I | an `org_admin` invite for a@x; an account with verified email b@y; an already accepted invite; one pending invite | create the invite; b@y accepts; reuse the token; two accept requests arrive concurrently | token stored hashed, expires after 7 d, single-use, bound to the invited email; b@y refused; second use refused with no second membership; exactly one concurrent accept succeeds (AC-02-02-04 is unsourced: derived, no document states the concurrent case). Overlap: TEST-SEC-031 covers invite expiry under fake time only | I | PROPOSED |
+| — | FEAT-02-02 | AC-02-02-05 | — | OPEN: bulk invite by CSV (FEAT-02-02.2) | OPEN: upload a file | OPEN: row limit, dry-run report, duplicate handling and role per row are not specified; only the institution roster CSV (SPEC-G5 section 3.2) has rules | — | OPEN |
+| TEST-TEN-014 | FEAT-02-07 | AC-02-07-03 | I | the application database role | role check | no `BYPASSRLS`. AC-02-07-01 is covered by TEST-TEN-001 and TEST-TEN-011; AC-02-07-02 by TEST-DAT-009 | I | PROPOSED |
+| TEST-API-018 | FEAT-04-01 | AC-04-01-01..03 | I | the skills read API; an alias of a skill; two skills merged | list; resolve the alias; read the old id | canonical skills returned with a taxonomy version; the alias resolves to the canonical skill; the old id still resolves (redirect) and a merge event is emitted | I | PROPOSED |
+| TEST-API-019 | FEAT-04-02 | AC-04-02-01..03 | I | evidence, a job, a course and any entity type; a free-text skill | tag with a canonical skill; tag with the free-text skill | canonical tag accepted; free text gives `422` (BR-T006); the same skill ids and API serve every entity type. Only suite-level TEST-BRU-T001-T040 reaches BR-T006 today | I | PROPOSED |
+| TEST-EVD-019 | FEAT-04-04 | AC-04-04-01 | U | evidence aged 0 y and 3 y | compute confidence | weights are 1.0 and about 0.37 (decay constant {3}, unratified) | U | PROPOSED |
+| TEST-EVD-020 | FEAT-04-04 | AC-04-04-03, AC-04-04-04 | I | a revocation event delivered twice; any client or role | the recompute job handles both; the client tries to set a skill's confidence directly | one effect, same result (dedupe on `event_id`); the direct set is rejected, confidence derives only from evidence rungs. AC-04-04-02 is covered by TEST-EVD-007 | I | PROPOSED |
+| — | FEAT-04-04 | AC-04-04-05 | — | OPEN: uncertainty interval (FEAT-04-04.3) | OPEN: confidence is shown | OPEN: interval formula and display bounds; SPEC-G2 and BR-T071 define an uncertainty band only for match display | — | OPEN |
+| TEST-ASM-014 | FEAT-07-01 | AC-07-01-01 | C | the assessment catalogue | open an item | mode badge and AI-policy label are shown | C | PROPOSED |
+| TEST-ASM-015 | FEAT-08-01 | AC-08-01-01, AC-08-01-02 | I | the course catalogue; a course with prerequisites; a learner who has not met them | filter by skill and level; open the course | only `published` courses returned; unmet prerequisites shown with links. OPEN: section 1 has no category code for learning, so ASM (assessment) is the nearest and the owner may re-home the id | I | PROPOSED |
+| TEST-HIR-020 | FEAT-10-17 (Remove) | AC-10-17-03 | I | a job with N applicants | the recruiter opens the applicant view | all N returned; no score cut-off hides any (BR-T072, INV-T52). AC-10-17-01 and -02 are covered by TEST-HIR-004 and TEST-HIR-014 | I | PROPOSED |
+| TEST-MSG-006 | FEAT-15-01 | AC-15-01-01, AC-15-01-02 | I | in-app notifications, one unread | open the notification centre; mark the unread item read twice | newest first with an unread count; the second mark-read is idempotent | I | PROPOSED |
+| TEST-MSG-007 | FEAT-15-02 | AC-15-02-02, AC-15-02-03 | I | an interview reminder raised during quiet hours; a security, verification, legal or billing category | route the reminder; the user tries to disable the category | reminder sent now (time-critical, BR-T086); disable refused, shown as locked with a reason (BR-T085). AC-15-02-01 and -04 are covered in part by TEST-MSG-001 | I | PROPOSED |
+| — | FEAT-15-02 | AC-15-02-05 | — | OPEN: digest frequency (FEAT-15-02.3) | OPEN: the user picks a frequency | OPEN: allowed values (BR-T087 caps digests at 1 per day; the instant/daily/weekly list is for job alerts only) and whether 21:00 and 08:00 are inside quiet hours | — | OPEN |
+| TEST-MSG-008 | FEAT-15-03 | AC-15-03-01, AC-15-03-02 | I | the email provider down; a mandatory security email during quiet hours | raise a notification; route the security email | in-app item exists, the `email.send` job retries (SM-BGJOB t4), no duplicate email on recovery; the security email is sent now (DT-07 row 2). Overlap: TEST-REL-003 covers the outage and breaker | I | PROPOSED |
+| TEST-MSG-009 | FEAT-15-06 | AC-15-06-01, AC-15-06-02 | I | a hard bounce webhook; a transient provider error | deliver the webhook; let the job retry | delivery `bounced` and the address suppressed; delivery shows `failed_retry` and mirrors the job, with no second retry schedule | I | PROPOSED |
+| TEST-MSG-010 | FEAT-15-07 | AC-15-07-01..03 | I | an engagement email; a mandatory transactional category; an address on the suppression list | one-click unsubscribe; unsubscribe attempt; attempt a send | the category is suppressed; the mandatory category is not suppressed and the page explains why; the send is not made (SM-NOTIFY t1) | I | PROPOSED |
+| TEST-BIL-011 | FEAT-16-01 (Phase 2) | AC-16-01-01 | C | a plan with no price set | the catalogue renders | no price is shown (prices are OPEN-05) | C | PROPOSED |
+| TEST-AI-007 | FEAT-17-01 | AC-17-01-01 | X | code that imports a model provider directly | CI lint | the build fails (BR-T110) | X | PROPOSED |
+| TEST-AI-008 | FEAT-17-01 | AC-17-01-02 | S | the Phase 0 gateway stub | make a call | denied by default; no provider is contacted. TEST-ASM-008 and TEST-ASM-009 are linked to this feature but verify injection and outage behaviour, not these ACs | S | PROPOSED |
+| TEST-AI-009 | FEAT-17-03 | AC-17-03-02 | I | a gateway denial for an `AI_PROHIBITED` principal | inspect the log | the log holds the policy and principal, not the prompt content. AC-17-03-01 is covered by TEST-ASM-001 | I | PROPOSED |
+| TEST-MSG-011 | FEAT-19-01, FEAT-19-02 | AC-19-01-01, AC-19-01-03, AC-19-01-04, AC-19-02-01 | I | a report filed then the message deleted; two reports on one target in one category; a report and a system flag on one target | open the case; file the second report; the subject views notices and case data; build the queue | the frozen context snapshot shows the original text; the second report merges into the open case (BR-T048, SM-MODCASE t1); the reporter's identity is not exposed; one case by target and category and automation cannot move it to `actioned`. AC-19-01-02 is a pointer to TEST-MSG-012. Overlap: TEST-MSG-002 covers the case, human action and appeal | I | PROPOSED |
+| — | FEAT-19-01 | AC-19-01-05 | — | OPEN: report category (FEAT-19-01.2) | OPEN: a reporter chooses a category | OPEN: the category list; BR-T048 and SM-MODCASE use "category" for dedupe but no document enumerates values | — | OPEN |
+| TEST-MSG-012 | FEAT-19-08 (Phase 2) | AC-19-08-01 | I | one reporter with {20} reports today | file the 20th then the 21st | the 20th is accepted; the 21st gets `429` (BR-T048; {20} unratified) | I | PROPOSED |
+| TEST-SEC-043 | FEAT-20-01 | AC-20-01-02, AC-20-01-03 | S | a staff principal without MFA; a role grant that changes | open the console; save the grant | denied until MFA is enrolled (BR-T044); the change is audited with actor and reason. AC-20-01-01 is covered by TEST-FED-016 | S | PROPOSED |
+| TEST-SEC-044 | FEAT-20-02 | AC-20-02-05a, AC-20-02-05b, AC-20-02-05c | S | a grant for subject A with a ticket id | read subject B; write A's evidence, application or verification state; continue after expiry | B denied (BR-T041); the write denied (BR-T043); a new grant is required and every read of A under the original grant was audited (BR-T042). AC-20-02-01..04 are covered by TEST-SEC-022 and TEST-SEC-023; the grant notification (AC-20-02.3-01) has no test | S | PROPOSED |
+| TEST-OBS-009 | FEAT-20-03 | AC-20-03-01, AC-20-03-02 | I | the audit viewer; an audit export request | open a record; request the export | actor, action, resource, reason and request id are shown; re-auth is required and the export is itself audited. Tamper detection (the chain) is covered by TEST-OBS-005 and TEST-OBS-006 | I | PROPOSED |
+| TEST-SEC-045 | FEAT-20-07 (Remove) | AC-20-07-01 | S | a staff principal of any role | look for a "log in as user" or impersonation route or role | none exists; no impersonation role is defined. AC-20-07-02 is covered by TEST-SEC-041 (which is conditional on the view-as feature, OPEN-X05) | S | PROPOSED |
+| — | FEAT-20-07 | AC-20-07-03 | — | OPEN: proof that staff cannot obtain a session as the subject | OPEN: a test asserts it | OPEN: the mechanism to assert (token issuance guard, route lint); no document says how absence is enforced | — | OPEN |
+| TEST-PRV-014 | FEAT-22-06 | AC-22-06-01, AC-22-06-02 | I | a user accepts policy version v; policy v+1 is published | store the acceptance; the user's next sensitive action | version, timestamp and account recorded; acceptance of v+1 is required first. TEST-ACC-01-13 (suite-level, FEAT-01-13) is a different feature | I | PROPOSED |
+| TEST-API-022 | FEAT-24-01 | AC-24-01-03 | I | the dispatcher restarts mid-batch | restart and finish the batch | no event is lost. AC-24-01-01 and -02 are covered by TEST-API-008 and TEST-API-009 | I | PROPOSED |
+| TEST-API-020 | FEAT-24-02 | AC-24-02-01, AC-24-02-03 | I | two workers racing for one job; jobs of kinds `email.send`, `ai.*` and a permanent error | claim; let failures repeat | exactly one wins (`SKIP LOCKED`); `email.send` is attempted up to 12 times, `ai.*` 3 times, a permanent error goes straight to `dead`, and a dead job of a protected kind raises an alert (SM-BGJOB t4, t7). AC-24-02-02 is covered by TEST-API-010 | I | PROPOSED |
+| TEST-SEC-046 | FEAT-24-04 | AC-24-04-02 | S | a non-image file | download it | forced as attachment (BR-T116). AC-24-04-01 is covered by TEST-SEC-007 | S | PROPOSED |
+| TEST-SEC-047 | FEAT-24-08 | AC-24-08-01 | S | requests over the limit | send them | `429` with `Retry-After`; auth endpoints stricter (BR-T115). TEST-SEC-021 covers the auth endpoints only | S | PROPOSED |
+| TEST-API-021 | FEAT-24-09 | AC-24-09-01, AC-24-09-02 | I | two worker replicas; a time-driven transition that is due | a scheduled tick fires; the job runs | the tick runs once (unique kind and tick); the guard is re-checked at execution time (U7) | I | PROPOSED |
+| TEST-DAT-010 | FEAT-24-11 | AC-24-11-01 | X | a migration that drops or rewrites a column in one step | lint | rejected unless it follows expand/contract with a rollback note. TEST-DAT-001 checks the rollback note only | X | PROPOSED |
+
+### G.2 Coverage table (feature to test)
+
+Evidence for "already tested" is the Given/When/Then text of the named existing row in this file, checked against the AC text. A row that only links the feature id but verifies other behaviour is not counted. Rows marked partial leave the listed ACs to the new ids.
+
+| Feature | New TEST ids | Already tested by (evidence) | OPEN |
+|---|---|---|---|
+| FEAT-01-09 | TEST-API-017 | TEST-API-014 for AC-01-09-02 (UI hints never exceed server allowance); partial | |
+| FEAT-02-01 | TEST-HIR-019 | TEST-HIR-013 for the one-live-job cap only; partial | |
+| FEAT-02-02 | TEST-SEC-042 | TEST-SEC-031 for invite expiry only; partial | AC-02-02-05 |
+| FEAT-02-07 | TEST-TEN-014 | TEST-TEN-001, TEN-002, TEN-011 (AC-02-07-01); TEST-DAT-009 (AC-02-07-02, which asserts RLS enabled only; the "forced" part of the AC is not asserted); partial | |
+| FEAT-04-01 | TEST-API-018 | none | |
+| FEAT-04-02 | TEST-API-019 | none (suite-level TEST-BRU-T001-T040 only) | |
+| FEAT-04-04 | TEST-EVD-019, TEST-EVD-020 | TEST-EVD-007 (AC-04-04-02, revocation recompute async and audited); partial | AC-04-04-05 |
+| FEAT-07-01 | TEST-ASM-014 | none | |
+| FEAT-08-01 | TEST-ASM-015 | none | category code for learning |
+| FEAT-10-17 | TEST-HIR-020 | TEST-HIR-004, TEST-HIR-014 (AC-10-17-01, -02); partial | |
+| FEAT-15-01 | TEST-MSG-006 | none | |
+| FEAT-15-02 | TEST-MSG-007 | TEST-MSG-001 (AC-15-02-01, -04, quiet hours and preferences); partial | AC-15-02-05 |
+| FEAT-15-03 | TEST-MSG-008 | TEST-REL-003 (provider outage, breaker); partial | |
+| FEAT-15-06 | TEST-MSG-009 | none | |
+| FEAT-15-07 | TEST-MSG-010 | none | |
+| FEAT-16-01 | TEST-BIL-011 | none | |
+| FEAT-17-01 | TEST-AI-007, TEST-AI-008 | none (TEST-ASM-008, -009 link the feature but verify other behaviour) | |
+| FEAT-17-02 | none needed | TEST-ASM-005 (free tier, no paid inference), TEST-AI-005; full | |
+| FEAT-17-03 | TEST-AI-009 | TEST-ASM-001 (AC-17-03-01); partial | |
+| FEAT-19-01 | TEST-MSG-011 | TEST-MSG-002 (case forms, human acts, appealable); partial | AC-19-01-05 |
+| FEAT-19-02 | TEST-MSG-011 | TEST-MSG-002; partial | |
+| FEAT-19-08 | TEST-MSG-012 | none | |
+| FEAT-20-01 | TEST-SEC-043 | TEST-FED-016 (AC-20-01-01, back-office behind authenticated edge rule); partial | |
+| FEAT-20-02 | TEST-SEC-044 | TEST-SEC-022, TEST-SEC-023 (AC-20-02-01..04); partial | |
+| FEAT-20-03 | TEST-OBS-009 | TEST-OBS-005, TEST-OBS-006 (tamper detection, not the viewer ACs); partial | |
+| FEAT-20-07 | TEST-SEC-045 | TEST-SEC-041 (AC-20-07-02, conditional on OPEN-X05); partial | AC-20-07-03 |
+| FEAT-21-01 | none needed | TEST-PRV-006 (events carry no direct identifiers, consent state respected; covers AC-21-01-01 only; AC-21-01-02, consent withdrawn so the next event is not captured, is not asserted); partial | |
+| FEAT-22-06 | TEST-PRV-014 | none | |
+| FEAT-24-01 | TEST-API-022 | TEST-API-008 (AC-24-01-01), TEST-API-009 (AC-24-01-02); partial | |
+| FEAT-24-02 | TEST-API-020 | TEST-API-010 (AC-24-02-02, fencing); partial | |
+| FEAT-24-04 | TEST-SEC-046 | TEST-SEC-007 (AC-24-04-01, signed URL expiry); partial | |
+| FEAT-24-05 | none needed | TEST-FED-011 (one trace across shell, remote, API, worker), TEST-SEC-016 (redaction); full | |
+| FEAT-24-06 | none needed | TEST-MOB-001 (AC-24-06-01), TEST-PWA-003 (AC-24-06-02), TEST-PWA-001 (AC-24-06-03), TEST-PWA-004 (AC-24-06-04: stale label and nothing consequential asserted from cache only; the revalidation of queued writes is TEST-PWA-006, conditional on COND-OUTBOX), TEST-PWA-010 (AC-24-06-05); AC-01..03 covered, AC-04 partial | AC-24-06-05 closed on paper by PLT-01 section 3, see G.3 |
+| FEAT-24-08 | TEST-SEC-047 | TEST-SEC-021 (auth endpoints only); partial | |
+| FEAT-24-09 | TEST-API-021 | none | |
+| FEAT-24-11 | TEST-DAT-010 | TEST-DAT-001 (rollback note only); partial | |
+
+### G.3 Contradictions and open questions
+
+1. `MICRO_FEATURE_SPECS.md` P0.3 item 5 and AC-24-06-05 say no document holds the platform fallback matrix. `../08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md` section 3 ("Fallback and test requirement per capability (FF-09)") lists a fallback and test requirement per capability (for example install: instruction sheet on iOS/Safari, app usable as a tab; push: in-app notification centre plus email). Independent review (2026-10-27) confirmed the matrix answers the AC: section 3 lists 13 capabilities, each with feature detection, a required fallback and a test requirement. Resolution (PROPOSED, not ratified): AC-24-06-05 is closed by PLT-01 sections 1 and 3 and covered by TEST-PWA-010 (WebKit fallback per capability), TEST-MOB-001/002, TEST-PWA-011, and TEST-PWA-009 with TEST-MOB-003/004; no new row is needed. Caveat: the matrix is Under Review and its cells are V(src) or U, none V(dev), so device verification stays open as OPEN-FE-01 and the owner still has to ratify.
+2. Section 1 has no category code for learning, so TEST-ASM-015 is placed under ASM. OPEN: confirm the category.
+3. The stale "(AC pending)" markers in rows of sections 2 to 13 are not edited (append-only); they are superseded by `MICRO_FEATURE_SPECS.md` section 2 and its P0 closure section.
+
+Counts (corrected after independent review, 2026-10-27, Sonnet read-only: PASS-WITH-FIXES): 36 P0 features checked; 2 fully covered by existing tests (FEAT-17-02, 24-05); 22 partly covered with residual ACs given new rows (FEAT-21-01 and 24-06 moved from full to partial, three overclaims fixed); 12 with no usable existing test. 33 new PROPOSED test rows (TEST ids unique, none executed). 5 OPEN AC rows without an id (AC-02-02-05, AC-04-04-05, AC-15-02-05, AC-19-01-05, AC-20-07-03) plus 1 open question (G.3 item 2): 6 OPEN in total. Review limits: 30 existing tests opened; the ACs of FEAT-07-01, 08-01 and 16-01 were matched by their one-line rows only. Cosmetic: the new tables use different columns from the earlier 5-column tables and have no Auto tier column. `COVERAGE_MATRICES.md` is not regenerated.

@@ -3,3 +3,11 @@
 {"t":0,"agent":"a8668c8","agent_type":"general-purpose","event":"agent_stop","success":true,"synthetic":true,"telemetry_status":"unmatched_stop","reason":"SubagentStop arrived without a matching SubagentStart; native Agent/Task start telemetry was not observed."}
 {"t":0,"agent":"a505c9e","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
 {"t":0,"agent":"a505c9e","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":178026}
+{"t":0,"agent":"af69e1e","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"af69e1e","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":182245}
+{"t":0,"agent":"a120b60","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a120b60","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":81298}
+{"t":0,"agent":"aa2365f","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"aa2365f","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":281834}
+{"t":0,"agent":"ad61534","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ad61534","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":116766}
