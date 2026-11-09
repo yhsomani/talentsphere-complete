@@ -22,7 +22,7 @@ Status vocabulary:
 
 ### Snapshot facts
 
-- Public repository, default branch `main`; repository tree contained 1,143 tracked paths when inspected.
+- Public repository, default branch `main`; inspected source commit `40ee2de350fd28d3186f3546d6383088ca5b514a`; repository tree contained 1,143 tracked paths when inspected.
 - Canonical feature registry contains 173 feature IDs; canonical business-rule registry contains 248 rules.
 - The API contract inventory contains 277 unique literal `/api/v1` endpoint entries plus the root `/health` liveness endpoint (inventory dated 2026-10-23; source may have changed since).
 - Database reference enumerates 112 named table/entity references; 55 migration files were present at inspection.
