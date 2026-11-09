@@ -655,6 +655,7 @@ API_HANDLER -->|domain or infrastructure failure| API_ERR
 end
 PWA -->|fetch JSON /api/v1; Authorization Bearer| API_ROUTER
 subgraph ROUTES["08 Endpoint inventory | route nodes grouped by API domain"]
+EP_ROOT_HEALTH["GET /health"] --> API_HANDLER
 subgraph RG_HEALTH["health routes"]
 EP_0["GET /api/v1/health"]
 EP_0 --> API_HANDLER
