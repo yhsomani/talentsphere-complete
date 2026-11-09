@@ -24,7 +24,7 @@ Status vocabulary:
 
 - Public repository, default branch `main`; repository tree contained 1,143 tracked paths when inspected.
 - Canonical feature registry contains 173 feature IDs; canonical business-rule registry contains 248 rules.
-- The API contract inventory contains 277 unique literal `/api/v1` endpoint entries (inventory dated 2026-10-23; source may have changed since).
+- The API contract inventory contains 277 unique literal `/api/v1` endpoint entries plus the root `/health` liveness endpoint (inventory dated 2026-10-23; source may have changed since).
 - Database reference enumerates 112 named table/entity references; 55 migration files were present at inspection.
 - Open release issues found: #44 transactional email; #45 privacy/deletion/legal; #46 ADR-015 and hosted migration validation; #47 deployment/single-writer/worker/restore; #48 durable beta modules; #49 interview executor/trust/session architecture; #50 monetization/entitlement policy.
 - The README says production readiness is not established.
@@ -1695,749 +1695,997 @@ RULE_GATE -->|TRUE| RULE_PASS
 RULE_GATE -->|FALSE| RULE_FAIL
 RULE_PASS --> API_HANDLER
 RULE_FAIL --> API_ERR
-R_BR_01["BR-01 Only 'ROLE_RECRUITER'/'ROLE_ADMIN' may create/edit job postings"]
-R_BR_01 --> RULE_GATE
+R_BR_01{"BR-01 Only 'ROLE_RECRUITER'/'ROLE_ADMIN' may create/edit job postings"}
+R_BR_01 -->|TRUE| RULE_PASS
+R_BR_01 -->|FALSE| RULE_FAIL
 R_BR_01 -.-> MOD_JOBS
-R_BR_02["BR-02 Only 'ROLE_USER' may submit applications; recruiters may not apply"]
-R_BR_02 --> RULE_GATE
+R_BR_02{"BR-02 Only 'ROLE_USER' may submit applications; recruiters may not apply"}
+R_BR_02 -->|TRUE| RULE_PASS
+R_BR_02 -->|FALSE| RULE_FAIL
 R_BR_02 -.-> MOD_JOBS
-R_BR_03["BR-03 Candidates review own applications only; recruiters all for their companies"]
-R_BR_03 --> RULE_GATE
+R_BR_03{"BR-03 Candidates review own applications only; recruiters all for their companies"}
+R_BR_03 -->|TRUE| RULE_PASS
+R_BR_03 -->|FALSE| RULE_FAIL
 R_BR_03 -.-> MOD_JOBS
-R_BR_04["BR-04 Only recruiters/admins create scorecards and notes"]
-R_BR_04 --> RULE_GATE
+R_BR_04{"BR-04 Only recruiters/admins create scorecards and notes"}
+R_BR_04 -->|TRUE| RULE_PASS
+R_BR_04 -->|FALSE| RULE_FAIL
 R_BR_04 -.-> MOD_JOBS
-R_BR_05["BR-05 User edits own profile only; admin any"]
-R_BR_05 --> RULE_GATE
+R_BR_05{"BR-05 User edits own profile only; admin any"}
+R_BR_05 -->|TRUE| RULE_PASS
+R_BR_05 -->|FALSE| RULE_FAIL
 R_BR_05 -.-> MOD_IDENTITY
-R_BR_06["BR-06 Flags, audit, settings, user mgmt, moderation are admin-only"]
-R_BR_06 --> RULE_GATE
+R_BR_06{"BR-06 Flags, audit, settings, user mgmt, moderation are admin-only"}
+R_BR_06 -->|TRUE| RULE_PASS
+R_BR_06 -->|FALSE| RULE_FAIL
 R_BR_06 -.-> MOD_GOVERNANCE
-R_BR_07["BR-07 Billing actions available to recruiters, not users/admins"]
-R_BR_07 --> RULE_GATE
+R_BR_07{"BR-07 Billing actions available to recruiters, not users/admins"}
+R_BR_07 -->|TRUE| RULE_PASS
+R_BR_07 -->|FALSE| RULE_FAIL
 R_BR_07 -.-> MOD_JOBS
-R_BR_08["BR-08 Route-level RBAC matches shared route registry"]
-R_BR_08 --> RULE_GATE
+R_BR_08{"BR-08 Route-level RBAC matches shared route registry"}
+R_BR_08 -->|TRUE| RULE_PASS
+R_BR_08 -->|FALSE| RULE_FAIL
 R_BR_08 -.-> MOD_GOVERNANCE
-R_BR_09["BR-09 Domain-level authorization backs state-changing commands"]
-R_BR_09 --> RULE_GATE
+R_BR_09{"BR-09 Domain-level authorization backs state-changing commands"}
+R_BR_09 -->|TRUE| RULE_PASS
+R_BR_09 -->|FALSE| RULE_FAIL
 R_BR_09 -.-> MOD_IDENTITY
-R_BR_10["BR-10 Job publish-readiness rule server-validated"]
-R_BR_10 --> RULE_GATE
+R_BR_10{"BR-10 Job publish-readiness rule server-validated"}
+R_BR_10 -->|TRUE| RULE_PASS
+R_BR_10 -->|FALSE| RULE_FAIL
 R_BR_10 -.-> MOD_JOBS
-R_BR_11["BR-11 Job lifecycle: draft→pending_approval→approved→scheduled→published→paused→closed→archived"]
-R_BR_11 --> RULE_GATE
+R_BR_11{"BR-11 Job lifecycle: draft→pending_approval→approved→scheduled→published→paused→closed→archived"}
+R_BR_11 -->|TRUE| RULE_PASS
+R_BR_11 -->|FALSE| RULE_FAIL
 R_BR_11 -.-> MOD_JOBS
-R_BR_12["BR-12 Recruiters update/publish/archive only own-company jobs"]
-R_BR_12 --> RULE_GATE
+R_BR_12{"BR-12 Recruiters update/publish/archive only own-company jobs"}
+R_BR_12 -->|TRUE| RULE_PASS
+R_BR_12 -->|FALSE| RULE_FAIL
 R_BR_12 -.-> MOD_JOBS
-R_BR_13["BR-13 Hidden jobs are client-preference; reversible"]
-R_BR_13 --> RULE_GATE
+R_BR_13{"BR-13 Hidden jobs are client-preference; reversible"}
+R_BR_13 -->|TRUE| RULE_PASS
+R_BR_13 -->|FALSE| RULE_FAIL
 R_BR_13 -.-> MOD_JOBS
-R_BR_14["BR-14 Saved-search digest runs as service-owned/audited scheduler"]
-R_BR_14 --> RULE_GATE
+R_BR_14{"BR-14 Saved-search digest runs as service-owned/audited scheduler"}
+R_BR_14 -->|TRUE| RULE_PASS
+R_BR_14 -->|FALSE| RULE_FAIL
 R_BR_14 -.-> MOD_GOVERNANCE
-R_BR_15["BR-15 No duplicate ACTIVE application per user per job (partial UNIQUE + 90-day cooldown post-terminal)"]
-R_BR_15 --> RULE_GATE
+R_BR_15{"BR-15 No duplicate ACTIVE application per user per job (partial UNIQUE + 90-day cooldown post-terminal)"}
+R_BR_15 -->|TRUE| RULE_PASS
+R_BR_15 -->|FALSE| RULE_FAIL
 R_BR_15 -.-> MOD_JOBS
-R_BR_16["BR-16 No applications to closed/unavailable jobs"]
-R_BR_16 --> RULE_GATE
+R_BR_16{"BR-16 No applications to closed/unavailable jobs"}
+R_BR_16 -->|TRUE| RULE_PASS
+R_BR_16 -->|FALSE| RULE_FAIL
 R_BR_16 -.-> MOD_JOBS
-R_BR_17["BR-17 Application lifecycle server-owned append-only"]
-R_BR_17 --> RULE_GATE
+R_BR_17{"BR-17 Application lifecycle server-owned append-only"}
+R_BR_17 -->|TRUE| RULE_PASS
+R_BR_17 -->|FALSE| RULE_FAIL
 R_BR_17 -.-> MOD_JOBS
-R_BR_18["BR-18 Application drafts autosave 30s; recoverable; versions retained"]
-R_BR_18 --> RULE_GATE
+R_BR_18{"BR-18 Application drafts autosave 30s; recoverable; versions retained"}
+R_BR_18 -->|TRUE| RULE_PASS
+R_BR_18 -->|FALSE| RULE_FAIL
 R_BR_18 -.-> MOD_JOBS
-R_BR_19["BR-19 Candidate notes/scorecards recruiter-scoped; never candidate-visible"]
-R_BR_19 --> RULE_GATE
+R_BR_19{"BR-19 Candidate notes/scorecards recruiter-scoped; never candidate-visible"}
+R_BR_19 -->|TRUE| RULE_PASS
+R_BR_19 -->|FALSE| RULE_FAIL
 R_BR_19 -.-> MOD_JOBS
-R_BR_20["BR-20 Status-event history append-only"]
-R_BR_20 --> RULE_GATE
+R_BR_20{"BR-20 Status-event history append-only"}
+R_BR_20 -->|TRUE| RULE_PASS
+R_BR_20 -->|FALSE| RULE_FAIL
 R_BR_20 -.-> MOD_GOVERNANCE
-R_BR_21["BR-21 Lesson completion idempotent"]
-R_BR_21 --> RULE_GATE
+R_BR_21{"BR-21 Lesson completion idempotent"}
+R_BR_21 -->|TRUE| RULE_PASS
+R_BR_21 -->|FALSE| RULE_FAIL
 R_BR_21 -.-> MOD_LEARNING
-R_BR_22["BR-22 Lesson prerequisites gate progression"]
-R_BR_22 --> RULE_GATE
+R_BR_22{"BR-22 Lesson prerequisites gate progression"}
+R_BR_22 -->|TRUE| RULE_PASS
+R_BR_22 -->|FALSE| RULE_FAIL
 R_BR_22 -.-> MOD_LEARNING
-R_BR_23["BR-23 Course completion → certificate + XP bonus"]
-R_BR_23 --> RULE_GATE
+R_BR_23{"BR-23 Course completion → certificate + XP bonus"}
+R_BR_23 -->|TRUE| RULE_PASS
+R_BR_23 -->|FALSE| RULE_FAIL
 R_BR_23 -.-> MOD_LEARNING
-R_BR_24["BR-24 Challenge language allowlist; execution limits per TD-05"]
-R_BR_24 --> RULE_GATE
+R_BR_24{"BR-24 Challenge language allowlist; execution limits per TD-05"}
+R_BR_24 -->|TRUE| RULE_PASS
+R_BR_24 -->|FALSE| RULE_FAIL
 R_BR_24 -.-> MOD_ASSESSMENT
-R_BR_25["BR-25 XP idempotent UNIQUE(user_id, reference_type, reference_id); daily cap **200 XP/day**"]
-R_BR_25 --> RULE_GATE
+R_BR_25{"BR-25 XP idempotent UNIQUE(user_id, reference_type, reference_id); daily cap **200 XP/day**"}
+R_BR_25 -->|TRUE| RULE_PASS
+R_BR_25 -->|FALSE| RULE_FAIL
 R_BR_25 -.-> MOD_COMMUNITY
-R_BR_26["BR-26 Resume exports append-only; artifact soft-delete"]
-R_BR_26 --> RULE_GATE
+R_BR_26{"BR-26 Resume exports append-only; artifact soft-delete"}
+R_BR_26 -->|TRUE| RULE_PASS
+R_BR_26 -->|FALSE| RULE_FAIL
 R_BR_26 -.-> MOD_COMMUNITY
-R_BR_27["BR-27 Analytics metadata whitelist-only; no raw text/tokens/secrets"]
-R_BR_27 --> RULE_GATE
+R_BR_27{"BR-27 Analytics metadata whitelist-only; no raw text/tokens/secrets"}
+R_BR_27 -->|TRUE| RULE_PASS
+R_BR_27 -->|FALSE| RULE_FAIL
 R_BR_27 -.-> MOD_GOVERNANCE
-R_BR_28["BR-28 Admin status distinguishes live/inferred/degraded/not-configured"]
-R_BR_28 --> RULE_GATE
+R_BR_28{"BR-28 Admin status distinguishes live/inferred/degraded/not-configured"}
+R_BR_28 -->|TRUE| RULE_PASS
+R_BR_28 -->|FALSE| RULE_FAIL
 R_BR_28 -.-> MOD_GOVERNANCE
-R_BR_29["BR-29 Admin actions: confirmation + audit + rollback"]
-R_BR_29 --> RULE_GATE
+R_BR_29{"BR-29 Admin actions: confirmation + audit + rollback"}
+R_BR_29 -->|TRUE| RULE_PASS
+R_BR_29 -->|FALSE| RULE_FAIL
 R_BR_29 -.-> MOD_GOVERNANCE
-R_BR_30["BR-30 Extension data stays in chrome.storage.local; no sync/fetch/network"]
-R_BR_30 --> RULE_GATE
+R_BR_30{"BR-30 Extension data stays in chrome.storage.local; no sync/fetch/network"}
+R_BR_30 -->|TRUE| RULE_PASS
+R_BR_30 -->|FALSE| RULE_FAIL
 R_BR_30 -.-> MOD_NETWORK
-R_BR_31["BR-31 Schedulers dry-run default; idempotent delivery keys"]
-R_BR_31 --> RULE_GATE
+R_BR_31{"BR-31 Schedulers dry-run default; idempotent delivery keys"}
+R_BR_31 -->|TRUE| RULE_PASS
+R_BR_31 -->|FALSE| RULE_FAIL
 R_BR_31 -.-> MOD_GOVERNANCE
-R_BR_32["BR-32 Subscription state webhook-owned"]
-R_BR_32 --> RULE_GATE
+R_BR_32{"BR-32 Subscription state webhook-owned"}
+R_BR_32 -->|TRUE| RULE_PASS
+R_BR_32 -->|FALSE| RULE_FAIL
 R_BR_32 -.-> MOD_BILLING
-R_BR_33["BR-33 AI drafts never auto-commit to records"]
-R_BR_33 --> RULE_GATE
+R_BR_33{"BR-33 AI drafts never auto-commit to records"}
+R_BR_33 -->|TRUE| RULE_PASS
+R_BR_33 -->|FALSE| RULE_FAIL
 R_BR_33 -.-> MOD_AI
-R_BR_34["BR-34 T&S report lifecycle pending→under_review→resolved/dismissed"]
-R_BR_34 --> RULE_GATE
+R_BR_34{"BR-34 T&S report lifecycle pending→under_review→resolved/dismissed"}
+R_BR_34 -->|TRUE| RULE_PASS
+R_BR_34 -->|FALSE| RULE_FAIL
 R_BR_34 -.-> MOD_GOVERNANCE
-R_BR_35["BR-35 SUPERSEDED — closures cited in §19.6"]
-R_BR_35 --> RULE_GATE
+R_BR_35{"BR-35 SUPERSEDED — closures cited in §19.6"}
+R_BR_35 -->|TRUE| RULE_PASS
+R_BR_35 -->|FALSE| RULE_FAIL
 R_BR_35 -.-> MOD_GOVERNANCE
-R_BR_036["BR-036 Jobs require approved org + verified owner"]
-R_BR_036 --> RULE_GATE
+R_BR_036{"BR-036 Jobs require approved org + verified owner"}
+R_BR_036 -->|TRUE| RULE_PASS
+R_BR_036 -->|FALSE| RULE_FAIL
 R_BR_036 -.-> MOD_JOBS
-R_BR_037["BR-037 Applications require ≥70% profile"]
-R_BR_037 --> RULE_GATE
+R_BR_037{"BR-037 Applications require ≥70% profile"}
+R_BR_037 -->|TRUE| RULE_PASS
+R_BR_037 -->|FALSE| RULE_FAIL
 R_BR_037 -.-> MOD_IDENTITY
-R_BR_038["BR-038 Candidates may apply only to open jobs"]
-R_BR_038 --> RULE_GATE
+R_BR_038{"BR-038 Candidates may apply only to open jobs"}
+R_BR_038 -->|TRUE| RULE_PASS
+R_BR_038 -->|FALSE| RULE_FAIL
 R_BR_038 -.-> MOD_JOBS
-R_BR_039["BR-039 Duplicate applications prevented (DB + app)"]
-R_BR_039 --> RULE_GATE
+R_BR_039{"BR-039 Duplicate applications prevented (DB + app)"}
+R_BR_039 -->|TRUE| RULE_PASS
+R_BR_039 -->|FALSE| RULE_FAIL
 R_BR_039 -.-> MOD_JOBS
-R_BR_040["BR-040 Recruiters access only their org's applications"]
-R_BR_040 --> RULE_GATE
+R_BR_040{"BR-040 Recruiters access only their org's applications"}
+R_BR_040 -->|TRUE| RULE_PASS
+R_BR_040 -->|FALSE| RULE_FAIL
 R_BR_040 -.-> MOD_JOBS
-R_BR_041["BR-041 Strict application state machine"]
-R_BR_041 --> RULE_GATE
+R_BR_041{"BR-041 Strict application state machine"}
+R_BR_041 -->|TRUE| RULE_PASS
+R_BR_041 -->|FALSE| RULE_FAIL
 R_BR_041 -.-> MOD_JOBS
-R_BR_042["BR-042 Offers require completed HM-scoped scorecard review"]
-R_BR_042 --> RULE_GATE
+R_BR_042{"BR-042 Offers require completed HM-scoped scorecard review"}
+R_BR_042 -->|TRUE| RULE_PASS
+R_BR_042 -->|FALSE| RULE_FAIL
 R_BR_042 -.-> MOD_ASSESSMENT
-R_BR_043["BR-043 Resumes are scanned for viruses before text extraction"]
-R_BR_043 --> RULE_GATE
+R_BR_043{"BR-043 Resumes are scanned for viruses before text extraction"}
+R_BR_043 -->|TRUE| RULE_PASS
+R_BR_043 -->|FALSE| RULE_FAIL
 R_BR_043 -.-> MOD_GOVERNANCE
-R_BR_044["BR-044 Extracted resume text encrypted at rest"]
-R_BR_044 --> RULE_GATE
+R_BR_044{"BR-044 Extracted resume text encrypted at rest"}
+R_BR_044 -->|TRUE| RULE_PASS
+R_BR_044 -->|FALSE| RULE_FAIL
 R_BR_044 -.-> MOD_GOVERNANCE
-R_BR_045["BR-045 Rejection emails sent with configurable delay (default 24h)"]
-R_BR_045 --> RULE_GATE
+R_BR_045{"BR-045 Rejection emails sent with configurable delay (default 24h)"}
+R_BR_045 -->|TRUE| RULE_PASS
+R_BR_045 -->|FALSE| RULE_FAIL
 R_BR_045 -.-> MOD_COMMUNICATION
-R_BR_046["BR-046 Course enrollments unique per (user, course) for active status"]
-R_BR_046 --> RULE_GATE
+R_BR_046{"BR-046 Course enrollments unique per (user, course) for active status"}
+R_BR_046 -->|TRUE| RULE_PASS
+R_BR_046 -->|FALSE| RULE_FAIL
 R_BR_046 -.-> MOD_LEARNING
-R_BR_047["BR-047 Module progress strictly sequential"]
-R_BR_047 --> RULE_GATE
+R_BR_047{"BR-047 Module progress strictly sequential"}
+R_BR_047 -->|TRUE| RULE_PASS
+R_BR_047 -->|FALSE| RULE_FAIL
 R_BR_047 -.-> MOD_GOVERNANCE
-R_BR_048["BR-048 Course completion requires passing final assessment (≥70%)"]
-R_BR_048 --> RULE_GATE
+R_BR_048{"BR-048 Course completion requires passing final assessment (≥70%)"}
+R_BR_048 -->|TRUE| RULE_PASS
+R_BR_048 -->|FALSE| RULE_FAIL
 R_BR_048 -.-> MOD_LEARNING
-R_BR_049["BR-049 Challenge submissions run in isolated sandbox"]
-R_BR_049 --> RULE_GATE
+R_BR_049{"BR-049 Challenge submissions run in isolated sandbox"}
+R_BR_049 -->|TRUE| RULE_PASS
+R_BR_049 -->|FALSE| RULE_FAIL
 R_BR_049 -.-> MOD_ASSESSMENT
-R_BR_050["BR-050 Sandbox execution has hard resource limits (30s CPU, 512MB RAM, 1GB disk)"]
-R_BR_050 --> RULE_GATE
+R_BR_050{"BR-050 Sandbox execution has hard resource limits (30s CPU, 512MB RAM, 1GB disk)"}
+R_BR_050 -->|TRUE| RULE_PASS
+R_BR_050 -->|FALSE| RULE_FAIL
 R_BR_050 -.-> MOD_GOVERNANCE
-R_BR_051["BR-051 Challenge test cases split: public + hidden"]
-R_BR_051 --> RULE_GATE
+R_BR_051{"BR-051 Challenge test cases split: public + hidden"}
+R_BR_051 -->|TRUE| RULE_PASS
+R_BR_051 -->|FALSE| RULE_FAIL
 R_BR_051 -.-> MOD_ASSESSMENT
-R_BR_052["BR-052 Plagiarism detection runs asynchronously"]
-R_BR_052 --> RULE_GATE
+R_BR_052{"BR-052 Plagiarism detection runs asynchronously"}
+R_BR_052 -->|TRUE| RULE_PASS
+R_BR_052 -->|FALSE| RULE_FAIL
 R_BR_052 -.-> MOD_GOVERNANCE
-R_BR_053["BR-053 Badges minted only upon verified milestone completion"]
-R_BR_053 --> RULE_GATE
+R_BR_053{"BR-053 Badges minted only upon verified milestone completion"}
+R_BR_053 -->|TRUE| RULE_PASS
+R_BR_053 -->|FALSE| RULE_FAIL
 R_BR_053 -.-> MOD_COMMUNITY
-R_BR_054["BR-054 Referral rewards pay out after referred candidate's first verified hire"]
-R_BR_054 --> RULE_GATE
+R_BR_054{"BR-054 Referral rewards pay out after referred candidate's first verified hire"}
+R_BR_054 -->|TRUE| RULE_PASS
+R_BR_054 -->|FALSE| RULE_FAIL
 R_BR_054 -.-> MOD_NETWORK
-R_BR_055["BR-055 Subscription changes apply at period boundary (or prorated)"]
-R_BR_055 --> RULE_GATE
+R_BR_055{"BR-055 Subscription changes apply at period boundary (or prorated)"}
+R_BR_055 -->|TRUE| RULE_PASS
+R_BR_055 -->|FALSE| RULE_FAIL
 R_BR_055 -.-> MOD_BILLING
-R_BR_056["BR-056 Entitlements derive from active subscription only"]
-R_BR_056 --> RULE_GATE
+R_BR_056{"BR-056 Entitlements derive from active subscription only"}
+R_BR_056 -->|TRUE| RULE_PASS
+R_BR_056 -->|FALSE| RULE_FAIL
 R_BR_056 -.-> MOD_BILLING
-R_BR_057["BR-057 Jobs auto-close after expiry (configurable, default 60 days)"]
-R_BR_057 --> RULE_GATE
+R_BR_057{"BR-057 Jobs auto-close after expiry (configurable, default 60 days)"}
+R_BR_057 -->|TRUE| RULE_PASS
+R_BR_057 -->|FALSE| RULE_FAIL
 R_BR_057 -.-> MOD_JOBS
-R_BR_058["BR-058 Applications auto-archive after 90 days in submitted"]
-R_BR_058 --> RULE_GATE
+R_BR_058{"BR-058 Applications auto-archive after 90 days in submitted"}
+R_BR_058 -->|TRUE| RULE_PASS
+R_BR_058 -->|FALSE| RULE_FAIL
 R_BR_058 -.-> MOD_JOBS
-R_BR_059["BR-059 Moderation flags expire after 7 days if not actioned"]
-R_BR_059 --> RULE_GATE
+R_BR_059{"BR-059 Moderation flags expire after 7 days if not actioned"}
+R_BR_059 -->|TRUE| RULE_PASS
+R_BR_059 -->|FALSE| RULE_FAIL
 R_BR_059 -.-> MOD_COMMUNITY
-R_BR_060["BR-060 XP transactions unique per (user, reference_type, reference_id)"]
-R_BR_060 --> RULE_GATE
+R_BR_060{"BR-060 XP transactions unique per (user, reference_type, reference_id)"}
+R_BR_060 -->|TRUE| RULE_PASS
+R_BR_060 -->|FALSE| RULE_FAIL
 R_BR_060 -.-> MOD_COMMUNITY
-R_BR_061["BR-061 Profile completeness ≥70% gate for job applications"]
-R_BR_061 --> RULE_GATE
+R_BR_061{"BR-061 Profile completeness ≥70% gate for job applications"}
+R_BR_061 -->|TRUE| RULE_PASS
+R_BR_061 -->|FALSE| RULE_FAIL
 R_BR_061 -.-> MOD_IDENTITY
-R_BR_062["BR-062 Verified organizations receive accelerated job approval"]
-R_BR_062 --> RULE_GATE
+R_BR_062{"BR-062 Verified organizations receive accelerated job approval"}
+R_BR_062 -->|TRUE| RULE_PASS
+R_BR_062 -->|FALSE| RULE_FAIL
 R_BR_062 -.-> MOD_JOBS
-R_BR_063["BR-063 Candidates may request data export; delivered within 30 days"]
-R_BR_063 --> RULE_GATE
+R_BR_063{"BR-063 Candidates may request data export; delivered within 30 days"}
+R_BR_063 -->|TRUE| RULE_PASS
+R_BR_063 -->|FALSE| RULE_FAIL
 R_BR_063 -.-> MOD_COMMUNITY
-R_BR_064["BR-064 Recruiters see verified signals on candidate profiles"]
-R_BR_064 --> RULE_GATE
+R_BR_064{"BR-064 Recruiters see verified signals on candidate profiles"}
+R_BR_064 -->|TRUE| RULE_PASS
+R_BR_064 -->|FALSE| RULE_FAIL
 R_BR_064 -.-> MOD_IDENTITY
-R_BR_065["BR-065 AI outputs below 0.7 confidence display disclaimer"]
-R_BR_065 --> RULE_GATE
+R_BR_065{"BR-065 AI outputs below 0.7 confidence display disclaimer"}
+R_BR_065 -->|TRUE| RULE_PASS
+R_BR_065 -->|FALSE| RULE_FAIL
 R_BR_065 -.-> MOD_AI
-R_BR_066["BR-066 AI outputs below 0.5 confidence are suppressed"]
-R_BR_066 --> RULE_GATE
+R_BR_066{"BR-066 AI outputs below 0.5 confidence are suppressed"}
+R_BR_066 -->|TRUE| RULE_PASS
+R_BR_066 -->|FALSE| RULE_FAIL
 R_BR_066 -.-> MOD_AI
-R_BR_067["BR-067 All admin actions are audit-logged"]
-R_BR_067 --> RULE_GATE
+R_BR_067{"BR-067 All admin actions are audit-logged"}
+R_BR_067 -->|TRUE| RULE_PASS
+R_BR_067 -->|FALSE| RULE_FAIL
 R_BR_067 -.-> MOD_GOVERNANCE
-R_BR_068["BR-068 Account termination requires Platform Admin dual approval"]
-R_BR_068 --> RULE_GATE
+R_BR_068{"BR-068 Account termination requires Platform Admin dual approval"}
+R_BR_068 -->|TRUE| RULE_PASS
+R_BR_068 -->|FALSE| RULE_FAIL
 R_BR_068 -.-> MOD_IDENTITY
-R_BR_069["BR-069 Interviewer inactivity auto-escalation: 7 business days → HM escalation; 14 days → auto-transition stale_withdrawn"]
-R_BR_069 --> RULE_GATE
+R_BR_069{"BR-069 Interviewer inactivity auto-escalation: 7 business days → HM escalation; 14 days → auto-transition stale_withdrawn"}
+R_BR_069 -->|TRUE| RULE_PASS
+R_BR_069 -->|FALSE| RULE_FAIL
 R_BR_069 -.-> MOD_ASSESSMENT
-R_BR_070["BR-070 Candidate non-response auto-release: 5 business days → reminders; 8 days → candidate_unresponsive"]
-R_BR_070 --> RULE_GATE
+R_BR_070{"BR-070 Candidate non-response auto-release: 5 business days → reminders; 8 days → candidate_unresponsive"}
+R_BR_070 -->|TRUE| RULE_PASS
+R_BR_070 -->|FALSE| RULE_FAIL
 R_BR_070 -.-> MOD_GOVERNANCE
-R_BR_071["BR-071 Abandoned requisition protection: 21 calendar days → review; 30 days → auto-pause + billing credit"]
-R_BR_071 --> RULE_GATE
+R_BR_071{"BR-071 Abandoned requisition protection: 21 calendar days → review; 30 days → auto-pause + billing credit"}
+R_BR_071 -->|TRUE| RULE_PASS
+R_BR_071 -->|FALSE| RULE_FAIL
 R_BR_071 -.-> MOD_BILLING
-R_BR_072["BR-072 Managed learners access course only while org holds unexpired assigned seat"]
-R_BR_072 --> RULE_GATE
+R_BR_072{"BR-072 Managed learners access course only while org holds unexpired assigned seat"}
+R_BR_072 -->|TRUE| RULE_PASS
+R_BR_072 -->|FALSE| RULE_FAIL
 R_BR_072 -.-> MOD_LEARNING
-R_BR_073["BR-073 Seat revocation triggers 7-day grace; in-progress assessments never interrupted"]
-R_BR_073 --> RULE_GATE
+R_BR_073{"BR-073 Seat revocation triggers 7-day grace; in-progress assessments never interrupted"}
+R_BR_073 -->|TRUE| RULE_PASS
+R_BR_073 -->|FALSE| RULE_FAIL
 R_BR_073 -.-> MOD_ASSESSMENT
-R_BR_074["BR-074 Seat consumption atomic; last-seat concurrency never oversells"]
-R_BR_074 --> RULE_GATE
+R_BR_074{"BR-074 Seat consumption atomic; last-seat concurrency never oversells"}
+R_BR_074 -->|TRUE| RULE_PASS
+R_BR_074 -->|FALSE| RULE_FAIL
 R_BR_074 -.-> MOD_GOVERNANCE
-R_BR_075["BR-075 Revoked seat returns to pool; learner progress and certificates retained"]
-R_BR_075 --> RULE_GATE
+R_BR_075{"BR-075 Revoked seat returns to pool; learner progress and certificates retained"}
+R_BR_075 -->|TRUE| RULE_PASS
+R_BR_075 -->|FALSE| RULE_FAIL
 R_BR_075 -.-> MOD_ASSESSMENT
-R_BR_076["BR-076 Graduation transition retains all verified signals and severs FERPA-restricted records"]
-R_BR_076 --> RULE_GATE
+R_BR_076{"BR-076 Graduation transition retains all verified signals and severs FERPA-restricted records"}
+R_BR_076 -->|TRUE| RULE_PASS
+R_BR_076 -->|FALSE| RULE_FAIL
 R_BR_076 -.-> MOD_AI
-R_BR_077["BR-077 Bulk imports require dry-run validation preview; no silent partial imports"]
-R_BR_077 --> RULE_GATE
+R_BR_077{"BR-077 Bulk imports require dry-run validation preview; no silent partial imports"}
+R_BR_077 -->|TRUE| RULE_PASS
+R_BR_077 -->|FALSE| RULE_FAIL
 R_BR_077 -.-> MOD_GOVERNANCE
-R_BR_078["BR-078 Faculty/Proctor hold no org-level billing, licensing, or user-management privileges"]
-R_BR_078 --> RULE_GATE
+R_BR_078{"BR-078 Faculty/Proctor hold no org-level billing, licensing, or user-management privileges"}
+R_BR_078 -->|TRUE| RULE_PASS
+R_BR_078 -->|FALSE| RULE_FAIL
 R_BR_078 -.-> MOD_BILLING
-R_BR_079["BR-079 Employer-facing student showcases require recorded, revocable consent"]
-R_BR_079 --> RULE_GATE
+R_BR_079{"BR-079 Employer-facing student showcases require recorded, revocable consent"}
+R_BR_079 -->|TRUE| RULE_PASS
+R_BR_079 -->|FALSE| RULE_FAIL
 R_BR_079 -.-> MOD_LEARNING
-R_BR_080["BR-080 Every org-owned record scoped by 'organization_id'; cross-tenant reads prohibited"]
-R_BR_080 --> RULE_GATE
+R_BR_080{"BR-080 Every org-owned record scoped by 'organization_id'; cross-tenant reads prohibited"}
+R_BR_080 -->|TRUE| RULE_PASS
+R_BR_080 -->|FALSE| RULE_FAIL
 R_BR_080 -.-> MOD_JOBS
-R_BR_081["BR-081 Institutional pricing tiers configurable per course/package; never hard-coded"]
-R_BR_081 --> RULE_GATE
+R_BR_081{"BR-081 Institutional pricing tiers configurable per course/package; never hard-coded"}
+R_BR_081 -->|TRUE| RULE_PASS
+R_BR_081 -->|FALSE| RULE_FAIL
 R_BR_081 -.-> MOD_LEARNING
-R_BR_082["BR-082 Course-access authorization server-side: org + learner + license + enrollment + validity"]
-R_BR_082 --> RULE_GATE
+R_BR_082{"BR-082 Course-access authorization server-side: org + learner + license + enrollment + validity"}
+R_BR_082 -->|TRUE| RULE_PASS
+R_BR_082 -->|FALSE| RULE_FAIL
 R_BR_082 -.-> MOD_IDENTITY
-R_BR_083["BR-083 External media validated before publication; invalid/private/embed-blocked rejected"]
-R_BR_083 --> RULE_GATE
+R_BR_083{"BR-083 External media validated before publication; invalid/private/embed-blocked rejected"}
+R_BR_083 -->|TRUE| RULE_PASS
+R_BR_083 -->|FALSE| RULE_FAIL
 R_BR_083 -.-> MOD_GOVERNANCE
-R_BR_084["BR-084 Provider embedding restrictions never bypassed; protected content never downloaded"]
-R_BR_084 --> RULE_GATE
+R_BR_084{"BR-084 Provider embedding restrictions never bypassed; protected content never downloaded"}
+R_BR_084 -->|TRUE| RULE_PASS
+R_BR_084 -->|FALSE| RULE_FAIL
 R_BR_084 -.-> MOD_GOVERNANCE
-R_BR_085["BR-085 Provider capabilities determine available playback/completion settings"]
-R_BR_085 --> RULE_GATE
+R_BR_085{"BR-085 Provider capabilities determine available playback/completion settings"}
+R_BR_085 -->|TRUE| RULE_PASS
+R_BR_085 -->|FALSE| RULE_FAIL
 R_BR_085 -.-> MOD_GOVERNANCE
-R_BR_086["BR-086 Broken external provider isolated to affected content item; course remains functional"]
-R_BR_086 --> RULE_GATE
+R_BR_086{"BR-086 Broken external provider isolated to affected content item; course remains functional"}
+R_BR_086 -->|TRUE| RULE_PASS
+R_BR_086 -->|FALSE| RULE_FAIL
 R_BR_086 -.-> MOD_LEARNING
-R_BR_087["BR-087 Platform stores learner progress even for externally hosted playback where trackable"]
-R_BR_087 --> RULE_GATE
+R_BR_087{"BR-087 Platform stores learner progress even for externally hosted playback where trackable"}
+R_BR_087 -->|TRUE| RULE_PASS
+R_BR_087 -->|FALSE| RULE_FAIL
 R_BR_087 -.-> MOD_GOVERNANCE
-R_BR_088["BR-088 Unsupported providers produce explicit errors, never silent broken embeds"]
-R_BR_088 --> RULE_GATE
+R_BR_088{"BR-088 Unsupported providers produce explicit errors, never silent broken embeds"}
+R_BR_088 -->|TRUE| RULE_PASS
+R_BR_088 -->|FALSE| RULE_FAIL
 R_BR_088 -.-> MOD_COMMUNITY
-R_BR_089["BR-089 Authors attest right to use external content before publication"]
-R_BR_089 --> RULE_GATE
+R_BR_089{"BR-089 Authors attest right to use external content before publication"}
+R_BR_089 -->|TRUE| RULE_PASS
+R_BR_089 -->|FALSE| RULE_FAIL
 R_BR_089 -.-> MOD_IDENTITY
-R_BR_090["BR-090 Org provider allowlists enforced server-side"]
-R_BR_090 --> RULE_GATE
+R_BR_090{"BR-090 Org provider allowlists enforced server-side"}
+R_BR_090 -->|TRUE| RULE_PASS
+R_BR_090 -->|FALSE| RULE_FAIL
 R_BR_090 -.-> MOD_GOVERNANCE
-R_BR_091["BR-091 Course submission requires ≥5 lessons and ≥30 min total content"]
-R_BR_091 --> RULE_GATE
+R_BR_091{"BR-091 Course submission requires ≥5 lessons and ≥30 min total content"}
+R_BR_091 -->|TRUE| RULE_PASS
+R_BR_091 -->|FALSE| RULE_FAIL
 R_BR_091 -.-> MOD_LEARNING
-R_BR_092["BR-092 Course requires ≥1 video or text lesson (no quiz-only courses)"]
-R_BR_092 --> RULE_GATE
+R_BR_092{"BR-092 Course requires ≥1 video or text lesson (no quiz-only courses)"}
+R_BR_092 -->|TRUE| RULE_PASS
+R_BR_092 -->|FALSE| RULE_FAIL
 R_BR_092 -.-> MOD_LEARNING
-R_BR_093["BR-093 Structural edits to a published course require a new version"]
-R_BR_093 --> RULE_GATE
+R_BR_093{"BR-093 Structural edits to a published course require a new version"}
+R_BR_093 -->|TRUE| RULE_PASS
+R_BR_093 -->|FALSE| RULE_FAIL
 R_BR_093 -.-> MOD_LEARNING
-R_BR_094["BR-094 Free-preview lessons ≤20% of course content"]
-R_BR_094 --> RULE_GATE
+R_BR_094{"BR-094 Free-preview lessons ≤20% of course content"}
+R_BR_094 -->|TRUE| RULE_PASS
+R_BR_094 -->|FALSE| RULE_FAIL
 R_BR_094 -.-> MOD_LEARNING
-R_BR_095["BR-095 Rating requires ≥20% course progress and verified enrolment"]
-R_BR_095 --> RULE_GATE
+R_BR_095{"BR-095 Rating requires ≥20% course progress and verified enrolment"}
+R_BR_095 -->|TRUE| RULE_PASS
+R_BR_095 -->|FALSE| RULE_FAIL
 R_BR_095 -.-> MOD_LEARNING
-R_BR_096["BR-096 Category assignment required before submission"]
-R_BR_096 --> RULE_GATE
+R_BR_096{"BR-096 Category assignment required before submission"}
+R_BR_096 -->|TRUE| RULE_PASS
+R_BR_096 -->|FALSE| RULE_FAIL
 R_BR_096 -.-> MOD_GOVERNANCE
-R_BR_097["BR-097 Instructor must have an approved profile before publishing"]
-R_BR_097 --> RULE_GATE
+R_BR_097{"BR-097 Instructor must have an approved profile before publishing"}
+R_BR_097 -->|TRUE| RULE_PASS
+R_BR_097 -->|FALSE| RULE_FAIL
 R_BR_097 -.-> MOD_IDENTITY
-R_BR_098["BR-098 Course image ≥750×422, ≤4MB"]
-R_BR_098 --> RULE_GATE
+R_BR_098{"BR-098 Course image ≥750×422, ≤4MB"}
+R_BR_098 -->|TRUE| RULE_PASS
+R_BR_098 -->|FALSE| RULE_FAIL
 R_BR_098 -.-> MOD_LEARNING
-R_BR_099["BR-099 Coupon cannot reduce price below platform minimum"]
-R_BR_099 --> RULE_GATE
+R_BR_099{"BR-099 Coupon cannot reduce price below platform minimum"}
+R_BR_099 -->|TRUE| RULE_PASS
+R_BR_099 -->|FALSE| RULE_FAIL
 R_BR_099 -.-> MOD_GOVERNANCE
-R_BR_100["BR-100 Refund window 30 days from purchase (configurable), pro-rated after"]
-R_BR_100 --> RULE_GATE
+R_BR_100{"BR-100 Refund window 30 days from purchase (configurable), pro-rated after"}
+R_BR_100 -->|TRUE| RULE_PASS
+R_BR_100 -->|FALSE| RULE_FAIL
 R_BR_100 -.-> MOD_GOVERNANCE
-R_BR_101["BR-101 Instructor earnings = 70% of net revenue after platform commission (configurable)"]
-R_BR_101 --> RULE_GATE
+R_BR_101{"BR-101 Instructor earnings = 70% of net revenue after platform commission (configurable)"}
+R_BR_101 -->|TRUE| RULE_PASS
+R_BR_101 -->|FALSE| RULE_FAIL
 R_BR_101 -.-> MOD_LEARNING
-R_BR_102["BR-102 Course announcements limited to 1/day/course"]
-R_BR_102 --> RULE_GATE
+R_BR_102{"BR-102 Course announcements limited to 1/day/course"}
+R_BR_102 -->|TRUE| RULE_PASS
+R_BR_102 -->|FALSE| RULE_FAIL
 R_BR_102 -.-> MOD_LEARNING
-R_BR_103["BR-103 Peer review requires ≥2 completed reviews per submission"]
-R_BR_103 --> RULE_GATE
+R_BR_103{"BR-103 Peer review requires ≥2 completed reviews per submission"}
+R_BR_103 -->|TRUE| RULE_PASS
+R_BR_103 -->|FALSE| RULE_FAIL
 R_BR_103 -.-> MOD_GOVERNANCE
-R_BR_104["BR-104 Instructor cannot review or rate own course"]
-R_BR_104 --> RULE_GATE
+R_BR_104{"BR-104 Instructor cannot review or rate own course"}
+R_BR_104 -->|TRUE| RULE_PASS
+R_BR_104 -->|FALSE| RULE_FAIL
 R_BR_104 -.-> MOD_LEARNING
-R_BR_105["BR-105 Course version preserves existing student progress"]
-R_BR_105 --> RULE_GATE
+R_BR_105{"BR-105 Course version preserves existing student progress"}
+R_BR_105 -->|TRUE| RULE_PASS
+R_BR_105 -->|FALSE| RULE_FAIL
 R_BR_105 -.-> MOD_LEARNING
-R_BR_106["BR-106 Learning-path courses complete in declared order when sequenced"]
-R_BR_106 --> RULE_GATE
+R_BR_106{"BR-106 Learning-path courses complete in declared order when sequenced"}
+R_BR_106 -->|TRUE| RULE_PASS
+R_BR_106 -->|FALSE| RULE_FAIL
 R_BR_106 -.-> MOD_LEARNING
-R_BR_107["BR-107 Quiz attempts bounded by configured max; practice quizzes unlimited"]
-R_BR_107 --> RULE_GATE
+R_BR_107{"BR-107 Quiz attempts bounded by configured max; practice quizzes unlimited"}
+R_BR_107 -->|TRUE| RULE_PASS
+R_BR_107 -->|FALSE| RULE_FAIL
 R_BR_107 -.-> MOD_GOVERNANCE
-R_BR_108["BR-108 Graded quiz contributes to course grade; passing score configurable"]
-R_BR_108 --> RULE_GATE
+R_BR_108{"BR-108 Graded quiz contributes to course grade; passing score configurable"}
+R_BR_108 -->|TRUE| RULE_PASS
+R_BR_108 -->|FALSE| RULE_FAIL
 R_BR_108 -.-> MOD_LEARNING
-R_BR_109["BR-109 Final exam cumulative; required for course completion when configured"]
-R_BR_109 --> RULE_GATE
+R_BR_109{"BR-109 Final exam cumulative; required for course completion when configured"}
+R_BR_109 -->|TRUE| RULE_PASS
+R_BR_109 -->|FALSE| RULE_FAIL
 R_BR_109 -.-> MOD_LEARNING
-R_BR_110["BR-110 Program certificate issued only when all required path courses complete"]
-R_BR_110 --> RULE_GATE
+R_BR_110{"BR-110 Program certificate issued only when all required path courses complete"}
+R_BR_110 -->|TRUE| RULE_PASS
+R_BR_110 -->|FALSE| RULE_FAIL
 R_BR_110 -.-> MOD_LEARNING
-R_BR_111["BR-111 Assignment late submission flagged, graded per instructor policy"]
-R_BR_111 --> RULE_GATE
+R_BR_111{"BR-111 Assignment late submission flagged, graded per instructor policy"}
+R_BR_111 -->|TRUE| RULE_PASS
+R_BR_111 -->|FALSE| RULE_FAIL
 R_BR_111 -.-> MOD_LEARNING
-R_BR_112["BR-112 Auto-grading for code assignments reuses the challenge sandbox"]
-R_BR_112 --> RULE_GATE
+R_BR_112{"BR-112 Auto-grading for code assignments reuses the challenge sandbox"}
+R_BR_112 -->|TRUE| RULE_PASS
+R_BR_112 -->|FALSE| RULE_FAIL
 R_BR_112 -.-> MOD_ASSESSMENT
-R_BR_113["BR-113 Question-bank reuse preserves per-attempt snapshots (no retroactive edits)"]
-R_BR_113 --> RULE_GATE
+R_BR_113{"BR-113 Question-bank reuse preserves per-attempt snapshots (no retroactive edits)"}
+R_BR_113 -->|TRUE| RULE_PASS
+R_BR_113 -->|FALSE| RULE_FAIL
 R_BR_113 -.-> MOD_GOVERNANCE
-R_BR_114["BR-114 Course archive/unpublish preserves enrolled-student access per policy"]
-R_BR_114 --> RULE_GATE
+R_BR_114{"BR-114 Course archive/unpublish preserves enrolled-student access per policy"}
+R_BR_114 -->|TRUE| RULE_PASS
+R_BR_114 -->|FALSE| RULE_FAIL
 R_BR_114 -.-> MOD_LEARNING
-R_BR_115["BR-115 All course purchases are idempotent and webhook-owned"]
-R_BR_115 --> RULE_GATE
+R_BR_115{"BR-115 All course purchases are idempotent and webhook-owned"}
+R_BR_115 -->|TRUE| RULE_PASS
+R_BR_115 -->|FALSE| RULE_FAIL
 R_BR_115 -.-> MOD_LEARNING
-R_BR_116["BR-116 One reaction per user per target; changeable, never additive"]
-R_BR_116 --> RULE_GATE
+R_BR_116{"BR-116 One reaction per user per target; changeable, never additive"}
+R_BR_116 -->|TRUE| RULE_PASS
+R_BR_116 -->|FALSE| RULE_FAIL
 R_BR_116 -.-> MOD_GOVERNANCE
-R_BR_117["BR-117 One repost per user per post"]
-R_BR_117 --> RULE_GATE
+R_BR_117{"BR-117 One repost per user per post"}
+R_BR_117 -->|TRUE| RULE_PASS
+R_BR_117 -->|FALSE| RULE_FAIL
 R_BR_117 -.-> MOD_GOVERNANCE
-R_BR_118["BR-118 Post edits retain an 'edited' marker and version history"]
-R_BR_118 --> RULE_GATE
+R_BR_118{"BR-118 Post edits retain an 'edited' marker and version history"}
+R_BR_118 -->|TRUE| RULE_PASS
+R_BR_118 -->|FALSE| RULE_FAIL
 R_BR_118 -.-> MOD_AI
-R_BR_119["BR-119 Comment authors and post authors may moderate; authors may disable comments"]
-R_BR_119 --> RULE_GATE
+R_BR_119{"BR-119 Comment authors and post authors may moderate; authors may disable comments"}
+R_BR_119 -->|TRUE| RULE_PASS
+R_BR_119 -->|FALSE| RULE_FAIL
 R_BR_119 -.-> MOD_IDENTITY
-R_BR_120["BR-120 Mentions notify only if the recipient allows mentions"]
-R_BR_120 --> RULE_GATE
+R_BR_120{"BR-120 Mentions notify only if the recipient allows mentions"}
+R_BR_120 -->|TRUE| RULE_PASS
+R_BR_120 -->|FALSE| RULE_FAIL
 R_BR_120 -.-> MOD_GOVERNANCE
-R_BR_121["BR-121 Follows unique; blocked/muted targets cannot be followed"]
-R_BR_121 --> RULE_GATE
+R_BR_121{"BR-121 Follows unique; blocked/muted targets cannot be followed"}
+R_BR_121 -->|TRUE| RULE_PASS
+R_BR_121 -->|FALSE| RULE_FAIL
 R_BR_121 -.-> MOD_GOVERNANCE
-R_BR_122["BR-122 Post visibility enforced server-side (public/connections/org/private)"]
-R_BR_122 --> RULE_GATE
+R_BR_122{"BR-122 Post visibility enforced server-side (public/connections/org/private)"}
+R_BR_122 -->|TRUE| RULE_PASS
+R_BR_122 -->|FALSE| RULE_FAIL
 R_BR_122 -.-> MOD_NETWORK
-R_BR_123["BR-123 Newsletter subscriptions opt-in only; one-click unsubscribe (RFC 8058)"]
-R_BR_123 --> RULE_GATE
+R_BR_123{"BR-123 Newsletter subscriptions opt-in only; one-click unsubscribe (RFC 8058)"}
+R_BR_123 -->|TRUE| RULE_PASS
+R_BR_123 -->|FALSE| RULE_FAIL
 R_BR_123 -.-> MOD_BILLING
-R_BR_124["BR-124 Feed must always offer a chronological view; ranking factors disclosed on demand"]
-R_BR_124 --> RULE_GATE
+R_BR_124{"BR-124 Feed must always offer a chronological view; ranking factors disclosed on demand"}
+R_BR_124 -->|TRUE| RULE_PASS
+R_BR_124 -->|FALSE| RULE_FAIL
 R_BR_124 -.-> MOD_GOVERNANCE
-R_BR_125["BR-125 UGC passes pre-publish abuse scan; post rate limits per actor"]
-R_BR_125 --> RULE_GATE
+R_BR_125{"BR-125 UGC passes pre-publish abuse scan; post rate limits per actor"}
+R_BR_125 -->|TRUE| RULE_PASS
+R_BR_125 -->|FALSE| RULE_FAIL
 R_BR_125 -.-> MOD_GOVERNANCE
-R_BR_126["BR-126 Sponsored content labelled as sponsored; never undisclosed in organic ranking"]
-R_BR_126 --> RULE_GATE
+R_BR_126{"BR-126 Sponsored content labelled as sponsored; never undisclosed in organic ranking"}
+R_BR_126 -->|TRUE| RULE_PASS
+R_BR_126 -->|FALSE| RULE_FAIL
 R_BR_126 -.-> MOD_GOVERNANCE
-R_BR_127["BR-127 Mute hides content without unfollowing and without notifying the muted party"]
-R_BR_127 --> RULE_GATE
+R_BR_127{"BR-127 Mute hides content without unfollowing and without notifying the muted party"}
+R_BR_127 -->|TRUE| RULE_PASS
+R_BR_127 -->|FALSE| RULE_FAIL
 R_BR_127 -.-> MOD_GOVERNANCE
-R_BR_128["BR-128 Minors (16+) get private-by-default profiles and restricted outreach"]
-R_BR_128 --> RULE_GATE
+R_BR_128{"BR-128 Minors (16+) get private-by-default profiles and restricted outreach"}
+R_BR_128 -->|TRUE| RULE_PASS
+R_BR_128 -->|FALSE| RULE_FAIL
 R_BR_128 -.-> MOD_IDENTITY
-R_BR_129["BR-129 Outreach credit consumed on send to a non-connection; refunded on reply within 7 days"]
-R_BR_129 --> RULE_GATE
+R_BR_129{"BR-129 Outreach credit consumed on send to a non-connection; refunded on reply within 7 days"}
+R_BR_129 -->|TRUE| RULE_PASS
+R_BR_129 -->|FALSE| RULE_FAIL
 R_BR_129 -.-> MOD_NETWORK
-R_BR_130["BR-130 Outreach weekly caps: 20 (Pro), 50 (Team), custom (Enterprise)"]
-R_BR_130 --> RULE_GATE
+R_BR_130{"BR-130 Outreach weekly caps: 20 (Pro), 50 (Team), custom (Enterprise)"}
+R_BR_130 -->|TRUE| RULE_PASS
+R_BR_130 -->|FALSE| RULE_FAIL
 R_BR_130 -.-> MOD_GOVERNANCE
-R_BR_131["BR-131 Endorsements require an existing connection"]
-R_BR_131 --> RULE_GATE
+R_BR_131{"BR-131 Endorsements require an existing connection"}
+R_BR_131 -->|TRUE| RULE_PASS
+R_BR_131 -->|FALSE| RULE_FAIL
 R_BR_131 -.-> MOD_NETWORK
-R_BR_132["BR-132 Written recommendations display only after recipient acceptance"]
-R_BR_132 --> RULE_GATE
+R_BR_132{"BR-132 Written recommendations display only after recipient acceptance"}
+R_BR_132 -->|TRUE| RULE_PASS
+R_BR_132 -->|FALSE| RULE_FAIL
 R_BR_132 -.-> MOD_INTELLIGENCE
-R_BR_133["BR-133 Profile-view logging honours the viewer's privacy mode"]
-R_BR_133 --> RULE_GATE
+R_BR_133{"BR-133 Profile-view logging honours the viewer's privacy mode"}
+R_BR_133 -->|TRUE| RULE_PASS
+R_BR_133 -->|FALSE| RULE_FAIL
 R_BR_133 -.-> MOD_IDENTITY
-R_BR_134["BR-134 Identity-verification badges only via approved partners; failure never blocks core use"]
-R_BR_134 --> RULE_GATE
+R_BR_134{"BR-134 Identity-verification badges only via approved partners; failure never blocks core use"}
+R_BR_134 -->|TRUE| RULE_PASS
+R_BR_134 -->|FALSE| RULE_FAIL
 R_BR_134 -.-> MOD_IDENTITY
-R_BR_135["BR-135 Salary aggregates displayed only with ≥5 reports for a role/location cell"]
-R_BR_135 --> RULE_GATE
+R_BR_135{"BR-135 Salary aggregates displayed only with ≥5 reports for a role/location cell"}
+R_BR_135 -->|TRUE| RULE_PASS
+R_BR_135 -->|FALSE| RULE_FAIL
 R_BR_135 -.-> MOD_INTELLIGENCE
-R_BR_136["BR-136 Anonymous reviews hide identity from employer and public, never from Platform Admin/legal"]
-R_BR_136 --> RULE_GATE
+R_BR_136{"BR-136 Anonymous reviews hide identity from employer and public, never from Platform Admin/legal"}
+R_BR_136 -->|TRUE| RULE_PASS
+R_BR_136 -->|FALSE| RULE_FAIL
 R_BR_136 -.-> MOD_IDENTITY
-R_BR_137["BR-137 Company responses are appended, never edit the original review"]
-R_BR_137 --> RULE_GATE
+R_BR_137{"BR-137 Company responses are appended, never edit the original review"}
+R_BR_137 -->|TRUE| RULE_PASS
+R_BR_137 -->|FALSE| RULE_FAIL
 R_BR_137 -.-> MOD_GOVERNANCE
-R_BR_138["BR-138 Interview questions require moderation before public display"]
-R_BR_138 --> RULE_GATE
+R_BR_138{"BR-138 Interview questions require moderation before public display"}
+R_BR_138 -->|TRUE| RULE_PASS
+R_BR_138 -->|FALSE| RULE_FAIL
 R_BR_138 -.-> MOD_ASSESSMENT
-R_BR_139["BR-139 Contest submissions locked at server-authoritative end time; clock skew never extends"]
-R_BR_139 --> RULE_GATE
+R_BR_139{"BR-139 Contest submissions locked at server-authoritative end time; clock skew never extends"}
+R_BR_139 -->|TRUE| RULE_PASS
+R_BR_139 -->|FALSE| RULE_FAIL
 R_BR_139 -.-> MOD_IDENTITY
-R_BR_140["BR-140 Certification exam pass requires the configured score in a single attempt (retake policy configurable)"]
-R_BR_140 --> RULE_GATE
+R_BR_140{"BR-140 Certification exam pass requires the configured score in a single attempt (retake policy configurable)"}
+R_BR_140 -->|TRUE| RULE_PASS
+R_BR_140 -->|FALSE| RULE_FAIL
 R_BR_140 -.-> MOD_ASSESSMENT
-R_BR_141["BR-141 Skills taxonomy curated by Platform Admin; no user can create canonical skills"]
-R_BR_141 --> RULE_GATE
+R_BR_141{"BR-141 Skills taxonomy curated by Platform Admin; no user can create canonical skills"}
+R_BR_141 -->|TRUE| RULE_PASS
+R_BR_141 -->|FALSE| RULE_FAIL
 R_BR_141 -.-> MOD_EVIDENCE
-R_BR_142["BR-142 Skill relationships are directional: 'prerequisite_of', 'subskill_of', 'supersedes'"]
-R_BR_142 --> RULE_GATE
+R_BR_142{"BR-142 Skill relationships are directional: 'prerequisite_of', 'subskill_of', 'supersedes'"}
+R_BR_142 -->|TRUE| RULE_PASS
+R_BR_142 -->|FALSE| RULE_FAIL
 R_BR_142 -.-> MOD_EVIDENCE
-R_BR_143["BR-143 Correlations ('correlates_with') are bidirectional and computed statistically"]
-R_BR_143 --> RULE_GATE
+R_BR_143{"BR-143 Correlations ('correlates_with') are bidirectional and computed statistically"}
+R_BR_143 -->|TRUE| RULE_PASS
+R_BR_143 -->|FALSE| RULE_FAIL
 R_BR_143 -.-> MOD_GOVERNANCE
-R_BR_144["BR-144 Every course, challenge, job, and candidate skill tag MUST reference a canonical skill"]
-R_BR_144 --> RULE_GATE
+R_BR_144{"BR-144 Every course, challenge, job, and candidate skill tag MUST reference a canonical skill"}
+R_BR_144 -->|TRUE| RULE_PASS
+R_BR_144 -->|FALSE| RULE_FAIL
 R_BR_144 -.-> MOD_EVIDENCE
-R_BR_145["BR-145 Skill market signals update daily from aggregated data"]
-R_BR_145 --> RULE_GATE
+R_BR_145{"BR-145 Skill market signals update daily from aggregated data"}
+R_BR_145 -->|TRUE| RULE_PASS
+R_BR_145 -->|FALSE| RULE_FAIL
 R_BR_145 -.-> MOD_EVIDENCE
-R_BR_146["BR-146 Skill graph traversal depth bounded (max 5 hops)"]
-R_BR_146 --> RULE_GATE
+R_BR_146{"BR-146 Skill graph traversal depth bounded (max 5 hops)"}
+R_BR_146 -->|TRUE| RULE_PASS
+R_BR_146 -->|FALSE| RULE_FAIL
 R_BR_146 -.-> MOD_EVIDENCE
-R_BR_147["BR-147 Skill relationships must be acyclic for 'prerequisite_of' (validated at write time)"]
-R_BR_147 --> RULE_GATE
+R_BR_147{"BR-147 Skill relationships must be acyclic for 'prerequisite_of' (validated at write time)"}
+R_BR_147 -->|TRUE| RULE_PASS
+R_BR_147 -->|FALSE| RULE_FAIL
 R_BR_147 -.-> MOD_EVIDENCE
-R_BR_148["BR-148 Emerging skills require minimum 5 independent signals before taxonomy promotion"]
-R_BR_148 --> RULE_GATE
+R_BR_148{"BR-148 Emerging skills require minimum 5 independent signals before taxonomy promotion"}
+R_BR_148 -->|TRUE| RULE_PASS
+R_BR_148 -->|FALSE| RULE_FAIL
 R_BR_148 -.-> MOD_EVIDENCE
-R_BR_149["BR-149 Credentials are append-only; revocation creates a new record with 'revoked_at'"]
-R_BR_149 --> RULE_GATE
+R_BR_149{"BR-149 Credentials are append-only; revocation creates a new record with 'revoked_at'"}
+R_BR_149 -->|TRUE| RULE_PASS
+R_BR_149 -->|FALSE| RULE_FAIL
 R_BR_149 -.-> MOD_EVIDENCE
-R_BR_150["BR-150 Every credential has a public verification URL (no PII exposed)"]
-R_BR_150 --> RULE_GATE
+R_BR_150{"BR-150 Every credential has a public verification URL (no PII exposed)"}
+R_BR_150 -->|TRUE| RULE_PASS
+R_BR_150 -->|FALSE| RULE_FAIL
 R_BR_150 -.-> MOD_EVIDENCE
-R_BR_151["BR-151 Credential evidence links are immutable once issued"]
-R_BR_151 --> RULE_GATE
+R_BR_151{"BR-151 Credential evidence links are immutable once issued"}
+R_BR_151 -->|TRUE| RULE_PASS
+R_BR_151 -->|FALSE| RULE_FAIL
 R_BR_151 -.-> MOD_EVIDENCE
-R_BR_152["BR-152 Endorsement weights derive from endorser's verified reputation + relationship proximity"]
-R_BR_152 --> RULE_GATE
+R_BR_152{"BR-152 Endorsement weights derive from endorser's verified reputation + relationship proximity"}
+R_BR_152 -->|TRUE| RULE_PASS
+R_BR_152 -->|FALSE| RULE_FAIL
 R_BR_152 -.-> MOD_COMMUNITY
-R_BR_153["BR-153 Anonymous endorsements are not permitted (P-01)"]
-R_BR_153 --> RULE_GATE
+R_BR_153{"BR-153 Anonymous endorsements are not permitted (P-01)"}
+R_BR_153 -->|TRUE| RULE_PASS
+R_BR_153 -->|FALSE| RULE_FAIL
 R_BR_153 -.-> MOD_COMMUNITY
-R_BR_154["BR-154 Appeal path exists for disputed credentials; SLA ≤7 days"]
-R_BR_154 --> RULE_GATE
+R_BR_154{"BR-154 Appeal path exists for disputed credentials; SLA ≤7 days"}
+R_BR_154 -->|TRUE| RULE_PASS
+R_BR_154 -->|FALSE| RULE_FAIL
 R_BR_154 -.-> MOD_EVIDENCE
-R_BR_155["BR-155 Privacy-preserving proofs allow skill verification without revealing full profile"]
-R_BR_155 --> RULE_GATE
+R_BR_155{"BR-155 Privacy-preserving proofs allow skill verification without revealing full profile"}
+R_BR_155 -->|TRUE| RULE_PASS
+R_BR_155 -->|FALSE| RULE_FAIL
 R_BR_155 -.-> MOD_IDENTITY
-R_BR_156["BR-156 Credential issue requires underlying achievement verified by platform activity"]
-R_BR_156 --> RULE_GATE
+R_BR_156{"BR-156 Credential issue requires underlying achievement verified by platform activity"}
+R_BR_156 -->|TRUE| RULE_PASS
+R_BR_156 -->|FALSE| RULE_FAIL
 R_BR_156 -.-> MOD_EVIDENCE
-R_BR_157["BR-157 Career outcome tracking requires explicit user opt-in"]
-R_BR_157 --> RULE_GATE
+R_BR_157{"BR-157 Career outcome tracking requires explicit user opt-in"}
+R_BR_157 -->|TRUE| RULE_PASS
+R_BR_157 -->|FALSE| RULE_FAIL
 R_BR_157 -.-> MOD_INTELLIGENCE
-R_BR_158["BR-158 Aggregated career data requires k ≥5 for display"]
-R_BR_158 --> RULE_GATE
+R_BR_158{"BR-158 Aggregated career data requires k ≥5 for display"}
+R_BR_158 -->|TRUE| RULE_PASS
+R_BR_158 -->|FALSE| RULE_FAIL
 R_BR_158 -.-> MOD_INTELLIGENCE
-R_BR_159["BR-159 Individual career transitions visible only to the user"]
-R_BR_159 --> RULE_GATE
+R_BR_159{"BR-159 Individual career transitions visible only to the user"}
+R_BR_159 -->|TRUE| RULE_PASS
+R_BR_159 -->|FALSE| RULE_FAIL
 R_BR_159 -.-> MOD_INTELLIGENCE
-R_BR_160["BR-160 Progression benchmarks by role require ≥20 data points to publish"]
-R_BR_160 --> RULE_GATE
+R_BR_160{"BR-160 Progression benchmarks by role require ≥20 data points to publish"}
+R_BR_160 -->|TRUE| RULE_PASS
+R_BR_160 -->|FALSE| RULE_FAIL
 R_BR_160 -.-> MOD_INTELLIGENCE
-R_BR_161["BR-161 Salary progression tracked separately from base salary"]
-R_BR_161 --> RULE_GATE
+R_BR_161{"BR-161 Salary progression tracked separately from base salary"}
+R_BR_161 -->|TRUE| RULE_PASS
+R_BR_161 -->|FALSE| RULE_FAIL
 R_BR_161 -.-> MOD_INTELLIGENCE
-R_BR_162["BR-162 Career graph updates do not retroactively alter historical benchmarks"]
-R_BR_162 --> RULE_GATE
+R_BR_162{"BR-162 Career graph updates do not retroactively alter historical benchmarks"}
+R_BR_162 -->|TRUE| RULE_PASS
+R_BR_162 -->|FALSE| RULE_FAIL
 R_BR_162 -.-> MOD_INTELLIGENCE
-R_BR_163["BR-163 Career path recommendations must disclose data sources and confidence intervals"]
-R_BR_163 --> RULE_GATE
+R_BR_163{"BR-163 Career path recommendations must disclose data sources and confidence intervals"}
+R_BR_163 -->|TRUE| RULE_PASS
+R_BR_163 -->|FALSE| RULE_FAIL
 R_BR_163 -.-> MOD_INTELLIGENCE
-R_BR_164["BR-164 Reputation score is derived, never manually set"]
-R_BR_164 --> RULE_GATE
+R_BR_164{"BR-164 Reputation score is derived, never manually set"}
+R_BR_164 -->|TRUE| RULE_PASS
+R_BR_164 -->|FALSE| RULE_FAIL
 R_BR_164 -.-> MOD_COMMUNITY
-R_BR_165["BR-165 Reputation is skill-specific"]
-R_BR_165 --> RULE_GATE
+R_BR_165{"BR-165 Reputation is skill-specific"}
+R_BR_165 -->|TRUE| RULE_PASS
+R_BR_165 -->|FALSE| RULE_FAIL
 R_BR_165 -.-> MOD_EVIDENCE
-R_BR_166["BR-166 Time-decay: signals older than 24 months count less"]
-R_BR_166 --> RULE_GATE
+R_BR_166{"BR-166 Time-decay: signals older than 24 months count less"}
+R_BR_166 -->|TRUE| RULE_PASS
+R_BR_166 -->|FALSE| RULE_FAIL
 R_BR_166 -.-> MOD_GOVERNANCE
-R_BR_167["BR-167 Reputation is private by default; recruiter visibility requires candidate consent or active application"]
-R_BR_167 --> RULE_GATE
+R_BR_167{"BR-167 Reputation is private by default; recruiter visibility requires candidate consent or active application"}
+R_BR_167 -->|TRUE| RULE_PASS
+R_BR_167 -->|FALSE| RULE_FAIL
 R_BR_167 -.-> MOD_JOBS
-R_BR_168["BR-168 Reputation signals are auditable"]
-R_BR_168 --> RULE_GATE
+R_BR_168{"BR-168 Reputation signals are auditable"}
+R_BR_168 -->|TRUE| RULE_PASS
+R_BR_168 -->|FALSE| RULE_FAIL
 R_BR_168 -.-> MOD_COMMUNITY
-R_BR_169["BR-169 Interview recording requires dual consent"]
-R_BR_169 --> RULE_GATE
+R_BR_169{"BR-169 Interview recording requires dual consent"}
+R_BR_169 -->|TRUE| RULE_PASS
+R_BR_169 -->|FALSE| RULE_FAIL
 R_BR_169 -.-> MOD_ASSESSMENT
-R_BR_170["BR-170 Recordings encrypted at rest; retention ≤90 days unless extended"]
-R_BR_170 --> RULE_GATE
+R_BR_170{"BR-170 Recordings encrypted at rest; retention ≤90 days unless extended"}
+R_BR_170 -->|TRUE| RULE_PASS
+R_BR_170 -->|FALSE| RULE_FAIL
 R_BR_170 -.-> MOD_GOVERNANCE
-R_BR_171["BR-171 AI feedback is advisory; never a hiring decision input without human review"]
-R_BR_171 --> RULE_GATE
+R_BR_171{"BR-171 AI feedback is advisory; never a hiring decision input without human review"}
+R_BR_171 -->|TRUE| RULE_PASS
+R_BR_171 -->|FALSE| RULE_FAIL
 R_BR_171 -.-> MOD_JOBS
-R_BR_172["BR-172 AI analysis excludes protected attributes"]
-R_BR_172 --> RULE_GATE
+R_BR_172{"BR-172 AI analysis excludes protected attributes"}
+R_BR_172 -->|TRUE| RULE_PASS
+R_BR_172 -->|FALSE| RULE_FAIL
 R_BR_172 -.-> MOD_AI
-R_BR_173["BR-173 Interview questions are company-scoped; not visible to candidates before assessment"]
-R_BR_173 --> RULE_GATE
+R_BR_173{"BR-173 Interview questions are company-scoped; not visible to candidates before assessment"}
+R_BR_173 -->|TRUE| RULE_PASS
+R_BR_173 -->|FALSE| RULE_FAIL
 R_BR_173 -.-> MOD_ASSESSMENT
-R_BR_174["BR-174 Assessment scores are append-only; changes are compensating entries"]
-R_BR_174 --> RULE_GATE
+R_BR_174{"BR-174 Assessment scores are append-only; changes are compensating entries"}
+R_BR_174 -->|TRUE| RULE_PASS
+R_BR_174 -->|FALSE| RULE_FAIL
 R_BR_174 -.-> MOD_ASSESSMENT
-R_BR_175["BR-175 Live coding environment reuses the challenge sandbox"]
-R_BR_175 --> RULE_GATE
+R_BR_175{"BR-175 Live coding environment reuses the challenge sandbox"}
+R_BR_175 -->|TRUE| RULE_PASS
+R_BR_175 -->|FALSE| RULE_FAIL
 R_BR_175 -.-> MOD_ASSESSMENT
-R_BR_176["BR-176 Comparison across candidates uses structured rubrics, never free-form scores"]
-R_BR_176 --> RULE_GATE
+R_BR_176{"BR-176 Comparison across candidates uses structured rubrics, never free-form scores"}
+R_BR_176 -->|TRUE| RULE_PASS
+R_BR_176 -->|FALSE| RULE_FAIL
 R_BR_176 -.-> MOD_GOVERNANCE
-R_BR_177["BR-177 Salary reports require verification: self-reported (0.5) or verified via employment (1.0)"]
-R_BR_177 --> RULE_GATE
+R_BR_177{"BR-177 Salary reports require verification: self-reported (0.5) or verified via employment (1.0)"}
+R_BR_177 -->|TRUE| RULE_PASS
+R_BR_177 -->|FALSE| RULE_FAIL
 R_BR_177 -.-> MOD_EVIDENCE
-R_BR_178["BR-178 Aggregated salary data requires k ≥5 submissions per cell"]
-R_BR_178 --> RULE_GATE
+R_BR_178{"BR-178 Aggregated salary data requires k ≥5 submissions per cell"}
+R_BR_178 -->|TRUE| RULE_PASS
+R_BR_178 -->|FALSE| RULE_FAIL
 R_BR_178 -.-> MOD_INTELLIGENCE
-R_BR_179["BR-179 Salary data displayed in minor units + ISO-4217 currency"]
-R_BR_179 --> RULE_GATE
+R_BR_179{"BR-179 Salary data displayed in minor units + ISO-4217 currency"}
+R_BR_179 -->|TRUE| RULE_PASS
+R_BR_179 -->|FALSE| RULE_FAIL
 R_BR_179 -.-> MOD_INTELLIGENCE
-R_BR_180["BR-180 Company-specific salary data shown only if company has ≥3 reports OR opted in"]
-R_BR_180 --> RULE_GATE
+R_BR_180{"BR-180 Company-specific salary data shown only if company has ≥3 reports OR opted in"}
+R_BR_180 -->|TRUE| RULE_PASS
+R_BR_180 -->|FALSE| RULE_FAIL
 R_BR_180 -.-> MOD_INTELLIGENCE
-R_BR_181["BR-181 Users may withdraw their salary submission at any time"]
-R_BR_181 --> RULE_GATE
+R_BR_181{"BR-181 Users may withdraw their salary submission at any time"}
+R_BR_181 -->|TRUE| RULE_PASS
+R_BR_181 -->|FALSE| RULE_FAIL
 R_BR_181 -.-> MOD_INTELLIGENCE
-R_BR_182["BR-182 Salary intelligence updates quarterly; historical data versioned"]
-R_BR_182 --> RULE_GATE
+R_BR_182{"BR-182 Salary intelligence updates quarterly; historical data versioned"}
+R_BR_182 -->|TRUE| RULE_PASS
+R_BR_182 -->|FALSE| RULE_FAIL
 R_BR_182 -.-> MOD_INTELLIGENCE
-R_BR_183["BR-183 Equity data (F-98) separately aggregated from salary"]
-R_BR_183 --> RULE_GATE
+R_BR_183{"BR-183 Equity data (F-98) separately aggregated from salary"}
+R_BR_183 -->|TRUE| RULE_PASS
+R_BR_183 -->|FALSE| RULE_FAIL
 R_BR_183 -.-> MOD_INTELLIGENCE
-R_BR_184["BR-184 Recommendation factors must be disclosed ('why am I seeing this?')"]
-R_BR_184 --> RULE_GATE
+R_BR_184{"BR-184 Recommendation factors must be disclosed ('why am I seeing this?')"}
+R_BR_184 -->|TRUE| RULE_PASS
+R_BR_184 -->|FALSE| RULE_FAIL
 R_BR_184 -.-> MOD_INTELLIGENCE
-R_BR_185["BR-185 Recommendations never use protected attributes"]
-R_BR_185 --> RULE_GATE
+R_BR_185{"BR-185 Recommendations never use protected attributes"}
+R_BR_185 -->|TRUE| RULE_PASS
+R_BR_185 -->|FALSE| RULE_FAIL
 R_BR_185 -.-> MOD_INTELLIGENCE
-R_BR_186["BR-186 Users can dismiss recommendations; dismissals train the model"]
-R_BR_186 --> RULE_GATE
+R_BR_186{"BR-186 Users can dismiss recommendations; dismissals train the model"}
+R_BR_186 -->|TRUE| RULE_PASS
+R_BR_186 -->|FALSE| RULE_FAIL
 R_BR_186 -.-> MOD_INTELLIGENCE
-R_BR_187["BR-187 Recommendations may not include promoted content without explicit 'sponsored' label"]
-R_BR_187 --> RULE_GATE
+R_BR_187{"BR-187 Recommendations may not include promoted content without explicit 'sponsored' label"}
+R_BR_187 -->|TRUE| RULE_PASS
+R_BR_187 -->|FALSE| RULE_FAIL
 R_BR_187 -.-> MOD_INTELLIGENCE
-R_BR_188["BR-188 Recommendation engine must be replaceable without breaking downstream features"]
-R_BR_188 --> RULE_GATE
+R_BR_188{"BR-188 Recommendation engine must be replaceable without breaking downstream features"}
+R_BR_188 -->|TRUE| RULE_PASS
+R_BR_188 -->|FALSE| RULE_FAIL
 R_BR_188 -.-> MOD_INTELLIGENCE
-R_BR_189["BR-189 Course outcome correlation requires ≥30 enrolled learners with measurable outcomes"]
-R_BR_189 --> RULE_GATE
+R_BR_189{"BR-189 Course outcome correlation requires ≥30 enrolled learners with measurable outcomes"}
+R_BR_189 -->|TRUE| RULE_PASS
+R_BR_189 -->|FALSE| RULE_FAIL
 R_BR_189 -.-> MOD_LEARNING
-R_BR_190["BR-190 Individual learner outcomes are never exposed without consent"]
-R_BR_190 --> RULE_GATE
+R_BR_190{"BR-190 Individual learner outcomes are never exposed without consent"}
+R_BR_190 -->|TRUE| RULE_PASS
+R_BR_190 -->|FALSE| RULE_FAIL
 R_BR_190 -.-> MOD_COMMUNITY
-R_BR_191["BR-191 Course quality scores derived from outcomes visible to instructors, not publicly ranked"]
-R_BR_191 --> RULE_GATE
+R_BR_191{"BR-191 Course quality scores derived from outcomes visible to instructors, not publicly ranked"}
+R_BR_191 -->|TRUE| RULE_PASS
+R_BR_191 -->|FALSE| RULE_FAIL
 R_BR_191 -.-> MOD_LEARNING
-R_BR_192["BR-192 Learning impact analytics do not create incentives to lower standards"]
-R_BR_192 --> RULE_GATE
+R_BR_192{"BR-192 Learning impact analytics do not create incentives to lower standards"}
+R_BR_192 -->|TRUE| RULE_PASS
+R_BR_192 -->|FALSE| RULE_FAIL
 R_BR_192 -.-> MOD_LEARNING
-R_BR_193["BR-193 Correlation is not causation — all outcome claims labelled as correlational"]
-R_BR_193 --> RULE_GATE
+R_BR_193{"BR-193 Correlation is not causation — all outcome claims labelled as correlational"}
+R_BR_193 -->|TRUE| RULE_PASS
+R_BR_193 -->|FALSE| RULE_FAIL
 R_BR_193 -.-> MOD_AI
-R_BR_194["BR-194 Peer mentorship sessions have a 30-day inactivity auto-close"]
-R_BR_194 --> RULE_GATE
+R_BR_194{"BR-194 Peer mentorship sessions have a 30-day inactivity auto-close"}
+R_BR_194 -->|TRUE| RULE_PASS
+R_BR_194 -->|FALSE| RULE_FAIL
 R_BR_194 -.-> MOD_IDENTITY
-R_BR_195["BR-195 Expert network calls may be paid; platform takes a transparent fee"]
-R_BR_195 --> RULE_GATE
+R_BR_195{"BR-195 Expert network calls may be paid; platform takes a transparent fee"}
+R_BR_195 -->|TRUE| RULE_PASS
+R_BR_195 -->|FALSE| RULE_FAIL
 R_BR_195 -.-> MOD_NETWORK
-R_BR_196["BR-196 Industry hubs must have ≥3 active contributors to display"]
-R_BR_196 --> RULE_GATE
+R_BR_196{"BR-196 Industry hubs must have ≥3 active contributors to display"}
+R_BR_196 -->|TRUE| RULE_PASS
+R_BR_196 -->|FALSE| RULE_FAIL
 R_BR_196 -.-> MOD_GOVERNANCE
-R_BR_197["BR-197 Resume parsing never auto-applies changes without user review"]
-R_BR_197 --> RULE_GATE
+R_BR_197{"BR-197 Resume parsing never auto-applies changes without user review"}
+R_BR_197 -->|TRUE| RULE_PASS
+R_BR_197 -->|FALSE| RULE_FAIL
 R_BR_197 -.-> MOD_GOVERNANCE
-R_BR_198["BR-198 Custom assessments must be approved by Platform Admin before deployment"]
-R_BR_198 --> RULE_GATE
+R_BR_198{"BR-198 Custom assessments must be approved by Platform Admin before deployment"}
+R_BR_198 -->|TRUE| RULE_PASS
+R_BR_198 -->|FALSE| RULE_FAIL
 R_BR_198 -.-> MOD_ASSESSMENT
-R_BR_199["BR-199 Candidate comparison requires verified profiles only"]
-R_BR_199 --> RULE_GATE
+R_BR_199{"BR-199 Candidate comparison requires verified profiles only"}
+R_BR_199 -->|TRUE| RULE_PASS
+R_BR_199 -->|FALSE| RULE_FAIL
 R_BR_199 -.-> MOD_IDENTITY
-R_BR_200["BR-200 DE&I analytics use aggregated data only; individual demographic data never stored"]
-R_BR_200 --> RULE_GATE
+R_BR_200{"BR-200 DE&I analytics use aggregated data only; individual demographic data never stored"}
+R_BR_200 -->|TRUE| RULE_PASS
+R_BR_200 -->|FALSE| RULE_FAIL
 R_BR_200 -.-> MOD_GOVERNANCE
-R_BR_201["BR-201 Post-hire analytics require employer consent and are aggregate-only"]
-R_BR_201 --> RULE_GATE
+R_BR_201{"BR-201 Post-hire analytics require employer consent and are aggregate-only"}
+R_BR_201 -->|TRUE| RULE_PASS
+R_BR_201 -->|FALSE| RULE_FAIL
 R_BR_201 -.-> MOD_GOVERNANCE
-R_BR_202["BR-202 Badge marketplace prohibits paid badges; all badges earned"]
-R_BR_202 --> RULE_GATE
+R_BR_202{"BR-202 Badge marketplace prohibits paid badges; all badges earned"}
+R_BR_202 -->|TRUE| RULE_PASS
+R_BR_202 -->|FALSE| RULE_FAIL
 R_BR_202 -.-> MOD_COMMUNITY
-R_BR_203["BR-203 Mobile-first application must maintain feature parity with desktop"]
-R_BR_203 --> RULE_GATE
+R_BR_203{"BR-203 Mobile-first application must maintain feature parity with desktop"}
+R_BR_203 -->|TRUE| RULE_PASS
+R_BR_203 -->|FALSE| RULE_FAIL
 R_BR_203 -.-> MOD_JOBS
-R_BR_204["BR-204 Accessibility is a release gate; WCAG 2.2 AA mandatory"]
-R_BR_204 --> RULE_GATE
+R_BR_204{"BR-204 Accessibility is a release gate; WCAG 2.2 AA mandatory"}
+R_BR_204 -->|TRUE| RULE_PASS
+R_BR_204 -->|FALSE| RULE_FAIL
 R_BR_204 -.-> MOD_GOVERNANCE
-R_BR_205["BR-205 API access requires enterprise tier; rate-limited per CON-006"]
-R_BR_205 --> RULE_GATE
+R_BR_205{"BR-205 API access requires enterprise tier; rate-limited per CON-006"}
+R_BR_205 -->|TRUE| RULE_PASS
+R_BR_205 -->|FALSE| RULE_FAIL
 R_BR_205 -.-> MOD_GOVERNANCE
-R_BR_206["BR-206 Emerging skills require platform-wide adoption before taxonomy promotion"]
-R_BR_206 --> RULE_GATE
+R_BR_206{"BR-206 Emerging skills require platform-wide adoption before taxonomy promotion"}
+R_BR_206 -->|TRUE| RULE_PASS
+R_BR_206 -->|FALSE| RULE_FAIL
 R_BR_206 -.-> MOD_EVIDENCE
-R_BR_207["BR-207 Job market analytics require k ≥10 data points per geographic cell"]
-R_BR_207 --> RULE_GATE
+R_BR_207{"BR-207 Job market analytics require k ≥10 data points per geographic cell"}
+R_BR_207 -->|TRUE| RULE_PASS
+R_BR_207 -->|FALSE| RULE_FAIL
 R_BR_207 -.-> MOD_JOBS
-R_BR_208["BR-208 All new AI-powered features inherit AI safety rules §32"]
-R_BR_208 --> RULE_GATE
+R_BR_208{"BR-208 All new AI-powered features inherit AI safety rules §32"}
+R_BR_208 -->|TRUE| RULE_PASS
+R_BR_208 -->|FALSE| RULE_FAIL
 R_BR_208 -.-> MOD_AI
-R_BR_209["BR-209 Introducer consent required for each introduction"]
-R_BR_209 --> RULE_GATE
+R_BR_209{"BR-209 Introducer consent required for each introduction"}
+R_BR_209 -->|TRUE| RULE_PASS
+R_BR_209 -->|FALSE| RULE_FAIL
 R_BR_209 -.-> MOD_GOVERNANCE
-R_BR_210["BR-210 Max path depth = 4"]
-R_BR_210 --> RULE_GATE
+R_BR_210{"BR-210 Max path depth = 4"}
+R_BR_210 -->|TRUE| RULE_PASS
+R_BR_210 -->|FALSE| RULE_FAIL
 R_BR_210 -.-> MOD_GOVERNANCE
-R_BR_211["BR-211 Max 10 intro requests/week/user"]
-R_BR_211 --> RULE_GATE
+R_BR_211{"BR-211 Max 10 intro requests/week/user"}
+R_BR_211 -->|TRUE| RULE_PASS
+R_BR_211 -->|FALSE| RULE_FAIL
 R_BR_211 -.-> MOD_GOVERNANCE
-R_BR_212["BR-212 Introducer can opt out of intro services"]
-R_BR_212 --> RULE_GATE
+R_BR_212{"BR-212 Introducer can opt out of intro services"}
+R_BR_212 -->|TRUE| RULE_PASS
+R_BR_212 -->|FALSE| RULE_FAIL
 R_BR_212 -.-> MOD_GOVERNANCE
-R_BR_213["BR-213 Target can block all intro requests"]
-R_BR_213 --> RULE_GATE
+R_BR_213{"BR-213 Target can block all intro requests"}
+R_BR_213 -->|TRUE| RULE_PASS
+R_BR_213 -->|FALSE| RULE_FAIL
 R_BR_213 -.-> MOD_GOVERNANCE
-R_BR_214["BR-214 Introduction messages separate from cold outreach"]
-R_BR_214 --> RULE_GATE
+R_BR_214{"BR-214 Introduction messages separate from cold outreach"}
+R_BR_214 -->|TRUE| RULE_PASS
+R_BR_214 -->|FALSE| RULE_FAIL
 R_BR_214 -.-> MOD_NETWORK
-R_BR_215["BR-215 Paths visible only to requester"]
-R_BR_215 --> RULE_GATE
+R_BR_215{"BR-215 Paths visible only to requester"}
+R_BR_215 -->|TRUE| RULE_PASS
+R_BR_215 -->|FALSE| RULE_FAIL
 R_BR_215 -.-> MOD_GOVERNANCE
-R_BR_216["BR-216 No path suggestion for blocked users"]
-R_BR_216 --> RULE_GATE
+R_BR_216{"BR-216 No path suggestion for blocked users"}
+R_BR_216 -->|TRUE| RULE_PASS
+R_BR_216 -->|FALSE| RULE_FAIL
 R_BR_216 -.-> MOD_GOVERNANCE
-R_BR_217["BR-217 Minimum reason category required on rejection"]
-R_BR_217 --> RULE_GATE
+R_BR_217{"BR-217 Minimum reason category required on rejection"}
+R_BR_217 -->|TRUE| RULE_PASS
+R_BR_217 -->|FALSE| RULE_FAIL
 R_BR_217 -.-> MOD_GOVERNANCE
-R_BR_218["BR-218 Feedback delivered within 7 days of decision"]
-R_BR_218 --> RULE_GATE
+R_BR_218{"BR-218 Feedback delivered within 7 days of decision"}
+R_BR_218 -->|TRUE| RULE_PASS
+R_BR_218 -->|FALSE| RULE_FAIL
 R_BR_218 -.-> MOD_GOVERNANCE
-R_BR_219["BR-219 Feedback visible only to candidate"]
-R_BR_219 --> RULE_GATE
+R_BR_219{"BR-219 Feedback visible only to candidate"}
+R_BR_219 -->|TRUE| RULE_PASS
+R_BR_219 -->|FALSE| RULE_FAIL
 R_BR_219 -.-> MOD_GOVERNANCE
-R_BR_220["BR-220 Aggregate insights use k ≥10"]
-R_BR_220 --> RULE_GATE
+R_BR_220{"BR-220 Aggregate insights use k ≥10"}
+R_BR_220 -->|TRUE| RULE_PASS
+R_BR_220 -->|FALSE| RULE_FAIL
 R_BR_220 -.-> MOD_GOVERNANCE
-R_BR_221["BR-221 AI drafts require human review before sending"]
-R_BR_221 --> RULE_GATE
+R_BR_221{"BR-221 AI drafts require human review before sending"}
+R_BR_221 -->|TRUE| RULE_PASS
+R_BR_221 -->|FALSE| RULE_FAIL
 R_BR_221 -.-> MOD_AI
-R_BR_222["BR-222 Candidate can request feedback if not provided (30-day window)"]
-R_BR_222 --> RULE_GATE
+R_BR_222{"BR-222 Candidate can request feedback if not provided (30-day window)"}
+R_BR_222 -->|TRUE| RULE_PASS
+R_BR_222 -->|FALSE| RULE_FAIL
 R_BR_222 -.-> MOD_GOVERNANCE
-R_BR_223["BR-223 Negative feedback must include actionable element"]
-R_BR_223 --> RULE_GATE
+R_BR_223{"BR-223 Negative feedback must include actionable element"}
+R_BR_223 -->|TRUE| RULE_PASS
+R_BR_223 -->|FALSE| RULE_FAIL
 R_BR_223 -.-> MOD_GOVERNANCE
-R_BR_224["BR-224 Feedback templates org-configurable"]
-R_BR_224 --> RULE_GATE
+R_BR_224{"BR-224 Feedback templates org-configurable"}
+R_BR_224 -->|TRUE| RULE_PASS
+R_BR_224 -->|FALSE| RULE_FAIL
 R_BR_224 -.-> MOD_JOBS
-R_BR_225["BR-225 Freshness score computed nightly, immutable per day"]
-R_BR_225 --> RULE_GATE
+R_BR_225{"BR-225 Freshness score computed nightly, immutable per day"}
+R_BR_225 -->|TRUE| RULE_PASS
+R_BR_225 -->|FALSE| RULE_FAIL
 R_BR_225 -.-> MOD_EVIDENCE
-R_BR_226["BR-226 Decay curves per skill category, admin-configurable"]
-R_BR_226 --> RULE_GATE
+R_BR_226{"BR-226 Decay curves per skill category, admin-configurable"}
+R_BR_226 -->|TRUE| RULE_PASS
+R_BR_226 -->|FALSE| RULE_FAIL
 R_BR_226 -.-> MOD_EVIDENCE
-R_BR_227["BR-227 Freshness 20 demotes to self-reported"]
-R_BR_227 --> RULE_GATE
+R_BR_227{"BR-227 Freshness 20 demotes to self-reported"}
+R_BR_227 -->|TRUE| RULE_PASS
+R_BR_227 -->|FALSE| RULE_FAIL
 R_BR_227 -.-> MOD_EVIDENCE
-R_BR_228["BR-228 Re-verification restores freshness to 100"]
-R_BR_228 --> RULE_GATE
+R_BR_228{"BR-228 Re-verification restores freshness to 100"}
+R_BR_228 -->|TRUE| RULE_PASS
+R_BR_228 -->|FALSE| RULE_FAIL
 R_BR_228 -.-> MOD_EVIDENCE
-R_BR_229["BR-229 Self-attestation counts 0.5×"]
-R_BR_229 --> RULE_GATE
+R_BR_229{"BR-229 Self-attestation counts 0.5×"}
+R_BR_229 -->|TRUE| RULE_PASS
+R_BR_229 -->|FALSE| RULE_FAIL
 R_BR_229 -.-> MOD_GOVERNANCE
-R_BR_230["BR-230 Freshness visible to candidate always; recruiter-visible only with consent"]
-R_BR_230 --> RULE_GATE
+R_BR_230{"BR-230 Freshness visible to candidate always; recruiter-visible only with consent"}
+R_BR_230 -->|TRUE| RULE_PASS
+R_BR_230 -->|FALSE| RULE_FAIL
 R_BR_230 -.-> MOD_EVIDENCE
-R_BR_231["BR-231 Market drift alerts opt-in"]
-R_BR_231 --> RULE_GATE
+R_BR_231{"BR-231 Market drift alerts opt-in"}
+R_BR_231 -->|TRUE| RULE_PASS
+R_BR_231 -->|FALSE| RULE_FAIL
 R_BR_231 -.-> MOD_SEARCH
-R_BR_232["BR-232 Freshness stored historically (time-series)"]
-R_BR_232 --> RULE_GATE
+R_BR_232{"BR-232 Freshness stored historically (time-series)"}
+R_BR_232 -->|TRUE| RULE_PASS
+R_BR_232 -->|FALSE| RULE_FAIL
 R_BR_232 -.-> MOD_EVIDENCE
-R_BR_233["BR-233 Max 3 referral requests per 30 days per candidate"]
-R_BR_233 --> RULE_GATE
+R_BR_233{"BR-233 Max 3 referral requests per 30 days per candidate"}
+R_BR_233 -->|TRUE| RULE_PASS
+R_BR_233 -->|FALSE| RULE_FAIL
 R_BR_233 -.-> MOD_NETWORK
-R_BR_234["BR-234 Referrer consent required per request"]
-R_BR_234 --> RULE_GATE
+R_BR_234{"BR-234 Referrer consent required per request"}
+R_BR_234 -->|TRUE| RULE_PASS
+R_BR_234 -->|FALSE| RULE_FAIL
 R_BR_234 -.-> MOD_GOVERNANCE
-R_BR_235["BR-235 Referral tag visible to recruiter (priority signal)"]
-R_BR_235 --> RULE_GATE
+R_BR_235{"BR-235 Referral tag visible to recruiter (priority signal)"}
+R_BR_235 -->|TRUE| RULE_PASS
+R_BR_235 -->|FALSE| RULE_FAIL
 R_BR_235 -.-> MOD_JOBS
-R_BR_236["BR-236 Referral rewards follow org policy; XP default"]
-R_BR_236 --> RULE_GATE
+R_BR_236{"BR-236 Referral rewards follow org policy; XP default"}
+R_BR_236 -->|TRUE| RULE_PASS
+R_BR_236 -->|FALSE| RULE_FAIL
 R_BR_236 -.-> MOD_NETWORK
-R_BR_237["BR-237 System verifies referrer's employment"]
-R_BR_237 --> RULE_GATE
+R_BR_237{"BR-237 System verifies referrer's employment"}
+R_BR_237 -->|TRUE| RULE_PASS
+R_BR_237 -->|FALSE| RULE_FAIL
 R_BR_237 -.-> MOD_GOVERNANCE
-R_BR_238["BR-238 No referral request from blocked user"]
-R_BR_238 --> RULE_GATE
+R_BR_238{"BR-238 No referral request from blocked user"}
+R_BR_238 -->|TRUE| RULE_PASS
+R_BR_238 -->|FALSE| RULE_FAIL
 R_BR_238 -.-> MOD_NETWORK
-R_BR_239["BR-239 Referrer max 20 referrals/quarter"]
-R_BR_239 --> RULE_GATE
+R_BR_239{"BR-239 Referrer max 20 referrals/quarter"}
+R_BR_239 -->|TRUE| RULE_PASS
+R_BR_239 -->|FALSE| RULE_FAIL
 R_BR_239 -.-> MOD_NETWORK
-R_BR_240["BR-240 Referral attribution tracked 12 months"]
-R_BR_240 --> RULE_GATE
+R_BR_240{"BR-240 Referral attribution tracked 12 months"}
+R_BR_240 -->|TRUE| RULE_PASS
+R_BR_240 -->|FALSE| RULE_FAIL
 R_BR_240 -.-> MOD_NETWORK
-R_BR_241["BR-241 Affiliation verified (email domain or institutional seat)"]
-R_BR_241 --> RULE_GATE
+R_BR_241{"BR-241 Affiliation verified (email domain or institutional seat)"}
+R_BR_241 -->|TRUE| RULE_PASS
+R_BR_241 -->|FALSE| RULE_FAIL
 R_BR_241 -.-> MOD_COMMUNICATION
-R_BR_242["BR-242 Alumni discovery respects privacy settings"]
-R_BR_242 --> RULE_GATE
+R_BR_242{"BR-242 Alumni discovery respects privacy settings"}
+R_BR_242 -->|TRUE| RULE_PASS
+R_BR_242 -->|FALSE| RULE_FAIL
 R_BR_242 -.-> MOD_NETWORK
-R_BR_243["BR-243 Alumni group default-join, opt-out allowed"]
-R_BR_243 --> RULE_GATE
+R_BR_243{"BR-243 Alumni group default-join, opt-out allowed"}
+R_BR_243 -->|TRUE| RULE_PASS
+R_BR_243 -->|FALSE| RULE_FAIL
 R_BR_243 -.-> MOD_NETWORK
-R_BR_244["BR-244 Alumni job postings must be from verified alumni"]
-R_BR_244 --> RULE_GATE
+R_BR_244{"BR-244 Alumni job postings must be from verified alumni"}
+R_BR_244 -->|TRUE| RULE_PASS
+R_BR_244 -->|FALSE| RULE_FAIL
 R_BR_244 -.-> MOD_JOBS
-R_BR_245["BR-245 Alumni mentorship opt-in"]
-R_BR_245 --> RULE_GATE
+R_BR_245{"BR-245 Alumni mentorship opt-in"}
+R_BR_245 -->|TRUE| RULE_PASS
+R_BR_245 -->|FALSE| RULE_FAIL
 R_BR_245 -.-> MOD_NETWORK
-R_BR_246["BR-246 No cross-institution data leakage"]
-R_BR_246 --> RULE_GATE
+R_BR_246{"BR-246 No cross-institution data leakage"}
+R_BR_246 -->|TRUE| RULE_PASS
+R_BR_246 -->|FALSE| RULE_FAIL
 R_BR_246 -.-> MOD_GOVERNANCE
-R_BR_247["BR-247 Graduated students retain alumni status"]
-R_BR_247 --> RULE_GATE
+R_BR_247{"BR-247 Graduated students retain alumni status"}
+R_BR_247 -->|TRUE| RULE_PASS
+R_BR_247 -->|FALSE| RULE_FAIL
 R_BR_247 -.-> MOD_LEARNING
-R_BR_248["BR-248 Alumni networks public or private (institution choice)"]
-R_BR_248 --> RULE_GATE
+R_BR_248{"BR-248 Alumni networks public or private (institution choice)"}
+R_BR_248 -->|TRUE| RULE_PASS
+R_BR_248 -->|FALSE| RULE_FAIL
 R_BR_248 -.-> MOD_NETWORK
 end
 subgraph CONDITIONS["13 Explicit implementation conditions read from condition matrix; branches reflect recorded current behavior"]
@@ -2447,8 +2695,8 @@ CN_AU_01["FALSE: account created, 201"]
 C_AU_01 -->|TRUE| CY_AU_01
 C_AU_01 -->|FALSE| CN_AU_01
 C_AU_01 -.-> MOD_COMMUNICATION
-CY_AU_01 --> API_HANDLER
-CN_AU_01 --> API_ERR
+CY_AU_01 --> API_ERR
+CN_AU_01 --> API_HANDLER
 C_AU_02{"AU-02 Sign-up role is candidate or recruiter"}
 CY_AU_02["TRUE: accepted"]
 CN_AU_02["FALSE: 400"]
@@ -2504,31 +2752,31 @@ C_AU_08 -->|TRUE| CY_AU_08
 C_AU_08 -->|FALSE| CN_AU_08
 C_AU_08 -.-> MOD_IDENTITY
 CY_AU_08 --> API_HANDLER
-CN_AU_08 --> API_ERR
+CN_AU_08 --> API_HANDLER
 C_AU_09{"AU-09 'issuedAt' before 'sessionsValidAfter'"}
 CY_AU_09["TRUE: 401"]
 CN_AU_09["FALSE: pass"]
 C_AU_09 -->|TRUE| CY_AU_09
 C_AU_09 -->|FALSE| CN_AU_09
 C_AU_09 -.-> MOD_IDENTITY
-CY_AU_09 --> API_HANDLER
-CN_AU_09 --> API_ERR
+CY_AU_09 --> API_ERR
+CN_AU_09 --> API_HANDLER
 C_AU_10{"AU-10 Account status not active and route not allowed"}
 CY_AU_10["TRUE: 403"]
 CN_AU_10["FALSE: pass"]
 C_AU_10 -->|TRUE| CY_AU_10
 C_AU_10 -->|FALSE| CN_AU_10
 C_AU_10 -.-> MOD_IDENTITY
-CY_AU_10 --> API_HANDLER
-CN_AU_10 --> API_ERR
+CY_AU_10 --> API_ERR
+CN_AU_10 --> API_HANDLER
 C_AU_11{"AU-11 No account row"}
 CY_AU_11["TRUE: pg storage: 401; memory storage: signed claims trusted"]
 CN_AU_11["FALSE: n/a"]
 C_AU_11 -->|TRUE| CY_AU_11
 C_AU_11 -->|FALSE| CN_AU_11
 C_AU_11 -.-> MOD_IDENTITY
-CY_AU_11 --> API_HANDLER
-CN_AU_11 --> API_ERR
+CY_AU_11 --> API_ERR
+CN_AU_11 --> API_HANDLER
 C_AU_12{"AU-12 Only a platform admin may change roles; may not remove their own admin role"}
 CY_AU_12["TRUE: allowed"]
 CN_AU_12["FALSE: 403 or rejected"]
@@ -2544,7 +2792,7 @@ C_AU_13 -->|TRUE| CY_AU_13
 C_AU_13 -->|FALSE| CN_AU_13
 C_AU_13 -.-> MOD_GOVERNANCE
 CY_AU_13 --> API_HANDLER
-CN_AU_13 --> API_ERR
+CN_AU_13 --> API_HANDLER
 C_AU_14{"AU-14 Web: a token string exists"}
 CY_AU_14["TRUE: page renders"]
 CN_AU_14["FALSE: redirect to '/login?return=' (no role check)"]
@@ -2552,7 +2800,7 @@ C_AU_14 -->|TRUE| CY_AU_14
 C_AU_14 -->|FALSE| CN_AU_14
 C_AU_14 -.-> MOD_GOVERNANCE
 CY_AU_14 --> API_HANDLER
-CN_AU_14 --> API_ERR
+CN_AU_14 --> API_HANDLER
 C_AU_15{"AU-15 'return' starts with one slash"}
 CY_AU_15["TRUE: follow it"]
 CN_AU_15["FALSE: go to '/dashboard'"]
@@ -2560,7 +2808,7 @@ C_AU_15 -->|TRUE| CY_AU_15
 C_AU_15 -->|FALSE| CN_AU_15
 C_AU_15 -.-> MOD_GOVERNANCE
 CY_AU_15 --> API_HANDLER
-CN_AU_15 --> API_ERR
+CN_AU_15 --> API_HANDLER
 C_JB_01{"JB-01 Caller is a member of the organization or platform admin (BR-12)"}
 CY_JB_01["TRUE: continue"]
 CN_JB_01["FALSE: 403"]
@@ -2599,8 +2847,8 @@ CN_AP_01["FALSE: continue"]
 C_AP_01 -->|TRUE| CY_AP_01
 C_AP_01 -->|FALSE| CN_AP_01
 C_AP_01 -.-> MOD_JOBS
-CY_AP_01 --> API_HANDLER
-CN_AP_01 --> API_ERR
+CY_AP_01 --> API_ERR
+CN_AP_01 --> API_HANDLER
 C_AP_02{"AP-02 Job is published (BR-16)"}
 CY_AP_02["TRUE: continue"]
 CN_AP_02["FALSE: 422"]
@@ -2615,8 +2863,8 @@ CN_AP_03["FALSE: created as submitted"]
 C_AP_03 -->|TRUE| CY_AP_03
 C_AP_03 -->|FALSE| CN_AP_03
 C_AP_03 -.-> MOD_JOBS
-CY_AP_03 --> API_HANDLER
-CN_AP_03 --> API_ERR
+CY_AP_03 --> API_ERR
+CN_AP_03 --> API_HANDLER
 C_AP_04{"AP-04 Application transition is in the table (BR-41)"}
 CY_AP_04["TRUE: continue"]
 CN_AP_04["FALSE: 409"]
@@ -2648,7 +2896,7 @@ C_AP_07 -->|TRUE| CY_AP_07
 C_AP_07 -->|FALSE| CN_AP_07
 C_AP_07 -.-> MOD_JOBS
 CY_AP_07 --> API_HANDLER
-CN_AP_07 --> API_ERR
+CN_AP_07 --> API_HANDLER
 C_WH_01{"WH-01 Dates valid, none in the future, end after start"}
 CY_WH_01["TRUE: role created"]
 CN_WH_01["FALSE: VALIDATION_FAILED"]
@@ -2663,8 +2911,8 @@ CN_WH_02["FALSE: continue"]
 C_WH_02 -->|TRUE| CY_WH_02
 C_WH_02 -->|FALSE| CN_WH_02
 C_WH_02 -.-> MOD_GOVERNANCE
-CY_WH_02 --> API_HANDLER
-CN_WH_02 --> API_ERR
+CY_WH_02 --> API_ERR
+CN_WH_02 --> API_HANDLER
 C_WH_03{"WH-03 Address is not webmail or disposable"}
 CY_WH_03["TRUE: continue"]
 CN_WH_03["FALSE: VALIDATION_FAILED"]
@@ -2680,7 +2928,7 @@ C_WH_04 -->|TRUE| CY_WH_04
 C_WH_04 -->|FALSE| CN_WH_04
 C_WH_04 -.-> MOD_GOVERNANCE
 CY_WH_04 --> API_HANDLER
-CN_WH_04 --> API_ERR
+CN_WH_04 --> API_HANDLER
 C_WH_05{"WH-05 Referee token present, hash matches and the request is under 30 days old"}
 CY_WH_05["TRUE: continue"]
 CN_WH_05["FALSE: 404 on view, 403 on submit ('UNAUTHORIZED' maps to 403)"]
@@ -2695,16 +2943,16 @@ CN_WH_06["FALSE: continue"]
 C_WH_06 -->|TRUE| CY_WH_06
 C_WH_06 -->|FALSE| CN_WH_06
 C_WH_06 -.-> MOD_ASSESSMENT
-CY_WH_06 --> API_HANDLER
-CN_WH_06 --> API_ERR
+CY_WH_06 --> API_ERR
+CN_WH_06 --> API_HANDLER
 C_WH_07{"WH-07 Wrong-code attempts below 5"}
 CY_WH_07["TRUE: attempts + 1 and VALIDATION_FAILED"]
 CN_WH_07["FALSE: RATE_LIMIT_EXCEEDED; challenge kept"]
 C_WH_07 -->|TRUE| CY_WH_07
 C_WH_07 -->|FALSE| CN_WH_07
 C_WH_07 -.-> MOD_GOVERNANCE
-CY_WH_07 --> API_HANDLER
-CN_WH_07 --> API_ERR
+CY_WH_07 --> API_ERR
+CN_WH_07 --> API_HANDLER
 C_WH_08{"WH-08 Referee equals the candidate (id or email)"}
 CY_WH_08["TRUE: CONFLICT"]
 CN_WH_08["FALSE: continue"]
@@ -2712,7 +2960,7 @@ C_WH_08 -->|TRUE| CY_WH_08
 C_WH_08 -->|FALSE| CN_WH_08
 C_WH_08 -.-> MOD_COMMUNICATION
 CY_WH_08 --> API_HANDLER
-CN_WH_08 --> API_ERR
+CN_WH_08 --> API_HANDLER
 C_WH_09{"WH-09 Reference status is requested"}
 CY_WH_09["TRUE: submit allowed"]
 CN_WH_09["FALSE: INVALID_STATE_TRANSITION"]
@@ -2720,7 +2968,7 @@ C_WH_09 -->|TRUE| CY_WH_09
 C_WH_09 -->|FALSE| CN_WH_09
 C_WH_09 -.-> MOD_GOVERNANCE
 CY_WH_09 --> API_HANDLER
-CN_WH_09 --> API_ERR
+CN_WH_09 --> API_HANDLER
 C_WH_10{"WH-10 Ratings are integers 1 to 5"}
 CY_WH_10["TRUE: continue"]
 CN_WH_10["FALSE: VALIDATION_FAILED"]
@@ -2736,7 +2984,7 @@ C_WH_11 -->|TRUE| CY_WH_11
 C_WH_11 -->|FALSE| CN_WH_11
 C_WH_11 -.-> MOD_EVIDENCE
 CY_WH_11 --> API_HANDLER
-CN_WH_11 --> API_ERR
+CN_WH_11 --> API_HANDLER
 C_WH_12{"WH-12 Viewer is not the owner or an admin"}
 CY_WH_12["TRUE: email hidden; referee names and ratings hidden; average shown only with at least 3 ratings"]
 CN_WH_12["FALSE: full detail"]
@@ -2744,7 +2992,7 @@ C_WH_12 -->|TRUE| CY_WH_12
 C_WH_12 -->|FALSE| CN_WH_12
 C_WH_12 -.-> MOD_GOVERNANCE
 CY_WH_12 --> API_HANDLER
-CN_WH_12 --> API_ERR
+CN_WH_12 --> API_HANDLER
 C_WH_13{"WH-13 Only the owner may delete a role"}
 CY_WH_13["TRUE: allowed"]
 CN_WH_13["FALSE: 403 (admins too)"]
@@ -2760,7 +3008,7 @@ C_CB_01 -->|TRUE| CY_CB_01
 C_CB_01 -->|FALSE| CN_CB_01
 C_CB_01 -.-> MOD_GOVERNANCE
 CY_CB_01 --> API_HANDLER
-CN_CB_01 --> API_ERR
+CN_CB_01 --> API_HANDLER
 C_CB_02{"CB-02 Caller asks for a lower threshold"}
 CY_CB_02["TRUE: ignored; floor stays 20"]
 CN_CB_02["FALSE: n/a"]
@@ -2768,7 +3016,7 @@ C_CB_02 -->|TRUE| CY_CB_02
 C_CB_02 -->|FALSE| CN_CB_02
 C_CB_02 -.-> MOD_GOVERNANCE
 CY_CB_02 --> API_HANDLER
-CN_CB_02 --> API_ERR
+CN_CB_02 --> API_HANDLER
 C_CB_03{"CB-03 Skill has recorded market signals"}
 CY_CB_03["TRUE: forecast computed"]
 CN_CB_03["FALSE: 404 (single skill); skill omitted (ranking)"]
@@ -2800,7 +3048,7 @@ C_LI_02 -->|TRUE| CY_LI_02
 C_LI_02 -->|FALSE| CN_LI_02
 C_LI_02 -.-> MOD_GOVERNANCE
 CY_LI_02 --> API_HANDLER
-CN_LI_02 --> API_ERR
+CN_LI_02 --> API_HANDLER
 C_BL_01{"BL-01 'BILLING_MODE' is stripe"}
 CY_BL_01["TRUE: Stripe routes active"]
 CN_BL_01["FALSE: routes answer 503 'not enabled'"]
@@ -2824,7 +3072,7 @@ C_BL_03 -->|TRUE| CY_BL_03
 C_BL_03 -->|FALSE| CN_BL_03
 C_BL_03 -.-> MOD_GOVERNANCE
 CY_BL_03 --> API_HANDLER
-CN_BL_03 --> API_ERR
+CN_BL_03 --> API_HANDLER
 C_BL_04{"BL-04 Subscription event older than stored state"}
 CY_BL_04["TRUE: recorded only"]
 CN_BL_04["FALSE: state updated"]
@@ -2832,7 +3080,7 @@ C_BL_04 -->|TRUE| CY_BL_04
 C_BL_04 -->|FALSE| CN_BL_04
 C_BL_04 -.-> MOD_BILLING
 CY_BL_04 --> API_HANDLER
-CN_BL_04 --> API_ERR
+CN_BL_04 --> API_HANDLER
 C_BL_05{"BL-05 Subscription price in the server catalog and status active or trialing"}
 CY_BL_05["TRUE: paid tier and entitlements"]
 CN_BL_05["FALSE: free tier"]
@@ -2840,15 +3088,15 @@ C_BL_05 -->|TRUE| CY_BL_05
 C_BL_05 -->|FALSE| CN_BL_05
 C_BL_05 -.-> MOD_BILLING
 CY_BL_05 --> API_HANDLER
-CN_BL_05 --> API_ERR
+CN_BL_05 --> API_HANDLER
 C_BL_06{"BL-06 Checkout while a paid subscription is live"}
 CY_BL_06["TRUE: 409"]
 CN_BL_06["FALSE: session created"]
 C_BL_06 -->|TRUE| CY_BL_06
 C_BL_06 -->|FALSE| CN_BL_06
 C_BL_06 -.-> MOD_BILLING
-CY_BL_06 --> API_HANDLER
-CN_BL_06 --> API_ERR
+CY_BL_06 --> API_ERR
+CN_BL_06 --> API_HANDLER
 C_BL_07{"BL-07 Full refund of the live subscription's current-period charge"}
 CY_BL_07["TRUE: cancel at Stripe, access ends"]
 CN_BL_07["FALSE: recorded only"]
@@ -2856,7 +3104,7 @@ C_BL_07 -->|TRUE| CY_BL_07
 C_BL_07 -->|FALSE| CN_BL_07
 C_BL_07 -.-> MOD_BILLING
 CY_BL_07 --> API_HANDLER
-CN_BL_07 --> API_ERR
+CN_BL_07 --> API_HANDLER
 C_BL_08{"BL-08 Customer already linked to another account"}
 CY_BL_08["TRUE: event ignored"]
 CN_BL_08["FALSE: link created"]
@@ -2864,7 +3112,7 @@ C_BL_08 -->|TRUE| CY_BL_08
 C_BL_08 -->|FALSE| CN_BL_08
 C_BL_08 -.-> MOD_IDENTITY
 CY_BL_08 --> API_HANDLER
-CN_BL_08 --> API_ERR
+CN_BL_08 --> API_HANDLER
 C_BL_09{"BL-09 Deployed with 'BILLING_MODE=simulated'"}
 CY_BL_09["TRUE: refused at boot"]
 CN_BL_09["FALSE: allowed"]
@@ -2872,7 +3120,7 @@ C_BL_09 -->|TRUE| CY_BL_09
 C_BL_09 -->|FALSE| CN_BL_09
 C_BL_09 -.-> MOD_BILLING
 CY_BL_09 --> API_HANDLER
-CN_BL_09 --> API_ERR
+CN_BL_09 --> API_HANDLER
 C_ST_01{"ST-01 'STORAGE': explicit, else process env, else memory under test, else pg"}
 CY_ST_01["TRUE: n/a"]
 CN_ST_01["FALSE: n/a"]
@@ -2880,7 +3128,7 @@ C_ST_01 -->|TRUE| CY_ST_01
 C_ST_01 -->|FALSE| CN_ST_01
 C_ST_01 -.-> MOD_COMMUNITY
 CY_ST_01 --> API_HANDLER
-CN_ST_01 --> API_ERR
+CN_ST_01 --> API_HANDLER
 C_ST_02{"ST-02 pg and database unreachable"}
 CY_ST_02["TRUE: refuse to start"]
 CN_ST_02["FALSE: continue"]
@@ -2888,7 +3136,7 @@ C_ST_02 -->|TRUE| CY_ST_02
 C_ST_02 -->|FALSE| CN_ST_02
 C_ST_02 -.-> MOD_GOVERNANCE
 CY_ST_02 --> API_HANDLER
-CN_ST_02 --> API_ERR
+CN_ST_02 --> API_HANDLER
 C_ST_03{"ST-03 Advisory lock (718201,1) acquired"}
 CY_ST_03["TRUE: continue"]
 CN_ST_03["FALSE: refuse: second writer"]
@@ -2896,15 +3144,15 @@ C_ST_03 -->|TRUE| CY_ST_03
 C_ST_03 -->|FALSE| CN_ST_03
 C_ST_03 -.-> MOD_GOVERNANCE
 CY_ST_03 --> API_HANDLER
-CN_ST_03 --> API_ERR
+CN_ST_03 --> API_HANDLER
 C_ST_04{"ST-04 Lease lost while running"}
 CY_ST_04["TRUE: 503 on every request"]
 CN_ST_04["FALSE: normal"]
 C_ST_04 -->|TRUE| CY_ST_04
 C_ST_04 -->|FALSE| CN_ST_04
 C_ST_04 -.-> MOD_GOVERNANCE
-CY_ST_04 --> API_HANDLER
-CN_ST_04 --> API_ERR
+CY_ST_04 --> API_ERR
+CN_ST_04 --> API_HANDLER
 C_ST_05{"ST-05 Deployed with memory storage, weak or published token secret, PBKDF2 below 210000, default database URL"}
 CY_ST_05["TRUE: exit 1"]
 CN_ST_05["FALSE: continue"]
@@ -2912,7 +3160,7 @@ C_ST_05 -->|TRUE| CY_ST_05
 C_ST_05 -->|FALSE| CN_ST_05
 C_ST_05 -.-> MOD_GOVERNANCE
 CY_ST_05 --> API_HANDLER
-CN_ST_05 --> API_ERR
+CN_ST_05 --> API_HANDLER
 C_ST_06{"ST-06 Job handler outcome"}
 CY_ST_06["TRUE: success completes; permanent error fails; other error retries below 3 attempts then dead; no handler is dead"]
 CN_ST_06["FALSE: n/a"]
@@ -2920,7 +3168,7 @@ C_ST_06 -->|TRUE| CY_ST_06
 C_ST_06 -->|FALSE| CN_ST_06
 C_ST_06 -.-> MOD_JOBS
 CY_ST_06 --> API_HANDLER
-CN_ST_06 --> API_ERR
+CN_ST_06 --> API_HANDLER
 C_ST_07{"ST-07 Worker heartbeat 45 s or newer"}
 CY_ST_07["TRUE: alive"]
 CN_ST_07["FALSE: degraded"]
@@ -2928,7 +3176,7 @@ C_ST_07 -->|TRUE| CY_ST_07
 C_ST_07 -->|FALSE| CN_ST_07
 C_ST_07 -.-> MOD_COMMUNICATION
 CY_ST_07 --> API_HANDLER
-CN_ST_07 --> API_ERR
+CN_ST_07 --> API_HANDLER
 C_ST_08{"ST-08 Route not in the durable or stateless lists"}
 CY_ST_08["TRUE: response carries 'x-talentsphere-durability: ephemeral'"]
 CN_ST_08["FALSE: no header"]
@@ -2936,7 +3184,7 @@ C_ST_08 -->|TRUE| CY_ST_08
 C_ST_08 -->|FALSE| CN_ST_08
 C_ST_08 -.-> MOD_GOVERNANCE
 CY_ST_08 --> API_HANDLER
-CN_ST_08 --> API_ERR
+CN_ST_08 --> API_HANDLER
 end
 subgraph ASYNC["14 Durable background processing and communications"]
 JOBTABLE[("background_jobs: kind, payload, status, attempts, run_after, lock expiry, fence")]
@@ -3104,6 +3352,397 @@ SPEC --> RULES
 PROPOSED --> RELEASE
 UNKNOWN --> TERMINAL
 end
+MOD_GOVERNANCE --> RG_HEALTH
+MOD_GOVERNANCE --> RG_FEATURE_FLAGS
+MOD_IDENTITY --> RG_AUTH
+MOD_IDENTITY --> RG_PROFILE
+MOD_EVIDENCE --> RG_EVIDENCE
+MOD_EVIDENCE --> RG_SKILLS
+MOD_JOBS --> RG_ORGANIZATIONS
+MOD_JOBS --> RG_JOBS
+MOD_GOVERNANCE --> RG_JOB_TEMPLATES
+MOD_JOBS --> RG_SALARIES
+MOD_JOBS --> RG_APPLICATIONS
+MOD_INTELLIGENCE --> RG_FEEDBACK
+MOD_EVIDENCE --> RG_CANDIDATES
+MOD_ASSESSMENT --> RG_INTERVIEWS
+MOD_COMMUNITY --> RG_REPUTATION
+MOD_ASSESSMENT --> RG_CHALLENGES
+MOD_AI --> RG_AI
+MOD_COMMUNITY --> RG_XP
+MOD_LEARNING --> RG_COURSES
+MOD_LEARNING --> RG_MODULES
+MOD_LEARNING --> RG_LESSONS
+MOD_ASSESSMENT --> RG_CERTIFICATES
+MOD_GOVERNANCE --> RG_VERIFY
+MOD_NETWORK --> RG_THREADS
+MOD_COMMUNICATION --> RG_NOTIFICATIONS
+MOD_GOVERNANCE --> RG_RESUMES
+MOD_NETWORK --> RG_CONNECTIONS
+MOD_NETWORK --> RG_NETWORKING
+MOD_NETWORK --> RG_REFERRALS
+MOD_INTELLIGENCE --> RG_CAREER
+MOD_LEARNING --> RG_LEARNING
+MOD_INTELLIGENCE --> RG_RECRUITER
+MOD_NETWORK --> RG_ALUMNI
+MOD_COMMUNITY --> RG_ACTIVITY
+MOD_GOVERNANCE --> RG_PORTFOLIO
+MOD_COMMUNITY --> RG_GAMIFICATION
+MOD_GOVERNANCE --> RG_SETTINGS
+MOD_BILLING --> RG_BILLING
+MOD_GOVERNANCE --> RG_ADMIN
+MOD_SEARCH --> RG_SEARCH
+MOD_GOVERNANCE --> RG_MODERATION
+MOD_GOVERNANCE --> RG_ANALYTICS
+MOD_GOVERNANCE --> RG_REFERENCES
+MOD_GOVERNANCE --> RG_INTERNAL
+%% Explicit registry dependencies: dependency node -> dependent feature
+F_01 --> F_F_03
+F_01 --> F_F_04
+F_12 --> F_F_04
+F_04 --> F_F_05
+F_04 --> F_F_06
+F_05 --> F_F_06
+F_01 --> F_F_07
+F_12 --> F_F_07
+F_01 --> F_F_08
+F_12 --> F_F_08
+F_12 --> F_F_09
+F_01 --> F_F_10
+F_12 --> F_F_11
+F_01 --> F_F_12
+F_12 --> F_F_13
+F_01 --> F_F_14
+F_01 --> F_F_15
+F_01 --> F_F_16
+F_01 --> F_F_17
+F_01 --> F_F_18
+F_01 --> F_F_19
+F_01 --> F_F_20
+F_01 --> F_F_21
+F_07 --> F_F_22
+F_08 --> F_F_22
+F_22 --> F_F_23
+F_01 --> F_F_24
+F_04 --> F_F_25
+F_12 --> F_F_26
+F_18 --> F_F_27
+F_18 --> F_F_28
+F_14 --> F_F_29
+F_09 --> F_F_30
+F_19 --> F_F_31
+F_04 --> F_F_32
+F_10 --> F_F_33
+F_04 --> F_F_34
+F_07 --> F_F_34
+F_17 --> F_F_35
+F_04 --> F_F_36
+F_05 --> F_F_37
+F_01 --> F_F_40
+F_07 --> F_F_40
+F_40 --> F_F_41
+F_16 --> F_F_41
+F_07 --> F_F_42
+F_40 --> F_F_43
+F_42 --> F_F_44
+F_11 --> F_F_44
+F_40 --> F_F_45
+F_115 --> F_F_45
+F_40 --> F_F_46
+F_40 --> F_F_47
+F_01 --> F_F_48
+F_03 --> F_F_48
+F_48 --> F_F_49
+F_40 --> F_F_50
+F_42 --> F_F_50
+F_42 --> F_F_51
+F_07 --> F_F_52
+F_12 --> F_F_53
+F_12 --> F_F_54
+F_53 --> F_F_55
+F_12 --> F_F_56
+F_40 --> F_F_56
+F_53 --> F_F_57
+F_53 --> F_F_58
+F_10 --> F_F_59
+F_12 --> F_F_60
+F_60 --> F_F_61
+F_12 --> F_F_64
+F_64 --> F_F_65
+F_07 --> F_F_66
+F_42 --> F_F_66
+F_07 --> F_F_67
+F_145 --> F_F_67
+F_07 --> F_F_68
+F_07 --> F_F_69
+F_07 --> F_F_70
+F_66 --> F_F_70
+F_07 --> F_F_71
+F_07 --> F_F_72
+F_07 --> F_F_73
+F_16 --> F_F_73
+F_07 --> F_F_74
+F_66 --> F_F_74
+F_12 --> F_F_75
+F_56 --> F_F_75
+F_08 --> F_F_76
+F_08 --> F_F_77
+F_08 --> F_F_78
+F_54 --> F_F_79
+F_12 --> F_F_80
+F_12 --> F_F_81
+F_07 --> F_F_82
+F_17 --> F_F_83
+F_12 --> F_F_84
+F_07 --> F_F_84
+F_08 --> F_F_84
+F_12 --> F_F_85
+F_04 --> F_F_85
+F_06 --> F_F_85
+F_84 --> F_F_85
+F_04 --> F_F_86
+F_06 --> F_F_86
+F_56 --> F_F_86
+F_04 --> F_F_87
+F_56 --> F_F_87
+F_88 --> F_F_87
+F_08 --> F_F_88
+F_33 --> F_F_88
+F_06 --> F_F_88
+F_26 --> F_F_89
+F_12 --> F_F_89
+F_12 --> F_F_90
+F_10 --> F_F_90
+F_55 --> F_F_90
+F_84 --> F_F_91
+F_08 --> F_F_91
+F_12 --> F_F_91
+F_12 --> F_F_92
+F_34 --> F_F_92
+F_08 --> F_F_92
+F_96 --> F_F_92
+F_33 --> F_F_93
+F_06 --> F_F_93
+F_88 --> F_F_93
+F_12 --> F_F_94
+F_58 --> F_F_94
+F_84 --> F_F_95
+F_91 --> F_F_95
+F_07 --> F_F_95
+F_12 --> F_F_96
+F_26 --> F_F_96
+F_04 --> F_F_97
+F_06 --> F_F_97
+F_56 --> F_F_98
+F_86 --> F_F_98
+F_12 --> F_F_99
+F_84 --> F_F_99
+F_91 --> F_F_99
+F_07 --> F_F_99
+F_07 --> F_F_100
+F_69 --> F_F_100
+F_10 --> F_F_100
+F_23 --> F_F_101
+F_26 --> F_F_101
+F_06 --> F_F_102
+F_88 --> F_F_102
+F_06 --> F_F_103
+F_92 --> F_F_103
+F_06 --> F_F_104
+F_08 --> F_F_104
+F_88 --> F_F_104
+F_102 --> F_F_105
+F_93 --> F_F_105
+F_07 --> F_F_106
+F_70 --> F_F_106
+F_84 --> F_F_106
+F_07 --> F_F_107
+F_71 --> F_F_107
+F_10 --> F_F_107
+F_09 --> F_F_108
+F_12 --> F_F_108
+F_10 --> F_F_108
+F_86 --> F_F_109
+F_98 --> F_F_109
+F_96 --> F_F_110
+F_12 --> F_F_110
+F_58 --> F_F_110
+F_07 --> F_F_111
+F_55 --> F_F_111
+F_13 --> F_F_112
+F_12 --> F_F_112
+F_59 --> F_F_113
+F_06 --> F_F_113
+F_07 --> F_F_114
+F_04 --> F_F_114
+F_06 --> F_F_114
+F_77 --> F_F_115
+F_45 --> F_F_115
+F_07 --> F_F_116
+F_44 --> F_F_116
+F_04 --> F_F_117
+F_33 --> F_F_117
+F_84 --> F_F_118
+F_06 --> F_F_119
+F_01 --> F_F_120
+F_34 --> F_F_120
+F_09 --> F_F_121
+F_12 --> F_F_121
+F_56 --> F_F_121
+F_125 --> F_F_121
+F_06 --> F_F_122
+F_04 --> F_F_122
+F_84 --> F_F_123
+F_96 --> F_F_123
+F_07 --> F_F_124
+F_26 --> F_F_124
+F_100 --> F_F_124
+F_12 --> F_F_125
+F_09 --> F_F_125
+F_40 --> F_F_125
+F_87 --> F_F_126
+F_90 --> F_F_126
+F_88 --> F_F_126
+F_56 --> F_F_127
+F_75 --> F_F_127
+F_86 --> F_F_128
+F_98 --> F_F_128
+F_109 --> F_F_128
+F_07 --> F_F_129
+F_84 --> F_F_129
+F_04 --> F_F_130
+F_100 --> F_F_130
+F_124 --> F_F_130
+F_04 --> F_F_131
+F_40 --> F_F_131
+F_40 --> F_F_132
+F_07 --> F_F_132
+F_26 --> F_F_133
+F_100 --> F_F_133
+F_08 --> F_F_134
+F_26 --> F_F_134
+F_88 --> F_F_135
+F_08 --> F_F_135
+F_07 --> F_F_136
+F_42 --> F_F_136
+F_07 --> F_F_137
+F_68 --> F_F_137
+F_07 --> F_F_138
+F_55 --> F_F_138
+F_09 --> F_F_139
+F_55 --> F_F_139
+F_57 --> F_F_139
+F_55 --> F_F_140
+F_09 --> F_F_140
+F_06 --> F_F_141
+F_33 --> F_F_141
+F_09 --> F_F_142
+F_04 --> F_F_142
+F_89 --> F_F_143
+F_26 --> F_F_143
+F_96 --> F_F_144
+F_58 --> F_F_144
+F_72 --> F_F_144
+F_84 --> F_F_145
+F_144 --> F_F_145
+F_123 --> F_F_146
+F_84 --> F_F_146
+F_144 --> F_F_146
+F_84 --> F_F_147
+F_145 --> F_F_147
+F_72 --> F_F_148
+F_144 --> F_F_148
+F_75 --> F_F_149
+F_56 --> F_F_149
+F_144 --> F_F_149
+F_110 --> F_F_150
+F_144 --> F_F_150
+F_84 --> F_F_151
+F_86 --> F_F_151
+F_97 --> F_F_151
+F_85 --> F_F_152
+F_86 --> F_F_152
+F_93 --> F_F_152
+F_114 --> F_F_153
+F_85 --> F_F_153
+F_86 --> F_F_153
+F_88 --> F_F_154
+F_102 --> F_F_154
+F_105 --> F_F_154
+F_07 --> F_F_155
+F_84 --> F_F_155
+F_145 --> F_F_155
+F_91 --> F_F_156
+F_95 --> F_F_156
+F_145 --> F_F_156
+F_84 --> F_F_157
+F_114 --> F_F_157
+F_07 --> F_F_157
+F_92 --> F_F_158
+F_84 --> F_F_158
+F_144 --> F_F_158
+F_123 --> F_F_159
+F_84 --> F_F_159
+F_144 --> F_F_159
+F_84 --> F_F_160
+F_85 --> F_F_160
+F_144 --> F_F_160
+F_84 --> F_F_161
+F_91 --> F_F_161
+F_132 --> F_F_161
+F_94 --> F_F_162
+F_84 --> F_F_162
+F_96 --> F_F_163
+F_96 --> F_F_164
+F_26 --> F_F_164
+F_119 --> F_F_165
+F_88 --> F_F_166
+F_102 --> F_F_166
+F_88 --> F_F_167
+F_103 --> F_F_167
+F_88 --> F_F_168
+F_105 --> F_F_168
+F_55 --> F_F_169
+F_144 --> F_F_169
+F_144 --> F_F_170
+F_90 --> F_F_170
+F_56 --> F_F_171
+F_75 --> F_F_171
+F_149 --> F_F_171
+F_86 --> F_F_172
+F_98 --> F_F_172
+F_109 --> F_F_172
+F_84 --> F_F_173
+F_04 --> F_F_173
+%% Mounted screen -> primary feature entry points
+PG_0 --> F_02
+PG_1 --> F_01
+PG_2 --> F_01
+PG_3 --> F_16
+PG_4 --> F_04
+PG_5 --> F_25
+PG_6 --> F_94
+PG_7 --> F_96
+PG_8 --> F_03
+PG_9 --> F_06
+PG_10 --> F_96
+PG_11 --> F_08
+PG_12 --> F_12
+PG_13 --> F_15
+PG_14 --> F_26
+PG_15 --> F_13
+PG_16 --> F_09
+PG_17 --> F_07
+PG_18 --> F_07
+PG_19 --> F_85
+PG_20 --> F_14
+PG_21 --> F_10
+PG_22 --> F_10
+PG_23 --> F_05
+PG_24 --> F_06
+PG_25 --> F_17
+PG_26 --> F_15
+PG_27 --> F_15
 classDef actor fill:#e9f2ff,stroke:#3465a4,color:#142b45
 classDef screen fill:#f0edff,stroke:#6652a3,color:#241a4a
 classDef feature fill:#edf8f1,stroke:#3c8058,color:#173d27
@@ -3633,7 +4272,7 @@ Routes described in the intended navigation but not mounted include institution,
 
 ## 8. API endpoint inventory
 
-The diagram contains one node for every unique endpoint entry in the checked-in API contract index. This list is the transport inventory; it is not a claim that each endpoint has durable storage or full feature acceptance.
+The diagram contains one node for every unique endpoint entry in the checked-in API contract index, including root health and the `/api/v1` health check. This list is the transport inventory; it is not a claim that each endpoint has durable storage or full feature acceptance.
 
 - `GET /api/v1/health`
 - `GET /api/v1/feature-flags`
