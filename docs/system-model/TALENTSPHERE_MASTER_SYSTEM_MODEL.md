@@ -1669,6 +1669,54 @@ MOD_IDENTITY --> T_REVOKED_SESSIONS
 T_WORKER_HEALTH[("worker_health")]
 T_WORKER_HEALTH --> PG
 MOD_COMMUNICATION --> T_WORKER_HEALTH
+T_PROFILES -->|account owns profile; IDs differ| T_USERS
+T_ORG_MEMBERSHIPS -->|membership belongs to organization| T_ORGANIZATIONS
+T_ORG_MEMBERSHIPS -->|membership belongs to account| T_USERS
+T_JOB_SKILLS -->|job-to-skill join| T_JOBS
+T_JOB_SKILLS -->|job-to-skill join| T_SKILLS
+T_JOB_APPLICATIONS -->|application targets job| T_JOBS
+T_APPLICATION_EVIDENCE -->|application evidence join| T_JOB_APPLICATIONS
+T_APPLICATION_EVIDENCE -->|application evidence join| T_EVIDENCE
+T_EVIDENCE_SKILLS -->|evidence-to-skill join| T_EVIDENCE
+T_EVIDENCE_SKILLS -->|evidence-to-skill join| T_SKILLS
+T_VERIFIED_WORK_HISTORIES -->|candidate work history| T_PROFILES
+T_VERIFIED_WORK_HISTORIES -->|employer organization| T_ORGANIZATIONS
+T_EMPLOYMENT_REFERENCES -->|reference for work history| T_VERIFIED_WORK_HISTORIES
+T_EMPLOYMENT_REFERENCES -->|candidate/referee profile references; check account/profile identity mapping| T_PROFILES
+T_WORK_HISTORY_EMAIL_CHALLENGES -->|email challenge for work-history record| T_VERIFIED_WORK_HISTORIES
+T_THREAD_PARTICIPANTS -->|thread membership| T_MESSAGE_THREADS
+T_THREAD_PARTICIPANTS -->|participant account| T_USERS
+T_MESSAGES -->|message belongs to thread| T_MESSAGE_THREADS
+T_NOTIFICATIONS -->|notification recipient| T_USERS
+T_NOTIFICATION_PREFERENCES -->|preference owner| T_USERS
+T_REVOKED_SESSIONS -->|revoked session account| T_USERS
+T_SAVED_JOBS -->|saved-job bookmark| T_JOBS
+T_JOB_ALERTS -->|alert generated from saved search| T_SAVED_SEARCHES
+T_JOB_ALERTS -->|alert references job| T_JOBS
+T_APPLICATION_DRAFT_VERSIONS -->|draft version history| T_APPLICATION_DRAFTS
+T_APPLICATION_DRAFTS -->|candidate draft owner| T_PROFILES
+T_APPLICATION_DRAFTS -->|draft targets job| T_JOBS
+T_APPLICATION_DRAFTS -->|optional resume reference| T_RESUMES
+T_COURSE_MODULES -->|course contains ordered modules| T_COURSES
+T_LESSONS -->|module contains ordered lessons| T_COURSE_MODULES
+T_COURSE_ENROLLMENTS -->|enrollment for course| T_COURSES
+T_LESSON_PROGRESS -->|progress belongs to enrollment| T_COURSE_ENROLLMENTS
+T_LESSON_PROGRESS -->|progress references lesson| T_LESSONS
+T_COURSE_CERTIFICATES -->|certificate issued from enrollment| T_COURSE_ENROLLMENTS
+T_CERTIFICATE_REVOCATIONS -->|revocation record for certificate| T_COURSE_CERTIFICATES
+T_INTERVIEW_ASSESSMENTS -->|assessment for application| T_JOB_APPLICATIONS
+T_INTERVIEW_SCORECARDS -->|scorecard for assessment| T_INTERVIEW_ASSESSMENTS
+T_INTERVIEW_AI_FEEDBACKS -->|AI feedback for assessment| T_INTERVIEW_ASSESSMENTS
+T_TALENT_POOL_MEMBERS -->|member belongs to pool| T_TALENT_POOLS
+T_TALENT_POOL_MEMBERS -->|pool candidate| T_PROFILES
+T_ALUMNI_GROUP_MEMBERS -->|group membership| T_ALUMNI_GROUPS
+T_ALUMNI_GROUP_MEMBERS -->|alumni member account| T_USERS
+T_REFERRAL_OUTCOMES -->|outcome for referral| T_REFERRAL_REQUESTS
+T_STRIPE_CUSTOMERS -->|Stripe customer belongs to account| T_USERS
+T_SUBSCRIPTIONS -->|subscription owner; verify schema-specific user key| T_USERS
+T_INVOICES -->|invoice owner; verify schema-specific user key| T_USERS
+T_ENTITLEMENTS -->|entitlement owner; verify schema-specific user key| T_USERS
+T_BILLING_EVENTS -->|billing event account; verify nullable/unknown provider events| T_USERS
 end
 subgraph AUTHZ["11 Identity, roles, authorization and session lifecycle"]
 REG["POST auth/register: candidate or recruiter only; email unique; password 8–256; PBKDF2 hash"]
@@ -4671,6 +4719,14 @@ The diagram contains one node for every named entity/table reference enumerated 
 - `worker_health`
 
 **Data consistency rules:** core `CoreOp[]` commits are one Postgres transaction; the Maps update only after commit. Guarded updates use optimistic concurrency and return conflict on stale bases. SQL uniqueness/FK constraints are the final race guard. A durability header on an API response is route-specific; a module can write an auxiliary durable row while its principal state remains ephemeral.
+
+
+
+### Explicit relational clusters traced from the database reference and migrations
+
+The diagram now includes these cross-entity relationships as labelled edges: users↔profiles; organizations↔memberships; jobs↔job skills and applications; applications↔application evidence; evidence↔evidence skills; work histories↔profiles/organizations/references/email challenges; message threads↔participants/messages; notifications/preferences↔accounts; sessions↔accounts; saved jobs/searches/alerts; application drafts↔candidate/job/resume and draft versions; courses↔modules↔lessons↔enrollments↔progress↔certificates/revocations; interview assessments↔applications/scorecards/AI feedback; talent pools↔members/candidate profiles; alumni groups↔members; referrals↔outcomes; and Stripe customer/billing records↔accounts.
+
+**Important schema caveat:** the diagram's database nodes include names referenced by the database reference, not a claim that all 112 are confirmed physical tables in the latest target schema. The migration review confirmed multiple table-level and column-level relationships, but a complete generated constraint ledger (all PK, FK, CHECK, UNIQUE, partial-index, ON DELETE/UPDATE and RLS policies across 55 migrations) has not yet been independently reconciled. Some relationship labels are logical ownership edges rather than an assertion of a specific FK column. The database reference itself warns that account IDs and profile IDs differ; verify each join against the migration before querying or changing data.
 
 ## 10. Role and permission model
 
