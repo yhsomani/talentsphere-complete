@@ -48,6 +48,7 @@ import {
   createProfileEntity,
   updateProfileEntity,
   canViewProfile,
+  canViewActivity,
   createEvidence,
   verifyEvidence,
   disputeEvidence,
@@ -9522,12 +9523,35 @@ export async function buildApp(
   app.get(
     '/api/v1/activity/users/:userId/score',
     async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
-      extractUser(req);
+      const session = extractUser(req);
       const { userId } = req.params;
 
       const user = usersById.get(userId);
-      if (!user) {
+      const profile = profilesByUserId.get(userId);
+      if (!user || !profile) {
         throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      }
+
+      // Same privacy as the profile, plus the person's "show activity"
+      // setting (C-26). Settings are read through without writing defaults.
+      const settings =
+        userSettingsByUserId.get(userId) ??
+        (await storage.accountMetadata.getSettings(userId)) ??
+        undefined;
+      const visibility = canViewActivity({
+        profile,
+        settings,
+        viewerUserId: session.userId,
+        viewerRoles: session.roles,
+      });
+      if (visibility === 'profile_restricted') {
+        throw new DomainError(
+          'FORBIDDEN',
+          'This profile is private or restricted to authorized roles.'
+        );
+      }
+      if (visibility === 'activity_hidden') {
+        throw new DomainError('FORBIDDEN', 'This person does not share their activity.');
       }
 
       const userEvents = activityEventsByUserId.get(userId) || [];

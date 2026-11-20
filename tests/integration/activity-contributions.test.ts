@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Integration: Activity & Contribution Tracking (F-146, S-09)', () => {
   let app: FastifyInstance;
@@ -190,5 +191,86 @@ describe('Integration: Activity & Contribution Tracking (F-146, S-09)', () => {
     const body = JSON.parse(res.payload);
     expect(body.score.compositeScore).toBeGreaterThanOrEqual(20);
     expect(body.score.totalEventsCount).toBe(4);
+  });
+});
+
+// C-26: the score follows the profile's privacy and the person's own
+// "show activity" setting.
+describe('Integration: activity score visibility (C-26, CF-34)', () => {
+  let app: FastifyInstance;
+  const users: Record<string, { token: string; userId: string }> = {};
+  const adminToken = createSessionToken(
+    '00000000-0000-4000-a000-0000000000a7',
+    'admin.activity@talentsphere.internal',
+    ['platform_admin']
+  );
+
+  const inject = async (method: 'GET' | 'PATCH', url: string, token: string, payload?: object) =>
+    app.inject({
+      method,
+      url,
+      headers: { authorization: `Bearer ${token}` },
+      ...(payload ? { payload } : {}),
+    });
+  const scoreOf = (target: string, viewerToken: string) =>
+    inject('GET', `/api/v1/activity/users/${users[target].userId}/score`, viewerToken);
+
+  beforeAll(async () => {
+    app = await buildApp({ NODE_ENV: 'test', PORT: '0', LOG_LEVEL: 'error' });
+    await app.ready();
+    for (const [name, role] of [
+      ['target', 'candidate'],
+      ['peer', 'candidate'],
+      ['recruiter', 'recruiter'],
+    ]) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `${name}.visibility.${Date.now()}@example.com`,
+          password: 'Password123!',
+          fullName: `Visibility ${name}`,
+          role,
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const body = JSON.parse(res.payload);
+      users[name] = { token: body.token, userId: body.user.id };
+    }
+  });
+
+  it('refuses another candidate when the profile is recruiters-only, and still serves a recruiter', async () => {
+    expect((await scoreOf('target', users.peer.token)).statusCode).toBe(200);
+    const patched = await inject('PATCH', '/api/v1/profile/me', users.target.token, {
+      privacy: 'recruiters_only',
+    });
+    expect(patched.statusCode).toBe(200);
+
+    const peer = await scoreOf('target', users.peer.token);
+    expect(peer.statusCode).toBe(403);
+    expect(JSON.parse(peer.payload).error.code).toBe('FORBIDDEN');
+    expect((await scoreOf('target', users.recruiter.token)).statusCode).toBe(200);
+  });
+
+  it('refuses a recruiter once the person stops sharing activity; owner and admin still see it', async () => {
+    const patched = await inject('PATCH', '/api/v1/settings', users.target.token, {
+      showActivity: false,
+    });
+    expect(patched.statusCode).toBe(200);
+
+    const recruiter = await scoreOf('target', users.recruiter.token);
+    expect(recruiter.statusCode).toBe(403);
+    expect(JSON.parse(recruiter.payload).error.message).toContain('does not share their activity');
+    expect((await scoreOf('target', users.target.token)).statusCode).toBe(200);
+    expect((await scoreOf('target', adminToken)).statusCode).toBe(200);
+  });
+
+  it('still answers 404 for an unknown user', async () => {
+    const res = await inject(
+      'GET',
+      '/api/v1/activity/users/00000000-0000-4000-a000-00000000dead/score',
+      users.peer.token
+    );
+    expect(res.statusCode).toBe(404);
   });
 });
