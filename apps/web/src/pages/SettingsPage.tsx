@@ -3,7 +3,7 @@ import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { useSession } from '../lib/SessionContext.js';
-import { LoadError, Button, Input, Notice, PageHeader, Select } from '../components/ui/index.js';
+import { LoadError, Button, Notice, PageHeader, Select } from '../components/ui/index.js';
 
 type Theme = 'light' | 'dark' | 'system';
 type Visibility = 'public' | 'connections_only' | 'recruiters_only' | 'private';
@@ -13,6 +13,11 @@ type Digest = 'realtime' | 'daily' | 'weekly' | 'none';
 // The preference fields the account settings API accepts. The stored BYO AI key
 // and two-factor are left out on purpose: a key needs encrypted secret storage,
 // and two-factor changes how people sign in, so each belongs to its own flow.
+// Only controls the product acts on are shown (C-29): profile visibility, email
+// and activity display, and connection requests. Theme, language, time zone,
+// direct-message rules, search indexing, push, marketing and summary emails,
+// activity emails and AI consent are not acted on yet, so they are not offered;
+// their saved values still round-trip untouched (the form sends only changes).
 interface Preferences {
   theme: Theme;
   language: string;
@@ -47,30 +52,11 @@ const PREFERENCE_KEYS: ReadonlyArray<keyof Preferences> = [
   'aiDataUsageConsent',
 ];
 
-const THEME_OPTIONS: ReadonlyArray<{ value: Theme; label: string }> = [
-  { value: 'system', label: 'Match my device' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
-
 const VISIBILITY_OPTIONS: ReadonlyArray<{ value: Visibility; label: string }> = [
   { value: 'public', label: 'Anyone' },
   { value: 'connections_only', label: 'Only my connections' },
   { value: 'recruiters_only', label: 'Only people hiring on TalentSphere' },
   { value: 'private', label: 'Only me' },
-];
-
-const DIRECT_MESSAGE_OPTIONS: ReadonlyArray<{ value: DirectMessages; label: string }> = [
-  { value: 'everyone', label: 'Anyone' },
-  { value: 'connections_only', label: 'Only my connections' },
-  { value: 'none', label: 'Nobody' },
-];
-
-const DIGEST_OPTIONS: ReadonlyArray<{ value: Digest; label: string }> = [
-  { value: 'realtime', label: 'As it happens' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'none', label: 'Never' },
 ];
 
 const Toggle: React.FC<{
@@ -122,7 +108,7 @@ const Group: React.FC<{ title: string; children: React.ReactNode }> = ({ title, 
 );
 
 export const SettingsPage: React.FC = () => {
-  usePageMeta('Settings', 'Choose how TalentSphere looks, who can see you, and what we send you.');
+  usePageMeta('Settings', 'Choose who can see you and who can reach you on TalentSphere.');
   const session = useSession();
   // baseline is what the server last confirmed; draft is what the form shows.
   const [baseline, setBaseline] = useState<Preferences | null>(null);
@@ -202,7 +188,7 @@ export const SettingsPage: React.FC = () => {
     <div>
       <PageHeader
         title="Settings"
-        intro="Choose how TalentSphere looks, who can see you, and what we send you."
+        intro="Choose who can see you and who can reach you on TalentSphere."
       />
       {error && (
         <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="settings-error">
@@ -216,35 +202,6 @@ export const SettingsPage: React.FC = () => {
       )}
 
       <form onSubmit={save} noValidate>
-        <Group title="Appearance">
-          <Select
-            id="settings-theme"
-            label="Theme"
-            value={draft.theme}
-            onChange={(e) => update('theme', e.target.value as Theme)}
-            options={THEME_OPTIONS}
-            data-testid="settings-theme"
-          />
-          <Input
-            id="settings-language"
-            label="Language"
-            helperText="A language tag such as en."
-            value={draft.language}
-            maxLength={10}
-            onChange={(e) => update('language', e.target.value)}
-            data-testid="settings-language"
-          />
-          <Input
-            id="settings-timezone"
-            label="Time zone"
-            helperText="For example Europe/London."
-            value={draft.timezone}
-            maxLength={64}
-            onChange={(e) => update('timezone', e.target.value)}
-            data-testid="settings-timezone"
-          />
-        </Group>
-
         <Group title="Privacy">
           <Select
             id="settings-visibility"
@@ -271,58 +228,6 @@ export const SettingsPage: React.FC = () => {
             label="Allow connection requests"
             checked={draft.allowConnectionRequests}
             onChange={(checked) => update('allowConnectionRequests', checked)}
-          />
-          <Select
-            id="settings-direct-messages"
-            label="Who can message you directly"
-            value={draft.allowDirectMessages}
-            onChange={(e) => update('allowDirectMessages', e.target.value as DirectMessages)}
-            options={DIRECT_MESSAGE_OPTIONS}
-            data-testid="settings-direct-messages"
-          />
-          <Toggle
-            id="settings-search-indexing"
-            label="Allow search engines to index my profile"
-            checked={draft.searchEngineIndexing}
-            onChange={(checked) => update('searchEngineIndexing', checked)}
-          />
-        </Group>
-
-        <Group title="Notifications">
-          <Toggle
-            id="settings-email-notifications"
-            label="Email me about activity"
-            checked={draft.emailNotifications}
-            onChange={(checked) => update('emailNotifications', checked)}
-          />
-          <Toggle
-            id="settings-push-notifications"
-            label="Send push notifications"
-            checked={draft.pushNotifications}
-            onChange={(checked) => update('pushNotifications', checked)}
-          />
-          <Toggle
-            id="settings-marketing-emails"
-            label="Email me about new features and offers"
-            checked={draft.marketingEmails}
-            onChange={(checked) => update('marketingEmails', checked)}
-          />
-          <Select
-            id="settings-digest"
-            label="Summary email frequency"
-            value={draft.digestFrequency}
-            onChange={(e) => update('digestFrequency', e.target.value as Digest)}
-            options={DIGEST_OPTIONS}
-            data-testid="settings-digest"
-          />
-        </Group>
-
-        <Group title="AI features">
-          <Toggle
-            id="settings-ai-consent"
-            label="Allow TalentSphere AI to use my profile data"
-            checked={draft.aiDataUsageConsent}
-            onChange={(checked) => update('aiDataUsageConsent', checked)}
           />
         </Group>
 

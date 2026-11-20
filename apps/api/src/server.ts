@@ -1261,7 +1261,9 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      const allowed = canViewProfile(profile, viewerId, viewerRoles);
+      const allowed = canViewProfile(profile, viewerId, viewerRoles, {
+        isConnected: viewerIsConnected(viewerId, profile),
+      });
       if (!allowed) {
         throw new DomainError(
           'FORBIDDEN',
@@ -1438,7 +1440,12 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        profile &&
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to this evidence is restricted by profile privacy.'
@@ -1478,7 +1485,11 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (!canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to evidence is restricted by subject privacy settings.'
@@ -6353,6 +6364,12 @@ export async function buildApp(
   // Professional Networking Repositories & Endpoints (F-09)
   const connectionsById = new Map<string, Connection>();
   const connectionsByUserId = new Map<string, Connection[]>();
+  // Whether a viewer has an accepted connection with a profile's owner, for
+  // connections-only profile visibility (C-29).
+  const viewerIsConnected = (viewerId: string | undefined, profile: { userId: string }) =>
+    viewerId
+      ? areConnected(connectionsByUserId.get(viewerId) ?? [], viewerId, profile.userId)
+      : false;
 
   app.post('/api/v1/connections/request', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -6369,13 +6386,17 @@ export async function buildApp(
     }
 
     const userConnections = connectionsByUserId.get(session.userId) || [];
+    // Read through the durable settings so the choice survives a restart (C-29).
+    const recipientSettings =
+      targetUserId === session.userId ? undefined : await accountSettings(targetUserId);
     const connection = requestConnection(
       {
         senderId: session.userId,
         recipientId: targetUserId,
         note: input.note,
       },
-      userConnections
+      userConnections,
+      recipientSettings?.allowConnectionRequests ?? true
     );
 
     connectionsById.set(connection.id, connection);
@@ -8474,7 +8495,12 @@ export async function buildApp(
     const stealth =
       (userSettingsByUserId.get(profile.userId) as any)?.stealthMode === true ||
       declared?.engagementSegment === 'stealth';
-    return !stealth && canViewProfile(profile, session.userId, session.roles);
+    return (
+      !stealth &&
+      canViewProfile(profile, session.userId, session.roles, {
+        isConnected: viewerIsConnected(session.userId, profile),
+      })
+    );
   };
   const assertMayProfileCandidate = (session: AuthPayload, candidateId: string) => {
     if (!candidateProfileFor(candidateId) && candidateId !== session.userId) {
@@ -11279,7 +11305,11 @@ export async function buildApp(
     if (type === 'all' || type === 'profiles') {
       for (const profile of profilesById.values()) {
         // Enforce privacy rule: skip if viewer cannot view profile
-        if (!canViewProfile(profile, viewerId, viewerRoles)) {
+        if (
+          !canViewProfile(profile, viewerId, viewerRoles, {
+            isConnected: viewerIsConnected(viewerId, profile),
+          })
+        ) {
           continue;
         }
 
@@ -11467,7 +11497,11 @@ export async function buildApp(
 
     // Collect public profiles
     for (const profile of profilesById.values()) {
-      if (canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         candidateItems.push({
           id: profile.id,
           type: 'profile',
@@ -12861,7 +12895,9 @@ export async function buildApp(
     const appliedToViewer = !!viewerProfile && appliedToTeamOf(profile, viewerProfile);
     if (
       !appliedToViewer &&
-      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[])
+      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[], {
+        isConnected: viewerIsConnected(session?.userId, profile),
+      })
     ) {
       throw new DomainError(
         'FORBIDDEN',
