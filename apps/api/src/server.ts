@@ -6107,9 +6107,17 @@ export async function buildApp(
     convMessages.push(userMsg);
 
     // 6. Generate AI response with advisory provenance
+    // The user's real skills: the freshness records keyed by profile id (C-19).
+    const ownProfileId = profilesByUserId.get(session.userId)?.id;
+    const candidateSkills = [
+      ...(skillFreshnessByCandidateId.get(ownProfileId ?? '')?.values() ?? []),
+    ]
+      .map((record) => skillsById.get(record.skillId)?.name)
+      .filter((name): name is string => Boolean(name));
     const aiResult = generateCareerAssistantResponse({
       conversationId: conversation.id,
       prompt: input.prompt,
+      candidateSkills,
     });
 
     convMessages.push(aiResult.message);

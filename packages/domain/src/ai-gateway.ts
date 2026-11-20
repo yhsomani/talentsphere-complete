@@ -236,9 +236,13 @@ export function generateCareerAssistantResponse(params: {
       '2. Structure behavioral responses with the STAR method (Situation, Task, Action, Result).\n' +
       '3. Complete live sandboxed challenges in the TalentSphere Arena to validate your proficiency.';
   } else if (lower.includes('skill') || lower.includes('learn') || lower.includes('gap')) {
-    const known = candidateSkills.length > 0 ? candidateSkills.join(', ') : 'TypeScript, SQL';
+    // Name only skills the user actually has; never invent any (C-19).
+    const opening =
+      candidateSkills.length > 0
+        ? `Based on your current competencies (${candidateSkills.join(', ')}), high-impact learning paths include:\n`
+        : 'You have not added skills to your profile yet. High-impact learning paths include:\n';
     responseText =
-      `Based on your current competencies (${known}), high-impact learning paths include:\n` +
+      opening +
       '1. Distributed event streaming and transactional worker queues.\n' +
       '2. Zero-trust security, defense-in-depth authorization, and public credential verification.\n' +
       '3. Explore relevant courses in the TalentSphere Learning Management System (LMS).';

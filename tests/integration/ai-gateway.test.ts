@@ -78,6 +78,33 @@ describe('Central AI Gateway & Career Assistant Integration (F-11, SSOT Section 
     expect(body.provenance.tokensUsed).toBeGreaterThan(0);
   });
 
+  it("bases skill advice on the user's own skills, never invented ones (C-19)", async () => {
+    const ask = async (token: string) =>
+      (
+        await app.inject({
+          method: 'POST',
+          url: '/api/v1/ai/career-assistant/chat',
+          headers: { authorization: `Bearer ${token}` },
+          payload: { prompt: 'Where is my skill gap?' },
+        })
+      ).json().message.content as string;
+
+    // Charlie has no skills: the assistant says so instead of inventing some.
+    const none = await ask(charlieToken);
+    expect(none).not.toContain('TypeScript, SQL');
+    expect(none).toContain('You have not added skills to your profile yet.');
+
+    const skill = (await app.inject({ method: 'GET', url: '/api/v1/skills' })).json().skills[0];
+    const added = await app.inject({
+      method: 'POST',
+      url: '/api/v1/skills/freshness',
+      headers: { authorization: `Bearer ${aliceToken}` },
+      payload: { skillId: skill.id, category: 'fast_changing', verificationSource: 'challenge' },
+    });
+    expect(added.statusCode).toBe(201);
+    expect(await ask(aliceToken)).toContain(`Based on your current competencies (${skill.name})`);
+  });
+
   it('persists conversation history and isolates access across users', async () => {
     // 1. Create a dedicated conversation
     const convRes = await app.inject({
