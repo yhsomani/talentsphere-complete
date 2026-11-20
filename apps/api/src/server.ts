@@ -813,6 +813,8 @@ export async function buildApp(
   // governed review and appeal" (SSOT §Trust) plus their GDPR rights — and
   // nothing else. Erased accounts have no credential and no access at all.
   const RESTRICTED_SESSION_ROUTES = new Set([
+    // The client's bootstrap; returns only the caller's own state (C-01).
+    'GET /api/v1/auth/session',
     'GET /api/v1/profile/me',
     'POST /api/v1/auth/password',
     'POST /api/v1/auth/sign-out',

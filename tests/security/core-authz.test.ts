@@ -201,6 +201,12 @@ describe('SEC: account state is enforced on every request, not at token expiry',
     // ...but the governed-review path stays open (SSOT: restrictions require appeal).
     expect((await call(app, 'GET', '/api/v1/moderation/reports/my', user.token)).status).toBe(200);
     expect((await call(app, 'GET', '/api/v1/profile/me', user.token)).status).toBe(200);
+    // The client's session bootstrap stays open so the web can show the
+    // restricted state instead of an error (C-01).
+    const session = await call(app, 'GET', '/api/v1/auth/session', user.token);
+    expect(session.status).toBe(200);
+    expect(session.body.user.status).toBe('suspended');
+    expect(session.body.profile.userId).toBe(user.user.id);
 
     const login = await call(app, 'POST', '/api/v1/auth/login', undefined, {
       email: 'suspended@example.com',
@@ -208,6 +214,25 @@ describe('SEC: account state is enforced on every request, not at token expiry',
     });
     expect(login.status).toBe(200);
     expect(login.body.user.status).toBe('suspended');
+  });
+
+  it('lets a deactivated account read its own session but nothing else (C-01)', async () => {
+    const user = await register(app, 'deactivated@example.com');
+    const deactivate = await call(
+      app,
+      'PATCH',
+      `/api/v1/admin/users/${user.user.id}/status`,
+      adminToken,
+      { status: 'deactivated', reason: 'Account closed by support' }
+    );
+    expect(deactivate.status).toBe(200);
+
+    const session = await call(app, 'GET', '/api/v1/auth/session', user.token);
+    expect(session.status).toBe(200);
+    expect(session.body.user.status).toBe('deactivated');
+    expect(session.body.profile.userId).toBe(user.user.id);
+    // The allow-list did not widen: ordinary routes stay closed.
+    expect((await call(app, 'GET', '/api/v1/evidence/mine', user.token)).status).toBe(403);
   });
 
   it('applies a role change to existing sessions immediately', async () => {
