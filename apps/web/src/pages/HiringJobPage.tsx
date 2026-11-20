@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
 import { ApiError, apiJson, errorMessage } from '../lib/api.js';
-import { applicationStatusLabel, formatDate } from '../lib/format.js';
+import { applicationStatusLabel, evidenceStatusLabel, formatDate } from '../lib/format.js';
 import { createStableKeyer } from '../lib/idempotency.js';
 import {
   APPLICATION_TRANSITIONS,
@@ -429,13 +429,7 @@ export const HiringJobPage: React.FC = () => {
                                 <li key={ev.id}>
                                   {ev.title}{' '}
                                   <span style={{ color: colors.neutral[600] }}>
-                                    (
-                                    {ev.status === 'revoked' || ev.status === 'expired'
-                                      ? ev.status
-                                      : ev.verificationLevel === 'unverified'
-                                        ? 'self-reported'
-                                        : ev.verificationLevel.replace('_', ' ')}
-                                    )
+                                    ({evidenceStatusLabel(ev)})
                                   </span>
                                 </li>
                               ))}
