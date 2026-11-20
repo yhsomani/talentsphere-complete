@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
+import crypto from 'node:crypto';
 import { buildApp } from '../../apps/api/src/server.js';
 
 describe('Direct Messaging Integration (F-10, WF-10)', () => {
@@ -243,5 +244,62 @@ describe('Direct Messaging Integration (F-10, WF-10)', () => {
     );
     expect(msgJob).toBeDefined();
     expect(msgJob.payload.recipientIds).toContain(aliceProfileId);
+  });
+
+  // POST /threads/:id/read had no test (audit A10-003, cross-review C-24 T3).
+  it('marks a thread read for a participant only (POST /threads/:id/read)', async () => {
+    const auth = (token: string) => ({ authorization: `Bearer ${token}` });
+    const started = await app.inject({
+      method: 'POST',
+      url: '/api/v1/threads',
+      headers: auth(aliceToken),
+      payload: { recipientId: bobProfileId, initialMessage: 'Unread until Bob says so' },
+    });
+    expect([200, 201]).toContain(started.statusCode);
+    const threadId = started.json().thread.id;
+    const sent = await app.inject({
+      method: 'POST',
+      url: `/api/v1/threads/${threadId}/messages`,
+      headers: auth(aliceToken),
+      payload: { content: 'One more unread message' },
+    });
+    expect(sent.statusCode).toBe(201);
+    const unreadFor = async (token: string) => {
+      const res = await app.inject({ method: 'GET', url: '/api/v1/threads', headers: auth(token) });
+      expect(res.statusCode).toBe(200);
+      return res.json().threads.find((t: any) => t.id === threadId).unreadCount as number;
+    };
+    expect(await unreadFor(bobToken)).toBeGreaterThan(0);
+
+    // No token, a non-participant and an unknown thread are refused, and
+    // none of them changes Bob's read position.
+    const anon = await app.inject({ method: 'POST', url: `/api/v1/threads/${threadId}/read` });
+    expect(anon.statusCode).toBe(401);
+    const outsider = await app.inject({
+      method: 'POST',
+      url: `/api/v1/threads/${threadId}/read`,
+      headers: auth(charlieToken),
+    });
+    expect(outsider.statusCode).toBe(403);
+    expect(outsider.json().error.code).toBe('FORBIDDEN');
+    const unknown = await app.inject({
+      method: 'POST',
+      url: `/api/v1/threads/${crypto.randomUUID()}/read`,
+      headers: auth(bobToken),
+    });
+    expect(unknown.statusCode).toBe(404);
+    expect(await unreadFor(bobToken)).toBeGreaterThan(0);
+    const aliceBefore = await unreadFor(aliceToken);
+
+    const read = await app.inject({
+      method: 'POST',
+      url: `/api/v1/threads/${threadId}/read`,
+      headers: auth(bobToken),
+    });
+    expect(read.statusCode).toBe(200);
+    expect(Number.isNaN(Date.parse(read.json().lastReadAt))).toBe(false);
+    expect(await unreadFor(bobToken)).toBe(0);
+    // Bob reading moves only Bob's position.
+    expect(await unreadFor(aliceToken)).toBe(aliceBefore);
   });
 });
