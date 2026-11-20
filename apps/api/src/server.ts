@@ -189,6 +189,8 @@ import {
   AnalyticsEvent,
   recordAnalyticsEvent,
   computeKPIs,
+  appendBounded,
+  ANALYTICS_EVENT_RETENTION,
   JobTemplate,
   createJobTemplate,
   updateJobTemplate,
@@ -245,6 +247,7 @@ import {
   ActivityEvent,
   ContributionScore,
   recordActivityEvent,
+  prependActivityEvent,
   calculateContributionScores,
   InstructorReputationProfile,
   InstructorOperationalMetrics,
@@ -9418,42 +9421,55 @@ export async function buildApp(
   const activityEventsByUserId = new Map<string, ActivityEvent[]>();
   const contributionScoresByUserId = new Map<string, ContributionScore>();
 
-  app.post('/api/v1/activity/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = RecordActivityEventInputSchema.parse(req.body || {});
+  // Self-reported and kept in memory: a 16 KB body, 60 a minute per account,
+  // metadata limits, and the newest ACTIVITY_EVENT_RETENTION_PER_USER events
+  // per account (M-1).
+  const activityIngestOptions = {
+    bodyLimit: 16 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/activity/events',
+    activityIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = RecordActivityEventInputSchema.parse(req.body || {});
 
-    const event = recordActivityEvent({
-      userId: session.userId,
-      category: input.category,
-      activityType: input.activityType,
-      weight: input.weight,
-      metadata: input.metadata,
-      occurredAt: input.occurredAt,
-    });
+      const event = recordActivityEvent({
+        userId: session.userId,
+        category: input.category,
+        activityType: input.activityType,
+        weight: input.weight,
+        metadata: input.metadata,
+        occurredAt: input.occurredAt,
+      });
 
-    activityEventsById.set(event.id, event);
+      activityEventsById.set(event.id, event);
 
-    const userEvents = activityEventsByUserId.get(session.userId) || [];
-    userEvents.unshift(event);
-    activityEventsByUserId.set(session.userId, userEvents);
+      const userEvents = activityEventsByUserId.get(session.userId) || [];
+      for (const dropped of prependActivityEvent(userEvents, event)) {
+        activityEventsById.delete(dropped.id);
+      }
+      activityEventsByUserId.set(session.userId, userEvents);
 
-    const score = calculateContributionScores(session.userId, userEvents);
-    contributionScoresByUserId.set(session.userId, score);
+      const score = calculateContributionScores(session.userId, userEvents);
+      contributionScoresByUserId.set(session.userId, score);
 
-    auditLogs.push({
-      event: 'activity.recorded',
-      actorId: session.userId,
-      targetId: event.id,
-      metadata: {
-        category: event.category,
-        activityType: event.activityType,
-        compositeScore: score.compositeScore,
-      },
-      timestamp: new Date().toISOString(),
-    });
+      auditLogs.push({
+        event: 'activity.recorded',
+        actorId: session.userId,
+        targetId: event.id,
+        metadata: {
+          category: event.category,
+          activityType: event.activityType,
+          compositeScore: score.compositeScore,
+        },
+        timestamp: new Date().toISOString(),
+      });
 
-    return reply.status(201).send({ event, score });
-  });
+      return reply.status(201).send({ event, score });
+    }
+  );
 
   app.get(
     '/api/v1/activity/events',
@@ -12262,66 +12278,79 @@ export async function buildApp(
   });
 
   // Product Analytics & Telemetry Routes (F-19, F-31, BR-27)
-  app.post('/api/v1/analytics/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = maybeExtractUser(req);
-    let telemetryConsent = true;
+  // Ingestion is anonymous and the store is in memory, so it is bounded: a
+  // 64 KB body, 60 requests a minute per caller, metadata limits (BR-27) and
+  // the newest ANALYTICS_EVENT_RETENTION events kept (C-03).
+  const analyticsIngestOptions = {
+    bodyLimit: 64 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/analytics/events',
+    analyticsIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = maybeExtractUser(req);
+      let telemetryConsent = true;
 
-    if (session) {
-      const settings = userSettingsByUserId.get(session.userId);
-      if (
-        settings &&
-        (settings.showActivity === false || (settings as any).telemetryEnabled === false)
-      ) {
-        telemetryConsent = false;
+      if (session) {
+        const settings = userSettingsByUserId.get(session.userId);
+        if (
+          settings &&
+          (settings.showActivity === false || (settings as any).telemetryEnabled === false)
+        ) {
+          telemetryConsent = false;
+        }
       }
-    }
 
-    const body = req.body as Record<string, unknown>;
-    const ipHash = crypto
-      .createHash('sha256')
-      .update(req.ip || '127.0.0.1')
-      .digest('hex');
-    const userAgent =
-      typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+      const body = req.body as Record<string, unknown>;
+      const ipHash = crypto
+        .createHash('sha256')
+        .update(req.ip || '127.0.0.1')
+        .digest('hex');
+      const userAgent =
+        typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
 
-    const recorded: AnalyticsEvent[] = [];
+      const recorded: AnalyticsEvent[] = [];
 
-    if (body && Array.isArray(body.events)) {
-      const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
-      for (const item of batchInput.events) {
+      if (body && Array.isArray(body.events)) {
+        const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
+        for (const item of batchInput.events) {
+          const ev = recordAnalyticsEvent({
+            userId: session?.userId,
+            anonymousId: item.anonymousId,
+            eventType: item.eventType,
+            metadata: item.metadata,
+            ipHash,
+            userAgent,
+            telemetryConsent,
+          });
+          appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
+          recorded.push(ev);
+        }
+      } else {
+        const singleInput = RecordAnalyticsEventInputSchema.parse(body);
         const ev = recordAnalyticsEvent({
           userId: session?.userId,
-          anonymousId: item.anonymousId,
-          eventType: item.eventType,
-          metadata: item.metadata,
+          anonymousId: singleInput.anonymousId,
+          eventType: singleInput.eventType,
+          metadata: singleInput.metadata,
           ipHash,
           userAgent,
           telemetryConsent,
         });
-        analyticsEvents.push(ev);
+        appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
         recorded.push(ev);
       }
-    } else {
-      const singleInput = RecordAnalyticsEventInputSchema.parse(body);
-      const ev = recordAnalyticsEvent({
-        userId: session?.userId,
-        anonymousId: singleInput.anonymousId,
-        eventType: singleInput.eventType,
-        metadata: singleInput.metadata,
-        ipHash,
-        userAgent,
-        telemetryConsent,
-      });
-      analyticsEvents.push(ev);
-      recorded.push(ev);
-    }
 
-    return reply.status(201).send({
-      message: 'Analytics event(s) recorded successfully.',
-      count: recorded.length,
-      events: recorded,
-    });
-  });
+      return reply.status(201).send({
+        message: 'Analytics event(s) recorded successfully.',
+        count: recorded.length,
+        // The caller's address hash and user agent stay server-side (admin
+        // GET /analytics/events keeps the full record).
+        events: recorded.map(({ ipHash: _ipHash, userAgent: _userAgent, ...event }) => event),
+      });
+    }
+  );
 
   app.get(
     '/api/v1/analytics/events',

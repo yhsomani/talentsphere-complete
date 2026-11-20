@@ -192,3 +192,57 @@ describe('Integration: Activity & Contribution Tracking (F-146, S-09)', () => {
     expect(body.score.totalEventsCount).toBe(4);
   });
 });
+
+describe('Integration: activity ingestion is bounded (M-1)', () => {
+  let app: FastifyInstance;
+  let token: string;
+
+  beforeAll(async () => {
+    app = await buildApp({ NODE_ENV: 'test', PORT: '0' });
+    await app.ready();
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: `bounded.act.${Date.now()}@example.com`,
+        password: 'Password123!',
+        fullName: 'Bounded Activity',
+        role: 'candidate',
+      },
+    });
+    token = JSON.parse(reg.payload).token;
+  });
+
+  const post = (payload: Record<string, unknown>) =>
+    app.inject({
+      method: 'POST',
+      url: '/api/v1/activity/events',
+      headers: { authorization: `Bearer ${token}` },
+      payload,
+    });
+
+  it('refuses a body over 16 KB with 413', async () => {
+    const res = await post({
+      category: 'learning',
+      activityType: 'big',
+      metadata: { blob: 'x'.repeat(100 * 1024) },
+    });
+    expect(res.statusCode).toBe(413);
+  });
+
+  it('refuses metadata with more than 30 keys with 422', async () => {
+    const metadata = Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`k${i}`, i]));
+    const res = await post({ category: 'learning', activityType: 'wide', metadata });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('limits one account to 60 events a minute', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 61; i++) {
+      statuses.push((await post({ category: 'learning', activityType: `rate_${i}` })).statusCode);
+    }
+    // The two refused requests above count toward the window too.
+    expect(statuses.filter((s) => s === 201)).toHaveLength(58);
+    expect(statuses.slice(-3)).toEqual([429, 429, 429]);
+  });
+});
