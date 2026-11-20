@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createEvidence,
+  courseCompletionEvidence,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -444,5 +445,24 @@ describe('Skills Graph & Taxonomy Domain Model (F-84, BR-141..147)', () => {
     expect(graph.subskills).toHaveLength(1);
     expect(graph.subskills[0].slug).toBe('nextjs');
     expect(graph.depth).toBeLessThanOrEqual(5);
+  });
+});
+
+describe('courseCompletionEvidence (C-20)', () => {
+  it('records a course completion unverified and pending, naming it as not assessed', () => {
+    const evidence = courseCompletionEvidence({
+      subjectId: 'c0000000-0000-4000-a000-000000000001',
+      course: { id: 'course-1', title: 'Modern Go Systems' },
+      nowIso: '2026-11-20T10:00:00.000Z',
+    });
+    expect(evidence.verificationLevel).toBe('unverified');
+    expect(evidence.status).toBe('pending');
+    expect(evidence.type).toBe('course_completion');
+    expect(evidence.provenance).toBe('course:course-1');
+    expect(evidence.source).toBe('TalentSphere LMS');
+    expect(evidence.recencyDate).toBe('2026-11-20');
+    expect(evidence.description).toBe(
+      'Completed all lessons in "Modern Go Systems" (completion recorded by TalentSphere; not assessed).'
+    );
   });
 });

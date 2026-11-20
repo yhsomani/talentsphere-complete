@@ -47,6 +47,7 @@ import {
   updateProfileEntity,
   canViewProfile,
   createEvidence,
+  courseCompletionEvidence,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -5279,19 +5280,13 @@ export async function buildApp(
         enrollment.status = 'completed';
         enrollment.completedAt = now;
 
-        // Auto-mint verified Evidence in the Talent Graph (BR-23)
-        const evidence = createEvidence({
+        // Record the completion as evidence in the Talent Graph (BR-23); its
+        // level is a domain rule (unverified: nothing was assessed) (C-20).
+        const evidence = courseCompletionEvidence({
           subjectId: profile.id,
-          type: 'course_completion',
-          title: `Course Certificate: ${course.title}`,
-          description: `Successfully completed all modules and lessons in "${course.title}".`,
-          source: 'TalentSphere LMS',
-          provenance: `course:${course.id}`,
-          recencyDate: now.split('T')[0],
+          course,
+          nowIso: now,
         });
-        // Authority level for platform LMS completion
-        evidence.status = 'verified';
-        evidence.verificationLevel = 'authority_verified';
 
         await persist({ kind: 'evidence', value: evidence });
 

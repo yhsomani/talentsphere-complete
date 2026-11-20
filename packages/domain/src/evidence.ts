@@ -68,6 +68,30 @@ export function createEvidence(params: CreateEvidenceParams): Evidence {
 }
 
 /**
+ * The evidence a finished TalentSphere course leaves on the learner's graph
+ * (BR-23). Lesson completion is self-paced and not assessed, so the record
+ * starts unverified like any other self-originated evidence; it is not
+ * `authority_verified` (that level is reserved for verification staff, see
+ * verifyEvidence) (C-20).
+ */
+export function courseCompletionEvidence(params: {
+  subjectId: string;
+  course: { id: string; title: string };
+  nowIso: string;
+}): Evidence {
+  const { course } = params;
+  return createEvidence({
+    subjectId: params.subjectId,
+    type: 'course_completion',
+    title: `Course Certificate: ${course.title}`,
+    description: `Completed all lessons in "${course.title}" (completion recorded by TalentSphere; not assessed).`,
+    source: 'TalentSphere LMS',
+    provenance: `course:${course.id}`,
+    recencyDate: params.nowIso.split('T')[0],
+  });
+}
+
+/**
  * Who is acting on an evidence record. Pass every role the account holds
  * (`roles`): authority comes from any of them, not only the first (gap
  * G-25). `role` alone is still accepted for single-role callers.
