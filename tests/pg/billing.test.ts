@@ -263,6 +263,7 @@ describe('Billing persistence (PostgreSQL)', () => {
       method: 'POST',
       url: '/api/v1/settings/erasure/execute',
       headers: auth(),
+      payload: { currentPassword: 'long-enough-billing-test-password' },
     });
     expect(erased.statusCode).toBe(200);
     expect(deletedCustomers).toContain(customerId);

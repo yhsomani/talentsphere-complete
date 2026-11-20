@@ -49,6 +49,7 @@ export const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
@@ -99,12 +100,21 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const closeDelete = () => {
+    setDeleteOpen(false);
+    setDeletePassword('');
+  };
+
   const deleteAccount = async () => {
     if (deleteBusy) return;
     setDeleteBusy(true);
     setDeleteError(null);
     try {
-      await apiJson('/api/v1/settings/erasure/execute', { method: 'POST' });
+      // The server asks for the current password before erasing (C-04).
+      await apiJson('/api/v1/settings/erasure/execute', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword: deletePassword }),
+      });
       session.signOut();
       navigate('/', { replace: true });
     } catch (err) {
@@ -298,10 +308,10 @@ export const ProfilePage: React.FC = () => {
 
       <Modal
         isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
+        onClose={closeDelete}
         busy={deleteBusy}
         title="Delete your account?"
-        description="Type DELETE to confirm. Your data is removed immediately."
+        description="Type DELETE and enter your password to confirm. Your data is removed immediately."
       >
         {deleteError && (
           <Notice tone="error" style={{ marginBottom: spacing.md }}>
@@ -315,12 +325,21 @@ export const ProfilePage: React.FC = () => {
           onChange={(e) => setDeleteConfirm(e.target.value)}
           data-testid="delete-confirm-input"
         />
+        <Input
+          id="delete-password"
+          label="Current password"
+          type="password"
+          autoComplete="current-password"
+          value={deletePassword}
+          onChange={(e) => setDeletePassword(e.target.value)}
+          data-testid="delete-password-input"
+        />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
-          <Button variant="secondary" disabled={deleteBusy} onClick={() => setDeleteOpen(false)}>
+          <Button variant="secondary" disabled={deleteBusy} onClick={closeDelete}>
             Keep my account
           </Button>
           <Button
-            disabled={deleteConfirm !== 'DELETE'}
+            disabled={deleteConfirm !== 'DELETE' || deletePassword.length === 0}
             loading={deleteBusy}
             onClick={() => void deleteAccount()}
             data-testid="delete-confirm"

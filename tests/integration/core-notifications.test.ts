@@ -252,7 +252,9 @@ describe('Core-loop notifications', () => {
     // That the erased person's notifications are deleted is checked against
     // the database in tests/pg/notifications.test.ts.
     expect((await inbox(app, candidate.token)).notifications.length).toBeGreaterThan(0);
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', candidate.token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', candidate.token, {
+      currentPassword: 'a-long-enough-passphrase',
+    });
     expect(erased.status).toBe(200);
     expect((await inbox(app, owner.token)).notifications.length).toBeGreaterThan(0);
   });
