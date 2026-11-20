@@ -4,6 +4,7 @@
 **Date:** 24 September 2026  
 **Implementation reality:** **PARTIALLY IMPLEMENTED; RELEASE READINESS NOT ESTABLISHED**. Current evidence and inspection limits are recorded in `docs/reports/FEATURE_STATUS_2026-10-21.md`; historical counts are not maintained here.
 **Status:** Canonical specification (intent). Implementation status is not recorded here; see `docs/reports/FEATURE_STATUS_2026-10-21.md`  
+**Multi-agent evaluation (20–21 Nov 2026):** Part IX records the evaluation, the approved amendments SSOT-AMD-01…28 (binding requirements, **not implemented in the codebase**), validation evidence and owner decisions.  
 **Authority:** This file is the authoritative definition of intended product/system behavior. Executable code, tests, migrations, runtime evidence and production evidence determine actual implementation status.
 
 > **Founder directive:** Preserve valid capabilities and intent, not obsolete wording or weak technical choices. This document supersedes prior TalentSphere SSOT editions as an active specification. Older documents remain historical evidence only.
@@ -4493,6 +4494,8 @@ Material changes must update dependencies, tests, analytics, migrations, operati
 
 A feature may be labeled implemented only when current executable evidence supports it. Specification completeness is separate from implementation completion.
 
+The 2026-11-20 evaluation (Part IX) follows this gate: its approved amendments are specified and tested only in an unapplied reference patch, so they remain **not implemented** until code lands and passes §27.7's missing e2e and browser checks.
+
 ---
 
 ## 26. Canonical Glossary
@@ -5649,6 +5652,259 @@ The following patterns are a single canonical micro-interaction reference. Apply
 ---
 
 
+
+---
+
+# PART IX — MULTI-AGENT EVALUATION, IMPROVEMENTS, AND VALIDATION SUMMARY
+
+**Evaluation date:** 20–21 November 2026 · **Code evaluated:** `main` at `781866f` (PR #77) · **Evidence class:** `FACT` where a command was executed or a line was read; `INFERENCE` where marked.
+
+> [!IMPORTANT]
+> **Owner instruction (21 Nov 2026): no change to application code in the codebase.** Every improvement below is specified here as an implementation-ready requirement. None of it is applied to the codebase. A local, unapplied reference implementation was produced and tested in a sandbox before that instruction. It is kept outside the repository as four patch files so the owner can review, adopt or discard it (§27.6). In this part, "Implemented" means **implemented in that unapplied patch only**. The codebase status of every item is **Not implemented**.
+
+## 27.1 Method
+
+| Stage | What was done | Evidence |
+|---|---|---|
+| Independent evaluation | Ten specialist agents ran in parallel, each on its own area, from the same brief and rules (read-only, `path:line` evidence, confidence labels, no invented requirements) | 10 reports, 169 findings |
+| Cross-review | Two fresh reviewer agents, who had not taken part in the evaluation, re-verified 29 consolidated candidates against the code and arbitrated disagreements between agents | 2 review records; 0 rejected; 27 approved (5 as drafted, 22 with corrected specifications, several with owner-only sub-parts split out); 2 left to the owner |
+| Consolidation | The lead merged duplicates, applied the review verdicts and fixed an approved scope with named owners | Approved plan: 28 work items in 4 groups |
+| Reference implementation | Four implementer agents, each in an isolated git worktree and branch, implemented their group with tests | 4 unmerged branches, 33 commits, all automated checks green per branch |
+| Owner stop | The owner instructed that no code change enter the codebase; integration stopped | This part is the only repository change |
+
+Every agent's output was checked against the code by a different agent before approval. Agents worked independently: they were not shown each other's findings during evaluation.
+
+**Baseline measured on `781866f` (sandbox, authorised install and build, nothing committed):**
+
+| Check | Result |
+|---|---|
+| `pnpm build` | Pass. The web app ships as one JS chunk of 492 KB (143.6 KB gzip). |
+| `pnpm typecheck` | Pass |
+| `pnpm lint` | **Fail** on 182 files that predate this evaluation (155 `Yash_Final_Project_Document/`, 21 `.omc/`, 3 `deploy/`, 1 each in `tests/`, `apps/`, `.claude/`). Because `ci.yml` stops at the first failed step, CI runs nothing after lint (A10-001). |
+| `pnpm test` (Vitest) | 130 files / 1,357 tests pass |
+| `pnpm test:pg` (fresh Postgres 16) | 13 files / 58 tests pass |
+| `pnpm test:e2e` (Playwright, Chromium) | 256 pass, **1 fail**: `tests/e2e/responsive.spec.ts:233` finds 11 px text on `/` at every viewport. Cause: `apps/web/src/components/LandingArt.tsx:392` sets `fontSize="11"` (A04-001). |
+
+## 27.2 Mind map of the evaluation
+
+```mermaid
+mindmap
+  root((TalentSphere evaluation 2026-11-20))
+    Trust and verification
+      Self-made gold badge (A01-001, A03-003)
+      Course clicks mint authority evidence (A01-002)
+      Alumni domain self-verify (A08-003)
+      Institution verify by any instructor (C-27, owner)
+    Privacy and erasure
+      Erasure on bearer token alone (A06-001, A08-006)
+      In-memory leftovers after erasure (A05-004, A08-007, M-3)
+      No grace-period executor (G-09)
+      Inert privacy settings (G-11, G-12)
+    Access and accounts
+      Restricted users see session error (G-24)
+      No password reset or email verification (A02-001)
+      Per-account sign-in throttle missing (A08-011)
+      Activity score readable by anyone (A08-017)
+    Reliability
+      No SIGTERM handling (A09-001)
+      Lease loss gives permanent 503 (A09-002)
+      Health ignores database (G-19)
+      Anonymous analytics memory growth (A07-002, A09-004)
+      Worker livelock past max attempts (A07-011)
+    Delivery and quality
+      CI stops at lint (A10-001)
+      Landing text 11 px (A04-001)
+      Injection tests certify unused guards (A10-002)
+      8 routes untested (A10-003)
+    Architecture
+      13.4k-line route file (A05-006)
+      Three hiring-role checks (A05-003, CF-16, CF-20)
+      Durable data pointing at ephemeral data (A05-001)
+```
+
+## 27.3 Agent evaluation summary
+
+| Agent | Responsibility | Areas examined | Findings (P0/P1/P2/P3) | Most important findings |
+|---|---|---|---|---|
+| A01 Product & business logic | Purpose, core loop, business rules vs register | SSOT core loop, PRD, BUSINESS_RULE_REGISTRY vs `packages/domain`, billing plans, module value | 16 (0/6/8/2) | A candidate can earn the "verified" badge alone: the web never sends `companyId`, so the employer-domain check never runs, and referees are any email typed (A01-001). Course completion mints `authority_verified` evidence from lesson clicks, with no assessment (BR-048), and the code allows 3 lessons where BR-091 says 5 (A01-002). Rejections store an invented reason, and the outcome loop never closes (A01-003/005). Paid plan cards list features that are not built (A01-008). Module keep/gate/cut table (A01-013). |
+| A02 Functional completeness | Feature-by-feature UI→API→domain→storage | 30 modules with a web UI | 15 (0/6/8/1) | Restricted accounts are locked out of their options (G-24). No password reset or email verification exists (A02-001). Jobs cannot be edited (A02-003). Erasure is immediate, and the 30-day path has no UI or executor (A02-004). Most settings do nothing (A02-005). Every web call reaches an existing route with the right method. |
+| A03 Micro-features & edge cases | Validation, state guards, idempotency, UI states | Core-loop contracts, domain transitions, pages | 24 (0/5/10/9) | One mailbox can supply every reference, including the role's own work email, which yields score 100 and gold (A03-003). Work-email codes re-issue without limit (A03-004). A double checkout can create two paid subscriptions (A03-016). `mark-read {}` marks everything (A03-001). Revoked evidence is re-stamped on repeat revoke and accepted in applications (A03-011/013). |
+| A04 UX/UI & journeys | Navigation, journeys, consistency, a11y, feedback | `App.tsx` route map, pages, components, tokens, JOURNEY_REGISTRY | 18 (0/4/10/4) | Root cause of the e2e failure (A04-001). The responsive test reads computed size, so it misses landing SVG text drawn at about 8 px on a 320 px screen. Restricted session error, and no appeal page (A04-002). No password reset (A04-003). Dark theme, "Nobody can message me" and push do nothing, and the `connections_only` help text is false (A04-005). The Challenges page is live but unlinked (G-16 changed). |
+| A05 Architecture | Boundaries, coupling, durability strategy | `server.ts`, storage, durability labels, packages, worker, config | 14 (0/4/3/7) | Durable evidence points at ephemeral courses and certificates, so it cannot be revoked after a restart. Stealth flags are lost and consent defaults to true after a restart (A05-001/002). Three conflicting "who is hiring" checks live in routes, none in the domain (A05-003, CF-16/20 open). Erasure leaves in-memory personal data (A05-004). `TOKEN_SECRET` is read before `.env` loads (A05-007, CF-21 changed). `buildApp` is about 12.9k lines with no module boundaries (A05-006). |
+| A06 Database & data | Schema, constraints, RLS, transactions, lifecycle | 55 migrations, `storage/*`, DATABASE.md | 16 (0/4/8/4) | Irreversible erasure on a bearer token. Grace-period requests never run (A06-001, G-09). Erasure leaves personal data and deletes billing records that may need retention (A06-002). Evidence history is overwritten (A06-004, G-21 open). Admin audit is now durable (G-07 partly fixed), but 44 user-level audit writes go to an array nothing reads, and admin audit rows are written outside the action's transaction (A06-005). |
+| A07 API & integrations | Validation, envelopes, Stripe, email, worker | Routes vs contracts, `billing-stripe.ts`, `apps/worker/src/email`, claim/queue | 15 (1/5/5/4) | Staging compose passes `EMAIL_FROM=""` and the old `RESEND_API_KEY`, never `BREVO_API_KEY`. The empty string fails env validation, so the API should refuse to boot (A07-001, P0, `deploy/` is protected). Anonymous analytics grows without limit (A07-002). `/health` ignores the DB, and lease loss gives a permanent 503 (A07-008). Stripe events applied by arrival order within one second (A07-007). Worker double execution (D-02) is fixed; retry gaps remain (A07-011). |
+| A08 Security, privacy & permissions | OWASP/CWE, authz across routes, secrets, privacy | auth.ts, every route's object-level checks, helmet/CORS, webhooks, k-anonymity | 17 (0/8/5/4) | Core auth holds: signing, expiry, revocation, hashing, reference tokens and webhooks. Erasure lacks re-authentication (A08-006, CWE-306). Erasure leaves salary reports and alumni affiliations public (A08-007, CWE-359). Alumni domain verification trusts unverified emails (A08-003, CWE-287). Self-chosen recruiter role privileges (A08-001/002). Per-account login throttle missing (A08-011, CWE-307). Prior fixes G-03, G-25, G-27, G-30 and G-31 hold. G-01 is partly fixed. |
+| A09 Performance & reliability | Startup, memory, shutdown, leases, pooling, bundle | entry points, storage, limiter, worker, bundle | 18 (0/4/9/5) | No SIGTERM handling in API or worker (A09-001). Lease loss gives 503 forever, and there is no healthcheck (A09-002). Production config accepts a transaction-mode pooler, which breaks the writer lock (A09-003). Anonymous analytics can exhaust the heap (A09-004). There is no route-level code splitting (one 492 KB chunk against the §20 budget). G-17 and G-23 are still open. |
+| A10 Testing & QA | Suites, CI, assertion strength, coverage | 5 suites, configs, CI, TESTING.md | 16 (1/6/5/3; 1 unrated) | CI fails at its first step, so nothing after it has run on GitHub (A10-001, P0, protected files). SQLi, XSS and SSRF tests certify guard functions that no production code calls (A10-002). 8 of 278 routes are untested, and no suite checks authentication on every route (A10-003/005). `canViewProfile` is untested (A10-004). |
+
+**Totals:** 169 findings. P0 2, P1 52, P2 71, P3 43, 1 unrated, by the agents' own ratings, before deduplication.
+
+**Prior registers re-verified.** G-01 partly fixed. G-20 changed (wrong ids fixed; omissions remain). G-04 cited as fixed in code comments but not re-verified. G-02, G-03, G-25, G-26, G-27, G-28 (apart from the self-chosen recruiter role), G-30 and G-31 fixed. G-07 partly fixed. G-06 narrowed to 8 routes. G-16 changed. G-19 partly fixed. G-08, G-09, G-11, G-12, G-13, G-15, G-17, G-21, G-23 and G-24 still open. CF-14, CF-15, CF-16, CF-20, CF-22, CF-33, CF-37, CF-41 and CF-45 open; CF-21, CF-25 and CF-28 changed.
+
+## 27.4 Consolidated findings and decisions
+
+### Overlaps (one root cause, several agents)
+
+| Consolidated | Agents | Root cause |
+|---|---|---|
+| Restricted accounts locked out (G-24) | A02, A03, A04 | `GET /api/v1/auth/session` missing from `RESTRICTED_SESSION_ROUTES` |
+| Erasure without re-authentication | A02, A03, A06, A08 | Destructive route gated by bearer token only |
+| Erasure leaves in-memory data | A05, A06, A08, R1 (M-3) | No per-module erasure, and wrong-key deletes |
+| Anonymous memory growth | A07, A09, R1 (M-1, M-2) | Unbounded arrays, no metadata bounds, no route body limits |
+| Inert settings | A02, A03, A04 | Settings stored and returned but never read |
+| Readiness and lease loss | A07, A09 | Liveness-only health; the process keeps serving 503 |
+
+### Conflicting recommendations and how they were resolved
+
+| Topic | Positions | Decision and reason |
+|---|---|---|
+| C-20 course evidence | A01: safe to fix now. A05: owner decision | **Split.** Lowering the level to `unverified` is safe: it only removes a claim the code cannot back. Durability, BR-048, BR-091 and the CF-41 cascade are owner decisions. |
+| C-29 settings | A02: enforce DM and connection settings now. A03/A04: hide vs implement is an owner decision | **Split.** Enforce `allowConnectionRequests`: one meaning, no exemption question. Make `connections_only` true using the existing portfolio `isConnected` rule. Hide controls that do nothing. DM semantics are an owner decision, because "Nobody" collides with recruiter↔applicant messaging in the core loop. |
+| C-07 lease loss | A09: exit. Others: re-acquire the lease in process | **Exit(1)** from the entry point. Re-acquiring in process cannot prove that no other writer took over. |
+| C-06 code attempts | A03: carry attempts across resends. R1: drop that | **Drop it.** It contradicts the server's own message and locks out real users. Cooldown and issuance caps cover the abuse. |
+| C-14 empty env | Blanket strip vs optional-only | **Optional-only.** A blanket rule would turn `NODE_ENV=""` into `development`, which fails open. |
+| C-23 throttle | Per account and per IP | **Per-account failures only.** The code deliberately avoids address-only keys (NAT). Changing that is security architecture. |
+| C-26 activity score | Owner/admin only vs profile rules | **`canViewProfile` + `showActivity`.** Owner-only would break a tested recruiter feature. |
+| C-21 checkout | A03: everything is an owner decision. A07: client key is safe | **Split.** Client key, subscription re-fetch and logging are mechanism, not pricing. One open session per user needs Stripe test-mode verification. Refund policy is an owner decision. |
+| C-11 secret load order | Inject config vs load `.env` first | **Load `.env` first.** Injection adds a global mutable key with a wide test blast radius. |
+
+### Rejected or deferred recommendations
+
+- **Rejected:** carry attempts across resends (C-06); a blanket empty-env strip (C-14); a per-IP-across-emails login bucket (C-23); in-process lease re-acquisition (C-07); "owner/admin only" activity score (C-26); a runtime `pg_backend_pid()` pooler probe (C-09: it cannot prove session affinity).
+- **Not approved now, owner decisions (§27.8):** C-27 (institution-verify authority) and C-28 (job edit).
+
+## 27.5 Approved improvements: implementation-ready specification
+
+Each requirement below is **Approved**. **Codebase status: Not implemented.** The "Ref. patch" column gives the state of the unapplied reference implementation (§27.6). Acceptance criteria are the tests that implemented and passed in that patch.
+
+### Group A: Security, privacy and erasure
+
+| ID | Requirement (normative) | Acceptance criteria | Ref. patch |
+|---|---|---|---|
+| SSOT-AMD-01 (C-04) | `POST /settings/erasure/execute` requires `currentPassword` for a fresh erasure. Missing → 400 `VALIDATION_FAILED`. Wrong → 422 with `details.field='currentPassword'`. At most 10 checks per account per 15 min → 429. A resumed, interrupted erasure does not ask again. The Profile "Delete account" dialog asks for the current password and enables "Delete permanently" only when the box says DELETE and a password is entered. The 30-day grace model stays an owner decision. | No body → 400, the account is intact and the old password still signs in. Wrong password → 422. 11th attempt → 429. Resume path unaffected. | Implemented, tested |
+| SSOT-AMD-02 (C-05, M-3) | Erasure removes the person's own records from every in-memory module: salary reports, alumni affiliations (both indexes), warm introductions they requested, connections, received endorsements and referral requests. The deletes use the keys each map is actually indexed by. Records owned by third parties follow per-domain retention (owner). | Salary benchmark count drops. The affiliation leaves the directory, and verify returns 404. Endorsements, referrals and connections are gone. Each test fails on `781866f`. | Implemented, tested. Also fixed three more wrong-key deletes the reviewer missed. |
+| SSOT-AMD-03 (C-16) | The alumni `email_domain` method is refused (422) while account emails are unverified, both at `/verify` and for auto-verification at creation. The domain match refuses look-alike suffixes such as `stanford.edu.evil.example`. | Creating with a matching domain gives `unverified`. Verify with `email_domain` → 422. The matcher unit tests pass. | Implemented, tested. **Behaviour change: closes self-serve alumni verification until email verification exists. Needs owner acknowledgement.** |
+| SSOT-AMD-04 (C-23) | Sign-in keeps a per-account window of **failed** attempts: 15 min, `AUTH_ACCOUNT_FAILURE_MAX`, default 50. Unknown emails are treated identically, so the throttle reveals nothing about which accounts exist. Above the cap → 429. Bystander accounts are unaffected. | Many-address guessing → 401… then 429. The same sequence for an unknown email. Another account unaffected. | Implemented, tested |
+| SSOT-AMD-05 (C-26) | Reading another person's activity score applies `canViewProfile` (403 as for `/profile/:id`) and the target's `showActivity` (403 unless owner, admin or moderator). Unknown user → 404. `claim-activity` is unchanged (owner). | A peer reads a public profile → 200, then 403 after `recruiters_only`. A recruiter → 403 after `showActivity:false`. The owner → 200. | Implemented, tested |
+| SSOT-AMD-06 (C-06) | Work-email codes: 60 s re-issue cooldown, kept across restarts through the durable challenge's `createdAt`. At most 5 issues per account per hour and 10 per address per day. At most 10 reference requests per account per hour. Above a limit → 429. The web disables "Send a new code" for 60 s and says why. Attempts are **not** carried across re-issues. | Cooldown → 429 with exactly one outbox job. 6th issue per hour → 429. 11th code to one address across 3 accounts → 429. 11th reference → 429. | Implemented, tested |
+
+### Group B: Reliability, configuration and integrations
+
+| ID | Requirement | Acceptance criteria | Ref. patch |
+|---|---|---|---|
+| SSOT-AMD-07 (C-14) | Empty strings count as unset **only** for optional variables without a default. `NODE_ENV=""` still fails validation. | `EMAIL_FROM=""` boots. `NODE_ENV=""` fails. | Implemented, tested |
+| SSOT-AMD-08 (C-11) | `.env` is loaded by a side-effect module imported before anything reads `TOKEN_SECRET` | The secret from `.env` signs tokens in a non-container run | Implemented, tested |
+| SSOT-AMD-09 (C-09) | Deployed config refuses port 6543 on any Supabase host and `pgbouncer=true` on any host, with or without `SUPABASE_PROJECT_REF`. Session pooler and direct connections on port 5432, and self-hosted 6543, are accepted. | 5 config cases | Implemented, tested |
+| SSOT-AMD-10 (C-15) | Booleans in query and env are parsed strictly: `true/false/1/0` in any case, trimmed. Anything else → 400, or a boot failure for env. | `includeUnverified=false` hides unverified roles. `maybe` → 400. | Implemented, tested |
+| SSOT-AMD-11 (C-03, M-1, M-2) | Anonymous analytics: 64 KB body limit, 60 requests per 60 s, retained events in a bounded ring buffer, metadata bounded in size and depth including array elements (BR-27), and responses never contain `ipHash` or `userAgent`. `POST /activity/events` gets the same metadata bounds, a body limit, a per-route rate limit and a cap of 1,000 retained events per user. | Unit bound tests. Oversized body → 413. Sanitised arrays. Response fields. | Implemented, tested |
+| SSOT-AMD-12 (C-10) | The telemetry route reads the durable `showActivity` setting, so an explicit opt-out survives a restart. The default-consent model is unchanged (owner). | Postgres test: after a restart, an opted-out user's event is anonymised and a bystander's is attributed | Implemented, tested |
+| SSOT-AMD-13 (C-07) | Unauthenticated root `GET /ready`: 200 `{status:'ready'}` or 503 `{status:'not_ready'}` after a database round trip with a 2 s limit, exempt from the rate limiter. On writer-lease loss the process exits 1 from the entry point. In memory mode `/ready` reports ready. | Lifecycle unit tests. `/ready` integration tests. | Implemented, tested |
+| SSOT-AMD-14 (C-08) | API and worker handle SIGTERM and SIGINT: stop accepting work, finish in-flight work, exit 0 within 8 s (under Docker's 10 s default) or exit after the deadline | SIGTERM → close then exit 0. A hanging close → exit after 8 s. A second signal is ignored. | Implemented, tested |
+| SSOT-AMD-15 (C-22) | The worker dead-letters a job at claim time once it is past max attempts. The lease is measured with the worker's own clock from the moment it asked for the claim. | Max-attempt and skewed-clock tests. One existing test that asserted the livelock was rewritten to the correct behaviour, not weakened. | Implemented, tested |
+| SSOT-AMD-16 (C-21 a, b, d) | `PaidPlans` sends a stable `idempotencyKey` for each plan and cycle. `customer.subscription.*` events apply the subscription re-fetched from the provider, and a provider failure → 503 so Stripe redelivers. A second live subscription is logged at error level with both ids. One open checkout session per user (c) and the refund policy (d) are **not approved now**. | A same-second older event delivered last does not undo `active`. Provider failure → 503. Normalisation keeps the event time. | Implemented, tested (fake gateway only; Stripe test mode not exercised) |
+
+### Group C: Functional, domain and UX
+
+| ID | Requirement | Acceptance criteria | Ref. patch |
+|---|---|---|---|
+| SSOT-AMD-17 (C-01) | Restricted (suspended or banned) accounts can call `GET /api/v1/auth/session`. Every other non-allow-listed route still returns 403. | Automated: a suspended account's `/auth/session` → 200 while e.g. `/evidence/mine` stays 403. Browser check (not run): `/dashboard` shows `restricted-notice` and export works | Implemented, tested |
+| SSOT-AMD-18 (C-02) | Landing SVG captions are at least 12 px. The fix goes in the art, never the test threshold. | `responsive.spec.ts:233` passes | Implemented; e2e not run on the patch |
+| SSOT-AMD-19 (C-12) | Revoking or disputing again → 409. Applying with revoked evidence → 422. The pipeline response strips evidence metadata (`disputeReason`, `revokedBy`, …). | Domain and integration tests | Implemented, tested |
+| SSOT-AMD-20 (C-13) | `POST /notifications/mark-read` requires explicit ids or `all:true` → otherwise 422. The web caller already sends explicit ids or `all:true` (no change needed). | `{}` → 422. Mark-all and mark-one still work. | Implemented, tested |
+| SSOT-AMD-21 (C-17) | A reference is refused (409) when the referee email equals the candidate's account email, the role's work email, or an existing reference on the same role. A stronger independence policy remains an owner decision (A01-001). | 409 cases. The score is not inflated by a single mailbox. | Implemented, tested |
+| SSOT-AMD-22 (C-18) | A rejection without a reason stores no reason, and none is fabricated. BR-217 categories remain an owner decision. | Automated: no stored or returned reason. Browser check (not run): no reason line shown | Implemented, tested |
+| SSOT-AMD-23 (C-19) | The career assistant uses the caller's own skills or says they have none. It never uses hard-coded skills. | Unit and integration tests | Implemented, tested |
+| SSOT-AMD-24 (C-20) | Course-completion evidence is created `unverified` / `pending`, labelled "not assessed" | The LMS test was rewritten because it encoded the defect | Implemented, tested |
+| SSOT-AMD-25 (C-25) | Profile `privacy` and settings `profileVisibility` are one value, offered identically on both pages | Both pages show the same value | Implemented, tested |
+| SSOT-AMD-26 (C-29) | `allowConnectionRequests:false` → 403 on connection requests. `connections_only` profiles are visible to accepted connections (an optional `isConnected` on `canViewProfile`), so after a restart they fail closed to private. Settings controls that do nothing are hidden, while API fields still round-trip. DM enforcement is an owner decision. | `canViewProfile` visibility matrix. Connection 403/201. A connected peer sees the profile, a stranger does not. | Implemented, tested |
+| SSOT-AMD-27 (PLAN-COPY) | Plan cards list only built features. The AI-quota lines are kept. Prices, caps and entitlements are unchanged. | `plan-limits-domain` test still passes | Implemented, tested |
+
+### Group D: Test coverage
+
+| ID | Requirement | Acceptance criteria | Ref. patch |
+|---|---|---|---|
+| SSOT-AMD-28 (C-24) | A route authorization sweep: every `/api/v1` route not in an explicit public set (49, each with a reason) returns 401 for no token, a tampered token, a wrong-secret token and garbage. Tests cover the 8 previously untested routes. | 228 routes × 4 cases pass | Implemented, tested (tests only) |
+
+**New findings from Group D (not yet approved):**
+- **I-D-01 (Low):** `GET /evidence/subject/:subjectId` returns the oldest records first, unlike `/evidence/mine` (`server.ts:1480`).
+- **I-D-02:** `GET /skills/endorsements/recipients/:id` is anonymous (`server.ts:7298`), but `docs/system-model/06-route-authorization.md` says it needs sign-in. That document has further mismatches with the code (3–4, depending on how they are counted). An owner must decide which one is right.
+
+## 27.6 Implementation summary
+
+| Group | Branch, sandbox only, not pushed | Commits | Files | Items |
+|---|---|---|---|---|
+| A | `impl/a-security` | 7 | 33 (+1,552 / −293) | AMD-01…06 |
+| B | `impl/b-reliability` | 10 | 39 (+2,091 / −193) | AMD-07…16 |
+| C | `impl/c-functional` | 13 | 40 (+1,244 / −171) | AMD-17…27 |
+| D | `impl/d-tests` | 3 | 6 (+903) | AMD-28 |
+
+- **New features introduced:** readiness probe (AMD-13), graceful shutdown (AMD-14), route authorization sweep (AMD-28).
+- **Existing features enhanced:** AMD-01…12 and AMD-15…27.
+- **Features replaced or removed:** inert Settings controls hidden (AMD-26); unbuilt plan copy removed (AMD-27).
+- **Affected modules:** auth/session, settings/erasure, evidence, work history/references, notifications, connections/profile visibility, alumni, analytics/activity, LMS completion, AI assistant, billing/Stripe, config, worker, landing page, Settings/Profile/Evidence/Hiring pages.
+- **Protected build files touched:** none. **Migrations added:** none.
+
+**Codebase status of every item: Not implemented, by owner instruction.** To adopt any group, apply its patch on a branch, run the §27.7 checks, run the e2e and browser checks that were not done (§27.7), and review the owner acknowledgements (§27.8).
+
+## 27.7 Validation summary
+
+| Check | Group A | Group B | Group C | Group D | C + D merged (lead) |
+|---|---|---|---|---|---|
+| `pnpm build` | Pass | Pass | Pass | Pass | Pass |
+| `pnpm typecheck` | Pass | Pass | Pass | Pass | Pass |
+| `pnpm test` | 133 files / 1,390 pass | 135 / 1,414 pass | 1,423 pass | 133 / 1,378 pass (1 expected fail, I-D-01) | 137 / 1,444 pass |
+| `pnpm test:pg` | 13 / 58 pass | 15 / 62 pass | 58 pass | 13 / 59 pass | not run |
+| Prettier on changed files | Clean | Clean | Clean | Clean | — |
+| `pnpm test:e2e` | **Not run** | **Not run** | **Not run** | **Not run** | **Not run** |
+| Browser verification (Reticle) | **Not run** | **Not run** | **Not run** | — | — |
+
+- **Regressions:** none found in the automated suites of any branch. Existing tests that encoded a defect were rewritten to the correct behaviour: the C-22 worker clock test (named in its commit), the C-20 LMS level assertion, the C-16 alumni integration test (it asserted the bypass) and the C-17 removal fixtures; the latter three are recorded in the implementer reports, not in commit messages. The implementers report that no assertion was loosened; this was not independently audited line by line.
+- **Edge cases covered:** empty and invalid input (AMD-07, 10, 20), repeated actions (AMD-19), limits (AMD-04, 06, 11), restart behaviour (AMD-06, 12), signals and deadlines (AMD-14), clock skew (AMD-15), same-second event ordering (AMD-16).
+- **Not validated:**
+  - All four groups together: A and B were never merged with C and D.
+  - E2E for any change, including the e2e specs edited in the patches (`checkout-idempotency.spec.ts`, `alumni-networks.spec.ts`).
+  - Browser checks of the Delete-account dialog, the resend button, Settings and the landing page.
+  - Stripe test mode.
+  - Any deployed environment.
+- **Outstanding failures in the codebase:** the 182-file lint failure (A10-001) and the 11 px landing text (A04-001) remain, because no code was changed.
+
+**Status key used in this part:** Recommended → Approved → Implemented (unapplied patch) → Tested (automated, per branch) → Verified (end-to-end and browser). **No item has reached Verified, and no item is implemented in the codebase.**
+
+## 27.8 Decisions that require the owner
+
+| # | Decision | Why it is the owner's | Source |
+|---|---|---|---|
+| 1 | Adopt the reference patches (any of A–D), or keep them as specification only | Owner instruction, 21 Nov 2026 | §27.6 |
+| 2 | Accept that AMD-03 closes self-serve alumni verification until email verification exists | Behaviour removal | A08-003, C-16 |
+| 3 | CI: exclude non-source docs from lint (`.prettierignore`) or reformat them. CI currently runs nothing after lint. | Protected build files | A10-001 (P0) |
+| 4 | Staging compose: `RESEND_API_KEY` → `BREVO_API_KEY`, no empty `EMAIL_FROM`, healthcheck on `/ready`, `stop_grace_period` | Protected `deploy/` | A07-001 (P0), A08-016, A09-002 |
+| 5 | Erasure model: 30-day grace and executor (G-09), whether a suspended account may self-erase, billing record retention, third-party records that mention the person | Privacy policy, legal retention | A06-001/002 |
+| 6 | Password reset and email verification (needs live email) | New security flows | A02-001, A04-003 |
+| 7 | Verification trust model: referee independence, employer domain via `companyId`, gold/verified thresholds, cleanup of inflated historic scores | Consequential trust logic | A01-001, A03-003, A08-004 |
+| 8 | Self-registered recruiter privileges, org membership semantics and `recruiters_only` visibility | Security architecture | A08-001/002, CF-14/16/20 |
+| 9 | Who may institution-verify evidence (no issuer link in the data model) | Trust rule and migration | C-27, A08-005 |
+| 10 | DM permission semantics (applicant exemption, re-check per message, post-rejection window) | Product rule colliding with the core loop | A03-008, C-29 |
+| 11 | LMS: durability, BR-048 final assessment, BR-091 (code 3 vs register 5), CF-41 certificate→evidence cascade | Register/code conflict | A01-002, C-20 |
+| 12 | Job edit, approval, scheduling and applicant notice on close (BR-11, G-08, CF-15) | State-machine design | A02-003, A01-006/007 |
+| 13 | Rejection reason categories (BR-217) and candidate-facing feedback | Product rule | A01-003/004 |
+| 14 | Consent default for users who never saved settings, `showActivity` as telemetry consent, stealth persistence | Consent model | A05-001/002, C-10 |
+| 15 | `claim-activity` XP and self-reported events in recruiter-visible scores | Gamification and ranking design | C-26, M-1 |
+| 16 | Pricing and caps (a paid recruiter plan caps postings while free is unlimited) | Pricing | A01-008, A02-013 |
+| 17 | Append-only evidence events (BR-149, G-21) and audit written inside each action's transaction (G-07) | Schema design | A06-004/005 |
+| 18 | Salary k-anonymity counted by distinct people | Privacy rule | A08-008 |
+| 19 | Gating or cutting ephemeral modules; extracting modules from `server.ts`; route-level code splitting | Big refactor, scope | A01-010…013, A05-006, A09 |
+| 20 | CSP and HSTS on the web origin; token storage (G-15) | Security architecture, hosting | A08, G-15 |
+| 21 | Which is right for `/skills/endorsements/recipients/:id` and three other doc-06 mismatches | Spec vs code | I-D-02 |
+| 22 | Stripe: one open checkout session per user (needs test mode), duplicate-subscription refund policy | Billing policy | C-21 c/d |
+
+## 27.9 Remaining limitations of this evaluation
+
+- Static review was supplemented by automated suites only. There was no penetration test, load test or deployed-environment check. The rendered UI was checked only through the existing Playwright baseline.
+- Agent findings carry their own confidence labels. Items marked *Suspected* in the agent reports and not listed in §27.5 have not been verified.
+- Two process incidents occurred, and neither left a trace in the codebase:
+  1. An evaluation agent wrote scratch analysis files into the lead's sandbox copy. They were deleted.
+  2. `git stash` is shared across worktrees, so one implementer popped another's stash. It was detected, reverted, and the affected work was confirmed intact.
+- This part records evaluation evidence as of 21 Nov 2026. It does not change §1–§26 intent, apart from the approved amendments SSOT-AMD-01…28, which are binding as requirements and pending as implementation.
 
 ---
 
