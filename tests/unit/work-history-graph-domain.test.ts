@@ -580,4 +580,91 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       expect(graphVerifiedOnly.nodes.some((n) => n.label === 'Acme Technologies')).toBe(true);
     });
   });
+
+  describe('One mailbox cannot supply every reference (C-17)', () => {
+    const request = (overrides: Record<string, unknown> = {}) =>
+      requestEmploymentReference({
+        workHistoryId: 'wh_1',
+        candidateId: 'cand_1',
+        candidateUserId: 'user_cand',
+        candidateEmail: 'candidate@example.com',
+        refereeName: 'Bob Manager',
+        refereeEmail: 'bob@google.com',
+        relationship: 'manager',
+        nowIso: fixedNow,
+        ...overrides,
+      });
+
+    it("refuses the role's own work email as its referee, case-insensitively", () => {
+      expect(() =>
+        request({ refereeEmail: 'Alice@Google.com', roleCorporateEmail: 'alice@google.com' })
+      ).toThrow(/work email on this role/);
+    });
+
+    it('refuses asking the same address twice for one role, unless it declined', () => {
+      expect(() =>
+        request({ existingReferences: [{ refereeEmail: 'BOB@google.com', status: 'requested' }] })
+      ).toThrow(/already asked/);
+      expect(() =>
+        request({ existingReferences: [{ refereeEmail: 'bob@google.com', status: 'submitted' }] })
+      ).toThrow(/already asked/);
+      expect(
+        request({ existingReferences: [{ refereeEmail: 'bob@google.com', status: 'declined' }] })
+          .status
+      ).toBe('requested');
+      expect(
+        request({ existingReferences: [{ refereeEmail: 'carol@google.com', status: 'requested' }] })
+          .status
+      ).toBe('requested');
+    });
+
+    it('does not give the two-reference bonus for one mailbox answering twice', () => {
+      const wh: VerifiedWorkHistory = {
+        id: 'wh_1',
+        candidateId: 'cand_1',
+        companyName: 'Google',
+        title: 'Staff SWE',
+        employmentType: 'full_time',
+        startDate: '2020-01-01',
+        endDate: '2024-01-01',
+        isCurrent: false,
+        corporateEmail: 'alice@google.com',
+        emailVerifiedAt: fixedNow,
+        verificationStatus: 'verified',
+        verificationScore: 0,
+        badgeTier: 'none',
+        skills: ['Go', 'Distributed Systems'],
+        createdAt: fixedNow,
+        updatedAt: fixedNow,
+      };
+      const ref = (id: string, refereeEmail: string): EmploymentReference => ({
+        id,
+        workHistoryId: 'wh_1',
+        candidateId: 'cand_1',
+        refereeName: 'Bob Manager',
+        refereeEmail,
+        relationship: 'manager',
+        status: 'submitted',
+        confirmDates: true,
+        confirmTitle: true,
+        ratings: { technicalProficiency: 5, collaborationRating: 5, deliveryReliability: 5 },
+        endorsedSkills: ['Go', 'Distributed Systems'],
+        requestedAt: fixedNow,
+        submittedAt: fixedNow,
+        createdAt: fixedNow,
+        updatedAt: fixedNow,
+      });
+      // Email (40) + Manager (30) + ratings (10) + skills (5); no +15 for one person.
+      const same = calculateVerificationScoreAndBadge(wh, [
+        ref('ref_1', 'bob@google.com'),
+        ref('ref_2', 'BOB@google.com'),
+      ]);
+      expect(same.score).toBe(85);
+      const distinct = calculateVerificationScoreAndBadge(wh, [
+        ref('ref_1', 'bob@google.com'),
+        ref('ref_2', 'carol@google.com'),
+      ]);
+      expect(distinct.score).toBe(100);
+    });
+  });
 });

@@ -12630,15 +12630,19 @@ export async function buildApp(
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
+      // Anti-self checks compare against the candidate, also when an admin
+      // asks on their behalf (C-17).
       const requested = requestEmploymentReference({
         workHistoryId: id,
         candidateId: workHistory.candidateId,
-        candidateUserId: session.userId,
-        candidateEmail: session.email,
+        candidateUserId: workHistory.candidateId,
+        candidateEmail: usersById.get(workHistory.candidateId)?.email,
         refereeUserId,
         refereeName: body.refereeName,
         refereeEmail: body.refereeEmail,
         relationship: body.relationship,
+        roleCorporateEmail: workHistory.corporateEmail,
+        existingReferences: employmentReferencesByHistoryId.get(id) ?? [],
       });
 
       // The one-time token is the referee's credential. It is emailed to the

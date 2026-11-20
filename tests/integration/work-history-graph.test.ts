@@ -442,6 +442,75 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
 
       expect(res.statusCode).toBe(403);
     });
+
+    it('refuses the role work email, a repeat referee, and self-reference via an admin (C-17)', async () => {
+      const ask = (historyId: string, token: string, refereeEmailAddress: string) =>
+        app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/${historyId}/references/request`,
+          headers: { authorization: `Bearer ${token}` },
+          payload: {
+            refereeName: 'Someone',
+            refereeEmail: refereeEmailAddress,
+            relationship: 'peer',
+          },
+        });
+
+      // The work email verified for this role is the candidate's own mailbox.
+      const corporate = await ask(createdWorkHistoryId, candidateToken, 'Alex.Mercer@acmecloud.io');
+      expect(corporate.statusCode).toBe(409);
+      expect(JSON.parse(corporate.body).error.message).toMatch(/work email on this role/);
+
+      // Sarah was already asked for this role.
+      const repeat = await ask(createdWorkHistoryId, candidateToken, refereeEmail);
+      expect(repeat.statusCode).toBe(409);
+      expect(JSON.parse(repeat.body).error.message).toMatch(/already asked/);
+
+      // An admin asking on the candidate's behalf is checked against the candidate.
+      const adminToken = createSessionToken(
+        '00000000-0000-4000-a000-00000000ad17',
+        'ops-admin@talentsphere.test',
+        ['platform_admin']
+      );
+      const onBehalf = await ask(createdWorkHistoryId, adminToken, candidateEmail);
+      expect(onBehalf.statusCode).toBe(409);
+
+      // The same referee may vouch for a different role.
+      const reg = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: 'two.roles.wh@talentsphere.test',
+          password: 'Password123!Secure',
+          fullName: 'Two Roles',
+          role: 'candidate',
+        },
+      });
+      const twoRolesToken = JSON.parse(reg.body).token;
+      const role = async (companyName: string) =>
+        JSON.parse(
+          (
+            await app.inject({
+              method: 'POST',
+              url: '/api/v1/candidates/work-history',
+              headers: { authorization: `Bearer ${twoRolesToken}` },
+              payload: {
+                companyName,
+                title: 'Engineer',
+                employmentType: 'full_time',
+                startDate: '2021-01-01',
+                endDate: '2022-01-01',
+                isCurrent: false,
+              },
+            })
+          ).body
+        ).workHistory.id as string;
+      const first = await role('First Co');
+      const second = await role('Second Co');
+      expect((await ask(first, twoRolesToken, 'pat.peer@example.com')).statusCode).toBe(201);
+      expect((await ask(second, twoRolesToken, 'pat.peer@example.com')).statusCode).toBe(201);
+      expect((await ask(first, twoRolesToken, 'PAT.peer@example.com')).statusCode).toBe(409);
+    });
   });
 
   describe('4. Submit Employment Reference (POST /api/v1/candidates/work-history/references/:refId/submit)', () => {
