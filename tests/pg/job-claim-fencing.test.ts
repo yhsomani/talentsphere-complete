@@ -87,4 +87,28 @@ describe('background_jobs attempts fencing (pg)', () => {
     const id = await reclaimed('fence.legacy');
     expect(await store.complete(id)).toBe(true);
   });
+
+  // C-22: a job whose lease expires on its last allowed attempt (worker crash
+  // or hang) is dead-lettered at claim time instead of being re-run forever.
+  it('dead-letters a lease-expired job that has used its attempts, stripping secrets', async () => {
+    await pool.query(
+      "UPDATE public.background_jobs SET status = 'canceled' WHERE status IN ('queued', 'running')"
+    );
+    const { job } = await store.enqueue({
+      kind: 'fence.dead',
+      payload: { to: 'a@example.com', code: '123456', token: 'secret' },
+    });
+    for (let i = 1; i <= 3; i += 1) {
+      const [claimed] = await store.claim({ limit: 1, leaseMs: 1, maxAttempts: 3 });
+      expect(claimed.id).toBe(job.id);
+      expect(claimed.attempts).toBe(i);
+      await new Promise((r) => setTimeout(r, 25));
+    }
+    expect(await store.claim({ limit: 1, leaseMs: 1, maxAttempts: 3 })).toHaveLength(0);
+    const record = (await store.list()).find((j) => j.id === job.id)!;
+    expect(record.status).toBe('dead');
+    expect(record.lockExpiresAt).toBeNull();
+    expect(record.lastError).toMatch(/lease expired after 3 attempts/);
+    expect(record.payload).toEqual({ to: 'a@example.com' });
+  });
 });

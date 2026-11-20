@@ -227,7 +227,14 @@ describe('Claim cycle: worker safety', () => {
     expect(claimSizes[0]).toBe(1); // 60s lease / 30s handler timeout leaves room for one
   });
 
-  it('still refuses to start a job whose lease cannot cover the handler timeout', async () => {
+  // C-22 (A07-011, A09-013): this test used to assert the opposite — that a
+  // worker whose clock is 45 s ahead of the database refuses the job. That
+  // premise was wrong: the lease is enforced by the DATABASE clock
+  // (lock_expires_at vs NOW()), so the worker really has ~60 s whatever its
+  // own clock reads. Comparing worker-now with the DB timestamp made a skewed
+  // worker refuse every job forever (a livelock burning attempts). Rewritten,
+  // not weakened: the genuine-lapse guard is still pinned by the next test.
+  it('runs a job even when the worker clock is skewed ahead of the database', async () => {
     const store = new MemoryJobStore();
     await store.enqueue({ kind: 'slow.job', payload: {} });
     let runs = 0;
@@ -235,8 +242,31 @@ describe('Claim cycle: worker safety', () => {
       store,
       leaseMs: 60_000,
       handlerTimeoutMs: 30_000,
-      // Worker clock is 45s ahead of the database: only 15s of lease remain.
       now: () => Date.now() + 45_000,
+      handlers: handlers({
+        'slow.job': async () => {
+          runs += 1;
+        },
+      }),
+    });
+    expect(runs).toBe(1);
+    expect(result).toMatchObject({ claimed: 1, succeeded: 1, lapsed: 0 });
+  });
+
+  it('still refuses to start a job once its own clock shows the lease cannot cover the handler', async () => {
+    const store = new MemoryJobStore();
+    await store.enqueue({ kind: 'slow.job', payload: {} });
+    let runs = 0;
+    // The first reading is taken just before the claim; by the time the job
+    // would start, 45 s have passed on the worker's own clock (a slow claim
+    // round trip or a paused process): 15 s of a 60 s lease is left.
+    const start = Date.now();
+    let reads = 0;
+    const result = await runClaimCycle({
+      store,
+      leaseMs: 60_000,
+      handlerTimeoutMs: 30_000,
+      now: () => (reads++ === 0 ? start : start + 45_000),
       handlers: handlers({
         'slow.job': async () => {
           runs += 1;
@@ -245,6 +275,48 @@ describe('Claim cycle: worker safety', () => {
     });
     expect(runs).toBe(0);
     expect(result).toMatchObject({ claimed: 1, succeeded: 0, lapsed: 1 });
+  });
+
+  it('dead-letters a job whose lease expired on its last allowed attempt', async () => {
+    const store = new MemoryJobStore();
+    const { job } = await store.enqueue({
+      kind: 'crashy.job',
+      payload: { to: 'a@example.com', code: '123456', token: 'secret' },
+    });
+    // Three claims whose leases lapse (the worker crashed each time).
+    for (let i = 1; i <= 3; i += 1) {
+      const [claimed] = await store.claim({ limit: 1, leaseMs: 1, maxAttempts: 3 });
+      expect(claimed.attempts).toBe(i);
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    expect(await store.claim({ limit: 1, leaseMs: 1, maxAttempts: 3 })).toHaveLength(0);
+    const [record] = await store.list();
+    expect(record.id).toBe(job.id);
+    expect(record.status).toBe('dead');
+    expect(record.attempts).toBe(3);
+    expect(record.lockExpiresAt).toBeNull();
+    expect(record.lastError).toMatch(/lease expired after 3 attempts/);
+    expect(record.payload).toEqual({ to: 'a@example.com' });
+  });
+
+  it('the claim cycle passes maxAttempts, so a crash-looping job stops being re-run', async () => {
+    const store = new MemoryJobStore();
+    await store.enqueue({ kind: 'crashy.job', payload: {} });
+    await store.claim({ limit: 1, leaseMs: 1 });
+    await new Promise((r) => setTimeout(r, 5));
+    let runs = 0;
+    const result = await runClaimCycle({
+      store,
+      maxAttempts: 1,
+      handlers: handlers({
+        'crashy.job': async () => {
+          runs += 1;
+        },
+      }),
+    });
+    expect(runs).toBe(0);
+    expect(result.claimed).toBe(0);
+    expect((await store.list())[0].status).toBe('dead');
   });
 });
 
