@@ -231,6 +231,24 @@ export function productionConfigProblems(env: ServerEnv): string[] {
   if (/postgres:postgres@localhost/.test(env.DATABASE_URL)) {
     problems.push('DATABASE_URL still points at the local development default');
   }
+  // The API's single-writer guarantee is a session-level advisory lock held on
+  // one retained connection (apps/api/src/storage, ADR-015). Behind a
+  // transaction-mode pooler (Supabase/Supavisor or PgBouncer on 6543, or
+  // pgbouncer=true) consecutive statements may run on different server
+  // backends, so the lock proves nothing. Checked for every deployed URL,
+  // whether or not SUPABASE_PROJECT_REF is set.
+  try {
+    const url = new URL(env.DATABASE_URL);
+    const host = url.hostname.toLowerCase();
+    const supabaseHost = host.endsWith('.supabase.co') || host.endsWith('.supabase.com');
+    if ((supabaseHost && url.port === '6543') || url.searchParams.get('pgbouncer') === 'true') {
+      problems.push(
+        'DATABASE_URL uses a transaction-mode pooler (port 6543 / pgbouncer=true); the API writer lock needs a session-mode or direct connection (ADR-015)'
+      );
+    }
+  } catch {
+    // Not a URL: the Supabase check below reports it when a project ref is set.
+  }
   if (env.SUPABASE_PROJECT_REF) {
     // Supabase direct connections have the project ref in the host; session/
     // transaction poolers use postgres.<ref> in their database username.

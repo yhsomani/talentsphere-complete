@@ -243,3 +243,51 @@ describe('Empty optional variables (C-14, A07-001)', () => {
     expect(() => validateServerEnv({ ...STAGING, EMAIL_FROM: 'not-an-email' })).toThrow();
   });
 });
+
+describe('Transaction-mode pooler refused for the API writer lock (C-09, A09-003)', () => {
+  const ref = 'qidckctwrkxyiwworchd';
+  const withUrl = (DATABASE_URL: string, over: Record<string, string> = {}) =>
+    productionConfigProblems(validateServerEnv({ ...SAFE_PRODUCTION, DATABASE_URL, ...over })).join(
+      ' | '
+    );
+
+  it('refuses the Supabase transaction pooler on 6543', () => {
+    expect(
+      withUrl(
+        `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=verify-full`,
+        { SUPABASE_PROJECT_REF: ref }
+      )
+    ).toMatch(/transaction-mode pooler/);
+  });
+
+  it("refuses the direct host's dedicated PgBouncer on 6543, with or without a project ref", () => {
+    const url = `postgresql://postgres:secret@db.${ref}.supabase.co:6543/postgres?sslmode=verify-full`;
+    expect(withUrl(url, { SUPABASE_PROJECT_REF: ref })).toMatch(/transaction-mode pooler/);
+    expect(withUrl(url)).toMatch(/transaction-mode pooler/);
+  });
+
+  it('refuses pgbouncer=true on any host', () => {
+    expect(withUrl('postgresql://app:s3cret@db.internal:6432/talentsphere?pgbouncer=true')).toMatch(
+      /transaction-mode pooler/
+    );
+  });
+
+  it('accepts session-mode and direct connections on 5432', () => {
+    expect(
+      withUrl(
+        `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=verify-full`,
+        { SUPABASE_PROJECT_REF: ref }
+      )
+    ).toBe('');
+    expect(withUrl('postgresql://app:s3cret@db.internal:5432/talentsphere')).toBe('');
+    // A self-hosted Postgres that happens to listen on 6543 is not a Supabase pooler.
+    expect(withUrl('postgresql://app:s3cret@db.internal:6543/talentsphere')).toBe('');
+  });
+
+  it('never applies in development or test', () => {
+    const url = `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:6543/postgres`;
+    for (const NODE_ENV of ['development', 'test']) {
+      expect(productionConfigProblems(validateServerEnv({ NODE_ENV, DATABASE_URL: url }))).toEqual([]);
+    }
+  });
+});
