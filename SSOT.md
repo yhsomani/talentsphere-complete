@@ -5722,6 +5722,52 @@ mindmap
       Durable data pointing at ephemeral data (A05-001)
 ```
 
+### Flowchart: evaluation process and status of each amendment
+
+```mermaid
+flowchart TD
+  A[main @ 781866f] --> B[10 independent specialist agents]
+  B --> C[169 findings with path:line evidence]
+  C --> D[Lead consolidation: 29 candidates]
+  D --> E[2 fresh cross-reviewers verify against code]
+  E -->|27 approved| F[Approved plan: 28 work items, 4 owners]
+  E -->|2 owner| O[Owner decisions §27.8]
+  F --> G[Reference implementation in isolated worktrees]
+  G --> H[Per-branch build, typecheck, unit, Postgres tests: pass]
+  H --> I{Owner: change code in codebase?}
+  I -->|No, 21 Nov 2026| J[Specified here as SSOT-AMD-01..28; patches kept outside repo]
+  I -->|Future yes| K[Apply patches, run combined e2e + browser checks]
+  K --> L[Verified]
+
+  classDef done fill:#e6f4ea,stroke:#2e7d32;
+  classDef pending fill:#fff4e5,stroke:#b26a00;
+  class B,C,D,E,F,G,H,J done;
+  class K,L,O pending;
+```
+
+Status ladder for every amendment: `Recommended → Approved → Implemented (unapplied patch) → Tested (automated, per branch) → Verified (e2e + browser)`. The current state of all 28 is **Tested in patch, Not implemented in codebase, Not verified**.
+
+### Flowchart: approved account-deletion flow (SSOT-AMD-01, SSOT-AMD-02)
+
+```mermaid
+flowchart TD
+  U[Profile → Delete account] --> T{Typed DELETE and entered current password?}
+  T -->|No| X[Delete button stays disabled]
+  T -->|Yes| R[POST /settings/erasure/execute]
+  R --> P{More than 10 calls for this account in 15 min?}
+  P -->|Yes| Z[429 Too many attempts]
+  P -->|No| Q{Resuming an interrupted erasure?}
+  Q -->|Yes| E[Continue erasure]
+  Q -->|No| V{Password correct?}
+  V -->|Missing| M[400 VALIDATION_FAILED]
+  V -->|Wrong| W["422 details.field = currentPassword"]
+  V -->|Correct| E
+  E --> D[Delete durable records]
+  D --> N["Delete own in-memory records: salary reports, alumni affiliations,<br/>warm intros, connections, endorsements, referrals"]
+  N --> S[Sign out, account gone]
+  G[30-day grace period and executor] -.->|owner decision, §27.8 item 5| R
+```
+
 ## 27.3 Agent evaluation summary
 
 | Agent | Responsibility | Areas examined | Findings (P0/P1/P2/P3) | Most important findings |
