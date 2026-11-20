@@ -490,6 +490,12 @@ export type BuildAppEnv = Partial<Record<keyof ServerEnv, string | number | bool
 export interface BuildAppOverrides {
   /** Replaces the Stripe SDK gateway (BILLING_MODE=stripe only). */
   stripeGateway?: StripeGateway;
+  /**
+   * Called once if the pg writer lease is lost after boot. The process entry
+   * point exits on it so the supervisor restarts the API (C-07); buildApp
+   * itself never exits the process.
+   */
+  onWriterLeaseLost?: () => void;
 }
 
 export async function buildApp(
@@ -545,6 +551,7 @@ export async function buildApp(
       await storage.close();
       throw error;
     }
+    storage.onWriterLeaseLost(() => overrides.onWriterLeaseLost?.());
     app.log.info(`storage: pg — ${boot.detail}; exclusive writer lease acquired`);
   } else {
     app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
@@ -757,6 +764,27 @@ export async function buildApp(
       timestamp: new Date().toISOString(),
       version: env.APP_VERSION,
     };
+  });
+
+  // Readiness: can this instance serve traffic now? A live database round trip
+  // (2 s budget) in pg mode; memory mode has no database and is always ready.
+  // Answers only ready/not_ready: the storage detail names the database host
+  // and stays in the admin diagnostics. The worker is not a dependency: a
+  // dead worker must not take the API out of rotation (C-07).
+  app.get('/ready', { config: { rateLimit: false } }, async (_req, reply) => {
+    let ready = storage.mode === 'memory';
+    if (!ready) {
+      let timer: NodeJS.Timeout | undefined;
+      const timedOut = new Promise<{ ok: false }>((resolve) => {
+        timer = setTimeout(() => resolve({ ok: false }), 2000);
+      });
+      try {
+        ready = (await Promise.race([storage.health(), timedOut])).ok;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });
   });
 
   app.get('/api/v1/health', { config: { rateLimit: false } }, async () => {

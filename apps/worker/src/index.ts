@@ -1,7 +1,8 @@
 import pg from 'pg';
 import { createLogger } from '@talentsphere/observability';
 import { createPgJobStore, DISPATCH_EVENT_KINDS, type JobStore } from '@talentsphere/domain';
-import { runClaimCycle, PermanentJobError, type ClaimHandler } from './claim.js';
+import { PermanentJobError, type ClaimHandler } from './claim.js';
+import { createStopSignal, runLoop } from './loop.js';
 import { loadEmailConfig, emailConfigProblems } from './email/config.js';
 import { createEmailService } from './email/service.js';
 import { renderTemplate } from './email/templates.js';
@@ -114,10 +115,12 @@ claimHandlers.set(
   }))
 );
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /** pg store from DATABASE_URL; null when this process must not claim (memory). */
-function resolveStore(): { store: JobStore; heartbeat: () => Promise<void> } | null {
+function resolveStore(): {
+  store: JobStore;
+  heartbeat: () => Promise<void>;
+  close: () => Promise<void>;
+} | null {
   const mode =
     process.env.STORAGE === 'pg' || process.env.STORAGE === 'memory'
       ? process.env.STORAGE
@@ -150,6 +153,7 @@ function resolveStore(): { store: JobStore; heartbeat: () => Promise<void> } | n
         'INSERT INTO public.worker_health (id, last_seen_at) VALUES (1, now()) ON CONFLICT (id) DO UPDATE SET last_seen_at = EXCLUDED.last_seen_at'
       );
     },
+    close: () => pool.end(),
   };
 }
 
@@ -163,38 +167,44 @@ async function runWorker(): Promise<void> {
       throw new Error(`Email provider configuration invalid: ${problems.join('; ')}.`);
     }
   }
+  // Graceful SIGTERM/SIGINT (C-08): stop claiming, let the current cycle
+  // finish, release the pool and exit 0. The hard deadline (8 s) stays under
+  // Docker's default 10 s stop grace period; a handler still running then is
+  // cut and its job redelivered after its lease, as on any crash.
+  const signal = createStopSignal();
+  const onSignal = (name: NodeJS.Signals) => {
+    if (signal.stopping) return;
+    logger.info({ signal: name }, 'stop requested; finishing the current cycle');
+    signal.stop();
+    setTimeout(() => process.exit(0), 8000).unref();
+  };
+  process.once('SIGTERM', onSignal);
+  process.once('SIGINT', onSignal);
+
   const runner = resolveStore();
   if (!runner) {
     logger.warn(
       'TalentSphere Async Worker started with STORAGE=memory: background jobs are NOT durable and are NOT processed; idling.'
     );
-    for (;;) {
-      await sleep(60_000);
+    while (!signal.stopping) {
+      await signal.sleep(60_000);
     }
+    logger.info('worker stopped');
+    process.exit(0);
   }
 
-  const { store, heartbeat } = runner;
+  const { store, heartbeat, close } = runner;
   logger.info({ mode: store.mode }, 'TalentSphere Async Worker started (durable claim loop)');
-  let lastHeartbeatAt = 0;
-  for (;;) {
-    try {
-      // An idle worker is still alive. A stopped worker leaves a stale timestamp,
-      // and a database outage prevents the heartbeat from being refreshed.
-      if (Date.now() - lastHeartbeatAt >= 10_000) {
-        await heartbeat();
-        lastHeartbeatAt = Date.now();
-      }
-      const result = await runClaimCycle({ store, handlers: claimHandlers });
-      if (result.claimed === 0) {
-        await sleep(1000);
-      }
-    } catch (err) {
-      // A transient outage (database restart, network blip) must slow the
-      // loop down and stay observable, never crash-loop or spin.
-      logger.error({ err }, 'claim cycle failed; retrying in 5s');
-      await sleep(5000);
-    }
-  }
+  await runLoop({
+    store,
+    handlers: claimHandlers,
+    heartbeat,
+    signal,
+    onError: (err) => logger.error({ err }, 'claim cycle failed; retrying in 5s'),
+  });
+  await close();
+  logger.info('worker stopped');
+  process.exit(0);
 }
 
 if (process.env.NODE_ENV !== 'test') {
