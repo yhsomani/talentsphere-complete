@@ -1,6 +1,16 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 
+// Compose files hand an unset `${VAR:-}` to the process as an empty string.
+// For an optional setting with no default, empty means "not set" (the worker
+// already reads it that way, apps/worker/src/email/config.ts). Settings with a
+// default (NODE_ENV in particular) are not wrapped: an empty NODE_ENV must
+// keep failing rather than fall back to development.
+const emptyAsUnset = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? undefined : value;
+const optional = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess(emptyAsUnset, schema.optional());
+
 export const ServerEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   APP_NAME: z.string().default('TalentSphere'),
@@ -16,35 +26,32 @@ export const ServerEnvSchema = z.object({
   SUPABASE_URL: z.string().url().default('https://localhost.supabase.co'),
   SUPABASE_ANON_KEY: z.string().default('dev-anon-key'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().default('dev-service-role-key'),
-  SUPABASE_JWKS_URL: z.string().url().optional(),
+  SUPABASE_JWKS_URL: optional(z.string().url()),
 
   // Database
   DATABASE_URL: z.string().default('postgresql://postgres:postgres@localhost:5432/postgres'),
-  DIRECT_URL: z.string().optional(),
+  DIRECT_URL: optional(z.string()),
   // Identifies the expected hosted Supabase tenant; no credentials live here.
-  SUPABASE_PROJECT_REF: z.string().regex(/^[a-z0-9]{20}$/).optional(),
+  SUPABASE_PROJECT_REF: optional(z.string().regex(/^[a-z0-9]{20}$/)),
   // Persistence backend: 'pg' (real Postgres, the product default) or
   // 'memory' (explicit non-durable Maps, tests only). Unset resolves to
   // memory when NODE_ENV=test, pg otherwise — see apps/api/src/storage.
-  STORAGE: z.enum(['pg', 'memory']).optional(),
+  STORAGE: optional(z.enum(['pg', 'memory'])),
 
   // Separate 256-bit key for AES-GCM encryption of user-supplied BYO API keys.
   // Rotation requires re-encryption of existing ciphertext; do not silently
   // reuse TOKEN_SECRET for this purpose.
-  BYO_AI_KEY_ENCRYPTION_KEY: z
-    .string()
-    .regex(/^[0-9a-fA-F]{64}$/)
-    .optional(),
+  BYO_AI_KEY_ENCRYPTION_KEY: optional(z.string().regex(/^[0-9a-fA-F]{64}$/)),
 
   // Security & Rate Limiting
   // TOKEN_SECRET signs session tokens. It is optional so local development works
   // without it (the domain layer then generates a random per-process key, so tokens
   // are unforgeable but do not survive a restart). If provided it must be at least
   // 32 characters. Production deployments should always set it.
-  TOKEN_SECRET: z.string().min(32).optional(),
+  TOKEN_SECRET: optional(z.string().min(32)),
   // Password hashing work factor (PBKDF2-SHA512). Unset uses the domain default.
   // Deployed environments must not go below MIN_DEPLOYED_PBKDF2_ITERATIONS.
-  PASSWORD_PBKDF2_ITERATIONS: z.coerce.number().int().min(1000).optional(),
+  PASSWORD_PBKDF2_ITERATIONS: optional(z.coerce.number().int().min(1000)),
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:5173'),
   // Global limiter: requests per window per signed-in account (or per client
   // address for anonymous callers). The former default (100 per 15 minutes)
@@ -58,7 +65,7 @@ export const ServerEnvSchema = z.object({
   // proxy hops (e.g. "1"), "true" to trust every X-Forwarded-For hop, or a
   // comma-separated list of proxy IPs/CIDRs. Without it, rate limits behind a
   // proxy key everyone to the proxy's address.
-  TRUST_PROXY: z.string().optional(),
+  TRUST_PROXY: optional(z.string()),
 
   // Storage
   SUPABASE_BUCKET_AVATARS: z.string().default('avatars'),
@@ -70,10 +77,10 @@ export const ServerEnvSchema = z.object({
   // environments. Brevo is the only provider; it still needs a verified sender
   // domain (SPF/DKIM/DMARC at the DNS host) and a real mailbox test outside CI.
   EMAIL_PROVIDER: z.enum(['none', 'brevo']).default('none'),
-  BREVO_API_KEY: z.string().min(12).optional(),
-  EMAIL_FROM: z.string().email().optional(),
-  EMAIL_FROM_NAME: z.string().min(1).optional(),
-  EMAIL_REPLY_TO: z.string().email().optional(),
+  BREVO_API_KEY: optional(z.string().min(12)),
+  EMAIL_FROM: optional(z.string().email()),
+  EMAIL_FROM_NAME: optional(z.string().min(1)),
+  EMAIL_REPLY_TO: optional(z.string().email()),
 
   // Billing. 'disabled' (default) refuses paid subscriptions honestly;
   // 'simulated' activates them WITHOUT payment for development and tests only
@@ -83,25 +90,25 @@ export const ServerEnvSchema = z.object({
   BILLING_MODE: z.enum(['disabled', 'simulated', 'stripe']).default('disabled'),
   // HMAC-SHA256 secret for /api/v1/billing/webhook. Unset = the webhook is
   // not configured and refuses every call (it never accepts unsigned events).
-  BILLING_WEBHOOK_SECRET: z.string().min(16).optional(),
+  BILLING_WEBHOOK_SECRET: optional(z.string().min(16)),
   // Stripe (server-only; never sent to the browser). Secret or restricted key,
   // and the signing secret of this API's /api/v1/billing/stripe-webhook endpoint.
-  STRIPE_SECRET_KEY: z
-    .string()
-    .regex(/^(sk|rk)_(test|live)_[A-Za-z0-9]{16,}$/, 'must be a Stripe secret or restricted key')
-    .optional(),
-  STRIPE_WEBHOOK_SECRET: z
-    .string()
-    .regex(/^whsec_[A-Za-z0-9]{16,}$/, 'must be a Stripe webhook signing secret (whsec_…)')
-    .optional(),
+  STRIPE_SECRET_KEY: optional(
+    z
+      .string()
+      .regex(/^(sk|rk)_(test|live)_[A-Za-z0-9]{16,}$/, 'must be a Stripe secret or restricted key')
+  ),
+  STRIPE_WEBHOOK_SECRET: optional(
+    z.string().regex(/^whsec_[A-Za-z0-9]{16,}$/, 'must be a Stripe webhook signing secret (whsec_…)')
+  ),
   // Stripe Price ids for each paid plan and cycle (server-side catalog: the
   // client never supplies a price or an amount).
-  STRIPE_PRICE_CANDIDATE_PRO_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
-  STRIPE_PRICE_CANDIDATE_PRO_YEARLY: z.string().regex(/^price_\w+$/).optional(),
-  STRIPE_PRICE_RECRUITER_STARTER_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
-  STRIPE_PRICE_RECRUITER_STARTER_YEARLY: z.string().regex(/^price_\w+$/).optional(),
-  STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY: z.string().regex(/^price_\w+$/).optional(),
-  STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY: z.string().regex(/^price_\w+$/).optional(),
+  STRIPE_PRICE_CANDIDATE_PRO_MONTHLY: optional(z.string().regex(/^price_\w+$/)),
+  STRIPE_PRICE_CANDIDATE_PRO_YEARLY: optional(z.string().regex(/^price_\w+$/)),
+  STRIPE_PRICE_RECRUITER_STARTER_MONTHLY: optional(z.string().regex(/^price_\w+$/)),
+  STRIPE_PRICE_RECRUITER_STARTER_YEARLY: optional(z.string().regex(/^price_\w+$/)),
+  STRIPE_PRICE_RECRUITER_ENTERPRISE_MONTHLY: optional(z.string().regex(/^price_\w+$/)),
+  STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY: optional(z.string().regex(/^price_\w+$/)),
 
   // AI Policy Invariants
   AI_ENABLED: z.coerce.boolean().default(true),
