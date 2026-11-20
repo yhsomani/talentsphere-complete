@@ -10329,6 +10329,12 @@ export async function buildApp(
             field: 'currentPassword',
           });
         }
+        // The password check yields to the event loop; a concurrent erasure
+        // of the same account may have committed meanwhile. Never start a
+        // second run from the stale record: the loser gets 409.
+        if (usersById.get(session.userId) !== user) {
+          throw new DomainError('CONFLICT', 'Account erasure is already in progress.');
+        }
       }
 
       const result = executeLogicalAnonymization(

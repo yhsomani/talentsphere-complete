@@ -821,7 +821,7 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(sent).toHaveLength(1);
     });
 
-    it('caps codes per account at 5 an hour even when each resend waits out the cooldown', async () => {
+    it('caps codes per account at 5 an hour even when each request waits out the cooldown', async () => {
       const who = await newCandidate();
       vi.useFakeTimers({ toFake: ['Date'] });
       const start = Date.now();

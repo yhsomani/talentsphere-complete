@@ -454,7 +454,7 @@ export function assertCorporateEmailEligible(corporateEmail: string, companyDoma
  * (C-06). Bounds code guessing (issues × attempts per challenge) and stops
  * one account from flooding a mailbox. Tunables, not product policy.
  */
-export const EMAIL_CODE_RESEND_COOLDOWN_MS = 60_000;
+export const EMAIL_CODE_REISSUE_COOLDOWN_MS = 60_000;
 export const EMAIL_CODE_MAX_ISSUES_PER_HOUR = 5; // per account
 export const EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY = 10; // per recipient address
 export const REFERENCE_REQUESTS_MAX_PER_HOUR = 10; // per account
@@ -470,7 +470,7 @@ export interface EmailCodeIssueParams {
 export function assertEmailCodeIssuable(params: EmailCodeIssueParams): void {
   if (
     params.existing &&
-    params.now.getTime() - Date.parse(params.existing.createdAt) < EMAIL_CODE_RESEND_COOLDOWN_MS
+    params.now.getTime() - Date.parse(params.existing.createdAt) < EMAIL_CODE_REISSUE_COOLDOWN_MS
   ) {
     throw new DomainError(
       'RATE_LIMIT_EXCEEDED',

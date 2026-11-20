@@ -12,7 +12,7 @@ import {
   buildWorkHistoryGraph,
   assertEmailCodeIssuable,
   assertReferenceRequestAllowed,
-  EMAIL_CODE_RESEND_COOLDOWN_MS,
+  EMAIL_CODE_REISSUE_COOLDOWN_MS,
   EMAIL_CODE_MAX_ISSUES_PER_HOUR,
   EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY,
   REFERENCE_REQUESTS_MAX_PER_HOUR,
@@ -593,8 +593,8 @@ describe('sending budget for work-email codes and reference invitations (C-06)',
   const ago = (ms: number) => ({ createdAt: new Date(now.getTime() - ms).toISOString() });
   const base = { issuesByAccountLastHour: 0, issuesToAddressLastDay: 0, now };
 
-  it('refuses a resend inside the 60-second cooldown and allows it after', () => {
-    expect(EMAIL_CODE_RESEND_COOLDOWN_MS).toBe(60_000);
+  it('refuses a new code inside the 60-second cooldown and allows it after', () => {
+    expect(EMAIL_CODE_REISSUE_COOLDOWN_MS).toBe(60_000);
     expect(() => assertEmailCodeIssuable({ ...base, existing: ago(59_000) })).toThrow(
       /less than a minute/
     );
