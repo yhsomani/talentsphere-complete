@@ -1,12 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { processStripeEvent, type StripeBillingDeps } from '../../apps/api/src/billing-stripe.js';
 import { MemoryBillingStore } from '../../apps/api/src/storage/billing-store.js';
-import type {
-  NormalizedStripeEvent,
-  StripeGateway,
-  StripeSubscriptionSnapshot,
-} from '../../apps/api/src/stripe-gateway.js';
-import { buildPriceCatalog } from '../../packages/domain/src/stripe-billing.js';
+import type { NormalizedStripeEvent, StripeGateway } from '../../apps/api/src/stripe-gateway.js';
+import {
+  buildPriceCatalog,
+  type StripeSubscriptionSnapshot,
+} from '../../packages/domain/src/stripe-billing.js';
 
 // C-21 (b) and (d), at the event-processing layer: subscription events apply
 // Stripe's current state, and a second live subscription is logged at error

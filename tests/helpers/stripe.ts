@@ -1,8 +1,6 @@
 import crypto from 'node:crypto';
-import type {
-  StripeGateway,
-  StripeSubscriptionSnapshot,
-} from '../../apps/api/src/stripe-gateway.js';
+import type { StripeGateway } from '../../apps/api/src/stripe-gateway.js';
+import type { StripeSubscriptionSnapshot } from '../../packages/domain/src/stripe-billing.js';
 
 /**
  * Test doubles for Stripe. Nothing here talks to Stripe or holds a real
