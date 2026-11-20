@@ -59,6 +59,7 @@ import {
   transitionJobStatus,
   submitJobApplication,
   transitionApplicationState,
+  applicationForCandidate,
   Challenge,
   AssessmentSession,
   XpTransaction,
@@ -2707,7 +2708,7 @@ export async function buildApp(
       const job = jobsById.get(app.jobId);
       const org = job ? organizationsById.get(job.orgId) : undefined;
       return {
-        ...app,
+        ...applicationForCandidate(app),
         job: job
           ? { ...job, organization: org ? { id: org.id, name: org.name } : undefined }
           : undefined,
@@ -2738,7 +2739,12 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
       }
 
-      return reply.status(200).send({ application });
+      // The candidate never sees the hiring team's private rejection note (C-18).
+      const visible =
+        isCandidate && !isOrgMember && !isAdmin
+          ? applicationForCandidate(application)
+          : application;
+      return reply.status(200).send({ application: visible });
     }
   );
 

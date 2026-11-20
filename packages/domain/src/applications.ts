@@ -123,10 +123,21 @@ export function transitionApplicationState(
     updated.withdrawnAt = now;
   } else if (targetState === 'rejected') {
     updated.rejectedAt = now;
-    updated.rejectionReason = reason || 'Candidate does not match position criteria.';
+    // Record only a reason someone actually gave (C-18); never a default.
+    updated.rejectionReason = reason?.trim() || undefined;
   } else if (targetState === 'hired') {
     updated.hiredAt = now;
   }
 
   return updated;
+}
+
+/**
+ * The application as its candidate may see it. The rejection reason is the
+ * hiring team's private note (BR-19: recruiter-scoped, never candidate-visible),
+ * so it is left out (C-18).
+ */
+export function applicationForCandidate(application: JobApplication): JobApplication {
+  const { rejectionReason: _rejectionReason, ...visible } = application;
+  return visible;
 }

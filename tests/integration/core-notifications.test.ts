@@ -143,6 +143,19 @@ describe('Core-loop notifications', () => {
     const { notifications } = await inbox(app, other.token);
     expect(notifications[0].title).toBe('Platform Engineer: not taken forward');
     expect(JSON.stringify(notifications)).not.toContain('INTERNAL-NOTE');
+    // Nor through the application itself (C-18; BR-19)...
+    const mine = await call(app, 'GET', '/api/v1/applications/my', other.token);
+    expect(mine.status).toBe(200);
+    expect(mine.body.applications.find((a: Json) => a.id === id).status).toBe('rejected');
+    expect(JSON.stringify(mine.body)).not.toContain('INTERNAL-NOTE');
+    const one = await call(app, 'GET', `/api/v1/applications/${id}`, other.token);
+    expect(one.status).toBe(200);
+    expect(JSON.stringify(one.body)).not.toContain('INTERNAL-NOTE');
+    // ...while the hiring team still reads its note.
+    const pipeline = await call(app, 'GET', `/api/v1/jobs/${jobId}/applications`, owner.token);
+    expect(JSON.stringify(pipeline.body)).toContain('INTERNAL-NOTE');
+    const teamView = await call(app, 'GET', `/api/v1/applications/${id}`, owner.token);
+    expect(teamView.body.application.rejectionReason).toBe('INTERNAL-NOTE-weak-system-design');
   });
 
   it('tells the hiring team when a candidate withdraws', async () => {
