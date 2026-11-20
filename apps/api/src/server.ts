@@ -10415,11 +10415,26 @@ export async function buildApp(
 
       // Remove the subject's remaining ephemeral private state while this process
       // is still alive; database persistence for these preview modules remains
-      // an independent release gate.
+      // an independent release gate. Records indexed in several maps are
+      // removed from every one of them (C-05): deleting only the by-user index
+      // left them served by the by-id and secondary indexes.
+      const dropFromIndex = <T extends { id: string }>(
+        index: Map<string, T[]>,
+        key: string | undefined,
+        id: string
+      ) => {
+        if (!key) return;
+        const list = (index.get(key) || []).filter((x) => x.id !== id);
+        if (list.length) index.set(key, list);
+        else index.delete(key);
+      };
       userSettingsByUserId.delete(session.userId);
       exportRequestsByUserId.delete(session.userId);
       searchHistoryByUserId.delete(session.userId);
       await storage.savedJobs.eraseUser(session.userId);
+      for (const r of salaryReportsByUserId.get(session.userId) || []) {
+        salaryReportsById.delete(r.id);
+      }
       salaryReportsByUserId.delete(session.userId);
       reputationSignalsByUserId.delete(session.userId);
       xpTransactionsByUserId.delete(session.userId);
@@ -10446,27 +10461,88 @@ export async function buildApp(
       portfolioProjectsByUserId.delete(session.userId);
       gamificationProfilesByUserId.delete(session.userId);
       userBadgesByUserId.delete(session.userId);
+      for (const e of activityEventsByUserId.get(session.userId) || []) {
+        activityEventsById.delete(e.id);
+      }
       activityEventsByUserId.delete(session.userId);
       contributionScoresByUserId.delete(session.userId);
-      careerTransitionsByUserId.delete(session.userId);
-      careerMilestoneEvaluationsByUserId.delete(session.userId);
-      learningOutcomesByUserId.delete(session.userId);
+      // Career transitions, milestone evaluations and learning outcomes are
+      // keyed by PROFILE id (the deletes by user id were no-ops). Transitions
+      // also feed the shared benchmark list, outcomes the per-course metrics.
+      const erasedTransitionIds = new Set(
+        (careerTransitionsByUserId.get(profile.id) || []).map((t) => t.id)
+      );
+      for (const id of erasedTransitionIds) careerTransitionsById.delete(id);
+      for (let i = allCareerTransitions.length - 1; i >= 0; i--) {
+        if (erasedTransitionIds.has(allCareerTransitions[i].id)) allCareerTransitions.splice(i, 1);
+      }
+      careerTransitionsByUserId.delete(profile.id);
+      careerMilestoneEvaluationsByUserId.delete(profile.id);
+      for (const o of learningOutcomesByUserId.get(profile.id) || []) {
+        learningOutcomesById.delete(o.id);
+        dropFromIndex(learningOutcomesByCourseId, o.courseId, o.id);
+        learningImpactMetricsByCourseId.delete(o.courseId);
+      }
+      learningOutcomesByUserId.delete(profile.id);
+      for (const a of alumniAffiliationsByUserId.get(session.userId) || []) {
+        alumniAffiliationsById.delete(a.id);
+        dropFromIndex(alumniAffiliationsByInstitutionId, a.institutionId, a.id);
+      }
       alumniAffiliationsByUserId.delete(session.userId);
       warmIntroPrefsByUserId.delete(session.userId);
+      for (const w of warmIntroRequestsByRequesterId.get(session.userId) || []) {
+        warmIntroRequestsById.delete(w.id);
+        dropFromIndex(warmIntroRequestsByIntroducerId, w.introducerUserId, w.id);
+        dropFromIndex(warmIntroRequestsByTargetId, w.targetUserId, w.id);
+      }
       warmIntroRequestsByRequesterId.delete(session.userId);
+      for (const c of connectionsByUserId.get(session.userId) || []) {
+        connectionsById.delete(c.id);
+        dropFromIndex(
+          connectionsByUserId,
+          c.senderId === session.userId ? c.recipientId : c.senderId,
+          c.id
+        );
+      }
       connectionsByUserId.delete(session.userId);
       skillFreshnessByCandidateId.delete(profile.id);
+      // Written under either id by the two behavioral-profile routes.
       behavioralProfilesByCandidateId.delete(profile.id);
+      behavioralProfilesByCandidateId.delete(session.userId);
       interviewAssessmentsByCandidateId.delete(profile.id);
+      for (const a of assessmentSessionsByCandidateId.get(profile.id) || []) {
+        assessmentSessionsById.delete(a.id);
+      }
       assessmentSessionsByCandidateId.delete(profile.id);
-      referralRequestsByCandidateId.delete(profile.id);
-      skillEndorsementsByRecipientId.delete(profile.id);
+      // Referral requests and received endorsements are keyed by USER id (the
+      // former deletes by profile id were no-ops). A forwarded referral is
+      // also listed under the forwardee, so every referrer list is filtered.
+      const erasedReferralIds = new Set(
+        (referralRequestsByCandidateId.get(session.userId) || []).map((r) => r.id)
+      );
+      for (const id of erasedReferralIds) referralRequestsById.delete(id);
+      referralRequestsByReferrerId.forEach((list, key) => {
+        const kept = list.filter((r) => !erasedReferralIds.has(r.id));
+        if (kept.length === list.length) return;
+        if (kept.length) referralRequestsByReferrerId.set(key, kept);
+        else referralRequestsByReferrerId.delete(key);
+      });
+      referralRequestsByCandidateId.delete(session.userId);
+      for (const e of skillEndorsementsByRecipientId.get(session.userId) || []) {
+        skillEndorsementsById.delete(e.id);
+        dropFromIndex(skillEndorsementsByEndorserId, e.endorserId, e.id);
+      }
+      skillEndorsementsByRecipientId.delete(session.userId);
       await storage.savedSearches.eraseUser(session.userId);
       jobAlertsById.forEach((alert, key) => {
         if (alert.userId === session.userId) jobAlertsById.delete(key);
       });
       // Retained multi-party records (reviews, chat, organizational activity)
       // need an approved per-domain redaction/retention policy before release.
+      // Kept deliberately until then (owner scope): interview assessments and
+      // scorecards (org-owned hiring records; only the candidate index is
+      // dropped above), endorsements the person gave, moderation reports,
+      // reviews, talent-pool memberships, application drafts, auditLogs.
 
       // Mark the durable request history only after core erasure commits.
       // If this write fails, do not claim the lifecycle was updated.
