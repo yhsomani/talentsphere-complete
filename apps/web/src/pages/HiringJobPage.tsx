@@ -430,9 +430,11 @@ export const HiringJobPage: React.FC = () => {
                                   {ev.title}{' '}
                                   <span style={{ color: colors.neutral[600] }}>
                                     (
-                                    {ev.verificationLevel === 'unverified'
-                                      ? 'self-reported'
-                                      : ev.verificationLevel.replace('_', ' ')}
+                                    {ev.status === 'revoked' || ev.status === 'expired'
+                                      ? ev.status
+                                      : ev.verificationLevel === 'unverified'
+                                        ? 'self-reported'
+                                        : ev.verificationLevel.replace('_', ' ')}
                                     )
                                   </span>
                                 </li>

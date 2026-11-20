@@ -48,6 +48,8 @@ import {
   canViewProfile,
   createEvidence,
   courseCompletionEvidence,
+  assertAttachableEvidence,
+  evidenceSummaryForReviewers,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -2628,6 +2630,7 @@ export async function buildApp(
               `Evidence item ${evId} does not belong to your profile.`
             );
           }
+          assertAttachableEvidence(ev);
         }
       }
 
@@ -2784,7 +2787,10 @@ export async function buildApp(
         return {
           ...app,
           candidate,
-          evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+          evidence: app.attachedEvidenceIds
+            .map((evId) => evidenceById.get(evId))
+            .filter((ev): ev is Evidence => Boolean(ev))
+            .map(evidenceSummaryForReviewers),
           workHistorySummary: {
             roles: histories.length,
             emailVerifiedRoles: histories.filter((h) => h.emailVerifiedAt).length,

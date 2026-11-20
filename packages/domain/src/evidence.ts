@@ -270,6 +270,10 @@ export function disputeEvidence(
       'Only staff, the verifier, or someone with a recorded relationship to this person may dispute it. Report it instead.'
     );
   }
+  // A second dispute would overwrite the first one's reason and author (C-12).
+  if (evidence.status === 'disputed') {
+    throw new DomainError('CONFLICT', 'This record is already disputed and awaiting staff review.');
+  }
 
   const now = new Date().toISOString();
   return {
@@ -314,6 +318,10 @@ export function revokeEvidence(
       'Only the owner, issuer/verifier, or platform admin may revoke evidence.'
     );
   }
+  // Revocation is final; a repeat would re-stamp who revoked it and when (C-12).
+  if (evidence.status === 'revoked') {
+    throw new DomainError('CONFLICT', 'This record is already revoked.');
+  }
 
   const now = new Date().toISOString();
   return {
@@ -326,6 +334,41 @@ export function revokeEvidence(
       revokedAt: now,
     },
     updatedAt: now,
+  };
+}
+
+/**
+ * Refuses evidence that can no longer support an application: a revoked or
+ * expired record (C-12). Pending and disputed records stay attachable; a
+ * dispute is unresolved, not a finding that the record is false.
+ */
+export function assertAttachableEvidence(evidence: Evidence): void {
+  if (evidence.status === 'revoked' || evidence.status === 'expired') {
+    throw new DomainError(
+      'INVALID_STATE_TRANSITION',
+      `Evidence item ${evidence.id} is ${evidence.status} and cannot be attached to an application.`
+    );
+  }
+}
+
+/**
+ * What a reviewer (the hiring team) sees of an attached evidence record (C-12):
+ * no metadata (dispute and revocation reasons, who raised them, verification
+ * notes) and no verifier account id.
+ */
+export function evidenceSummaryForReviewers(evidence: Evidence) {
+  return {
+    id: evidence.id,
+    subjectId: evidence.subjectId,
+    type: evidence.type,
+    title: evidence.title,
+    description: evidence.description,
+    source: evidence.source,
+    status: evidence.status,
+    verificationLevel: evidence.verificationLevel,
+    verifiedAt: evidence.verifiedAt,
+    recencyDate: evidence.recencyDate,
+    createdAt: evidence.createdAt,
   };
 }
 

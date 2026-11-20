@@ -471,6 +471,50 @@ describe('Evidence Graph & Skills Taxonomy Integration Suite (F-96, F-84)', () =
     expect(JSON.parse(revokeRes.body).evidence.status).toBe('revoked');
   });
 
+  it('refuses a repeated dispute or revocation instead of re-stamping it (C-12)', async () => {
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/evidence',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: {
+        type: 'project',
+        title: 'Repeat-guard project',
+        description: 'Used to check repeat transitions.',
+        source: 'self',
+        provenance: 'direct_entry',
+        recencyDate: '2026-08-01',
+      },
+    });
+    const evidence = JSON.parse(created.body).evidence;
+    const act = (action: 'dispute' | 'revoke', token: string, reason: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/evidence/${evidence.id}/${action}`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: { reason },
+      });
+
+    expect((await act('dispute', adminToken, 'First dispute.')).statusCode).toBe(200);
+    const secondDispute = await act('dispute', adminToken, 'Second dispute.');
+    expect(secondDispute.statusCode).toBe(409);
+
+    const firstRevoke = await act('revoke', candidateToken, 'First revocation.');
+    expect(firstRevoke.statusCode).toBe(200);
+    const firstStamp = JSON.parse(firstRevoke.body).evidence.metadata;
+    const secondRevoke = await act('revoke', adminToken, 'Second revocation.');
+    expect(secondRevoke.statusCode).toBe(409);
+
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/v1/evidence/mine',
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    const stored = JSON.parse(mine.body).evidence.find((e: any) => e.id === evidence.id);
+    expect(stored.metadata.revokedBy).toBe(firstStamp.revokedBy);
+    expect(stored.metadata.revocationReason).toBe('First revocation.');
+    expect(stored.metadata.disputeReason).toBe('First dispute.');
+  });
+
   it('provides zero-PII public verification endpoint (BR-150, BR-155)', async () => {
     const createRes = await app.inject({
       method: 'POST',
