@@ -1,18 +1,6 @@
+import './load-env.js';
 import { buildApp } from './server.js';
 import { productionConfigProblems, validateServerEnv } from '@talentsphere/config';
-
-// Load .env natively (Node process.loadEnvFile): found from the repo root, or
-// two levels up when started from apps/api (pnpm --filter dev). A missing file
-// is fine — CI and production pass environment variables directly — and values
-// already in process.env are never overridden by the file.
-for (const candidate of ['.env', '../../.env']) {
-  try {
-    process.loadEnvFile(candidate);
-    break;
-  } catch {
-    // not here — try the next location
-  }
-}
 
 async function main() {
   const env = validateServerEnv();
