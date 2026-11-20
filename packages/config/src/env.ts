@@ -11,6 +11,19 @@ const emptyAsUnset = (value: unknown) =>
 const optional = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess(emptyAsUnset, schema.optional());
 
+// A boolean setting. `z.coerce.boolean()` is `Boolean(value)`, so
+// AI_ENABLED=false would read as true; accept true/false/1/0 (any case) and
+// fail boot on anything else (C-15, A08-013). Local twin of contracts'
+// queryBoolean: config does not depend on contracts.
+const envBoolean = z.preprocess((value) => {
+  if (typeof value === 'string') {
+    const normalised = value.trim().toLowerCase();
+    if (normalised === 'true' || normalised === '1') return true;
+    if (normalised === 'false' || normalised === '0') return false;
+  }
+  return value;
+}, z.boolean());
+
 export const ServerEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   APP_NAME: z.string().default('TalentSphere'),
@@ -111,9 +124,9 @@ export const ServerEnvSchema = z.object({
   STRIPE_PRICE_RECRUITER_ENTERPRISE_YEARLY: optional(z.string().regex(/^price_\w+$/)),
 
   // AI Policy Invariants
-  AI_ENABLED: z.coerce.boolean().default(true),
-  AI_FREE_USER_PAID_INFERENCE: z.coerce.boolean().default(false),
-  AI_CLOUD_FALLBACK_ENABLED: z.coerce.boolean().default(false),
+  AI_ENABLED: envBoolean.default(true),
+  AI_FREE_USER_PAID_INFERENCE: envBoolean.default(false),
+  AI_CLOUD_FALLBACK_ENABLED: envBoolean.default(false),
   AI_REQUEST_TIMEOUT_MS: z.coerce.number().default(30000),
 });
 
