@@ -79,13 +79,14 @@ describe('Removing a role on PostgreSQL', () => {
     expect(res.status).toBe(201);
     return res.body.workHistory.id as string;
   };
-  const requestReference = async (historyId: string) => {
+  // One mailbox gives at most one reference per role (C-17).
+  const requestReference = async (historyId: string, refereeEmail = 'morgan@contoso.example') => {
     const res = await call(
       app,
       'POST',
       `/api/v1/candidates/work-history/${historyId}/references/request`,
       token,
-      { refereeName: 'Morgan', refereeEmail: 'morgan@contoso.example', relationship: 'manager' }
+      { refereeName: 'Morgan', refereeEmail, relationship: 'manager' }
     );
     expect(res.status).toBe(201);
     const refId = res.body.reference.id as string;
@@ -130,7 +131,7 @@ describe('Removing a role on PostgreSQL', () => {
       corporateEmail: 'casey@contoso.example',
     });
     const pending = await requestReference(role);
-    const answered = await requestReference(role);
+    const answered = await requestReference(role, 'riley@contoso.example');
     const submitted = await call(
       app,
       'POST',
