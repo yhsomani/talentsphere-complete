@@ -421,7 +421,7 @@ export type SendMessageInput = z.infer<typeof SendMessageInputSchema>;
  * Notification Center Contracts (F-14, BR-120)
  */
 export const MarkNotificationsReadInputSchema = z.object({
-  notificationIds: z.array(z.string().uuid()).optional(),
+  notificationIds: z.array(z.string().uuid()).max(200).optional(),
   all: z.boolean().optional(),
 });
 

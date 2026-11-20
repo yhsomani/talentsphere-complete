@@ -189,6 +189,34 @@ describe('Core-loop notifications', () => {
     expect(foreign.body.markedCount).toBe(0);
     expect((await inbox(app, owner.token)).notifications[0].isRead).toBe(false);
 
+    // A request that names nothing marks nothing (C-13): it is refused.
+    const own = (await inbox(app, candidate.token)).notifications;
+    for (const body of [
+      {},
+      { all: false },
+      { notificationIds: [] },
+      { all: true, notificationIds: [own[0].id] },
+    ]) {
+      const refused = await call(
+        app,
+        'POST',
+        '/api/v1/notifications/mark-read',
+        candidate.token,
+        body
+      );
+      expect(refused.status).toBe(422);
+      expect(refused.body.error.code).toBe('VALIDATION_FAILED');
+    }
+    const absent = await app.inject({
+      method: 'POST',
+      url: '/api/v1/notifications/mark-read',
+      headers: { authorization: `Bearer ${candidate.token}` },
+    });
+    expect(absent.statusCode).toBe(422);
+    expect(
+      (await call(app, 'GET', '/api/v1/notifications/summary', candidate.token)).body.unreadCount
+    ).toBe(2);
+
     const all = await call(app, 'POST', '/api/v1/notifications/mark-read', candidate.token, {
       all: true,
     });

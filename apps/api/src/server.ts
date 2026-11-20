@@ -98,6 +98,7 @@ import {
   createNotificationEntity,
   candidateApplicationUpdate,
   markNotificationsAsRead,
+  resolveMarkReadTargets,
   AIConversation,
   AIMessage,
   AIUsageMeter,
@@ -5901,7 +5902,7 @@ export async function buildApp(
 
     const input = MarkNotificationsReadInputSchema.parse(req.body || {});
     const userNotifs = notificationsByRecipientId.get(profile.id) || [];
-    const targetIds = input.all ? undefined : input.notificationIds;
+    const targetIds = resolveMarkReadTargets(input);
 
     // Mark copies, never the stored objects, and persist them: the read state
     // survives a restart, and only the recipient's own notifications move.
