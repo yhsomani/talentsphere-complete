@@ -143,6 +143,7 @@ import {
   DataExportRequest,
   createDefaultUserSettings,
   updateUserSettings,
+  withProfileVisibility,
   requestAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
@@ -9973,6 +9974,9 @@ export async function buildApp(
       byoAiKey: settings.byoAiKey ? '••••••••' : null,
     };
   };
+  // What the person is shown: profile visibility follows the profile (C-25).
+  const settingsView = (settings: UserSettings) =>
+    sanitizeSettings(withProfileVisibility(settings, profilesByUserId.get(settings.userId)));
 
   // Settings are read from PostgreSQL on first access, not reset on restart.
   const accountSettings = async (userId: string): Promise<UserSettings> => {
@@ -9991,7 +9995,7 @@ export async function buildApp(
     const settings = await accountSettings(session.userId);
 
     return reply.status(200).send({
-      settings: sanitizeSettings(settings),
+      settings: settingsView(settings),
     });
   });
 
@@ -10034,7 +10038,7 @@ export async function buildApp(
 
     return reply.status(200).send({
       message: 'Account settings updated successfully.',
-      settings: sanitizeSettings(updated),
+      settings: settingsView(updated),
     });
   });
 
@@ -10056,7 +10060,8 @@ export async function buildApp(
       throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
     }
 
-    const settings = await accountSettings(session.userId);
+    // One visibility value in the archive, the profile's (C-25).
+    const settings = withProfileVisibility(await accountSettings(session.userId), profile);
 
     // Evidence and applications are keyed by PROFILE id; collecting them by
     // user id exported nothing (gap G-20).
