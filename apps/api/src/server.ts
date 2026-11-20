@@ -191,6 +191,7 @@ import {
   computeKPIs,
   appendBounded,
   ANALYTICS_EVENT_RETENTION,
+  telemetryConsentFrom,
   JobTemplate,
   createJobTemplate,
   updateJobTemplate,
@@ -12293,13 +12294,15 @@ export async function buildApp(
       let telemetryConsent = true;
 
       if (session) {
-        const settings = userSettingsByUserId.get(session.userId);
-        if (
-          settings &&
-          (settings.showActivity === false || (settings as any).telemetryEnabled === false)
-        ) {
-          telemetryConsent = false;
-        }
+        // The cache is filled only by GET/PATCH /settings, so after a restart
+        // it is empty: read the durable setting through (never creating a
+        // row) so an explicit opt-out survives restarts (C-10).
+        const settings =
+          userSettingsByUserId.get(session.userId) ??
+          (await storage.accountMetadata.getSettings(session.userId)) ??
+          undefined;
+        if (settings) userSettingsByUserId.set(session.userId, settings);
+        telemetryConsent = telemetryConsentFrom(settings);
       }
 
       const body = req.body as Record<string, unknown>;

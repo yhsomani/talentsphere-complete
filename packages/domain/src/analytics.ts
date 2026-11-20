@@ -160,6 +160,15 @@ export function appendBounded<T>(list: T[], item: T, cap: number): void {
 }
 
 /**
+ * Telemetry consent from a user's stored settings (F-19). A user who never
+ * saved settings is consenting (the documented default); an explicit
+ * `showActivity: false` withdraws consent, so their events are anonymised.
+ */
+export function telemetryConsentFrom(settings?: { showActivity?: boolean } | null): boolean {
+  return settings ? settings.showActivity !== false : true;
+}
+
+/**
  * Records an analytics event with telemetry consent enforcement and metadata sanitization (F-19, BR-27).
  */
 export function recordAnalyticsEvent(params: RecordAnalyticsEventParams): AnalyticsEvent {

@@ -6,6 +6,7 @@ import {
   assertMetadataWithinLimits,
   appendBounded,
   ANALYTICS_METADATA_LIMITS,
+  telemetryConsentFrom,
   type AnalyticsEvent,
 } from '../../packages/domain/src/analytics.js';
 
@@ -219,5 +220,14 @@ describe('Domain: analytics metadata bounds (C-03, M-2)', () => {
     expect(list).toHaveLength(10_000);
     expect(list[0]).toBe(50);
     expect(list[list.length - 1]).toBe(10_049);
+  });
+});
+
+describe('Domain: telemetry consent from stored settings (C-10)', () => {
+  it('consents by default and withdraws only on an explicit showActivity: false', () => {
+    expect(telemetryConsentFrom(undefined)).toBe(true);
+    expect(telemetryConsentFrom(null)).toBe(true);
+    expect(telemetryConsentFrom({ showActivity: true })).toBe(true);
+    expect(telemetryConsentFrom({ showActivity: false })).toBe(false);
   });
 });
