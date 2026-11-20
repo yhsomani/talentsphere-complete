@@ -209,6 +209,10 @@ restore the old password (`tests/pg/concurrency.test.ts`).
   reveal whether an account exists.
 - Login is rate-limited per client IP + email and sign-up per client IP
   (`AUTH_RATE_LIMIT_MAX_REQUESTS`, default 10 per 15 minutes), on top of the global limiter.
+- Failed sign-ins are also counted per account (email) across every client address
+  (`AUTH_ACCOUNT_FAILURE_MAX`, default 50 per 15 minutes; in memory, per process). Successes
+  are not counted and clear the count, as does a password change. Unknown emails are counted
+  the same way, so the 429 does not reveal which addresses are registered.
 - Global limiter: 300 requests per minute per signed-in account (keyed by the verified
   token's user id), or per client address for anonymous and invalid-token callers, so a
   forged token buys no budget. Health checks are exempt. Behind a proxy set `TRUST_PROXY`,

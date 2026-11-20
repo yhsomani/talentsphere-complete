@@ -38,6 +38,8 @@ import {
   hashPassword,
   verifyPassword,
   passwordNeedsRehash,
+  recentLoginFailures,
+  loginFailureDecision,
   createSessionToken,
   verifySessionToken,
   type AuthPayload,
@@ -970,6 +972,24 @@ export async function buildApp(
   // same time as "wrong password" and response timing does not reveal which
   // addresses are registered.
   const timingDecoyHash = hashPassword(crypto.randomBytes(16).toString('hex'));
+  // Failed sign-ins per email across every client address (C-23). The
+  // per-(IP, email) limiter above does not bound guessing from many
+  // addresses. In memory, per process, like the limiter store.
+  const loginFailuresByEmail = new Map<string, number[]>();
+  const recordLoginFailure = (emailKey: string) => {
+    const now = Date.now();
+    // Only the newest AUTH_ACCOUNT_FAILURE_MAX entries can matter.
+    const list = [...recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], now), now].slice(
+      -env.AUTH_ACCOUNT_FAILURE_MAX
+    );
+    loginFailuresByEmail.set(emailKey, list);
+    // Unknown emails create entries too; drop expired ones so the map stays bounded.
+    if (loginFailuresByEmail.size > 10_000) {
+      for (const [key, times] of loginFailuresByEmail) {
+        if (recentLoginFailures(times, now).length === 0) loginFailuresByEmail.delete(key);
+      }
+    }
+  };
 
   app.post(
     '/api/v1/auth/register',
@@ -1016,16 +1036,29 @@ export async function buildApp(
     { config: loginRateLimit },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const input = LoginInputSchema.parse(req.body);
-      const user = usersByEmail.get(input.email.toLowerCase());
+      const emailKey = input.email.toLowerCase();
+      const failures = recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], Date.now());
+      if (loginFailureDecision(failures.length, env.AUTH_ACCOUNT_FAILURE_MAX) === 'refuse') {
+        // Same cost as a real check, and the same answer for unknown emails.
+        await verifyPassword(input.password, await timingDecoyHash);
+        throw new DomainError(
+          'RATE_LIMIT_EXCEEDED',
+          'Too many sign-in attempts for this account. Wait 15 minutes, then try again.'
+        );
+      }
+      const user = usersByEmail.get(emailKey);
       if (!user) {
         await verifyPassword(input.password, await timingDecoyHash);
+        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
 
       const isValid = await verifyPassword(input.password, user.passwordHash);
       if (!isValid) {
+        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
+      loginFailuresByEmail.delete(emailKey);
 
       // Transparent upgrade: hashes written at the old work factor (10k
       // iterations) are re-hashed at the current one while the plaintext is in
@@ -1122,6 +1155,8 @@ export async function buildApp(
           sessionsValidAfter: cutoff,
         },
       });
+      // Guesses against the old password no longer count against the account.
+      loginFailuresByEmail.delete(user.email.toLowerCase());
       auditLogs.push({
         event: 'auth.password_changed',
         actorId: user.id,

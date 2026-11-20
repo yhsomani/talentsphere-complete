@@ -13,7 +13,7 @@
  * api-server.test.ts (404 envelope, x-request-id propagation, helmet headers,
  * basic auth route contracts).
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { FastifyInstance } from 'fastify';
 import crypto from 'node:crypto';
 import { buildApp } from '../../apps/api/src/server.js';
@@ -697,5 +697,82 @@ describe('SEC: Rate limiting (SECURITY.md §8, threat: rate-limit bypass)', () =
       headers: { authorization: `Bearer ${crypto.randomBytes(24).toString('base64url')}.x` },
     });
     expect(forged.statusCode).toBe(429);
+  });
+});
+
+describe('SEC: per-account sign-in failure throttle (C-23, CWE-307)', () => {
+  let app: FastifyInstance;
+  const PASSWORD = 'a-long-enough-passphrase';
+
+  beforeAll(async () => {
+    app = await buildApp({
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'error',
+      CORS_ALLOWED_ORIGINS: ALLOWED_ORIGIN,
+      RATE_LIMIT_MAX_REQUESTS: '10000',
+      AUTH_ACCOUNT_FAILURE_MAX: '3',
+      // x-forwarded-for picks the client address, so each guess comes "from" a new one.
+      TRUST_PROXY: 'true',
+    });
+    await app.ready();
+    for (const email of ['victim@example.com', 'bystander@example.com']) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: { email, password: PASSWORD, fullName: 'Throttle Test', role: 'candidate' },
+      });
+      expect(res.statusCode).toBe(201);
+    }
+  });
+
+  afterAll(async () => {
+    vi.useRealTimers();
+    await app.close();
+  });
+
+  const login = (email: string, password: string, ip: string) =>
+    app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/login',
+      headers: { 'x-forwarded-for': ip },
+      payload: { email, password },
+    });
+
+  const guessFromFourAddresses = async (email: string, prefix: string) => {
+    const statuses: number[] = [];
+    for (let i = 1; i <= 4; i++) {
+      statuses.push((await login(email, 'wrong-guess', `${prefix}.${i}`)).statusCode);
+    }
+    return statuses;
+  };
+
+  it('refuses further guesses against one account even when every guess comes from a new address', async () => {
+    expect(await guessFromFourAddresses('victim@example.com', '198.51.100')).toEqual([
+      401, 401, 401, 429,
+    ]);
+    const refused = await login('victim@example.com', PASSWORD, '198.51.100.99');
+    expect(refused.statusCode).toBe(429);
+    expect(refused.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+  });
+
+  it('answers an unknown email with the same sequence, so the throttle does not reveal registration', async () => {
+    expect(await guessFromFourAddresses('nobody-here@example.com', '203.0.113')).toEqual([
+      401, 401, 401, 429,
+    ]);
+  });
+
+  it('does not affect another account signing in from the same addresses', async () => {
+    expect((await login('bystander@example.com', PASSWORD, '198.51.100.1')).statusCode).toBe(200);
+  });
+
+  it('lets the correct password in once the window has passed, and a success clears the count', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.now() + 15 * 60 * 1000 + 1000);
+    expect((await login('victim@example.com', PASSWORD, '192.0.2.1')).statusCode).toBe(200);
+    // Cleared: two failures after the success are still below the cap of 3.
+    expect((await login('victim@example.com', 'wrong-guess', '192.0.2.2')).statusCode).toBe(401);
+    expect((await login('victim@example.com', 'wrong-guess', '192.0.2.3')).statusCode).toBe(401);
+    expect((await login('victim@example.com', PASSWORD, '192.0.2.4')).statusCode).toBe(200);
+    vi.useRealTimers();
   });
 });
