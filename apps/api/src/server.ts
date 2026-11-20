@@ -316,6 +316,8 @@ import {
   createWorkHistory,
   verifyCorporateEmail,
   assertCorporateEmailEligible,
+  assertEmailCodeIssuable,
+  assertReferenceRequestAllowed,
   canTransitionApplication,
   requestEmploymentReference,
   submitEmploymentReference,
@@ -12412,6 +12414,21 @@ export async function buildApp(
 
   const EMAIL_CHALLENGE_TTL_MS = 15 * 60 * 1000;
   const EMAIL_CHALLENGE_MAX_ATTEMPTS = 5;
+  // Sliding-window send logs for the budgets in assertEmailCodeIssuable /
+  // assertReferenceRequestAllowed (C-06). Keys: `code-user:<id>`,
+  // `code-addr:<email>`, `ref-user:<id>`. Per process, like the limiter store.
+  const HOUR_MS = 60 * 60 * 1000;
+  const sendLog = new Map<string, number[]>();
+  const sendsWithin = (key: string, windowMs: number): number => {
+    const now = Date.now();
+    const recent = (sendLog.get(key) || []).filter((t) => now - t < windowMs);
+    if (recent.length) sendLog.set(key, recent);
+    else sendLog.delete(key);
+    return recent.length;
+  };
+  const recordSend = (...keys: string[]) => {
+    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), Date.now()]);
+  };
 
   // Response projections: replay keys and token hashes never leave the API.
   const publicWorkHistory = (h: StoredWorkHistory): VerifiedWorkHistory => {
@@ -12518,6 +12535,12 @@ export async function buildApp(
           );
         }
         assertCorporateEmailEligible(email, companyDomain);
+        assertEmailCodeIssuable({
+          existing: emailChallengesByHistoryId.get(id),
+          issuesByAccountLastHour: sendsWithin(`code-user:${session.userId}`, HOUR_MS),
+          issuesToAddressLastDay: sendsWithin(`code-addr:${email}`, 24 * HOUR_MS),
+          now: new Date(),
+        });
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
         const challenge: EmailChallenge = {
@@ -12541,6 +12564,7 @@ export async function buildApp(
         } catch {
           throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
         }
+        recordSend(`code-user:${session.userId}`, `code-addr:${email}`);
         return reply.status(202).send({
           status: 'verification_pending',
           email,
@@ -12644,6 +12668,9 @@ export async function buildApp(
           'Reference invitations are unavailable until email delivery is configured.'
         );
       }
+      assertReferenceRequestAllowed({
+        requestsByAccountLastHour: sendsWithin(`ref-user:${session.userId}`, HOUR_MS),
+      });
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
@@ -12686,6 +12713,7 @@ export async function buildApp(
       } catch {
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
+      recordSend(`ref-user:${session.userId}`);
 
       return reply.status(201).send({
         reference: publicReference(stored),

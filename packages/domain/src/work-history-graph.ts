@@ -449,6 +449,57 @@ export function assertCorporateEmailEligible(corporateEmail: string, companyDoma
   }
 }
 
+/**
+ * Sending budget for mail the platform sends on a candidate's behalf
+ * (C-06). Bounds code guessing (issues × attempts per challenge) and stops
+ * one account from flooding a mailbox. Tunables, not product policy.
+ */
+export const EMAIL_CODE_RESEND_COOLDOWN_MS = 60_000;
+export const EMAIL_CODE_MAX_ISSUES_PER_HOUR = 5; // per account
+export const EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY = 10; // per recipient address
+export const REFERENCE_REQUESTS_MAX_PER_HOUR = 10; // per account
+
+export interface EmailCodeIssueParams {
+  /** The open challenge for this record, if any. */
+  existing?: { createdAt: string };
+  issuesByAccountLastHour: number;
+  issuesToAddressLastDay: number;
+  now: Date;
+}
+
+export function assertEmailCodeIssuable(params: EmailCodeIssueParams): void {
+  if (
+    params.existing &&
+    params.now.getTime() - Date.parse(params.existing.createdAt) < EMAIL_CODE_RESEND_COOLDOWN_MS
+  ) {
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'A code was sent less than a minute ago. Wait, then request a new one.'
+    );
+  }
+  if (params.issuesByAccountLastHour >= EMAIL_CODE_MAX_ISSUES_PER_HOUR) {
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'Too many verification codes requested. Try again in an hour.'
+    );
+  }
+  if (params.issuesToAddressLastDay >= EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY) {
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'Too many verification codes were sent to this address today. Try again tomorrow.'
+    );
+  }
+}
+
+export function assertReferenceRequestAllowed(params: { requestsByAccountLastHour: number }): void {
+  if (params.requestsByAccountLastHour >= REFERENCE_REQUESTS_MAX_PER_HOUR) {
+    throw new DomainError(
+      'RATE_LIMIT_EXCEEDED',
+      'Too many reference requests in the last hour. Try again later.'
+    );
+  }
+}
+
 export function verifyCorporateEmail(params: VerifyCorporateEmailParams): VerifiedWorkHistory {
   const { workHistory, corporateEmail, companyDomain } = params;
   const now = params.nowIso ?? new Date().toISOString();
