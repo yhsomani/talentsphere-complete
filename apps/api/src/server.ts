@@ -262,6 +262,8 @@ import {
   AlumniGroupMember,
   AlumniMentorshipRequest,
   createAlumniAffiliation,
+  matchesInstitutionDomain,
+  assertEmailDomainVerificationAvailable,
   filterAlumniDirectory,
   createAlumniGroup,
   joinAlumniGroup,
@@ -9006,6 +9008,10 @@ export async function buildApp(
       verificationMethod: input.verificationMethod,
       userEmail,
       institutionDomain,
+      // Account emails are not confirmed at registration (A02-001), so the
+      // address cannot prove the affiliation (C-16). Pass the real flag once
+      // account-email verification exists.
+      userEmailVerified: false,
     });
 
     alumniAffiliationsById.set(affiliation.id, affiliation);
@@ -9054,26 +9060,12 @@ export async function buildApp(
       }
 
       if (input.verificationMethod === 'email_domain') {
+        // Closed until account emails are confirmed (C-16): see the create route.
+        assertEmailDomainVerificationAvailable(false);
         const org = organizationsById.get(affiliation.institutionId);
-        const instDomain = org?.website
-          ? org.website
-              .replace(/^https?:\/\//i, '')
-              .replace(/\/.*$/, '')
-              .toLowerCase()
-          : '';
         const user = usersById.get(affiliation.userId);
         const userEmail = user?.email || session.email;
-        const emailParts = userEmail.split('@');
-        const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
-
-        // Exact domain or a subdomain of it: substring matching accepted
-        // x@stanford.edu.evil.example (SEC-04). Account emails are still not
-        // verified at registration, so this path stays weaker than a seat.
-        if (
-          !instDomain ||
-          !userDomain ||
-          (userDomain !== instDomain && !userDomain.endsWith(`.${instDomain}`))
-        ) {
+        if (!org?.website || !matchesInstitutionDomain(userEmail, org.website)) {
           throw new DomainError(
             'VALIDATION_FAILED',
             'User email domain does not match institution domain.'

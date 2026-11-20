@@ -69,6 +69,11 @@ export interface CreateAffiliationParams {
   verificationMethod?: AlumniVerificationMethod;
   userEmail?: string;
   institutionDomain?: string;
+  /**
+   * True only when the account email has been confirmed (C-16). No such
+   * confirmation exists yet, so callers pass false and nothing auto-verifies.
+   */
+  userEmailVerified?: boolean;
   nowIso?: string;
 }
 
@@ -111,6 +116,41 @@ export function validateGraduationYear(year: number): void {
 }
 
 /**
+ * True when the email's domain is the institution's domain or a subdomain of
+ * it. Accepts a website URL or a bare domain. Exact/subdomain only: substring
+ * matching accepted x@stanford.edu.evil.example (SEC-04).
+ */
+export function matchesInstitutionDomain(
+  email: string,
+  institutionWebsiteOrDomain: string
+): boolean {
+  const emailParts = email.split('@');
+  if (emailParts.length !== 2) return false;
+  const emailDomain = emailParts[1].toLowerCase();
+  const target = institutionWebsiteOrDomain
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/.*$/, '')
+    .replace(/^@/, '')
+    .toLowerCase();
+  if (!emailDomain || !target) return false;
+  return emailDomain === target || emailDomain.endsWith(`.${target}`);
+}
+
+/**
+ * Email-domain verification proves an institution affiliation only if the
+ * account email itself is proven (C-16, A08-003). Account emails are not
+ * confirmed at registration, so this path is closed until they are.
+ */
+export function assertEmailDomainVerificationAvailable(userEmailVerified: boolean): void {
+  if (!userEmailVerified) {
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Email-domain verification needs a confirmed account email. Ask an administrator of the institution to confirm your seat.'
+    );
+  }
+}
+
+/**
  * Creates a new alumni affiliation record with initial verification status.
  */
 export function createAlumniAffiliation(params: CreateAffiliationParams): AlumniAffiliation {
@@ -125,18 +165,17 @@ export function createAlumniAffiliation(params: CreateAffiliationParams): Alumni
   let verificationMethod: AlumniVerificationMethod = params.verificationMethod ?? 'unverified';
   let verifiedAt: string | undefined = undefined;
 
-  // Auto-verify if email domain matches institution domain
-  if (params.userEmail && params.institutionDomain) {
-    const emailParts = params.userEmail.split('@');
-    if (emailParts.length === 2) {
-      const emailDomain = emailParts[1].toLowerCase();
-      const targetDomain = params.institutionDomain.toLowerCase().replace(/^@/, '');
-      if (emailDomain === targetDomain || emailDomain.endsWith(`.${targetDomain}`)) {
-        verificationStatus = 'verified';
-        verificationMethod = 'email_domain';
-        verifiedAt = now;
-      }
-    }
+  // Auto-verify only when a CONFIRMED account email matches the institution
+  // domain: an unconfirmed address proves nothing (C-16).
+  if (
+    params.userEmailVerified === true &&
+    params.userEmail &&
+    params.institutionDomain &&
+    matchesInstitutionDomain(params.userEmail, params.institutionDomain)
+  ) {
+    verificationStatus = 'verified';
+    verificationMethod = 'email_domain';
+    verifiedAt = now;
   }
 
   return {
