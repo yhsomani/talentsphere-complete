@@ -39,6 +39,31 @@ describe('plan limits: one source of truth', () => {
     }
   });
 
+  it('plan copy sells nothing that is not built (PLAN-COPY, docs/PRICING.md)', () => {
+    const copy = Object.values(PLATFORM_PLANS)
+      .flatMap((plan) => plan.features)
+      .join(' | ');
+    for (const unbuilt of [
+      /Advanced AI/i,
+      /career gap analytics/i,
+      /resume variations/i,
+      /ATS preview/i,
+      /Priority showcase/i,
+      /skill matching/i,
+      /recruitment analytics/i,
+      /Multi-seat/i,
+      /Deep Talent Graph/i,
+      /recruitment intelligence/i,
+      /Dedicated support/i,
+      /SLA/,
+    ]) {
+      expect(copy).not.toMatch(unbuilt);
+    }
+    for (const plan of Object.values(PLATFORM_PLANS)) {
+      expect(plan.features.length).toBeGreaterThan(0);
+    }
+  });
+
   it('maps every plan tier to a meter tier', () => {
     expect(aiTierForPlan('free')).toBe('free');
     expect(aiTierForPlan('recruiter_starter')).toBe('pro');
