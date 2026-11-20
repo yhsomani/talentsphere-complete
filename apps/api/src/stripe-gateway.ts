@@ -72,6 +72,16 @@ export interface StripeGateway {
   /** Cancels at period end, or immediately; returns Stripe's resulting state. */
   setCancellation(subscriptionId: string, immediate: boolean): Promise<StripeSubscriptionSnapshot>;
   /**
+   * Stripe's current state of a subscription (C-21). Webhook events can arrive
+   * out of order within the same second, so the handler applies this rather
+   * than the event's payload. `eventCreated` is the triggering event's time,
+   * kept as the ordering stamp.
+   */
+  retrieveSubscription(
+    subscriptionId: string,
+    eventCreated: number
+  ): Promise<StripeSubscriptionSnapshot>;
+  /**
    * The subscription an invoice payment was made for, or undefined when the
    * payment is not a subscription invoice (or cannot be resolved).
    */
@@ -260,6 +270,11 @@ export function createStripeGateway(options: {
           : await stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
         return normalizeSubscription(sub, Math.floor(Date.now() / 1000));
       }),
+
+    retrieveSubscription: (subscriptionId, eventCreated) =>
+      guard('subscriptions.retrieve', async () =>
+        normalizeSubscription(await stripe.subscriptions.retrieve(subscriptionId), eventCreated)
+      ),
 
     subscriptionIdForPayment: (paymentIntentId) =>
       guard('invoicePayments.list', async () => {

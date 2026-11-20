@@ -28,3 +28,51 @@ describe('Stripe gateway deleteCustomer (account erasure)', () => {
     });
   });
 });
+
+describe('Stripe gateway retrieveSubscription (C-21)', () => {
+  const gatewayWith = (retrieve: (id: string) => Promise<unknown>) =>
+    createStripeGateway({
+      secretKey: 'sk_test_unit',
+      webhookSecret: 'whsec_unit',
+      logger: { error: () => undefined },
+      client: { subscriptions: { retrieve } } as never,
+    });
+
+  it("normalises Stripe's current state and keeps the triggering event's time", async () => {
+    const seen: string[] = [];
+    const snapshot = await gatewayWith(async (id) => {
+      seen.push(id);
+      return {
+        id,
+        customer: { id: 'cus_1' },
+        status: 'active',
+        cancel_at_period_end: false,
+        canceled_at: null,
+        start_date: 100,
+        items: {
+          data: [{ price: { id: 'price_x' }, current_period_start: 200, current_period_end: 300 }],
+        },
+      };
+    }).retrieveSubscription('sub_1', 12345);
+    expect(seen).toEqual(['sub_1']);
+    expect(snapshot).toEqual({
+      id: 'sub_1',
+      customerId: 'cus_1',
+      status: 'active',
+      priceId: 'price_x',
+      cancelAtPeriodEnd: false,
+      canceledAt: null,
+      currentPeriodStart: 200,
+      currentPeriodEnd: 300,
+      eventCreated: 12345,
+    });
+  });
+
+  it('turns a provider failure into SERVICE_UNAVAILABLE', async () => {
+    await expect(
+      gatewayWith(async () => {
+        throw Object.assign(new Error('down'), { type: 'StripeConnectionError' });
+      }).retrieveSubscription('sub_1', 1)
+    ).rejects.toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+  });
+});

@@ -1,4 +1,8 @@
 import crypto from 'node:crypto';
+import type {
+  StripeGateway,
+  StripeSubscriptionSnapshot,
+} from '../../apps/api/src/stripe-gateway.js';
 
 /**
  * Test doubles for Stripe. Nothing here talks to Stripe or holds a real
@@ -178,4 +182,36 @@ export function invoiceEvent(o: {
       },
     },
   };
+}
+
+/**
+ * Stripe's side of `retrieveSubscription` for tests (C-21). The API applies
+ * Stripe's current subscription state rather than an event's payload, so a
+ * fake gateway needs that state: here it is the newest subscription event
+ * delivered for each subscription, except events the test lists in
+ * `lateDeliveries` (an older event Stripe delivers after a newer one, within
+ * the same second). Wrap the real gateway's `verifyWebhook` so signatures are
+ * still checked for real.
+ */
+export function fakeStripeSubscriptions(real: Pick<StripeGateway, 'verifyWebhook'>) {
+  const current = new Map<string, StripeSubscriptionSnapshot>();
+  const lateDeliveries = new Set<string>();
+  const control = { failRetrieve: false, retrieved: [] as string[] };
+  const verifyWebhook: StripeGateway['verifyWebhook'] = (rawBody, signature) => {
+    const event = real.verifyWebhook(rawBody, signature);
+    if (event.kind === 'subscription' && !lateDeliveries.has(event.id)) {
+      const previous = current.get(event.snapshot.id);
+      if (!previous || event.snapshot.eventCreated >= previous.eventCreated) {
+        current.set(event.snapshot.id, event.snapshot);
+      }
+    }
+    return event;
+  };
+  const retrieveSubscription: StripeGateway['retrieveSubscription'] = async (id, eventCreated) => {
+    control.retrieved.push(id);
+    const snapshot = current.get(id);
+    if (control.failRetrieve || !snapshot) throw new Error('fake Stripe: subscription unavailable');
+    return { ...snapshot, eventCreated };
+  };
+  return { current, lateDeliveries, control, verifyWebhook, retrieveSubscription };
 }

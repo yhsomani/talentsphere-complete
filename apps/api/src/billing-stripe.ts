@@ -34,6 +34,7 @@ export interface StripeBillingDeps {
   dispatchJob(event: { type: string; payload: Record<string, unknown> }): Promise<void>;
   log: {
     warn(obj: Record<string, unknown>, msg: string): void;
+    error(obj: Record<string, unknown>, msg: string): void;
   };
 }
 
@@ -95,14 +96,27 @@ export async function processStripeEvent(
     }
 
     case 'subscription': {
-      const { snapshot } = event;
       const userId =
-        (await billing.findUserIdByStripeSubscription(snapshot.id)) ??
-        (await billing.findUserIdByStripeCustomer(snapshot.customerId));
+        (await billing.findUserIdByStripeSubscription(event.snapshot.id)) ??
+        (await billing.findUserIdByStripeCustomer(event.snapshot.customerId));
       if (!userId || !deps.getAccountEmail(userId)) {
         deps.log.warn({ eventId: event.id }, 'Stripe subscription event for an unknown customer');
         return { status: 'ignored', reason: 'unknown customer' };
       }
+      // Events created in the same second can arrive in either order, and the
+      // stale guard has one-second resolution, so the payload's snapshot may be
+      // older than one already applied. Apply Stripe's current state instead
+      // (C-21). A provider failure is a 503 before anything is recorded, so
+      // Stripe redelivers the event.
+      const snapshot = await deps.gateway
+        .retrieveSubscription(event.snapshot.id, event.created)
+        .catch((error: unknown) => {
+          if (error instanceof DomainError) throw error;
+          throw new DomainError(
+            'SERVICE_UNAVAILABLE',
+            'The payment provider could not be reached. The event will be retried.'
+          );
+        });
       const existing = await billing.getSubscription(userId);
       const payload = { subscriptionId: snapshot.id, status: snapshot.status };
 
@@ -113,7 +127,26 @@ export async function processStripeEvent(
         existing.stripeSubscriptionId !== snapshot.id &&
         isLive(existing)
       ) {
-        deps.log.warn({ eventId: event.id }, 'Stripe event for a superseded subscription ignored');
+        if (['active', 'trialing', 'past_due'].includes(snapshot.status)) {
+          // Two live subscriptions for one account: the second one bills but
+          // grants nothing. What to do about it (cancel, refund) is an owner
+          // policy decision; make it visible so an operator can act.
+          deps.log.error(
+            {
+              eventId: event.id,
+              userId,
+              liveSubscriptionId: existing.stripeSubscriptionId,
+              secondSubscriptionId: snapshot.id,
+              secondSubscriptionStatus: snapshot.status,
+            },
+            'Second live Stripe subscription for an account that already has one; not applied, operator action needed'
+          );
+        } else {
+          deps.log.warn(
+            { eventId: event.id },
+            'Stripe event for a superseded subscription ignored'
+          );
+        }
         return done(await billing.applyEvent(record(userId, payload)));
       }
 

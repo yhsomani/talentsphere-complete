@@ -10497,7 +10497,10 @@ export async function buildApp(
         extractUser,
         getAccountEmail: (userId) => usersById.get(userId)?.email,
         dispatchJob: (event) => dispatchJob(event),
-        log: { warn: (obj, msg) => app.log.warn(obj, msg) },
+        log: {
+          warn: (obj, msg) => app.log.warn(obj, msg),
+          error: (obj, msg) => app.log.error(obj, msg),
+        },
       }
     : undefined;
   if (stripeDeps) {
