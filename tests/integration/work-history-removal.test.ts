@@ -265,7 +265,9 @@ describe('Removing a role from your work history', () => {
     const leaving = await register(app, 'leaving@example.org');
     const role = await addRole(app, leaving.token, 'Wingtip');
     const ref = await requestReference(app, leaving.token, role);
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', leaving.token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', leaving.token, {
+      currentPassword: 'a-long-enough-passphrase',
+    });
     expect(erased.status).toBe(200);
     const job = (await jobs(app)).find((j) => j.id === ref.jobId)!;
     expect(job.status).toBe('canceled');

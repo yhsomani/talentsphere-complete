@@ -653,6 +653,18 @@ export const CancelErasureInputSchema = z.object({
 
 export type CancelErasureInput = z.infer<typeof CancelErasureInputSchema>;
 
+// Fresh erasure requires the current password (C-04): a stolen or left-open
+// session alone cannot destroy an account. Not required to resume an
+// interrupted erasure, whose credential is already gone.
+export const ExecuteErasureInputSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(1, 'Enter your current password to delete your account.')
+    .max(1024),
+});
+
+export type ExecuteErasureInput = z.infer<typeof ExecuteErasureInputSchema>;
+
 export const RequestDataExportInputSchema = z.object({
   format: z.enum(['json', 'csv']).default('json'),
 });

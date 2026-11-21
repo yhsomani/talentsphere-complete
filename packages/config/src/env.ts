@@ -73,6 +73,9 @@ export const ServerEnvSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(300),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(10),
+  // Failed sign-ins per account (email), from any client address, per 15
+  // minutes. Successful sign-ins are not counted and clear the count.
+  AUTH_ACCOUNT_FAILURE_MAX: z.coerce.number().int().positive().default(50),
   // Client address behind a reverse proxy / load balancer. Unset: the socket
   // address is the client (direct exposure). Set to the number of trusted
   // proxy hops (e.g. "1"), "true" to trust every X-Forwarded-For hop, or a

@@ -38,6 +38,8 @@ import {
   hashPassword,
   verifyPassword,
   passwordNeedsRehash,
+  recentLoginFailures,
+  loginFailureDecision,
   createSessionToken,
   verifySessionToken,
   type AuthPayload,
@@ -46,6 +48,7 @@ import {
   createProfileEntity,
   updateProfileEntity,
   canViewProfile,
+  canViewActivity,
   createEvidence,
   courseCompletionEvidence,
   assertAttachableEvidence,
@@ -270,6 +273,8 @@ import {
   AlumniGroupMember,
   AlumniMentorshipRequest,
   createAlumniAffiliation,
+  matchesInstitutionDomain,
+  assertEmailDomainVerificationAvailable,
   filterAlumniDirectory,
   createAlumniGroup,
   joinAlumniGroup,
@@ -324,6 +329,8 @@ import {
   createWorkHistory,
   verifyCorporateEmail,
   assertCorporateEmailEligible,
+  assertEmailCodeIssuable,
+  assertReferenceRequestAllowed,
   canTransitionApplication,
   requestEmploymentReference,
   submitEmploymentReference,
@@ -372,6 +379,7 @@ import {
   UpdateUserSettingsInputSchema,
   RequestErasureInputSchema,
   CancelErasureInputSchema,
+  ExecuteErasureInputSchema,
   RequestDataExportInputSchema,
   SubscribePlanInputSchema,
   CancelSubscriptionInputSchema,
@@ -1010,6 +1018,24 @@ export async function buildApp(
   // same time as "wrong password" and response timing does not reveal which
   // addresses are registered.
   const timingDecoyHash = hashPassword(crypto.randomBytes(16).toString('hex'));
+  // Failed sign-ins per email across every client address (C-23). The
+  // per-(IP, email) limiter above does not bound guessing from many
+  // addresses. In memory, per process, like the limiter store.
+  const loginFailuresByEmail = new Map<string, number[]>();
+  const recordLoginFailure = (emailKey: string) => {
+    const now = Date.now();
+    // Only the newest AUTH_ACCOUNT_FAILURE_MAX entries can matter.
+    const list = [...recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], now), now].slice(
+      -env.AUTH_ACCOUNT_FAILURE_MAX
+    );
+    loginFailuresByEmail.set(emailKey, list);
+    // Unknown emails create entries too; drop expired ones so the map stays bounded.
+    if (loginFailuresByEmail.size > 10_000) {
+      for (const [key, times] of loginFailuresByEmail) {
+        if (recentLoginFailures(times, now).length === 0) loginFailuresByEmail.delete(key);
+      }
+    }
+  };
 
   app.post(
     '/api/v1/auth/register',
@@ -1056,16 +1082,29 @@ export async function buildApp(
     { config: loginRateLimit },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const input = LoginInputSchema.parse(req.body);
-      const user = usersByEmail.get(input.email.toLowerCase());
+      const emailKey = input.email.toLowerCase();
+      const failures = recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], Date.now());
+      if (loginFailureDecision(failures.length, env.AUTH_ACCOUNT_FAILURE_MAX) === 'refuse') {
+        // Same cost as a real check, and the same answer for unknown emails.
+        await verifyPassword(input.password, await timingDecoyHash);
+        throw new DomainError(
+          'RATE_LIMIT_EXCEEDED',
+          'Too many sign-in attempts for this account. Wait 15 minutes, then try again.'
+        );
+      }
+      const user = usersByEmail.get(emailKey);
       if (!user) {
         await verifyPassword(input.password, await timingDecoyHash);
+        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
 
       const isValid = await verifyPassword(input.password, user.passwordHash);
       if (!isValid) {
+        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
+      loginFailuresByEmail.delete(emailKey);
 
       // Transparent upgrade: hashes written at the old work factor (10k
       // iterations) are re-hashed at the current one while the plaintext is in
@@ -1162,6 +1201,8 @@ export async function buildApp(
           sessionsValidAfter: cutoff,
         },
       });
+      // Guesses against the old password no longer count against the account.
+      loginFailuresByEmail.delete(user.email.toLowerCase());
       auditLogs.push({
         event: 'auth.password_changed',
         actorId: user.id,
@@ -9045,6 +9086,10 @@ export async function buildApp(
       verificationMethod: input.verificationMethod,
       userEmail,
       institutionDomain,
+      // Account emails are not confirmed at registration (A02-001), so the
+      // address cannot prove the affiliation (C-16). Pass the real flag once
+      // account-email verification exists.
+      userEmailVerified: false,
     });
 
     alumniAffiliationsById.set(affiliation.id, affiliation);
@@ -9093,26 +9138,12 @@ export async function buildApp(
       }
 
       if (input.verificationMethod === 'email_domain') {
+        // Closed until account emails are confirmed (C-16): see the create route.
+        assertEmailDomainVerificationAvailable(false);
         const org = organizationsById.get(affiliation.institutionId);
-        const instDomain = org?.website
-          ? org.website
-              .replace(/^https?:\/\//i, '')
-              .replace(/\/.*$/, '')
-              .toLowerCase()
-          : '';
         const user = usersById.get(affiliation.userId);
         const userEmail = user?.email || session.email;
-        const emailParts = userEmail.split('@');
-        const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
-
-        // Exact domain or a subdomain of it: substring matching accepted
-        // x@stanford.edu.evil.example (SEC-04). Account emails are still not
-        // verified at registration, so this path stays weaker than a seat.
-        if (
-          !instDomain ||
-          !userDomain ||
-          (userDomain !== instDomain && !userDomain.endsWith(`.${instDomain}`))
-        ) {
+        if (!org?.website || !matchesInstitutionDomain(userEmail, org.website)) {
           throw new DomainError(
             'VALIDATION_FAILED',
             'User email domain does not match institution domain.'
@@ -9582,12 +9613,35 @@ export async function buildApp(
   app.get(
     '/api/v1/activity/users/:userId/score',
     async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
-      extractUser(req);
+      const session = extractUser(req);
       const { userId } = req.params;
 
       const user = usersById.get(userId);
-      if (!user) {
+      const profile = profilesByUserId.get(userId);
+      if (!user || !profile) {
         throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      }
+
+      // Same privacy as the profile, plus the person's "show activity"
+      // setting (C-26). Settings are read through without writing defaults.
+      const settings =
+        userSettingsByUserId.get(userId) ??
+        (await storage.accountMetadata.getSettings(userId)) ??
+        undefined;
+      const visibility = canViewActivity({
+        profile,
+        settings,
+        viewerUserId: session.userId,
+        viewerRoles: session.roles,
+      });
+      if (visibility === 'profile_restricted') {
+        throw new DomainError(
+          'FORBIDDEN',
+          'This profile is private or restricted to authorized roles.'
+        );
+      }
+      if (visibility === 'activity_hidden') {
+        throw new DomainError('FORBIDDEN', 'This person does not share their activity.');
       }
 
       const userEvents = activityEventsByUserId.get(userId) || [];
@@ -10292,226 +10346,342 @@ export async function buildApp(
   });
 
   // 8. Execute Immediate Account Erasure / Logical Anonymization (§31.4)
-  app.post('/api/v1/settings/erasure/execute', async (req: FastifyRequest, reply: FastifyReply) => {
-    let session: AuthPayload;
-    // Set when this call finishes an erasure whose core transaction already
-    // committed in an earlier, interrupted call.
-    let resumed: DataErasureRequest | undefined;
-    try {
-      session = extractUser(req);
-    } catch (err) {
-      // Once the core transaction commits the account is closed and every
-      // normal session is refused. A still-validly-signed, unrevoked token of
-      // that same user may finish (or re-read) its own erasure and nothing
-      // else; any other failure keeps its original error.
-      const bearer = req.headers.authorization;
-      const raw = bearer?.startsWith('Bearer ')
-        ? verifySessionToken(bearer.substring(7).trim())
-        : null;
-      const closed =
-        raw &&
-        !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
-        usersById.get(raw.userId)?.passwordHash === ERASED_CREDENTIAL &&
-        // Same cut-off rule as resolveSession: sessions ended by a password
-        // change or "sign out other devices" cannot resume either.
-        !(
-          usersById.get(raw.userId)?.sessionsValidAfter &&
-          raw.issuedAt * 1000 < Date.parse(usersById.get(raw.userId)!.sessionsValidAfter!)
-        );
-      if (!raw || !closed) throw err;
-      const history = await storage.erasureRequests.list(raw.userId);
-      resumed = history.find((r) => r.status === 'processing');
-      const done = history.find((r) => r.status === 'completed' && r.anonymizedHash);
-      if (!resumed && !done) throw err;
-      if (!resumed) {
-        return reply.status(200).send({
-          message: 'Account erasure was already completed.',
-          anonymizedHash: done!.anonymizedHash,
-          completedAt: done!.completedAt,
-        });
-      }
-      session = raw;
-    }
-
-    const user = usersById.get(session.userId);
-    const profile = profilesByUserId.get(session.userId);
-
-    if (!user || !profile) {
-      throw new DomainError('NOT_FOUND', 'User or profile not found for erasure execution.');
-    }
-
-    const result = executeLogicalAnonymization(
-      {
-        id: user.id,
-        email: user.email,
-        roles: user.roles as any,
-        status: (user.status as any) || 'active',
-        createdAt: user.createdAt,
-        updatedAt: user.createdAt,
-      },
-      profile
-    );
-    // A resumed run keeps the hash and request recorded before the first
-    // attempt: the original email it was derived from is already gone.
-    const anonymizedHash = resumed?.anonymizedHash ?? result.anonymizedHash;
-    const completedAt = result.completedAt;
-
-    // Durable 'executing' marker, written BEFORE any destructive step so a
-    // process that dies part-way leaves a request that the next call resumes.
-    if (!resumed) {
-      await storage.erasureRequests.beginExecution(
-        session.userId,
-        crypto.randomUUID(),
-        completedAt,
-        anonymizedHash
-      );
-    }
-
-    // Billing first: ends the Stripe customer (and its subscriptions) and
-    // removes local billing records. If Stripe is unreachable this throws
-    // before anything else is changed, so the request is safe to retry.
-    await eraseBillingData(session.userId);
-
-    // Persist the anonymized state in ONE transaction. Now that this data is
-    // durable, erasure has to remove personal data rather than rely on a
-    // restart to forget it:
-    //  - the account can never sign in again (credential destroyed);
-    //  - work history, references and evidence (employer names, titles,
-    //    corporate emails, referee contacts, free text) are deleted;
-    //  - open applications are withdrawn and cover letters blanked, keeping
-    //    only the minimal record an employer's pipeline still points at.
-    // Skipped on resume: the account is already anonymized and its credential
-    // destroyed, so the core transaction is not repeated.
-    if (!resumed) {
-      const erasedAt = completedAt;
-      const erasureOps: CoreOp[] = [
-        {
-          kind: 'user',
-          base: user,
-          value: {
-            ...user,
-            email: result.anonymizedUser.email,
-            status: 'deactivated',
-            passwordHash: ERASED_CREDENTIAL,
+  app.post(
+    '/api/v1/settings/erasure/execute',
+    {
+      config: {
+        // The password check below must not become a guessing oracle for
+        // anyone holding a session: same per-account budget as /auth/password.
+        rateLimit: {
+          max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+          timeWindow: AUTH_WINDOW_MS,
+          keyGenerator: (req: FastifyRequest) => {
+            const auth = req.headers.authorization;
+            const session =
+              typeof auth === 'string' && auth.startsWith('Bearer ')
+                ? verifySessionToken(auth.substring(7).trim())
+                : null;
+            return session ? `erasure:${session.userId}` : `erasure-ip:${req.ip}`;
           },
         },
-        { kind: 'profile', value: result.anonymizedProfile },
-        // Notifications addressed to the person name their applications,
-        // employers and referees.
-        { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
-        // What they wrote, and their place in every conversation.
-        { kind: 'messagesDeleteForProfile', profileId: profile.id },
-      ];
-      const erasedHistoryIds: string[] = [];
-      const erasedReferenceIds: string[] = [];
-      for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
-        erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
-        erasedHistoryIds.push(history.id);
-        for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
-          erasedReferenceIds.push(ref.id);
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      let session: AuthPayload;
+      // Set when this call finishes an erasure whose core transaction already
+      // committed in an earlier, interrupted call.
+      let resumed: DataErasureRequest | undefined;
+      try {
+        session = extractUser(req);
+      } catch (err) {
+        // Once the core transaction commits the account is closed and every
+        // normal session is refused. A still-validly-signed, unrevoked token of
+        // that same user may finish (or re-read) its own erasure and nothing
+        // else; any other failure keeps its original error.
+        const bearer = req.headers.authorization;
+        const raw = bearer?.startsWith('Bearer ')
+          ? verifySessionToken(bearer.substring(7).trim())
+          : null;
+        const closed =
+          raw &&
+          !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
+          usersById.get(raw.userId)?.passwordHash === ERASED_CREDENTIAL &&
+          // Same cut-off rule as resolveSession: sessions ended by a password
+          // change or "sign out other devices" cannot resume either.
+          !(
+            usersById.get(raw.userId)?.sessionsValidAfter &&
+            raw.issuedAt * 1000 < Date.parse(usersById.get(raw.userId)!.sessionsValidAfter!)
+          );
+        if (!raw || !closed) throw err;
+        const history = await storage.erasureRequests.list(raw.userId);
+        resumed = history.find((r) => r.status === 'processing');
+        const done = history.find((r) => r.status === 'completed' && r.anonymizedHash);
+        if (!resumed && !done) throw err;
+        if (!resumed) {
+          return reply.status(200).send({
+            message: 'Account erasure was already completed.',
+            anonymizedHash: done!.anonymizedHash,
+            completedAt: done!.completedAt,
+          });
+        }
+        session = raw;
+      }
+
+      const user = usersById.get(session.userId);
+      const profile = profilesByUserId.get(session.userId);
+
+      if (!user || !profile) {
+        throw new DomainError('NOT_FOUND', 'User or profile not found for erasure execution.');
+      }
+
+      // Re-authenticate a fresh erasure (C-04). A resumed one has no password
+      // left to check: its credential was destroyed by the committed core step.
+      if (!resumed) {
+        const input = ExecuteErasureInputSchema.parse(req.body ?? {});
+        if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
+          throw new DomainError('VALIDATION_FAILED', 'Your current password is not correct.', {
+            field: 'currentPassword',
+          });
+        }
+        // The password check yields to the event loop; a concurrent erasure
+        // of the same account may have committed meanwhile. Never start a
+        // second run from the stale record: the loser gets 409.
+        if (usersById.get(session.userId) !== user) {
+          throw new DomainError('CONFLICT', 'Account erasure is already in progress.');
         }
       }
-      for (const item of evidenceBySubjectId.get(profile.id) || []) {
-        erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+
+      const result = executeLogicalAnonymization(
+        {
+          id: user.id,
+          email: user.email,
+          roles: user.roles as any,
+          status: (user.status as any) || 'active',
+          createdAt: user.createdAt,
+          updatedAt: user.createdAt,
+        },
+        profile
+      );
+      // A resumed run keeps the hash and request recorded before the first
+      // attempt: the original email it was derived from is already gone.
+      const anonymizedHash = resumed?.anonymizedHash ?? result.anonymizedHash;
+      const completedAt = result.completedAt;
+
+      // Durable 'executing' marker, written BEFORE any destructive step so a
+      // process that dies part-way leaves a request that the next call resumes.
+      if (!resumed) {
+        await storage.erasureRequests.beginExecution(
+          session.userId,
+          crypto.randomUUID(),
+          completedAt,
+          anonymizedHash
+        );
       }
-      for (const application of applicationsByCandidateId.get(profile.id) || []) {
-        const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
-        erasureOps.push({
-          kind: 'application',
-          base: application,
-          value: {
-            ...application,
-            status: terminal ? application.status : 'withdrawn',
-            withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
-            coverLetter: undefined,
-            attachedEvidenceIds: [],
-            updatedAt: erasedAt,
+
+      // Billing first: ends the Stripe customer (and its subscriptions) and
+      // removes local billing records. If Stripe is unreachable this throws
+      // before anything else is changed, so the request is safe to retry.
+      await eraseBillingData(session.userId);
+
+      // Persist the anonymized state in ONE transaction. Now that this data is
+      // durable, erasure has to remove personal data rather than rely on a
+      // restart to forget it:
+      //  - the account can never sign in again (credential destroyed);
+      //  - work history, references and evidence (employer names, titles,
+      //    corporate emails, referee contacts, free text) are deleted;
+      //  - open applications are withdrawn and cover letters blanked, keeping
+      //    only the minimal record an employer's pipeline still points at.
+      // Skipped on resume: the account is already anonymized and its credential
+      // destroyed, so the core transaction is not repeated.
+      if (!resumed) {
+        const erasedAt = completedAt;
+        const erasureOps: CoreOp[] = [
+          {
+            kind: 'user',
+            base: user,
+            value: {
+              ...user,
+              email: result.anonymizedUser.email,
+              status: 'deactivated',
+              passwordHash: ERASED_CREDENTIAL,
+            },
           },
-        });
+          { kind: 'profile', value: result.anonymizedProfile },
+          // Notifications addressed to the person name their applications,
+          // employers and referees.
+          { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
+          // What they wrote, and their place in every conversation.
+          { kind: 'messagesDeleteForProfile', profileId: profile.id },
+        ];
+        const erasedHistoryIds: string[] = [];
+        const erasedReferenceIds: string[] = [];
+        for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+          erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
+          erasedHistoryIds.push(history.id);
+          for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
+            erasedReferenceIds.push(ref.id);
+          }
+        }
+        for (const item of evidenceBySubjectId.get(profile.id) || []) {
+          erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+        }
+        for (const application of applicationsByCandidateId.get(profile.id) || []) {
+          const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(
+            application.status
+          );
+          erasureOps.push({
+            kind: 'application',
+            base: application,
+            value: {
+              ...application,
+              status: terminal ? application.status : 'withdrawn',
+              withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
+              coverLetter: undefined,
+              attachedEvidenceIds: [],
+              updatedAt: erasedAt,
+            },
+          });
+        }
+        // Queued referee emails name the work history being deleted, so they are
+        // cancelled while those ids are still known (best effort, idempotent).
+        await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
+        await persist(...erasureOps);
       }
-      // Queued referee emails name the work history being deleted, so they are
-      // cancelled while those ids are still known (best effort, idempotent).
-      await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
-      await persist(...erasureOps);
-    }
-    await storage.accountMetadata.erase(session.userId);
+      await storage.accountMetadata.erase(session.userId);
 
-    // Remove the subject's remaining ephemeral private state while this process
-    // is still alive; database persistence for these preview modules remains
-    // an independent release gate.
-    userSettingsByUserId.delete(session.userId);
-    exportRequestsByUserId.delete(session.userId);
-    searchHistoryByUserId.delete(session.userId);
-    await storage.savedJobs.eraseUser(session.userId);
-    salaryReportsByUserId.delete(session.userId);
-    reputationSignalsByUserId.delete(session.userId);
-    xpTransactionsByUserId.delete(session.userId);
-    aiUsageMetersByUserAndDate.forEach((_meter, key) => {
-      if (key.startsWith(`${session.userId}:`)) aiUsageMetersByUserAndDate.delete(key);
-    });
-    const conversations = aiConversationsByUserId.get(session.userId) || [];
-    for (const conversation of conversations) {
-      aiConversationsById.delete(conversation.id);
-      aiMessagesByConversationId.delete(conversation.id);
-    }
-    aiConversationsByUserId.delete(session.userId);
-    const resumes = resumesByUserId.get(session.userId) || [];
-    for (const resume of resumes) {
-      resumesById.delete(resume.id);
-      for (const exported of resumeExportsByResumeId.get(resume.id) || []) {
-        resumeExportsById.delete(exported.id);
+      // Remove the subject's remaining ephemeral private state while this process
+      // is still alive; database persistence for these preview modules remains
+      // an independent release gate. Records indexed in several maps are
+      // removed from every one of them (C-05): deleting only the by-user index
+      // left them served by the by-id and secondary indexes.
+      const dropFromIndex = <T extends { id: string }>(
+        index: Map<string, T[]>,
+        key: string | undefined,
+        id: string
+      ) => {
+        if (!key) return;
+        const list = (index.get(key) || []).filter((x) => x.id !== id);
+        if (list.length) index.set(key, list);
+        else index.delete(key);
+      };
+      userSettingsByUserId.delete(session.userId);
+      exportRequestsByUserId.delete(session.userId);
+      searchHistoryByUserId.delete(session.userId);
+      await storage.savedJobs.eraseUser(session.userId);
+      for (const r of salaryReportsByUserId.get(session.userId) || []) {
+        salaryReportsById.delete(r.id);
       }
-      resumeExportsByResumeId.delete(resume.id);
-    }
-    resumesByUserId.delete(session.userId);
-    const projects = portfolioProjectsByUserId.get(session.userId) || [];
-    for (const project of projects) portfolioProjectsById.delete(project.id);
-    portfolioProjectsByUserId.delete(session.userId);
-    gamificationProfilesByUserId.delete(session.userId);
-    userBadgesByUserId.delete(session.userId);
-    activityEventsByUserId.delete(session.userId);
-    contributionScoresByUserId.delete(session.userId);
-    careerTransitionsByUserId.delete(session.userId);
-    careerMilestoneEvaluationsByUserId.delete(session.userId);
-    learningOutcomesByUserId.delete(session.userId);
-    alumniAffiliationsByUserId.delete(session.userId);
-    warmIntroPrefsByUserId.delete(session.userId);
-    warmIntroRequestsByRequesterId.delete(session.userId);
-    connectionsByUserId.delete(session.userId);
-    skillFreshnessByCandidateId.delete(profile.id);
-    behavioralProfilesByCandidateId.delete(profile.id);
-    interviewAssessmentsByCandidateId.delete(profile.id);
-    assessmentSessionsByCandidateId.delete(profile.id);
-    referralRequestsByCandidateId.delete(profile.id);
-    skillEndorsementsByRecipientId.delete(profile.id);
-    await storage.savedSearches.eraseUser(session.userId);
-    jobAlertsById.forEach((alert, key) => {
-      if (alert.userId === session.userId) jobAlertsById.delete(key);
-    });
-    // Retained multi-party records (reviews, chat, organizational activity)
-    // need an approved per-domain redaction/retention policy before release.
+      salaryReportsByUserId.delete(session.userId);
+      reputationSignalsByUserId.delete(session.userId);
+      xpTransactionsByUserId.delete(session.userId);
+      aiUsageMetersByUserAndDate.forEach((_meter, key) => {
+        if (key.startsWith(`${session.userId}:`)) aiUsageMetersByUserAndDate.delete(key);
+      });
+      const conversations = aiConversationsByUserId.get(session.userId) || [];
+      for (const conversation of conversations) {
+        aiConversationsById.delete(conversation.id);
+        aiMessagesByConversationId.delete(conversation.id);
+      }
+      aiConversationsByUserId.delete(session.userId);
+      const resumes = resumesByUserId.get(session.userId) || [];
+      for (const resume of resumes) {
+        resumesById.delete(resume.id);
+        for (const exported of resumeExportsByResumeId.get(resume.id) || []) {
+          resumeExportsById.delete(exported.id);
+        }
+        resumeExportsByResumeId.delete(resume.id);
+      }
+      resumesByUserId.delete(session.userId);
+      const projects = portfolioProjectsByUserId.get(session.userId) || [];
+      for (const project of projects) portfolioProjectsById.delete(project.id);
+      portfolioProjectsByUserId.delete(session.userId);
+      gamificationProfilesByUserId.delete(session.userId);
+      userBadgesByUserId.delete(session.userId);
+      for (const e of activityEventsByUserId.get(session.userId) || []) {
+        activityEventsById.delete(e.id);
+      }
+      activityEventsByUserId.delete(session.userId);
+      contributionScoresByUserId.delete(session.userId);
+      // Career transitions, milestone evaluations and learning outcomes are
+      // keyed by PROFILE id (the deletes by user id were no-ops). Transitions
+      // also feed the shared benchmark list, outcomes the per-course metrics.
+      const erasedTransitionIds = new Set(
+        (careerTransitionsByUserId.get(profile.id) || []).map((t) => t.id)
+      );
+      for (const id of erasedTransitionIds) careerTransitionsById.delete(id);
+      for (let i = allCareerTransitions.length - 1; i >= 0; i--) {
+        if (erasedTransitionIds.has(allCareerTransitions[i].id)) allCareerTransitions.splice(i, 1);
+      }
+      careerTransitionsByUserId.delete(profile.id);
+      careerMilestoneEvaluationsByUserId.delete(profile.id);
+      for (const o of learningOutcomesByUserId.get(profile.id) || []) {
+        learningOutcomesById.delete(o.id);
+        dropFromIndex(learningOutcomesByCourseId, o.courseId, o.id);
+        learningImpactMetricsByCourseId.delete(o.courseId);
+      }
+      learningOutcomesByUserId.delete(profile.id);
+      for (const a of alumniAffiliationsByUserId.get(session.userId) || []) {
+        alumniAffiliationsById.delete(a.id);
+        dropFromIndex(alumniAffiliationsByInstitutionId, a.institutionId, a.id);
+      }
+      alumniAffiliationsByUserId.delete(session.userId);
+      warmIntroPrefsByUserId.delete(session.userId);
+      for (const w of warmIntroRequestsByRequesterId.get(session.userId) || []) {
+        warmIntroRequestsById.delete(w.id);
+        dropFromIndex(warmIntroRequestsByIntroducerId, w.introducerUserId, w.id);
+        dropFromIndex(warmIntroRequestsByTargetId, w.targetUserId, w.id);
+      }
+      warmIntroRequestsByRequesterId.delete(session.userId);
+      for (const c of connectionsByUserId.get(session.userId) || []) {
+        connectionsById.delete(c.id);
+        dropFromIndex(
+          connectionsByUserId,
+          c.senderId === session.userId ? c.recipientId : c.senderId,
+          c.id
+        );
+      }
+      connectionsByUserId.delete(session.userId);
+      skillFreshnessByCandidateId.delete(profile.id);
+      // Written under either id by the two behavioral-profile routes.
+      behavioralProfilesByCandidateId.delete(profile.id);
+      behavioralProfilesByCandidateId.delete(session.userId);
+      interviewAssessmentsByCandidateId.delete(profile.id);
+      for (const a of assessmentSessionsByCandidateId.get(profile.id) || []) {
+        assessmentSessionsById.delete(a.id);
+      }
+      assessmentSessionsByCandidateId.delete(profile.id);
+      // Referral requests and received endorsements are keyed by USER id (the
+      // former deletes by profile id were no-ops). A forwarded referral is
+      // also listed under the forwardee, so every referrer list is filtered.
+      const erasedReferralIds = new Set(
+        (referralRequestsByCandidateId.get(session.userId) || []).map((r) => r.id)
+      );
+      for (const id of erasedReferralIds) referralRequestsById.delete(id);
+      referralRequestsByReferrerId.forEach((list, key) => {
+        const kept = list.filter((r) => !erasedReferralIds.has(r.id));
+        if (kept.length === list.length) return;
+        if (kept.length) referralRequestsByReferrerId.set(key, kept);
+        else referralRequestsByReferrerId.delete(key);
+      });
+      referralRequestsByCandidateId.delete(session.userId);
+      for (const e of skillEndorsementsByRecipientId.get(session.userId) || []) {
+        skillEndorsementsById.delete(e.id);
+        dropFromIndex(skillEndorsementsByEndorserId, e.endorserId, e.id);
+      }
+      skillEndorsementsByRecipientId.delete(session.userId);
+      await storage.savedSearches.eraseUser(session.userId);
+      jobAlertsById.forEach((alert, key) => {
+        if (alert.userId === session.userId) jobAlertsById.delete(key);
+      });
+      // Retained multi-party records (reviews, chat, organizational activity)
+      // need an approved per-domain redaction/retention policy before release.
+      // Kept deliberately until then (owner scope): interview assessments and
+      // scorecards (org-owned hiring records; only the candidate index is
+      // dropped above), endorsements the person gave, moderation reports,
+      // reviews, talent-pool memberships, application drafts, auditLogs.
 
-    // Mark the durable request history only after core erasure commits.
-    // If this write fails, do not claim the lifecycle was updated.
-    await storage.erasureRequests.completeActive(session.userId, completedAt, anonymizedHash);
+      // Mark the durable request history only after core erasure commits.
+      // If this write fails, do not claim the lifecycle was updated.
+      await storage.erasureRequests.completeActive(session.userId, completedAt, anonymizedHash);
 
-    await dispatchJob({
-      type: 'gdpr.erasure.completed',
-      payload: {
-        userId: session.userId,
+      await dispatchJob({
+        type: 'gdpr.erasure.completed',
+        payload: {
+          userId: session.userId,
+          anonymizedHash,
+        },
+        enqueuedAt: completedAt,
+      });
+
+      return reply.status(200).send({
+        message:
+          'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
+          'This does not certify full statutory erasure across all modules and backups.',
         anonymizedHash,
-      },
-      enqueuedAt: completedAt,
-    });
-
-    return reply.status(200).send({
-      message:
-        'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
-        'This does not certify full statutory erasure across all modules and backups.',
-      anonymizedHash,
-      completedAt,
-    });
-  });
+        completedAt,
+      });
+    }
+  );
 
   // ============================================================================
   // Billing & Subscriptions Routes (F-16, Section 64, WF-16, WIT-016)
@@ -12497,6 +12667,21 @@ export async function buildApp(
 
   const EMAIL_CHALLENGE_TTL_MS = 15 * 60 * 1000;
   const EMAIL_CHALLENGE_MAX_ATTEMPTS = 5;
+  // Sliding-window send logs for the budgets in assertEmailCodeIssuable /
+  // assertReferenceRequestAllowed (C-06). Keys: `code-user:<id>`,
+  // `code-addr:<email>`, `ref-user:<id>`. Per process, like the limiter store.
+  const HOUR_MS = 60 * 60 * 1000;
+  const sendLog = new Map<string, number[]>();
+  const sendsWithin = (key: string, windowMs: number): number => {
+    const now = Date.now();
+    const recent = (sendLog.get(key) || []).filter((t) => now - t < windowMs);
+    if (recent.length) sendLog.set(key, recent);
+    else sendLog.delete(key);
+    return recent.length;
+  };
+  const recordSend = (...keys: string[]) => {
+    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), Date.now()]);
+  };
 
   // Response projections: replay keys and token hashes never leave the API.
   const publicWorkHistory = (h: StoredWorkHistory): VerifiedWorkHistory => {
@@ -12603,6 +12788,12 @@ export async function buildApp(
           );
         }
         assertCorporateEmailEligible(email, companyDomain);
+        assertEmailCodeIssuable({
+          existing: emailChallengesByHistoryId.get(id),
+          issuesByAccountLastHour: sendsWithin(`code-user:${session.userId}`, HOUR_MS),
+          issuesToAddressLastDay: sendsWithin(`code-addr:${email}`, 24 * HOUR_MS),
+          now: new Date(),
+        });
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
         const challenge: EmailChallenge = {
@@ -12626,6 +12817,7 @@ export async function buildApp(
         } catch {
           throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
         }
+        recordSend(`code-user:${session.userId}`, `code-addr:${email}`);
         return reply.status(202).send({
           status: 'verification_pending',
           email,
@@ -12729,6 +12921,9 @@ export async function buildApp(
           'Reference invitations are unavailable until email delivery is configured.'
         );
       }
+      assertReferenceRequestAllowed({
+        requestsByAccountLastHour: sendsWithin(`ref-user:${session.userId}`, HOUR_MS),
+      });
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
@@ -12775,6 +12970,7 @@ export async function buildApp(
       } catch {
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
+      recordSend(`ref-user:${session.userId}`);
 
       return reply.status(201).send({
         reference: publicReference(stored),

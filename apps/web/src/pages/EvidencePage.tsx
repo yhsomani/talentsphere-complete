@@ -78,6 +78,10 @@ const microLabel: React.CSSProperties = {
   marginBottom: spacing.xs,
 };
 
+// The API refuses a new code within a minute of the last one (C-06,
+// EMAIL_CODE_REISSUE_COOLDOWN_MS); the button waits it out instead of failing.
+const NEW_CODE_COOLDOWN_MS = 60_000;
+
 /** Per-record email verification: start a challenge, then confirm the code. */
 const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Promise<void> }> = ({
   item,
@@ -89,7 +93,14 @@ const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Pro
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newCodeLocked, setNewCodeLocked] = useState(false);
   const pending = item.emailVerificationPending;
+
+  useEffect(() => {
+    if (!newCodeLocked) return;
+    const timer = window.setTimeout(() => setNewCodeLocked(false), NEW_CODE_COOLDOWN_MS);
+    return () => window.clearTimeout(timer);
+  }, [newCodeLocked]);
 
   if (item.emailVerifiedAt) {
     return (
@@ -118,6 +129,7 @@ const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Pro
         method: 'POST',
         body: JSON.stringify({ corporateEmail: address }),
       });
+      setNewCodeLocked(true);
       await onChanged();
     } catch (err) {
       setError(errorMessage(err));
@@ -188,12 +200,21 @@ const EmailVerification: React.FC<{ item: WorkHistoryEntry; onChanged: () => Pro
               type="button"
               size="sm"
               variant="ghost"
-              disabled={busy}
+              disabled={busy || newCodeLocked}
               onClick={() => void send(pending.email)}
+              data-testid={`verify-code-new-${item.id}`}
             >
               Send a new code
             </Button>
           </div>
+          {newCodeLocked && (
+            <p
+              style={{ fontSize: '0.8125rem', color: colors.neutral[600], marginTop: spacing.xs }}
+              data-testid={`verify-code-new-wait-${item.id}`}
+            >
+              You can ask for a new code in a minute.
+            </p>
+          )}
         </form>
       ) : (
         <form

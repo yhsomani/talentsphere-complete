@@ -10,6 +10,12 @@ import {
   requestEmploymentReference,
   submitEmploymentReference,
   buildWorkHistoryGraph,
+  assertEmailCodeIssuable,
+  assertReferenceRequestAllowed,
+  EMAIL_CODE_REISSUE_COOLDOWN_MS,
+  EMAIL_CODE_MAX_ISSUES_PER_HOUR,
+  EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY,
+  REFERENCE_REQUESTS_MAX_PER_HOUR,
   DomainError,
   type VerifiedWorkHistory,
   type EmploymentReference,
@@ -666,5 +672,53 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       ]);
       expect(distinct.score).toBe(100);
     });
+  });
+});
+
+describe('sending budget for work-email codes and reference invitations (C-06)', () => {
+  const now = new Date('2026-11-20T12:00:00.000Z');
+  const ago = (ms: number) => ({ createdAt: new Date(now.getTime() - ms).toISOString() });
+  const base = { issuesByAccountLastHour: 0, issuesToAddressLastDay: 0, now };
+
+  it('refuses a new code inside the 60-second cooldown and allows it after', () => {
+    expect(EMAIL_CODE_REISSUE_COOLDOWN_MS).toBe(60_000);
+    expect(() => assertEmailCodeIssuable({ ...base, existing: ago(59_000) })).toThrow(
+      /less than a minute/
+    );
+    expect(() => assertEmailCodeIssuable({ ...base, existing: ago(61_000) })).not.toThrow();
+    expect(() => assertEmailCodeIssuable(base)).not.toThrow();
+  });
+
+  it('caps issues per account per hour and per address per day', () => {
+    expect(() =>
+      assertEmailCodeIssuable({
+        ...base,
+        issuesByAccountLastHour: EMAIL_CODE_MAX_ISSUES_PER_HOUR - 1,
+      })
+    ).not.toThrow();
+    expect(() =>
+      assertEmailCodeIssuable({ ...base, issuesByAccountLastHour: EMAIL_CODE_MAX_ISSUES_PER_HOUR })
+    ).toThrow(/in an hour/);
+    expect(() =>
+      assertEmailCodeIssuable({
+        ...base,
+        issuesToAddressLastDay: EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY,
+      })
+    ).toThrow(/this address today/);
+  });
+
+  it('caps reference requests per account per hour', () => {
+    expect(() =>
+      assertReferenceRequestAllowed({
+        requestsByAccountLastHour: REFERENCE_REQUESTS_MAX_PER_HOUR - 1,
+      })
+    ).not.toThrow();
+    let code: string | undefined;
+    try {
+      assertReferenceRequestAllowed({ requestsByAccountLastHour: REFERENCE_REQUESTS_MAX_PER_HOUR });
+    } catch (err) {
+      code = (err as { code?: string }).code;
+    }
+    expect(code).toBe('RATE_LIMIT_EXCEEDED');
   });
 });

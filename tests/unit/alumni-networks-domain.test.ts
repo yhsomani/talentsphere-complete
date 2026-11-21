@@ -8,6 +8,8 @@ import {
   joinAlumniGroup,
   createAlumniMentorshipRequest,
   respondToAlumniMentorship,
+  matchesInstitutionDomain,
+  assertEmailDomainVerificationAvailable,
   AlumniAffiliation,
 } from '../../packages/domain/src/alumni-networks.js';
 import { DomainError } from '../../packages/domain/src/index.js';
@@ -49,7 +51,7 @@ describe('Alumni Networks Domain (F-125, F-12, F-09, F-40)', () => {
       expect(aff.verifiedAt).toBeUndefined();
     });
 
-    it('auto-verifies affiliation when email domain matches institution domain', () => {
+    it('auto-verifies affiliation when a confirmed account email matches the institution domain', () => {
       const aff = createAlumniAffiliation({
         userId: user1Id,
         institutionId,
@@ -58,11 +60,43 @@ describe('Alumni Networks Domain (F-125, F-12, F-09, F-40)', () => {
         graduationYear: 2023,
         userEmail: 'alice@cs.stanford.edu',
         institutionDomain: 'stanford.edu',
+        userEmailVerified: true,
       });
 
       expect(aff.verificationStatus).toBe('verified');
       expect(aff.verificationMethod).toBe('email_domain');
       expect(aff.verifiedAt).toBeDefined();
+    });
+
+    // C-16: an unconfirmed account email proves nothing about the affiliation.
+    it('does not auto-verify when the matching account email is not confirmed', () => {
+      for (const userEmailVerified of [undefined, false]) {
+        const aff = createAlumniAffiliation({
+          userId: user1Id,
+          institutionId,
+          degreeType: 'masters',
+          fieldOfStudy: 'Artificial Intelligence',
+          graduationYear: 2023,
+          userEmail: 'alice@cs.stanford.edu',
+          institutionDomain: 'stanford.edu',
+          userEmailVerified,
+        });
+        expect(aff.verificationStatus).toBe('unverified');
+        expect(aff.verifiedAt).toBeUndefined();
+      }
+    });
+
+    it('refuses email-domain verification until the account email is confirmed', () => {
+      expect(() => assertEmailDomainVerificationAvailable(false)).toThrow(DomainError);
+      expect(() => assertEmailDomainVerificationAvailable(true)).not.toThrow();
+    });
+
+    it('matches only the institution domain or its subdomains', () => {
+      expect(matchesInstitutionDomain('a@stanford.edu', 'https://stanford.edu/about')).toBe(true);
+      expect(matchesInstitutionDomain('a@cs.stanford.edu', 'stanford.edu')).toBe(true);
+      expect(matchesInstitutionDomain('a@stanford.edu.evil.example', 'stanford.edu')).toBe(false);
+      expect(matchesInstitutionDomain('a@notstanford.edu', 'stanford.edu')).toBe(false);
+      expect(matchesInstitutionDomain('not-an-email', 'stanford.edu')).toBe(false);
     });
 
     it('rejects empty field of study', () => {

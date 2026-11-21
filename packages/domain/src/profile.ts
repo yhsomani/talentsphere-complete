@@ -64,3 +64,27 @@ export function canViewProfile(
       return false;
   }
 }
+
+export type ActivityVisibility = 'allowed' | 'profile_restricted' | 'activity_hidden';
+
+/**
+ * May the viewer read another person's activity score (C-26, CF-34)? The
+ * profile's privacy applies first, as for the profile itself; then the
+ * person's own "show activity" setting, which only the owner and
+ * admins/moderators may override. Missing settings mean the default (shown).
+ */
+export function canViewActivity(params: {
+  profile: Profile;
+  settings?: { showActivity?: boolean };
+  viewerUserId?: string;
+  viewerRoles?: Role[];
+}): ActivityVisibility {
+  const { profile, settings, viewerUserId, viewerRoles = [] } = params;
+  if (!canViewProfile(profile, viewerUserId, viewerRoles)) return 'profile_restricted';
+  const privileged =
+    viewerUserId === profile.userId ||
+    viewerRoles.includes('platform_admin') ||
+    viewerRoles.includes('moderator');
+  if (!privileged && settings?.showActivity === false) return 'activity_hidden';
+  return 'allowed';
+}

@@ -34,11 +34,15 @@ describe('Account erasure execute is resumable and idempotent', () => {
     await app.close();
   });
 
-  const execute = (bearer?: string) =>
+  const PASSWORD = 'Password123!Secure';
+  // A fresh erasure needs the current password (C-04); a resume sends none,
+  // because the interrupted run already destroyed the credential.
+  const execute = (bearer?: string, currentPassword?: string) =>
     app.inject({
       method: 'POST',
       url: '/api/v1/settings/erasure/execute',
       headers: bearer ? { authorization: `Bearer ${bearer}` } : {},
+      ...(currentPassword ? { payload: { currentPassword } } : {}),
     });
 
   it('finishes an interrupted run on the next call, then returns the completed result', async () => {
@@ -46,7 +50,7 @@ describe('Account erasure execute is resumable and idempotent', () => {
     vi.spyOn(MemoryAccountMetadataStore.prototype, 'erase').mockRejectedValueOnce(
       new Error('simulated crash after core transaction')
     );
-    const interrupted = await execute(token);
+    const interrupted = await execute(token, PASSWORD);
     expect(interrupted.statusCode).toBeGreaterThanOrEqual(500);
 
     // The account is already closed for every other route...
@@ -57,7 +61,8 @@ describe('Account erasure execute is resumable and idempotent', () => {
     });
     expect(closed.statusCode).toBe(401);
 
-    // ...but the same user's token can resume its own erasure.
+    // ...but the same user's token can resume its own erasure, with no
+    // password (there is none left to check).
     const resumed = await execute(token);
     expect(resumed.statusCode).toBe(200);
     const body = JSON.parse(resumed.body);
@@ -120,7 +125,7 @@ describe('Account erasure execute is resumable and idempotent', () => {
     });
     expect(out.statusCode).toBe(200);
     crashOnce();
-    expect((await execute(live)).statusCode).toBeGreaterThanOrEqual(500);
+    expect((await execute(live, PASSWORD)).statusCode).toBeGreaterThanOrEqual(500);
     expect((await execute(revoked)).statusCode).toBe(401);
     expect((await execute(live)).statusCode).toBe(200);
   });
@@ -141,7 +146,7 @@ describe('Account erasure execute is resumable and idempotent', () => {
     // Wait until the cut-off has passed so `fresh` and later tokens are valid.
     await new Promise((r) => setTimeout(r, 1100));
     const fresher = await login(email);
-    expect((await execute(fresher)).statusCode).toBeGreaterThanOrEqual(500);
+    expect((await execute(fresher, PASSWORD)).statusCode).toBeGreaterThanOrEqual(500);
     expect((await execute(older)).statusCode).toBe(401);
     expect((await execute(fresher)).statusCode).toBe(200);
   });
@@ -150,9 +155,9 @@ describe('Account erasure execute is resumable and idempotent', () => {
     const victim = await registerUser('resume.victim@example.com');
     const other = await registerUser('resume.other@example.com');
     crashOnce();
-    expect((await execute(victim)).statusCode).toBeGreaterThanOrEqual(500);
+    expect((await execute(victim, PASSWORD)).statusCode).toBeGreaterThanOrEqual(500);
     // The other (healthy) account only ever erases itself, with its own hash.
-    const own = await execute(other);
+    const own = await execute(other, PASSWORD);
     expect(own.statusCode).toBe(200);
     const victimResume = await execute(victim);
     expect(victimResume.statusCode).toBe(200);
@@ -189,6 +194,7 @@ describe('Concurrent account erasure execute from one active session', () => {
           method: 'POST',
           url: '/api/v1/settings/erasure/execute',
           headers: { authorization: `Bearer ${token}` },
+          payload: { currentPassword: 'Password123!Secure' },
         });
 
       const results = await Promise.all([fire(), fire()]);

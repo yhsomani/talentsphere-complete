@@ -199,7 +199,9 @@ describe('Messaging: who may start a conversation, and what one is', () => {
 
   it('erasing an account removes what that person wrote and leaves the other side’s own messages', async () => {
     const thread = (await call(app, 'GET', '/api/v1/threads', rita.token)).body.threads[0];
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', casey.token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', casey.token, {
+      currentPassword: 'a-long-enough-passphrase',
+    });
     expect(erased.status).toBe(200);
     const view = await call(app, 'GET', `/api/v1/threads/${thread.id}`, rita.token);
     expect(view.status).toBe(200);

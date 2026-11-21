@@ -259,11 +259,73 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(afterCancelBody.hasPendingErasure).toBe(false);
   });
 
+  // C-04: a session alone must not be able to destroy the account.
+  it('refuses to erase without the current password and leaves the account intact', async () => {
+    const noBody = await app.inject({
+      method: 'POST',
+      url: '/api/v1/settings/erasure/execute',
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(noBody.statusCode).toBe(400);
+    expect(JSON.parse(noBody.body).error.code).toBe('VALIDATION_FAILED');
+
+    const wrong = await app.inject({
+      method: 'POST',
+      url: '/api/v1/settings/erasure/execute',
+      headers: { authorization: `Bearer ${candidateToken}` },
+      payload: { currentPassword: 'not-my-password' },
+    });
+    expect(wrong.statusCode).toBe(422);
+    const wrongBody = JSON.parse(wrong.body);
+    expect(wrongBody.error.code).toBe('VALIDATION_FAILED');
+    expect(wrongBody.error.details.field).toBe('currentPassword');
+
+    const me = await app.inject({
+      method: 'GET',
+      url: '/api/v1/profile/me',
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(me.statusCode).toBe(200);
+    const relogin = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/login',
+      payload: { email: 'maya.privacy@example.com', password: 'Password123!Secure' },
+    });
+    expect(relogin.statusCode).toBe(200);
+  });
+
+  it('throttles password guesses on erasure per account', async () => {
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'erasure.guess@example.com',
+        password: 'Password123!Secure',
+        fullName: 'Guess Target',
+        role: 'candidate',
+      },
+    });
+    const token = JSON.parse(reg.body).token as string;
+    const statuses: number[] = [];
+    for (let i = 0; i < 11; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/settings/erasure/execute',
+        headers: { authorization: `Bearer ${token}` },
+        payload: { currentPassword: `guess-${i}` },
+      });
+      statuses.push(res.statusCode);
+    }
+    expect(statuses.slice(0, 10)).toEqual(Array(10).fill(422));
+    expect(statuses[10]).toBe(429);
+  });
+
   it('executes logical anonymization & deactivation under §31.4 severance pattern', async () => {
     const execRes = await app.inject({
       method: 'POST',
       url: '/api/v1/settings/erasure/execute',
       headers: { authorization: `Bearer ${candidateToken}` },
+      payload: { currentPassword: 'Password123!Secure' },
     });
 
     expect(execRes.statusCode).toBe(200);

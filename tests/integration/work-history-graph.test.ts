@@ -832,6 +832,120 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(replayData.reference.id).toBe(firstId);
     });
   });
+
+  describe('8. Sending budget for codes and reference invitations (C-06)', () => {
+    let seq = 0;
+    const newCandidate = async () => {
+      seq += 1;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `budget.${seq}.${Date.now()}@talentsphere.test`,
+          password: 'Password123!Secure',
+          fullName: `Budget Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const token = JSON.parse(res.body).token as string;
+      const entry = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          companyName: 'Budget Corp',
+          title: 'Engineer',
+          startDate: '2019-01-01',
+          endDate: '2021-01-01',
+          isCurrent: false,
+        },
+      });
+      expect(entry.statusCode).toBe(201);
+      return { token, historyId: JSON.parse(entry.body).workHistory.id as string };
+    };
+    const requestCode = (who: { token: string; historyId: string }, corporateEmail: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${who.historyId}/verify-email`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { corporateEmail },
+      });
+    const MINUTE = 60_000;
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('refuses a second code for the same record within a minute and sends only one email', async () => {
+      const who = await newCandidate();
+      expect((await requestCode(who, 'cooldown@budgetcorp.io')).statusCode).toBe(202);
+      const again = await requestCode(who, 'cooldown@budgetcorp.io');
+      expect(again.statusCode).toBe(429);
+      expect(again.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(again.json().error.message).toContain('less than a minute');
+      const sent = (await outbox(app, 'work_history.email_verification_requested')).filter(
+        (m) => m.workHistoryId === who.historyId
+      );
+      expect(sent).toHaveLength(1);
+    });
+
+    it('caps codes per account at 5 an hour even when each request waits out the cooldown', async () => {
+      const who = await newCandidate();
+      vi.useFakeTimers({ toFake: ['Date'] });
+      const start = Date.now();
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        vi.setSystemTime(start + i * (MINUTE + 1000));
+        statuses.push((await requestCode(who, 'hourly@budgetcorp.io')).statusCode);
+      }
+      expect(statuses).toEqual([202, 202, 202, 202, 202, 429]);
+      vi.useRealTimers();
+    });
+
+    it('caps codes sent to one address at 10 a day across accounts', async () => {
+      const first = await newCandidate();
+      const second = await newCandidate();
+      const third = await newCandidate();
+      vi.useFakeTimers({ toFake: ['Date'] });
+      const start = Date.now();
+      let step = 0;
+      const send = async (who: { token: string; historyId: string }) => {
+        step += 1;
+        vi.setSystemTime(start + step * (MINUTE + 1000));
+        return requestCode(who, 'mailbox.victim@budgetcorp.io');
+      };
+      for (let i = 0; i < 5; i++) expect((await send(first)).statusCode).toBe(202);
+      for (let i = 0; i < 5; i++) expect((await send(second)).statusCode).toBe(202);
+      const refused = await send(third);
+      expect(refused.statusCode).toBe(429);
+      expect(refused.json().error.message).toContain('this address today');
+      vi.useRealTimers();
+    });
+
+    it('caps reference invitations at 10 an hour per account; a replay is still answered', async () => {
+      const who = await newCandidate();
+      const ask = (n: number) =>
+        app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/${who.historyId}/references/request`,
+          headers: { authorization: `Bearer ${who.token}` },
+          payload: {
+            refereeName: `Referee ${n}`,
+            refereeEmail: `referee.${n}.${who.historyId}@corp.test`,
+            relationship: 'peer',
+            clientRequestId: `budget-ref-${who.historyId}-${n}`,
+          },
+        });
+      for (let n = 1; n <= 10; n++) expect((await ask(n)).statusCode).toBe(201);
+      const refused = await ask(11);
+      expect(refused.statusCode).toBe(429);
+      expect(refused.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+      const replay = await ask(1);
+      expect(replay.statusCode).toBe(200);
+      expect(replay.json().deduplicated).toBe(true);
+    });
+  });
 });
 
 describe('Work-history graph includeUnverified is parsed strictly (C-15, A08-013)', () => {

@@ -231,7 +231,13 @@ describe('Messaging on PostgreSQL', () => {
 
   it('erasure deletes what the person wrote and their place in the conversation', async () => {
     const cand = await login(app, 'cand@example.org');
-    expect((await call(app, 'POST', '/api/v1/settings/erasure/execute', cand)).status).toBe(200);
+    expect(
+      (
+        await call(app, 'POST', '/api/v1/settings/erasure/execute', cand, {
+          currentPassword: PASSWORD,
+        })
+      ).status
+    ).toBe(200);
     expect(
       await sql('SELECT 1 FROM messages WHERE sender_id = $1', [ids.candProfile])
     ).toHaveLength(0);

@@ -139,7 +139,9 @@ describe('Saved-search persistence and isolation', () => {
         .title
     ).toBe('Remote developer roles');
 
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token, {
+      currentPassword: password,
+    });
     expect(erased.status).toBe(200);
     expect(
       (

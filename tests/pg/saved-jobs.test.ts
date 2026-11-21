@@ -157,7 +157,9 @@ describe('Saved-job bookmark persistence', () => {
     expect((await call(app, 'DELETE', route, token)).status).toBe(404);
     expect((await call(app, 'POST', route, token)).status).toBe(201);
 
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token, {
+      currentPassword: password,
+    });
     expect(erased.status).toBe(200);
     const afterErasure = await pool.query(
       'SELECT count(*)::int AS n FROM public.saved_jobs WHERE user_id = $1',
