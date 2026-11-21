@@ -785,17 +785,41 @@ export async function buildApp(
   // Answers only ready/not_ready: the storage detail names the database host
   // and stays in the admin diagnostics. The worker is not a dependency: a
   // dead worker must not take the API out of rotation (C-07).
+  // The endpoint is unauthenticated and limiter-exempt, so the database probe
+  // is shared: concurrent calls await one in-flight check and a result is
+  // reused for READY_CACHE_MS (K-08). Lease loss is not masked: the onRequest
+  // guard answers 503 before this handler whenever the lease is unhealthy.
+  const READY_CACHE_MS = 1000;
+  let readyCached: { ok: boolean; at: number } | null = null;
+  let readyInFlight: Promise<boolean> | null = null;
+  const probeReady = async (): Promise<boolean> => {
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<{ ok: false }>((resolve) => {
+      timer = setTimeout(() => resolve({ ok: false }), 2000);
+    });
+    try {
+      return (await Promise.race([storage.health(), timedOut])).ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
   app.get('/ready', { config: { rateLimit: false } }, async (_req, reply) => {
     let ready = storage.mode === 'memory';
     if (!ready) {
-      let timer: NodeJS.Timeout | undefined;
-      const timedOut = new Promise<{ ok: false }>((resolve) => {
-        timer = setTimeout(() => resolve({ ok: false }), 2000);
-      });
-      try {
-        ready = (await Promise.race([storage.health(), timedOut])).ok;
-      } finally {
-        clearTimeout(timer);
+      if (readyCached && Date.now() - readyCached.at < READY_CACHE_MS) {
+        ready = readyCached.ok;
+      } else {
+        if (!readyInFlight) {
+          readyInFlight = probeReady()
+            .then((ok) => {
+              readyCached = { ok, at: Date.now() };
+              return ok;
+            })
+            .finally(() => {
+              readyInFlight = null;
+            });
+        }
+        ready = await readyInFlight;
       }
     }
     return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });

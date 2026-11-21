@@ -89,4 +89,27 @@ describe('Writer lease loss and readiness (C-07)', () => {
     }
     expect(lost).toHaveBeenCalledTimes(1);
   });
+  // K-08: /ready is unauthenticated and limiter-exempt; a flood must not cost
+  // one database round trip per call. Concurrent calls share one probe and a
+  // result is reused for 1 s.
+  it('concurrent /ready calls share one database probe; a later call re-probes', async () => {
+    const app = await boot(vi.fn());
+    const query = vi.spyOn(pg.Pool.prototype, 'query');
+    const probes = () => query.mock.calls.filter(([sql]) => sql === 'SELECT 1').length;
+    try {
+      const responses = await Promise.all(
+        Array.from({ length: 200 }, () => app.inject({ method: 'GET', url: '/ready' }))
+      );
+      expect(responses.every((r) => r.statusCode === 200)).toBe(true);
+      expect(probes()).toBeGreaterThanOrEqual(1);
+      expect(probes()).toBeLessThanOrEqual(2);
+      const before = probes();
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      expect((await app.inject({ method: 'GET', url: '/ready' })).statusCode).toBe(200);
+      expect(probes()).toBe(before + 1);
+    } finally {
+      query.mockRestore();
+      await app.close();
+    }
+  });
 });
