@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { apiJson, errorMessage } from '../lib/api.js';
+import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { useSession, type SessionProfile } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
@@ -53,6 +53,7 @@ export const ProfilePage: React.FC = () => {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletePasswordError, setDeletePasswordError] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
   const [exportStatus, setExportStatus] = useState<{
     tone: 'success' | 'error';
@@ -101,15 +102,20 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  // Closing the dialog (button, Escape or backdrop) starts the next attempt clean (K-13).
   const closeDelete = () => {
     setDeleteOpen(false);
     setDeletePassword('');
+    setDeleteConfirm('');
+    setDeleteError(null);
+    setDeletePasswordError(null);
   };
 
   const deleteAccount = async () => {
     if (deleteBusy) return;
     setDeleteBusy(true);
     setDeleteError(null);
+    setDeletePasswordError(null);
     try {
       // The server asks for the current password before erasing (C-04).
       await apiJson('/api/v1/settings/erasure/execute', {
@@ -119,7 +125,19 @@ export const ProfilePage: React.FC = () => {
       session.signOut();
       navigate('/', { replace: true });
     } catch (err) {
-      setDeleteError(errorMessage(err));
+      // A wrong password belongs to the password field (K-13); anything else
+      // (rate limit, conflict, outage) stays in the notice at the top.
+      if (
+        err instanceof ApiError &&
+        err.status === 422 &&
+        (err.details as { field?: string } | undefined)?.field === 'currentPassword'
+      ) {
+        setDeletePasswordError(err.message);
+        setDeletePassword('');
+        document.getElementById('delete-password')?.focus();
+      } else {
+        setDeleteError(errorMessage(err));
+      }
       setDeleteBusy(false);
     }
   };
@@ -315,7 +333,7 @@ export const ProfilePage: React.FC = () => {
         description="Type DELETE and enter your password to confirm. Your data is removed immediately."
       >
         {deleteError && (
-          <Notice tone="error" style={{ marginBottom: spacing.md }}>
+          <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="delete-error">
             {deleteError}
           </Notice>
         )}
@@ -332,7 +350,11 @@ export const ProfilePage: React.FC = () => {
           type="password"
           autoComplete="current-password"
           value={deletePassword}
-          onChange={(e) => setDeletePassword(e.target.value)}
+          error={deletePasswordError ?? undefined}
+          onChange={(e) => {
+            setDeletePassword(e.target.value);
+            setDeletePasswordError(null);
+          }}
           data-testid="delete-password-input"
         />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>
