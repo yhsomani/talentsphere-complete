@@ -155,3 +155,79 @@ describe('GET /api/v1/evidence/subject/:subjectId honours profile visibility (A1
     ]);
   });
 });
+
+describe('evidence internals are hidden from non-owners and non-staff (K-03)', () => {
+  let app: FastifyInstance;
+  let owner: Awaited<ReturnType<typeof register>>;
+  let recruiter: Awaited<ReturnType<typeof register>>;
+  let adminToken: string;
+  let evidenceId: string;
+  const reason = 'Dispute reason only staff and the subject may read';
+
+  beforeAll(async () => {
+    app = await buildApp({
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'error',
+      RATE_LIMIT_MAX_REQUESTS: '100000',
+      AUTH_RATE_LIMIT_MAX_REQUESTS: '100000',
+    } as never);
+    await app.ready();
+    owner = await register(app, 'internals-owner');
+    recruiter = await register(app, 'internals-recruiter', 'recruiter');
+    adminToken = createSessionToken(crypto.randomUUID(), 'admin@talentsphere.io', [
+      'platform_admin',
+    ]);
+    expect(
+      (await call(app, 'PATCH', '/api/v1/profile/me', owner.token, { privacy: 'public' })).status
+    ).toBe(200);
+    const created = await call(
+      app,
+      'POST',
+      '/api/v1/evidence',
+      owner.token,
+      evidenceInput('Disputed project')
+    );
+    expect(created.status).toBe(201);
+    evidenceId = created.body.evidence.id;
+    const disputed = await call(app, 'POST', `/api/v1/evidence/${evidenceId}/dispute`, adminToken, {
+      reason,
+    });
+    expect(disputed.status).toBe(200);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  const reads = () => [
+    `/api/v1/evidence/${evidenceId}`,
+    `/api/v1/evidence/subject/${owner.profile.id}`,
+  ];
+  const records = (body: Json): Json[] =>
+    Array.isArray(body.evidence) ? body.evidence : [body.evidence];
+
+  it('anonymous callers and a recruiter get no metadata, verifier id or reason', async () => {
+    for (const token of [undefined, recruiter.token]) {
+      for (const url of reads()) {
+        const res = await call(app, 'GET', url, token);
+        expect(res.status).toBe(200);
+        for (const record of records(res.body)) {
+          expect(record.metadata).toBeUndefined();
+          expect(record.verifiedBy).toBeUndefined();
+          expect(record.status).toBe('disputed');
+        }
+        expect(JSON.stringify(res.body)).not.toContain(reason);
+      }
+    }
+  });
+
+  it('the subject and a platform admin still see the dispute reason', async () => {
+    for (const token of [owner.token, adminToken]) {
+      for (const url of reads()) {
+        const res = await call(app, 'GET', url, token);
+        expect(res.status).toBe(200);
+        expect(records(res.body)[0].metadata.disputeReason).toBe(reason);
+      }
+    }
+  });
+});

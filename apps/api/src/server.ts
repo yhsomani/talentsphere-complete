@@ -53,6 +53,7 @@ import {
   courseCompletionEvidence,
   assertAttachableEvidence,
   evidenceSummaryForReviewers,
+  canSeeEvidenceInternals,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -1532,7 +1533,11 @@ export async function buildApp(
             .filter(Boolean)
         : [];
 
-      return reply.status(200).send({ evidence, skills });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const view = canSeeEvidenceInternals(viewerId, viewerRoles, profile?.userId)
+        ? evidence
+        : evidenceSummaryForReviewers(evidence);
+      return reply.status(200).send({ evidence: view, skills });
     }
   );
 
@@ -1570,7 +1575,11 @@ export async function buildApp(
       }
 
       const list = evidenceBySubjectId.get(subjectId) || [];
-      return reply.status(200).send({ evidence: list });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const evidence = canSeeEvidenceInternals(viewerId, viewerRoles, profile.userId)
+        ? list
+        : list.map(evidenceSummaryForReviewers);
+      return reply.status(200).send({ evidence });
     }
   );
 

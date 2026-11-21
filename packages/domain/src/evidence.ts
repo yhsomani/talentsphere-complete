@@ -373,6 +373,24 @@ export function evidenceSummaryForReviewers(evidence: Evidence) {
 }
 
 /**
+ * Whether a viewer may read an evidence record's internals (metadata such as
+ * dispute and revocation reasons, and the verifier's account id): the
+ * subject themself, and the staff who may dispute anyone's evidence. Every
+ * other reader gets `evidenceSummaryForReviewers` (K-03).
+ */
+export function canSeeEvidenceInternals(
+  viewerId: string | undefined,
+  viewerRoles: Role[],
+  subjectUserId: string | undefined
+): boolean {
+  if (viewerId && subjectUserId && viewerId === subjectUserId) return true;
+  return !!heldRole({ userId: viewerId ?? '', roles: viewerRoles }, [
+    ...EVIDENCE_STAFF,
+    'moderator',
+  ]);
+}
+
+/**
  * Generates a privacy-preserving public verification proof conforming to BR-150 and BR-155.
  * Zero PII exposed: candidate name, email, address, and personal notes are completely omitted.
  */
