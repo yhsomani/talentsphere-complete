@@ -512,3 +512,53 @@ test.describe('MUT: reconciliation, idempotency keys and session truthfulness', 
     await expect(page.getByTestId(`apply-status-${job.jobId}`)).toHaveText('Submitted');
   });
 });
+
+test.describe('MUT: email code resend waits out the server cooldown (AMD-06, K-15)', () => {
+  test('"Send a new code" is locked for a minute after a send, then unlocks', async ({
+    page,
+    request,
+  }) => {
+    // A controlled clock: the minute passes by fast-forward, not by sleeping.
+    await page.clock.install();
+    await mintSession(page, request, 'resend-cooldown');
+    const email = 'hr@replay-corp.test';
+    let sent = false;
+    await page.route('**/api/v1/candidates/*/work-history', (route) =>
+      route.fulfill(
+        json({
+          workHistories: [
+            sent
+              ? {
+                  ...sampleEntry,
+                  corporateEmail: email,
+                  emailVerificationPending: {
+                    email,
+                    expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+                  },
+                }
+              : sampleEntry,
+          ],
+        })
+      )
+    );
+    await page.route('**/verify-email', (route) => {
+      sent = true;
+      return route.fulfill(json({ ok: true }));
+    });
+
+    await page.goto('/evidence');
+    const id = sampleEntry.id;
+    await page.getByTestId(`verify-email-input-${id}`).fill(email);
+    await page.getByTestId(`verify-email-send-${id}`).click();
+
+    await expect(page.getByTestId(`verify-code-form-${id}`)).toBeVisible();
+    await expect(page.getByTestId(`verify-code-new-${id}`)).toBeDisabled();
+    await expect(page.getByTestId(`verify-code-new-wait-${id}`)).toHaveText(
+      'You can ask for a new code in a minute.'
+    );
+
+    await page.clock.fastForward(61_000);
+    await expect(page.getByTestId(`verify-code-new-${id}`)).toBeEnabled();
+    await expect(page.getByTestId(`verify-code-new-wait-${id}`)).toHaveCount(0);
+  });
+});

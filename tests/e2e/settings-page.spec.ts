@@ -47,6 +47,31 @@ test.describe('E2E: Settings page and command search (F-15, F-20)', () => {
     expect(body.settings.showActivity).toBe(!before);
   });
 
+  test('offers only controls the product acts on (C-29, K-15)', async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page.getByTestId('settings-visibility')).toBeVisible();
+    for (const id of [
+      'settings-theme',
+      'settings-language',
+      'settings-digest',
+      'settings-ai-consent',
+    ]) {
+      await expect(page.getByTestId(id)).toHaveCount(0);
+    }
+  });
+
+  test('connections-only visibility saved in Settings is what the profile shows (K-15)', async ({
+    page,
+  }) => {
+    await page.goto('/settings');
+    await page.getByTestId('settings-visibility').selectOption('connections_only');
+    await page.getByTestId('settings-save').click();
+    await expect(page.getByTestId('settings-saved')).toBeVisible();
+
+    await page.goto('/profile');
+    await expect(page.getByTestId('profile-privacy')).toHaveValue('connections_only');
+  });
+
   test('command search opens with Ctrl+K, filters, and navigates (F-20)', async ({ page }) => {
     await page.goto('/dashboard');
     await page.locator('main').click();
