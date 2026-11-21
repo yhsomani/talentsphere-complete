@@ -202,74 +202,85 @@ export const ProfilePage: React.FC = () => {
         </Notice>
       )}
 
-      <form onSubmit={save} data-testid="profile-form" noValidate>
-        <Input
-          id="profile-name"
-          label="Full name"
-          required
-          value={fullName}
-          onChange={(e) => {
-            setFullName(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-name"
-        />
-        <Input
-          id="profile-headline"
-          label="Headline"
-          maxLength={160}
-          placeholder="e.g. Backend engineer focused on payments"
-          helperText="One line about what you do. Shown next to your name."
-          value={headline}
-          onChange={(e) => {
-            setHeadline(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-headline"
-        />
-        <Input
-          id="profile-location"
-          label="Location"
-          maxLength={100}
-          value={location}
-          onChange={(e) => {
-            setLocation(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-location"
-        />
-        <TextArea
-          id="profile-bio"
-          label="About you"
-          maxLength={2000}
-          rows={5}
-          value={bio}
-          onChange={(e) => {
-            setBio(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-bio"
-        />
-        <Select
-          id="profile-privacy"
-          label="Who can see your profile"
-          value={privacy}
-          onChange={(e) => {
-            setPrivacy(e.target.value as SessionProfile['privacy']);
-            setSaved(false);
-          }}
-          options={PRIVACY_OPTIONS}
-          helperText={PRIVACY_HELP[privacy]}
-          data-testid="profile-privacy"
-        />
-        <Button type="submit" loading={busy} data-testid="profile-save">
-          Save profile
-        </Button>
-      </form>
+      {/* K-14: a restricted account cannot edit its profile, skills or evidence
+          (the API answers 403), so those sections are not offered. Password,
+          other devices, export and deletion below stay available. */}
+      {session.isRestricted ? (
+        <p style={{ color: colors.neutral[700] }} data-testid="profile-restricted">
+          Editing is paused while your account is restricted.
+        </p>
+      ) : (
+        <>
+          <form onSubmit={save} data-testid="profile-form" noValidate>
+            <Input
+              id="profile-name"
+              label="Full name"
+              required
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-name"
+            />
+            <Input
+              id="profile-headline"
+              label="Headline"
+              maxLength={160}
+              placeholder="e.g. Backend engineer focused on payments"
+              helperText="One line about what you do. Shown next to your name."
+              value={headline}
+              onChange={(e) => {
+                setHeadline(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-headline"
+            />
+            <Input
+              id="profile-location"
+              label="Location"
+              maxLength={100}
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-location"
+            />
+            <TextArea
+              id="profile-bio"
+              label="About you"
+              maxLength={2000}
+              rows={5}
+              value={bio}
+              onChange={(e) => {
+                setBio(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-bio"
+            />
+            <Select
+              id="profile-privacy"
+              label="Who can see your profile"
+              value={privacy}
+              onChange={(e) => {
+                setPrivacy(e.target.value as SessionProfile['privacy']);
+                setSaved(false);
+              }}
+              options={PRIVACY_OPTIONS}
+              helperText={PRIVACY_HELP[privacy]}
+              data-testid="profile-privacy"
+            />
+            <Button type="submit" loading={busy} data-testid="profile-save">
+              Save profile
+            </Button>
+          </form>
 
-      <SkillsSection />
+          <SkillsSection />
 
-      <CredentialsSection />
+          <CredentialsSection />
+        </>
+      )}
 
       <Card style={{ marginTop: spacing['2xl'] }}>
         <CardContent style={{ padding: spacing.lg }}>

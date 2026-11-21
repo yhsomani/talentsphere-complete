@@ -46,6 +46,14 @@ const HIRING_NAV: NavItem[] = [
   { label: 'Messages', path: '/messages', testId: 'nav-messages' },
 ];
 
+// A restricted account (suspended or banned) can reach only its own profile:
+// password, other devices, export and deletion (K-14). Every other page would
+// answer 403.
+const RESTRICTED_NAV: NavItem[] = [
+  { label: 'Dashboard', path: '/dashboard', testId: 'nav-dashboard' },
+  { label: 'Profile', path: '/profile', testId: 'nav-restricted-profile' },
+];
+
 const isActivePath = (pathname: string, path: string) =>
   pathname === path || pathname.startsWith(`${path}/`);
 
@@ -89,13 +97,16 @@ export const Layout: React.FC = () => {
   // navigation to draw, so the header does not flicker on every load.
   const signedIn = session.status !== 'anonymous';
   const roles = session.user?.roles ?? (getStoredUser()?.roles as string[] | undefined) ?? [];
+  const restricted = session.isRestricted;
   const baseNavLinks = !signedIn
     ? PUBLIC_NAV
-    : roles.some((r) => HIRING_ROLES.includes(r))
-      ? HIRING_NAV
-      : CANDIDATE_NAV;
+    : restricted
+      ? RESTRICTED_NAV
+      : roles.some((r) => HIRING_ROLES.includes(r))
+        ? HIRING_NAV
+        : CANDIDATE_NAV;
   const navLinks =
-    signedIn && roles.includes('platform_admin')
+    signedIn && !restricted && roles.includes('platform_admin')
       ? [...baseNavLinks, { label: 'Admin', path: '/admin', testId: 'nav-admin' }]
       : baseNavLinks;
   const accountName = session.profile?.fullName ?? session.user?.email ?? getStoredUser()?.email;
@@ -105,7 +116,7 @@ export const Layout: React.FC = () => {
   // The badge: one small read per page change, on focus, and right after the
   // user reads notifications. A failure leaves the last known count.
   useEffect(() => {
-    if (session.status !== 'ready') {
+    if (session.status !== 'ready' || restricted) {
       setUnreadNotifications(0);
       return;
     }
@@ -123,7 +134,7 @@ export const Layout: React.FC = () => {
       window.removeEventListener('focus', refresh);
       window.removeEventListener(NOTIFICATIONS_EVENT, refresh);
     };
-  }, [session.status, location.pathname]);
+  }, [session.status, restricted, location.pathname]);
 
   // Menus close whenever the route changes.
   useEffect(() => {
@@ -201,7 +212,7 @@ export const Layout: React.FC = () => {
     navigate('/login', { replace: true });
   };
 
-  const bell = signedIn && (
+  const bell = signedIn && !restricted && (
     <Link
       to="/notifications"
       className="icon-button"
@@ -344,16 +355,18 @@ export const Layout: React.FC = () => {
                       >
                         Profile
                       </Link>
-                      <Link
-                        to="/settings"
-                        className="menu-item"
-                        data-testid="nav-settings"
-                        aria-current={
-                          isActivePath(location.pathname, '/settings') ? 'page' : undefined
-                        }
-                      >
-                        Settings
-                      </Link>
+                      {!restricted && (
+                        <Link
+                          to="/settings"
+                          className="menu-item"
+                          data-testid="nav-settings"
+                          aria-current={
+                            isActivePath(location.pathname, '/settings') ? 'page' : undefined
+                          }
+                        >
+                          Settings
+                        </Link>
+                      )}
                       <button type="button" className="menu-item" onClick={signOut}>
                         Sign out
                       </button>
@@ -405,7 +418,7 @@ export const Layout: React.FC = () => {
                     {item.label}
                   </Link>
                 ))}
-                {signedIn && (
+                {signedIn && !restricted && (
                   <Link
                     to="/profile"
                     className="menu-item"
@@ -415,7 +428,7 @@ export const Layout: React.FC = () => {
                     Profile
                   </Link>
                 )}
-                {signedIn && (
+                {signedIn && !restricted && (
                   <Link
                     to="/settings"
                     className="menu-item"
@@ -455,7 +468,7 @@ export const Layout: React.FC = () => {
 
       <CommandPalette
         items={
-          signedIn
+          signedIn && !restricted
             ? [
                 ...navLinks,
                 { label: 'Notifications', path: '/notifications' },
