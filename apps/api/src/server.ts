@@ -4687,7 +4687,7 @@ export async function buildApp(
       return reply.status(200).send({
         organizationId,
         reviews: reviews.map((r) =>
-          publicEmployerReview(r, viewer && { userId: viewer.userId, roles: viewer.roles })
+          publicEmployerReview(r, viewer ?? undefined)
         ),
         total: reviews.length,
       });
