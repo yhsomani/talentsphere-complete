@@ -530,6 +530,33 @@ export function verifyCorporateEmail(params: VerifyCorporateEmailParams): Verifi
   };
 }
 
+/** A referee's emailed link stops working this long after the request was made. */
+export const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function referenceLinkExpired(
+  reference: { requestedAt: string },
+  nowMs: number = Date.now()
+): boolean {
+  return nowMs - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
+}
+
+/**
+ * Does this reference still stand in the way of asking the same mailbox
+ * again (K-02)? An answered or flagged reference does; an unanswered one
+ * only until its link expires; a declined one never. A request without
+ * `requestedAt` counts as live.
+ */
+function referenceBlocksReask(
+  r: { status: ReferenceStatus; requestedAt?: string },
+  nowMs: number
+): boolean {
+  if (r.status === 'submitted' || r.status === 'flagged') return true;
+  if (r.status === 'requested') {
+    return !(r.requestedAt && referenceLinkExpired({ requestedAt: r.requestedAt }, nowMs));
+  }
+  return false;
+}
+
 export interface RequestEmploymentReferenceParams {
   id?: string;
   workHistoryId: string;
@@ -543,7 +570,11 @@ export interface RequestEmploymentReferenceParams {
   /** The work email recorded on this role; it cannot also be the referee (C-17). */
   roleCorporateEmail?: string;
   /** References already requested for this role (C-17). */
-  existingReferences?: Array<{ refereeEmail: string; status: ReferenceStatus }>;
+  existingReferences?: Array<{
+    refereeEmail: string;
+    status: ReferenceStatus;
+    requestedAt?: string;
+  }>;
   nowIso?: string;
 }
 
@@ -573,10 +604,15 @@ export function requestEmploymentReference(
     throw new DomainError('CONFLICT', 'The work email on this role cannot also be its referee.');
   }
 
-  // One mailbox, one reference per role (C-17); a declined request may be re-asked.
+  const now = params.nowIso ?? new Date().toISOString();
+
+  // One mailbox, one reference per role (C-17); a declined request, or one
+  // whose link expired unanswered, may be re-asked (K-02).
+  const nowMs = Date.parse(now);
   if (
     params.existingReferences?.some(
-      (r) => r.refereeEmail.trim().toLowerCase() === normRefereeEmail && r.status !== 'declined'
+      (r) =>
+        r.refereeEmail.trim().toLowerCase() === normRefereeEmail && referenceBlocksReask(r, nowMs)
     )
   ) {
     throw new DomainError(
@@ -585,7 +621,6 @@ export function requestEmploymentReference(
     );
   }
 
-  const now = params.nowIso ?? new Date().toISOString();
   const token = crypto.randomBytes(16).toString('hex');
 
   return {

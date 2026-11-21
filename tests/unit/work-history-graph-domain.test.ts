@@ -624,6 +624,18 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       ).toBe('requested');
     });
 
+    it('lets an unanswered request be re-asked once its link has expired (K-02)', () => {
+      const daysBefore = (days: number) =>
+        new Date(Date.parse(fixedNow) - days * 24 * 60 * 60 * 1000).toISOString();
+      const existing = (status: string, requestedAt: string) => ({
+        existingReferences: [{ refereeEmail: 'bob@google.com', status, requestedAt }],
+      });
+      expect(request(existing('requested', daysBefore(31))).status).toBe('requested');
+      expect(() => request(existing('requested', daysBefore(29)))).toThrow(/already asked/);
+      expect(() => request(existing('submitted', daysBefore(400)))).toThrow(/already asked/);
+      expect(() => request(existing('flagged', daysBefore(400)))).toThrow(/already asked/);
+    });
+
     it('does not give the two-reference bonus for one mailbox answering twice', () => {
       const wh: VerifiedWorkHistory = {
         id: 'wh_1',

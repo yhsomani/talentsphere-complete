@@ -335,6 +335,7 @@ import {
   assertReferenceRequestAllowed,
   canTransitionApplication,
   requestEmploymentReference,
+  referenceLinkExpired,
   submitEmploymentReference,
   calculateVerificationScoreAndBadge,
   buildWorkHistoryGraph,
@@ -974,11 +975,6 @@ export async function buildApp(
    * `salt:hash` pair, so verifyPassword can never succeed against it.
    */
   const ERASED_CREDENTIAL = '!erased';
-
-  /** A referee's emailed link stops working this long after the request was made. */
-  const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-  const referenceLinkExpired = (reference: { requestedAt: string }): boolean =>
-    Date.now() - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
 
   /** May this session manage the given organization's jobs and pipeline? (BR-12) */
   const canManageJobs = (
@@ -4686,9 +4682,7 @@ export async function buildApp(
       const viewer = maybeExtractUser(req);
       return reply.status(200).send({
         organizationId,
-        reviews: reviews.map((r) =>
-          publicEmployerReview(r, viewer ?? undefined)
-        ),
+        reviews: reviews.map((r) => publicEmployerReview(r, viewer ?? undefined)),
         total: reviews.length,
       });
     }
@@ -12982,6 +12976,10 @@ export async function buildApp(
           },
         });
       } catch {
+        // Undo the request, so a retry (same or new clientRequestId) asks again (K-02).
+        await persist({ kind: 'referenceDelete', id: stored.id, base: stored }).catch(
+          () => undefined
+        );
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
       recordSend(`ref-user:${session.userId}`);
@@ -13499,6 +13497,16 @@ export async function buildApp(
         emailChallengesByHistoryId.delete(op.id);
         return;
       }
+      case 'referenceDelete': {
+        const ref = employmentReferencesById.get(op.id);
+        if (!ref) return;
+        employmentReferencesById.delete(op.id);
+        removeFrom(employmentReferencesByHistoryId, ref.workHistoryId, op.id);
+        if (ref.clientRequestId) {
+          referencesByClientRequest.delete(`${ref.candidateId}:${ref.clientRequestId}`);
+        }
+        return;
+      }
       case 'evidenceDelete': {
         const item = evidenceById.get(op.id);
         if (!item) return;
@@ -13611,6 +13619,8 @@ export async function buildApp(
         return `workHistory:${op.id}`;
       case 'reference':
         return `reference:${op.value.id}`;
+      case 'referenceDelete':
+        return `reference:${op.id}`;
       case 'emailChallenge':
         return `emailChallenge:${op.value.workHistoryId}`;
       case 'emailChallengeDelete':
@@ -13651,6 +13661,8 @@ export async function buildApp(
         return verifiedWorkHistoriesById.get(op.value.id);
       case 'reference':
         return employmentReferencesById.get(op.value.id);
+      case 'referenceDelete':
+        return employmentReferencesById.get(op.id);
       case 'emailChallenge':
         return emailChallengesByHistoryId.get(op.value.workHistoryId);
       case 'emailChallengeDelete':

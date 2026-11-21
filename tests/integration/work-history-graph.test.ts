@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+// The API runs on the built domain package; spy on the class it instantiates.
+import { MemoryJobStore } from '../../packages/domain/dist/index.js';
 
 /**
  * The email the worker would deliver (dev/test outbox). Codes and referee
@@ -944,6 +946,107 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       const replay = await ask(1);
       expect(replay.statusCode).toBe(200);
       expect(replay.json().deduplicated).toBe(true);
+    });
+  });
+
+  describe('9. An unanswered or never-queued request does not block re-asking (K-02)', () => {
+    let seq = 0;
+    const newEntry = async () => {
+      seq += 1;
+      const email = `reask.${seq}.${Date.now()}@talentsphere.test`;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email,
+          password: 'Password123!Secure',
+          fullName: `Reask Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const { token, user } = JSON.parse(res.body) as { token: string; user: { id: string } };
+      const entry = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          companyName: 'Reask Corp',
+          title: 'Engineer',
+          startDate: '2019-01-01',
+          endDate: '2021-01-01',
+          isCurrent: false,
+        },
+      });
+      expect(entry.statusCode).toBe(201);
+      return {
+        token,
+        userId: user.id,
+        email,
+        historyId: JSON.parse(entry.body).workHistory.id as string,
+      };
+    };
+    const ask = (
+      who: { token: string; historyId: string },
+      refereeEmail: string,
+      clientRequestId?: string
+    ) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${who.historyId}/references/request`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: {
+          refereeName: 'Pat Referee',
+          refereeEmail,
+          relationship: 'peer',
+          clientRequestId,
+        },
+      });
+
+    it('refuses the same referee within 30 days and accepts them once the link expired', async () => {
+      const who = await newEntry();
+      const referee = `pat.${who.historyId}@corp.test`;
+      const day = 24 * 60 * 60 * 1000;
+      try {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        expect((await ask(who, referee)).statusCode).toBe(201);
+        // A fresh session at each step: only the reference ages.
+        const later = () => ({
+          ...who,
+          token: createSessionToken(who.userId, who.email, ['candidate']),
+        });
+        vi.setSystemTime(Date.now() + 29 * day);
+        const early = await ask(later(), referee);
+        expect(early.statusCode).toBe(409);
+        expect(early.json().error.message).toMatch(/already asked/);
+        vi.setSystemTime(Date.now() + 2 * day);
+        expect((await ask(later(), referee)).statusCode).toBe(201);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('undoes the request when the invitation cannot be queued, so the retry asks again', async () => {
+      const who = await newEntry();
+      const referee = `queued.${who.historyId}@corp.test`;
+      const clientRequestId = `reask-${who.historyId}`;
+      const enqueue = vi
+        .spyOn(MemoryJobStore.prototype, 'enqueue')
+        .mockRejectedValueOnce(new Error('queue down'));
+      try {
+        const failed = await ask(who, referee, clientRequestId);
+        expect(failed.statusCode).toBe(503);
+        expect(failed.json().error.code).toBe('SERVICE_UNAVAILABLE');
+      } finally {
+        enqueue.mockRestore();
+      }
+      const retry = await ask(who, referee, clientRequestId);
+      expect(retry.statusCode).toBe(201);
+      expect(retry.json().deduplicated).toBeUndefined();
+      const invitations = (await outbox(app, 'reference.requested')).filter(
+        (p) => p.to === referee
+      );
+      expect(invitations).toHaveLength(1);
     });
   });
 });
