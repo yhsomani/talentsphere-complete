@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { colors, spacing } from '@talentsphere/ui';
 import { usePageMeta } from '../hooks/usePageMeta.js';
-import { apiJson, errorMessage } from '../lib/api.js';
+import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { useSession, type SessionProfile } from '../lib/SessionContext.js';
 import { SessionErrorNotice } from '../components/SessionErrorNotice.js';
 import { ChangePasswordForm } from '../components/ChangePasswordForm.js';
@@ -53,6 +53,7 @@ export const ProfilePage: React.FC = () => {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletePasswordError, setDeletePasswordError] = useState<string | null>(null);
   const [exportBusy, setExportBusy] = useState(false);
   const [exportStatus, setExportStatus] = useState<{
     tone: 'success' | 'error';
@@ -101,15 +102,20 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  // Closing the dialog (button, Escape or backdrop) starts the next attempt clean (K-13).
   const closeDelete = () => {
     setDeleteOpen(false);
     setDeletePassword('');
+    setDeleteConfirm('');
+    setDeleteError(null);
+    setDeletePasswordError(null);
   };
 
   const deleteAccount = async () => {
     if (deleteBusy) return;
     setDeleteBusy(true);
     setDeleteError(null);
+    setDeletePasswordError(null);
     try {
       // The server asks for the current password before erasing (C-04).
       await apiJson('/api/v1/settings/erasure/execute', {
@@ -119,7 +125,19 @@ export const ProfilePage: React.FC = () => {
       session.signOut();
       navigate('/', { replace: true });
     } catch (err) {
-      setDeleteError(errorMessage(err));
+      // A wrong password belongs to the password field (K-13); anything else
+      // (rate limit, conflict, outage) stays in the notice at the top.
+      if (
+        err instanceof ApiError &&
+        err.status === 422 &&
+        (err.details as { field?: string } | undefined)?.field === 'currentPassword'
+      ) {
+        setDeletePasswordError(err.message);
+        setDeletePassword('');
+        document.getElementById('delete-password')?.focus();
+      } else {
+        setDeleteError(errorMessage(err));
+      }
       setDeleteBusy(false);
     }
   };
@@ -184,74 +202,85 @@ export const ProfilePage: React.FC = () => {
         </Notice>
       )}
 
-      <form onSubmit={save} data-testid="profile-form" noValidate>
-        <Input
-          id="profile-name"
-          label="Full name"
-          required
-          value={fullName}
-          onChange={(e) => {
-            setFullName(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-name"
-        />
-        <Input
-          id="profile-headline"
-          label="Headline"
-          maxLength={160}
-          placeholder="e.g. Backend engineer focused on payments"
-          helperText="One line about what you do. Shown next to your name."
-          value={headline}
-          onChange={(e) => {
-            setHeadline(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-headline"
-        />
-        <Input
-          id="profile-location"
-          label="Location"
-          maxLength={100}
-          value={location}
-          onChange={(e) => {
-            setLocation(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-location"
-        />
-        <TextArea
-          id="profile-bio"
-          label="About you"
-          maxLength={2000}
-          rows={5}
-          value={bio}
-          onChange={(e) => {
-            setBio(e.target.value);
-            setSaved(false);
-          }}
-          data-testid="profile-bio"
-        />
-        <Select
-          id="profile-privacy"
-          label="Who can see your profile"
-          value={privacy}
-          onChange={(e) => {
-            setPrivacy(e.target.value as SessionProfile['privacy']);
-            setSaved(false);
-          }}
-          options={PRIVACY_OPTIONS}
-          helperText={PRIVACY_HELP[privacy]}
-          data-testid="profile-privacy"
-        />
-        <Button type="submit" loading={busy} data-testid="profile-save">
-          Save profile
-        </Button>
-      </form>
+      {/* K-14: a restricted account cannot edit its profile, skills or evidence
+          (the API answers 403), so those sections are not offered. Password,
+          other devices, export and deletion below stay available. */}
+      {session.isRestricted ? (
+        <p style={{ color: colors.neutral[700] }} data-testid="profile-restricted">
+          Editing is paused while your account is restricted.
+        </p>
+      ) : (
+        <>
+          <form onSubmit={save} data-testid="profile-form" noValidate>
+            <Input
+              id="profile-name"
+              label="Full name"
+              required
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-name"
+            />
+            <Input
+              id="profile-headline"
+              label="Headline"
+              maxLength={160}
+              placeholder="e.g. Backend engineer focused on payments"
+              helperText="One line about what you do. Shown next to your name."
+              value={headline}
+              onChange={(e) => {
+                setHeadline(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-headline"
+            />
+            <Input
+              id="profile-location"
+              label="Location"
+              maxLength={100}
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-location"
+            />
+            <TextArea
+              id="profile-bio"
+              label="About you"
+              maxLength={2000}
+              rows={5}
+              value={bio}
+              onChange={(e) => {
+                setBio(e.target.value);
+                setSaved(false);
+              }}
+              data-testid="profile-bio"
+            />
+            <Select
+              id="profile-privacy"
+              label="Who can see your profile"
+              value={privacy}
+              onChange={(e) => {
+                setPrivacy(e.target.value as SessionProfile['privacy']);
+                setSaved(false);
+              }}
+              options={PRIVACY_OPTIONS}
+              helperText={PRIVACY_HELP[privacy]}
+              data-testid="profile-privacy"
+            />
+            <Button type="submit" loading={busy} data-testid="profile-save">
+              Save profile
+            </Button>
+          </form>
 
-      <SkillsSection />
+          <SkillsSection />
 
-      <CredentialsSection />
+          <CredentialsSection />
+        </>
+      )}
 
       <Card style={{ marginTop: spacing['2xl'] }}>
         <CardContent style={{ padding: spacing.lg }}>
@@ -315,7 +344,7 @@ export const ProfilePage: React.FC = () => {
         description="Type DELETE and enter your password to confirm. Your data is removed immediately."
       >
         {deleteError && (
-          <Notice tone="error" style={{ marginBottom: spacing.md }}>
+          <Notice tone="error" style={{ marginBottom: spacing.md }} data-testid="delete-error">
             {deleteError}
           </Notice>
         )}
@@ -332,7 +361,11 @@ export const ProfilePage: React.FC = () => {
           type="password"
           autoComplete="current-password"
           value={deletePassword}
-          onChange={(e) => setDeletePassword(e.target.value)}
+          error={deletePasswordError ?? undefined}
+          onChange={(e) => {
+            setDeletePassword(e.target.value);
+            setDeletePasswordError(null);
+          }}
           data-testid="delete-password-input"
         />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: spacing.sm }}>

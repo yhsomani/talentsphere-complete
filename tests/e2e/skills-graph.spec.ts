@@ -58,6 +58,10 @@ test.describe('E2E: Skills and related skills on the profile (F-84)', () => {
     await signIn(page, account);
     await page.goto('/profile');
     await expect(page.getByTestId('skills-empty')).toBeVisible();
+    // K-19: skills are kept in server memory; the page says so.
+    await expect(page.getByTestId('skills-ephemeral-notice')).toHaveText(
+      'Skills are not saved permanently yet. A server restart clears them.'
+    );
 
     // No relationships defined yet: the skill is listed and the page says so.
     await page.getByLabel('Add a skill').selectOption({ label: main });

@@ -400,11 +400,13 @@ export const DashboardPage: React.FC = () => {
       <PageHeader
         title={name ?? 'Dashboard'}
         intro={
-          session.isRecruiter
-            ? session.memberships[0]?.organizationName
-              ? `Hiring at ${session.memberships[0].organizationName}.`
-              : 'Set up your company to start hiring.'
-            : session.profile?.headline || 'Your applications, work history and what to do next.'
+          session.isRestricted
+            ? undefined
+            : session.isRecruiter
+              ? session.memberships[0]?.organizationName
+                ? `Hiring at ${session.memberships[0].organizationName}.`
+                : 'Set up your company to start hiring.'
+              : session.profile?.headline || 'Your applications, work history and what to do next.'
         }
         actions={
           session.isRecruiter && !session.isRestricted ? (
@@ -421,9 +423,18 @@ export const DashboardPage: React.FC = () => {
           Loading your dashboard…
         </p>
       ) : session.isRestricted ? (
+        // K-14: promise only what the web offers today. Reports and appeals have
+        // no page yet, so the notice does not mention them.
         <Notice tone="warning" data-testid="restricted-notice">
-          Your account is restricted after a moderation decision. You can still view your reports,
-          appeal, and export or delete your data.
+          <p style={{ margin: 0 }}>
+            Your account is restricted after a moderation decision. You can still download or delete
+            your data and change your password from your profile.
+          </p>
+          <div style={{ marginTop: spacing.md }}>
+            <ButtonLink to="/profile" data-testid="restricted-profile-link">
+              Go to your profile
+            </ButtonLink>
+          </div>
         </Notice>
       ) : session.isRecruiter ? (
         <RecruiterDashboard />

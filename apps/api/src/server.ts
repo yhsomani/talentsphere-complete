@@ -920,7 +920,7 @@ export async function buildApp(
       if (!RESTRICTED_SESSION_ROUTES.has(route)) {
         throw new DomainError(
           'FORBIDDEN',
-          'This account is restricted. You can still view your reports, appeal a decision, and export or delete your data.',
+          'This account is restricted. You can still export or delete your data.',
           { accountStatus: account.status }
         );
       }
