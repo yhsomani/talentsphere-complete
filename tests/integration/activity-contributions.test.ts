@@ -237,13 +237,21 @@ describe('Integration: activity ingestion is bounded (M-1)', () => {
     expect(res.statusCode).toBe(422);
   });
 
+  it('refuses metadata over 4 KB with 422 (K-06)', async () => {
+    const metadata = Object.fromEntries(
+      Array.from({ length: 30 }, (_, i) => [`k${i}`, 'x'.repeat(200)])
+    );
+    const res = await post({ category: 'learning', activityType: 'heavy', metadata });
+    expect(res.statusCode).toBe(422);
+  });
+
   it('limits one account to 60 events a minute', async () => {
     const statuses: number[] = [];
     for (let i = 0; i < 61; i++) {
       statuses.push((await post({ category: 'learning', activityType: `rate_${i}` })).statusCode);
     }
-    // The two refused requests above count toward the window too.
-    expect(statuses.filter((s) => s === 201)).toHaveLength(58);
+    // The three refused requests above count toward the window too.
+    expect(statuses.filter((s) => s === 201)).toHaveLength(57);
     expect(statuses.slice(-3)).toEqual([429, 429, 429]);
   });
 });

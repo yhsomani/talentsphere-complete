@@ -6,6 +6,7 @@ import {
   assertMetadataWithinLimits,
   appendBounded,
   ANALYTICS_METADATA_LIMITS,
+  ANALYTICS_USER_AGENT_MAX,
   telemetryConsentFrom,
   type AnalyticsEvent,
 } from '../../packages/domain/src/analytics.js';
@@ -229,5 +230,54 @@ describe('Domain: telemetry consent from stored settings (C-10)', () => {
     expect(telemetryConsentFrom(null)).toBe(true);
     expect(telemetryConsentFrom({ showActivity: true })).toBe(true);
     expect(telemetryConsentFrom({ showActivity: false })).toBe(false);
+  });
+  // K-06: retention is by count, so each event must also be bounded by size.
+  describe('metadata is bounded by key length and serialized bytes (K-06)', () => {
+    const errorCode = (fn: () => unknown) => {
+      try {
+        fn();
+        return 'no error';
+      } catch (err) {
+        return (err as { code?: string }).code;
+      }
+    };
+    const strings = (keys: number, length: number) =>
+      Object.fromEntries(Array.from({ length: keys }, (_, i) => [`k${i}`, 'x'.repeat(length)]));
+
+    it('refuses a key longer than 64 characters', () => {
+      const key = 'k'.repeat(65);
+      expect(errorCode(() => sanitizeAnalyticsMetadata({ [key]: 1 }))).toBe('VALIDATION_FAILED');
+      expect(errorCode(() => assertMetadataWithinLimits({ [key]: 1 }))).toBe('VALIDATION_FAILED');
+      expect(errorCode(() => sanitizeAnalyticsMetadata({ ['k'.repeat(64)]: 1 }))).toBe('no error');
+    });
+
+    it('refuses an event whose sanitized metadata exceeds 4 KB; 3 KB is accepted', () => {
+      expect(ANALYTICS_METADATA_LIMITS.maxEventMetadataBytes).toBe(4096);
+      // 30 keys x 200 chars ≈ 6 KB.
+      expect(
+        errorCode(() => recordAnalyticsEvent({ eventType: 'big', metadata: strings(30, 200) }))
+      ).toBe('VALIDATION_FAILED');
+      expect(errorCode(() => assertMetadataWithinLimits(strings(30, 200)))).toBe(
+        'VALIDATION_FAILED'
+      );
+      // 3 x 1000 chars ≈ 3 KB.
+      expect(
+        errorCode(() => recordAnalyticsEvent({ eventType: 'ok', metadata: strings(3, 1000) }))
+      ).toBe('no error');
+      expect(errorCode(() => assertMetadataWithinLimits(strings(3, 1000)))).toBe('no error');
+    });
+
+    it('counts bytes, not characters', () => {
+      // 3 x 700 three-byte characters ≈ 6.3 KB, though only 2,100 characters.
+      const wide = Object.fromEntries([0, 1, 2].map((i) => [`k${i}`, '€'.repeat(700)]));
+      expect(errorCode(() => recordAnalyticsEvent({ eventType: 'utf8', metadata: wide }))).toBe(
+        'VALIDATION_FAILED'
+      );
+    });
+
+    it('cuts a long user agent', () => {
+      const event = recordAnalyticsEvent({ eventType: 'ua', userAgent: 'a'.repeat(1024) });
+      expect(event.userAgent).toHaveLength(ANALYTICS_USER_AGENT_MAX);
+    });
   });
 });

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
-import { apiJson, errorMessage } from '../lib/api.js';
+import { ApiError, apiJson, errorMessage } from '../lib/api.js';
 import { formatMoney } from '../lib/format.js';
 import { createStableKeyer } from '../lib/idempotency.js';
 import { Button, Notice } from './ui/index.js';
@@ -131,6 +131,13 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
       });
       window.location.assign(url);
     } catch (err) {
+      // Reuse the checkout key only when the outcome is unknown (timeout or
+      // network failure, status 0): the server may have opened the session.
+      // Any answered failure gets a fresh key, so a retry cannot replay a
+      // failure Stripe stored under the old one (K-09).
+      if (!(err instanceof ApiError && err.status === 0)) {
+        checkoutKeyer.current = createStableKeyer();
+      }
       setError(errorMessage(err));
       setBusy(null);
     }

@@ -48,6 +48,12 @@ export interface ClaimCycleResult {
   lapsed: number;
 }
 
+/** Default per-handler timeout; the claim lease must exceed it. */
+export const DEFAULT_HANDLER_TIMEOUT_MS = 30_000;
+
+// The timer does not cancel the handler: it only stops waiting for it. Handlers
+// with external side effects must bound themselves below handlerTimeoutMs
+// (the email provider's own timeout is pinned below it by a unit test, K-21).
 async function runWithTimeout(
   handler: ClaimHandler,
   record: BackgroundJobRecord,
@@ -76,7 +82,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     // 60s lease > 30s handler timeout: a running handler always finishes (or
     // times out) before its lease expires, so redelivery cannot double-run it.
     leaseMs = 60_000,
-    handlerTimeoutMs = 30_000,
+    handlerTimeoutMs = DEFAULT_HANDLER_TIMEOUT_MS,
     maxAttempts = 3,
     backoffMs = 1_000,
     batchSize = 10,

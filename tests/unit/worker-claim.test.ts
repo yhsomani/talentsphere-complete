@@ -417,3 +417,13 @@ describe('Claim cycle: attempts fencing against stale workers', () => {
     }
   });
 });
+
+describe('Handler timeout invariant (K-21)', () => {
+  it('the email provider timeout is below the handler timeout, so a timed-out job is no longer sending', async () => {
+    const { DEFAULT_HANDLER_TIMEOUT_MS } = await import('../../apps/worker/src/claim.js');
+    const { EMAIL_PROVIDER_TIMEOUT_MS, loadEmailConfig } =
+      await import('../../apps/worker/src/email/config.js');
+    expect(EMAIL_PROVIDER_TIMEOUT_MS).toBeLessThan(DEFAULT_HANDLER_TIMEOUT_MS);
+    expect(loadEmailConfig({}).timeoutMs).toBe(EMAIL_PROVIDER_TIMEOUT_MS);
+  });
+});

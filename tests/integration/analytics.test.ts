@@ -210,6 +210,19 @@ describe('Integration: analytics ingestion is bounded (C-03)', () => {
     expect(res.statusCode).toBe(422);
   });
 
+  it('refuses event metadata over 4 KB with 422 (K-06)', async () => {
+    const metadata = Object.fromEntries(
+      Array.from({ length: 30 }, (_, i) => [`k${i}`, 'x'.repeat(200)])
+    );
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/analytics/events',
+      payload: { eventType: 'heavy', metadata },
+    });
+    expect(res.statusCode).toBe(422);
+    expect(JSON.parse(res.body).error.code).toBe('VALIDATION_FAILED');
+  });
+
   it('does not echo the address hash or user agent; the admin record keeps them', async () => {
     const res = await app.inject({
       method: 'POST',

@@ -116,4 +116,37 @@ describe('Analytics consent survives a restart (C-10)', () => {
     ]);
     expect(rows.rowCount).toBe(0);
   });
+  // K-11: a connection request reads the recipient's settings; it must not
+  // write a default settings row in the recipient's name.
+  it('a connection request does not create the recipient settings row; a stored refusal still applies after restart', async () => {
+    const sender = await register(app, `conn.sender.${Date.now()}@example.com`);
+    const quiet = await register(app, `conn.quiet.${Date.now()}@example.com`);
+    const closed = await register(app, `conn.closed.${Date.now()}@example.com`);
+    const request = (recipientId: string) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/v1/connections/request',
+        headers: { authorization: `Bearer ${sender.token}` },
+        payload: { recipientId },
+      });
+
+    expect((await request(quiet.userId)).statusCode).toBe(201);
+    const rows = await pool.query('SELECT 1 FROM public.user_settings WHERE user_id = $1', [
+      quiet.userId,
+    ]);
+    expect(rows.rowCount).toBe(0);
+
+    const off = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/settings',
+      headers: { authorization: `Bearer ${closed.token}` },
+      payload: { allowConnectionRequests: false },
+    });
+    expect(off.statusCode).toBe(200);
+    await app.close();
+    app = await boot();
+    const refused = await request(closed.userId);
+    expect(refused.statusCode).toBe(403);
+    expect(JSON.parse(refused.body).error.message).toMatch(/not accepting connection requests/);
+  });
 });

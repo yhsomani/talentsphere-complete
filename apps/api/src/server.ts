@@ -200,6 +200,7 @@ import {
   computeKPIs,
   appendBounded,
   ANALYTICS_EVENT_RETENTION,
+  AUDIT_LOG_RETENTION,
   telemetryConsentFrom,
   JobTemplate,
   createJobTemplate,
@@ -785,17 +786,41 @@ export async function buildApp(
   // Answers only ready/not_ready: the storage detail names the database host
   // and stays in the admin diagnostics. The worker is not a dependency: a
   // dead worker must not take the API out of rotation (C-07).
+  // The endpoint is unauthenticated and limiter-exempt, so the database probe
+  // is shared: concurrent calls await one in-flight check and a result is
+  // reused for READY_CACHE_MS (K-08). Lease loss is not masked: the onRequest
+  // guard answers 503 before this handler whenever the lease is unhealthy.
+  const READY_CACHE_MS = 1000;
+  let readyCached: { ok: boolean; at: number } | null = null;
+  let readyInFlight: Promise<boolean> | null = null;
+  const probeReady = async (): Promise<boolean> => {
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<{ ok: false }>((resolve) => {
+      timer = setTimeout(() => resolve({ ok: false }), 2000);
+    });
+    try {
+      return (await Promise.race([storage.health(), timedOut])).ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
   app.get('/ready', { config: { rateLimit: false } }, async (_req, reply) => {
     let ready = storage.mode === 'memory';
     if (!ready) {
-      let timer: NodeJS.Timeout | undefined;
-      const timedOut = new Promise<{ ok: false }>((resolve) => {
-        timer = setTimeout(() => resolve({ ok: false }), 2000);
-      });
-      try {
-        ready = (await Promise.race([storage.health(), timedOut])).ok;
-      } finally {
-        clearTimeout(timer);
+      if (readyCached && Date.now() - readyCached.at < READY_CACHE_MS) {
+        ready = readyCached.ok;
+      } else {
+        if (!readyInFlight) {
+          readyInFlight = probeReady()
+            .then((ok) => {
+              readyCached = { ok, at: Date.now() };
+              return ok;
+            })
+            .finally(() => {
+              readyInFlight = null;
+            });
+        }
+        ready = await readyInFlight;
       }
     }
     return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });
@@ -1092,16 +1117,18 @@ export async function buildApp(
           'Too many sign-in attempts for this account. Wait 15 minutes, then try again.'
         );
       }
+      // Count the attempt before the first await, so parallel guesses are
+      // each evaluated against the attempts already in flight (K-05); a
+      // correct password clears the window, as before.
+      recordLoginFailure(emailKey);
       const user = usersByEmail.get(emailKey);
       if (!user) {
         await verifyPassword(input.password, await timingDecoyHash);
-        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
 
       const isValid = await verifyPassword(input.password, user.passwordHash);
       if (!isValid) {
-        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
       loginFailuresByEmail.delete(emailKey);
@@ -1355,7 +1382,12 @@ export async function buildApp(
   const skillsBySlug = new Map<string, Skill>();
   const skillRelationships: SkillRelationship[] = [];
   const evidenceSkills = new Map<string, Set<string>>();
-  const auditLogs: any[] = [];
+  // In-memory, write-only security/admin event trail: bounded so it cannot
+  // grow without limit between restarts (K-06). Not durable (A05-005, owner).
+  const auditLogEntries: unknown[] = [];
+  const auditLogs = {
+    push: (entry: unknown) => appendBounded(auditLogEntries, entry, AUDIT_LOG_RETENTION),
+  };
 
   // Notification Center Repositories & Helper (F-14, BR-120)
   const notificationsById = new Map<string, Notification>();
@@ -6459,9 +6491,10 @@ export async function buildApp(
     }
 
     const userConnections = connectionsByUserId.get(session.userId) || [];
-    // Read through the durable settings so the choice survives a restart (C-29).
+    // Read through the durable settings so the choice survives a restart (C-29),
+    // without writing a default settings row in the recipient's name (K-11).
     const recipientSettings =
-      targetUserId === session.userId ? undefined : await accountSettings(targetUserId);
+      targetUserId === session.userId ? undefined : await readSettings(targetUserId);
     const connection = requestConnection(
       {
         senderId: session.userId,
@@ -9560,18 +9593,6 @@ export async function buildApp(
       const score = calculateContributionScores(session.userId, userEvents);
       contributionScoresByUserId.set(session.userId, score);
 
-      auditLogs.push({
-        event: 'activity.recorded',
-        actorId: session.userId,
-        targetId: event.id,
-        metadata: {
-          category: event.category,
-          activityType: event.activityType,
-          compositeScore: score.compositeScore,
-        },
-        timestamp: new Date().toISOString(),
-      });
-
       return reply.status(201).send({ event, score });
     }
   );
@@ -9624,10 +9645,7 @@ export async function buildApp(
 
       // Same privacy as the profile, plus the person's "show activity"
       // setting (C-26). Settings are read through without writing defaults.
-      const settings =
-        userSettingsByUserId.get(userId) ??
-        (await storage.accountMetadata.getSettings(userId)) ??
-        undefined;
+      const settings = await readSettings(userId);
       const visibility = canViewActivity({
         profile,
         settings,
@@ -10104,6 +10122,18 @@ export async function buildApp(
     sanitizeSettings(withProfileVisibility(settings, profilesByUserId.get(settings.userId)));
 
   // Settings are read from PostgreSQL on first access, not reset on restart.
+  // Another user's settings, or the caller's outside the Settings page: cache,
+  // then the durable row; a hit is cached, a miss is NOT created (K-11).
+  const readSettings = async (userId: string): Promise<UserSettings | undefined> => {
+    const cached = userSettingsByUserId.get(userId);
+    if (cached) return cached;
+    const stored = (await storage.accountMetadata.getSettings(userId)) ?? undefined;
+    if (stored) userSettingsByUserId.set(userId, stored);
+    return stored;
+  };
+
+  // The owner's own settings (GET/PATCH /settings, export): creates and saves
+  // defaults on first use.
   const accountSettings = async (userId: string): Promise<UserSettings> => {
     const cached = userSettingsByUserId.get(userId);
     if (cached) return cached;
@@ -12555,11 +12585,7 @@ export async function buildApp(
         // The cache is filled only by GET/PATCH /settings, so after a restart
         // it is empty: read the durable setting through (never creating a
         // row) so an explicit opt-out survives restarts (C-10).
-        const settings =
-          userSettingsByUserId.get(session.userId) ??
-          (await storage.accountMetadata.getSettings(session.userId)) ??
-          undefined;
-        if (settings) userSettingsByUserId.set(session.userId, settings);
+        const settings = await readSettings(session.userId);
         telemetryConsent = telemetryConsentFrom(settings);
       }
 
@@ -12670,6 +12696,9 @@ export async function buildApp(
   // Sliding-window send logs for the budgets in assertEmailCodeIssuable /
   // assertReferenceRequestAllowed (C-06). Keys: `code-user:<id>`,
   // `code-addr:<email>`, `ref-user:<id>`. Per process, like the limiter store.
+  // A send is reserved synchronously right after its budget check (no await
+  // in between), so parallel requests see each other; a failed send releases
+  // its reservation (K-05).
   const HOUR_MS = 60 * 60 * 1000;
   const sendLog = new Map<string, number[]>();
   const sendsWithin = (key: string, windowMs: number): number => {
@@ -12679,8 +12708,18 @@ export async function buildApp(
     else sendLog.delete(key);
     return recent.length;
   };
-  const recordSend = (...keys: string[]) => {
-    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), Date.now()]);
+  const reserveSends = (...keys: string[]): (() => void) => {
+    // A unique stamp per reservation, so release removes exactly this one.
+    const stamp = Date.now() + Math.random() / 2;
+    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), stamp]);
+    return () => {
+      for (const key of keys) {
+        const list = sendLog.get(key);
+        const at = list ? list.indexOf(stamp) : -1;
+        if (list && at >= 0) list.splice(at, 1);
+        if (list && list.length === 0) sendLog.delete(key);
+      }
+    };
   };
 
   // Response projections: replay keys and token hashes never leave the API.
@@ -12794,6 +12833,7 @@ export async function buildApp(
           issuesToAddressLastDay: sendsWithin(`code-addr:${email}`, 24 * HOUR_MS),
           now: new Date(),
         });
+        const releaseSend = reserveSends(`code-user:${session.userId}`, `code-addr:${email}`);
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
         const challenge: EmailChallenge = {
@@ -12804,7 +12844,12 @@ export async function buildApp(
           expiresAt: new Date(now.getTime() + EMAIL_CHALLENGE_TTL_MS).toISOString(),
           createdAt: now.toISOString(),
         };
-        await persist({ kind: 'emailChallenge', value: challenge });
+        try {
+          await persist({ kind: 'emailChallenge', value: challenge });
+        } catch (err) {
+          releaseSend();
+          throw err;
+        }
         // The worker delivers this (email provider) — the code is never
         // returned to the browser that asked for it.
         // Credentials must be durably queued. Failure must not be swallowed
@@ -12815,9 +12860,14 @@ export async function buildApp(
             payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
           });
         } catch {
+          // No code was queued: remove exactly this challenge (a retry must
+          // not hit the re-issue cooldown) and give the budget back (K-05).
+          await persist({ kind: 'emailChallengeDelete', workHistoryId: id, base: challenge }).catch(
+            () => undefined
+          );
+          releaseSend();
           throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
         }
-        recordSend(`code-user:${session.userId}`, `code-addr:${email}`);
         return reply.status(202).send({
           status: 'verification_pending',
           email,
@@ -12951,7 +13001,13 @@ export async function buildApp(
         tokenHash: token ? sha256Hex(token) : undefined,
         clientRequestId: body.clientRequestId,
       };
-      await persist({ kind: 'reference', value: stored });
+      const releaseSend = reserveSends(`ref-user:${session.userId}`);
+      try {
+        await persist({ kind: 'reference', value: stored });
+      } catch (err) {
+        releaseSend();
+        throw err;
+      }
 
       const candidateName = profilesByUserId.get(workHistory.candidateId)?.fullName;
       try {
@@ -12968,9 +13024,9 @@ export async function buildApp(
           },
         });
       } catch {
+        releaseSend();
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
-      recordSend(`ref-user:${session.userId}`);
 
       return reply.status(201).send({
         reference: publicReference(stored),
