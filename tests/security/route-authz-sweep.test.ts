@@ -354,3 +354,164 @@ describe('SEC: every non-public /api/v1 route requires a valid session (A10-005)
     expect(failures).toEqual([]);
   });
 });
+
+/**
+ * Role-level sweep (K-16). The 401 sweep above proves a session is required;
+ * this proves the role is. Every admin route, the analytics reads and the
+ * moderator queues refuse a valid candidate or recruiter session with 403
+ * FORBIDDEN, and the admin routes also refuse a moderator (moderator is not
+ * admin). The three moderator mutations parse the body and load the record
+ * before the role check (it lives in the domain call), so they are driven
+ * against real, seeded records with valid bodies.
+ *
+ * Mutation check (manual, 2026-11-21): deleting `assertPlatformAdmin` from
+ * `POST /api/v1/admin/maintenance` in server.ts makes the first case fail for
+ * that route.
+ */
+describe('SEC: role-gated routes refuse sessions without the role (K-16)', () => {
+  let app: FastifyInstance;
+  let roleGated: Array<{ method: string; url: string }>;
+  const token = (roles: string[]) =>
+    createSessionToken(crypto.randomUUID(), `${roles[0]}.${Date.now()}@example.com`, roles);
+  const bearer = (t: string) => ({ authorization: `Bearer ${t}` });
+
+  beforeAll(async () => {
+    registered.length = 0;
+    app = await buildApp({
+      NODE_ENV: 'test',
+      LOG_LEVEL: 'fatal',
+      RATE_LIMIT_MAX_REQUESTS: '100000',
+      AUTH_RATE_LIMIT_MAX_REQUESTS: '100000',
+    } as never);
+    await app.ready();
+    const seen = new Set<string>();
+    roleGated = registered.filter((r) => {
+      const key = `${r.method} ${r.url}`;
+      if (seen.has(key) || r.method === 'HEAD' || r.method === 'OPTIONS') return false;
+      seen.add(key);
+      return (
+        /^\/api\/v1\/admin\//.test(r.url) ||
+        (r.method === 'GET' && /^\/api\/v1\/analytics\/(events|kpis)$/.test(r.url)) ||
+        ['GET /api/v1/moderation/reports', 'GET /api/v1/moderation/appeals'].includes(key)
+      );
+    });
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('refuses a candidate and a recruiter on every admin, analytics-read and moderator-queue route', async () => {
+    // A prefix rename must not empty the list and turn this into a no-op.
+    expect(roleGated.length).toBeGreaterThanOrEqual(12);
+    const failures: string[] = [];
+    for (const [label, roles] of [
+      ['candidate', ['candidate']],
+      ['recruiter', ['recruiter']],
+    ] as const) {
+      const headers = bearer(token([...roles]));
+      for (const r of roleGated) {
+        const res = await app.inject({
+          method: r.method as never,
+          url: concrete(r.url),
+          headers,
+          ...(r.method === 'GET' ? {} : { payload: {} }),
+        });
+        const code = res.statusCode === 403 ? res.json().error?.code : undefined;
+        if (res.statusCode !== 403 || code !== 'FORBIDDEN') {
+          failures.push(`${r.method} ${r.url} [${label}] -> ${res.statusCode}`);
+        }
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it('refuses a moderator on every admin route', async () => {
+    const adminRoutes = roleGated.filter((r) => r.url.startsWith('/api/v1/admin/'));
+    expect(adminRoutes.length).toBeGreaterThanOrEqual(8);
+    const headers = bearer(token(['moderator']));
+    const failures: string[] = [];
+    for (const r of adminRoutes) {
+      const res = await app.inject({
+        method: r.method as never,
+        url: concrete(r.url),
+        headers,
+        ...(r.method === 'GET' ? {} : { payload: {} }),
+      });
+      const code = res.statusCode === 403 ? res.json().error?.code : undefined;
+      if (res.statusCode !== 403 || code !== 'FORBIDDEN') {
+        failures.push(`${r.method} ${r.url} -> ${res.statusCode}`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+
+  it('refuses a candidate on the moderator mutations, given real records and valid bodies', async () => {
+    const reporter = bearer(token(['candidate']));
+    const moderator = bearer(token(['moderator']));
+    const outsider = bearer(token(['candidate']));
+    const targetId = crypto.randomUUID();
+    const target = bearer(
+      createSessionToken(targetId, `target.${Date.now()}@example.com`, ['candidate'])
+    );
+
+    const fileReport = async (aboutUserId: string) => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/moderation/reports',
+        headers: reporter,
+        payload: {
+          targetType: 'user',
+          targetId: aboutUserId,
+          reason: 'spam',
+          details: `role sweep ${crypto.randomUUID()}`,
+        },
+      });
+      expect(res.statusCode, res.body).toBe(201);
+      return res.json().report.id as string;
+    };
+
+    // A pending report for status/resolve, and a resolved one with an appeal.
+    const pendingId = await fileReport(crypto.randomUUID());
+    const resolvedId = await fileReport(targetId);
+    const resolved = await app.inject({
+      method: 'POST',
+      url: `/api/v1/moderation/reports/${resolvedId}/resolve`,
+      headers: moderator,
+      payload: { action: 'warning', resolutionNotes: 'Seeded for the role sweep.' },
+    });
+    expect(resolved.statusCode, resolved.body).toBe(200);
+    const appealed = await app.inject({
+      method: 'POST',
+      url: `/api/v1/moderation/reports/${resolvedId}/appeal`,
+      headers: target,
+      payload: { reason: 'Seeded appeal for the role sweep.' },
+    });
+    expect(appealed.statusCode, appealed.body).toBe(201);
+    const appealId = appealed.json().appeal.id as string;
+
+    const attempts: Array<[string, string, Record<string, unknown>]> = [
+      ['PATCH', `/api/v1/moderation/reports/${pendingId}/status`, { status: 'under_review' }],
+      [
+        'POST',
+        `/api/v1/moderation/reports/${pendingId}/resolve`,
+        { action: 'warning', resolutionNotes: 'Not a moderator.' },
+      ],
+      [
+        'POST',
+        `/api/v1/moderation/appeals/${appealId}/review`,
+        { decision: 'upheld', decisionNotes: 'Not a moderator.' },
+      ],
+    ];
+    const failures: string[] = [];
+    for (const [method, url, payload] of attempts) {
+      const res = await app.inject({ method: method as never, url, headers: outsider, payload });
+      const body = res.statusCode === 403 ? res.json().error : undefined;
+      // The refusal must be the role check, not some other 403.
+      if (res.statusCode !== 403 || body?.code !== 'FORBIDDEN' || !/Moderator/.test(body.message)) {
+        failures.push(`${method} ${url} -> ${res.statusCode} ${res.body}`);
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+});
