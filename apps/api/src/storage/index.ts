@@ -122,7 +122,12 @@ class PgStorage implements Storage {
       idleTimeoutMillis: 30_000,
       // TCP keepalive: a silent network partition then errors the retained
       // writer-lease session instead of leaving it looking healthy (C-07).
+      // Without an initial delay pg passes 0, which means the OS default idle
+      // time (Linux: 7200 s). With 10 s idle, detection is about 10 s plus the
+      // OS probe interval x count (Linux defaults 75 s x 9, about 11 min), and
+      // the first probe also keeps NAT state warm (K-10).
       keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
     });
     // Idle clients die on restarts and network blips; without a listener the
     // pool's 'error' event would crash the process.

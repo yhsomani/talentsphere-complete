@@ -66,3 +66,20 @@ describe('API shutdown (C-07, C-08)', () => {
     expect(log.mock.calls.map(([level]) => level)).toEqual(['fatal', 'info']);
   });
 });
+
+describe('pg pool transport settings (K-10)', () => {
+  it('sets a 10 s TCP keepalive idle delay instead of the OS default (0 → ~2 h)', async () => {
+    const { createStorage } = await import('../../apps/api/src/storage/index.js');
+    // Constructing the pool does not connect; nothing listens on port 1.
+    const storage = createStorage({
+      STORAGE: 'pg',
+      DATABASE_URL: 'postgres://user@127.0.0.1:1/none',
+      NODE_ENV: 'test',
+    });
+    const options = (storage as unknown as { pool: { options: Record<string, unknown> } }).pool
+      .options;
+    expect(options.keepAlive).toBe(true);
+    expect(options.keepAliveInitialDelayMillis).toBe(10_000);
+    await storage.close();
+  });
+});

@@ -141,6 +141,9 @@ function resolveStore(): {
     connectionString: process.env.DATABASE_URL,
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 30_000,
+    // Same transport settings as the API pool (K-10): detect silent drops.
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
   });
   // Without this listener an idle-client error would crash the process.
   pool.on('error', (err: Error) => {
