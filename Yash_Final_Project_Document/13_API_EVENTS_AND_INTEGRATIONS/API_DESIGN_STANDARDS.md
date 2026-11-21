@@ -4,7 +4,7 @@ Doc ID: API-STD · Owner: Backend Architecture Team · Version 1.0 · Status: Un
 
 Tags: **[TARGET]** decision · **[OPEN]** open · **[REF]** reference. Numeric limits are **[TARGET]** starting values with rationale; calibration is OPEN-B2. The reference project's `API_CONTRACTS.md` is **[REF]** only.
 
-**Root SSOT reconciliation (OPEN-46):** SSOT v6 §§23.1–23.3 specifies a `{success,data,meta}` success/list envelope, cursor default 20, and a minimum deprecation period of six months. This target standard specifies `{items,page}` list pagination with default 25 and a 90-day deprecation window. RFC 9457 `problem+json` describes errors and may coexist with a success envelope; whether the SSOT success envelope is retained is not yet decided. These contract differences remain open, and this target document does not silently supersede the SSOT.
+**Root SSOT reconciliation (OPEN-46):** SSOT §§12.18–12.20 (v6.2 numbering) specifies a `{success,data,meta}` success/list envelope, cursor default 20, and a minimum deprecation period of six months. This target standard specifies `{items,page}` list pagination with default 25 and a 90-day deprecation window. RFC 9457 `problem+json` describes errors and may coexist with a success envelope; whether the SSOT success envelope is retained is not yet decided. These contract differences remain open, and this target document does not silently supersede the SSOT.
 
 The candidate row-level mapping for SSOT `CON-001…CON-016` is in [SSOT_INTERFACE_CONTRACT_CROSSWALK](SSOT_INTERFACE_CONTRACT_CROSSWALK.md) and [CSV](SSOT_INTERFACE_CONTRACT_CROSSWALK.csv). It records two conflicts and remaining partial mappings; no equivalence is approved.
 
