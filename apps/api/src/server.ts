@@ -12751,6 +12751,28 @@ export async function buildApp(
     });
   });
 
+  /**
+   * Every mailbox the candidate controls (K-01): the account email, each
+   * role's verified work email, and each address with a pending code. None
+   * may vouch for them.
+   */
+  const candidateMailboxes = (candidateId: string): string[] => {
+    const mailboxes: string[] = [];
+    const accountEmail = usersById.get(candidateId)?.email;
+    if (accountEmail) mailboxes.push(accountEmail);
+    for (const history of verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []) {
+      if (history.corporateEmail) mailboxes.push(history.corporateEmail);
+      const pending = emailChallengesByHistoryId.get(history.id)?.email;
+      if (pending) mailboxes.push(pending);
+    }
+    return mailboxes;
+  };
+  /** The candidate's references on all their roles (K-01). */
+  const candidateReferences = (candidateId: string): StoredReference[] =>
+    (verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []).flatMap(
+      (history) => employmentReferencesByHistoryId.get(history.id) ?? []
+    );
+
   // 2. Verify Corporate Email for Work History (F-94) — two steps.
   //
   // Step 1 (no verificationCode): policy check, then a single-use 6-digit code
@@ -12869,6 +12891,8 @@ export async function buildApp(
         corporateEmail: email,
         companyDomain,
         references: existingRefs,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        otherReferees: candidateReferences(workHistory.candidateId),
       });
 
       const saved: StoredWorkHistory = {
@@ -12947,6 +12971,7 @@ export async function buildApp(
         refereeEmail: body.refereeEmail,
         relationship: body.relationship,
         roleCorporateEmail: workHistory.corporateEmail,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
         existingReferences: employmentReferencesByHistoryId.get(id) ?? [],
       });
 
@@ -13098,7 +13123,9 @@ export async function buildApp(
         const refs = (employmentReferencesByHistoryId.get(reference.workHistoryId) || []).map(
           (r) => (r.id === refId ? updatedRef : r)
         );
-        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs);
+        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs, {
+          candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        });
         updatedHistory = {
           ...workHistory,
           verificationScore: score,

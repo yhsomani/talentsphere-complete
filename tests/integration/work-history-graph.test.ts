@@ -1049,6 +1049,125 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(invitations).toHaveLength(1);
     });
   });
+
+  describe("10. A referee is never one of the candidate's own mailboxes (K-01)", () => {
+    let seq = 0;
+    const newCandidate = async () => {
+      seq += 1;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `selfref.${seq}.${Date.now()}@talentsphere.test`,
+          password: 'Password123!Secure',
+          fullName: `Selfref Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const { token, user } = JSON.parse(res.body) as { token: string; user: { id: string } };
+      return { token, userId: user.id };
+    };
+    const addRole = async (who: { token: string }, companyName: string) => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { companyName, title: 'Engineer', startDate: '2019-01-01', isCurrent: true },
+      });
+      expect(res.statusCode).toBe(201);
+      return JSON.parse(res.body).workHistory.id as string;
+    };
+    const verifyEmail = (who: { token: string }, historyId: string, payload: object) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${historyId}/verify-email`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload,
+      });
+    const codeFor = async (historyId: string) =>
+      (await outbox(app, 'work_history.email_verification_requested'))
+        .filter((m) => m.workHistoryId === historyId)
+        .pop()!.code as string;
+    const ask = (who: { token: string }, historyId: string, refereeEmail: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${historyId}/references/request`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { refereeName: 'Self', refereeEmail, relationship: 'manager' },
+      });
+
+    it('refuses an address with a pending code as the referee', async () => {
+      const who = await newCandidate();
+      const role = await addRole(who, 'Pending Corp');
+      const mailbox = `me.${role}@acmecloud.io`;
+      expect((await verifyEmail(who, role, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const res = await ask(who, role, mailbox.replace('@', '+ref@'));
+      expect(res.statusCode).toBe(409);
+      expect(res.json().error.message).toMatch(/belongs to you on another role/);
+    });
+
+    it("refuses another role's verified work email as the referee", async () => {
+      const who = await newCandidate();
+      const first = await addRole(who, 'First Corp');
+      const second = await addRole(who, 'Second Corp');
+      const mailbox = `me.${second}@secondcorp.io`;
+      expect((await verifyEmail(who, second, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const verified = await verifyEmail(who, second, {
+        corporateEmail: mailbox,
+        verificationCode: await codeFor(second),
+      });
+      expect(verified.statusCode).toBe(200);
+      const res = await ask(who, first, mailbox);
+      expect(res.statusCode).toBe(409);
+      expect(res.json().error.message).toMatch(/belongs to you on another role/);
+    });
+
+    it('refuses a work email that already vouched for the role, so no gold badge', async () => {
+      const who = await newCandidate();
+      const role = await addRole(who, 'Order Corp');
+      const mailbox = `me.${role}@ordercorp.io`;
+      // Ask "a referee" first, at an address the candidate controls, and answer it.
+      const requested = await ask(who, role, mailbox);
+      expect(requested.statusCode).toBe(201);
+      const refId = requested.json().reference.id as string;
+      const [invite] = (await outbox(app, 'reference.requested')).filter(
+        (p) => p.referenceId === refId
+      );
+      const submitted = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/references/${refId}/submit`,
+        payload: {
+          token: invite.token,
+          confirmDates: true,
+          confirmTitle: true,
+          technicalProficiency: 5,
+          collaborationRating: 5,
+          deliveryReliability: 5,
+          leadershipRating: 5,
+          endorsedSkills: [],
+        },
+      });
+      expect(submitted.statusCode).toBe(200);
+      // Then claim the same mailbox as the role's work email.
+      expect((await verifyEmail(who, role, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const verified = await verifyEmail(who, role, {
+        corporateEmail: mailbox,
+        verificationCode: await codeFor(role),
+      });
+      expect(verified.statusCode).toBe(409);
+      expect(verified.json().error.message).toMatch(/is a referee on one of your roles/);
+
+      const list = await app.inject({
+        method: 'GET',
+        url: `/api/v1/candidates/${who.userId}/work-history`,
+        headers: { authorization: `Bearer ${who.token}` },
+      });
+      const history = list.json().workHistories.find((h: any) => h.id === role);
+      expect(history.badgeTier).not.toBe('gold');
+      expect(history.emailVerifiedAt).toBeUndefined();
+    });
+  });
 });
 
 describe('Work-history graph includeUnverified is parsed strictly (C-15, A08-013)', () => {
