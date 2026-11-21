@@ -162,6 +162,32 @@ describe('Messaging on PostgreSQL', () => {
     expect(after.body.threads[0].unreadCount).toBe(0);
   });
 
+  // POST /threads/:id/read had no test (audit A10-003, cross-review C-24 T3).
+  it('records an explicit mark-as-read durably: it holds across a restart', async () => {
+    const cand = await login(app, 'cand@example.org');
+    const sent = await call(app, 'POST', `/api/v1/threads/${ids.thread}/messages`, cand, {
+      content: 'One more question about the role.',
+    });
+    expect(sent.status).toBe(201);
+    let rec = await login(app, 'rec@acme.example');
+    const before = await call(app, 'GET', '/api/v1/threads', rec);
+    expect(before.body.threads[0]).toMatchObject({ id: ids.thread, unreadCount: 1 });
+
+    const read = await call(app, 'POST', `/api/v1/threads/${ids.thread}/read`, rec);
+    expect(read.status).toBe(200);
+    const [row] = await sql<{ last_read_at: Date }>(
+      'SELECT last_read_at FROM thread_participants WHERE thread_id = $1 AND user_id = $2',
+      [ids.thread, ids.recProfile]
+    );
+    expect(row.last_read_at.toISOString()).toBe(new Date(read.body.lastReadAt).toISOString());
+
+    await app.close();
+    app = await boot();
+    rec = await login(app, 'rec@acme.example');
+    const after = await call(app, 'GET', '/api/v1/threads', rec);
+    expect(after.body.threads[0]).toMatchObject({ id: ids.thread, unreadCount: 0 });
+  });
+
   it('stores a retried send as one row', async () => {
     const rec = await login(app, 'rec@acme.example');
     const send = () =>
