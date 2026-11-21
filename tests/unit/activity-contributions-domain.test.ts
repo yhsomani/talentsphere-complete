@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   recordActivityEvent,
+  prependActivityEvent,
+  ACTIVITY_EVENT_RETENTION_PER_USER,
   calculateContributionScores,
   determineEngagementBand,
   ActivityEvent,
@@ -179,5 +181,28 @@ describe('Domain: Activity & Contribution Tracking (F-146, S-09)', () => {
       expect(scoreRecentOnly.creationScore).toBe(20); // 2 * 10
       expect(scoreOldOnly.creationScore).toBeLessThan(scoreRecentOnly.creationScore);
     });
+  });
+});
+
+// M-1: self-reported events are bounded per account and in size.
+describe('Domain: activity event bounds (M-1)', () => {
+  const event = (i: number) =>
+    recordActivityEvent({ userId: 'u1', category: 'learning', activityType: `t${i}` });
+
+  it('keeps the newest ACTIVITY_EVENT_RETENTION_PER_USER events and returns the dropped ones', () => {
+    expect(ACTIVITY_EVENT_RETENTION_PER_USER).toBe(1000);
+    const list: ActivityEvent[] = [];
+    const dropped: ActivityEvent[] = [];
+    for (let i = 0; i < 1001; i++) dropped.push(...prependActivityEvent(list, event(i)));
+    expect(list).toHaveLength(1000);
+    expect(list[0].activityType).toBe('t1000');
+    expect(dropped.map((e) => e.activityType)).toEqual(['t0']);
+  });
+
+  it('refuses metadata over the analytics bounds', () => {
+    const metadata = Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`k${i}`, i]));
+    expect(() =>
+      recordActivityEvent({ userId: 'u1', category: 'learning', activityType: 'x', metadata })
+    ).toThrow(DomainError);
   });
 });

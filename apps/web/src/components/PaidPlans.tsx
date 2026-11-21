@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { colors, spacing } from '@talentsphere/ui';
 import { apiJson, errorMessage } from '../lib/api.js';
 import { formatMoney } from '../lib/format.js';
+import { createStableKeyer } from '../lib/idempotency.js';
 import { Button, Notice } from './ui/index.js';
 
 interface Plan {
@@ -50,6 +51,10 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
   const [cycle, setCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // A retry of the same plan and cycle (after a timeout or error) reuses its
+  // key, so the server returns the same Checkout Session instead of opening
+  // a second one (C-21). Another plan or cycle is a new purchase: a new key.
+  const checkoutKeyer = useRef(createStableKeyer());
 
   useEffect(() => {
     const controller = new AbortController();
@@ -242,7 +247,14 @@ export const PaidPlans: React.FC<{ signedIn: boolean }> = ({ signedIn }) => {
                 onClick={() =>
                   go(
                     '/api/v1/billing/checkout',
-                    { planTier: plan.tier, billingCycle: cycle },
+                    {
+                      planTier: plan.tier,
+                      billingCycle: cycle,
+                      idempotencyKey: checkoutKeyer.current({
+                        planTier: plan.tier,
+                        billingCycle: cycle,
+                      }),
+                    },
                     plan.tier
                   )
                 }

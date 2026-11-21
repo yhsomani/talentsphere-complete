@@ -195,6 +195,9 @@ import {
   AnalyticsEvent,
   recordAnalyticsEvent,
   computeKPIs,
+  appendBounded,
+  ANALYTICS_EVENT_RETENTION,
+  telemetryConsentFrom,
   JobTemplate,
   createJobTemplate,
   updateJobTemplate,
@@ -251,6 +254,7 @@ import {
   ActivityEvent,
   ContributionScore,
   recordActivityEvent,
+  prependActivityEvent,
   calculateContributionScores,
   InstructorReputationProfile,
   InstructorOperationalMetrics,
@@ -492,6 +496,12 @@ export type BuildAppEnv = Partial<Record<keyof ServerEnv, string | number | bool
 export interface BuildAppOverrides {
   /** Replaces the Stripe SDK gateway (BILLING_MODE=stripe only). */
   stripeGateway?: StripeGateway;
+  /**
+   * Called once if the pg writer lease is lost after boot. The process entry
+   * point exits on it so the supervisor restarts the API (C-07); buildApp
+   * itself never exits the process.
+   */
+  onWriterLeaseLost?: () => void;
 }
 
 export async function buildApp(
@@ -547,6 +557,7 @@ export async function buildApp(
       await storage.close();
       throw error;
     }
+    storage.onWriterLeaseLost(() => overrides.onWriterLeaseLost?.());
     app.log.info(`storage: pg — ${boot.detail}; exclusive writer lease acquired`);
   } else {
     app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
@@ -759,6 +770,27 @@ export async function buildApp(
       timestamp: new Date().toISOString(),
       version: env.APP_VERSION,
     };
+  });
+
+  // Readiness: can this instance serve traffic now? A live database round trip
+  // (2 s budget) in pg mode; memory mode has no database and is always ready.
+  // Answers only ready/not_ready: the storage detail names the database host
+  // and stays in the admin diagnostics. The worker is not a dependency: a
+  // dead worker must not take the API out of rotation (C-07).
+  app.get('/ready', { config: { rateLimit: false } }, async (_req, reply) => {
+    let ready = storage.mode === 'memory';
+    if (!ready) {
+      let timer: NodeJS.Timeout | undefined;
+      const timedOut = new Promise<{ ok: false }>((resolve) => {
+        timer = setTimeout(() => resolve({ ok: false }), 2000);
+      });
+      try {
+        ready = (await Promise.race([storage.health(), timedOut])).ok;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });
   });
 
   app.get('/api/v1/health', { config: { rateLimit: false } }, async () => {
@@ -9463,42 +9495,55 @@ export async function buildApp(
   const activityEventsByUserId = new Map<string, ActivityEvent[]>();
   const contributionScoresByUserId = new Map<string, ContributionScore>();
 
-  app.post('/api/v1/activity/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = RecordActivityEventInputSchema.parse(req.body || {});
+  // Self-reported and kept in memory: a 16 KB body, 60 a minute per account,
+  // metadata limits, and the newest ACTIVITY_EVENT_RETENTION_PER_USER events
+  // per account (M-1).
+  const activityIngestOptions = {
+    bodyLimit: 16 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/activity/events',
+    activityIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = RecordActivityEventInputSchema.parse(req.body || {});
 
-    const event = recordActivityEvent({
-      userId: session.userId,
-      category: input.category,
-      activityType: input.activityType,
-      weight: input.weight,
-      metadata: input.metadata,
-      occurredAt: input.occurredAt,
-    });
+      const event = recordActivityEvent({
+        userId: session.userId,
+        category: input.category,
+        activityType: input.activityType,
+        weight: input.weight,
+        metadata: input.metadata,
+        occurredAt: input.occurredAt,
+      });
 
-    activityEventsById.set(event.id, event);
+      activityEventsById.set(event.id, event);
 
-    const userEvents = activityEventsByUserId.get(session.userId) || [];
-    userEvents.unshift(event);
-    activityEventsByUserId.set(session.userId, userEvents);
+      const userEvents = activityEventsByUserId.get(session.userId) || [];
+      for (const dropped of prependActivityEvent(userEvents, event)) {
+        activityEventsById.delete(dropped.id);
+      }
+      activityEventsByUserId.set(session.userId, userEvents);
 
-    const score = calculateContributionScores(session.userId, userEvents);
-    contributionScoresByUserId.set(session.userId, score);
+      const score = calculateContributionScores(session.userId, userEvents);
+      contributionScoresByUserId.set(session.userId, score);
 
-    auditLogs.push({
-      event: 'activity.recorded',
-      actorId: session.userId,
-      targetId: event.id,
-      metadata: {
-        category: event.category,
-        activityType: event.activityType,
-        compositeScore: score.compositeScore,
-      },
-      timestamp: new Date().toISOString(),
-    });
+      auditLogs.push({
+        event: 'activity.recorded',
+        actorId: session.userId,
+        targetId: event.id,
+        metadata: {
+          category: event.category,
+          activityType: event.activityType,
+          compositeScore: score.compositeScore,
+        },
+        timestamp: new Date().toISOString(),
+      });
 
-    return reply.status(201).send({ event, score });
-  });
+      return reply.status(201).send({ event, score });
+    }
+  );
 
   app.get(
     '/api/v1/activity/events',
@@ -10501,7 +10546,10 @@ export async function buildApp(
         extractUser,
         getAccountEmail: (userId) => usersById.get(userId)?.email,
         dispatchJob: (event) => dispatchJob(event),
-        log: { warn: (obj, msg) => app.log.warn(obj, msg) },
+        log: {
+          warn: (obj, msg) => app.log.warn(obj, msg),
+          error: (obj, msg) => app.log.error(obj, msg),
+        },
       }
     : undefined;
   if (stripeDeps) {
@@ -12319,66 +12367,81 @@ export async function buildApp(
   });
 
   // Product Analytics & Telemetry Routes (F-19, F-31, BR-27)
-  app.post('/api/v1/analytics/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = maybeExtractUser(req);
-    let telemetryConsent = true;
+  // Ingestion is anonymous and the store is in memory, so it is bounded: a
+  // 64 KB body, 60 requests a minute per caller, metadata limits (BR-27) and
+  // the newest ANALYTICS_EVENT_RETENTION events kept (C-03).
+  const analyticsIngestOptions = {
+    bodyLimit: 64 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/analytics/events',
+    analyticsIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = maybeExtractUser(req);
+      let telemetryConsent = true;
 
-    if (session) {
-      const settings = userSettingsByUserId.get(session.userId);
-      if (
-        settings &&
-        (settings.showActivity === false || (settings as any).telemetryEnabled === false)
-      ) {
-        telemetryConsent = false;
+      if (session) {
+        // The cache is filled only by GET/PATCH /settings, so after a restart
+        // it is empty: read the durable setting through (never creating a
+        // row) so an explicit opt-out survives restarts (C-10).
+        const settings =
+          userSettingsByUserId.get(session.userId) ??
+          (await storage.accountMetadata.getSettings(session.userId)) ??
+          undefined;
+        if (settings) userSettingsByUserId.set(session.userId, settings);
+        telemetryConsent = telemetryConsentFrom(settings);
       }
-    }
 
-    const body = req.body as Record<string, unknown>;
-    const ipHash = crypto
-      .createHash('sha256')
-      .update(req.ip || '127.0.0.1')
-      .digest('hex');
-    const userAgent =
-      typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+      const body = req.body as Record<string, unknown>;
+      const ipHash = crypto
+        .createHash('sha256')
+        .update(req.ip || '127.0.0.1')
+        .digest('hex');
+      const userAgent =
+        typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
 
-    const recorded: AnalyticsEvent[] = [];
+      const recorded: AnalyticsEvent[] = [];
 
-    if (body && Array.isArray(body.events)) {
-      const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
-      for (const item of batchInput.events) {
+      if (body && Array.isArray(body.events)) {
+        const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
+        for (const item of batchInput.events) {
+          const ev = recordAnalyticsEvent({
+            userId: session?.userId,
+            anonymousId: item.anonymousId,
+            eventType: item.eventType,
+            metadata: item.metadata,
+            ipHash,
+            userAgent,
+            telemetryConsent,
+          });
+          appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
+          recorded.push(ev);
+        }
+      } else {
+        const singleInput = RecordAnalyticsEventInputSchema.parse(body);
         const ev = recordAnalyticsEvent({
           userId: session?.userId,
-          anonymousId: item.anonymousId,
-          eventType: item.eventType,
-          metadata: item.metadata,
+          anonymousId: singleInput.anonymousId,
+          eventType: singleInput.eventType,
+          metadata: singleInput.metadata,
           ipHash,
           userAgent,
           telemetryConsent,
         });
-        analyticsEvents.push(ev);
+        appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
         recorded.push(ev);
       }
-    } else {
-      const singleInput = RecordAnalyticsEventInputSchema.parse(body);
-      const ev = recordAnalyticsEvent({
-        userId: session?.userId,
-        anonymousId: singleInput.anonymousId,
-        eventType: singleInput.eventType,
-        metadata: singleInput.metadata,
-        ipHash,
-        userAgent,
-        telemetryConsent,
-      });
-      analyticsEvents.push(ev);
-      recorded.push(ev);
-    }
 
-    return reply.status(201).send({
-      message: 'Analytics event(s) recorded successfully.',
-      count: recorded.length,
-      events: recorded,
-    });
-  });
+      return reply.status(201).send({
+        message: 'Analytics event(s) recorded successfully.',
+        count: recorded.length,
+        // The caller's address hash and user agent stay server-side (admin
+        // GET /analytics/events keeps the full record).
+        events: recorded.map(({ ipHash: _ipHash, userAgent: _userAgent, ...event }) => event),
+      });
+    }
+  );
 
   app.get(
     '/api/v1/analytics/events',

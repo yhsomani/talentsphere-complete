@@ -3,6 +3,10 @@ import {
   sanitizeAnalyticsMetadata,
   recordAnalyticsEvent,
   computeKPIs,
+  assertMetadataWithinLimits,
+  appendBounded,
+  ANALYTICS_METADATA_LIMITS,
+  telemetryConsentFrom,
   type AnalyticsEvent,
 } from '../../packages/domain/src/analytics.js';
 
@@ -140,5 +144,90 @@ describe('Domain: Product Analytics, Telemetry & KPI Rollups (F-19, F-31, BR-27)
 
     // Top job views
     expect(kpis.topJobViews.job_consensus).toBe(2);
+  });
+});
+
+// C-03 / M-2: ingestion is anonymous, so metadata is bounded in width and
+// depth, and array elements get the same BR-27 checks as object values.
+describe('Domain: analytics metadata bounds (C-03, M-2)', () => {
+  const wide = (n: number) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`k${i}`, i]));
+  const nested = (levels: number): Record<string, unknown> =>
+    levels === 0 ? { leaf: 1 } : { child: nested(levels - 1) };
+  const code = (fn: () => unknown) => {
+    try {
+      fn();
+    } catch (err) {
+      return (err as { code?: string }).code;
+    }
+    return 'no error';
+  };
+
+  it('refuses more than maxKeys keys', () => {
+    expect(ANALYTICS_METADATA_LIMITS.maxKeys).toBe(30);
+    expect(code(() => sanitizeAnalyticsMetadata(wide(31)))).toBe('VALIDATION_FAILED');
+    expect(code(() => sanitizeAnalyticsMetadata({ inner: wide(31) }))).toBe('VALIDATION_FAILED');
+  });
+
+  it('refuses nesting deeper than maxDepth', () => {
+    expect(code(() => sanitizeAnalyticsMetadata(nested(6)))).toBe('VALIDATION_FAILED');
+    expect(code(() => sanitizeAnalyticsMetadata(nested(5)))).toBe('VALIDATION_FAILED');
+  });
+
+  it('accepts 30 keys with nesting at depth 4 (the top level is depth 0)', () => {
+    const metadata = { ...wide(29), deep: nested(3) };
+    expect(Object.keys(metadata)).toHaveLength(30);
+    expect(sanitizeAnalyticsMetadata(metadata)).toEqual(metadata);
+    expect(sanitizeAnalyticsMetadata(nested(4))).toEqual(nested(4));
+  });
+
+  it('checks array elements: a forbidden key or bearer token inside a list is refused', () => {
+    expect(code(() => sanitizeAnalyticsMetadata({ list: [{ password: 'x' }] }))).toBe(
+      'VALIDATION_FAILED'
+    );
+    expect(
+      code(() => sanitizeAnalyticsMetadata({ list: ['Bearer eyJhbGciOiJIUzI1NiJ9.e30.x'] }))
+    ).toBe('VALIDATION_FAILED');
+  });
+
+  it('cuts array elements, drops nested arrays and bounds strings inside arrays', () => {
+    const out = sanitizeAnalyticsMetadata({
+      list: ['a'.repeat(2000), 3, true, ['nested'], { ok: 1 }, null],
+      many: Array.from({ length: 80 }, (_, i) => i),
+    });
+    expect(out.list).toEqual(['a'.repeat(1000), 3, true, { ok: 1 }]);
+    expect(out.many).toHaveLength(50);
+  });
+
+  it('assertMetadataWithinLimits refuses oversize trees without changing them', () => {
+    expect(code(() => assertMetadataWithinLimits(wide(31)))).toBe('VALIDATION_FAILED');
+    expect(code(() => assertMetadataWithinLimits({ list: Array(51).fill(1) }))).toBe(
+      'VALIDATION_FAILED'
+    );
+    expect(code(() => assertMetadataWithinLimits({ s: 'x'.repeat(1001) }))).toBe(
+      'VALIDATION_FAILED'
+    );
+    expect(code(() => assertMetadataWithinLimits(nested(5)))).toBe('VALIDATION_FAILED');
+    // Arrays count as a level, so nested arrays cannot bypass the depth bound.
+    expect(code(() => assertMetadataWithinLimits({ a: [[[[[1]]]]] }))).toBe('VALIDATION_FAILED');
+    expect(code(() => assertMetadataWithinLimits({ ...wide(29), deep: nested(3) }))).toBe(
+      'no error'
+    );
+  });
+
+  it('appendBounded keeps only the newest `cap` items', () => {
+    const list: number[] = [];
+    for (let i = 0; i < 10_050; i++) appendBounded(list, i, 10_000);
+    expect(list).toHaveLength(10_000);
+    expect(list[0]).toBe(50);
+    expect(list[list.length - 1]).toBe(10_049);
+  });
+});
+
+describe('Domain: telemetry consent from stored settings (C-10)', () => {
+  it('consents by default and withdraws only on an explicit showActivity: false', () => {
+    expect(telemetryConsentFrom(undefined)).toBe(true);
+    expect(telemetryConsentFrom(null)).toBe(true);
+    expect(telemetryConsentFrom({ showActivity: true })).toBe(true);
+    expect(telemetryConsentFrom({ showActivity: false })).toBe(false);
   });
 });

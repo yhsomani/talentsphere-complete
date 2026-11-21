@@ -112,6 +112,7 @@ export const DURABLE_ROUTES: ReadonlySet<string> = new Set([
 /** Routes that hold no entity state at all (health, static catalogs). */
 export const STATELESS_ROUTES: ReadonlySet<string> = new Set([
   'GET /health',
+  'GET /ready',
   'GET /api/v1/health',
   'GET /api/v1/billing/plans',
 ]);

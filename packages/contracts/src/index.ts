@@ -1775,8 +1775,22 @@ export const SubmitEmploymentReferenceInputSchema = z.object({
 
 export type SubmitEmploymentReferenceInput = z.infer<typeof SubmitEmploymentReferenceInputSchema>;
 
+/**
+ * A boolean query-string flag. `z.coerce.boolean()` is `Boolean(value)`, which
+ * reads the string "false" as true; this accepts true/false/1/0 (any case)
+ * and rejects anything else as a validation error (C-15, A08-013).
+ */
+export const queryBoolean = z.preprocess((value) => {
+  if (typeof value === 'string') {
+    const normalised = value.trim().toLowerCase();
+    if (normalised === 'true' || normalised === '1') return true;
+    if (normalised === 'false' || normalised === '0') return false;
+  }
+  return value;
+}, z.boolean());
+
 export const QueryWorkHistoryGraphSchema = z.object({
-  includeUnverified: z.coerce.boolean().default(false),
+  includeUnverified: queryBoolean.default(false),
 });
 
 export type QueryWorkHistoryGraph = z.infer<typeof QueryWorkHistoryGraphSchema>;

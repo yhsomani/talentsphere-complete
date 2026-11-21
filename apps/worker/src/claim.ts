@@ -100,7 +100,13 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
   // retry attempt already burned. With the defaults this claims one job per
   // cycle; the worker loop re-cycles immediately while there is work.
   const safeBatch = Math.max(1, Math.min(batchSize, Math.floor(leaseMs / handlerTimeoutMs) - 1));
-  const claimed = await store.claim({ limit: safeBatch, leaseMs });
+  // The lease is enforced by the database clock (lock_expires_at vs NOW()), so
+  // its real length is leaseMs from when the claim ran, whatever this
+  // machine's clock says. Measure it with the worker's own clock from just
+  // before the claim: conservative (it also counts the round trip) and immune
+  // to clock skew between worker and database.
+  const claimStartedAt = now();
+  const claimed = await store.claim({ limit: safeBatch, leaseMs, maxAttempts });
   result.claimed = claimed.length;
 
   for (const record of claimed) {
@@ -125,7 +131,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     // waited out most of its lease. Starting it now could outlive the lease and
     // let another worker claim and run it too (duplicate side effects such as a
     // second email). Leave it: it is redelivered once its lease lapses.
-    const leaseEnd = record.lockExpiresAt ? Date.parse(record.lockExpiresAt) : Infinity;
+    const leaseEnd = claimStartedAt + leaseMs;
     if (now() + handlerTimeoutMs >= leaseEnd) {
       result.lapsed += 1;
       logger.warn(

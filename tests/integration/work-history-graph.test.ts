@@ -833,3 +833,74 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
     });
   });
 });
+
+describe('Work-history graph includeUnverified is parsed strictly (C-15, A08-013)', () => {
+  let app: FastifyInstance;
+  let ownerToken: string;
+  let ownerId: string;
+
+  beforeAll(async () => {
+    app = await buildApp({
+      NODE_ENV: 'test',
+      PORT: '0',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
+    });
+    await app.ready();
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'strict.bool.owner@talentsphere.test',
+        password: 'Password123!Secure',
+        fullName: 'Strict Bool',
+        role: 'candidate',
+      },
+    });
+    const body = JSON.parse(reg.body);
+    ownerToken = body.token;
+    ownerId = body.user.id;
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/candidates/work-history',
+      headers: { authorization: `Bearer ${ownerToken}` },
+      payload: {
+        companyName: 'Unverified Example Ltd',
+        title: 'Engineer',
+        employmentType: 'full_time',
+        startDate: '2021-01-01',
+        endDate: '2022-01-01',
+        isCurrent: false,
+      },
+    });
+    expect(created.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  const graph = (flag: string) =>
+    app.inject({
+      method: 'GET',
+      url: `/api/v1/candidates/${ownerId}/work-history-graph?includeUnverified=${flag}`,
+      headers: { authorization: `Bearer ${ownerToken}` },
+    });
+
+  it('?includeUnverified=false leaves the unverified role out', async () => {
+    const res = await graph('false');
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).graph.summary.totalRoles).toBe(0);
+  });
+
+  it('?includeUnverified=true includes it for the owner', async () => {
+    const res = await graph('true');
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).graph.summary.totalRoles).toBe(1);
+  });
+
+  it('an unrecognised value is a validation error', async () => {
+    const res = await graph('maybe');
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error.code).toBe('VALIDATION_FAILED');
+  });
+});
