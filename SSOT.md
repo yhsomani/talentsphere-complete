@@ -5660,6 +5660,8 @@ The following patterns are a single canonical micro-interaction reference. Apply
 **Evaluation date:** 20–21 November 2026 · **Code evaluated:** `main` at `781866f` (PR #77) · **Evidence class:** `FACT` where a command was executed or a line was read; `INFERENCE` where marked.
 
 > [!IMPORTANT]
+> **Update, 22 Nov 2026:** the owner later asked for a second pass that includes code; its integrated, re-evaluated and validated result is recorded in §27.11, which supersedes the status statements of §27.1–§27.9 for branch `feat/integrate-audit-fixes-2026-11-21`.
+>
 > **Owner instruction (21 Nov 2026): no change to application code in the codebase.** Every improvement below is specified here as an implementation-ready requirement. None of it is applied to the codebase. A local, unapplied reference implementation was produced and tested in a sandbox before that instruction. It is kept outside the repository as four patch files so the owner can review, adopt or discard it (§27.6). In this part, "Implemented" means **implemented in that unapplied patch only**. The codebase status of every item is **Not implemented**.
 
 ## 27.1 Method
@@ -5890,7 +5892,7 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
 - **Affected modules:** auth/session, settings/erasure, evidence, work history/references, notifications, connections/profile visibility, alumni, analytics/activity, LMS completion, AI assistant, billing/Stripe, config, worker, landing page, Settings/Profile/Evidence/Hiring pages.
 - **Protected build files touched:** none. **Migrations added:** none.
 
-**Codebase status of every item: Not implemented, by owner instruction.** To adopt any group, apply its patch on a branch, run the §27.7 checks, run the e2e and browser checks that were not done (§27.7), and review the owner acknowledgements (§27.8).
+**Codebase status of every item (as of 21 Nov 2026): Not implemented, by owner instruction. Superseded by §27.11.** To adopt any group, apply its patch on a branch, run the §27.7 checks, run the e2e and browser checks that were not done (§27.7), and review the owner acknowledgements (§27.8).
 
 ## 27.7 Validation summary
 
@@ -5951,6 +5953,70 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
   1. An evaluation agent wrote scratch analysis files into the lead's sandbox copy. They were deleted.
   2. `git stash` is shared across worktrees, so one implementer popped another's stash. It was detected, reverted, and the affected work was confirmed intact.
 - This part records evaluation evidence as of 21 Nov 2026. It does not change §1–§26 intent, apart from the approved amendments SSOT-AMD-01…28, which are binding as requirements and pending as implementation.
+
+## 27.11 Pass 2: integration, re-evaluation, fixes and validation (21–22 November 2026)
+
+**Owner instructions.**
+- Later on 21 Nov 2026 the owner asked for all work to be committed and pushed. The four reference branches were pushed as branches.
+- The owner then asked for the full brief to be run again, on both the code and the SSOT.
+- This section supersedes the earlier "no code change" status of §27.1–§27.9 for the code delivered on branch `feat/integrate-audit-fixes-2026-11-21`.
+- Everything below is status **on that branch**. It becomes status of `main` only when the owner merges the branch.
+
+**Method.**
+
+| Stage | What was done | Evidence |
+|---|---|---|
+| Integration | The four branches `impl/a-security`, `impl/b-reliability`, `impl/c-functional` and `impl/d-tests` were merged onto `main` @ `6b36d20`. One test-file conflict (two new `describe` blocks) was resolved by keeping both. | Merge commits on the branch |
+| Combined validation (first time) | On `50d9861`: build pass, typecheck pass. Vitest 145 files / 1,534 tests pass. Postgres 16: 15 files / 63 tests pass. Playwright: 258 passed, 0 failed (was 256 passed, 1 failed on `781866f`). | Commands run by the lead |
+| Independent re-evaluation | Ten fresh specialist agents (the same ten roles as §27.3) reviewed the integrated code read-only. Each re-checked its pass-1 findings, reviewed the integration diff in its area, and searched for new defects: 97 new findings by the agents' own counts. | Ten pass-2 reports kept with the audit logs |
+| Cross-review | Two fresh reviewers verified 22 consolidated candidates (K-01…K-22) against the code: 17 approved (13 of them with corrected specifications), 1 rejected and replaced by a guard test, 4 left to the owner; owner-only sub-parts were split out of several approved items | Two review records |
+| Implementation | Three implementer agents in isolated worktrees, one owner per group, built 22 commits with tests. Two conflicts in `server.ts` were resolved by keeping both sides' behaviour. | Branches `impl2/a-trust`, `impl2/b-reliability`, `impl2/c-ux` |
+| Final validation | On `2cb736a`: build pass, typecheck pass. Vitest 146 files / 1,571 tests pass. Postgres 16: 15 files / 66 tests pass. Playwright (Chromium): **265 passed, 0 failed**. Prettier clean on every changed file. No protected build file and no migration changed. | Commands run by the lead, 2026-11-22 |
+
+**Pass-1 amendments re-verified by pass 2.** Most of SSOT-AMD-01…28 were confirmed fixed in code. Several were found incomplete and are completed by the K items below: AMD-19 (two more evidence reads), AMD-21 (the order of steps and `+tag` addresses), AMD-04 and AMD-06 (limiter races), AMD-11 (byte cap) and AMD-26 (activity visibility for connections).
+
+**Approved and implemented in pass 2** (each has a test that fails without the fix):
+
+| ID | Change | Group |
+|---|---|---|
+| K-01 | Referee independence is enforced when a reference is requested, when the work email is verified, and when the score is computed. Addresses are normalised (case, surrounding spaces, `+tag`) for comparison only. | Trust |
+| K-02 | Only active or completed references block a re-ask. A reference whose email fails to queue is deleted (`referenceDelete`), so the referee can be asked again. | Trust |
+| K-03 | `GET /evidence/:id` and `GET /evidence/subject/:id` hide dispute and revocation internals from anyone who is not the owner or an admin | Privacy |
+| K-04 | Public employer reviews no longer return `reviewerId`; the reviewer and admins still see it | Privacy |
+| K-05 | Email-send budgets and the sign-in failure limit are reserved atomically before any `await` and released on failure. A failed enqueue no longer leaves a false 429 or 409. | Reliability |
+| K-06 | Analytics retention is capped by bytes as well as count. Activity events are no longer copied into the unbounded `auditLogs` array, which is now bounded. | Reliability |
+| K-07 | Activity-score visibility honours accepted connections, as `canViewProfile` does | Privacy |
+| K-08 | `/ready` is served from one shared in-flight probe and a 1 s cache, so a flood cannot exhaust the pool | Reliability |
+| K-09 | The checkout `idempotencyKey` is regenerated after any failure other than a network error. Stripe caches failed responses under a key for 24 h. | Billing |
+| K-10 | The pg pools for API and worker set a 10 s TCP keepalive initial delay, so lease loss is noticed in minutes | Reliability |
+| K-11 | Reading a recipient's `allowConnectionRequests` no longer creates their settings row | Data |
+| K-12 | Erasure also removes the person's drafts, analytics events, memberships and the new limiter entries. Limiter maps are swept for stale keys. | Privacy |
+| K-13 | The delete-account dialog shows a wrong password on the password field, moves focus there, and clears everything when closed | UX |
+| K-14 | Restricted accounts see an honest notice (no promise of reports or appeal), a reduced navigation (Dashboard, Profile) and no page calls that return 403 | UX |
+| K-15 | New Playwright specs: delete with a wrong and a right password, the restricted notice, the resend cooldown, and the hidden Settings controls | Tests |
+| K-16 | The authorization sweep checks roles: admin, analytics and moderator routes return 403 for a signed-in candidate | Tests |
+| K-17 | `docs/engineering/API_CONTRACTS.md` documents every new status code per route (400/409/413/422/429/503) | Docs |
+| K-19 (part) | Profile skills carry a note that they are not yet saved permanently | UX |
+| K-21 (replaced) | Exported timeout constants, and a test that keeps the email provider's limit below the worker handler timeout. The reviewer showed no current handler can double-send, so the original proposal was rejected. | Reliability |
+
+**Decisions added for the owner** (in addition to §27.8):
+- **K-18:** the per-account sign-in throttle lets an attacker keep an account locked. This needs a password-reset or unlock design.
+- **K-19:** durable profile skills need a migration.
+- **K-20:** whether candidates see rejection reasons, and whether exports include recruiter notes. AMD-22 already hides reasons from candidates, which settles half of §27.8 item 13 without a decision.
+- **K-22:** one open checkout session per user. This needs Stripe test mode.
+- **K-14:** a reports and appeal view. Moderation reports are kept in memory only.
+- The owner-only carve-outs listed within K-01, K-06, K-10, K-11 and K-21.
+
+**Status after pass 2 (on the branch).**
+- **SSOT-AMD-01…28 and K-01…K-21 (as approved):** Implemented and Tested, by Vitest, Postgres and Playwright.
+- **Verified end to end in a real browser for the flows the Playwright specs drive:** account deletion, restricted account, resend cooldown, Settings and landing text. Reticle, the in-app verifier the repository asks for, could not run: no Reticle tools were available in this session. Playwright in Chromium was used instead.
+- **Not verified:**
+  - a deployed environment;
+  - Stripe test mode;
+  - live email delivery;
+  - load and penetration testing;
+  - the CI pipeline, which still stops at `pnpm lint` on 182 pre-existing non-source files (§27.8 item 3).
+- **Codebase status of `main`:** unchanged until the owner merges the branch.
 
 ---
 
