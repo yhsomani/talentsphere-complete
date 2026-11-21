@@ -371,7 +371,7 @@ describe('SEC: every non-public /api/v1 route requires a valid session (A10-005)
 describe('SEC: role-gated routes refuse sessions without the role (K-16)', () => {
   let app: FastifyInstance;
   let roleGated: Array<{ method: string; url: string }>;
-  const token = (roles: string[]) =>
+  const token = (roles: Parameters<typeof createSessionToken>[2]) =>
     createSessionToken(crypto.randomUUID(), `${roles[0]}.${Date.now()}@example.com`, roles);
   const bearer = (t: string) => ({ authorization: `Bearer ${t}` });
 
