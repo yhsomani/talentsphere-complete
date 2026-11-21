@@ -6489,9 +6489,10 @@ export async function buildApp(
     }
 
     const userConnections = connectionsByUserId.get(session.userId) || [];
-    // Read through the durable settings so the choice survives a restart (C-29).
+    // Read through the durable settings so the choice survives a restart (C-29),
+    // without writing a default settings row in the recipient's name (K-11).
     const recipientSettings =
-      targetUserId === session.userId ? undefined : await accountSettings(targetUserId);
+      targetUserId === session.userId ? undefined : await readSettings(targetUserId);
     const connection = requestConnection(
       {
         senderId: session.userId,
@@ -9642,10 +9643,7 @@ export async function buildApp(
 
       // Same privacy as the profile, plus the person's "show activity"
       // setting (C-26). Settings are read through without writing defaults.
-      const settings =
-        userSettingsByUserId.get(userId) ??
-        (await storage.accountMetadata.getSettings(userId)) ??
-        undefined;
+      const settings = await readSettings(userId);
       const visibility = canViewActivity({
         profile,
         settings,
@@ -10122,6 +10120,18 @@ export async function buildApp(
     sanitizeSettings(withProfileVisibility(settings, profilesByUserId.get(settings.userId)));
 
   // Settings are read from PostgreSQL on first access, not reset on restart.
+  // Another user's settings, or the caller's outside the Settings page: cache,
+  // then the durable row; a hit is cached, a miss is NOT created (K-11).
+  const readSettings = async (userId: string): Promise<UserSettings | undefined> => {
+    const cached = userSettingsByUserId.get(userId);
+    if (cached) return cached;
+    const stored = (await storage.accountMetadata.getSettings(userId)) ?? undefined;
+    if (stored) userSettingsByUserId.set(userId, stored);
+    return stored;
+  };
+
+  // The owner's own settings (GET/PATCH /settings, export): creates and saves
+  // defaults on first use.
   const accountSettings = async (userId: string): Promise<UserSettings> => {
     const cached = userSettingsByUserId.get(userId);
     if (cached) return cached;
@@ -12573,11 +12583,7 @@ export async function buildApp(
         // The cache is filled only by GET/PATCH /settings, so after a restart
         // it is empty: read the durable setting through (never creating a
         // row) so an explicit opt-out survives restarts (C-10).
-        const settings =
-          userSettingsByUserId.get(session.userId) ??
-          (await storage.accountMetadata.getSettings(session.userId)) ??
-          undefined;
-        if (settings) userSettingsByUserId.set(session.userId, settings);
+        const settings = await readSettings(session.userId);
         telemetryConsent = telemetryConsentFrom(settings);
       }
 
