@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
+import crypto from 'node:crypto';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Employer Reputation & Brand System Integration (F-149, F-75, F-56, F-144)', () => {
   let app: FastifyInstance;
@@ -176,5 +178,38 @@ describe('Employer Reputation & Brand System Integration (F-149, F-75, F-56, F-1
     expect(body.organizationId).toBe(orgId);
     expect(body.reviews).toHaveLength(1);
     expect(body.reviews[0].title).toBe('Streamlined interview with timely feedback');
+    // K-04: the public list never names the reviewer's account.
+    expect(body.reviews[0].reviewerId).toBeUndefined();
+    expect(body.reviews[0].isMine).toBeUndefined();
+  });
+
+  it("marks the reviewer's own review and shows the reviewer id only to admins (K-04)", async () => {
+    const url = `/api/v1/reputation/organizations/${orgId}/reviews`;
+    const asReviewer = await app.inject({
+      method: 'GET',
+      url,
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    expect(asReviewer.statusCode).toBe(200);
+    const mine = JSON.parse(asReviewer.body).reviews[0];
+    expect(mine.isMine).toBe(true);
+    expect(mine.reviewerId).toBeUndefined();
+
+    const asRecruiter = await app.inject({
+      method: 'GET',
+      url,
+      headers: { authorization: `Bearer ${recruiterToken}` },
+    });
+    expect(JSON.parse(asRecruiter.body).reviews[0].reviewerId).toBeUndefined();
+
+    const adminToken = createSessionToken(crypto.randomUUID(), 'admin@talentsphere.io', [
+      'platform_admin',
+    ]);
+    const asAdmin = await app.inject({
+      method: 'GET',
+      url,
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    expect(JSON.parse(asAdmin.body).reviews[0].reviewerId).toBe(candidateId);
   });
 });

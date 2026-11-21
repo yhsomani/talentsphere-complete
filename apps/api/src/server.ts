@@ -285,6 +285,7 @@ import {
   EmployerReview,
   EmployerOperationalMetrics,
   calculateEmployerReputation,
+  publicEmployerReview,
   createEmployerReview,
   SkillMarketSignal,
   SkillForecast,
@@ -4682,9 +4683,12 @@ export async function buildApp(
       }
 
       const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const viewer = maybeExtractUser(req);
       return reply.status(200).send({
         organizationId,
-        reviews,
+        reviews: reviews.map((r) =>
+          publicEmployerReview(r, viewer && { userId: viewer.userId, roles: viewer.roles })
+        ),
         total: reviews.length,
       });
     }
