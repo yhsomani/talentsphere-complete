@@ -200,6 +200,7 @@ import {
   computeKPIs,
   appendBounded,
   ANALYTICS_EVENT_RETENTION,
+  AUDIT_LOG_RETENTION,
   telemetryConsentFrom,
   JobTemplate,
   createJobTemplate,
@@ -1379,7 +1380,12 @@ export async function buildApp(
   const skillsBySlug = new Map<string, Skill>();
   const skillRelationships: SkillRelationship[] = [];
   const evidenceSkills = new Map<string, Set<string>>();
-  const auditLogs: any[] = [];
+  // In-memory, write-only security/admin event trail: bounded so it cannot
+  // grow without limit between restarts (K-06). Not durable (A05-005, owner).
+  const auditLogEntries: unknown[] = [];
+  const auditLogs = {
+    push: (entry: unknown) => appendBounded(auditLogEntries, entry, AUDIT_LOG_RETENTION),
+  };
 
   // Notification Center Repositories & Helper (F-14, BR-120)
   const notificationsById = new Map<string, Notification>();
@@ -9583,18 +9589,6 @@ export async function buildApp(
 
       const score = calculateContributionScores(session.userId, userEvents);
       contributionScoresByUserId.set(session.userId, score);
-
-      auditLogs.push({
-        event: 'activity.recorded',
-        actorId: session.userId,
-        targetId: event.id,
-        metadata: {
-          category: event.category,
-          activityType: event.activityType,
-          compositeScore: score.compositeScore,
-        },
-        timestamp: new Date().toISOString(),
-      });
 
       return reply.status(201).send({ event, score });
     }
