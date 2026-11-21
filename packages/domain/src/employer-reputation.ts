@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto';
-import { DomainError } from './core.js';
+import { DomainError, type Role } from './core.js';
 
 export type EmployerReputationBand =
   'top_employer' | 'strong_reputation' | 'developing' | 'needs_improvement';
@@ -44,6 +44,28 @@ export interface EmployerReview {
   feedback?: string;
   isVerifiedEmployee: boolean;
   createdAt: string;
+}
+
+/** An employer review as listed publicly: no reviewer account id (K-04). */
+export type PublicEmployerReview = Omit<EmployerReview, 'reviewerId'> & {
+  reviewerId?: string;
+  isMine?: boolean;
+};
+
+/**
+ * The public view of an employer review (K-04). The reviewer's account id is
+ * shown only to platform admins and moderators: an organization could join it
+ * to its member list and identify the author. The reviewer themself gets
+ * `isMine: true` instead of the id.
+ */
+export function publicEmployerReview(
+  review: EmployerReview,
+  viewer?: { userId?: string; roles?: Role[] }
+): PublicEmployerReview {
+  const roles = viewer?.roles ?? [];
+  if (roles.includes('platform_admin') || roles.includes('moderator')) return { ...review };
+  const { reviewerId, ...rest } = review;
+  return viewer?.userId && viewer.userId === reviewerId ? { ...rest, isMine: true } : rest;
 }
 
 export interface EmployerOperationalMetrics {

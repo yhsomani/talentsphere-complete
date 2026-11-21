@@ -257,7 +257,25 @@ export function verifyCorporateEmailDomain(email: string, companyWebsiteOrDomain
 }
 
 /**
+ * The mailbox an address delivers to, for comparison only (K-01): trimmed,
+ * lower-cased, and without a `+tag` in the local part (`a+x@d` → `a@d`).
+ * Never stored; stored addresses stay as entered (lower-cased).
+ */
+export function mailboxKey(email: string): string {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf('@');
+  if (at < 0) return normalized;
+  const local = normalized.slice(0, at);
+  const plus = local.indexOf('+');
+  return plus < 0 ? normalized : `${local.slice(0, plus)}${normalized.slice(at)}`;
+}
+
+/**
  * Calculates deterministic verification score (0-100) and badge tier.
+ *
+ * A reference from a mailbox the candidate controls — this role's work email
+ * or any of `candidateMailboxes` (account email, other roles' work emails,
+ * addresses with a pending code) — counts for nothing (K-01).
  */
 export function calculateVerificationScoreAndBadge(
   workHistory: {
@@ -265,7 +283,8 @@ export function calculateVerificationScoreAndBadge(
     emailVerifiedAt?: string;
     skills?: string[];
   },
-  references: EmploymentReference[]
+  references: EmploymentReference[],
+  opts: { candidateMailboxes?: string[] } = {}
 ): {
   score: number;
   badgeTier: BadgeTier;
@@ -279,9 +298,17 @@ export function calculateVerificationScoreAndBadge(
   }
 
   // 2. References evaluation
+  const ownMailboxes = new Set(
+    [workHistory.corporateEmail, ...(opts.candidateMailboxes ?? [])]
+      .filter((e): e is string => Boolean(e))
+      .map(mailboxKey)
+  );
   const submittedRefs = references.filter((r) => r.status === 'submitted');
   const validConfirmedRefs = submittedRefs.filter(
-    (r) => r.confirmDates !== false && r.confirmTitle !== false
+    (r) =>
+      r.confirmDates !== false &&
+      r.confirmTitle !== false &&
+      !ownMailboxes.has(mailboxKey(r.refereeEmail))
   );
 
   if (validConfirmedRefs.length > 0) {
@@ -297,11 +324,18 @@ export function calculateVerificationScoreAndBadge(
     }
 
     // Additional reference bonus (+15 pts for 2 or more confirmed references
-    // from different people: one mailbox answering twice is one referee, C-17)
-    const distinctReferees = new Set(
-      validConfirmedRefs.map((r) => r.refereeId ?? r.refereeEmail.trim().toLowerCase())
-    );
-    if (distinctReferees.size >= 2) {
+    // from different people: one mailbox answering twice is one referee, C-17,
+    // also behind `+tags`; one signed-in account answering twice is too, K-01)
+    const distinctReferees: EmploymentReference[] = [];
+    for (const r of validConfirmedRefs) {
+      const sameReferee = distinctReferees.some(
+        (d) =>
+          mailboxKey(d.refereeEmail) === mailboxKey(r.refereeEmail) ||
+          (d.refereeId !== undefined && d.refereeId === r.refereeId)
+      );
+      if (!sameReferee) distinctReferees.push(r);
+    }
+    if (distinctReferees.length >= 2) {
       score += 15;
     }
 
@@ -415,6 +449,10 @@ export interface VerifyCorporateEmailParams {
   corporateEmail: string;
   companyDomain?: string;
   references?: EmploymentReference[];
+  /** Every other mailbox the candidate controls (K-01). */
+  candidateMailboxes?: string[];
+  /** The candidate's references on all their roles, this one included (K-01). */
+  otherReferees?: Array<{ refereeEmail: string; status: ReferenceStatus; requestedAt?: string }>;
   nowIso?: string;
 }
 
@@ -510,6 +548,20 @@ export function verifyCorporateEmail(params: VerifyCorporateEmailParams): Verifi
 
   assertCorporateEmailEligible(corporateEmail, companyDomain);
 
+  // A mailbox asked to vouch for the candidate cannot also be theirs (K-01).
+  const nowMs = Date.parse(now);
+  const ownKey = mailboxKey(corporateEmail);
+  if (
+    params.otherReferees?.some(
+      (r) => mailboxKey(r.refereeEmail) === ownKey && referenceBlocksReask(r, nowMs)
+    )
+  ) {
+    throw new DomainError(
+      'CONFLICT',
+      'This address is a referee on one of your roles, so it cannot also be your work email.'
+    );
+  }
+
   const updatedHistory: VerifiedWorkHistory = {
     ...workHistory,
     corporateEmail: corporateEmail.toLowerCase(),
@@ -519,7 +571,8 @@ export function verifyCorporateEmail(params: VerifyCorporateEmailParams): Verifi
 
   const { score, badgeTier, status } = calculateVerificationScoreAndBadge(
     updatedHistory,
-    params.references ?? []
+    params.references ?? [],
+    { candidateMailboxes: params.candidateMailboxes }
   );
 
   return {
@@ -528,6 +581,33 @@ export function verifyCorporateEmail(params: VerifyCorporateEmailParams): Verifi
     badgeTier,
     verificationStatus: status,
   };
+}
+
+/** A referee's emailed link stops working this long after the request was made. */
+export const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function referenceLinkExpired(
+  reference: { requestedAt: string },
+  nowMs: number = Date.now()
+): boolean {
+  return nowMs - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
+}
+
+/**
+ * Does this reference still stand in the way of asking the same mailbox
+ * again (K-02)? An answered or flagged reference does; an unanswered one
+ * only until its link expires; a declined one never. A request without
+ * `requestedAt` counts as live.
+ */
+function referenceBlocksReask(
+  r: { status: ReferenceStatus; requestedAt?: string },
+  nowMs: number
+): boolean {
+  if (r.status === 'submitted' || r.status === 'flagged') return true;
+  if (r.status === 'requested') {
+    return !(r.requestedAt && referenceLinkExpired({ requestedAt: r.requestedAt }, nowMs));
+  }
+  return false;
 }
 
 export interface RequestEmploymentReferenceParams {
@@ -542,8 +622,17 @@ export interface RequestEmploymentReferenceParams {
   relationship: ReferenceRelationship;
   /** The work email recorded on this role; it cannot also be the referee (C-17). */
   roleCorporateEmail?: string;
+  /**
+   * Every other mailbox the candidate controls: other roles' work emails and
+   * addresses with a pending code (K-01). None may be the referee.
+   */
+  candidateMailboxes?: string[];
   /** References already requested for this role (C-17). */
-  existingReferences?: Array<{ refereeEmail: string; status: ReferenceStatus }>;
+  existingReferences?: Array<{
+    refereeEmail: string;
+    status: ReferenceStatus;
+    requestedAt?: string;
+  }>;
   nowIso?: string;
 }
 
@@ -554,6 +643,7 @@ export function requestEmploymentReference(
   params: RequestEmploymentReferenceParams
 ): EmploymentReference {
   const normRefereeEmail = params.refereeEmail.trim().toLowerCase();
+  const refereeKey = mailboxKey(normRefereeEmail);
 
   // Anti-self check 1: referee user ID cannot match candidate user ID
   if (params.refereeUserId && params.refereeUserId === params.candidateUserId) {
@@ -561,22 +651,31 @@ export function requestEmploymentReference(
   }
 
   // Anti-self check 2: referee email cannot match candidate email
-  if (params.candidateEmail && normRefereeEmail === params.candidateEmail.trim().toLowerCase()) {
+  if (params.candidateEmail && refereeKey === mailboxKey(params.candidateEmail)) {
     throw new DomainError('CONFLICT', 'Candidate email cannot match referee email.');
   }
 
   // Anti-self check 3: the role's own work email is the candidate's mailbox (C-17).
-  if (
-    params.roleCorporateEmail &&
-    normRefereeEmail === params.roleCorporateEmail.trim().toLowerCase()
-  ) {
+  if (params.roleCorporateEmail && refereeKey === mailboxKey(params.roleCorporateEmail)) {
     throw new DomainError('CONFLICT', 'The work email on this role cannot also be its referee.');
   }
 
-  // One mailbox, one reference per role (C-17); a declined request may be re-asked.
+  // Anti-self check 4: any other mailbox the candidate controls (K-01).
+  if (params.candidateMailboxes?.some((m) => mailboxKey(m) === refereeKey)) {
+    throw new DomainError(
+      'CONFLICT',
+      'That address belongs to you on another role and cannot be your referee.'
+    );
+  }
+
+  const now = params.nowIso ?? new Date().toISOString();
+
+  // One mailbox, one reference per role (C-17); a declined request, or one
+  // whose link expired unanswered, may be re-asked (K-02).
+  const nowMs = Date.parse(now);
   if (
     params.existingReferences?.some(
-      (r) => r.refereeEmail.trim().toLowerCase() === normRefereeEmail && r.status !== 'declined'
+      (r) => mailboxKey(r.refereeEmail) === refereeKey && referenceBlocksReask(r, nowMs)
     )
   ) {
     throw new DomainError(
@@ -585,7 +684,6 @@ export function requestEmploymentReference(
     );
   }
 
-  const now = params.nowIso ?? new Date().toISOString();
   const token = crypto.randomBytes(16).toString('hex');
 
   return {

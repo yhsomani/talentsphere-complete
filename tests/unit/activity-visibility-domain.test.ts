@@ -61,4 +61,25 @@ describe('canViewActivity (C-26)', () => {
       canViewActivity({ profile: profile('public'), settings: undefined, viewerUserId: viewerId })
     ).toBe('allowed');
   });
+
+  it("lets an accepted connection read a connections_only profile's activity (K-07)", () => {
+    const connectionsOnly = profile('connections_only');
+    expect(
+      canViewActivity({ profile: connectionsOnly, viewerUserId: viewerId, isConnected: true })
+    ).toBe('allowed');
+    expect(
+      canViewActivity({ profile: connectionsOnly, viewerUserId: viewerId, isConnected: false })
+    ).toBe('profile_restricted');
+    expect(canViewActivity({ profile: connectionsOnly, viewerUserId: viewerId })).toBe(
+      'profile_restricted'
+    );
+    expect(
+      canViewActivity({
+        profile: connectionsOnly,
+        settings: { showActivity: false },
+        viewerUserId: viewerId,
+        isConnected: true,
+      })
+    ).toBe('activity_hidden');
+  });
 });

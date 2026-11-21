@@ -5,6 +5,15 @@
  * affiliations stayed served by their other indexes, and the deletes of
  * received endorsements, referral requests, career transitions and learning
  * outcomes used the wrong key and removed nothing.
+ *
+ * K-12 adds analytics events and alumni group memberships (below). Also
+ * erased by K-12 but covered by code review only, because no route reads
+ * them for an erased subject without a test hook: application drafts
+ * (owner-only reads), course enrolments and lesson progress, mentorship
+ * requests the person made, candidate segmentations, the sign-in and
+ * sending-budget limiter maps, and derived reputation scores/plans (the
+ * score route answers a baseline whenever the person has no signals, so it
+ * reads the same before and after the fix).
  */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { FastifyInstance } from 'fastify';
@@ -270,5 +279,77 @@ describe('Erasure removes the person from in-memory modules (C-05)', () => {
     await erase(people[0].token);
     // 19 people left: below the publication threshold.
     expect(await published()).toBe(0);
+  });
+
+  it('removes the erased person’s analytics events (K-12)', async () => {
+    const u = await register('analytics-u');
+    const posted = await call('POST', '/api/v1/analytics/events', u.token, {
+      eventType: 'page_view',
+      metadata: { page: 'dashboard' },
+    });
+    expect(posted.status).toBe(201);
+    const mine = async () =>
+      (
+        (await call('GET', '/api/v1/analytics/events', adminToken)).body.events as Array<{
+          userId?: string;
+        }>
+      ).filter((e) => e.userId === u.userId);
+    expect((await mine()).length).toBeGreaterThanOrEqual(1);
+
+    await erase(u.token);
+    expect(await mine()).toHaveLength(0);
+  });
+
+  it('removes the erased person from alumni group member lists (K-12)', async () => {
+    const owner = await register('group-owner', 'candidate', 'k12-uni.edu');
+    const org = await call('POST', '/api/v1/organizations', owner.token, {
+      name: 'K12 University',
+      slug: `k12-university-${seq}`,
+      website: 'https://k12-uni.edu',
+    });
+    expect(org.status).toBe(201);
+    const institutionId = org.body.organization.id as string;
+    const group = await call(
+      'POST',
+      `/api/v1/alumni/institutions/${institutionId}/groups`,
+      adminToken,
+      { name: 'K12 Alumni' }
+    );
+    expect(group.status).toBe(201);
+    const groupId = group.body.group.id as string;
+
+    const u = await register('group-u', 'candidate', 'elsewhere.example');
+    const created = await call('POST', '/api/v1/alumni/affiliations', u.token, {
+      institutionId,
+      degreeType: 'bachelors',
+      fieldOfStudy: 'History',
+      graduationYear: 2020,
+    });
+    expect(created.status).toBe(201);
+    const seat = { verificationMethod: 'institutional_seat', seatCode: 'K12-SEAT-2020' };
+    expect(
+      (
+        await call(
+          'POST',
+          `/api/v1/alumni/affiliations/${created.body.affiliation.id}/verify`,
+          adminToken,
+          seat
+        )
+      ).status
+    ).toBe(200);
+    expect((await call('POST', `/api/v1/alumni/groups/${groupId}/join`, u.token, {})).status).toBe(
+      200
+    );
+
+    const members = async () =>
+      (await call('GET', `/api/v1/alumni/groups/${groupId}/members`, adminToken)).body
+        .members as Array<{ userId: string }>;
+    expect((await members()).some((m) => m.userId === u.userId)).toBe(true);
+
+    await erase(u.token);
+    const after = await members();
+    expect(after.some((m) => m.userId === u.userId)).toBe(false);
+    // The group and its other member (the creator) stay.
+    expect(after.length).toBeGreaterThanOrEqual(1);
   });
 });

@@ -53,6 +53,7 @@ import {
   courseCompletionEvidence,
   assertAttachableEvidence,
   evidenceSummaryForReviewers,
+  canSeeEvidenceInternals,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -285,6 +286,7 @@ import {
   EmployerReview,
   EmployerOperationalMetrics,
   calculateEmployerReputation,
+  publicEmployerReview,
   createEmployerReview,
   SkillMarketSignal,
   SkillForecast,
@@ -334,6 +336,7 @@ import {
   assertReferenceRequestAllowed,
   canTransitionApplication,
   requestEmploymentReference,
+  referenceLinkExpired,
   submitEmploymentReference,
   calculateVerificationScoreAndBadge,
   buildWorkHistoryGraph,
@@ -998,11 +1001,6 @@ export async function buildApp(
    */
   const ERASED_CREDENTIAL = '!erased';
 
-  /** A referee's emailed link stops working this long after the request was made. */
-  const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-  const referenceLinkExpired = (reference: { requestedAt: string }): boolean =>
-    Date.now() - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
-
   /** May this session manage the given organization's jobs and pipeline? (BR-12) */
   const canManageJobs = (
     session: { userId: string; roles: Role[] } | null | undefined,
@@ -1047,6 +1045,7 @@ export async function buildApp(
   // per-(IP, email) limiter above does not bound guessing from many
   // addresses. In memory, per process, like the limiter store.
   const loginFailuresByEmail = new Map<string, number[]>();
+  let lastLoginFailureSweepMs = 0;
   const recordLoginFailure = (emailKey: string) => {
     const now = Date.now();
     // Only the newest AUTH_ACCOUNT_FAILURE_MAX entries can matter.
@@ -1054,8 +1053,11 @@ export async function buildApp(
       -env.AUTH_ACCOUNT_FAILURE_MAX
     );
     loginFailuresByEmail.set(emailKey, list);
-    // Unknown emails create entries too; drop expired ones so the map stays bounded.
-    if (loginFailuresByEmail.size > 10_000) {
+    // Unknown emails create entries too; drop expired ones so the map stays
+    // bounded — at most once a minute, so a spray is not a full scan per
+    // failure (K-12/K-18).
+    if (loginFailuresByEmail.size > 10_000 && now - lastLoginFailureSweepMs >= 60_000) {
+      lastLoginFailureSweepMs = now;
       for (const [key, times] of loginFailuresByEmail) {
         if (recentLoginFailures(times, now).length === 0) loginFailuresByEmail.delete(key);
       }
@@ -1564,7 +1566,11 @@ export async function buildApp(
             .filter(Boolean)
         : [];
 
-      return reply.status(200).send({ evidence, skills });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const view = canSeeEvidenceInternals(viewerId, viewerRoles, profile?.userId)
+        ? evidence
+        : evidenceSummaryForReviewers(evidence);
+      return reply.status(200).send({ evidence: view, skills });
     }
   );
 
@@ -1602,7 +1608,11 @@ export async function buildApp(
       }
 
       const list = evidenceBySubjectId.get(subjectId) || [];
-      return reply.status(200).send({ evidence: list });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const evidence = canSeeEvidenceInternals(viewerId, viewerRoles, profile.userId)
+        ? list
+        : list.map(evidenceSummaryForReviewers);
+      return reply.status(200).send({ evidence });
     }
   );
 
@@ -4705,9 +4715,10 @@ export async function buildApp(
       }
 
       const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const viewer = maybeExtractUser(req);
       return reply.status(200).send({
         organizationId,
-        reviews,
+        reviews: reviews.map((r) => publicEmployerReview(r, viewer ?? undefined)),
         total: reviews.length,
       });
     }
@@ -9651,6 +9662,7 @@ export async function buildApp(
         settings,
         viewerUserId: session.userId,
         viewerRoles: session.roles,
+        isConnected: viewerIsConnected(session.userId, profile),
       });
       if (visibility === 'profile_restricted') {
         throw new DomainError(
@@ -10488,6 +10500,16 @@ export async function buildApp(
         );
       }
 
+      // Limiter keys name the person's addresses; read them before the core
+      // step anonymises the account and deletes its work histories (K-12).
+      const erasedLimiterEmail = user.email.toLowerCase();
+      const erasedWorkAddresses = new Set<string>();
+      for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+        if (history.corporateEmail) erasedWorkAddresses.add(history.corporateEmail);
+        const pending = emailChallengesByHistoryId.get(history.id)?.email;
+        if (pending) erasedWorkAddresses.add(pending);
+      }
+
       // Billing first: ends the Stripe customer (and its subscriptions) and
       // removes local billing records. If Stripe is unreachable this throws
       // before anything else is changed, so the request is safe to retry.
@@ -10683,12 +10705,68 @@ export async function buildApp(
       jobAlertsById.forEach((alert, key) => {
         if (alert.userId === session.userId) jobAlertsById.delete(key);
       });
+      // The person's own records in the remaining in-memory stores (K-12).
+      // Application drafts are keyed by PROFILE id and read only by their owner.
+      for (const [draftId, draft] of applicationDraftsById) {
+        if (draft.candidateId !== profile.id) continue;
+        applicationDraftsById.delete(draftId);
+        applicationDraftVersionsByDraftId.delete(draftId);
+        applicationDraftsByCandidateAndJob.delete(`${profile.id}:${draft.jobId}`);
+      }
+      // Course enrolments (keyed `${profileId}:${courseId}`) and their lesson
+      // progress. Issued certificates stay: public verification (owner #5).
+      for (const [key, enrollment] of enrollmentsByUserAndCourse) {
+        if (!key.startsWith(`${profile.id}:`)) continue;
+        enrollmentsById.delete(enrollment.id);
+        enrollmentsByUserAndCourse.delete(key);
+        for (const progressKey of lessonProgressByEnrollmentAndLesson.keys()) {
+          if (progressKey.startsWith(`${enrollment.id}:`)) {
+            lessonProgressByEnrollmentAndLesson.delete(progressKey);
+          }
+        }
+      }
+      // Alumni group memberships (a group they created stays for its other
+      // members, possibly without an admin) and mentorship they asked for.
+      // Requests where they are the mentor are the mentee's record (owner #5).
+      for (const [groupId, members] of alumniGroupMembersByGroupId) {
+        const kept = members.filter((m) => m.userId !== session.userId);
+        if (kept.length === members.length) continue;
+        if (kept.length) alumniGroupMembersByGroupId.set(groupId, kept);
+        else alumniGroupMembersByGroupId.delete(groupId);
+      }
+      for (const [requestId, request] of alumniMentorshipRequestsById) {
+        if (request.menteeId !== session.userId) continue;
+        alumniMentorshipRequestsById.delete(requestId);
+        dropFromIndex(alumniMentorshipByInstitutionId, request.institutionId, requestId);
+      }
+      // Scores and recovery plans derived from the reputation signals erased above.
+      for (const key of reputationScoresByUserContextDomain.keys()) {
+        if (key.startsWith(`${session.userId}:`)) reputationScoresByUserContextDomain.delete(key);
+      }
+      for (const [planId, plan] of reputationRecoveryPlansById) {
+        if (plan.userId === session.userId) reputationRecoveryPlansById.delete(planId);
+      }
+      // Written under whichever id the caller passed.
+      candidateSegmentationsById.delete(profile.id);
+      candidateSegmentationsById.delete(session.userId);
+      // In place: appendBounded holds this array.
+      for (let i = analyticsEvents.length - 1; i >= 0; i--) {
+        if (analyticsEvents[i].userId === session.userId) analyticsEvents.splice(i, 1);
+      }
+      // Sign-in and sending budgets keyed by the person's ids and addresses.
+      loginFailuresByEmail.delete(erasedLimiterEmail);
+      sendLog.delete(`code-user:${session.userId}`);
+      sendLog.delete(`ref-user:${session.userId}`);
+      for (const address of erasedWorkAddresses) sendLog.delete(`code-addr:${address}`);
+
       // Retained multi-party records (reviews, chat, organizational activity)
       // need an approved per-domain redaction/retention policy before release.
       // Kept deliberately until then (owner scope): interview assessments and
       // scorecards (org-owned hiring records; only the candidate index is
       // dropped above), endorsements the person gave, moderation reports,
-      // reviews, talent-pool memberships, application drafts, auditLogs.
+      // reviews, talent-pool memberships, course certificates, mentorship
+      // requests where the person is the mentor, alumni groups they created,
+      // auditLogs.
 
       // Mark the durable request history only after core erasure commits.
       // If this write fails, do not claim the lifecycle was updated.
@@ -12708,10 +12786,21 @@ export async function buildApp(
     else sendLog.delete(key);
     return recent.length;
   };
+  // Keys are pruned when read again; ones never read again are swept here,
+  // at most once a minute once the log is large (K-12). 24 h is the longest
+  // window any budget reads.
+  let lastSendLogSweepMs = 0;
   const reserveSends = (...keys: string[]): (() => void) => {
     // A unique stamp per reservation, so release removes exactly this one.
-    const stamp = Date.now() + Math.random() / 2;
+    const now = Date.now();
+    const stamp = now + Math.random() / 2;
     for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), stamp]);
+    if (sendLog.size > 10_000 && now - lastSendLogSweepMs >= 60_000) {
+      lastSendLogSweepMs = now;
+      for (const [key, times] of sendLog) {
+        if (now - times[times.length - 1] >= 24 * HOUR_MS) sendLog.delete(key);
+      }
+    }
     return () => {
       for (const key of keys) {
         const list = sendLog.get(key);
@@ -12781,6 +12870,28 @@ export async function buildApp(
       message: 'Work history record created successfully.',
     });
   });
+
+  /**
+   * Every mailbox the candidate controls (K-01): the account email, each
+   * role's verified work email, and each address with a pending code. None
+   * may vouch for them.
+   */
+  const candidateMailboxes = (candidateId: string): string[] => {
+    const mailboxes: string[] = [];
+    const accountEmail = usersById.get(candidateId)?.email;
+    if (accountEmail) mailboxes.push(accountEmail);
+    for (const history of verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []) {
+      if (history.corporateEmail) mailboxes.push(history.corporateEmail);
+      const pending = emailChallengesByHistoryId.get(history.id)?.email;
+      if (pending) mailboxes.push(pending);
+    }
+    return mailboxes;
+  };
+  /** The candidate's references on all their roles (K-01). */
+  const candidateReferences = (candidateId: string): StoredReference[] =>
+    (verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []).flatMap(
+      (history) => employmentReferencesByHistoryId.get(history.id) ?? []
+    );
 
   // 2. Verify Corporate Email for Work History (F-94) — two steps.
   //
@@ -12911,6 +13022,8 @@ export async function buildApp(
         corporateEmail: email,
         companyDomain,
         references: existingRefs,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        otherReferees: candidateReferences(workHistory.candidateId),
       });
 
       const saved: StoredWorkHistory = {
@@ -12989,6 +13102,7 @@ export async function buildApp(
         refereeEmail: body.refereeEmail,
         relationship: body.relationship,
         roleCorporateEmail: workHistory.corporateEmail,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
         existingReferences: employmentReferencesByHistoryId.get(id) ?? [],
       });
 
@@ -13025,6 +13139,10 @@ export async function buildApp(
         });
       } catch {
         releaseSend();
+        // Undo the request, so a retry (same or new clientRequestId) asks again (K-02).
+        await persist({ kind: 'referenceDelete', id: stored.id, base: stored }).catch(
+          () => undefined
+        );
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
 
@@ -13142,7 +13260,9 @@ export async function buildApp(
         const refs = (employmentReferencesByHistoryId.get(reference.workHistoryId) || []).map(
           (r) => (r.id === refId ? updatedRef : r)
         );
-        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs);
+        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs, {
+          candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        });
         updatedHistory = {
           ...workHistory,
           verificationScore: score,
@@ -13541,6 +13661,16 @@ export async function buildApp(
         emailChallengesByHistoryId.delete(op.id);
         return;
       }
+      case 'referenceDelete': {
+        const ref = employmentReferencesById.get(op.id);
+        if (!ref) return;
+        employmentReferencesById.delete(op.id);
+        removeFrom(employmentReferencesByHistoryId, ref.workHistoryId, op.id);
+        if (ref.clientRequestId) {
+          referencesByClientRequest.delete(`${ref.candidateId}:${ref.clientRequestId}`);
+        }
+        return;
+      }
       case 'evidenceDelete': {
         const item = evidenceById.get(op.id);
         if (!item) return;
@@ -13653,6 +13783,8 @@ export async function buildApp(
         return `workHistory:${op.id}`;
       case 'reference':
         return `reference:${op.value.id}`;
+      case 'referenceDelete':
+        return `reference:${op.id}`;
       case 'emailChallenge':
         return `emailChallenge:${op.value.workHistoryId}`;
       case 'emailChallengeDelete':
@@ -13693,6 +13825,8 @@ export async function buildApp(
         return verifiedWorkHistoriesById.get(op.value.id);
       case 'reference':
         return employmentReferencesById.get(op.value.id);
+      case 'referenceDelete':
+        return employmentReferencesById.get(op.id);
       case 'emailChallenge':
         return emailChallengesByHistoryId.get(op.value.workHistoryId);
       case 'emailChallengeDelete':

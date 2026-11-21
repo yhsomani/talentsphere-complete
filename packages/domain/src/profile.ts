@@ -78,9 +78,12 @@ export function canViewActivity(params: {
   settings?: { showActivity?: boolean };
   viewerUserId?: string;
   viewerRoles?: Role[];
+  /** The viewer has an accepted connection with the profile owner (K-07). */
+  isConnected?: boolean;
 }): ActivityVisibility {
   const { profile, settings, viewerUserId, viewerRoles = [] } = params;
-  if (!canViewProfile(profile, viewerUserId, viewerRoles)) return 'profile_restricted';
+  if (!canViewProfile(profile, viewerUserId, viewerRoles, { isConnected: params.isConnected }))
+    return 'profile_restricted';
   const privileged =
     viewerUserId === profile.userId ||
     viewerRoles.includes('platform_admin') ||

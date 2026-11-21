@@ -108,6 +108,8 @@ export type CoreOp =
   | { kind: 'evidence'; value: Evidence; skillIds?: string[]; base?: Evidence }
   | { kind: 'workHistory'; value: StoredWorkHistory; base?: StoredWorkHistory }
   | { kind: 'reference'; value: StoredReference; base?: StoredReference }
+  /** Undo a reference request whose invitation could not be queued (K-02). */
+  | { kind: 'referenceDelete'; id: string; base: StoredReference }
   | { kind: 'emailChallenge'; value: EmailChallenge; base?: EmailChallenge }
   | { kind: 'emailChallengeDelete'; workHistoryId: string; base?: EmailChallenge }
   /** Insert a notification, or (with base) record that it was read. */
@@ -679,6 +681,15 @@ async function writeOp(db: Queryable, op: CoreOp): Promise<void> {
       await db.query('DELETE FROM public.evidence WHERE id = $1', [op.id]);
       return;
     }
+    case 'referenceDelete': {
+      // Only a request nobody has answered yet.
+      const result = await db.query(
+        `DELETE FROM public.employment_references WHERE id = $1 AND status = 'requested'`,
+        [op.id]
+      );
+      assertGuardHeld(true, result);
+      return;
+    }
     case 'sessionRevocation': {
       const r = op.value;
       await db.query(
@@ -773,6 +784,7 @@ const WRITE_ORDER: Record<CoreOp['kind'], number> = {
   // Deletes run last so an upsert in the same batch cannot re-reference them.
   workHistoryDelete: 11,
   evidenceDelete: 11,
+  referenceDelete: 11,
   notificationsDeleteForRecipient: 11,
   messagesDeleteForProfile: 11,
 };
