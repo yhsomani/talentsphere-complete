@@ -143,6 +143,19 @@ describe('Core-loop notifications', () => {
     const { notifications } = await inbox(app, other.token);
     expect(notifications[0].title).toBe('Platform Engineer: not taken forward');
     expect(JSON.stringify(notifications)).not.toContain('INTERNAL-NOTE');
+    // Nor through the application itself (C-18; BR-19)...
+    const mine = await call(app, 'GET', '/api/v1/applications/my', other.token);
+    expect(mine.status).toBe(200);
+    expect(mine.body.applications.find((a: Json) => a.id === id).status).toBe('rejected');
+    expect(JSON.stringify(mine.body)).not.toContain('INTERNAL-NOTE');
+    const one = await call(app, 'GET', `/api/v1/applications/${id}`, other.token);
+    expect(one.status).toBe(200);
+    expect(JSON.stringify(one.body)).not.toContain('INTERNAL-NOTE');
+    // ...while the hiring team still reads its note.
+    const pipeline = await call(app, 'GET', `/api/v1/jobs/${jobId}/applications`, owner.token);
+    expect(JSON.stringify(pipeline.body)).toContain('INTERNAL-NOTE');
+    const teamView = await call(app, 'GET', `/api/v1/applications/${id}`, owner.token);
+    expect(teamView.body.application.rejectionReason).toBe('INTERNAL-NOTE-weak-system-design');
   });
 
   it('tells the hiring team when a candidate withdraws', async () => {
@@ -188,6 +201,34 @@ describe('Core-loop notifications', () => {
     });
     expect(foreign.body.markedCount).toBe(0);
     expect((await inbox(app, owner.token)).notifications[0].isRead).toBe(false);
+
+    // A request that names nothing marks nothing (C-13): it is refused.
+    const own = (await inbox(app, candidate.token)).notifications;
+    for (const body of [
+      {},
+      { all: false },
+      { notificationIds: [] },
+      { all: true, notificationIds: [own[0].id] },
+    ]) {
+      const refused = await call(
+        app,
+        'POST',
+        '/api/v1/notifications/mark-read',
+        candidate.token,
+        body
+      );
+      expect(refused.status).toBe(422);
+      expect(refused.body.error.code).toBe('VALIDATION_FAILED');
+    }
+    const absent = await app.inject({
+      method: 'POST',
+      url: '/api/v1/notifications/mark-read',
+      headers: { authorization: `Bearer ${candidate.token}` },
+    });
+    expect(absent.statusCode).toBe(422);
+    expect(
+      (await call(app, 'GET', '/api/v1/notifications/summary', candidate.token)).body.unreadCount
+    ).toBe(2);
 
     const all = await call(app, 'POST', '/api/v1/notifications/mark-read', candidate.token, {
       all: true,

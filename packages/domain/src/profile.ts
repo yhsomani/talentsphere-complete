@@ -36,7 +36,8 @@ export function updateProfileEntity(
 export function canViewProfile(
   targetProfile: Profile,
   viewerUserId?: string,
-  viewerRoles: Role[] = []
+  viewerRoles: Role[] = [],
+  opts: { isConnected?: boolean } = {}
 ): boolean {
   // 1. Owner can always view own profile
   if (viewerUserId && viewerUserId === targetProfile.userId) {
@@ -55,8 +56,8 @@ export function canViewProfile(
     case 'recruiters_only':
       return viewerRoles.includes('recruiter') || viewerRoles.includes('hiring_manager');
     case 'connections_only':
-      // Requires connection state
-      return false;
+      // An accepted connection, as for connections-only portfolio projects (C-29).
+      return Boolean(opts.isConnected);
     case 'private':
       return false;
     default:

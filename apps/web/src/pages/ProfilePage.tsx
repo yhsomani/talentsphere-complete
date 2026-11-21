@@ -23,6 +23,7 @@ import {
 
 const PRIVACY_OPTIONS: ReadonlyArray<{ value: SessionProfile['privacy']; label: string }> = [
   { value: 'public', label: 'Anyone' },
+  { value: 'connections_only', label: 'Only my connections' },
   { value: 'recruiters_only', label: 'Only people hiring on TalentSphere' },
   { value: 'private', label: 'Only me' },
 ];

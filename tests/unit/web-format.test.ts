@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, formatSalaryRange } from '../../apps/web/src/lib/format.js';
+import {
+  evidenceStatusLabel,
+  formatMoney,
+  formatSalaryRange,
+} from '../../apps/web/src/lib/format.js';
 
 describe('web format: formatMoney', () => {
   it('keeps whole-dollar amounts without cents', () => {
@@ -24,5 +28,24 @@ describe('web format: formatMoney', () => {
       '$90,000 – $120,000.50'
     );
     expect(formatSalaryRange(undefined)).toBeNull();
+  });
+});
+
+describe('web format: evidenceStatusLabel (C-12)', () => {
+  it('says a revoked or expired record is revoked or expired, not its old level', () => {
+    expect(
+      evidenceStatusLabel({ status: 'revoked', verificationLevel: 'authority_verified' })
+    ).toBe('revoked');
+    expect(evidenceStatusLabel({ status: 'expired', verificationLevel: 'peer_reviewed' })).toBe(
+      'expired'
+    );
+  });
+  it('labels live records by level', () => {
+    expect(evidenceStatusLabel({ status: 'pending', verificationLevel: 'unverified' })).toBe(
+      'self-reported'
+    );
+    expect(
+      evidenceStatusLabel({ status: 'verified', verificationLevel: 'authority_verified' })
+    ).toBe('authority verified');
   });
 });

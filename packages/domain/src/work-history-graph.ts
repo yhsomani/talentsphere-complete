@@ -296,8 +296,12 @@ export function calculateVerificationScoreAndBadge(
       score += 15;
     }
 
-    // Additional reference bonus (+15 pts for 2 or more confirmed references)
-    if (validConfirmedRefs.length >= 2) {
+    // Additional reference bonus (+15 pts for 2 or more confirmed references
+    // from different people: one mailbox answering twice is one referee, C-17)
+    const distinctReferees = new Set(
+      validConfirmedRefs.map((r) => r.refereeId ?? r.refereeEmail.trim().toLowerCase())
+    );
+    if (distinctReferees.size >= 2) {
       score += 15;
     }
 
@@ -485,6 +489,10 @@ export interface RequestEmploymentReferenceParams {
   refereeName: string;
   refereeEmail: string;
   relationship: ReferenceRelationship;
+  /** The work email recorded on this role; it cannot also be the referee (C-17). */
+  roleCorporateEmail?: string;
+  /** References already requested for this role (C-17). */
+  existingReferences?: Array<{ refereeEmail: string; status: ReferenceStatus }>;
   nowIso?: string;
 }
 
@@ -504,6 +512,26 @@ export function requestEmploymentReference(
   // Anti-self check 2: referee email cannot match candidate email
   if (params.candidateEmail && normRefereeEmail === params.candidateEmail.trim().toLowerCase()) {
     throw new DomainError('CONFLICT', 'Candidate email cannot match referee email.');
+  }
+
+  // Anti-self check 3: the role's own work email is the candidate's mailbox (C-17).
+  if (
+    params.roleCorporateEmail &&
+    normRefereeEmail === params.roleCorporateEmail.trim().toLowerCase()
+  ) {
+    throw new DomainError('CONFLICT', 'The work email on this role cannot also be its referee.');
+  }
+
+  // One mailbox, one reference per role (C-17); a declined request may be re-asked.
+  if (
+    params.existingReferences?.some(
+      (r) => r.refereeEmail.trim().toLowerCase() === normRefereeEmail && r.status !== 'declined'
+    )
+  ) {
+    throw new DomainError(
+      'CONFLICT',
+      'You have already asked this person for a reference for this role.'
+    );
   }
 
   const now = params.nowIso ?? new Date().toISOString();

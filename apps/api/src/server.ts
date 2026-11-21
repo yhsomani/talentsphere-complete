@@ -47,6 +47,9 @@ import {
   updateProfileEntity,
   canViewProfile,
   createEvidence,
+  courseCompletionEvidence,
+  assertAttachableEvidence,
+  evidenceSummaryForReviewers,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -59,6 +62,7 @@ import {
   transitionJobStatus,
   submitJobApplication,
   transitionApplicationState,
+  applicationForCandidate,
   Challenge,
   AssessmentSession,
   XpTransaction,
@@ -98,6 +102,7 @@ import {
   createNotificationEntity,
   candidateApplicationUpdate,
   markNotificationsAsRead,
+  resolveMarkReadTargets,
   AIConversation,
   AIMessage,
   AIUsageMeter,
@@ -138,6 +143,7 @@ import {
   DataExportRequest,
   createDefaultUserSettings,
   updateUserSettings,
+  withProfileVisibility,
   requestAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
@@ -813,6 +819,8 @@ export async function buildApp(
   // governed review and appeal" (SSOT §Trust) plus their GDPR rights — and
   // nothing else. Erased accounts have no credential and no access at all.
   const RESTRICTED_SESSION_ROUTES = new Set([
+    // The client's bootstrap; returns only the caller's own state (C-01).
+    'GET /api/v1/auth/session',
     'GET /api/v1/profile/me',
     'POST /api/v1/auth/password',
     'POST /api/v1/auth/sign-out',
@@ -1253,7 +1261,9 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      const allowed = canViewProfile(profile, viewerId, viewerRoles);
+      const allowed = canViewProfile(profile, viewerId, viewerRoles, {
+        isConnected: viewerIsConnected(viewerId, profile),
+      });
       if (!allowed) {
         throw new DomainError(
           'FORBIDDEN',
@@ -1430,7 +1440,12 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        profile &&
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to this evidence is restricted by profile privacy.'
@@ -1470,7 +1485,11 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (!canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to evidence is restricted by subject privacy settings.'
@@ -2623,6 +2642,7 @@ export async function buildApp(
               `Evidence item ${evId} does not belong to your profile.`
             );
           }
+          assertAttachableEvidence(ev);
         }
       }
 
@@ -2704,7 +2724,7 @@ export async function buildApp(
       const job = jobsById.get(app.jobId);
       const org = job ? organizationsById.get(job.orgId) : undefined;
       return {
-        ...app,
+        ...applicationForCandidate(app),
         job: job
           ? { ...job, organization: org ? { id: org.id, name: org.name } : undefined }
           : undefined,
@@ -2735,7 +2755,12 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
       }
 
-      return reply.status(200).send({ application });
+      // The candidate never sees the hiring team's private rejection note (C-18).
+      const visible =
+        isCandidate && !isOrgMember && !isAdmin
+          ? applicationForCandidate(application)
+          : application;
+      return reply.status(200).send({ application: visible });
     }
   );
 
@@ -2774,7 +2799,10 @@ export async function buildApp(
         return {
           ...app,
           candidate,
-          evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+          evidence: app.attachedEvidenceIds
+            .map((evId) => evidenceById.get(evId))
+            .filter((ev): ev is Evidence => Boolean(ev))
+            .map(evidenceSummaryForReviewers),
           workHistorySummary: {
             roles: histories.length,
             emailVerifiedRoles: histories.filter((h) => h.emailVerifiedAt).length,
@@ -5270,19 +5298,13 @@ export async function buildApp(
         enrollment.status = 'completed';
         enrollment.completedAt = now;
 
-        // Auto-mint verified Evidence in the Talent Graph (BR-23)
-        const evidence = createEvidence({
+        // Record the completion as evidence in the Talent Graph (BR-23); its
+        // level is a domain rule (unverified: nothing was assessed) (C-20).
+        const evidence = courseCompletionEvidence({
           subjectId: profile.id,
-          type: 'course_completion',
-          title: `Course Certificate: ${course.title}`,
-          description: `Successfully completed all modules and lessons in "${course.title}".`,
-          source: 'TalentSphere LMS',
-          provenance: `course:${course.id}`,
-          recencyDate: now.split('T')[0],
+          course,
+          nowIso: now,
         });
-        // Authority level for platform LMS completion
-        evidence.status = 'verified';
-        evidence.verificationLevel = 'authority_verified';
 
         await persist({ kind: 'evidence', value: evidence });
 
@@ -5899,7 +5921,7 @@ export async function buildApp(
 
     const input = MarkNotificationsReadInputSchema.parse(req.body || {});
     const userNotifs = notificationsByRecipientId.get(profile.id) || [];
-    const targetIds = input.all ? undefined : input.notificationIds;
+    const targetIds = resolveMarkReadTargets(input);
 
     // Mark copies, never the stored objects, and persist them: the read state
     // survives a restart, and only the recipient's own notifications move.
@@ -6098,9 +6120,17 @@ export async function buildApp(
     convMessages.push(userMsg);
 
     // 6. Generate AI response with advisory provenance
+    // The user's real skills: the freshness records keyed by profile id (C-19).
+    const ownProfileId = profilesByUserId.get(session.userId)?.id;
+    const candidateSkills = [
+      ...(skillFreshnessByCandidateId.get(ownProfileId ?? '')?.values() ?? []),
+    ]
+      .map((record) => skillsById.get(record.skillId)?.name)
+      .filter((name): name is string => Boolean(name));
     const aiResult = generateCareerAssistantResponse({
       conversationId: conversation.id,
       prompt: input.prompt,
+      candidateSkills,
     });
 
     convMessages.push(aiResult.message);
@@ -6334,6 +6364,12 @@ export async function buildApp(
   // Professional Networking Repositories & Endpoints (F-09)
   const connectionsById = new Map<string, Connection>();
   const connectionsByUserId = new Map<string, Connection[]>();
+  // Whether a viewer has an accepted connection with a profile's owner, for
+  // connections-only profile visibility (C-29).
+  const viewerIsConnected = (viewerId: string | undefined, profile: { userId: string }) =>
+    viewerId
+      ? areConnected(connectionsByUserId.get(viewerId) ?? [], viewerId, profile.userId)
+      : false;
 
   app.post('/api/v1/connections/request', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -6350,13 +6386,17 @@ export async function buildApp(
     }
 
     const userConnections = connectionsByUserId.get(session.userId) || [];
+    // Read through the durable settings so the choice survives a restart (C-29).
+    const recipientSettings =
+      targetUserId === session.userId ? undefined : await accountSettings(targetUserId);
     const connection = requestConnection(
       {
         senderId: session.userId,
         recipientId: targetUserId,
         note: input.note,
       },
-      userConnections
+      userConnections,
+      recipientSettings?.allowConnectionRequests ?? true
     );
 
     connectionsById.set(connection.id, connection);
@@ -8455,7 +8495,12 @@ export async function buildApp(
     const stealth =
       (userSettingsByUserId.get(profile.userId) as any)?.stealthMode === true ||
       declared?.engagementSegment === 'stealth';
-    return !stealth && canViewProfile(profile, session.userId, session.roles);
+    return (
+      !stealth &&
+      canViewProfile(profile, session.userId, session.roles, {
+        isConnected: viewerIsConnected(session.userId, profile),
+      })
+    );
   };
   const assertMayProfileCandidate = (session: AuthPayload, candidateId: string) => {
     if (!candidateProfileFor(candidateId) && candidateId !== session.userId) {
@@ -9955,6 +10000,9 @@ export async function buildApp(
       byoAiKey: settings.byoAiKey ? '••••••••' : null,
     };
   };
+  // What the person is shown: profile visibility follows the profile (C-25).
+  const settingsView = (settings: UserSettings) =>
+    sanitizeSettings(withProfileVisibility(settings, profilesByUserId.get(settings.userId)));
 
   // Settings are read from PostgreSQL on first access, not reset on restart.
   const accountSettings = async (userId: string): Promise<UserSettings> => {
@@ -9973,7 +10021,7 @@ export async function buildApp(
     const settings = await accountSettings(session.userId);
 
     return reply.status(200).send({
-      settings: sanitizeSettings(settings),
+      settings: settingsView(settings),
     });
   });
 
@@ -10016,7 +10064,7 @@ export async function buildApp(
 
     return reply.status(200).send({
       message: 'Account settings updated successfully.',
-      settings: sanitizeSettings(updated),
+      settings: settingsView(updated),
     });
   });
 
@@ -10038,7 +10086,8 @@ export async function buildApp(
       throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
     }
 
-    const settings = await accountSettings(session.userId);
+    // One visibility value in the archive, the profile's (C-25).
+    const settings = withProfileVisibility(await accountSettings(session.userId), profile);
 
     // Evidence and applications are keyed by PROFILE id; collecting them by
     // user id exported nothing (gap G-20).
@@ -11256,7 +11305,11 @@ export async function buildApp(
     if (type === 'all' || type === 'profiles') {
       for (const profile of profilesById.values()) {
         // Enforce privacy rule: skip if viewer cannot view profile
-        if (!canViewProfile(profile, viewerId, viewerRoles)) {
+        if (
+          !canViewProfile(profile, viewerId, viewerRoles, {
+            isConnected: viewerIsConnected(viewerId, profile),
+          })
+        ) {
           continue;
         }
 
@@ -11444,7 +11497,11 @@ export async function buildApp(
 
     // Collect public profiles
     for (const profile of profilesById.values()) {
-      if (canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         candidateItems.push({
           id: profile.id,
           type: 'profile',
@@ -12612,15 +12669,19 @@ export async function buildApp(
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
+      // Anti-self checks compare against the candidate, also when an admin
+      // asks on their behalf (C-17).
       const requested = requestEmploymentReference({
         workHistoryId: id,
         candidateId: workHistory.candidateId,
-        candidateUserId: session.userId,
-        candidateEmail: session.email,
+        candidateUserId: workHistory.candidateId,
+        candidateEmail: usersById.get(workHistory.candidateId)?.email,
         refereeUserId,
         refereeName: body.refereeName,
         refereeEmail: body.refereeEmail,
         relationship: body.relationship,
+        roleCorporateEmail: workHistory.corporateEmail,
+        existingReferences: employmentReferencesByHistoryId.get(id) ?? [],
       });
 
       // The one-time token is the referee's credential. It is emailed to the
@@ -12834,7 +12895,9 @@ export async function buildApp(
     const appliedToViewer = !!viewerProfile && appliedToTeamOf(profile, viewerProfile);
     if (
       !appliedToViewer &&
-      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[])
+      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[], {
+        isConnected: viewerIsConnected(session?.userId, profile),
+      })
     ) {
       throw new DomainError(
         'FORBIDDEN',

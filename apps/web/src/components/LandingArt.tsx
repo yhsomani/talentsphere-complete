@@ -389,7 +389,7 @@ export const RecruiterArt: React.FC<ArtProps> = ({ className }) => (
         <line x1="52" y1={78 + i * 50} x2="368" y2={78 + i * 50} stroke={SOFT} strokeWidth="1.5" />
         <circle cx="68" cy={106 + i * 50} r="11" fill={colors.neutral[300]} />
         <rect x="90" y={96 + i * 50} width={bar} height="6" rx="3" fill={colors.neutral[400]} />
-        <text x="90" y={118 + i * 50} fontSize="11" fill={colors.neutral[600]}>
+        <text x="90" y={118 + i * 50} fontSize="12" fill={colors.neutral[600]}>
           {how}
         </text>
         <Seal cx={278} cy={104 + i * 50} r={13} level={level} />

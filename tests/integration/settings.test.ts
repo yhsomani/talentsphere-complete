@@ -134,6 +134,59 @@ describe('Account Settings, Privacy Control & GDPR Erasure Integration (F-15, §
     expect(latestBody.latestExport.id).toBe(body.exportRequest.id);
   });
 
+  it('shows one profile visibility whichever page changed it (C-25)', async () => {
+    const auth = { authorization: `Bearer ${candidateToken}` };
+    // Changed on the Profile page...
+    const profilePatch = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/profile/me',
+      headers: auth,
+      payload: { privacy: 'private' },
+    });
+    expect(profilePatch.statusCode).toBe(200);
+    // ...Settings shows it,
+    const settings = await app.inject({ method: 'GET', url: '/api/v1/settings', headers: auth });
+    expect(JSON.parse(settings.body).settings.profileVisibility).toBe('private');
+    // and the archive carries one value, not two.
+    const exported = await app.inject({
+      method: 'POST',
+      url: '/api/v1/settings/export',
+      headers: auth,
+      payload: { format: 'json' },
+    });
+    const data = JSON.parse(exported.body).data;
+    expect(data.profile.privacy).toBe('private');
+    expect(data.settings.profileVisibility).toBe('private');
+
+    // Changed on Settings, the profile follows.
+    const settingsPatch = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/settings',
+      headers: auth,
+      payload: { profileVisibility: 'recruiters_only' },
+    });
+    expect(JSON.parse(settingsPatch.body).settings.profileVisibility).toBe('recruiters_only');
+    const profile = await app.inject({ method: 'GET', url: '/api/v1/profile/me', headers: auth });
+    expect(JSON.parse(profile.body).profile.privacy).toBe('recruiters_only');
+
+    // A settings save that does not touch visibility still reports the profile's.
+    const unrelated = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/settings',
+      headers: auth,
+      payload: { digestFrequency: 'weekly' },
+    });
+    expect(JSON.parse(unrelated.body).settings.profileVisibility).toBe('recruiters_only');
+    await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/profile/me',
+      headers: auth,
+      payload: { privacy: 'connections_only' },
+    });
+    const after = await app.inject({ method: 'GET', url: '/api/v1/settings', headers: auth });
+    expect(JSON.parse(after.body).settings.profileVisibility).toBe('connections_only');
+  });
+
   it('rejects unsupported CSV rather than labeling JSON as a CSV download', async () => {
     const res = await app.inject({
       method: 'POST',

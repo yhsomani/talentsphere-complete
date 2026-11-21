@@ -37,7 +37,7 @@ rank, assessment bypass or private evidence.
 | Recruiter Starter: max 5 published jobs per organisation, on create and on status change | **Enforced** (same test, direct API calls) |
 | Paid access only from verified Stripe state; failed/unpaid/canceled = free | **Enforced** (`effectiveEntitlements`, `stripe-billing` tests) |
 | Duplicate / stale / forged Stripe webhooks | **Covered** by `tests/integration/stripe-billing.test.ts` |
-| `hasAdvancedAnalytics`, "unlimited resume variations", "priority showcase visibility", multi-seat workspace, Deep Talent Graph | **Listed in plan copy, not gated or not implemented.** Do not sell until each is implemented and gated. |
+| `hasAdvancedAnalytics`, "unlimited resume variations", "priority showcase visibility", multi-seat workspace, Deep Talent Graph | **Removed from plan copy (2026-11-20); not gated or not implemented.** Do not re-add a line until it is implemented and gated (`plan-limits-domain` test). The `hasAdvancedAnalytics` / `canExportCredentials` entitlement flags still exist and are read nowhere. |
 | Free recruiters (no subscription) posting jobs | **Unlimited today.** Policy undecided; `activeJobPostingLimit` deliberately ignores non-recruiter tiers. |
 
 ## Stripe (test mode only)

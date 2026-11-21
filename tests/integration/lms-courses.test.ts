@@ -382,9 +382,28 @@ describe('LMS Courses & Learning Management Integration (F-07)', () => {
     expect(lmsJob).toBeDefined();
     expect(lmsJob.payload.certificateNumber).toBe(certificateNumber);
 
+    // Completing the lessons is not an assessment: the evidence is recorded
+    // unverified, never authority_verified (C-20).
     const evidenceJob = jobs.find(
-      (j: any) => j.type === 'evidence.propagate' && j.payload.level === 'authority_verified'
+      (j: any) => j.type === 'evidence.propagate' && j.payload.level === 'unverified'
     );
     expect(evidenceJob).toBeDefined();
+    expect(
+      jobs.some(
+        (j: any) => j.type === 'evidence.propagate' && j.payload.level === 'authority_verified'
+      )
+    ).toBe(false);
+
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/v1/evidence/mine',
+      headers: { authorization: `Bearer ${candidateToken}` },
+    });
+    const completion = mine
+      .json()
+      .evidence.find(
+        (e: any) => e.type === 'course_completion' && e.provenance === `course:${course.id}`
+      );
+    expect(completion).toMatchObject({ verificationLevel: 'unverified', status: 'pending' });
   });
 });

@@ -60,7 +60,14 @@ async function addRole(app: FastifyInstance, token: string, companyName: string,
   return res.body.workHistory.id as string;
 }
 
-async function requestReference(app: FastifyInstance, token: string, historyId: string) {
+// One mailbox gives at most one reference per role (C-17), so a second
+// reference on the same role names a different referee.
+async function requestReference(
+  app: FastifyInstance,
+  token: string,
+  historyId: string,
+  refereeEmail = 'morgan@contoso.example'
+) {
   const res = await call(
     app,
     'POST',
@@ -68,7 +75,7 @@ async function requestReference(app: FastifyInstance, token: string, historyId: 
     token,
     {
       refereeName: 'Morgan Manager',
-      refereeEmail: 'morgan@contoso.example',
+      refereeEmail,
       relationship: 'manager',
     }
   );
@@ -112,7 +119,7 @@ describe('Removing a role from your work history', () => {
       }
     );
     const pending = await requestReference(app, casey.token, mistaken);
-    const answered = await requestReference(app, casey.token, mistaken);
+    const answered = await requestReference(app, casey.token, mistaken, 'riley@contoso.example');
     const submitted = await call(
       app,
       'POST',

@@ -31,7 +31,8 @@ export interface RequestConnectionInput {
  */
 export function requestConnection(
   input: RequestConnectionInput,
-  existingConnections: Connection[] = []
+  existingConnections: Connection[] = [],
+  recipientAccepts = true
 ): Connection {
   if (input.senderId === input.recipientId) {
     throw new DomainError('VALIDATION_FAILED', 'Cannot send a connection request to yourself.');
@@ -57,6 +58,11 @@ export function requestConnection(
         'A connection request is already pending between these users.'
       );
     }
+  }
+
+  // The recipient's "Allow connection requests" setting (C-29).
+  if (!recipientAccepts) {
+    throw new DomainError('FORBIDDEN', 'This person is not accepting connection requests.');
   }
 
   const now = new Date().toISOString();
