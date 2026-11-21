@@ -11,7 +11,7 @@ Keep these three vocabularies separate:
 | Vocabulary | Source location | Rows |
 |---|---|---:|
 | IP founder execution phases 0–10 | [Implementation plan](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md#L19-L52) | 11 |
-| SSOT capability phases Ph0–Ph10 | [SSOT §38.1](../../SSOT.md#L4194-L4208) | 11 |
+| SSOT capability phases Ph0–Ph10 | [SSOT §23.1](../../SSOT.md#231-phases-010) | 11 |
 | RDM delivery phases Ph0–Ph4 | [Target roadmap §4](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md#L71-L79) | 5 target phases, referenced as candidates |
 
 Matching phase numbers do not establish equivalence. The implementation plan's [current-baseline note](../30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md#L3-L17) points to the current audit and delivery roadmap and preserves the distinction between a proposed restricted beta and career-loop GA. The target [roadmap](../22_IMPLEMENTATION_ROADMAP/ROADMAP.md) and [developer guide](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) are draft planning artifacts.
