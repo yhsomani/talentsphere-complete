@@ -115,5 +115,10 @@ describe('Connection requests and connections-only profiles (C-29)', () => {
     expect((await call(app, 'GET', profileUrl, stranger.token)).status).toBe(403);
     expect((await call(app, 'GET', evidenceUrl, stranger.token)).status).toBe(403);
     expect((await call(app, 'GET', profileUrl)).status).toBe(403);
+
+    // K-07: the activity score follows the same rule as the profile.
+    const activityUrl = `/api/v1/activity/users/${owner.user.id}/score`;
+    expect((await call(app, 'GET', activityUrl, peer.token)).status).toBe(200);
+    expect((await call(app, 'GET', activityUrl, stranger.token)).status).toBe(403);
   });
 });

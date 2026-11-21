@@ -9646,6 +9646,7 @@ export async function buildApp(
         settings,
         viewerUserId: session.userId,
         viewerRoles: session.roles,
+        isConnected: viewerIsConnected(session.userId, profile),
       });
       if (visibility === 'profile_restricted') {
         throw new DomainError(
