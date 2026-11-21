@@ -123,6 +123,14 @@ export const SkillsSection: React.FC = () => {
           The skills you list, and the skills that go with each one.{' '}
           <Link to="/career">See how ready you are for a role.</Link>
         </p>
+        {/* K-19: skills live in server memory until durable storage lands. */}
+        <Notice
+          tone="info"
+          style={{ marginBottom: spacing.md }}
+          data-testid="skills-ephemeral-notice"
+        >
+          Skills are not saved permanently yet. A server restart clears them.
+        </Notice>
         {error && <LoadError message={error} onRetry={() => void load()} />}
         {!error && mine === null && <p role="status">Loading your skills.</p>}
         {mine?.length === 0 && (
