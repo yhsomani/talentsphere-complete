@@ -12861,7 +12861,7 @@ export async function buildApp(
           });
         } catch {
           // No code was queued: remove exactly this challenge (a retry must
-          // not hit the resend cooldown) and give the budget back (K-05).
+          // not hit the re-issue cooldown) and give the budget back (K-05).
           await persist({ kind: 'emailChallengeDelete', workHistoryId: id, base: challenge }).catch(
             () => undefined
           );
