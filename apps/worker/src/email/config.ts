@@ -5,6 +5,12 @@ export const SUPPORTED_EMAIL_PROVIDERS = ['none', 'brevo'] as const;
 export type EmailProviderName = (typeof SUPPORTED_EMAIL_PROVIDERS)[number];
 
 /**
+ * Provider request timeout (aborts the HTTP call). Must stay below the claim
+ * cycle's handler timeout so a timed-out job is no longer sending (K-21).
+ */
+export const EMAIL_PROVIDER_TIMEOUT_MS = 20_000;
+
+/**
  * The worker's single reader of email-related environment variables. Secrets
  * are read here and nowhere else in the worker. (The API validates the same
  * names through @talentsphere/config; the worker cannot import that package
@@ -41,7 +47,7 @@ export function loadEmailConfig(env: Record<string, string | undefined>): EmailC
       apiKey: env.BREVO_API_KEY?.trim() || undefined,
       baseUrl: 'https://api.brevo.com/v3',
     },
-    timeoutMs: 20_000,
+    timeoutMs: EMAIL_PROVIDER_TIMEOUT_MS,
   };
 }
 
