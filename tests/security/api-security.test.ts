@@ -765,6 +765,32 @@ describe('SEC: per-account sign-in failure throttle (C-23, CWE-307)', () => {
     expect((await login('bystander@example.com', PASSWORD, '198.51.100.1')).statusCode).toBe(200);
   });
 
+  // K-05: the attempt is counted before the password check, so guesses sent in
+  // parallel cannot all be evaluated against the same (stale) count.
+  it('counts parallel guesses: of 6 concurrent wrong passwords at most 3 are checked', async () => {
+    const registered = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'parallel@example.com',
+        password: PASSWORD,
+        fullName: 'Throttle Test',
+        role: 'candidate',
+      },
+    });
+    expect(registered.statusCode).toBe(201);
+    const statuses = (
+      await Promise.all(
+        Array.from({ length: 6 }, (_, i) =>
+          login('parallel@example.com', 'wrong-guess', `198.18.0.${i + 1}`)
+        )
+      )
+    ).map((r) => r.statusCode);
+    expect(statuses.filter((s) => s === 401).length).toBeLessThanOrEqual(3);
+    expect(statuses.filter((s) => s === 429).length).toBeGreaterThanOrEqual(3);
+    expect(statuses.every((s) => s === 401 || s === 429)).toBe(true);
+  });
+
   it('lets the correct password in once the window has passed, and a success clears the count', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(Date.now() + 15 * 60 * 1000 + 1000);

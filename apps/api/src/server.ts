@@ -1117,16 +1117,18 @@ export async function buildApp(
           'Too many sign-in attempts for this account. Wait 15 minutes, then try again.'
         );
       }
+      // Count the attempt before the first await, so parallel guesses are
+      // each evaluated against the attempts already in flight (K-05); a
+      // correct password clears the window, as before.
+      recordLoginFailure(emailKey);
       const user = usersByEmail.get(emailKey);
       if (!user) {
         await verifyPassword(input.password, await timingDecoyHash);
-        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
 
       const isValid = await verifyPassword(input.password, user.passwordHash);
       if (!isValid) {
-        recordLoginFailure(emailKey);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
       loginFailuresByEmail.delete(emailKey);
@@ -12694,6 +12696,9 @@ export async function buildApp(
   // Sliding-window send logs for the budgets in assertEmailCodeIssuable /
   // assertReferenceRequestAllowed (C-06). Keys: `code-user:<id>`,
   // `code-addr:<email>`, `ref-user:<id>`. Per process, like the limiter store.
+  // A send is reserved synchronously right after its budget check (no await
+  // in between), so parallel requests see each other; a failed send releases
+  // its reservation (K-05).
   const HOUR_MS = 60 * 60 * 1000;
   const sendLog = new Map<string, number[]>();
   const sendsWithin = (key: string, windowMs: number): number => {
@@ -12703,8 +12708,18 @@ export async function buildApp(
     else sendLog.delete(key);
     return recent.length;
   };
-  const recordSend = (...keys: string[]) => {
-    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), Date.now()]);
+  const reserveSends = (...keys: string[]): (() => void) => {
+    // A unique stamp per reservation, so release removes exactly this one.
+    const stamp = Date.now() + Math.random() / 2;
+    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), stamp]);
+    return () => {
+      for (const key of keys) {
+        const list = sendLog.get(key);
+        const at = list ? list.indexOf(stamp) : -1;
+        if (list && at >= 0) list.splice(at, 1);
+        if (list && list.length === 0) sendLog.delete(key);
+      }
+    };
   };
 
   // Response projections: replay keys and token hashes never leave the API.
@@ -12818,6 +12833,7 @@ export async function buildApp(
           issuesToAddressLastDay: sendsWithin(`code-addr:${email}`, 24 * HOUR_MS),
           now: new Date(),
         });
+        const releaseSend = reserveSends(`code-user:${session.userId}`, `code-addr:${email}`);
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
         const challenge: EmailChallenge = {
@@ -12828,7 +12844,12 @@ export async function buildApp(
           expiresAt: new Date(now.getTime() + EMAIL_CHALLENGE_TTL_MS).toISOString(),
           createdAt: now.toISOString(),
         };
-        await persist({ kind: 'emailChallenge', value: challenge });
+        try {
+          await persist({ kind: 'emailChallenge', value: challenge });
+        } catch (err) {
+          releaseSend();
+          throw err;
+        }
         // The worker delivers this (email provider) — the code is never
         // returned to the browser that asked for it.
         // Credentials must be durably queued. Failure must not be swallowed
@@ -12839,9 +12860,14 @@ export async function buildApp(
             payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
           });
         } catch {
+          // No code was queued: remove exactly this challenge (a retry must
+          // not hit the resend cooldown) and give the budget back (K-05).
+          await persist({ kind: 'emailChallengeDelete', workHistoryId: id, base: challenge }).catch(
+            () => undefined
+          );
+          releaseSend();
           throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
         }
-        recordSend(`code-user:${session.userId}`, `code-addr:${email}`);
         return reply.status(202).send({
           status: 'verification_pending',
           email,
@@ -12975,7 +13001,13 @@ export async function buildApp(
         tokenHash: token ? sha256Hex(token) : undefined,
         clientRequestId: body.clientRequestId,
       };
-      await persist({ kind: 'reference', value: stored });
+      const releaseSend = reserveSends(`ref-user:${session.userId}`);
+      try {
+        await persist({ kind: 'reference', value: stored });
+      } catch (err) {
+        releaseSend();
+        throw err;
+      }
 
       const candidateName = profilesByUserId.get(workHistory.candidateId)?.fullName;
       try {
@@ -12992,9 +13024,9 @@ export async function buildApp(
           },
         });
       } catch {
+        releaseSend();
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
-      recordSend(`ref-user:${session.userId}`);
 
       return reply.status(201).send({
         reference: publicReference(stored),
