@@ -2,6 +2,8 @@
 
 Doc ID: SPEC-MICRO · Owner: Product Director (Functional Spec) · Version 1.0 · Status: Under Review · Relates: `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` (every ID below exists there), BR-REG, INV-REG, DT-00, SM-00, SPEC-01…SPEC-14
 
+> **Revision 2 folded in (2026-10-27)** from `MICRO_FEATURE_SPECS.md#record-spec-acceptance-additions-rev2`: appended under "Revision 2 additions"; where it differs from text above, the appended text governs. Status unchanged; proposals still need owner/ARB ratification.
+
 Compact, implementation-ready specs for small behaviours that need an unambiguous rule but not a full document. **[TARGET]**; `{…}` **[OPEN]**. Each row carries: **Rule** (what is always true), **Inputs/validation**, **Behaviour**, **Edge/failure**, **AC** (Given/When/Then in one line; ID `AC-<micro id>-NN`), **Test** (UT unit, IT integration, E2E, SEC, A11Y accessibility, PROP property). Phase and priority are inherited from the parent feature in the hierarchy. Where a micro-feature is fully specified in a long-form spec, the row points there instead of repeating.
 
 ## 1. Identity & access
@@ -107,3 +109,431 @@ Compact, implementation-ready specs for small behaviours that need an unambiguou
 ## 8. Coverage
 
 Count: **65 micro-feature specs**, covering all 24 domains except DOM-12, DOM-14, DOM-21, DOM-23 (no Phase-1/2 micro-behaviours needing a standalone rule; they are specified when their parent features enter delivery). Each row's parent feature, phase and priority are authoritative in the hierarchy. Rows must be promoted to a full spec (SPEC-n) if they gain more than one actor, more than one state, or any money/privacy consequence.
+
+# Revision 2 additions (folded 2026-10-27 from `MICRO_FEATURE_SPECS.md#record-spec-acceptance-additions-rev2`)
+
+## 1. Criteria for review-resolution rules
+
+### 1.1 Evidence integrity (REVW-12, REVW-22, REVW-20 archive)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-05-04-51 | a learner completes a first-party course with a platform rule | the issuer mints the completion | one item at `authority_verified` with `issuer_class = platform`; the badge shows the class | Happy |
+| AC-05-04-52 | any client sends an `issuerClass` or `rung` field when creating or editing evidence | POST/PATCH | field ignored or `422`; the stored class equals the class of the issuing record (INV-T46) | Security |
+| AC-05-04-53 | instructor account equals the learner account | instructor signs off | `422 self_signoff`; nothing minted; enrolment unchanged (INV-T47) | Negative |
+| AC-05-04-54 | instructor and learner share a device cluster or payment instrument | instructor signs off | sign-off held for human review; enrolment stays `completion_pending_signoff`; no evidence; no automatic rejection (DT-14 row 2) | Negative/Security |
+| AC-05-04-55 | an item whose only authority record has `issuer_class = instructor` | rendered; filtered by "platform verified"; scored for matching | badge "Instructor attested"; excluded from the platform-verified filter; match explanation shows the lower class weight | Honesty |
+| AC-05-04-56 | an `instructor`-class record is revoked by its issuer or a moderator | confirm | rung recomputes (falls to the next supported rung); holder notified within 24 h with appeal path; audited | Happy |
+| AC-08-04-51 | an approved instructor with a completed conflict-of-interest declaration signs off a learner other than themselves with no shared signal | sign-off | accepted; evidence minted at `authority_verified` with class `instructor` (DT-14 row 5) | Happy |
+| AC-06-01-51 | a work claim at a domain equal to a verified `org_domain` of a verified organization | candidate enters the code correctly | rung `artifact_backed`; badge "Mailbox verified" (`domain_binding = bound`) | Happy |
+| AC-06-01-52 | a work claim at a domain the candidate owns or controls that is not bound to a verified organization | code entered correctly | rung stays `claimed`; badge "Mailbox verified, employer not confirmed"; the popover says the employer is not confirmed | Honesty |
+| AC-06-01-53 | a `bound` proof exists and its organization's verification is revoked | revocation commits | the provenance record is invalidated; the item's rung recomputes; audited (INV-T48) | Happy |
+| AC-05-01-51 | an active evidence item | user chooses Archive then Undo within 8 s | no withdraw request is sent; item still `active` | Happy |
+| AC-05-01-52 | an active evidence item | user chooses Archive and does not undo | after 8 s the item is `withdrawn` (terminal); "Create again from this" creates a new `draft` with `restored_from` | Happy |
+
+### 1.2 Organization lifecycle (REVW-20)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-02-01-01 | a new organization (`verification_state = unverified`) | owner publishes a first valid job | allowed (pending-limited mode, 1 live job) | Happy |
+| AC-02-01-02 | the same organization with 1 live job | owner publishes a second job | `409 org_verification_required` | Negative |
+| AC-02-01-03 | owner submits a domain with a correct DNS TXT proof | review completes | `pending → verified`; `org_domain` usable for employer-domain binding; audited | Happy |
+| AC-02-01-04 | a verified organization with 3 live jobs | a reviewer revokes verification | in one transaction the oldest live job stays and two move to `paused` (reason `org_unverified`); applications on paused jobs continue; owner notified (BR-T123) | Happy |
+| AC-02-01-05 | an automated check fails a domain re-check | the system runs | a review task opens; `verification_state` does not change by itself (U6) | Negative |
+
+### 1.3 Account, age and erasure (REVW-21, REVW-29)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-01-01-51 | a registration without the minimum-age attestation | submit | `422 age_attestation_required`; no account row | Negative |
+| AC-01-01-52 | the person declares an age below the minimum | submit | refused with a neutral message; no account created; only a hashed rate-limit signal kept for 24 h | Security |
+| AC-01-01-53 | any account with status `active` | database constraint check | `min_age_attested_at` and the policy version are present (INV-T50) | Invariant |
+| AC-19-07-01 | one moderator decides to suspend an account | submits without a second approver | rejected `second_person_required`; with the documented emergency exception the action applies and is reviewed within 24 h | Negative |
+| AC-22-03-51 | a `suspended` account with an open moderation case | the holder requests erasure | request acknowledged and parked `on_hold` (reason `moderation_case_open`); the account stays `suspended`; the requester is told a hold applies (INV-T49) | Negative |
+| AC-22-03-52 | the case in AC-22-03-51 becomes `closed` | the hold clears | the request resumes; cooling-off starts | Happy |
+
+### 1.4 Applications, referees, matching view (REVW-27, REVW-38, REVW-43, REVW-11)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-10-03-51 | an application withdrawn 2 h ago, cooldown 24 h | the candidate re-applies | `409 reapply_cooldown` with the earliest allowed time | Negative |
+| AC-10-03-52 | a withdrawn application, cooldown passed, job `published` | the candidate re-applies | a new application with `reapplied_from`; the hiring team sees the link and withdrawal date; a new evidence snapshot is taken | Happy |
+| AC-10-03-53 | an application ended `rejected` | the candidate tries to re-apply | refused; only a recruiter invitation creates a new linked application | Negative |
+| AC-06-10-51 | a manual reminder was sent on day 3 | day 4 arrives | the system reminder is deferred until 3 days after the manual one; the total never exceeds 2 | Happy |
+| AC-06-10-52 | two reminders sent in any mix of system and manual | the candidate presses "Send reminder" | disabled with "2 of 2 reminders used"; the API returns `409 reminder_cap_reached` | Negative |
+| AC-11-10-01 | a job with 12 applicants of mixed scores | a recruiter opens "Suggested order" | 12 rows are returned; none hidden; the view is labelled "Suggested order" and advisory (INV-T52) | Honesty |
+| AC-11-10-02 | the UI and API surface | text and route lint | the advisory view is never named "shortlist" | Honesty |
+| AC-11-09-01 | a tenant with no recorded fairness review | a recruiter requests score-ranked results | the feature flag `matching.recruiter_ranking` is off; the plain filter and the candidate-facing explanation still work (BR-T126) | Negative |
+| AC-11-09-02 | ROLE-AUD has recorded the baseline review | the flag is switched on | the change is audited with the review reference | Happy |
+
+### 1.5 Sessions, idempotency, retention (REVW-18, REVW-14, REVW-26, entitlement stub)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-01-04-51 | a refresh token idle for more than CONST-S02 | refresh | `401 session_expired` (constants table in BR-REG-R2) | Negative |
+| AC-01-04-52 | a sensitive action and a re-auth older than CONST-S06 (5 min) | the action is submitted | step-up required | Security |
+| AC-01-04-53 | a refresh token presented again within CONST-S07 (5 s) with its successor unused | refresh | the same successor is returned; presented outside the leeway the family is revoked | Security |
+| AC-24-03-51 | a queued offline write with an `Idempotency-Key` created on day 0 | replayed on day 13 | the stored response is returned, no second effect | Idempotency |
+| AC-24-03-52 | a route with a natural key | the same logical write arrives twice after day 15 | the second is deduplicated by the natural key | Idempotency |
+| AC-10-14-51 | an application whose consent window ended 31 days ago | the retention job has run | the organization's copy holds no snapshot content, answers or contact details; at most the minimal record with an opaque `subject_ref` remains, and only if the OPEN-08 policy keeps it (BR-T122) | Privacy |
+| AC-16-04-51 | a free organization in Phase 1 | an admin compensation grant is created | the grant needs reason, approver and expiry; it is audited; a client or redirect cannot create it (BR-T090) | Security |
+| AC-02-03-51 | a principal with role `viewer` in an organization | the principal opens candidate content | denied; metadata only where DT-01 allows | Security |
+| AC-02-03-52 | an `org_admin` in an organization | the admin files a data-rights request for an employee | refused; the requester must be the subject (SM-DSR t1) | Security |
+
+## 2. Criteria for P0 features that had none (REVW-17)
+
+Method and list: `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2` section 5. Each feature below was a P0 feature in Phase 0 or 1 (or a P0 Phase 2 feature) with no criterion of its own.
+
+| AC | Feature | Given | When | Then | Category |
+|---|---|---|---|---|---|
+| AC-01-09-01 | FEAT-01-09 | an authenticated principal with several scoped grants | `GET /me/capabilities` for one scope | returns only that scope's evaluated capability set | Happy |
+| AC-01-09-02 | FEAT-01-09 | a capability absent from the response | the client calls the action directly | `403`; the capability set is a hint, never the enforcement (INV-T01) | Security |
+| AC-01-09-03 | FEAT-01-09 | a grant changes | the next request is made | the response reflects the new set (no stale cache) | Happy |
+| AC-02-07-01 | FEAT-02-07 | a principal of organization A | requests any tenant-scoped route with an id of organization B | `404` or `403`; the canary suite fails the build if any route returns B's data | Security |
+| AC-02-07-02 | FEAT-02-07 | any tenant table | lint | it has `org_id` and a forced row-level security policy | Invariant |
+| AC-02-07-03 | FEAT-02-07 | the application database role | role check | no `BYPASSRLS` | Invariant |
+| AC-04-01-01 | FEAT-04-01 | the skills read API | list | canonical skills are returned with a taxonomy version | Happy |
+| AC-04-01-02 | FEAT-04-01 | an alias of a skill | resolved | resolves to the canonical skill | Happy |
+| AC-04-01-03 | FEAT-04-01 | two skills are merged | an old id is read | it still resolves (redirect) and a merge event is emitted | Happy |
+| AC-04-02-01 | FEAT-04-02 | evidence, a job or a course | tagged with a canonical skill | accepted | Happy |
+| AC-04-02-02 | FEAT-04-02 | a free-text skill | tagged | `422` (BR-T006) | Negative |
+| AC-04-02-03 | FEAT-04-02 | any entity type | tagged | the same skill ids and API are used | Happy |
+| AC-08-01-01 | FEAT-08-01 | the course catalogue | filtered by skill and level | only `published` courses are returned | Happy |
+| AC-08-01-02 | FEAT-08-01 | a course with prerequisites | opened by a learner who has not met them | unmet prerequisites are shown with links | Happy |
+| AC-15-01-01 | FEAT-15-01 | in-app notifications exist | the notification centre opens | newest first, with an unread count | Happy |
+| AC-15-01-02 | FEAT-15-01 | an unread notification | marked read twice | idempotent | Idempotency |
+| AC-15-03-01 | FEAT-15-03 | the email provider is down | a notification is raised | the in-app item exists; the `email.send` job retries (SM-BGJOB t4); no duplicate email on recovery | Failure |
+| AC-15-03-02 | FEAT-15-03 | a mandatory security email during quiet hours | routed | sent now (DT-07 row 2) | Happy |
+| AC-15-06-01 | FEAT-15-06 | a hard bounce | the provider webhook arrives | delivery `bounced`; the address is suppressed | Happy |
+| AC-15-06-02 | FEAT-15-06 | a transient provider error | the job retries | delivery shows `failed_retry` and mirrors the job, not a second retry schedule | Happy |
+| AC-15-07-01 | FEAT-15-07 | an engagement email | the recipient uses one-click unsubscribe | that category is suppressed | Happy |
+| AC-15-07-02 | FEAT-15-07 | a mandatory transactional category | unsubscribe attempted | not suppressed; the page explains why | Negative |
+| AC-15-07-03 | FEAT-15-07 | an address on the suppression list | a send is attempted | not sent (SM-NOTIFY t1) | Negative |
+| AC-20-01-01 | FEAT-20-01 | a customer principal | opens a back-office route | `403`; back-office code is not served to the principal (authenticated edge rule) | Security |
+| AC-20-01-02 | FEAT-20-01 | a staff principal without MFA | opens the console | denied until MFA is enrolled (BR-T044) | Security |
+| AC-20-01-03 | FEAT-20-01 | a role grant changes | saved | audited with actor and reason | Happy |
+| AC-20-03-01 | FEAT-20-03 | the audit viewer | a record is opened | actor, action, resource, reason and request id are shown | Happy |
+| AC-20-03-02 | FEAT-20-03 | an audit export | requested | re-auth is required and the export is itself audited | Security |
+| AC-21-01-01 | FEAT-21-01 | a user without `analytics.product` consent | uses the product | no product-analytics event is captured | Privacy |
+| AC-21-01-02 | FEAT-21-01 | consent is withdrawn | the next event would fire | it is not captured | Privacy |
+| AC-22-06-01 | FEAT-22-06 | a user accepts policy version v | stored | version, timestamp and account are recorded | Happy |
+| AC-22-06-02 | FEAT-22-06 | policy version v+1 is published | the user's next sensitive action | acceptance of v+1 is required first | Happy |
+| AC-24-01-01 | FEAT-24-01 | a state change commits | the process is killed before dispatch | the outbox row survives and the event is delivered after restart | Failure |
+| AC-24-01-02 | FEAT-24-01 | an event is delivered twice | the consumer handles it | one effect (consumer dedupe on `event_id`) | Idempotency |
+| AC-24-01-03 | FEAT-24-01 | the dispatcher restarts | mid-batch | no event is lost | Failure |
+| AC-24-02-01 | FEAT-24-02 | two workers race for one job | claim | exactly one wins (`SKIP LOCKED`) | Concurrency |
+| AC-24-02-02 | FEAT-24-02 | a stale worker finishes after its lease expired | complete | the fenced write affects zero rows and the result is discarded | Concurrency |
+| AC-24-02-03 | FEAT-24-02 | jobs of kinds `email.send`, `ai.*` and a permanent error | failures repeat | `email.send` is attempted up to 12 times, `ai.*` 3 times, a permanent error goes straight to `dead`; a dead job of a protected kind raises an alert (SM-BGJOB t4, t7) | Failure |
+| AC-24-04-01 | FEAT-24-04 | a signed download URL | used after expiry | `403` | Security |
+| AC-24-04-02 | FEAT-24-04 | a non-image file | downloaded | forced as attachment (BR-T116) | Security |
+| AC-24-05-01 | FEAT-24-05 | a request that passes shell, API and worker | traced | one trace id spans all three; logs redact secrets and direct identifiers | Observability |
+| AC-24-08-01 | FEAT-24-08 | requests over the limit | sent | `429` with `Retry-After`; auth endpoints are stricter (BR-T115) | Security |
+| AC-24-09-01 | FEAT-24-09 | two worker replicas | a scheduled tick fires | it runs once (unique kind and tick) | Concurrency |
+| AC-24-09-02 | FEAT-24-09 | a time-driven transition is due | the job runs | the guard is re-checked at execution time (U7) | Happy |
+| AC-24-11-01 | FEAT-24-11 | a migration that drops or rewrites a column in one step | lint | rejected unless it follows expand/contract with a rollback note | Invariant |
+| AC-17-01-01 | FEAT-17-01 | code that imports a model provider directly | CI lint | the build fails (BR-T110) | Invariant |
+| AC-17-01-02 | FEAT-17-01 | the Phase 0 gateway stub | a call is made | denied by default; no provider is contacted | Security |
+| AC-17-02-01 | FEAT-17-02 | a free-tier user | requests AI assistance | no paid inference; the deterministic fallback runs (BR-T111) | Happy |
+| AC-17-03-01 | FEAT-17-03 | a principal bound to `AI_PROHIBITED` | any gateway call | denied regardless of caller (BR-T025) | Security |
+| AC-17-03-02 | FEAT-17-03 | a denial | logged | the log holds the policy and principal, not the prompt content | Privacy |
+| AC-07-01-01 | FEAT-07-01 (Phase 2) | the assessment catalogue | an item is opened | mode badge and AI-policy label are shown | Happy |
+| AC-16-01-01 | FEAT-16-01 (Phase 2) | a plan with no price set | the catalogue renders | no price is shown (prices are OPEN-05) | Honesty |
+| AC-19-02-01 | FEAT-19-02 (Phase 2) | a report and a system flag on one target | the queue is built | one case (dedupe by target and category); automation cannot move it to `actioned` | Happy |
+| AC-19-08-01 | FEAT-19-08 (Phase 2) | a reporter files more than 20 reports in a day | files one more | `429` (BR-T048) | Negative |
+
+## 3. Spec-text deltas (passages replaced once accepted)
+
+| Original passage | Replacement meaning |
+|---|---|
+| SPEC-G2 badge line (about L203): "`Mailbox verified` (artifact-backed via domain proof) ... `Employer confirmed` (authority; Phase 3 via verified org)" | Badges: "Not verified"; "Mailbox verified" only for a `bound` domain; "Mailbox verified, employer not confirmed" for an `unbound` domain (rung stays `claimed`); "Confirmed by referee"; for authority, the class is shown: "Platform verified", "Institution verified", "Employer confirmed", "Instructor attested" (DT-06 REV2) |
+| SPEC-G2 actors table (about L20): ROLE-INST and issuers "mint `authority_verified` items" | Issuers mint authority records with a mandatory `issuer_class`; instructor-class records follow BR-T119 and DT-14 |
+| SPEC-G3 actors and completion rule (about L189, L212 to L214): `instructorSignoff`, "rung `authority_verified` when ... instructor-signed-off" | Instructor sign-off mints `authority_verified` with class `instructor` only after DT-14; it never counts as platform-verified; revocable |
+| SPEC-G3 offline lines (L76, L209, L256) | Assessment answers are online-only; lesson progress is a queued write; downloadable video is out of Phases 1 and 2 (REVW-15 decision) |
+| SPEC-G1 onboarding (registration step, micro-feature FEAT-01-01.3 "age/guardian gate [OPEN-09]") | Registration requires the minimum-age attestation of BR-T120 (value [OPEN-counsel]); no account is created below the minimum |
+| SPEC-G4 FEAT-10-03 "Withdraw & re-apply policy" and the application states paragraph | Withdrawn is terminal; the candidate may submit a new linked application after the cooldown (BR-T125, SM-APPLICATION t12) |
+| SPEC-G4 FEAT-11-10 "Suggested shortlist per job (human-gated)" (also PCAP-01 title) | "Suggested order"; the view returns all applicants (INV-T52) |
+| SPEC-G5 section 3.2 CSV columns and BR-T106 | The roster CSV may carry the attestation flag or date of birth only if counsel requires it (BR-T120); rows flagged under-age stay blocked |
+| USER_JOURNEYS about line 115: "1st reminder after 3 days (ACT-VER-03)" | "Reminders: the system sends on day 4 and day 9; you can also send one yourself 3 days after the last send; two in total" (BR-T121) |
+| ACT-VER-03 availability (`07_UI_UX`) | "≥ 3 days since last send of any kind and fewer than 2 reminders in total" (DT-13) |
+| SPEC-G5 retention paragraph for applications; DATA-021 (24 months) | Identifiable content follows BR-T122; the 24-month figure applies only to the minimal record if OPEN-08 allows it |
+
+
+---
+
+<a id="record-spec-acceptance-additions-rev2"></a>
+## Preserved source record: SPEC_ACCEPTANCE_ADDITIONS_REV2
+
+> Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_ACCEPTANCE_ADDITIONS_REV2.md -->
+<a id="record-spec-acceptance-additions-rev2--feature-specifications-acceptance-additions-spec-rev2"></a>
+# Feature Specifications, Acceptance Additions (SPEC REV2)
+
+Doc ID: SPEC-00-R2 · Owner: Product Director (Functional Spec) · Version 2.0 · Status: Proposed (Under Review) · Date: 2026-10-25 · Closes: REVW-12, REVW-17 (P0 feature gaps), REVW-18, REVW-20, REVW-21, REVW-22, REVW-26, REVW-27, REVW-29, REVW-38, REVW-43 (acceptance and spec-text parts) · Relates: SPEC-00 and SPEC-G1 to G5, MICRO-FEAT, QA-AC, BR-REG-R2, INV-REG-R2, SM-00-R2, DT-00-R2
+
+> **Folded into `MICRO_FEATURE_SPECS.md` on 2026-10-27.** Change record only; edit the original.
+
+**Relationship (no original file was edited).** This file **extends** the long-form specifications `SPEC_G1…G5` and `MICRO_FEATURE_SPECS.md` with acceptance criteria and with spec-text deltas. It supersedes nothing. The spec-text deltas in section 3 name the original passages they would replace **once accepted**. Criteria are numbered so they cannot collide with registered ones: for features that already have criteria the new numbers start at 51; for features with none they start at 01. The test catalogue is owned by QA; this file proposes no TEST ids. Governance should link this file from `05_FEATURE_SPECIFICATIONS/README.md` (index) and `00_CONTROL_CENTRE/MASTER_INDEX.md`.
+
+This file registers **95 new criteria** (counted by script over rows that begin `| AC-DD-NN-NN |`; no id collides with a criterion registered in `05_*` or `16_*`). All content **[TARGET]**; nothing here claims anything is built. Table form is that of the long-form specs: `| AC id | Given | When | Then | Category |`.
+
+<a id="record-spec-acceptance-additions-rev2--1-criteria-for-review-resolution-rules"></a>
+## 1. Criteria for review-resolution rules
+
+<a id="record-spec-acceptance-additions-rev2--11-evidence-integrity-revw-12-revw-22-revw-20-archive"></a>
+### 1.1 Evidence integrity (REVW-12, REVW-22, REVW-20 archive)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-05-04-51 | a learner completes a first-party course with a platform rule | the issuer mints the completion | one item at `authority_verified` with `issuer_class = platform`; the badge shows the class | Happy |
+| AC-05-04-52 | any client sends an `issuerClass` or `rung` field when creating or editing evidence | POST/PATCH | field ignored or `422`; the stored class equals the class of the issuing record (INV-T46) | Security |
+| AC-05-04-53 | instructor account equals the learner account | instructor signs off | `422 self_signoff`; nothing minted; enrolment unchanged (INV-T47) | Negative |
+| AC-05-04-54 | instructor and learner share a device cluster or payment instrument | instructor signs off | sign-off held for human review; enrolment stays `completion_pending_signoff`; no evidence; no automatic rejection (DT-14 row 2) | Negative/Security |
+| AC-05-04-55 | an item whose only authority record has `issuer_class = instructor` | rendered; filtered by "platform verified"; scored for matching | badge "Instructor attested"; excluded from the platform-verified filter; match explanation shows the lower class weight | Honesty |
+| AC-05-04-56 | an `instructor`-class record is revoked by its issuer or a moderator | confirm | rung recomputes (falls to the next supported rung); holder notified within 24 h with appeal path; audited | Happy |
+| AC-08-04-51 | an approved instructor with a completed conflict-of-interest declaration signs off a learner other than themselves with no shared signal | sign-off | accepted; evidence minted at `authority_verified` with class `instructor` (DT-14 row 5) | Happy |
+| AC-06-01-51 | a work claim at a domain equal to a verified `org_domain` of a verified organization | candidate enters the code correctly | rung `artifact_backed`; badge "Mailbox verified" (`domain_binding = bound`) | Happy |
+| AC-06-01-52 | a work claim at a domain the candidate owns or controls that is not bound to a verified organization | code entered correctly | rung stays `claimed`; badge "Mailbox verified, employer not confirmed"; the popover says the employer is not confirmed | Honesty |
+| AC-06-01-53 | a `bound` proof exists and its organization's verification is revoked | revocation commits | the provenance record is invalidated; the item's rung recomputes; audited (INV-T48) | Happy |
+| AC-05-01-51 | an active evidence item | user chooses Archive then Undo within 8 s | no withdraw request is sent; item still `active` | Happy |
+| AC-05-01-52 | an active evidence item | user chooses Archive and does not undo | after 8 s the item is `withdrawn` (terminal); "Create again from this" creates a new `draft` with `restored_from` | Happy |
+
+<a id="record-spec-acceptance-additions-rev2--12-organization-lifecycle-revw-20"></a>
+### 1.2 Organization lifecycle (REVW-20)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-02-01-01 | a new organization (`verification_state = unverified`) | owner publishes a first valid job | allowed (pending-limited mode, 1 live job) | Happy |
+| AC-02-01-02 | the same organization with 1 live job | owner publishes a second job | `409 org_verification_required` | Negative |
+| AC-02-01-03 | owner submits a domain with a correct DNS TXT proof | review completes | `pending → verified`; `org_domain` usable for employer-domain binding; audited | Happy |
+| AC-02-01-04 | a verified organization with 3 live jobs | a reviewer revokes verification | in one transaction the oldest live job stays and two move to `paused` (reason `org_unverified`); applications on paused jobs continue; owner notified (BR-T123) | Happy |
+| AC-02-01-05 | an automated check fails a domain re-check | the system runs | a review task opens; `verification_state` does not change by itself (U6) | Negative |
+
+<a id="record-spec-acceptance-additions-rev2--13-account-age-and-erasure-revw-21-revw-29"></a>
+### 1.3 Account, age and erasure (REVW-21, REVW-29)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-01-01-51 | a registration without the minimum-age attestation | submit | `422 age_attestation_required`; no account row | Negative |
+| AC-01-01-52 | the person declares an age below the minimum | submit | refused with a neutral message; no account created; only a hashed rate-limit signal kept for 24 h | Security |
+| AC-01-01-53 | any account with status `active` | database constraint check | `min_age_attested_at` and the policy version are present (INV-T50) | Invariant |
+| AC-19-07-01 | one moderator decides to suspend an account | submits without a second approver | rejected `second_person_required`; with the documented emergency exception the action applies and is reviewed within 24 h | Negative |
+| AC-22-03-51 | a `suspended` account with an open moderation case | the holder requests erasure | request acknowledged and parked `on_hold` (reason `moderation_case_open`); the account stays `suspended`; the requester is told a hold applies (INV-T49) | Negative |
+| AC-22-03-52 | the case in AC-22-03-51 becomes `closed` | the hold clears | the request resumes; cooling-off starts | Happy |
+
+<a id="record-spec-acceptance-additions-rev2--14-applications-referees-matching-view-revw-27-revw-38-revw-43-revw-11"></a>
+### 1.4 Applications, referees, matching view (REVW-27, REVW-38, REVW-43, REVW-11)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-10-03-51 | an application withdrawn 2 h ago, cooldown 24 h | the candidate re-applies | `409 reapply_cooldown` with the earliest allowed time | Negative |
+| AC-10-03-52 | a withdrawn application, cooldown passed, job `published` | the candidate re-applies | a new application with `reapplied_from`; the hiring team sees the link and withdrawal date; a new evidence snapshot is taken | Happy |
+| AC-10-03-53 | an application ended `rejected` | the candidate tries to re-apply | refused; only a recruiter invitation creates a new linked application | Negative |
+| AC-06-10-51 | a manual reminder was sent on day 3 | day 4 arrives | the system reminder is deferred until 3 days after the manual one; the total never exceeds 2 | Happy |
+| AC-06-10-52 | two reminders sent in any mix of system and manual | the candidate presses "Send reminder" | disabled with "2 of 2 reminders used"; the API returns `409 reminder_cap_reached` | Negative |
+| AC-11-10-01 | a job with 12 applicants of mixed scores | a recruiter opens "Suggested order" | 12 rows are returned; none hidden; the view is labelled "Suggested order" and advisory (INV-T52) | Honesty |
+| AC-11-10-02 | the UI and API surface | text and route lint | the advisory view is never named "shortlist" | Honesty |
+| AC-11-09-01 | a tenant with no recorded fairness review | a recruiter requests score-ranked results | the feature flag `matching.recruiter_ranking` is off; the plain filter and the candidate-facing explanation still work (BR-T126) | Negative |
+| AC-11-09-02 | ROLE-AUD has recorded the baseline review | the flag is switched on | the change is audited with the review reference | Happy |
+
+<a id="record-spec-acceptance-additions-rev2--15-sessions-idempotency-retention-revw-18-revw-14-revw-26-entitlement-stub"></a>
+### 1.5 Sessions, idempotency, retention (REVW-18, REVW-14, REVW-26, entitlement stub)
+
+| AC | Given | When | Then | Category |
+|---|---|---|---|---|
+| AC-01-04-51 | a refresh token idle for more than CONST-S02 | refresh | `401 session_expired` (constants table in BR-REG-R2) | Negative |
+| AC-01-04-52 | a sensitive action and a re-auth older than CONST-S06 (5 min) | the action is submitted | step-up required | Security |
+| AC-01-04-53 | a refresh token presented again within CONST-S07 (5 s) with its successor unused | refresh | the same successor is returned; presented outside the leeway the family is revoked | Security |
+| AC-24-03-51 | a queued offline write with an `Idempotency-Key` created on day 0 | replayed on day 13 | the stored response is returned, no second effect | Idempotency |
+| AC-24-03-52 | a route with a natural key | the same logical write arrives twice after day 15 | the second is deduplicated by the natural key | Idempotency |
+| AC-10-14-51 | an application whose consent window ended 31 days ago | the retention job has run | the organization's copy holds no snapshot content, answers or contact details; at most the minimal record with an opaque `subject_ref` remains, and only if the OPEN-08 policy keeps it (BR-T122) | Privacy |
+| AC-16-04-51 | a free organization in Phase 1 | an admin compensation grant is created | the grant needs reason, approver and expiry; it is audited; a client or redirect cannot create it (BR-T090) | Security |
+| AC-02-03-51 | a principal with role `viewer` in an organization | the principal opens candidate content | denied; metadata only where DT-01 allows | Security |
+| AC-02-03-52 | an `org_admin` in an organization | the admin files a data-rights request for an employee | refused; the requester must be the subject (SM-DSR t1) | Security |
+
+<a id="record-spec-acceptance-additions-rev2--2-criteria-for-p0-features-that-had-none-revw-17"></a>
+## 2. Criteria for P0 features that had none (REVW-17)
+
+Method and list: `04_PRODUCT_CAPABILITIES/CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md#record-capability-map-phase-reconciliation-rev2` section 5. Each feature below was a P0 feature in Phase 0 or 1 (or a P0 Phase 2 feature) with no criterion of its own.
+
+| AC | Feature | Given | When | Then | Category |
+|---|---|---|---|---|---|
+| AC-01-09-01 | FEAT-01-09 | an authenticated principal with several scoped grants | `GET /me/capabilities` for one scope | returns only that scope's evaluated capability set | Happy |
+| AC-01-09-02 | FEAT-01-09 | a capability absent from the response | the client calls the action directly | `403`; the capability set is a hint, never the enforcement (INV-T01) | Security |
+| AC-01-09-03 | FEAT-01-09 | a grant changes | the next request is made | the response reflects the new set (no stale cache) | Happy |
+| AC-02-07-01 | FEAT-02-07 | a principal of organization A | requests any tenant-scoped route with an id of organization B | `404` or `403`; the canary suite fails the build if any route returns B's data | Security |
+| AC-02-07-02 | FEAT-02-07 | any tenant table | lint | it has `org_id` and a forced row-level security policy | Invariant |
+| AC-02-07-03 | FEAT-02-07 | the application database role | role check | no `BYPASSRLS` | Invariant |
+| AC-04-01-01 | FEAT-04-01 | the skills read API | list | canonical skills are returned with a taxonomy version | Happy |
+| AC-04-01-02 | FEAT-04-01 | an alias of a skill | resolved | resolves to the canonical skill | Happy |
+| AC-04-01-03 | FEAT-04-01 | two skills are merged | an old id is read | it still resolves (redirect) and a merge event is emitted | Happy |
+| AC-04-02-01 | FEAT-04-02 | evidence, a job or a course | tagged with a canonical skill | accepted | Happy |
+| AC-04-02-02 | FEAT-04-02 | a free-text skill | tagged | `422` (BR-T006) | Negative |
+| AC-04-02-03 | FEAT-04-02 | any entity type | tagged | the same skill ids and API are used | Happy |
+| AC-08-01-01 | FEAT-08-01 | the course catalogue | filtered by skill and level | only `published` courses are returned | Happy |
+| AC-08-01-02 | FEAT-08-01 | a course with prerequisites | opened by a learner who has not met them | unmet prerequisites are shown with links | Happy |
+| AC-15-01-01 | FEAT-15-01 | in-app notifications exist | the notification centre opens | newest first, with an unread count | Happy |
+| AC-15-01-02 | FEAT-15-01 | an unread notification | marked read twice | idempotent | Idempotency |
+| AC-15-03-01 | FEAT-15-03 | the email provider is down | a notification is raised | the in-app item exists; the `email.send` job retries (SM-BGJOB t4); no duplicate email on recovery | Failure |
+| AC-15-03-02 | FEAT-15-03 | a mandatory security email during quiet hours | routed | sent now (DT-07 row 2) | Happy |
+| AC-15-06-01 | FEAT-15-06 | a hard bounce | the provider webhook arrives | delivery `bounced`; the address is suppressed | Happy |
+| AC-15-06-02 | FEAT-15-06 | a transient provider error | the job retries | delivery shows `failed_retry` and mirrors the job, not a second retry schedule | Happy |
+| AC-15-07-01 | FEAT-15-07 | an engagement email | the recipient uses one-click unsubscribe | that category is suppressed | Happy |
+| AC-15-07-02 | FEAT-15-07 | a mandatory transactional category | unsubscribe attempted | not suppressed; the page explains why | Negative |
+| AC-15-07-03 | FEAT-15-07 | an address on the suppression list | a send is attempted | not sent (SM-NOTIFY t1) | Negative |
+| AC-20-01-01 | FEAT-20-01 | a customer principal | opens a back-office route | `403`; back-office code is not served to the principal (authenticated edge rule) | Security |
+| AC-20-01-02 | FEAT-20-01 | a staff principal without MFA | opens the console | denied until MFA is enrolled (BR-T044) | Security |
+| AC-20-01-03 | FEAT-20-01 | a role grant changes | saved | audited with actor and reason | Happy |
+| AC-20-03-01 | FEAT-20-03 | the audit viewer | a record is opened | actor, action, resource, reason and request id are shown | Happy |
+| AC-20-03-02 | FEAT-20-03 | an audit export | requested | re-auth is required and the export is itself audited | Security |
+| AC-21-01-01 | FEAT-21-01 | a user without `analytics.product` consent | uses the product | no product-analytics event is captured | Privacy |
+| AC-21-01-02 | FEAT-21-01 | consent is withdrawn | the next event would fire | it is not captured | Privacy |
+| AC-22-06-01 | FEAT-22-06 | a user accepts policy version v | stored | version, timestamp and account are recorded | Happy |
+| AC-22-06-02 | FEAT-22-06 | policy version v+1 is published | the user's next sensitive action | acceptance of v+1 is required first | Happy |
+| AC-24-01-01 | FEAT-24-01 | a state change commits | the process is killed before dispatch | the outbox row survives and the event is delivered after restart | Failure |
+| AC-24-01-02 | FEAT-24-01 | an event is delivered twice | the consumer handles it | one effect (consumer dedupe on `event_id`) | Idempotency |
+| AC-24-01-03 | FEAT-24-01 | the dispatcher restarts | mid-batch | no event is lost | Failure |
+| AC-24-02-01 | FEAT-24-02 | two workers race for one job | claim | exactly one wins (`SKIP LOCKED`) | Concurrency |
+| AC-24-02-02 | FEAT-24-02 | a stale worker finishes after its lease expired | complete | the fenced write affects zero rows and the result is discarded | Concurrency |
+| AC-24-02-03 | FEAT-24-02 | jobs of kinds `email.send`, `ai.*` and a permanent error | failures repeat | `email.send` is attempted up to 12 times, `ai.*` 3 times, a permanent error goes straight to `dead`; a dead job of a protected kind raises an alert (SM-BGJOB t4, t7) | Failure |
+| AC-24-04-01 | FEAT-24-04 | a signed download URL | used after expiry | `403` | Security |
+| AC-24-04-02 | FEAT-24-04 | a non-image file | downloaded | forced as attachment (BR-T116) | Security |
+| AC-24-05-01 | FEAT-24-05 | a request that passes shell, API and worker | traced | one trace id spans all three; logs redact secrets and direct identifiers | Observability |
+| AC-24-08-01 | FEAT-24-08 | requests over the limit | sent | `429` with `Retry-After`; auth endpoints are stricter (BR-T115) | Security |
+| AC-24-09-01 | FEAT-24-09 | two worker replicas | a scheduled tick fires | it runs once (unique kind and tick) | Concurrency |
+| AC-24-09-02 | FEAT-24-09 | a time-driven transition is due | the job runs | the guard is re-checked at execution time (U7) | Happy |
+| AC-24-11-01 | FEAT-24-11 | a migration that drops or rewrites a column in one step | lint | rejected unless it follows expand/contract with a rollback note | Invariant |
+| AC-17-01-01 | FEAT-17-01 | code that imports a model provider directly | CI lint | the build fails (BR-T110) | Invariant |
+| AC-17-01-02 | FEAT-17-01 | the Phase 0 gateway stub | a call is made | denied by default; no provider is contacted | Security |
+| AC-17-02-01 | FEAT-17-02 | a free-tier user | requests AI assistance | no paid inference; the deterministic fallback runs (BR-T111) | Happy |
+| AC-17-03-01 | FEAT-17-03 | a principal bound to `AI_PROHIBITED` | any gateway call | denied regardless of caller (BR-T025) | Security |
+| AC-17-03-02 | FEAT-17-03 | a denial | logged | the log holds the policy and principal, not the prompt content | Privacy |
+| AC-07-01-01 | FEAT-07-01 (Phase 2) | the assessment catalogue | an item is opened | mode badge and AI-policy label are shown | Happy |
+| AC-16-01-01 | FEAT-16-01 (Phase 2) | a plan with no price set | the catalogue renders | no price is shown (prices are OPEN-05) | Honesty |
+| AC-19-02-01 | FEAT-19-02 (Phase 2) | a report and a system flag on one target | the queue is built | one case (dedupe by target and category); automation cannot move it to `actioned` | Happy |
+| AC-19-08-01 | FEAT-19-08 (Phase 2) | a reporter files more than 20 reports in a day | files one more | `429` (BR-T048) | Negative |
+
+<a id="record-spec-acceptance-additions-rev2--3-spec-text-deltas-passages-replaced-once-accepted"></a>
+## 3. Spec-text deltas (passages replaced once accepted)
+
+| Original passage | Replacement meaning |
+|---|---|
+| SPEC-G2 badge line (about L203): "`Mailbox verified` (artifact-backed via domain proof) ... `Employer confirmed` (authority; Phase 3 via verified org)" | Badges: "Not verified"; "Mailbox verified" only for a `bound` domain; "Mailbox verified, employer not confirmed" for an `unbound` domain (rung stays `claimed`); "Confirmed by referee"; for authority, the class is shown: "Platform verified", "Institution verified", "Employer confirmed", "Instructor attested" (DT-06 REV2) |
+| SPEC-G2 actors table (about L20): ROLE-INST and issuers "mint `authority_verified` items" | Issuers mint authority records with a mandatory `issuer_class`; instructor-class records follow BR-T119 and DT-14 |
+| SPEC-G3 actors and completion rule (about L189, L212 to L214): `instructorSignoff`, "rung `authority_verified` when ... instructor-signed-off" | Instructor sign-off mints `authority_verified` with class `instructor` only after DT-14; it never counts as platform-verified; revocable |
+| SPEC-G3 offline lines (L76, L209, L256) | Assessment answers are online-only; lesson progress is a queued write; downloadable video is out of Phases 1 and 2 (REVW-15 decision) |
+| SPEC-G1 onboarding (registration step, micro-feature FEAT-01-01.3 "age/guardian gate [OPEN-09]") | Registration requires the minimum-age attestation of BR-T120 (value [OPEN-counsel]); no account is created below the minimum |
+| SPEC-G4 FEAT-10-03 "Withdraw & re-apply policy" and the application states paragraph | Withdrawn is terminal; the candidate may submit a new linked application after the cooldown (BR-T125, SM-APPLICATION t12) |
+| SPEC-G4 FEAT-11-10 "Suggested shortlist per job (human-gated)" (also PCAP-01 title) | "Suggested order"; the view returns all applicants (INV-T52) |
+| SPEC-G5 section 3.2 CSV columns and BR-T106 | The roster CSV may carry the attestation flag or date of birth only if counsel requires it (BR-T120); rows flagged under-age stay blocked |
+| USER_JOURNEYS about line 115: "1st reminder after 3 days (ACT-VER-03)" | "Reminders: the system sends on day 4 and day 9; you can also send one yourself 3 days after the last send; two in total" (BR-T121) |
+| ACT-VER-03 availability (`07_UI_UX`) | "≥ 3 days since last send of any kind and fewer than 2 reminders in total" (DT-13) |
+| SPEC-G5 retention paragraph for applications; DATA-021 (24 months) | Identifiable content follows BR-T122; the 24-month figure applies only to the minimal record if OPEN-08 allows it |
+
+<!-- source-record-end: Yash_Final_Project_Document/05_FEATURE_SPECIFICATIONS/SPEC_ACCEPTANCE_ADDITIONS_REV2.md -->
+
+## P0 acceptance gap closure (finding 17) — 2026-10-27
+
+Scope: review finding 17 (traceability). `COVERAGE_MATRICES.md` rows flag 36 P0 features as "P0 without AC" (the request counted 37; 36 IDs were listed and checked). That matrix predates the REV2 fold: **28 of the 36 already have feature-level ACs** in section 2 of this file ("Criteria for P0 features that had none (REVW-17)"). Of the other 8, six have only micro-level ACs and two are `Remove` features with no AC at all. This section adds ACs for those 8. **Every AC below has status PROPOSED** (not approved, not implemented, not tested). Rows whose Category is OPEN are questions, not criteria; the named document is silent. IDs follow `AC-<feature>-NN` and reuse none of the existing IDs (the micro-level `AC-02-02.1-01`, `AC-02-02.3-01`, `AC-04-04.1-01`, `AC-15-02.1-01`, `AC-15-02.2-01`, `AC-19-01.1-01`, `AC-20-02.3-01`, `AC-24-06.2-01` and `AC-24-06.3-01` stay valid and are cited, not repeated).
+
+### P0.1 Criteria
+
+| AC | Feature | Given | When | Then | Category | Status |
+|---|---|---|---|---|---|---|
+| AC-02-02-01 | FEAT-02-02 | an `org_admin` invites a valid email | the invite is created | the token is stored hashed, expires after 7 d, is single-use and is bound to the invited email (micro FEAT-02-02.1) | Happy | PROPOSED |
+| AC-02-02-02 | FEAT-02-02 | an invite for a@x and an account whose verified email is b@y | b@y accepts | refused; acceptance needs a matching verified email | Security | PROPOSED |
+| AC-02-02-03 | FEAT-02-02 | an invite that was already accepted | the same token is used again | refused (single-use); no second membership | Negative | PROPOSED |
+| AC-02-02-04 | FEAT-02-02 | one pending invite | two accept requests arrive concurrently | exactly one succeeds; the other is refused as used (derived from the single-use token in FEAT-02-02.1; no document states the concurrent case, so this row is unsourced) | Concurrency | PROPOSED |
+| AC-02-02-05 | FEAT-02-02 | OPEN: bulk invite by CSV (FEAT-02-02.2) | an admin uploads a file | OPEN: row limit, dry-run report, duplicate handling and role per row are not specified. `CAPABILITY_MAP_AND_FEATURE_HIERARCHY.md` names ".2 bulk invite CSV" and no spec defines it (the only CSV rules, SPEC-G5 section 3.2, are for institution rosters) | OPEN | PROPOSED |
+| AC-04-04-01 | FEAT-04-04 | evidence aged 0 y and 3 y | confidence is computed | weights are 1.0 and about 0.37 (decay constant {3}, micro FEAT-04-04.1) | Boundary | PROPOSED |
+| AC-04-04-02 | FEAT-04-04 | evidence that supported a skill is revoked | the outbox event is processed | confidence is recomputed asynchronously, excludes the revoked item and is audited (BR-T005; SPEC-G2 05-05 impact pipeline) | Happy | PROPOSED |
+| AC-04-04-03 | FEAT-04-04 | the same revocation event delivered twice | the recompute job handles both | one effect, same result (consumer dedupe on `event_id`, as AC-24-01-02) | Idempotency | PROPOSED |
+| AC-04-04-04 | FEAT-04-04 | any client or role | tries to set a skill's confidence directly | rejected; confidence derives only from evidence rungs (hierarchy rationale "never self-set") | Negative | PROPOSED |
+| AC-04-04-05 | FEAT-04-04 | OPEN: uncertainty interval (FEAT-04-04.3) | the confidence is shown | OPEN: the interval formula and display bounds. SPEC-G2 and BR-T071 define an uncertainty band only for match display, and the decay constant {3} is unratified | OPEN | PROPOSED |
+| AC-15-02-01 | FEAT-15-02 | default preferences and an engagement notice at 22:00 local | it is routed | deferred to 08:00 (BR-T086; micro FEAT-15-02.1) | Happy | PROPOSED |
+| AC-15-02-02 | FEAT-15-02 | an interview reminder raised during quiet hours | it is routed | sent now; interview reminders are time-critical (BR-T086) | Happy | PROPOSED |
+| AC-15-02-03 | FEAT-15-02 | a security, verification, legal or billing category | the user tries to disable it | refused; shown as locked with a reason (BR-T085; micro FEAT-15-02.2) | Negative | PROPOSED |
+| AC-15-02-04 | FEAT-15-02 | a user who disabled quiet hours | an engagement notice is routed at 22:00 | sent now, not deferred (BR-T086 exception) | Happy | PROPOSED |
+| AC-15-02-05 | FEAT-15-02 | OPEN: digest frequency (FEAT-15-02.3) | the user picks a frequency | OPEN: allowed values. BR-T087 caps digests at 1 per day; the instant/daily/weekly list in micro FEAT-09-06.2 is for job alerts only; no doc lists the values for notification digests. Also OPEN: whether 21:00 and 08:00 themselves are inside quiet hours | OPEN | PROPOSED |
+| AC-19-01-01 | FEAT-19-01 | a report filed, then the reported message deleted | a moderator opens the case | the frozen context snapshot shows the original text (micro FEAT-19-01.1) | Happy | PROPOSED |
+| AC-19-01-02 | FEAT-19-01 | one reporter with {20} reports today | files the 21st | pointer only: the same assertion is AC-19-08-01 (`429` on the 21st, the 20th accepted; BR-T048, limit {20} unratified); not counted as a separate test | Boundary | PROPOSED |
+| AC-19-01-03 | FEAT-19-01 | two reports on one target in one category | the second is filed | merged into the existing open case, no second case (BR-T048; SM-MODCASE t1) | Happy | PROPOSED |
+| AC-19-01-04 | FEAT-19-01 | a report is filed | the subject views any notice or case data | the reporter's identity is not exposed (BR-T048) | Privacy | PROPOSED |
+| AC-19-01-05 | FEAT-19-01 | OPEN: report category (FEAT-19-01.2) | a reporter chooses a category | OPEN: the category list. BR-T048 and SM-MODCASE use "category" for dedupe but no spec or decision table enumerates the values | OPEN | PROPOSED |
+| AC-20-02-01 | FEAT-20-02 | a support operator | creates a grant without a reason code | denied (BR-T041; TEST-SEC-022) | Negative | PROPOSED |
+| AC-20-02-02 | FEAT-20-02 | grants of 4 h and of 4 h + 1 s | each is created | the 4 h grant is allowed; the longer one is denied (BR-T041, at most 4 h) | Boundary | PROPOSED |
+| AC-20-02-03 | FEAT-20-02 | a grant past its expiry | the operator reads the subject's data | denied; the grant is shown as expired; audited (TEST-SEC-022; INV-T18) | Security | PROPOSED |
+| AC-20-02-04 | FEAT-20-02 | an operator with no grant | reads a user's personal data | denied and the attempt is audited (TEST-SEC-023; INV-T18) | Security | PROPOSED |
+| AC-20-02-05a | FEAT-20-02 | a grant for subject A with a ticket id | the operator reads subject B | B denied (BR-T041) | Security | PROPOSED |
+| AC-20-02-05b | FEAT-20-02 | a grant for subject A with a ticket id | the operator writes A's evidence, application or verification state | the write is denied (BR-T043) | Security | PROPOSED |
+| AC-20-02-05c | FEAT-20-02 | a grant for subject A with a ticket id that has expired or needs more time | the operator continues | a new grant is required; every read of A under the original grant was audited (BR-T042) | Security | PROPOSED |
+| AC-24-06-01 | FEAT-24-06 | Android Chrome | the app is installed | installability and the offline shell work (per TEST-MOB-001, Android Chrome case; that test also covers push and is registered to FEAT-15-04, so it is a shared reference, not this feature's own test) | Happy | PROPOSED |
+| AC-24-06-02 | FEAT-24-06 | cached profile, evidence, applications and saved jobs | the user logs out | the offline cache is cleared (micro FEAT-24-06.2) | Privacy | PROPOSED |
+| AC-24-06-03 | FEAT-24-06 | remote and host versions that are incompatible | the update is detected | a forced refresh runs and the unsaved draft is preserved (micro FEAT-24-06.3 edge case) | Failure | PROPOSED |
+| AC-24-06-04 | FEAT-24-06 | an offline cached list that the server has since changed | the device reconnects | the cache is never treated as authoritative; queued writes are revalidated server-side (INV-T13) | Invariant | PROPOSED |
+| AC-24-06-05 | FEAT-24-06 | a platform lacks installability or push (FEAT-24-06.4) | the user opens the app on it | the fallback listed for that capability in `08_PWA_AND_MOBILE/PLATFORM_COMPATIBILITY_MATRIX.md` (PLT-01) section 3 applies, for example the instruction sheet for install or the in-app notification centre plus email for push (ADR-T20); correction 2026-10-27: an earlier version of this row said no document holds the matrix, which an independent review showed was wrong; the matrix is Under Review and its cells are not device-verified (OPEN-FE-01), so ratification is still owner-pending | Compatibility | PROPOSED |
+| AC-10-17-01 | FEAT-10-17 (Remove) | an application whose match score is below any value | scoring completes | the application state is unchanged; nothing moves it to `rejected` automatically (INV-T09; SM universal rule U6) | Negative | PROPOSED |
+| AC-10-17-02 | FEAT-10-17 (Remove) | a rejection | it is recorded | the actor is a human and a `reasonCode` is present (SPEC-G4 rejection rule) | Negative | PROPOSED |
+| AC-10-17-03 | FEAT-10-17 (Remove) | a job with N applicants | the recruiter opens the applicant view | all N are returned; no score cut-off hides any (BR-T072, INV-T52) | Invariant | PROPOSED |
+| AC-20-07-01 | FEAT-20-07 (Remove) | a staff principal of any role | looks for a "log in as user" or impersonation route or role | none exists; no impersonation role is defined (STAKEHOLDERS_ROLES_PERMISSIONS, "removed on principle") | Negative | PROPOSED |
+| AC-20-07-02 | FEAT-20-07 (Remove) | a support operator holding a valid grant | views the subject's data | only a read-only scoped view is served; writes are denied (BR-T043; hierarchy: "replaced by read-only scoped view under grant") | Security | PROPOSED |
+| AC-20-07-03 | FEAT-20-07 (Remove) | OPEN: proof that staff cannot obtain a session as the subject | a test asserts it | OPEN: the mechanism to assert (token issuance guard, route lint). No document specifies how the absence is enforced | OPEN | PROPOSED |
+
+### P0.2 Coverage table (feature to AC)
+
+| Feature | Result | AC ids or location |
+|---|---|---|
+| FEAT-01-09 | already covered | AC-01-09-01..03 (section 2 above) |
+| FEAT-02-01 | already covered | AC-02-01-01..05 (section 1.2 and section 2 above) |
+| FEAT-02-02 | new ACs, one OPEN | AC-02-02-01..04, OPEN AC-02-02-05 |
+| FEAT-02-07 | already covered | AC-02-07-01..03 |
+| FEAT-04-01 | already covered | AC-04-01-01..03 |
+| FEAT-04-02 | already covered | AC-04-02-01..03 |
+| FEAT-04-04 | new ACs, one OPEN | AC-04-04-01..04, OPEN AC-04-04-05 |
+| FEAT-07-01 | already covered | AC-07-01-01 |
+| FEAT-08-01 | already covered | AC-08-01-01..02 |
+| FEAT-10-17 | new ACs | AC-10-17-01..03 |
+| FEAT-15-01 | already covered | AC-15-01-01..02 |
+| FEAT-15-02 | new ACs, one OPEN | AC-15-02-01..04, OPEN AC-15-02-05 |
+| FEAT-15-03 | already covered | AC-15-03-01..02 |
+| FEAT-15-06 | already covered | AC-15-06-01..02 |
+| FEAT-15-07 | already covered | AC-15-07-01..03 |
+| FEAT-16-01 | already covered | AC-16-01-01 |
+| FEAT-17-01 | already covered | AC-17-01-01..02 |
+| FEAT-17-02 | already covered | AC-17-02-01 |
+| FEAT-17-03 | already covered | AC-17-03-01..02 |
+| FEAT-19-01 | new ACs, one OPEN | AC-19-01-01..04, OPEN AC-19-01-05 |
+| FEAT-19-02 | already covered | AC-19-02-01 |
+| FEAT-19-08 | already covered | AC-19-08-01 |
+| FEAT-20-01 | already covered | AC-20-01-01..03 |
+| FEAT-20-02 | new ACs | AC-20-02-01..04, 05a, 05b, 05c (grant notification stays in AC-20-02.3-01) |
+| FEAT-20-03 | already covered | AC-20-03-01..02 |
+| FEAT-20-07 | new ACs, one OPEN | AC-20-07-01..02, OPEN AC-20-07-03 |
+| FEAT-21-01 | already covered | AC-21-01-01..02 |
+| FEAT-22-06 | already covered | AC-22-06-01..02 |
+| FEAT-24-01 | already covered | AC-24-01-01..03 |
+| FEAT-24-02 | already covered | AC-24-02-01..03 |
+| FEAT-24-04 | already covered | AC-24-04-01..02 |
+| FEAT-24-05 | already covered | AC-24-05-01 |
+| FEAT-24-06 | new ACs | AC-24-06-01..05 (05 cites PLT-01 section 3; ratification and device verification pending) |
+| FEAT-24-08 | already covered | AC-24-08-01 |
+| FEAT-24-09 | already covered | AC-24-09-01..02 |
+| FEAT-24-11 | already covered | AC-24-11-01 |
+
+Counts: 36 features checked; 28 already covered; 8 get new ACs (each also carries at least one concrete AC, so none is blocked outright); 38 new AC rows after review fixes, of which 32 are testable (AC-24-06-05 now cites PLT-01 section 3 after a second review caught the earlier wrong "no matrix" claim), 5 are OPEN placeholders and 1 (AC-19-01-02) is a pointer to AC-19-08-01 and not a separate test; all PROPOSED. Independent review (2026-10-27, Sonnet, read-only): PASS-WITH-FIXES; four fixes applied (AC-02-02-04 flagged unsourced, AC-19-01-02 made a pointer, AC-20-02-05 split into 05a/05b/05c, AC-24-06-01 reference corrected). Review limits: 20 of the 28 "already covered" claims were opened and all held; 02-01, 15-03, 15-07, 17-01, 17-03, 24-01, 24-04 and 24-09 were not opened. Weak existing ACs noted by the reviewer: AC-04-02-01 and AC-07-01-01 test little. Documents that still say "AC pending" or flag these features as blockers (COVERAGE_MATRICES.md, TEST_CATALOG.md, ROADMAP.md) are stale relative to this section.
+
+### P0.3 OPEN questions
+
+1. FEAT-02-02.2 bulk invite CSV: row limit, dry run, duplicate handling, role per row. Silent: all feature specs (only the institution roster CSV exists, in SPEC-G5).
+2. FEAT-04-04.3 uncertainty interval: formula and display bounds; ratification of decay constant {3}. Silent: SPEC-G2, BR-REG.
+3. FEAT-15-02.3 digest frequency values, and whether the 21:00 and 08:00 instants are inside quiet hours. Silent: BR-T086, BR-T087, SPEC-G5.
+4. FEAT-19-01.2 report category list. Silent: SPEC-G4/G5, DECISION_TABLES, STATE_MACHINES.
+5. FEAT-24-06.4 platform fallback matrix. RESOLVED on paper 2026-10-27 (this item previously said all documents were silent, which was wrong): `PLATFORM_COMPATIBILITY_MATRIX.md` section 3 holds it. Remaining OPEN: owner ratification and device verification (OPEN-FE-01).
+6. FEAT-20-07 how the absence of impersonation is enforced and tested. Silent: STAKEHOLDERS_ROLES_PERMISSIONS, BUSINESS_RULES_REGISTRY.
+7. Limits in braces ({20} reports per day, {3} decay constant) remain unratified; the ACs cite them as written.
+
+### P0.4 Cross-document findings
+
+- `COVERAGE_MATRICES.md` is stale: it still flags 28 features that section 2 above already covers, and it counts the two `Remove` features (FEAT-10-17, FEAT-20-07) as P0 blockers (already noted as REVW2-26).
+- `TEST_CATALOG.md` and `ROADMAP.md` still say "AC pending" for FEAT-20-02, FEAT-15-02, FEAT-19-01 and FEAT-19-02, although micro-level or section 2 ACs exist.
+- This file holds the REV2 acceptance additions twice (the folded copy and the preserved source record), so every REV2 AC ID appears twice; the two copies agree in the rows checked.

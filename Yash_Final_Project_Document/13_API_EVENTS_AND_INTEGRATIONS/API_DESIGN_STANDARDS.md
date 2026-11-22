@@ -147,3 +147,7 @@ Inbound provider webhooks: raw-body signature verification, dedupe by provider e
 | OPEN-B16 | Exact `/oauth/token` service-token flow and scope names (to be specified with INT-01 developer platform; DOM-23 conditional) |
 | OPEN-B17 | Whether to expose `estimatedTotal` for any list; default is none |
 | OPEN-B18 | Deprecation window length (90 days proposed) vs enterprise contract needs |
+
+## PATCH 2026-10-27: concurrency and idempotency confirmation (gap check)
+Confirmed already documented, no change needed: ETag/`If-Match` (sections above, error rows `precondition-failed` 412 and `precondition-required` 428), `Idempotency-Key` on unsafe POST (section 8; 422 on reuse with different body), and **409** `idempotency-in-flight`. Added clarifications (PROPOSED): (a) `409` means state conflict or in-flight key and is retried only after `Retry-After`/refetch; stale `If-Match` is `412`, not `409`; (b) every mutable resource GET returns a strong `ETag` and the client echoes it in `If-Match`; (c) lost-response outcome discovery via `GET /idempotency/{key}` is specified in `12_DATA_AND_DATABASE/PHYSICAL_DESIGN.md` DC-05 and is not yet in any OpenAPI file.
+Spec validation: **validation not run** for `contracts/openapi.yaml`, `contracts/openapi.addendum.yaml` and `contracts/asyncapi.yaml` in this patch (no validator executed); do not read this document as evidence they validate.

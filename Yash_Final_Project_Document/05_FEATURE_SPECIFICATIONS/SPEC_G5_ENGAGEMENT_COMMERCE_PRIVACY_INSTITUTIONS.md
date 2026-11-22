@@ -579,3 +579,16 @@ Order: tenant + roles → cohorts → roster dry-run → invites/claim → aggre
 
 ## 13. Related
 `BUSINESS_RULES_REGISTRY.md` BR-T100…T106 · `PRODUCT_INVARIANT_REGISTRY.md` INV-T41 · `DECISION_TABLES.md` DT-01 rows 10–11 · SPEC-02, SPEC-03, SPEC-06, SPEC-12, SPEC-13.
+
+## Contract links (patch 2026-10-27)
+
+Evidence label: PROPOSED mapping. Every id below was grepped in its owner file on 2026-10-27; ids marked "none" do not exist and are OPEN. Owners: ACT-ATOM-nn in 07 ACTION_REGISTRY; FLD-* in 07 SCREEN_SPECIFICATIONS_KEY; EDG-nn in 06 BUSINESS_PROCESS_INVENTORY; XT-nn in 06 SSOT_WORKFLOW_CROSSWALK; UXH-nn in 07 PROGRESSIVE_UX_AND_FEEDBACK; audit.* in 14 SECURITY_ARCHITECTURE and 07; TEST-ACT-nnn in 07 ACTION_REGISTRY (not yet in TEST_CATALOG, OPEN-P04).
+
+| SPEC | ACT-ATOM | Base ACT without atom | FLD | EDG | XT | UXH | audit events | TEST | Contract gap |
+|---|---|---|---|---|---|---|---|---|---|
+| SPEC-11 (FEAT-13-01..13-06, 16-11) | none | ACT-MSG-01, -06 | FLD-MSG-01 | EDG-01, EDG-09 (message quota), EDG-10 | none | UXH-07, UXH-06 | none | none | OPEN-F10: send message and outreach have no atomic contract, audit event or TEST |
+| SPEC-12 (FEAT-16-01..16-04, 16-07, 16-08, 16-11) | ACT-ATOM-11 (choose plan; webhook confirms) | ACT-BIL-02..-05 | none | EDG-05, EDG-10, EDG-14 | XT-01, XT-03 (licence pool, purchase approval: adjacent, scope to confirm) | UXH-08 | `audit.billing.subscription_confirmed`, `audit.billing.plan_changed`, `audit.billing.webhook_rejected`, `audit.billing.refund_issued` | TEST-ACT-011 | cancel plan and change seats (ACT-BIL-04, -05) have no atom; covered by OPEN-F13 |
+| SPEC-13 (FEAT-22-02, 22-03, 22-07, 01-10) | none | ACT-PRV-04, -05, -06, -07 | none | EDG-06 | none | UXH-08 | `audit.privacy.export_requested`, `audit.privacy.erasure_requested` | none | OPEN-F11: export, delete and cancel-deletion have no atomic contract or TEST |
+| SPEC-14 (FEAT-18-01..18-04, 18-06, 18-07) | ACT-ATOM-10 (role change; adjacent) | ACT-INS-01, -02, -03, -04; ACT-ORG-01 | FLD-ORG-01 | EDG-09 (seat limits), EDG-12 | XT-02 (revoke seat; adjacent, scope to confirm) | UXH-07 | `audit.org.member_added`, `audit.org.role_changed` | TEST-ACT-010 (role change only) | OPEN-F12: cohort create, invite, issue and revoke credential have no atomic contract, audit event or TEST |
+
+Proposed OPEN ids (not registered; governance owner to add to OPEN_DECISIONS.md): OPEN-F01..OPEN-F12 as above, plus OPEN-F13 (billing cancel and seats atoms, SPEC-12). Numbering checked: no OPEN-F[0-9] id exists (only OPEN-FE-nn). Counts of ACT-ATOM rows: 12 exist; none of them was invented here.

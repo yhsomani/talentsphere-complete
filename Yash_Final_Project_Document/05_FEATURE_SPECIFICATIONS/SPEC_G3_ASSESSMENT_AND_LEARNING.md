@@ -303,3 +303,12 @@ Build order: catalogue → free enrolment → progress → completion rule engin
 
 ## 13. Related
 `STATE_MACHINES.md` SM-ENROLMENT · `BUSINESS_RULES_REGISTRY.md` BR-T031…T034, T097 · SPEC-03 · SPEC-05 · SPEC-12 · SPEC-14.
+
+## Contract links (patch 2026-10-27)
+
+Evidence label: PROPOSED mapping. Every id below was grepped in its owner file on 2026-10-27; ids marked "none" do not exist and are OPEN. Owners: ACT-ATOM-nn in 07 ACTION_REGISTRY; FLD-* in 07 SCREEN_SPECIFICATIONS_KEY; EDG-nn in 06 BUSINESS_PROCESS_INVENTORY; XT-nn in 06 SSOT_WORKFLOW_CROSSWALK; UXH-nn in 07 PROGRESSIVE_UX_AND_FEEDBACK; audit.* in 14 SECURITY_ARCHITECTURE and 07; TEST-ACT-nnn in 07 ACTION_REGISTRY (not yet in TEST_CATALOG, OPEN-P04).
+
+| SPEC | ACT-ATOM | Base ACT without atom | FLD | EDG | XT | UXH | audit events | TEST | Contract gap |
+|---|---|---|---|---|---|---|---|---|---|
+| SPEC-05 (FEAT-07-02..07-08, 17-03) | ACT-ATOM-08 (submit attempt, timer expiry) | ACT-ASM-01, -02, -04, -06, -09, -10 | none | EDG-08 | none | UXH-08 | `audit.assessment.attempt_submitted` | TEST-ACT-008 | OPEN-F05: start, run code, pause and accommodation have no atomic contract |
+| SPEC-06 (FEAT-08-01..08-04, 08-08, 16-09) | none | ACT-LRN-01, -05, -06, -07 | none | EDG-05 (paid enrolment webhook), EDG-10 | XT-04, XT-05 (course review, assignment grading: adjacent, scope to confirm) | UXH-07 | none | none | OPEN-F06: enrol, complete and add-to-evidence have no atomic contract, audit event or TEST
