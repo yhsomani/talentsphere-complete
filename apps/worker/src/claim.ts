@@ -1,4 +1,4 @@
-// Durable claim → execute → acknowledge cycle (SSOT §27.1 ADR-009 §27.4).
+// Durable claim → execute → acknowledge cycle (SSOT §13.5 ADR-009, §13.8).
 // One cycle claims due jobs under a lease (SKIP LOCKED in pg), runs each
 // handler under a hard timeout, and records exactly one terminal transition:
 //   succeeded | retry (bounded, jittered backoff) | failed (permanent) | dead.

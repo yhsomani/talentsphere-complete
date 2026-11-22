@@ -52,7 +52,7 @@ export interface StorageHealth {
 export interface Storage {
   readonly mode: StorageMode;
   /**
-   * Background-job store (SSOT §27.1 ADR-009): durable in pg mode, in-process
+   * Background-job store (SSOT §13.5 ADR-009): durable in pg mode, in-process
    * in memory mode — same honesty rule as entity data.
    */
   readonly jobs: JobStore;

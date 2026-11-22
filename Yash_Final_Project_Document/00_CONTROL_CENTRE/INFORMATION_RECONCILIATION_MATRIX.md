@@ -5,7 +5,7 @@ Doc ID: CC-REC · Version 1.0 · Status: Draft · Additive; summarises and links
 | Source area | Target area | Reconciliation artifact | State |
 |---|---|---|---|
 | `SSOT.md` §7 features F-01…F-173 | 04 FEAT hierarchy | [SSOT_FEATURE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/SSOT_FEATURE_CROSSWALK.md) | Candidate, unapproved (OPEN-41) |
-| `docs/registries/BUSINESS_RULE_REGISTRY.md` + SSOT §19 (BR-001…248, MIG) | 06 BR-T registry | [LEGACY_RULE_CROSSWALK](../06_BUSINESS_PROCESSES/LEGACY_RULE_CROSSWALK.md) + `.csv` | Per manifest: 9 exact, 67 partial, 8 conflicts, 1 superseded, 171 no-match; owner review OPEN-43 |
+| `docs/registries/BUSINESS_RULE_REGISTRY.md` + SSOT §§10.12–10.40 (BR-001…248, MIG; v6.2 numbering) | 06 BR-T registry | [LEGACY_RULE_CROSSWALK](../06_BUSINESS_PROCESSES/LEGACY_RULE_CROSSWALK.md) + `.csv` | Per manifest: 9 exact, 67 partial, 8 conflicts, 1 superseded, 171 no-match; owner review OPEN-43 |
 | SSOT UX micro-patterns (100) | 07 UX | [UX_PATTERN_SOURCE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/UX_PATTERN_SOURCE_CROSSWALK.md) | Candidate |
 | SSOT phases/gates/governance (69) | 22, 24 | [PHASE_GATE_GOVERNANCE_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/PHASE_GATE_GOVERNANCE_CROSSWALK.md) | Candidate |
 | Observed implementation controls (38) | 11, 14, 17 | [OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK](../28_TRACEABILITY_AND_COVERAGE/OBSERVED_IMPLEMENTATION_CONTROL_CROSSWALK.md) | Candidate |

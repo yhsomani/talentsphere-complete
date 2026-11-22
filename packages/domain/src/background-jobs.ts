@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-// Durable background-job substrate — SSOT §27.1 ADR-009 (dual-queue boundary)
+// Durable background-job substrate — SSOT §13.5 ADR-009 (dual-queue boundary)
 // and §27.4 (job schema). The API enqueues domain-event dispatches through a
 // JobStore; the worker claims them with SKIP LOCKED semantics (pg) or idles
 // honestly (memory). One state machine, two persistence backends.

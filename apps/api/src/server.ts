@@ -593,7 +593,7 @@ export async function buildApp(
     done();
   });
 
-  // Durable background-job dispatch (SSOT §27.1 ADR-009). Replaces the old
+  // Durable background-job dispatch (SSOT §13.5 ADR-009). Replaces the old
   // in-memory `enqueuedWorkerJobs` array, which never drained, died with the
   // process, and reported a hardcoded healthy queue. Every dispatch is written
   // to the job store before the caller continues, so dispatched work is
