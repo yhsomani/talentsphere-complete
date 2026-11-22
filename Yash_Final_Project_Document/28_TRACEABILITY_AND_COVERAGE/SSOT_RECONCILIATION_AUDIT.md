@@ -19,7 +19,7 @@ This report preserves high-impact differences found while comparing the protecte
 
 ## API, integration, queue, realtime, and media contracts
 
-Root SSOT §§13 and 25–27 (approximately lines 3177–3462) define a 54-entry service contract register, integration removal drill VER-021, separate transactional and heavy queues, and detailed realtime/media behavior. Current target architecture proposes materially different defaults or leaves the contract as a placeholder.
+Root SSOT §13 (§13.1–§13.14 in v6.2 numbering) define a 54-entry service contract register, integration removal drill VER-021, separate transactional and heavy queues, and detailed realtime/media behavior. Current target architecture proposes materially different defaults or leaves the contract as a placeholder.
 
 - **SCI-01…SCI-54:** a 54-row candidate crosswalk now retains each operation, actor, idempotency key, candidate API ID, and residual. It records 33 partial candidates and 21 operations with no specific target catalog match. Candidate links are not approved equivalence; source SCI-09…16 (institutional licensing, import, seat operations, media authoring and progress), SCI-19…23 (course versions, review, assignments and peer review), SCI-25 (migration abort/rollback), SCI-27 (payout), SCI-34 (newsletter), SCI-38…39 (assessment/recording), and SCI-45…54 (emerging skills, relationship validation, introductions, feedback, freshness, referrals and alumni) retain material gaps. Names or domain similarity are not coverage evidence.
 - **Integration removal:** source VER-021 gates every integration-touching release on a removal drill; target proposes semiannual game days. Decide whether the per-release requirement, target cadence, or a revised risk-tiered policy governs.
@@ -52,7 +52,7 @@ Root SSOT sections 20-22 (approximately lines 3947-4172) carry controls not yet 
 
 ## Phases, governance, registries, and UX
 
-Root SSOT §§16, 42–45 and appendices (approximately lines 4227–4609), plus UX patterns M-01…M-100 (approximately lines 4621–5649), have not received a complete row-level disposition.
+Root SSOT §§23–25 (including the registers in §24.8) and Appendices A–C, plus UX patterns M-01…M-100 (Appendix D) (v6.2 numbering), have not received a complete row-level disposition.
 
 - **Phase mapping:** the [69-row phase/gate/governance crosswalk](PHASE_GATE_GOVERNANCE_CROSSWALK.md) records candidate links for the 11 IP phases and 11 SSOT capability phases against target Ph0–Ph4/WPs, plus distinct exit-gate families. It is unapproved and does not equate phase numbers. Institutional exits include ≥500 imports, atomic seat operations, public certificate verification, exact revoke/reassign with progress retention, and institution isolation; OPEN-42 feature/WP alignment and OPEN-50 owner disposition remain open.
 - **Governance:** the same candidate crosswalk preserves seven C1–C7 source classes and their target candidates. Source approval rights distinguish routine, schema/dependency, destructive, secrets, architecture/commercial, and locked-register changes. Target DEV/ADR/ARB procedures do not yet prove equivalent authority; record owners and required approvals before claiming governance parity.
