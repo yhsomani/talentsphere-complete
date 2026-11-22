@@ -10,7 +10,7 @@ Doc ID: COM-MKT - Owner: Finance Lead with Chief Product Officer - Version 1.0 -
 
 1. **Phase 2 sells first-party (platform-sold) courses only.** The platform is the seller of record; authors are engaged under contract or licence; the product contains no payout, connected-account, seller-KYC or instructor-pricing flow.
 2. **A third-party paid marketplace is deferred to Phase 3** and starts only after this ADR is accepted by the Architecture Review Board.
-3. Until acceptance, no feature, screen, API, event, state transition or test that assumes instructor payouts, third-party seller-of-record logic or instructor-set pricing may appear in a Phase 1 or Phase 2 launch registry. `TEST-BIL-009` (in `16_*/TEST_CATALOG_REV2.md`) checks this.
+3. Until acceptance, no feature, screen, API, event, state transition or test that assumes instructor payouts, third-party seller-of-record logic or instructor-set pricing may appear in a Phase 1 or Phase 2 launch registry. `TEST-BIL-009` (in `16_*/TEST_CATALOG.md#record-test-catalog-rev2`) checks this.
 4. Revenue share (OPEN-06) is a Phase 3 question. In Phase 2 any fee paid to an author is an ordinary contract payment outside the product.
 
 ## 2. Proposed ADR outline

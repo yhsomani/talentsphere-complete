@@ -23,6 +23,7 @@ Targets such as response times and staffing are **[OPEN-16]**; this document def
 | PROC-13 | Billing disputes, refunds and chargebacks | Finance Ops Lead | DOM-16 |
 | PROC-14 | Change and release management | Release Manager | DOM-24 |
 | PROC-15 | Appeals (integrity flags, moderation, verification disputes) | Trust & Safety Lead | DOM-07, DOM-19, DOM-06 |
+| PROC-16 | Regulator and law-enforcement requests (PROPOSED) | Privacy Lead (counsel review owner: OPEN-X04) | DOM-22, DOM-20 |
 
 Common controls for all processes: actor identity and role are authenticated; consequential actions require reason codes; every action emits an audit event (OPS-OBS §4.2); personal data in tickets follows INV-T14 (redacted attachments, no secrets); decisions affecting a person are made by a human (INV-T09, INV-T20); ticket data is subject to retention and erasure (PROC-09).
 
@@ -268,6 +269,25 @@ stateDiagram-v2
 | Metrics | Time to decision, reversal rate, repeat-appeal rate, disparate outcome checks |
 | Audit events | `audit.appeal.opened/decided`, `.state_restored` |
 | Recovery | Restoration workflow tested (TEST-MSG-002) |
+
+
+
+### PROC-16 Regulator and law-enforcement requests (PROPOSED, patch 2026-10-27)
+
+Procedure skeleton only. It states who does what, not what the law requires: legal basis, jurisdiction, deadlines, notice-to-user duties and what may be disclosed all need counsel verification. **Counsel review owner is an open decision (OPEN-X04).** No contact, authority or deadline is asserted. Added to the catalogue as row PROC-16 (owner: Privacy Lead with Legal liaison, domain DOM-22/DOM-20).
+
+| Field | Detail |
+|---|---|
+| Owner | Privacy Lead (accountable), Legal liaison (counsel review owner: OPEN-X04) |
+| Actors | Privacy Lead, Legal liaison/counsel, Security Lead, Data Steward (extract), Incident Commander if linked to an incident, executive sponsor (escalation) |
+| Triggers | Written request from a regulator, court, police or other authority, or a preservation request, received through any channel |
+| Workflow | 1) **Single intake**: any recipient (support, engineer, executive) forwards the request unanswered and undisclosed to the Privacy Lead; nobody replies or exports data on their own 2) Log and acknowledge receipt only; `audit.legal.request_received` 3) Verify authenticity out of band via a channel found independently, never from contact details in the request 4) Counsel reviews validity, jurisdiction, scope, whether the user may be told, and whether a legal hold applies 5) Decide: comply in full, comply in part (narrow scope), challenge, or decline; written decision with reason (`audit.legal.request_reviewed`) 6) If complying: the Data Steward produces the minimum scoped extract under a time-boxed grant (PROC-04), reviewed by a second person; no bulk or direct database access for the requester 7) Deliver through the counsel-approved secure channel; record what was sent (`audit.legal.request_answered`) 8) Notify the affected user if counsel confirms it is allowed and appropriate; otherwise record the reason for non-notice 9) Close, retain the file per counsel, include in the transparency summary if one is published [OPEN-X04] |
+| Permissions | Requests handled by named roles only; separation of duties: requester of the extract != approver; platform admins cannot self-approve |
+| Exceptions | Emergency requests: counsel-defined fast path, still logged and after-the-fact reviewed; request conflicts with another jurisdiction: escalate to counsel; request touches another tenant's data: out of scope unless counsel directs; suspected abuse of the process: Sev-2 and Security Lead |
+| Metrics | Count by type, outcome mix (full/partial/declined), time to counsel decision, extracts with second-review done |
+| Audit events | `audit.legal.request_received/reviewed/answered/declined` |
+| Recovery | Wrong disclosure: treat as a personal-data incident under PROC-10/INCIDENT_MANAGEMENT (Privacy/Legal liaison role) |
+| Related | PROC-09, PROC-10, PROC-04, `../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` R3-8, OPEN-08 |
 
 ## 3. Cross-process RACI (summary)
 

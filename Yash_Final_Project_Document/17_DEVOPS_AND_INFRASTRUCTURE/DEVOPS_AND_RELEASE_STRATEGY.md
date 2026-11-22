@@ -2,6 +2,8 @@
 
 Doc ID: OPS-REL · Owner: Release Engineering Lead (with Platform Architect) · Version 1.0 · Status: Draft for Review · Relates: ADR-T03, ADR-T05, ADR-T09, ADR-T17, ADR-T18, ADR-T19, FF-01…FF-10, INV-T14, QA-STRAT §9, OPS-DEP, OPS-OBS, OPS-FMEA, OPEN-14, OPEN-21, OPEN-22, OPEN-35, OPEN-36, WP-MONOREPO-CI, WP-IAC-ENVS, WP-CANARY
 
+> **Revision 2 folded in (2026-10-27)** from `FRONTEND_DELIVERY_REVIEW_FIXES.md`: appended under "Revision 2 additions"; where it differs from text above, the appended text governs. Status unchanged; proposals still need owner/ARB ratification.
+
 All tool names are **options** unless an ADR fixes them. **[REF]** marks reference-system facts: the reference repository is a pnpm monorepo with Fastify API, worker, Vite web app and SQL migrations, deployed to an Oracle VM via Compose and Coolify descriptors, with a documented rule that "build files are read-only for AI agents". The target does not inherit those choices.
 
 ## 1. Principles
@@ -249,3 +251,234 @@ Rollback is rehearsed in staging per release class (TEST-DEP-002) and recorded i
 | CDN provider and manifest signing key custody | OPEN-36 |
 | Canary statistics and bake parameters | OPEN-15 |
 | Whether federation proceeds or MF_MODE=bundled (affects remote pipelines) | OPEN-03, OPEN-11 |
+
+# Revision 2 additions (folded 2026-10-27 from `FRONTEND_DELIVERY_REVIEW_FIXES.md`)
+
+## 1. Edge delivery for the bundled default (complements DEPLOYMENT_ARCHITECTURE section 3)
+| Object | Cache-Control / rule |
+|---|---|
+| `index.html`, `sw.js`, `/version.json` | `no-cache` (unchanged) |
+| `/assets/**` hashed JS, CSS, fonts (shell and lazy module chunks) | `public, max-age=31536000, immutable` |
+| **`/assets/bo/**` (back-office chunks)** | Edge auth rule FD-14 runs **before** any shared cache; response `private, max-age=31536000, immutable` and `Vary: Cookie`; `404` for sessions without `admin.console` |
+| `/mf/**`, `/mf/registry.json` [FED] | As in DEPLOYMENT_ARCHITECTURE section 3; `/mf/mf-admin/**` gets the same FD-14 rule |
+| Public page snapshots (section 2) | Short `max-age` plus event-driven purge; `stale-while-revalidate` allowed; never contain per-user data |
+| `/sitemap*.xml`, `robots.txt` | Short `max-age` (sitemaps change on publish events) |
+| API | `private, no-store` by default (unchanged) |
+
+Release, bundled: one artefact set per release; canary by shell cohort/flag (OPS-REL progressive delivery); rollback = previous artefact set plus new SW version string (VCD-01 section 6.9); kill-switch SW unchanged. The weekly federated build is a scheduled non-release job; no registry store, signing key or KMS custody is provisioned until federation is activated (MFA-01-REV2 section 1).
+
+## 2. Edge rule for privileged chunks (FD-14) - operations view
+| Item | Requirement |
+|---|---|
+| Rule | Valid session and capability `admin.console`, else `404`. Paths `/assets/bo/**` and, if federated, `/mf/mf-admin/**` |
+| Order of evaluation | Auth check before cache lookup; gated responses are never stored in a shared cache without the check |
+| Capability source | **[OPEN, owner Security Architect]** signed-token verification at the edge versus sub-request to an auth-check endpoint with a short per-session cache (MFA-01-REV2 section 2.4). A shared HMAC secret at the edge is not accepted without a security decision |
+| Synthetic probes | Every 5 minutes [TARGET] from outside: anonymous and non-admin fetch of the back-office entry must be `404` (alert on any `200`); admin synthetic must be `200` |
+| Release gate | Edge-rule test (anonymous, candidate, admin) and a precache-manifest scan for `bo` paths (PWA-01-REV2 rule R2b) |
+| Honesty | Controls who can obtain the code; the bundle is not treated as secret; the server authorises every call (ADR-T19, INV-T01). Failure scenario FIM-01 FI-31 (MFA-01-REV2) |
+
+## 3. Public page prerender hosting (ADR-T24, proposed)
+Design is in FEA-01-REV2 section 2.2. Operations view:
+
+| Component | Placement and requirement |
+|---|---|
+| Snapshot generator | A worker job class (`public-snapshot`) triggered by outbox events `job.published`, `job.updated`, `job.closed`, `job.taken_down`, profile visibility change and erasure; idempotent per entity and version; runs in the existing worker (no new service); retry and dead-letter as other job classes |
+| Storage | Object storage prefix for snapshots; versioned; lifecycle rule removes snapshots of closed jobs after the notice period [OPEN] |
+| Serving | Edge rule maps public canonical paths to the snapshot with fallback to the SPA shell when missing (never a 5xx); `Cache-Control` short plus purge call on each event |
+| Sitemaps and robots | Worker job regenerates sitemap index and child files (at most 50,000 URLs each) on a schedule and on bulk change; `robots.txt` allows public paths and disallows app routes |
+| Privacy | Hide/erasure events purge the snapshot and the sitemap entry first; purge SLA [OPEN, Privacy lead]; the privacy notice states that search-engine copies are outside our control |
+| Renderer | Template renderer in the API versus headless render in the worker: spike [OPEN]; whichever is chosen runs behind the same job class |
+| Observability | `public.snapshot_age_s` (per template), `public.snapshot_missing_total`, `public.purge_latency_s`, sitemap URL count; alert when age exceeds the freshness target [OPEN] or when the fallback rate rises |
+| Failure modes | Generator down: pages stay at the last snapshot (stale), jobs closed meanwhile show closed content only after the purge, so purge failures are the priority alert; storage unavailable: edge falls back to SPA shell; renderer bug: previous snapshot retained, new write rejected by a validation check (title, canonical, JSON-LD present) |
+| Capacity and cost | Add a row to the cost envelope (21_*): snapshot generation, storage, egress; vendor quotes empty by design (REVW-16) |
+| Tests | No-JS fetch of each template; purge test; sitemap URL sample crawl; fallback test with the snapshot deleted |
+
+## 4. Observability and SLO wording
+| Place | Read as |
+|---|---|
+| OBSERVABILITY_DESIGN spans and metrics named `mf.registry.*`, `mf.remote.*` | [FED]. In bundled mode: span `module.load` (chunk load, `source=bundled`) and metric `module.load_error_total`; RUM attribute `ts.mf_mode` (already defined in FEA-01 section 11) distinguishes the modes |
+| OPS-SLO SLO-03 (per-remote activation, 216 min/month) and SLO-17 (federation overhead) | Apply only when federated; SLO-17 cannot be met on cold deep links with the corrected budgets without a size trade-off (FEA-01-REV2 section 4.3). Owner of folder 15 to adopt |
+| Alerts on `registry.*` and signature failures | [FED]; in bundled mode the equivalents are asset-reachability synthetics and the FD-14 non-admin `200` alert |
+| New metrics | `edge.bo_denied_total` (by reason), `edge.bo_allowed_total`, `public.*` (section 3) |
+
+## 5. Items for the governance pass
+ADR-T24 and the ADR-T23 scope note (8 remotes, FD-14); OPEN items: edge capability source, purge SLA, freshness target, renderer spike, closed-job status-code policy [UNVERIFIED against current search-engine guidance]; cost envelope row for snapshot generation; FIM-01 FI-31 runbook (RB-nn) to be assigned by operations.
+
+## 6. Supersession map (relationship only)
+| This file | Supersedes |
+|---|---|
+| section 1 | The cache-control summary in DEPLOYMENT_ARCHITECTURE section 3 for the bundled default (adds `/assets/bo/**` and snapshot rows) |
+| section 2 | Nothing existing; fills the missing mechanism behind "privileged UI is never delivered" (MFA-01 section 4 original claim) |
+| section 3 | Nothing existing; new design for OPEN-FE-17 |
+| section 4 | OBSERVABILITY_DESIGN metric names for bundled mode; OPS-SLO applicability (folder 15, relationship only) |
+
+
+---
+
+# Revision 3 additions (2026-10-27, gap patch; PROPOSED, nothing executed)
+
+Adds only what sections 3, 4, 8, 9 and 10 above lack: one operator checklist, explicit rollback triggers, a compat-check list, ordered independent-remote steps and a named environment matrix. Gate definitions stay owned by [TEST_STRATEGY.md](../16_QA_AND_TESTING/TEST_STRATEGY.md) section 9 (RG-01..RG-14); test IDs are in [TEST_CATALOG.md](../16_QA_AND_TESTING/TEST_CATALOG.md) and [TEST_CATALOG.md#record-test-catalog-rev2](../16_QA_AND_TESTING/TEST_CATALOG.md#record-test-catalog-rev2). Federation material: [FEDERATION_ARCHITECTURE.md](../09_MODULE_FEDERATION/FEDERATION_ARCHITECTURE.md), [VERSION_COMPATIBILITY_DESIGN.md](../09_MODULE_FEDERATION/VERSION_COMPATIBILITY_DESIGN.md), [REMOTE_REGISTRY.schema_REV2.json](../09_MODULE_FEDERATION/REMOTE_REGISTRY.schema_REV2.json). Status: PROPOSED. Numeric thresholds are [TARGET] pending baseline (OPEN-15). No hosting is chosen (OPEN-14), so no provider commands appear.
+
+## R3-1 Release-gate checklist (operator view; evidence link required per row)
+
+| # | Check | Gate | Evidence | Blocks release |
+|---:|---|---|---|---|
+| 1 | Lint, types, route registry, module boundaries, idempotency lint, migration lint green | RG-01 | CI report | Yes |
+| 2 | OpenAPI/AsyncAPI diff clean (oasdiff); no breaking change inside `/api/v1` | RG-02 | Contract report | Yes |
+| 3 | Authz matrix, IDOR suite, tenant canary (FF-05), state-machine tests green | RG-03 | Test report | Yes |
+| 4 | Secret scan, dependency and container scan clean; SBOM generated; artefacts signed | RG-04 | SBOM + signature | Yes |
+| 5 | Critical journeys J1-J14 pass on staging | RG-05 | Playwright traces | Yes |
+| 6 | Accessibility scan clean; assistive-technology pass if a critical flow changed | RG-06 | A11y report | Yes |
+| 7 | Performance budgets met | RG-07 | Lighthouse CI | Yes |
+| 8 | Migration and compatibility checks R3-3 complete | RG-08 | Migration report | Yes |
+| 9 | Federation checks (only if federation is activated) | RG-09 | Manifest validation | Conditional |
+| 10 | Nightly resilience subset green; no open Sev-2 resilience defect | RG-10 | REL report | Yes if infra/API core touched |
+| 11 | Rollback plan, flags, kill switches, runbook and alert updates, dashboards listed in the release record (section 9.3) | RG-12 | Release checklist | Yes |
+| 12 | Device-lab pass if service worker, push or install code changed (device lab is OPEN-12) | RG-13 | Device report | Conditional |
+| 13 | Restore drill within policy window if schema or storage changed | RG-14 | Drill record | Conditional |
+| 14 | Canary guardrails green for the full bake | RG-11 | Canary analysis | Yes before S3 |
+
+Waivers follow the rule in section 9.4; none is allowed for FF-01, FF-05, INV-T02 or INV-T03.
+
+## R3-2 Rollback triggers (halt and roll back; values [TARGET], OPEN-15)
+
+| Trigger | Condition (parameter) | Action | Runbook / test |
+|---|---|---|---|
+| Error ratio | Canary error ratio above baseline by margin M for window W | Auto-halt, roll back stage | RG-11 |
+| Latency | p95/p99 above SLO for W | Auto-halt, roll back | RG-11, OBSERVABILITY_DESIGN |
+| INP regression | Field INP regression above budget in cohort | Halt; flag off or roll back | RG-07, RG-11 |
+| Auth failures | Auth failure rate above baseline | Halt, roll back at once; page security on-call | RG-03 |
+| Business proxy | Successful apply rate below baseline | Halt, roll back | RG-11 |
+| Tenant isolation signal | Any cross-tenant read in logs or canary | Stop all rollout; Sev-1 incident; kill switch; no waiver | INV-T02/T03 |
+| Burn rate | SLO burn above threshold after S3 | Pause expansion, roll back | OBSERVABILITY_DESIGN |
+| Bad migration | Lock budget exceeded or data-integrity check fails | Stop deploy; forward-fix or data-safe down-migration; PITR repair if data damaged | RB-30, TEST-DEP-003 |
+| Service worker defect | Stale or broken SW detected | Enable SW kill switch (R-4); publish corrected SW | RB-09, TEST-PWA-009 |
+| Worker defect | Dead-letter growth or duplicate effects | Pause queue class; roll back worker | RB-11 |
+| Remote defect (federation only) | Remote error or contract-smoke failure | Publish previous version as higher-`sequence` entry or set `status:"disabled"` (R-7) | TEST-FED-014 |
+
+Parameters M, W and thresholds live in the canary analysis config. Until measured they are unset; the release owner sets conservative values per release and records them in the release record.
+
+## R3-3 Migration and compatibility checks (before deploy; complements section 8)
+
+1. Migration lint (FF-10): append-only, contiguous numbering, rollback or forward-fix note present.
+2. Classify the change as expand, backfill or contract. A contract change must not share a release with the code that stops using the old shape.
+3. Run API N and API N-1 against the post-expand schema (TEST-DAT-002).
+4. Measure lock and statement duration on a sized copy against the budget (TEST-DAT-003).
+5. Confirm the worker still handles queued job payload versions (R-5).
+6. For destructive steps, record a verified backup or PITR marker immediately before (FM-28); confirm RG-14 currency.
+7. Compat matrix: shell x API x schema (add remote only if federation is activated), stored in the release record.
+8. Hosted databases: apply only through the reviewed migration job; never ad-hoc SQL (PROC-08). The prior implementation's local migration runner must not be used on a hosted database (see [29 guide](../29_DEVELOPER_IMPLEMENTATION_GUIDE/DEVELOPER_IMPLEMENTATION_GUIDE.md) section 7).
+
+## R3-4 Independent remote release (CONDITIONAL on ADR-T23 federation activation; not a baseline procedure)
+
+Under the bundled baseline there is no remote release; domain modules ship with the shell. If federation is activated:
+1. Build once. Run FF-04 validators, FF-08 compat check against the current shell, registry and API range, headless contract-smoke on the staging registry, and the bundle-size budget.
+2. Publish content-hashed assets to immutable `/mf/<name>/<version>/`. Never overwrite.
+3. Create the registry entry: `sequence` +1, `rollbackTo` = current stable, declared `apiRange`, `hostContract`, `minShell`, `dataSchema` (R-2). Sign with the KMS key (custody OPEN-36).
+4. Put the entry on the canary channel only (`?ch=canary`), for a stable-hash cohort.
+5. Watch the R3-2 guardrails for the bake period. Remote errors must not affect the host (see [FAULT_ISOLATION_MATRIX.md](../09_MODULE_FEDERATION/FAULT_ISOLATION_MATRIX.md)).
+6. Promote to stable with a second signed put. Never lower `sequence`.
+7. Verify with the synthetic check and dashboards; record in the release record.
+8. Rollback: publish previous artefacts as a new, higher-`sequence` entry, or disable the entry. Propagation is bounded by registry TTL (<= 300 s [TARGET]).
+
+## R3-5 Environment matrix (names PROPOSED; provider and domains undecided, OPEN-14)
+
+| Env | Promotion in | Config and secrets source | Data | Deploy approval | Gates before leaving |
+|---|---|---|---|---|---|
+| local | none | `.env` copied from `.env.example` (variable names in 29 guide section 7) | synthetic | developer | none |
+| ci | PR | CI variables; ephemeral DB, same Postgres major | synthetic | automatic | RG-01..RG-05 |
+| preview | PR label | staging read-only config | synthetic | label | RG-05 |
+| staging | merge to main | staging secret store (never production values) | synthetic + tenant canaries | automatic | RG-06..RG-12 as applicable |
+| production | release candidate | production secret manager (product OPEN-22) | real | manual until OPEN-15 policy | RG-11 canary, then S3/S4 |
+
+Promotion path: ci -> staging -> production. The same signed artefact digest moves forward; only configuration differs. Production refuses in-memory storage and test-mode payment keys (SOURCE: comments in root `.env.example`; the startup-validation pattern is kept, TEST-DEP-007).
+
+## R3-6 Open items added
+
+| Item | Ref |
+|---|---|
+| Canary parameters M, W, thresholds | OPEN-15 |
+| Secret manager product and environment names | OPEN-22 |
+| Hosting, hence provider-specific deploy and rollback commands | OPEN-14 |
+
+
+<a id="record-frontend-delivery-review-fixes"></a>
+## Preserved source record: FRONTEND_DELIVERY_REVIEW_FIXES
+
+> Consolidated on 2026-10-27 (batch 3). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/17_DEVOPS_AND_INFRASTRUCTURE/FRONTEND_DELIVERY_REVIEW_FIXES.md -->
+<a id="record-frontend-delivery-review-fixes--frontend-delivery---review-fixes-federation-cdn-registry-wording"></a>
+# Frontend Delivery - Review Fixes (federation, CDN, registry wording)
+
+Doc ID: OPS-FE-REV2 (covers the frontend delivery parts of DEPLOYMENT_ARCHITECTURE, DEVOPS_AND_RELEASE_STRATEGY and OBSERVABILITY_DESIGN) · Owner: Platform Engineering / Frontend Platform · Version 2.0 · Status: Under Review
+
+> **Folded into `DEVOPS_AND_RELEASE_STRATEGY.md` on 2026-10-27.** Change record only; edit the original.
+Relates: ADR-T23 (proposed), ADR-T24 (proposed in FEA-01-REV2), ADR-T19 · REVW-07, REVW-08, REVW-13 · REV-RES · MFA-01-REV2, FEA-01-REV2, PWA-01-REV2
+
+Tags: [TARGET] [OPEN] [FED]. This file is **additive**; the three original documents in this folder are unchanged by this revision. Another editor already reworded DEPLOYMENT_ARCHITECTURE section 3 and DEVOPS_AND_RELEASE_STRATEGY to a bundled baseline with a conditional federated mode (ADR-T23); that wording stands and is not restated. This file adds only what those edits do not cover. No cost, traffic or capacity number is asserted.
+
+<a id="record-frontend-delivery-review-fixes--1-edge-delivery-for-the-bundled-default-complements-deployment_architecture-section-3"></a>
+## 1. Edge delivery for the bundled default (complements DEPLOYMENT_ARCHITECTURE section 3)
+| Object | Cache-Control / rule |
+|---|---|
+| `index.html`, `sw.js`, `/version.json` | `no-cache` (unchanged) |
+| `/assets/**` hashed JS, CSS, fonts (shell and lazy module chunks) | `public, max-age=31536000, immutable` |
+| **`/assets/bo/**` (back-office chunks)** | Edge auth rule FD-14 runs **before** any shared cache; response `private, max-age=31536000, immutable` and `Vary: Cookie`; `404` for sessions without `admin.console` |
+| `/mf/**`, `/mf/registry.json` [FED] | As in DEPLOYMENT_ARCHITECTURE section 3; `/mf/mf-admin/**` gets the same FD-14 rule |
+| Public page snapshots (section 2) | Short `max-age` plus event-driven purge; `stale-while-revalidate` allowed; never contain per-user data |
+| `/sitemap*.xml`, `robots.txt` | Short `max-age` (sitemaps change on publish events) |
+| API | `private, no-store` by default (unchanged) |
+
+Release, bundled: one artefact set per release; canary by shell cohort/flag (OPS-REL progressive delivery); rollback = previous artefact set plus new SW version string (VCD-01 section 6.9); kill-switch SW unchanged. The weekly federated build is a scheduled non-release job; no registry store, signing key or KMS custody is provisioned until federation is activated (MFA-01-REV2 section 1).
+
+<a id="record-frontend-delivery-review-fixes--2-edge-rule-for-privileged-chunks-fd-14---operations-view"></a>
+## 2. Edge rule for privileged chunks (FD-14) - operations view
+| Item | Requirement |
+|---|---|
+| Rule | Valid session and capability `admin.console`, else `404`. Paths `/assets/bo/**` and, if federated, `/mf/mf-admin/**` |
+| Order of evaluation | Auth check before cache lookup; gated responses are never stored in a shared cache without the check |
+| Capability source | **[OPEN, owner Security Architect]** signed-token verification at the edge versus sub-request to an auth-check endpoint with a short per-session cache (MFA-01-REV2 section 2.4). A shared HMAC secret at the edge is not accepted without a security decision |
+| Synthetic probes | Every 5 minutes [TARGET] from outside: anonymous and non-admin fetch of the back-office entry must be `404` (alert on any `200`); admin synthetic must be `200` |
+| Release gate | Edge-rule test (anonymous, candidate, admin) and a precache-manifest scan for `bo` paths (PWA-01-REV2 rule R2b) |
+| Honesty | Controls who can obtain the code; the bundle is not treated as secret; the server authorises every call (ADR-T19, INV-T01). Failure scenario FIM-01 FI-31 (MFA-01-REV2) |
+
+<a id="record-frontend-delivery-review-fixes--3-public-page-prerender-hosting-adr-t24-proposed"></a>
+## 3. Public page prerender hosting (ADR-T24, proposed)
+Design is in FEA-01-REV2 section 2.2. Operations view:
+
+| Component | Placement and requirement |
+|---|---|
+| Snapshot generator | A worker job class (`public-snapshot`) triggered by outbox events `job.published`, `job.updated`, `job.closed`, `job.taken_down`, profile visibility change and erasure; idempotent per entity and version; runs in the existing worker (no new service); retry and dead-letter as other job classes |
+| Storage | Object storage prefix for snapshots; versioned; lifecycle rule removes snapshots of closed jobs after the notice period [OPEN] |
+| Serving | Edge rule maps public canonical paths to the snapshot with fallback to the SPA shell when missing (never a 5xx); `Cache-Control` short plus purge call on each event |
+| Sitemaps and robots | Worker job regenerates sitemap index and child files (at most 50,000 URLs each) on a schedule and on bulk change; `robots.txt` allows public paths and disallows app routes |
+| Privacy | Hide/erasure events purge the snapshot and the sitemap entry first; purge SLA [OPEN, Privacy lead]; the privacy notice states that search-engine copies are outside our control |
+| Renderer | Template renderer in the API versus headless render in the worker: spike [OPEN]; whichever is chosen runs behind the same job class |
+| Observability | `public.snapshot_age_s` (per template), `public.snapshot_missing_total`, `public.purge_latency_s`, sitemap URL count; alert when age exceeds the freshness target [OPEN] or when the fallback rate rises |
+| Failure modes | Generator down: pages stay at the last snapshot (stale), jobs closed meanwhile show closed content only after the purge, so purge failures are the priority alert; storage unavailable: edge falls back to SPA shell; renderer bug: previous snapshot retained, new write rejected by a validation check (title, canonical, JSON-LD present) |
+| Capacity and cost | Add a row to the cost envelope (21_*): snapshot generation, storage, egress; vendor quotes empty by design (REVW-16) |
+| Tests | No-JS fetch of each template; purge test; sitemap URL sample crawl; fallback test with the snapshot deleted |
+
+<a id="record-frontend-delivery-review-fixes--4-observability-and-slo-wording"></a>
+## 4. Observability and SLO wording
+| Place | Read as |
+|---|---|
+| OBSERVABILITY_DESIGN spans and metrics named `mf.registry.*`, `mf.remote.*` | [FED]. In bundled mode: span `module.load` (chunk load, `source=bundled`) and metric `module.load_error_total`; RUM attribute `ts.mf_mode` (already defined in FEA-01 section 11) distinguishes the modes |
+| OPS-SLO SLO-03 (per-remote activation, 216 min/month) and SLO-17 (federation overhead) | Apply only when federated; SLO-17 cannot be met on cold deep links with the corrected budgets without a size trade-off (FEA-01-REV2 section 4.3). Owner of folder 15 to adopt |
+| Alerts on `registry.*` and signature failures | [FED]; in bundled mode the equivalents are asset-reachability synthetics and the FD-14 non-admin `200` alert |
+| New metrics | `edge.bo_denied_total` (by reason), `edge.bo_allowed_total`, `public.*` (section 3) |
+
+<a id="record-frontend-delivery-review-fixes--5-items-for-the-governance-pass"></a>
+## 5. Items for the governance pass
+ADR-T24 and the ADR-T23 scope note (8 remotes, FD-14); OPEN items: edge capability source, purge SLA, freshness target, renderer spike, closed-job status-code policy [UNVERIFIED against current search-engine guidance]; cost envelope row for snapshot generation; FIM-01 FI-31 runbook (RB-nn) to be assigned by operations.
+
+<a id="record-frontend-delivery-review-fixes--6-supersession-map-relationship-only"></a>
+## 6. Supersession map (relationship only)
+| This file | Supersedes |
+|---|---|
+| section 1 | The cache-control summary in DEPLOYMENT_ARCHITECTURE section 3 for the bundled default (adds `/assets/bo/**` and snapshot rows) |
+| section 2 | Nothing existing; fills the missing mechanism behind "privileged UI is never delivered" (MFA-01 section 4 original claim) |
+| section 3 | Nothing existing; new design for OPEN-FE-17 |
+| section 4 | OBSERVABILITY_DESIGN metric names for bundled mode; OPS-SLO applicability (folder 15, relationship only) |
+<!-- source-record-end: Yash_Final_Project_Document/17_DEVOPS_AND_INFRASTRUCTURE/FRONTEND_DELIVERY_REVIEW_FIXES.md -->

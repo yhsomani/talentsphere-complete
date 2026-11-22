@@ -238,3 +238,59 @@ At the time of this fix-pass note, the review report had not yet been updated. I
 - Updated folder 28 status to record TRC-17/TRC-18 as historical candidate maps, not approved equivalence or current verification.
 - Independent architecture review found and resolved the missed lock-loss unhealthy behavior and an unaddressable later-audit citation. Corrected the repository audit date to its documented as-of 2026-10-23 UTC and added DOC-000171 with exact section/line anchors; target issue/provider state remains historical.
 - Corrected the crosswalk to say ADR-015 approval is a prerequisite, not an accomplished approval; captured the later audit reviewed-upstream SHA to keep its dated evidence reproducible.
+
+
+---
+
+<a id="record-execution-ledger-v9-addendum"></a>
+## Preserved source record: EXECUTION_LEDGER_V9_ADDENDUM
+
+> Consolidated on 2026-10-27. The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. Approval conditions and authority remain unchanged: this move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/EXECUTION_LEDGER_V9_ADDENDUM.md -->
+<a id="record-execution-ledger-v9-addendum--execution-ledger--v9-addendum-2026-10-25"></a>
+# Execution Ledger — V9 Addendum (2026-10-25)
+
+Doc ID: CC-LED2 · Additive; the original [EXECUTION_LEDGER](EXECUTION_LEDGER.md) is left as is (V9 forbids overwriting existing files in this root).
+
+<a id="record-execution-ledger-v9-addendum--honest-disclosure-about-preservation"></a>
+## Honest disclosure about preservation
+The V8 phase of this work edited files **in place** inside this folder: the orchestrator's own earlier files and, through delegated Sonnet agents, many agent-written files (consent catalogue, state-machine vocabulary, cookie contract, audit/erasure design, permission-matrix rows, ledger append, status lines in the blueprint and readiness docs). These edits were made before the V9 rule ("existing files inside the root must not be destructively changed") was given. Git history holds the prior versions where those files were committed (the folder was committed by another session; check `git log -- Yash_Final_Project_Document`). From this point the work is **additive only** in this root: new revision/addendum files, no in-place edits.
+
+<a id="record-execution-ledger-v9-addendum--state-at-this-checkpoint"></a>
+## State at this checkpoint
+- Preservation checks run now: one `SSOT.md`, unchanged per git; no uncommitted change outside the doc root; 158 files in the root.
+- V9 control documents added: [SOURCE_DOCUMENT_INVENTORY](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-source-document-inventory), [INFORMATION_RECONCILIATION_MATRIX](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-information-reconciliation-matrix), [CLEANUP_CANDIDATES](KNOWLEDGE_PRESERVATION_MANIFEST.md#record-cleanup-candidates) (0 eligible). The manifest and baseline were produced by a parallel effort and are reused, not duplicated.
+- Review findings: REVW-01..05 resolved in docs. REVW-06..45: four fix agents (frontend/PWA/federation, product/rules/roadmap, backend/data/API/security, ops/QA/cost) were interrupted twice by usage limits (reset 6pm America/Los_Angeles); partial edits exist, completion unverified. Binding decisions are in `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md`.
+- Final blueprint exists at `99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md`; its status line says Revision Required. `99_*/FINAL_REVIEW_REPORT.md` (V9 layout) does not exist: the review lives at `27_INDEPENDENT_REVIEWS/FINAL_REVIEW_REPORT.md`.
+- Model policy: Sonnet only, via the Agent tool `model` parameter; effort used: high/xhigh. Not independently verified beyond that parameter. Haiku not used.
+- Validation not performed in this checkpoint: Redocly/AsyncAPI re-run after the interrupted edits, Mermaid rendering, link re-check after the latest parallel edits.
+
+<a id="record-execution-ledger-v9-addendum--next-actions-when-limits-reset"></a>
+## Next actions (when limits reset)
+1. Resume the four fix agents (SendMessage by id) in additive mode: write revisions as new files or addenda and link them from the index, per V9.
+2. Re-run YAML/JSON/link/ID scans; update validation notes in a new addendum.
+3. Governance pass: register ADR-T23+ and consolidate OPEN-FE/UX/B/CS ids in a new register file.
+
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/EXECUTION_LEDGER_V9_ADDENDUM.md -->
+
+
+<a id="record-project-scope"></a>
+## Preserved source record: PROJECT_SCOPE
+
+> Consolidated on 2026-10-27 (batch 2). The following is the complete source record, retained for provenance, exceptions and rationale. Its dates, counts and statements about files describe the earlier revision, not the current filesystem. This move neither ratifies proposals nor overrides the owning document’s current precedence rules. Relative references now point to the consolidated records.
+
+<!-- source-record-begin: Yash_Final_Project_Document/00_CONTROL_CENTRE/PROJECT_SCOPE.md -->
+# Project Scope & Execution Boundary
+
+Doc ID: CC-SCOPE · Version 1.0 · Status: Final for this initiative
+
+**Mission:** design and document the strongest practical target version of TalentSphere from first principles, as an implementation-ready blueprint.
+
+**Allowed:** read repo files for context; research; write documentation under `Yash_Final_Project_Document/` only.
+**Not done / not allowed:** application source changes, migrations, deployments, infra, secrets, pushes/merges, commits (no commit made).
+**Model policy:** orchestrator = Claude Sonnet 5.5; all delegated agents invoked with `model: sonnet`. Haiku was not used. Runtime enforcement of the model setting is by the Agent tool parameter; it was not independently verified beyond that parameter.
+**Authority of inputs:** existing `SSOT.md`, `ARCHITECTURE.md`, and `docs/` are preserved **[REF]** evidence, not automatically adopted target requirements. The blueprint is a proposed target; source-to-target differences remain unresolved until recorded with owner disposition. Target decisions live in `24_RISKS_AND_DECISIONS/ADR_REGISTER.md` and open owner decisions in `OPEN_DECISIONS.md`.
+**Reality check:** this is a design; no feature is claimed implemented, and documentation completeness does not prove production readiness.
+**Honest limits of this initiative:** no real stakeholder research; platform (iOS/Android) behaviour from secondary sources, unverified on devices; no legal review; no pricing, cost or schedule data; Module Federation + Vite plugin stability needs a spike (OPEN-11).
+<!-- source-record-end: Yash_Final_Project_Document/00_CONTROL_CENTRE/PROJECT_SCOPE.md -->

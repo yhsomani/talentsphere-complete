@@ -118,3 +118,7 @@ Treat vendor outages as incidents with the same lifecycle; severity by user impa
 ## 11. Measures
 
 MTTD, MTTA, MTTR by severity; incidents per month by cause; SLO minutes burned; percent of incidents detected by alert vs user report; action-item closure rate; repeat-incident rate (MET-035, MET-036).
+
+## Patch 2026-10-27: related procedure
+
+A regulator or law-enforcement request is handled under PROC-16 (`OPERATIONS_AND_SUPPORT_PROCESSES.md`), not as an incident, unless a disclosure was made in error: that is a personal-data incident (Sev-1 if more than one tenant or any doubt, per section 1), led by the Security lead with the Privacy/Legal liaison. Counsel review owner: OPEN-X04. A stale permission after removal beyond the proposed bound is Sev-2 minimum, Sev-1 if it exposed another tenant data (`../14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md` R3-2).
