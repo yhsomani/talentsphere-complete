@@ -5,11 +5,18 @@ import {
   verifyCorporateEmailDomain,
   extractDomain,
   calculateVerificationScoreAndBadge,
+  mailboxKey,
   createWorkHistory,
   verifyCorporateEmail,
   requestEmploymentReference,
   submitEmploymentReference,
   buildWorkHistoryGraph,
+  assertEmailCodeIssuable,
+  assertReferenceRequestAllowed,
+  EMAIL_CODE_REISSUE_COOLDOWN_MS,
+  EMAIL_CODE_MAX_ISSUES_PER_HOUR,
+  EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY,
+  REFERENCE_REQUESTS_MAX_PER_HOUR,
   DomainError,
   type VerifiedWorkHistory,
   type EmploymentReference,
@@ -579,5 +586,268 @@ describe('Verified Work History Network & References Domain (F-162, F-94, F-84)'
       expect(graphVerifiedOnly.nodes.some((n) => n.label === 'Stripe')).toBe(false);
       expect(graphVerifiedOnly.nodes.some((n) => n.label === 'Acme Technologies')).toBe(true);
     });
+  });
+
+  describe('One mailbox cannot supply every reference (C-17)', () => {
+    const request = (overrides: Record<string, unknown> = {}) =>
+      requestEmploymentReference({
+        workHistoryId: 'wh_1',
+        candidateId: 'cand_1',
+        candidateUserId: 'user_cand',
+        candidateEmail: 'candidate@example.com',
+        refereeName: 'Bob Manager',
+        refereeEmail: 'bob@google.com',
+        relationship: 'manager',
+        nowIso: fixedNow,
+        ...overrides,
+      });
+
+    it("refuses the role's own work email as its referee, case-insensitively", () => {
+      expect(() =>
+        request({ refereeEmail: 'Alice@Google.com', roleCorporateEmail: 'alice@google.com' })
+      ).toThrow(/work email on this role/);
+    });
+
+    it('refuses asking the same address twice for one role, unless it declined', () => {
+      expect(() =>
+        request({ existingReferences: [{ refereeEmail: 'BOB@google.com', status: 'requested' }] })
+      ).toThrow(/already asked/);
+      expect(() =>
+        request({ existingReferences: [{ refereeEmail: 'bob@google.com', status: 'submitted' }] })
+      ).toThrow(/already asked/);
+      expect(
+        request({ existingReferences: [{ refereeEmail: 'bob@google.com', status: 'declined' }] })
+          .status
+      ).toBe('requested');
+      expect(
+        request({ existingReferences: [{ refereeEmail: 'carol@google.com', status: 'requested' }] })
+          .status
+      ).toBe('requested');
+    });
+
+    it('lets an unanswered request be re-asked once its link has expired (K-02)', () => {
+      const daysBefore = (days: number) =>
+        new Date(Date.parse(fixedNow) - days * 24 * 60 * 60 * 1000).toISOString();
+      const existing = (status: string, requestedAt: string) => ({
+        existingReferences: [{ refereeEmail: 'bob@google.com', status, requestedAt }],
+      });
+      expect(request(existing('requested', daysBefore(31))).status).toBe('requested');
+      expect(() => request(existing('requested', daysBefore(29)))).toThrow(/already asked/);
+      expect(() => request(existing('submitted', daysBefore(400)))).toThrow(/already asked/);
+      expect(() => request(existing('flagged', daysBefore(400)))).toThrow(/already asked/);
+    });
+
+    it('does not give the two-reference bonus for one mailbox answering twice', () => {
+      const wh: VerifiedWorkHistory = {
+        id: 'wh_1',
+        candidateId: 'cand_1',
+        companyName: 'Google',
+        title: 'Staff SWE',
+        employmentType: 'full_time',
+        startDate: '2020-01-01',
+        endDate: '2024-01-01',
+        isCurrent: false,
+        corporateEmail: 'alice@google.com',
+        emailVerifiedAt: fixedNow,
+        verificationStatus: 'verified',
+        verificationScore: 0,
+        badgeTier: 'none',
+        skills: ['Go', 'Distributed Systems'],
+        createdAt: fixedNow,
+        updatedAt: fixedNow,
+      };
+      const ref = (id: string, refereeEmail: string): EmploymentReference => ({
+        id,
+        workHistoryId: 'wh_1',
+        candidateId: 'cand_1',
+        refereeName: 'Bob Manager',
+        refereeEmail,
+        relationship: 'manager',
+        status: 'submitted',
+        confirmDates: true,
+        confirmTitle: true,
+        ratings: { technicalProficiency: 5, collaborationRating: 5, deliveryReliability: 5 },
+        endorsedSkills: ['Go', 'Distributed Systems'],
+        requestedAt: fixedNow,
+        submittedAt: fixedNow,
+        createdAt: fixedNow,
+        updatedAt: fixedNow,
+      });
+      // Email (40) + Manager (30) + ratings (10) + skills (5); no +15 for one person.
+      const same = calculateVerificationScoreAndBadge(wh, [
+        ref('ref_1', 'bob@google.com'),
+        ref('ref_2', 'BOB@google.com'),
+      ]);
+      expect(same.score).toBe(85);
+      const distinct = calculateVerificationScoreAndBadge(wh, [
+        ref('ref_1', 'bob@google.com'),
+        ref('ref_2', 'carol@google.com'),
+      ]);
+      expect(distinct.score).toBe(100);
+    });
+  });
+});
+
+describe("A referee is never one of the candidate's own mailboxes (K-01)", () => {
+  const fixedNow = '2026-09-25T12:00:00.000Z';
+  const wh: VerifiedWorkHistory = {
+    id: 'wh_1',
+    candidateId: 'cand_1',
+    companyName: 'X',
+    title: 'Engineer',
+    employmentType: 'full_time',
+    startDate: '2020-01-01',
+    endDate: '2024-01-01',
+    isCurrent: false,
+    corporateEmail: 'a@x.io',
+    emailVerifiedAt: fixedNow,
+    verificationStatus: 'verified',
+    verificationScore: 0,
+    badgeTier: 'none',
+    skills: [],
+    createdAt: fixedNow,
+    updatedAt: fixedNow,
+  };
+  const ref = (
+    id: string,
+    refereeEmail: string,
+    extra: Partial<EmploymentReference> = {}
+  ): EmploymentReference => ({
+    id,
+    workHistoryId: 'wh_1',
+    candidateId: 'cand_1',
+    refereeName: 'Ref',
+    refereeEmail,
+    relationship: 'manager',
+    status: 'submitted',
+    confirmDates: true,
+    confirmTitle: true,
+    ratings: { technicalProficiency: 5, collaborationRating: 5, deliveryReliability: 5 },
+    endorsedSkills: [],
+    requestedAt: fixedNow,
+    submittedAt: fixedNow,
+    createdAt: fixedNow,
+    updatedAt: fixedNow,
+    ...extra,
+  });
+
+  it('normalises an address to its mailbox for comparison', () => {
+    expect(mailboxKey(' Me+Ref@X.io ')).toBe('me@x.io');
+    expect(mailboxKey('me@x.io')).toBe('me@x.io');
+  });
+
+  it("scores nothing for a reference from the role's own mailbox behind a +tag", () => {
+    const result = calculateVerificationScoreAndBadge(wh, [ref('r1', 'A+ref@x.io')]);
+    expect(result.score).toBe(40);
+    expect(result.badgeTier).toBe('bronze');
+  });
+
+  it("scores nothing for a reference from another of the candidate's mailboxes", () => {
+    const result = calculateVerificationScoreAndBadge(wh, [ref('r1', 'b@y.io')], {
+      candidateMailboxes: ['B@y.io'],
+    });
+    expect(result.score).toBe(40);
+  });
+
+  it('counts one mailbox behind two +tags, or one account, as one referee', () => {
+    // Email (40) + manager (30) + ratings (10); no +15.
+    expect(
+      calculateVerificationScoreAndBadge(wh, [ref('r1', 'me+a@z.io'), ref('r2', 'me+b@z.io')]).score
+    ).toBe(80);
+    expect(
+      calculateVerificationScoreAndBadge(wh, [
+        ref('r1', 'one@z.io', { refereeId: 'u1' }),
+        ref('r2', 'two@z.io', { refereeId: 'u1' }),
+      ]).score
+    ).toBe(80);
+    expect(
+      calculateVerificationScoreAndBadge(wh, [
+        ref('r1', 'one@z.io', { refereeId: 'u1' }),
+        ref('r2', 'two@z.io'),
+      ]).score
+    ).toBe(95);
+  });
+
+  it('refuses a work email that is a live referee on one of the roles', () => {
+    const unverified = { ...wh, corporateEmail: undefined, emailVerifiedAt: undefined };
+    const verify = (status: 'requested' | 'submitted', requestedAt: string) =>
+      verifyCorporateEmail({
+        workHistory: unverified,
+        corporateEmail: 'me@x.io',
+        otherReferees: [{ refereeEmail: 'me+ref@x.io', status, requestedAt }],
+        nowIso: fixedNow,
+      });
+    expect(() => verify('requested', fixedNow)).toThrow(/is a referee on one of your roles/);
+    expect(() => verify('submitted', '2025-01-01T00:00:00.000Z')).toThrow(DomainError);
+    // An unanswered request whose link expired no longer stands (K-02).
+    expect(verify('requested', '2026-08-01T00:00:00.000Z').emailVerifiedAt).toBe(fixedNow);
+  });
+
+  it("refuses another of the candidate's mailboxes as a referee", () => {
+    const ask = (refereeEmail: string) =>
+      requestEmploymentReference({
+        workHistoryId: 'wh_1',
+        candidateId: 'cand_1',
+        candidateUserId: 'user_cand',
+        candidateEmail: 'candidate@example.com',
+        refereeName: 'Ref',
+        refereeEmail,
+        relationship: 'manager',
+        roleCorporateEmail: 'a@x.io',
+        candidateMailboxes: ['b@y.io'],
+        nowIso: fixedNow,
+      });
+    expect(() => ask('B+1@y.io')).toThrow(/belongs to you on another role/);
+    expect(() => ask('a+ref@x.io')).toThrow(/work email on this role/);
+    expect(() => ask('candidate+x@example.com')).toThrow(/Candidate email cannot match/);
+    expect(ask('colleague@x.io').status).toBe('requested');
+  });
+});
+
+describe('sending budget for work-email codes and reference invitations (C-06)', () => {
+  const now = new Date('2026-11-20T12:00:00.000Z');
+  const ago = (ms: number) => ({ createdAt: new Date(now.getTime() - ms).toISOString() });
+  const base = { issuesByAccountLastHour: 0, issuesToAddressLastDay: 0, now };
+
+  it('refuses a new code inside the 60-second cooldown and allows it after', () => {
+    expect(EMAIL_CODE_REISSUE_COOLDOWN_MS).toBe(60_000);
+    expect(() => assertEmailCodeIssuable({ ...base, existing: ago(59_000) })).toThrow(
+      /less than a minute/
+    );
+    expect(() => assertEmailCodeIssuable({ ...base, existing: ago(61_000) })).not.toThrow();
+    expect(() => assertEmailCodeIssuable(base)).not.toThrow();
+  });
+
+  it('caps issues per account per hour and per address per day', () => {
+    expect(() =>
+      assertEmailCodeIssuable({
+        ...base,
+        issuesByAccountLastHour: EMAIL_CODE_MAX_ISSUES_PER_HOUR - 1,
+      })
+    ).not.toThrow();
+    expect(() =>
+      assertEmailCodeIssuable({ ...base, issuesByAccountLastHour: EMAIL_CODE_MAX_ISSUES_PER_HOUR })
+    ).toThrow(/in an hour/);
+    expect(() =>
+      assertEmailCodeIssuable({
+        ...base,
+        issuesToAddressLastDay: EMAIL_CODE_MAX_ISSUES_PER_ADDRESS_PER_DAY,
+      })
+    ).toThrow(/this address today/);
+  });
+
+  it('caps reference requests per account per hour', () => {
+    expect(() =>
+      assertReferenceRequestAllowed({
+        requestsByAccountLastHour: REFERENCE_REQUESTS_MAX_PER_HOUR - 1,
+      })
+    ).not.toThrow();
+    let code: string | undefined;
+    try {
+      assertReferenceRequestAllowed({ requestsByAccountLastHour: REFERENCE_REQUESTS_MAX_PER_HOUR });
+    } catch (err) {
+      code = (err as { code?: string }).code;
+    }
+    expect(code).toBe('RATE_LIMIT_EXCEEDED');
   });
 });

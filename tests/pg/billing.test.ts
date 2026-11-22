@@ -13,6 +13,7 @@ import { buildApp } from '../../apps/api/src/server.js';
 import { createStripeGateway, type StripeGateway } from '../../apps/api/src/stripe-gateway.js';
 import {
   FAKE_STRIPE_ENV,
+  fakeStripeSubscriptions,
   invoiceEvent,
   signStripeWebhook,
   subscriptionEvent,
@@ -36,8 +37,11 @@ const real = createStripeGateway({
   logger: { error: () => undefined },
 });
 const deletedCustomers: string[] = [];
+const stripeState = fakeStripeSubscriptions(real);
 const gateway: StripeGateway = {
   ...real,
+  verifyWebhook: stripeState.verifyWebhook,
+  retrieveSubscription: stripeState.retrieveSubscription,
   createCustomer: async ({ userId }) => `cus_${userId.slice(0, 8)}`,
   createCheckoutSession: async () => ({ url: 'https://checkout.stripe.test/s' }),
   deleteCustomer: async (id) => {
@@ -263,6 +267,7 @@ describe('Billing persistence (PostgreSQL)', () => {
       method: 'POST',
       url: '/api/v1/settings/erasure/execute',
       headers: auth(),
+      payload: { currentPassword: 'long-enough-billing-test-password' },
     });
     expect(erased.statusCode).toBe(200);
     expect(deletedCustomers).toContain(customerId);

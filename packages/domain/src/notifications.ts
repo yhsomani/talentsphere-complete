@@ -141,6 +141,28 @@ export function createNotificationEntity(params: CreateNotificationParams): Noti
 }
 
 /**
+ * Which notifications a mark-read request names (C-13): either every one
+ * (`all: true`, returns undefined) or a non-empty list of ids. Anything else,
+ * including an empty body, is refused instead of silently marking the whole
+ * inbox read.
+ */
+export function resolveMarkReadTargets(input: {
+  notificationIds?: string[];
+  all?: boolean;
+}): string[] | undefined {
+  const all = input.all === true;
+  const ids = input.notificationIds;
+  const valid = all ? ids === undefined : ids !== undefined && ids.length > 0;
+  if (!valid) {
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      'Send either "all": true or a non-empty "notificationIds" list.'
+    );
+  }
+  return all ? undefined : input.notificationIds;
+}
+
+/**
  * Marks target notifications as read.
  */
 export function markNotificationsAsRead(

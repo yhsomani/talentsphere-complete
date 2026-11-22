@@ -77,6 +77,12 @@ export interface Storage {
   acquireWriterLease(): Promise<void>;
   /** A lost lease must make the API refuse further traffic. */
   writerLeaseHealthy(): boolean;
+  /**
+   * Registers a callback run once when an acquired writer lease is lost (its
+   * session errored or ended). Not called by close(). The process entry point
+   * uses it to exit so the supervisor restarts the API (C-07).
+   */
+  onWriterLeaseLost(listener: () => void): void;
   /** Measured worker liveness, not merely queue/database reachability. */
   workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }>;
   close(): Promise<void>;
@@ -104,6 +110,8 @@ class PgStorage implements Storage {
   private writerLease: pg.PoolClient | null = null;
   private writerLeaseLost = false;
   private writerLeaseStarted = false;
+  private closing = false;
+  private readonly leaseLostListeners: Array<() => void> = [];
 
   constructor(databaseUrl: string, encryptionKey?: string) {
     this.target = redactDsn(databaseUrl);
@@ -112,6 +120,14 @@ class PgStorage implements Storage {
       // Fail fast: an unreachable host must not hang the boot check.
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30_000,
+      // TCP keepalive: a silent network partition then errors the retained
+      // writer-lease session instead of leaving it looking healthy (C-07).
+      // Without an initial delay pg passes 0, which means the OS default idle
+      // time (Linux: 7200 s). With 10 s idle, detection is about 10 s plus the
+      // OS probe interval x count (Linux defaults 75 s x 9, about 11 min), and
+      // the first probe also keeps NAT state warm (K-10).
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
     });
     // Idle clients die on restarts and network blips; without a listener the
     // pool's 'error' event would crash the process.
@@ -148,12 +164,8 @@ class PgStorage implements Storage {
             'The hydrated read model supports one API instance only (ADR-015).'
         );
       }
-      client.on('error', () => {
-        this.writerLeaseLost = true;
-      });
-      client.on('end', () => {
-        this.writerLeaseLost = true;
-      });
+      client.on('error', () => this.markWriterLeaseLost());
+      client.on('end', () => this.markWriterLeaseLost());
       this.writerLease = client;
     } catch (error) {
       client.release();
@@ -164,6 +176,24 @@ class PgStorage implements Storage {
 
   writerLeaseHealthy(): boolean {
     return this.writerLeaseStarted && this.writerLease !== null && !this.writerLeaseLost;
+  }
+
+  onWriterLeaseLost(listener: () => void): void {
+    this.leaseLostListeners.push(listener);
+  }
+
+  private markWriterLeaseLost(): void {
+    const first = !this.writerLeaseLost;
+    this.writerLeaseLost = true;
+    // Once, and never for our own shutdown (releasing the client ends it).
+    if (!first || this.closing) return;
+    for (const listener of this.leaseLostListeners) {
+      try {
+        listener();
+      } catch (err) {
+        console.error(`[storage] writer-lease-lost listener failed: ${String(err)}`);
+      }
+    }
   }
 
   async workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }> {
@@ -205,6 +235,7 @@ class PgStorage implements Storage {
   }
 
   async close(): Promise<void> {
+    this.closing = true;
     const lease = this.writerLease;
     this.writerLease = null;
     if (lease) {
@@ -246,6 +277,10 @@ class MemoryStorage implements Storage {
 
   writerLeaseHealthy(): boolean {
     return true;
+  }
+
+  onWriterLeaseLost(): void {
+    // No lease in memory mode, so it can never be lost.
   }
 
   async workerHeartbeat(): Promise<{ alive: boolean; lastSeenAt: string | null }> {

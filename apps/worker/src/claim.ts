@@ -48,6 +48,12 @@ export interface ClaimCycleResult {
   lapsed: number;
 }
 
+/** Default per-handler timeout; the claim lease must exceed it. */
+export const DEFAULT_HANDLER_TIMEOUT_MS = 30_000;
+
+// The timer does not cancel the handler: it only stops waiting for it. Handlers
+// with external side effects must bound themselves below handlerTimeoutMs
+// (the email provider's own timeout is pinned below it by a unit test, K-21).
 async function runWithTimeout(
   handler: ClaimHandler,
   record: BackgroundJobRecord,
@@ -76,7 +82,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     // 60s lease > 30s handler timeout: a running handler always finishes (or
     // times out) before its lease expires, so redelivery cannot double-run it.
     leaseMs = 60_000,
-    handlerTimeoutMs = 30_000,
+    handlerTimeoutMs = DEFAULT_HANDLER_TIMEOUT_MS,
     maxAttempts = 3,
     backoffMs = 1_000,
     batchSize = 10,
@@ -100,7 +106,13 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
   // retry attempt already burned. With the defaults this claims one job per
   // cycle; the worker loop re-cycles immediately while there is work.
   const safeBatch = Math.max(1, Math.min(batchSize, Math.floor(leaseMs / handlerTimeoutMs) - 1));
-  const claimed = await store.claim({ limit: safeBatch, leaseMs });
+  // The lease is enforced by the database clock (lock_expires_at vs NOW()), so
+  // its real length is leaseMs from when the claim ran, whatever this
+  // machine's clock says. Measure it with the worker's own clock from just
+  // before the claim: conservative (it also counts the round trip) and immune
+  // to clock skew between worker and database.
+  const claimStartedAt = now();
+  const claimed = await store.claim({ limit: safeBatch, leaseMs, maxAttempts });
   result.claimed = claimed.length;
 
   for (const record of claimed) {
@@ -125,7 +137,7 @@ export async function runClaimCycle(options: ClaimCycleOptions): Promise<ClaimCy
     // waited out most of its lease. Starting it now could outlive the lease and
     // let another worker claim and run it too (duplicate side effects such as a
     // second email). Leave it: it is redelivered once its lease lapses.
-    const leaseEnd = record.lockExpiresAt ? Date.parse(record.lockExpiresAt) : Infinity;
+    const leaseEnd = claimStartedAt + leaseMs;
     if (now() + handlerTimeoutMs >= leaseEnd) {
       result.lapsed += 1;
       logger.warn(

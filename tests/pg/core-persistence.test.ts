@@ -493,7 +493,9 @@ describe('Core-loop persistence on PostgreSQL (ADR-015)', () => {
       email: 'casey@example.com',
       password: 'another-long-passphrase',
     });
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', login.body.token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', login.body.token, {
+      currentPassword: 'another-long-passphrase',
+    });
     expect(erased.status).toBe(200);
 
     const [user] = await sql(`SELECT email, status, password_hash FROM users WHERE id = $1`, [

@@ -77,8 +77,17 @@ export interface JobStore {
    * Running jobs are left alone: delivery may already be under way.
    */
   cancelQueued(match: { kind: string; payloadField: string; values: string[] }): Promise<number>;
-  /** Claims due jobs (queued & run_after elapsed, or running with an expired lease). */
-  claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]>;
+  /**
+   * Claims due jobs (queued & run_after elapsed, or running with an expired lease).
+   * With `maxAttempts`, a running job whose lease expired after its last
+   * allowed attempt (the worker crashed, hung or never started it) is moved
+   * to `dead` instead of being re-run past the limit.
+   */
+  claim(opts: {
+    limit: number;
+    leaseMs: number;
+    maxAttempts?: number;
+  }): Promise<BackgroundJobRecord[]>;
   /**
    * running → succeeded; guarded so double-completion is a no-op. `attempts`
    * is the fencing token (the claimed record's attempt count): when given, a
@@ -140,6 +149,11 @@ export function withoutSecrets(payload: Record<string, unknown>): Record<string,
   const copy = { ...payload };
   for (const key of SECRET_PAYLOAD_KEYS) delete copy[key];
   return copy;
+}
+
+/** last_error of a job dead-lettered at claim time (lease expired on its last attempt). */
+export function leaseExpiredError(attempts: number): string {
+  return `lease expired after ${attempts} attempts (worker crash, hang or lapse)`;
 }
 
 export function truncateError(error: unknown): string {
@@ -282,16 +296,28 @@ export class MemoryJobStore implements JobStore {
     return canceled;
   }
 
-  async claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]> {
+  async claim(opts: {
+    limit: number;
+    leaseMs: number;
+    maxAttempts?: number;
+  }): Promise<BackgroundJobRecord[]> {
     const now = Date.now();
     const claimed: BackgroundJobRecord[] = [];
     for (const job of this.jobs) {
-      if (claimed.length >= opts.limit) break;
       const due = job.status === 'queued' && Date.parse(job.runAfter) <= now;
       const leaseExpired =
         job.status === 'running' &&
         job.lockExpiresAt !== null &&
         Date.parse(job.lockExpiresAt) < now;
+      if (leaseExpired && opts.maxAttempts !== undefined && job.attempts >= opts.maxAttempts) {
+        job.status = 'dead';
+        job.lockExpiresAt = null;
+        job.lastError = leaseExpiredError(job.attempts);
+        job.payload = withoutSecrets(job.payload);
+        job.updatedAt = new Date(now).toISOString();
+        continue;
+      }
+      if (claimed.length >= opts.limit) continue;
       if (!due && !leaseExpired) continue;
       job.status = 'running';
       job.attempts += 1;
@@ -454,7 +480,24 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
       return result.rowCount ?? 0;
     },
 
-    async claim(opts: { limit: number; leaseMs: number }): Promise<BackgroundJobRecord[]> {
+    async claim(opts: {
+      limit: number;
+      leaseMs: number;
+      maxAttempts?: number;
+    }): Promise<BackgroundJobRecord[]> {
+      const maxAttempts = opts.maxAttempts ?? null;
+      if (maxAttempts !== null) {
+        // Idempotent under concurrent workers: each row is moved once.
+        await query(
+          `UPDATE public.background_jobs
+           SET status = 'dead', lock_expires_at = NULL, updated_at = NOW(),
+               last_error = 'lease expired after ' || attempts || ' attempts (worker crash, hang or lapse)',
+               payload = payload - $2::text[]
+           WHERE status = 'running' AND lock_expires_at IS NOT NULL
+             AND lock_expires_at < NOW() AND attempts >= $1::int`,
+          [maxAttempts, SECRET_PAYLOAD_KEYS]
+        );
+      }
       const result = await query(
         `UPDATE public.background_jobs
          SET status = 'running',
@@ -464,13 +507,14 @@ export function createPgJobStore(query: PgQueryFn): JobStore {
          WHERE id IN (
            SELECT id FROM public.background_jobs
            WHERE (status = 'queued' AND run_after <= NOW())
-              OR (status = 'running' AND lock_expires_at IS NOT NULL AND lock_expires_at < NOW())
+              OR (status = 'running' AND lock_expires_at IS NOT NULL AND lock_expires_at < NOW()
+                  AND ($3::int IS NULL OR attempts < $3::int))
            ORDER BY run_after
            LIMIT $1
            FOR UPDATE SKIP LOCKED
          )
          RETURNING *`,
-        [opts.limit, opts.leaseMs]
+        [opts.limit, opts.leaseMs, maxAttempts]
       );
       return result.rows.map(mapRow);
     },

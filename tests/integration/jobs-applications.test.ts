@@ -276,6 +276,15 @@ describe('Job Marketplace & ATS Candidate Pipeline Integration Suite (F-04, F-05
     const application = listBody.applications[0];
     expect(application.candidate).toBeDefined();
     expect(application.evidence).toHaveLength(1);
+    // The hiring team sees a summary of the evidence, not its metadata (C-12).
+    expect(application.evidence[0]).toMatchObject({
+      id: evidenceId,
+      title: 'Distributed Consensus Engine in Go',
+      verificationLevel: 'unverified',
+      status: 'pending',
+    });
+    expect(application.evidence[0].metadata).toBeUndefined();
+    expect(application.evidence[0].verifiedBy).toBeUndefined();
 
     // 2. Advance stage: submitted -> in_review
     const inReviewRes = await app.inject({
@@ -353,5 +362,82 @@ describe('Job Marketplace & ATS Candidate Pipeline Integration Suite (F-04, F-05
         j.type === 'application.status_changed' && j.payload.applicationId === application.id
     );
     expect(statusChangedJobs.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('refuses revoked evidence on apply and shows later revocation without its metadata (C-12)', async () => {
+    const auth = (token: string) => ({ authorization: `Bearer ${token}` });
+    const job = await app.inject({
+      method: 'POST',
+      url: '/api/v1/jobs',
+      headers: auth(recruiterToken),
+      payload: {
+        orgId,
+        title: 'Evidence Guard Engineer',
+        description: 'Checks evidence.',
+        location: 'Remote',
+      },
+    });
+    const guardJobId = JSON.parse(job.body).job.id;
+    await app.inject({
+      method: 'PATCH',
+      url: `/api/v1/jobs/${guardJobId}/status`,
+      headers: auth(recruiterToken),
+      payload: { status: 'published' },
+    });
+    const newEvidence = async (title: string) =>
+      JSON.parse(
+        (
+          await app.inject({
+            method: 'POST',
+            url: '/api/v1/evidence',
+            headers: auth(candidateToken),
+            payload: {
+              type: 'project',
+              title,
+              description: '',
+              source: 'self',
+              provenance: 'direct_entry',
+              recencyDate: '2026-06-01',
+            },
+          })
+        ).body
+      ).evidence.id as string;
+    const revoke = (id: string, reason: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/evidence/${id}/revoke`,
+        headers: auth(candidateToken),
+        payload: { reason },
+      });
+
+    const revokedId = await newEvidence('Withdrawn claim');
+    expect((await revoke(revokedId, 'No longer accurate.')).statusCode).toBe(200);
+    const refused = await app.inject({
+      method: 'POST',
+      url: `/api/v1/jobs/${guardJobId}/apply`,
+      headers: auth(candidateToken),
+      payload: { attachedEvidenceIds: [revokedId] },
+    });
+    expect(refused.statusCode).toBe(422);
+
+    const keptId = await newEvidence('Still-valid claim');
+    const applied = await app.inject({
+      method: 'POST',
+      url: `/api/v1/jobs/${guardJobId}/apply`,
+      headers: auth(candidateToken),
+      payload: { attachedEvidenceIds: [keptId] },
+    });
+    expect(applied.statusCode).toBe(201);
+    expect((await revoke(keptId, 'PRIVATE-REVOCATION-NOTE')).statusCode).toBe(200);
+
+    const pipeline = await app.inject({
+      method: 'GET',
+      url: `/api/v1/jobs/${guardJobId}/applications`,
+      headers: auth(recruiterToken),
+    });
+    const [evidence] = JSON.parse(pipeline.body).applications[0].evidence;
+    expect(evidence).toMatchObject({ id: keptId, status: 'revoked' });
+    expect(pipeline.body).not.toContain('PRIVATE-REVOCATION-NOTE');
+    expect(pipeline.body).not.toContain('revokedBy');
   });
 });

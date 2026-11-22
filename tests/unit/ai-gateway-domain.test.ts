@@ -141,5 +141,23 @@ describe('Central AI Gateway Domain (F-11, SSOT Section 16)', () => {
       expect(response.provenance.executionMode).toBe('local_heuristic');
       expect(response.provenance.tokensUsed).toBeGreaterThan(0);
     });
+
+    it('never invents skills for a user who has none (C-19)', () => {
+      const response = generateCareerAssistantResponse({
+        conversationId: 'conv-123',
+        prompt: 'What skills should I learn?',
+      });
+      expect(response.message.content).not.toContain('TypeScript, SQL');
+      expect(response.message.content).toContain('You have not added skills to your profile yet.');
+    });
+
+    it("names the user's real skills when it has them (C-19)", () => {
+      const response = generateCareerAssistantResponse({
+        conversationId: 'conv-123',
+        prompt: 'What skills should I learn?',
+        candidateSkills: ['Go'],
+      });
+      expect(response.message.content).toContain('Based on your current competencies (Go)');
+    });
   });
 });

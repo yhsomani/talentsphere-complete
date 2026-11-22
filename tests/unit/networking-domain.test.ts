@@ -16,6 +16,15 @@ describe('Professional Networking Domain (F-09)', () => {
   const userC = '33333333-3333-3333-3333-333333333333';
 
   describe('requestConnection', () => {
+    it('refuses a request when the recipient does not accept them (C-29)', () => {
+      expect(() => requestConnection({ senderId: userA, recipientId: userB }, [], false)).toThrow(
+        /not accepting connection requests/
+      );
+      expect(requestConnection({ senderId: userA, recipientId: userB }, [], true).status).toBe(
+        'pending'
+      );
+    });
+
     it('prevents self-connection requests (Anti-Self Invariant)', () => {
       expect(() => {
         requestConnection({

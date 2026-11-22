@@ -91,6 +91,23 @@ export function passwordNeedsRehash(storedHash: string): boolean {
 }
 
 /**
+ * Per-account sign-in throttle (CWE-307). Counts only FAILED sign-ins for one
+ * email address, from any client address, over a sliding window; a correct
+ * password clears the count. Unknown emails are counted the same way, so the
+ * refusal does not reveal which addresses are registered.
+ */
+export const LOGIN_ACCOUNT_FAILURE_WINDOW_MS = 15 * 60 * 1000;
+
+/** Failure timestamps (ms) still inside the window ending at nowMs. */
+export function recentLoginFailures(failureTimesMs: readonly number[], nowMs: number): number[] {
+  return failureTimesMs.filter((t) => nowMs - t < LOGIN_ACCOUNT_FAILURE_WINDOW_MS);
+}
+
+export function loginFailureDecision(failuresInWindow: number, max: number): 'allow' | 'refuse' {
+  return failuresInWindow >= max ? 'refuse' : 'allow';
+}
+
+/**
  * Token payload structure
  */
 export interface AuthPayload {

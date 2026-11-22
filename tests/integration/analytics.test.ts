@@ -178,3 +178,86 @@ describe('Integration: Product Analytics & KPI Rollups (F-19, F-31, BR-27)', () 
     expect(data.events[0].userId).toBeUndefined();
   });
 });
+
+describe('Integration: analytics ingestion is bounded (C-03)', () => {
+  let app: FastifyInstance;
+  let adminToken: string;
+
+  beforeAll(async () => {
+    app = await buildApp({ NODE_ENV: 'test', PORT: '0' });
+    await app.ready();
+    adminToken = createSessionToken('user_admin_bounds', 'admin.bounds@talentsphere.internal', [
+      'platform_admin',
+    ]);
+  });
+
+  it('refuses a body over 64 KB with 413', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/analytics/events',
+      payload: { eventType: 'big', metadata: { blob: 'x'.repeat(100 * 1024) } },
+    });
+    expect(res.statusCode).toBe(413);
+  });
+
+  it('refuses metadata with more than 30 keys with 422', async () => {
+    const metadata = Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`k${i}`, i]));
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/analytics/events',
+      payload: { eventType: 'wide', metadata },
+    });
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('refuses event metadata over 4 KB with 422 (K-06)', async () => {
+    const metadata = Object.fromEntries(
+      Array.from({ length: 30 }, (_, i) => [`k${i}`, 'x'.repeat(200)])
+    );
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/analytics/events',
+      payload: { eventType: 'heavy', metadata },
+    });
+    expect(res.statusCode).toBe(422);
+    expect(JSON.parse(res.body).error.code).toBe('VALIDATION_FAILED');
+  });
+
+  it('does not echo the address hash or user agent; the admin record keeps them', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/analytics/events',
+      headers: { 'user-agent': 'bounds-test-agent' },
+      payload: { eventType: 'echo_check', metadata: { path: '/x' } },
+    });
+    expect(res.statusCode).toBe(201);
+    const event = JSON.parse(res.payload).events[0];
+    expect(event.eventType).toBe('echo_check');
+    expect(event).not.toHaveProperty('ipHash');
+    expect(event).not.toHaveProperty('userAgent');
+
+    const admin = await app.inject({
+      method: 'GET',
+      url: '/api/v1/analytics/events?eventType=echo_check',
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    const stored = JSON.parse(admin.payload).events[0];
+    expect(stored.ipHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(stored.userAgent).toBe('bounds-test-agent');
+  });
+
+  it('limits one caller to 60 ingestion requests a minute', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 61; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/analytics/events',
+        remoteAddress: '203.0.113.7',
+        payload: { eventType: 'rate_check' },
+      });
+      statuses.push(res.statusCode);
+    }
+    expect(statuses.slice(0, 60).every((s) => s === 201)).toBe(true);
+    expect(statuses[60]).toBe(429);
+  });
+});

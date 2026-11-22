@@ -79,13 +79,14 @@ describe('Removing a role on PostgreSQL', () => {
     expect(res.status).toBe(201);
     return res.body.workHistory.id as string;
   };
-  const requestReference = async (historyId: string) => {
+  // One mailbox gives at most one reference per role (C-17).
+  const requestReference = async (historyId: string, refereeEmail = 'morgan@contoso.example') => {
     const res = await call(
       app,
       'POST',
       `/api/v1/candidates/work-history/${historyId}/references/request`,
       token,
-      { refereeName: 'Morgan', refereeEmail: 'morgan@contoso.example', relationship: 'manager' }
+      { refereeName: 'Morgan', refereeEmail, relationship: 'manager' }
     );
     expect(res.status).toBe(201);
     const refId = res.body.reference.id as string;
@@ -130,7 +131,7 @@ describe('Removing a role on PostgreSQL', () => {
       corporateEmail: 'casey@contoso.example',
     });
     const pending = await requestReference(role);
-    const answered = await requestReference(role);
+    const answered = await requestReference(role, 'riley@contoso.example');
     const submitted = await call(
       app,
       'POST',
@@ -233,5 +234,36 @@ describe('Removing a role on PostgreSQL', () => {
         expect(served.references[0].status).toBe('submitted');
       }
     }
+  });
+
+  it('a reference whose invitation could not be queued leaves no row behind (K-02)', async () => {
+    const role = await addRole('Queue Down');
+    // Make the job insert fail for this one referee (test database only).
+    await sql(`CREATE OR REPLACE FUNCTION pg_test_refuse_job() RETURNS trigger AS $$
+      BEGIN RAISE EXCEPTION 'queue down'; END; $$ LANGUAGE plpgsql`);
+    await sql(`CREATE TRIGGER pg_test_refuse_job BEFORE INSERT ON public.background_jobs
+      FOR EACH ROW WHEN (NEW.payload->>'to' = 'queue.down@contoso.example')
+      EXECUTE FUNCTION pg_test_refuse_job()`);
+    const ask = () =>
+      call(app, 'POST', `/api/v1/candidates/work-history/${role}/references/request`, token, {
+        refereeName: 'Quinn',
+        refereeEmail: 'queue.down@contoso.example',
+        relationship: 'peer',
+        clientRequestId: `queue-down-${role}`,
+      });
+    try {
+      const failed = await ask();
+      expect(failed.status).toBe(503);
+      expect(
+        await sql('SELECT 1 FROM employment_references WHERE work_history_id = $1', [role])
+      ).toHaveLength(0);
+    } finally {
+      await sql('DROP TRIGGER IF EXISTS pg_test_refuse_job ON public.background_jobs');
+    }
+    const retry = await ask();
+    expect(retry.status).toBe(201);
+    expect(
+      await sql('SELECT 1 FROM employment_references WHERE work_history_id = $1', [role])
+    ).toHaveLength(1);
   });
 });

@@ -36,7 +36,8 @@ export function updateProfileEntity(
 export function canViewProfile(
   targetProfile: Profile,
   viewerUserId?: string,
-  viewerRoles: Role[] = []
+  viewerRoles: Role[] = [],
+  opts: { isConnected?: boolean } = {}
 ): boolean {
   // 1. Owner can always view own profile
   if (viewerUserId && viewerUserId === targetProfile.userId) {
@@ -55,11 +56,38 @@ export function canViewProfile(
     case 'recruiters_only':
       return viewerRoles.includes('recruiter') || viewerRoles.includes('hiring_manager');
     case 'connections_only':
-      // Requires connection state
-      return false;
+      // An accepted connection, as for connections-only portfolio projects (C-29).
+      return Boolean(opts.isConnected);
     case 'private':
       return false;
     default:
       return false;
   }
+}
+
+export type ActivityVisibility = 'allowed' | 'profile_restricted' | 'activity_hidden';
+
+/**
+ * May the viewer read another person's activity score (C-26, CF-34)? The
+ * profile's privacy applies first, as for the profile itself; then the
+ * person's own "show activity" setting, which only the owner and
+ * admins/moderators may override. Missing settings mean the default (shown).
+ */
+export function canViewActivity(params: {
+  profile: Profile;
+  settings?: { showActivity?: boolean };
+  viewerUserId?: string;
+  viewerRoles?: Role[];
+  /** The viewer has an accepted connection with the profile owner (K-07). */
+  isConnected?: boolean;
+}): ActivityVisibility {
+  const { profile, settings, viewerUserId, viewerRoles = [] } = params;
+  if (!canViewProfile(profile, viewerUserId, viewerRoles, { isConnected: params.isConnected }))
+    return 'profile_restricted';
+  const privileged =
+    viewerUserId === profile.userId ||
+    viewerRoles.includes('platform_admin') ||
+    viewerRoles.includes('moderator');
+  if (!privileged && settings?.showActivity === false) return 'activity_hidden';
+  return 'allowed';
 }

@@ -87,11 +87,13 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
     priceYearlyCents: 0,
     currency: 'USD',
     targetRole: 'candidate',
+    // Plan copy lists only what is built (PLAN-COPY; docs/PRICING.md "Do not
+    // sell until each is implemented"). Prices, caps and entitlements unchanged.
     features: [
       'Verified Skill Evidence Graph',
       'Course enrollments & challenges',
-      'Standard AI Career Assistant (5 req/day, 5,000 tokens/day)',
-      'Digital Credential export',
+      'AI Career Assistant (5 req/day, 5,000 tokens/day)',
+      'Digital credentials with public verification links',
       'Direct messaging & networking',
     ],
   },
@@ -106,10 +108,7 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
     targetRole: 'candidate',
     features: [
       'Everything in Free',
-      'Advanced AI Career Assistant (50 req/day, 100,000 tokens/day)',
-      'Detailed career gap analytics',
-      'Unlimited resume variations & ATS preview',
-      'Priority showcase visibility to verified recruiters',
+      'Higher AI Career Assistant quota (50 req/day, 100,000 tokens/day)',
     ],
   },
   recruiter_starter: {
@@ -121,10 +120,9 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
     currency: 'USD',
     targetRole: 'recruiter',
     features: [
-      'Up to 5 active verified job listings',
-      'Candidate ATS pipeline with verified skill matching',
+      'Up to 5 published job listings',
+      'Candidate pipeline with attached evidence and work history',
       'Direct messaging with candidate applicants',
-      'Standard recruitment analytics',
     ],
   },
   recruiter_enterprise: {
@@ -137,11 +135,9 @@ export const PLATFORM_PLANS: Record<PlanTier, PlanDefinition> = {
     currency: 'USD',
     targetRole: 'recruiter',
     features: [
-      'Up to 1,000 active job postings',
-      'Multi-seat workspace team access',
-      'Deep Talent Graph candidate discovery',
-      'Advanced recruitment intelligence & benchmarking',
-      'Dedicated support & custom billing SLAs',
+      'Up to 1,000 published job listings',
+      'Candidate pipeline with attached evidence and work history',
+      'Direct messaging with candidate applicants',
     ],
   },
 };

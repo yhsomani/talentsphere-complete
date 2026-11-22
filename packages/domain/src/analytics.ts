@@ -47,18 +47,70 @@ const FORBIDDEN_KEY_PATTERNS = [
 const JWT_BEARER_PATTERN = /^(Bearer\s+|eyJ[a-zA-Z0-9_-]{10,}\.)/;
 
 /**
+ * Size bounds for client-supplied metadata (BR-27). Ingestion is anonymous, so
+ * without them one request could store an arbitrarily wide or deep object.
+ * Key count, key length, depth and the serialized size of one event's
+ * metadata are refused (422); longer strings and arrays are cut. The byte cap
+ * makes the retained store bounded by size, not only by count (K-06).
+ */
+export const ANALYTICS_METADATA_LIMITS = {
+  maxKeys: 30,
+  maxKeyLength: 64,
+  maxDepth: 4,
+  maxArrayItems: 50,
+  maxStringLength: 1000,
+  maxEventMetadataBytes: 4096,
+} as const;
+
+/** Stored user-agent length; longer headers are cut. */
+export const ANALYTICS_USER_AGENT_MAX = 255;
+
+/** Events the in-memory analytics store keeps; older ones are dropped (C-03). */
+export const ANALYTICS_EVENT_RETENTION = 10_000;
+
+/** Entries the in-memory audit log keeps; older ones are dropped (K-06). */
+export const AUDIT_LOG_RETENTION = 10_000;
+
+const tooLarge = () =>
+  new DomainError('VALIDATION_FAILED', 'Analytics metadata is too large (BR-27).');
+
+function assertMetadataBytes(metadata: unknown): void {
+  const bytes = new TextEncoder().encode(JSON.stringify(metadata) ?? '').length;
+  if (bytes > ANALYTICS_METADATA_LIMITS.maxEventMetadataBytes) {
+    throw tooLarge();
+  }
+}
+
+function sanitizeString(key: string, value: string): string {
+  if (JWT_BEARER_PATTERN.test(value)) {
+    throw new DomainError(
+      'VALIDATION_FAILED',
+      `Prohibited auth token or JWT detected in metadata value for key "${key}" (BR-27).`
+    );
+  }
+  return value.slice(0, ANALYTICS_METADATA_LIMITS.maxStringLength);
+}
+
+/**
  * Validates and sanitizes analytics metadata per BR-27 (whitelist-only; zero secrets/tokens/raw passwords).
+ * Array elements get the same checks as object values, so a list cannot carry
+ * a forbidden key or a bearer token past the filter; nested arrays are dropped.
  */
 export function sanitizeAnalyticsMetadata(
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  depth = 0
 ): Record<string, unknown> {
   if (!metadata || typeof metadata !== 'object') {
     return {};
   }
+  if (depth > ANALYTICS_METADATA_LIMITS.maxDepth) throw tooLarge();
+  const entries = Object.entries(metadata);
+  if (entries.length > ANALYTICS_METADATA_LIMITS.maxKeys) throw tooLarge();
 
   const sanitized: Record<string, unknown> = {};
 
-  for (const [key, value] of Object.entries(metadata)) {
+  for (const [key, value] of entries) {
+    if (key.length > ANALYTICS_METADATA_LIMITS.maxKeyLength) throw tooLarge();
     // Check key against forbidden patterns (BR-27)
     for (const pattern of FORBIDDEN_KEY_PATTERNS) {
       if (pattern.test(key)) {
@@ -69,25 +121,77 @@ export function sanitizeAnalyticsMetadata(
       }
     }
 
-    // Check string values for sensitive tokens
     if (typeof value === 'string') {
-      if (JWT_BEARER_PATTERN.test(value)) {
-        throw new DomainError(
-          'VALIDATION_FAILED',
-          `Prohibited auth token or JWT detected in metadata value for key "${key}" (BR-27).`
-        );
-      }
-      sanitized[key] = value.slice(0, 1000); // Bounded string length
+      sanitized[key] = sanitizeString(key, value);
     } else if (typeof value === 'number' || typeof value === 'boolean') {
       sanitized[key] = value;
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.slice(0, 50);
+      const items: unknown[] = [];
+      for (const item of value.slice(0, ANALYTICS_METADATA_LIMITS.maxArrayItems)) {
+        if (typeof item === 'string') items.push(sanitizeString(key, item));
+        else if (typeof item === 'number' || typeof item === 'boolean') items.push(item);
+        else if (item && typeof item === 'object' && !Array.isArray(item)) {
+          items.push(sanitizeAnalyticsMetadata(item as Record<string, unknown>, depth + 1));
+        }
+      }
+      sanitized[key] = items;
     } else if (value && typeof value === 'object') {
-      sanitized[key] = sanitizeAnalyticsMetadata(value as Record<string, unknown>);
+      sanitized[key] = sanitizeAnalyticsMetadata(value as Record<string, unknown>, depth + 1);
     }
   }
 
   return sanitized;
+}
+
+/**
+ * Refuses client metadata that exceeds ANALYTICS_METADATA_LIMITS anywhere in
+ * the tree (too many keys, an over-long key, too deep, an over-long array or
+ * string, or more than maxEventMetadataBytes serialized) without changing it.
+ * Every nested object or array is one level of depth. For stores that keep
+ * metadata verbatim (activity events, M-1).
+ */
+export function assertMetadataWithinLimits(metadata: unknown, depth = 0): void {
+  const limits = ANALYTICS_METADATA_LIMITS;
+  if (typeof metadata === 'string') {
+    if (metadata.length > limits.maxStringLength) throw tooLarge();
+    return;
+  }
+  if (!metadata || typeof metadata !== 'object') return;
+  if (depth > limits.maxDepth) throw tooLarge();
+  if (
+    !Array.isArray(metadata) &&
+    Object.keys(metadata).some((k) => k.length > limits.maxKeyLength)
+  ) {
+    throw tooLarge();
+  }
+  const children = Array.isArray(metadata) ? metadata : Object.values(metadata);
+  if (
+    Array.isArray(metadata)
+      ? children.length > limits.maxArrayItems
+      : children.length > limits.maxKeys
+  ) {
+    throw tooLarge();
+  }
+  for (const child of children) assertMetadataWithinLimits(child, depth + 1);
+  if (depth === 0) assertMetadataBytes(metadata);
+}
+
+/**
+ * Appends to an in-memory event log and drops the oldest entries beyond `cap`,
+ * so a non-durable store cannot grow without bound (C-03).
+ */
+export function appendBounded<T>(list: T[], item: T, cap: number): void {
+  list.push(item);
+  if (list.length > cap) list.splice(0, list.length - cap);
+}
+
+/**
+ * Telemetry consent from a user's stored settings (F-19). A user who never
+ * saved settings is consenting (the documented default); an explicit
+ * `showActivity: false` withdraws consent, so their events are anonymised.
+ */
+export function telemetryConsentFrom(settings?: { showActivity?: boolean } | null): boolean {
+  return settings ? settings.showActivity !== false : true;
 }
 
 /**
@@ -99,6 +203,7 @@ export function recordAnalyticsEvent(params: RecordAnalyticsEventParams): Analyt
   }
 
   const cleanMetadata = sanitizeAnalyticsMetadata(params.metadata);
+  assertMetadataBytes(cleanMetadata);
   const now = new Date().toISOString();
 
   // If user explicitly opted out of telemetry, anonymize the event completely
@@ -112,7 +217,7 @@ export function recordAnalyticsEvent(params: RecordAnalyticsEventParams): Analyt
     eventType: params.eventType.trim().toLowerCase(),
     metadata: cleanMetadata,
     ipHash: params.ipHash,
-    userAgent: params.userAgent?.slice(0, 255),
+    userAgent: params.userAgent?.slice(0, ANALYTICS_USER_AGENT_MAX),
     isAnonymized,
     timestamp: now,
   };

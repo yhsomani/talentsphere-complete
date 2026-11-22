@@ -60,7 +60,14 @@ async function addRole(app: FastifyInstance, token: string, companyName: string,
   return res.body.workHistory.id as string;
 }
 
-async function requestReference(app: FastifyInstance, token: string, historyId: string) {
+// One mailbox gives at most one reference per role (C-17), so a second
+// reference on the same role names a different referee.
+async function requestReference(
+  app: FastifyInstance,
+  token: string,
+  historyId: string,
+  refereeEmail = 'morgan@contoso.example'
+) {
   const res = await call(
     app,
     'POST',
@@ -68,7 +75,7 @@ async function requestReference(app: FastifyInstance, token: string, historyId: 
     token,
     {
       refereeName: 'Morgan Manager',
-      refereeEmail: 'morgan@contoso.example',
+      refereeEmail,
       relationship: 'manager',
     }
   );
@@ -112,7 +119,7 @@ describe('Removing a role from your work history', () => {
       }
     );
     const pending = await requestReference(app, casey.token, mistaken);
-    const answered = await requestReference(app, casey.token, mistaken);
+    const answered = await requestReference(app, casey.token, mistaken, 'riley@contoso.example');
     const submitted = await call(
       app,
       'POST',
@@ -258,7 +265,9 @@ describe('Removing a role from your work history', () => {
     const leaving = await register(app, 'leaving@example.org');
     const role = await addRole(app, leaving.token, 'Wingtip');
     const ref = await requestReference(app, leaving.token, role);
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', leaving.token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', leaving.token, {
+      currentPassword: 'a-long-enough-passphrase',
+    });
     expect(erased.status).toBe(200);
     const job = (await jobs(app)).find((j) => j.id === ref.jobId)!;
     expect(job.status).toBe('canceled');

@@ -6,6 +6,7 @@ import {
   cancelAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
+  withProfileVisibility,
   GDPR_GRACE_PERIOD_DAYS,
 } from '../../packages/domain/src/index.js';
 import type { User, Profile } from '../../packages/domain/src/index.js';
@@ -230,5 +231,18 @@ describe('cancelAccountErasure once execution has started', () => {
         updatedAt: now,
       })
     ).toThrow(/cannot be cancelled/);
+  });
+});
+
+describe('withProfileVisibility (C-25)', () => {
+  const settings = createDefaultUserSettings('00000000-0000-0000-0000-0000000000c5');
+  it("reports the profile's privacy as the settings visibility", () => {
+    expect(withProfileVisibility(settings, { privacy: 'private' }).profileVisibility).toBe(
+      'private'
+    );
+    expect(settings.profileVisibility).toBe('public'); // input not mutated
+  });
+  it('falls back to the stored value when there is no profile', () => {
+    expect(withProfileVisibility(settings, undefined).profileVisibility).toBe('public');
   });
 });

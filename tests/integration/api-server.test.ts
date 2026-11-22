@@ -44,6 +44,43 @@ describe('Fastify Modular API Server Integration (E-09, E-10)', () => {
       expect(body.environment).toBe('test');
     });
 
+    // C-07: readiness for a load balancer / orchestrator. Memory mode has no
+    // database and is always ready; pg mode is covered in tests/pg/writer-lease.test.ts.
+    it('GET /ready returns 200 ready, without storage detail', async () => {
+      const response = await app.inject({ method: 'GET', url: '/ready' });
+      expect(response.statusCode).toBe(200);
+      expect(JSON.parse(response.body)).toEqual({ status: 'ready' });
+      // Labelled exactly like /health (memory mode labels every response;
+      // pg mode labels neither — tests/pg/writer-lease.test.ts).
+      const health = await app.inject({ method: 'GET', url: '/health' });
+      expect(response.headers['x-talentsphere-durability']).toBe(
+        health.headers['x-talentsphere-durability']
+      );
+    });
+
+    it('GET /ready is exempt from the rate limiter, like /health', async () => {
+      const limited = await buildApp({
+        NODE_ENV: 'test',
+        LOG_LEVEL: 'error',
+        RATE_LIMIT_MAX_REQUESTS: 2,
+      });
+      try {
+        const statuses: number[] = [];
+        for (let i = 0; i < 5; i += 1) {
+          statuses.push((await limited.inject({ method: 'GET', url: '/ready' })).statusCode);
+        }
+        expect(statuses).toEqual([200, 200, 200, 200, 200]);
+        // The limiter is really this tight for other routes.
+        for (let i = 0; i < 3; i += 1)
+          await limited.inject({ method: 'GET', url: '/api/v1/feature-flags' });
+        expect(
+          (await limited.inject({ method: 'GET', url: '/api/v1/feature-flags' })).statusCode
+        ).toBe(429);
+      } finally {
+        await limited.close();
+      }
+    });
+
     it('GET /api/v1/feature-flags returns active flags', async () => {
       const response = await app.inject({
         method: 'GET',

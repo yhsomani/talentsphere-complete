@@ -4,6 +4,7 @@ import {
   shouldDeliverNotification,
   createNotificationEntity,
   markNotificationsAsRead,
+  resolveMarkReadTargets,
   Notification,
   NotificationPreferences,
 } from '../../packages/domain/src/index.js';
@@ -144,5 +145,26 @@ describe('candidateApplicationUpdate', () => {
       await import('../../packages/domain/src/notifications.js');
     expect(candidateApplicationUpdate('withdrawn', 'X', 'Y')).toBeNull();
     expect(candidateApplicationUpdate('submitted', 'X', 'Y')).toBeNull();
+  });
+});
+
+describe('resolveMarkReadTargets (C-13)', () => {
+  const id = '00000000-0000-0000-0000-0000000000aa';
+  it('returns undefined (every notification) only for an explicit all: true', () => {
+    expect(resolveMarkReadTargets({ all: true })).toBeUndefined();
+  });
+  it('returns the named ids', () => {
+    expect(resolveMarkReadTargets({ notificationIds: [id] })).toEqual([id]);
+    expect(resolveMarkReadTargets({ all: false, notificationIds: [id] })).toEqual([id]);
+  });
+  it('refuses a request that names nothing or both', () => {
+    for (const input of [
+      {},
+      { all: false },
+      { notificationIds: [] },
+      { all: true, notificationIds: [id] },
+    ]) {
+      expect(() => resolveMarkReadTargets(input)).toThrow(/either "all": true/);
+    }
   });
 });

@@ -7,6 +7,7 @@ import {
   FAKE_STRIPE_ENV,
   chargeRefundedEvent,
   checkoutCompletedEvent,
+  fakeStripeSubscriptions,
   invoiceEvent,
   signStripeWebhook,
   subscriptionEvent,
@@ -17,6 +18,8 @@ const real = createStripeGateway({
   webhookSecret: FAKE_STRIPE_ENV.STRIPE_WEBHOOK_SECRET,
   logger: { error: () => undefined },
 });
+
+const stripeState = fakeStripeSubscriptions(real);
 
 const calls = {
   customers: [] as Array<{ userId: string; email: string }>,
@@ -29,6 +32,8 @@ const calls = {
 /** Real signature verification, fake network: nothing here reaches Stripe. */
 const gateway: StripeGateway = {
   ...real,
+  verifyWebhook: stripeState.verifyWebhook,
+  retrieveSubscription: stripeState.retrieveSubscription,
   createCustomer: async (input) => {
     calls.customers.push(input);
     return `cus_${input.userId.slice(0, 8)}`;
@@ -44,7 +49,7 @@ const gateway: StripeGateway = {
   setCancellation: async (id, immediate) => {
     calls.cancellations.push({ id, immediate });
     const now = Math.floor(Date.now() / 1000);
-    return {
+    const result = {
       id,
       customerId: 'cus_x',
       status: immediate ? 'canceled' : 'active',
@@ -55,7 +60,9 @@ const gateway: StripeGateway = {
       currentPeriodEnd: now + 29 * 86400,
       // Later than every event the tests above send, as a live Stripe response is.
       eventCreated: now + 3600,
-    };
+    } as const;
+    stripeState.current.set(id, result);
+    return result;
   },
   subscriptionIdForPayment: async (paymentIntentId) =>
     ({ pi_current: 'sub_second', pi_other_sub: 'sub_other' })[paymentIntentId],
@@ -523,5 +530,117 @@ describe('Stripe billing (F-16)', () => {
       );
       expect(JSON.parse(res.body)).toMatchObject({ status: 'ignored', reason: 'unknown customer' });
     });
+  });
+});
+
+describe('Stripe webhook applies the current subscription state (C-21 b)', () => {
+  let app: FastifyInstance;
+  let token: string;
+  let customerId: string;
+  const send = (event: unknown) => {
+    const { body, headers } = signStripeWebhook(event);
+    return app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/stripe-webhook',
+      headers,
+      payload: body,
+    });
+  };
+  const current = async () =>
+    JSON.parse(
+      (
+        await app.inject({
+          method: 'GET',
+          url: '/api/v1/billing/subscription',
+          headers: { authorization: `Bearer ${token}` },
+        })
+      ).body
+    );
+
+  beforeAll(async () => {
+    app = await buildApp(
+      {
+        NODE_ENV: 'test',
+        PORT: '0',
+        APP_URL: 'http://localhost:5173',
+        ...FAKE_STRIPE_ENV,
+      } as never,
+      { stripeGateway: gateway }
+    );
+    await app.ready();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'stripe.ordering@example.com',
+        password: 'Password123!Secure',
+        fullName: 'Order Tester',
+        role: 'candidate',
+      },
+    });
+    const body = JSON.parse(res.body);
+    token = body.token;
+    customerId = `cus_${body.user.id.slice(0, 8)}`;
+    // Checkout creates and links the Stripe customer.
+    const checkout = await app.inject({
+      method: 'POST',
+      url: '/api/v1/billing/checkout',
+      headers: { authorization: `Bearer ${token}` },
+      payload: { planTier: 'candidate_pro', billingCycle: 'monthly' },
+    });
+    expect(checkout.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('a same-second "created(incomplete)" delivered after "updated(active)" leaves the plan active', async () => {
+    const t = Math.floor(Date.now() / 1000);
+    const updated = subscriptionEvent({
+      eventId: 'evt_order_updated',
+      customerId,
+      subscriptionId: 'sub_order',
+      status: 'active',
+      created: t,
+    });
+    const created = subscriptionEvent({
+      eventId: 'evt_order_created',
+      customerId,
+      subscriptionId: 'sub_order',
+      type: 'customer.subscription.created',
+      status: 'incomplete',
+      created: t,
+    });
+    stripeState.lateDeliveries.add('evt_order_created');
+    expect((await send(updated)).statusCode).toBe(200);
+    expect((await send(created)).statusCode).toBe(200);
+    const sub = await current();
+    expect(sub.subscription.status).toBe('active');
+    expect(sub.entitlements.planTier).toBe('candidate_pro');
+  });
+
+  it('answers 503 and changes nothing when Stripe cannot be reached; the retry applies', async () => {
+    const t = Math.floor(Date.now() / 1000) + 30;
+    const event = subscriptionEvent({
+      eventId: 'evt_order_cancel',
+      customerId,
+      subscriptionId: 'sub_order',
+      status: 'canceled',
+      type: 'customer.subscription.deleted',
+      created: t,
+    });
+    stripeState.control.failRetrieve = true;
+    try {
+      const res = await send(event);
+      expect(res.statusCode).toBe(503);
+      expect((await current()).subscription.status).toBe('active');
+    } finally {
+      stripeState.control.failRetrieve = false;
+    }
+    const retried = await send(event);
+    expect(retried.statusCode).toBe(200);
+    expect(JSON.parse(retried.body).status).toBe('processed');
+    expect((await current()).subscription.status).toBe('canceled');
   });
 });

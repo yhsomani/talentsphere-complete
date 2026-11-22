@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../../apps/api/src/server.js';
 import { createSessionToken } from '../../packages/domain/src/index.js';
+// The API runs on the built domain package; spy on the class it instantiates.
+import { MemoryJobStore } from '../../packages/domain/dist/index.js';
 
 /**
  * The email the worker would deliver (dev/test outbox). Codes and referee
@@ -442,6 +444,75 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
 
       expect(res.statusCode).toBe(403);
     });
+
+    it('refuses the role work email, a repeat referee, and self-reference via an admin (C-17)', async () => {
+      const ask = (historyId: string, token: string, refereeEmailAddress: string) =>
+        app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/${historyId}/references/request`,
+          headers: { authorization: `Bearer ${token}` },
+          payload: {
+            refereeName: 'Someone',
+            refereeEmail: refereeEmailAddress,
+            relationship: 'peer',
+          },
+        });
+
+      // The work email verified for this role is the candidate's own mailbox.
+      const corporate = await ask(createdWorkHistoryId, candidateToken, 'Alex.Mercer@acmecloud.io');
+      expect(corporate.statusCode).toBe(409);
+      expect(JSON.parse(corporate.body).error.message).toMatch(/work email on this role/);
+
+      // Sarah was already asked for this role.
+      const repeat = await ask(createdWorkHistoryId, candidateToken, refereeEmail);
+      expect(repeat.statusCode).toBe(409);
+      expect(JSON.parse(repeat.body).error.message).toMatch(/already asked/);
+
+      // An admin asking on the candidate's behalf is checked against the candidate.
+      const adminToken = createSessionToken(
+        '00000000-0000-4000-a000-00000000ad17',
+        'ops-admin@talentsphere.test',
+        ['platform_admin']
+      );
+      const onBehalf = await ask(createdWorkHistoryId, adminToken, candidateEmail);
+      expect(onBehalf.statusCode).toBe(409);
+
+      // The same referee may vouch for a different role.
+      const reg = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: 'two.roles.wh@talentsphere.test',
+          password: 'Password123!Secure',
+          fullName: 'Two Roles',
+          role: 'candidate',
+        },
+      });
+      const twoRolesToken = JSON.parse(reg.body).token;
+      const role = async (companyName: string) =>
+        JSON.parse(
+          (
+            await app.inject({
+              method: 'POST',
+              url: '/api/v1/candidates/work-history',
+              headers: { authorization: `Bearer ${twoRolesToken}` },
+              payload: {
+                companyName,
+                title: 'Engineer',
+                employmentType: 'full_time',
+                startDate: '2021-01-01',
+                endDate: '2022-01-01',
+                isCurrent: false,
+              },
+            })
+          ).body
+        ).workHistory.id as string;
+      const first = await role('First Co');
+      const second = await role('Second Co');
+      expect((await ask(first, twoRolesToken, 'pat.peer@example.com')).statusCode).toBe(201);
+      expect((await ask(second, twoRolesToken, 'pat.peer@example.com')).statusCode).toBe(201);
+      expect((await ask(first, twoRolesToken, 'PAT.peer@example.com')).statusCode).toBe(409);
+    });
   });
 
   describe('4. Submit Employment Reference (POST /api/v1/candidates/work-history/references/:refId/submit)', () => {
@@ -762,5 +833,410 @@ describe('Verified Work History Network & References Integration (F-162, F-94, F
       expect(replayData.deduplicated).toBe(true);
       expect(replayData.reference.id).toBe(firstId);
     });
+  });
+
+  describe('8. Sending budget for codes and reference invitations (C-06)', () => {
+    let seq = 0;
+    const newCandidate = async () => {
+      seq += 1;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `budget.${seq}.${Date.now()}@talentsphere.test`,
+          password: 'Password123!Secure',
+          fullName: `Budget Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const token = JSON.parse(res.body).token as string;
+      const entry = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          companyName: 'Budget Corp',
+          title: 'Engineer',
+          startDate: '2019-01-01',
+          endDate: '2021-01-01',
+          isCurrent: false,
+        },
+      });
+      expect(entry.statusCode).toBe(201);
+      return { token, historyId: JSON.parse(entry.body).workHistory.id as string };
+    };
+    const requestCode = (who: { token: string; historyId: string }, corporateEmail: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${who.historyId}/verify-email`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { corporateEmail },
+      });
+    const MINUTE = 60_000;
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('refuses a second code for the same record within a minute and sends only one email', async () => {
+      const who = await newCandidate();
+      expect((await requestCode(who, 'cooldown@budgetcorp.io')).statusCode).toBe(202);
+      const again = await requestCode(who, 'cooldown@budgetcorp.io');
+      expect(again.statusCode).toBe(429);
+      expect(again.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+      expect(again.json().error.message).toContain('less than a minute');
+      const sent = (await outbox(app, 'work_history.email_verification_requested')).filter(
+        (m) => m.workHistoryId === who.historyId
+      );
+      expect(sent).toHaveLength(1);
+    });
+
+    it('caps codes per account at 5 an hour even when each request waits out the cooldown', async () => {
+      const who = await newCandidate();
+      vi.useFakeTimers({ toFake: ['Date'] });
+      const start = Date.now();
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        vi.setSystemTime(start + i * (MINUTE + 1000));
+        statuses.push((await requestCode(who, 'hourly@budgetcorp.io')).statusCode);
+      }
+      expect(statuses).toEqual([202, 202, 202, 202, 202, 429]);
+      vi.useRealTimers();
+    });
+
+    it('caps codes sent to one address at 10 a day across accounts', async () => {
+      const first = await newCandidate();
+      const second = await newCandidate();
+      const third = await newCandidate();
+      vi.useFakeTimers({ toFake: ['Date'] });
+      const start = Date.now();
+      let step = 0;
+      const send = async (who: { token: string; historyId: string }) => {
+        step += 1;
+        vi.setSystemTime(start + step * (MINUTE + 1000));
+        return requestCode(who, 'mailbox.victim@budgetcorp.io');
+      };
+      for (let i = 0; i < 5; i++) expect((await send(first)).statusCode).toBe(202);
+      for (let i = 0; i < 5; i++) expect((await send(second)).statusCode).toBe(202);
+      const refused = await send(third);
+      expect(refused.statusCode).toBe(429);
+      expect(refused.json().error.message).toContain('this address today');
+      vi.useRealTimers();
+    });
+
+    it('caps reference invitations at 10 an hour per account; a replay is still answered', async () => {
+      const who = await newCandidate();
+      const ask = (n: number) =>
+        app.inject({
+          method: 'POST',
+          url: `/api/v1/candidates/work-history/${who.historyId}/references/request`,
+          headers: { authorization: `Bearer ${who.token}` },
+          payload: {
+            refereeName: `Referee ${n}`,
+            refereeEmail: `referee.${n}.${who.historyId}@corp.test`,
+            relationship: 'peer',
+            clientRequestId: `budget-ref-${who.historyId}-${n}`,
+          },
+        });
+      for (let n = 1; n <= 10; n++) expect((await ask(n)).statusCode).toBe(201);
+      const refused = await ask(11);
+      expect(refused.statusCode).toBe(429);
+      expect(refused.json().error.code).toBe('RATE_LIMIT_EXCEEDED');
+      const replay = await ask(1);
+      expect(replay.statusCode).toBe(200);
+      expect(replay.json().deduplicated).toBe(true);
+    });
+  });
+
+  describe('9. An unanswered or never-queued request does not block re-asking (K-02)', () => {
+    let seq = 0;
+    const newEntry = async () => {
+      seq += 1;
+      const email = `reask.${seq}.${Date.now()}@talentsphere.test`;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email,
+          password: 'Password123!Secure',
+          fullName: `Reask Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const { token, user } = JSON.parse(res.body) as { token: string; user: { id: string } };
+      const entry = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${token}` },
+        payload: {
+          companyName: 'Reask Corp',
+          title: 'Engineer',
+          startDate: '2019-01-01',
+          endDate: '2021-01-01',
+          isCurrent: false,
+        },
+      });
+      expect(entry.statusCode).toBe(201);
+      return {
+        token,
+        userId: user.id,
+        email,
+        historyId: JSON.parse(entry.body).workHistory.id as string,
+      };
+    };
+    const ask = (
+      who: { token: string; historyId: string },
+      refereeEmail: string,
+      clientRequestId?: string
+    ) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${who.historyId}/references/request`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: {
+          refereeName: 'Pat Referee',
+          refereeEmail,
+          relationship: 'peer',
+          clientRequestId,
+        },
+      });
+
+    it('refuses the same referee within 30 days and accepts them once the link expired', async () => {
+      const who = await newEntry();
+      const referee = `pat.${who.historyId}@corp.test`;
+      const day = 24 * 60 * 60 * 1000;
+      try {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        expect((await ask(who, referee)).statusCode).toBe(201);
+        // A fresh session at each step: only the reference ages.
+        const later = () => ({
+          ...who,
+          token: createSessionToken(who.userId, who.email, ['candidate']),
+        });
+        vi.setSystemTime(Date.now() + 29 * day);
+        const early = await ask(later(), referee);
+        expect(early.statusCode).toBe(409);
+        expect(early.json().error.message).toMatch(/already asked/);
+        vi.setSystemTime(Date.now() + 2 * day);
+        expect((await ask(later(), referee)).statusCode).toBe(201);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('undoes the request when the invitation cannot be queued, so the retry asks again', async () => {
+      const who = await newEntry();
+      const referee = `queued.${who.historyId}@corp.test`;
+      const clientRequestId = `reask-${who.historyId}`;
+      const enqueue = vi
+        .spyOn(MemoryJobStore.prototype, 'enqueue')
+        .mockRejectedValueOnce(new Error('queue down'));
+      try {
+        const failed = await ask(who, referee, clientRequestId);
+        expect(failed.statusCode).toBe(503);
+        expect(failed.json().error.code).toBe('SERVICE_UNAVAILABLE');
+      } finally {
+        enqueue.mockRestore();
+      }
+      const retry = await ask(who, referee, clientRequestId);
+      expect(retry.statusCode).toBe(201);
+      expect(retry.json().deduplicated).toBeUndefined();
+      const invitations = (await outbox(app, 'reference.requested')).filter(
+        (p) => p.to === referee
+      );
+      expect(invitations).toHaveLength(1);
+    });
+  });
+
+  describe("10. A referee is never one of the candidate's own mailboxes (K-01)", () => {
+    let seq = 0;
+    const newCandidate = async () => {
+      seq += 1;
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: {
+          email: `selfref.${seq}.${Date.now()}@talentsphere.test`,
+          password: 'Password123!Secure',
+          fullName: `Selfref Candidate ${seq}`,
+          role: 'candidate',
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      const { token, user } = JSON.parse(res.body) as { token: string; user: { id: string } };
+      return { token, userId: user.id };
+    };
+    const addRole = async (who: { token: string }, companyName: string) => {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/candidates/work-history',
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { companyName, title: 'Engineer', startDate: '2019-01-01', isCurrent: true },
+      });
+      expect(res.statusCode).toBe(201);
+      return JSON.parse(res.body).workHistory.id as string;
+    };
+    const verifyEmail = (who: { token: string }, historyId: string, payload: object) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${historyId}/verify-email`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload,
+      });
+    const codeFor = async (historyId: string) =>
+      (await outbox(app, 'work_history.email_verification_requested'))
+        .filter((m) => m.workHistoryId === historyId)
+        .pop()!.code as string;
+    const ask = (who: { token: string }, historyId: string, refereeEmail: string) =>
+      app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/${historyId}/references/request`,
+        headers: { authorization: `Bearer ${who.token}` },
+        payload: { refereeName: 'Self', refereeEmail, relationship: 'manager' },
+      });
+
+    it('refuses an address with a pending code as the referee', async () => {
+      const who = await newCandidate();
+      const role = await addRole(who, 'Pending Corp');
+      const mailbox = `me.${role}@acmecloud.io`;
+      expect((await verifyEmail(who, role, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const res = await ask(who, role, mailbox.replace('@', '+ref@'));
+      expect(res.statusCode).toBe(409);
+      expect(res.json().error.message).toMatch(/belongs to you on another role/);
+    });
+
+    it("refuses another role's verified work email as the referee", async () => {
+      const who = await newCandidate();
+      const first = await addRole(who, 'First Corp');
+      const second = await addRole(who, 'Second Corp');
+      const mailbox = `me.${second}@secondcorp.io`;
+      expect((await verifyEmail(who, second, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const verified = await verifyEmail(who, second, {
+        corporateEmail: mailbox,
+        verificationCode: await codeFor(second),
+      });
+      expect(verified.statusCode).toBe(200);
+      const res = await ask(who, first, mailbox);
+      expect(res.statusCode).toBe(409);
+      expect(res.json().error.message).toMatch(/belongs to you on another role/);
+    });
+
+    it('refuses a work email that already vouched for the role, so no gold badge', async () => {
+      const who = await newCandidate();
+      const role = await addRole(who, 'Order Corp');
+      const mailbox = `me.${role}@ordercorp.io`;
+      // Ask "a referee" first, at an address the candidate controls, and answer it.
+      const requested = await ask(who, role, mailbox);
+      expect(requested.statusCode).toBe(201);
+      const refId = requested.json().reference.id as string;
+      const [invite] = (await outbox(app, 'reference.requested')).filter(
+        (p) => p.referenceId === refId
+      );
+      const submitted = await app.inject({
+        method: 'POST',
+        url: `/api/v1/candidates/work-history/references/${refId}/submit`,
+        payload: {
+          token: invite.token,
+          confirmDates: true,
+          confirmTitle: true,
+          technicalProficiency: 5,
+          collaborationRating: 5,
+          deliveryReliability: 5,
+          leadershipRating: 5,
+          endorsedSkills: [],
+        },
+      });
+      expect(submitted.statusCode).toBe(200);
+      // Then claim the same mailbox as the role's work email.
+      expect((await verifyEmail(who, role, { corporateEmail: mailbox })).statusCode).toBe(202);
+      const verified = await verifyEmail(who, role, {
+        corporateEmail: mailbox,
+        verificationCode: await codeFor(role),
+      });
+      expect(verified.statusCode).toBe(409);
+      expect(verified.json().error.message).toMatch(/is a referee on one of your roles/);
+
+      const list = await app.inject({
+        method: 'GET',
+        url: `/api/v1/candidates/${who.userId}/work-history`,
+        headers: { authorization: `Bearer ${who.token}` },
+      });
+      const history = list.json().workHistories.find((h: any) => h.id === role);
+      expect(history.badgeTier).not.toBe('gold');
+      expect(history.emailVerifiedAt).toBeUndefined();
+    });
+  });
+});
+
+describe('Work-history graph includeUnverified is parsed strictly (C-15, A08-013)', () => {
+  let app: FastifyInstance;
+  let ownerToken: string;
+  let ownerId: string;
+
+  beforeAll(async () => {
+    app = await buildApp({
+      NODE_ENV: 'test',
+      PORT: '0',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/talentsphere_test',
+    });
+    await app.ready();
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: 'strict.bool.owner@talentsphere.test',
+        password: 'Password123!Secure',
+        fullName: 'Strict Bool',
+        role: 'candidate',
+      },
+    });
+    const body = JSON.parse(reg.body);
+    ownerToken = body.token;
+    ownerId = body.user.id;
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/v1/candidates/work-history',
+      headers: { authorization: `Bearer ${ownerToken}` },
+      payload: {
+        companyName: 'Unverified Example Ltd',
+        title: 'Engineer',
+        employmentType: 'full_time',
+        startDate: '2021-01-01',
+        endDate: '2022-01-01',
+        isCurrent: false,
+      },
+    });
+    expect(created.statusCode).toBe(201);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  const graph = (flag: string) =>
+    app.inject({
+      method: 'GET',
+      url: `/api/v1/candidates/${ownerId}/work-history-graph?includeUnverified=${flag}`,
+      headers: { authorization: `Bearer ${ownerToken}` },
+    });
+
+  it('?includeUnverified=false leaves the unverified role out', async () => {
+    const res = await graph('false');
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).graph.summary.totalRoles).toBe(0);
+  });
+
+  it('?includeUnverified=true includes it for the owner', async () => {
+    const res = await graph('true');
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).graph.summary.totalRoles).toBe(1);
+  });
+
+  it('an unrecognised value is a validation error', async () => {
+    const res = await graph('maybe');
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).error.code).toBe('VALIDATION_FAILED');
   });
 });

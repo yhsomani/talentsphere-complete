@@ -204,7 +204,9 @@ describe('Notifications on PostgreSQL', () => {
     expect(
       (await sql(`SELECT 1 FROM notifications WHERE recipient_id = $1`, [ids.candProfile])).length
     ).toBeGreaterThan(0);
-    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token);
+    const erased = await call(app, 'POST', '/api/v1/settings/erasure/execute', token, {
+      currentPassword: PASSWORD,
+    });
     expect(erased.status).toBe(200);
     expect(
       await sql(`SELECT 1 FROM notifications WHERE recipient_id = $1`, [ids.candProfile])

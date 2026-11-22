@@ -127,6 +127,18 @@ export function createDefaultUserSettings(userId: string): UserSettings {
 }
 
 /**
+ * Settings as the person sees them (C-25). Profile visibility has one source
+ * of truth, the profile's `privacy`; the settings row's own copy is shown only
+ * when there is no profile.
+ */
+export function withProfileVisibility(
+  settings: UserSettings,
+  profile: Pick<Profile, 'privacy'> | undefined
+): UserSettings {
+  return profile ? { ...settings, profileVisibility: profile.privacy } : settings;
+}
+
+/**
  * Validates and updates user settings.
  */
 export function updateUserSettings(

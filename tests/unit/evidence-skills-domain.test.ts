@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   createEvidence,
+  courseCompletionEvidence,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
+  assertAttachableEvidence,
+  evidenceSummaryForReviewers,
   generatePublicProof,
   createSkillRelationship,
   wouldCreatePrerequisiteCycle,
@@ -444,5 +447,79 @@ describe('Skills Graph & Taxonomy Domain Model (F-84, BR-141..147)', () => {
     expect(graph.subskills).toHaveLength(1);
     expect(graph.subskills[0].slug).toBe('nextjs');
     expect(graph.depth).toBeLessThanOrEqual(5);
+  });
+});
+
+describe('courseCompletionEvidence (C-20)', () => {
+  it('records a course completion unverified and pending, naming it as not assessed', () => {
+    const evidence = courseCompletionEvidence({
+      subjectId: 'c0000000-0000-4000-a000-000000000001',
+      course: { id: 'course-1', title: 'Modern Go Systems' },
+      nowIso: '2026-11-20T10:00:00.000Z',
+    });
+    expect(evidence.verificationLevel).toBe('unverified');
+    expect(evidence.status).toBe('pending');
+    expect(evidence.type).toBe('course_completion');
+    expect(evidence.provenance).toBe('course:course-1');
+    expect(evidence.source).toBe('TalentSphere LMS');
+    expect(evidence.recencyDate).toBe('2026-11-20');
+    expect(evidence.description).toBe(
+      'Completed all lessons in "Modern Go Systems" (completion recorded by TalentSphere; not assessed).'
+    );
+  });
+});
+
+describe('Evidence repeat transitions and reviewer view (C-12)', () => {
+  const admin = { userId: 'a0000000-0000-4000-a000-000000000004', role: 'platform_admin' as const };
+  const ownerUserId = 'u0000000-0000-4000-a000-000000000001';
+  const owner = { userId: ownerUserId, role: 'candidate' as const };
+  const base = createEvidence({
+    subjectId: 'c0000000-0000-4000-a000-000000000001',
+    type: 'project',
+    title: 'Ledger service',
+    description: 'Built the ledger.',
+    source: 'self',
+    provenance: 'direct_entry',
+    recencyDate: '2026-05-10',
+  });
+
+  it('refuses a second revocation and keeps the first stamp', () => {
+    const revoked = revokeEvidence(base, owner, 'Outdated', ownerUserId);
+    expect(() => revokeEvidence(revoked, admin, 'Again')).toThrow(/already revoked/);
+    expect(revoked.metadata?.revokedBy).toBe(ownerUserId);
+  });
+
+  it('refuses a second dispute but still lets a disputed record be revoked', () => {
+    const disputed = disputeEvidence(base, admin, 'Audit found no record');
+    expect(() => disputeEvidence(disputed, admin, 'Another reason')).toThrow(/already disputed/);
+    expect(revokeEvidence(disputed, admin, 'Confirmed fraudulent').status).toBe('revoked');
+  });
+
+  it('keeps the authority check ahead of the repeat check', () => {
+    const revoked = revokeEvidence(base, owner, 'Outdated', ownerUserId);
+    const stranger = { userId: 's0000000-0000-4000-a000-000000000009', role: 'candidate' as const };
+    expect(() => revokeEvidence(revoked, stranger, 'x', ownerUserId)).toThrow(/owner/);
+  });
+
+  it('allows attaching pending, verified and disputed records, not revoked or expired ones', () => {
+    for (const status of ['pending', 'verified', 'disputed'] as const) {
+      expect(() => assertAttachableEvidence({ ...base, status })).not.toThrow();
+    }
+    for (const status of ['revoked', 'expired'] as const) {
+      expect(() => assertAttachableEvidence({ ...base, status })).toThrow(/cannot be attached/);
+    }
+  });
+
+  it('gives reviewers no metadata or verifier id', () => {
+    const disputed = disputeEvidence(
+      { ...base, verifiedBy: admin.userId, status: 'verified' },
+      admin,
+      'PRIVATE-REASON'
+    );
+    const summary = evidenceSummaryForReviewers(disputed);
+    expect('metadata' in summary).toBe(false);
+    expect('verifiedBy' in summary).toBe(false);
+    expect(JSON.stringify(summary)).not.toContain('PRIVATE-REASON');
+    expect(summary).toMatchObject({ id: base.id, title: 'Ledger service', status: 'disputed' });
   });
 });

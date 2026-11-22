@@ -86,10 +86,26 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
     mitOrgId = (await org2.json()).organization.id;
   });
 
-  test('submits alumni affiliations with domain auto-verification and institutional seat codes', async ({
+  test('submits alumni affiliations and confirms them with institutional seat codes', async ({
     request,
   }) => {
-    // 1. Alice submits Stanford affiliation (auto-verified via email domain)
+    // Account emails are not confirmed at registration, so a matching domain
+    // does not auto-verify (C-16); a platform administrator confirms seats.
+    const adminToken = createSessionToken(
+      `user_admin_alumni_${Date.now()}`,
+      `admin.alumni.${Date.now()}@talentsphere.internal`,
+      ['platform_admin']
+    );
+    const confirmSeat = async (affiliationId: string, seatCode: string) => {
+      const res = await request.post(`${API_BASE}/alumni/affiliations/${affiliationId}/verify`, {
+        headers: { authorization: `Bearer ${adminToken}` },
+        data: { verificationMethod: 'institutional_seat', seatCode },
+      });
+      expect(res.status()).toBe(200);
+      expect((await res.json()).affiliation.verificationStatus).toBe('verified');
+    };
+
+    // 1. Alice submits Stanford affiliation (unverified until a seat is confirmed)
     const affRes = await request.post(`${API_BASE}/alumni/affiliations`, {
       headers: { authorization: `Bearer ${user1Token}` },
       data: {
@@ -102,8 +118,8 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
 
     expect(affRes.status()).toBe(201);
     const affData = await affRes.json();
-    expect(affData.affiliation.verificationStatus).toBe('verified');
-    expect(affData.affiliation.verificationMethod).toBe('email_domain');
+    expect(affData.affiliation.verificationStatus).toBe('unverified');
+    await confirmSeat(affData.affiliation.id, 'STANFORD-SEAT-2020');
 
     // 2. Bob also registers at Stanford
     const bobAffRes = await request.post(`${API_BASE}/alumni/affiliations`, {
@@ -116,7 +132,9 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
       },
     });
     expect(bobAffRes.status()).toBe(201);
-    expect((await bobAffRes.json()).affiliation.verificationStatus).toBe('verified');
+    const bobData = await bobAffRes.json();
+    expect(bobData.affiliation.verificationStatus).toBe('unverified');
+    await confirmSeat(bobData.affiliation.id, 'STANFORD-SEAT-2022');
 
     // 3. Charlie (charlie@mit.edu) claims Stanford affiliation (unverified initially)
     const charlieRes = await request.post(`${API_BASE}/alumni/affiliations`, {
@@ -142,23 +160,7 @@ test.describe('E2E: Alumni Networks, Isolation, and Mentorship (F-125, F-12, F-0
       }
     );
     expect(selfClaim.status()).toBe(403);
-    const adminToken = createSessionToken(
-      `user_admin_alumni_${Date.now()}`,
-      `admin.alumni.${Date.now()}@talentsphere.internal`,
-      ['platform_admin']
-    );
-    const verifyRes = await request.post(
-      `${API_BASE}/alumni/affiliations/${charlieAffiliationId}/verify`,
-      {
-        headers: { authorization: `Bearer ${adminToken}` },
-        data: {
-          verificationMethod: 'institutional_seat',
-          seatCode: 'STANFORD-SEAT-2023',
-        },
-      }
-    );
-    expect(verifyRes.status()).toBe(200);
-    expect((await verifyRes.json()).affiliation.verificationStatus).toBe('verified');
+    await confirmSeat(charlieAffiliationId, 'STANFORD-SEAT-2023');
   });
 
   test('enforces strict cross-institution isolation on directory discovery (BR-F125-03)', async ({

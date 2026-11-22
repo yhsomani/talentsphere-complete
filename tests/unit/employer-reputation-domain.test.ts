@@ -5,6 +5,7 @@ import {
   createEmployerReview,
   trimOutlierEmployerReviews,
   calculateEmployerReputation,
+  publicEmployerReview,
   EmployerReview,
 } from '../../packages/domain/src/employer-reputation.js';
 import { DomainError } from '../../packages/domain/src/index.js';
@@ -215,6 +216,45 @@ describe('Employer Reputation & Brand System Domain (F-149, F-75, F-56, F-144)',
       expect(profile.factors.compensationReliabilityScore).toBeGreaterThan(85);
       expect(profile.factors.leadershipScore).toBe(100);
       expect(profile.highlights.length).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  describe('publicEmployerReview (K-04)', () => {
+    const review: EmployerReview = {
+      id: 'r-1',
+      organizationId: orgId,
+      reviewerId: reviewer1Id,
+      employmentStatus: 'current',
+      hiringRating: 4,
+      cultureRating: 4,
+      growthRating: 4,
+      compensationRating: 4,
+      leadershipRating: 4,
+      title: 'Good place',
+      isVerifiedEmployee: true,
+      createdAt: '2026-11-01T00:00:00.000Z',
+    };
+
+    it('drops the reviewer id for anonymous and unrelated viewers', () => {
+      expect(publicEmployerReview(review)).not.toHaveProperty('reviewerId');
+      const other = publicEmployerReview(review, { userId: 'someone-else', roles: ['recruiter'] });
+      expect(other).not.toHaveProperty('reviewerId');
+      expect(other.isMine).toBeUndefined();
+      expect(other.title).toBe('Good place');
+    });
+
+    it("marks the reviewer's own review without returning the id", () => {
+      const mine = publicEmployerReview(review, { userId: reviewer1Id, roles: ['candidate'] });
+      expect(mine).not.toHaveProperty('reviewerId');
+      expect(mine.isMine).toBe(true);
+    });
+
+    it('keeps the reviewer id for platform admins and moderators', () => {
+      for (const role of ['platform_admin', 'moderator'] as const) {
+        expect(publicEmployerReview(review, { userId: 'staff', roles: [role] }).reviewerId).toBe(
+          reviewer1Id
+        );
+      }
     });
   });
 });

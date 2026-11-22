@@ -87,6 +87,15 @@ export function jobStatusLabel(status: string): string {
   return JOB_STATUS_LABELS[status] ?? status;
 }
 
+// How an attached evidence record reads to the hiring team: a revoked or
+// expired record says so instead of showing the level it once had (C-12).
+export function evidenceStatusLabel(ev: { status: string; verificationLevel: string }): string {
+  if (ev.status === 'revoked' || ev.status === 'expired') return ev.status;
+  return ev.verificationLevel === 'unverified'
+    ? 'self-reported'
+    : ev.verificationLevel.replace('_', ' ');
+}
+
 const WORK_MODE_LABELS: Record<string, string> = {
   remote: 'Remote',
   hybrid: 'Hybrid',

@@ -14,7 +14,13 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
   let stanfordOrgId: string;
   let mitOrgId: string;
   let aliceAffiliationId: string;
+  let bobAffiliationId: string;
   let charlieAffiliationId: string;
+  const adminToken = createSessionToken(
+    '00000000-0000-4000-a000-0000000000c3',
+    'admin.alumni@talentsphere.internal',
+    ['platform_admin']
+  );
   let groupId: string;
   let mentorshipId: string;
 
@@ -102,7 +108,9 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
     await app.close();
   });
 
-  it('submits alumni affiliation and auto-verifies when email domain matches institution domain', async () => {
+  // C-16: account emails are not confirmed at registration, so a matching
+  // domain no longer auto-verifies; an administrator confirms the seat.
+  it('submits alumni affiliation unverified even when the account email domain matches', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/api/v1/alumni/affiliations',
@@ -119,8 +127,8 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
     const body = JSON.parse(res.body);
     expect(body.affiliation.userId).toBe(user1Id);
     expect(body.affiliation.institutionId).toBe(stanfordOrgId);
-    expect(body.affiliation.verificationStatus).toBe('verified');
-    expect(body.affiliation.verificationMethod).toBe('email_domain');
+    expect(body.affiliation.verificationStatus).toBe('unverified');
+    expect(body.affiliation.verifiedAt).toBeUndefined();
     aliceAffiliationId = body.affiliation.id;
 
     // Also register Bob at Stanford
@@ -136,7 +144,53 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
       },
     });
     expect(bobAffRes.statusCode).toBe(201);
-    expect(JSON.parse(bobAffRes.body).affiliation.verificationStatus).toBe('verified');
+    expect(JSON.parse(bobAffRes.body).affiliation.verificationStatus).toBe('unverified');
+    bobAffiliationId = JSON.parse(bobAffRes.body).affiliation.id;
+  });
+
+  it('refuses email-domain verification while account emails are unconfirmed (C-16)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: `/api/v1/alumni/affiliations/${aliceAffiliationId}/verify`,
+      headers: { authorization: `Bearer ${user1Token}` },
+      payload: { verificationMethod: 'email_domain' },
+    });
+    expect(res.statusCode).toBe(422);
+    expect(JSON.parse(res.body).error.code).toBe('VALIDATION_FAILED');
+
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/v1/alumni/affiliations/my',
+      headers: { authorization: `Bearer ${user1Token}` },
+    });
+    const alice = JSON.parse(mine.body).affiliations.find((a: any) => a.id === aliceAffiliationId);
+    expect(alice.verificationStatus).toBe('unverified');
+  });
+
+  it('keeps an unverified affiliate out of the institution directory', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: `/api/v1/alumni/institutions/${stanfordOrgId}/directory`,
+      headers: { authorization: `Bearer ${user2Token}` },
+    });
+    expect(res.statusCode).toBe(403);
+    expect(JSON.parse(res.body).error.code).toBe('TENANT_ISOLATION_VIOLATION');
+  });
+
+  it('lets a platform administrator confirm the Stanford seats', async () => {
+    for (const [id, seatCode] of [
+      [aliceAffiliationId, 'STANFORD-SEAT-2021'],
+      [bobAffiliationId, 'STANFORD-SEAT-2023'],
+    ]) {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/alumni/affiliations/${id}/verify`,
+        headers: { authorization: `Bearer ${adminToken}` },
+        payload: { verificationMethod: 'institutional_seat', seatCode },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).affiliation.verificationStatus).toBe('verified');
+    }
   });
 
   it('submits unverified affiliation when email domain does not match', async () => {
@@ -186,11 +240,6 @@ describe('Alumni Networks Integration (F-125, F-12, F-09, F-40)', () => {
     expect(selfClaim.statusCode).toBe(403);
 
     // ... an administrator confirms it.
-    const adminToken = createSessionToken(
-      '00000000-0000-4000-a000-0000000000c3',
-      'admin.alumni@talentsphere.internal',
-      ['platform_admin']
-    );
     const res = await app.inject({
       method: 'POST',
       url: `/api/v1/alumni/affiliations/${charlieAffiliationId}/verify`,

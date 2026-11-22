@@ -107,6 +107,7 @@ repository actually requires today.
 | `BILLING_MODE`                 | `disabled` (default), `simulated` (no payment; refused in production), or `stripe` (configured provider). |
 | `BILLING_WEBHOOK_SECRET`       | Unset ⇒ the billing webhook answers 503 to everything.                        |
 | `AUTH_RATE_LIMIT_MAX_REQUESTS` | Login attempts per IP+email and sign-ups per IP per window (default 10).      |
+| `AUTH_ACCOUNT_FAILURE_MAX`     | Failed sign-ins per account (any address) per 15 minutes before 429 (default 50). |
 | `RATE_LIMIT_MAX_REQUESTS` / `RATE_LIMIT_WINDOW_MS` | Global limiter per signed-in account (per address when anonymous); default 300 per minute. |
 | `TRUST_PROXY`                  | **Required behind a load balancer** (e.g. `1`): otherwise every anonymous client shares the proxy's address and one rate-limit bucket. |
 

@@ -38,6 +38,8 @@ import {
   hashPassword,
   verifyPassword,
   passwordNeedsRehash,
+  recentLoginFailures,
+  loginFailureDecision,
   createSessionToken,
   verifySessionToken,
   type AuthPayload,
@@ -46,7 +48,12 @@ import {
   createProfileEntity,
   updateProfileEntity,
   canViewProfile,
+  canViewActivity,
   createEvidence,
+  courseCompletionEvidence,
+  assertAttachableEvidence,
+  evidenceSummaryForReviewers,
+  canSeeEvidenceInternals,
   verifyEvidence,
   disputeEvidence,
   revokeEvidence,
@@ -59,6 +66,7 @@ import {
   transitionJobStatus,
   submitJobApplication,
   transitionApplicationState,
+  applicationForCandidate,
   Challenge,
   AssessmentSession,
   XpTransaction,
@@ -98,6 +106,7 @@ import {
   createNotificationEntity,
   candidateApplicationUpdate,
   markNotificationsAsRead,
+  resolveMarkReadTargets,
   AIConversation,
   AIMessage,
   AIUsageMeter,
@@ -138,6 +147,7 @@ import {
   DataExportRequest,
   createDefaultUserSettings,
   updateUserSettings,
+  withProfileVisibility,
   requestAccountErasure,
   executeLogicalAnonymization,
   compileDataExportArchive,
@@ -189,6 +199,10 @@ import {
   AnalyticsEvent,
   recordAnalyticsEvent,
   computeKPIs,
+  appendBounded,
+  ANALYTICS_EVENT_RETENTION,
+  AUDIT_LOG_RETENTION,
+  telemetryConsentFrom,
   JobTemplate,
   createJobTemplate,
   updateJobTemplate,
@@ -245,6 +259,7 @@ import {
   ActivityEvent,
   ContributionScore,
   recordActivityEvent,
+  prependActivityEvent,
   calculateContributionScores,
   InstructorReputationProfile,
   InstructorOperationalMetrics,
@@ -260,6 +275,8 @@ import {
   AlumniGroupMember,
   AlumniMentorshipRequest,
   createAlumniAffiliation,
+  matchesInstitutionDomain,
+  assertEmailDomainVerificationAvailable,
   filterAlumniDirectory,
   createAlumniGroup,
   joinAlumniGroup,
@@ -269,6 +286,7 @@ import {
   EmployerReview,
   EmployerOperationalMetrics,
   calculateEmployerReputation,
+  publicEmployerReview,
   createEmployerReview,
   SkillMarketSignal,
   SkillForecast,
@@ -314,8 +332,11 @@ import {
   createWorkHistory,
   verifyCorporateEmail,
   assertCorporateEmailEligible,
+  assertEmailCodeIssuable,
+  assertReferenceRequestAllowed,
   canTransitionApplication,
   requestEmploymentReference,
+  referenceLinkExpired,
   submitEmploymentReference,
   calculateVerificationScoreAndBadge,
   buildWorkHistoryGraph,
@@ -362,6 +383,7 @@ import {
   UpdateUserSettingsInputSchema,
   RequestErasureInputSchema,
   CancelErasureInputSchema,
+  ExecuteErasureInputSchema,
   RequestDataExportInputSchema,
   SubscribePlanInputSchema,
   CancelSubscriptionInputSchema,
@@ -486,6 +508,12 @@ export type BuildAppEnv = Partial<Record<keyof ServerEnv, string | number | bool
 export interface BuildAppOverrides {
   /** Replaces the Stripe SDK gateway (BILLING_MODE=stripe only). */
   stripeGateway?: StripeGateway;
+  /**
+   * Called once if the pg writer lease is lost after boot. The process entry
+   * point exits on it so the supervisor restarts the API (C-07); buildApp
+   * itself never exits the process.
+   */
+  onWriterLeaseLost?: () => void;
 }
 
 export async function buildApp(
@@ -541,6 +569,7 @@ export async function buildApp(
       await storage.close();
       throw error;
     }
+    storage.onWriterLeaseLost(() => overrides.onWriterLeaseLost?.());
     app.log.info(`storage: pg — ${boot.detail}; exclusive writer lease acquired`);
   } else {
     app.log.warn('storage: memory — NOT durable: every write is lost on restart (STORAGE=memory)');
@@ -755,6 +784,51 @@ export async function buildApp(
     };
   });
 
+  // Readiness: can this instance serve traffic now? A live database round trip
+  // (2 s budget) in pg mode; memory mode has no database and is always ready.
+  // Answers only ready/not_ready: the storage detail names the database host
+  // and stays in the admin diagnostics. The worker is not a dependency: a
+  // dead worker must not take the API out of rotation (C-07).
+  // The endpoint is unauthenticated and limiter-exempt, so the database probe
+  // is shared: concurrent calls await one in-flight check and a result is
+  // reused for READY_CACHE_MS (K-08). Lease loss is not masked: the onRequest
+  // guard answers 503 before this handler whenever the lease is unhealthy.
+  const READY_CACHE_MS = 1000;
+  let readyCached: { ok: boolean; at: number } | null = null;
+  let readyInFlight: Promise<boolean> | null = null;
+  const probeReady = async (): Promise<boolean> => {
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<{ ok: false }>((resolve) => {
+      timer = setTimeout(() => resolve({ ok: false }), 2000);
+    });
+    try {
+      return (await Promise.race([storage.health(), timedOut])).ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  app.get('/ready', { config: { rateLimit: false } }, async (_req, reply) => {
+    let ready = storage.mode === 'memory';
+    if (!ready) {
+      if (readyCached && Date.now() - readyCached.at < READY_CACHE_MS) {
+        ready = readyCached.ok;
+      } else {
+        if (!readyInFlight) {
+          readyInFlight = probeReady()
+            .then((ok) => {
+              readyCached = { ok, at: Date.now() };
+              return ok;
+            })
+            .finally(() => {
+              readyInFlight = null;
+            });
+        }
+        ready = await readyInFlight;
+      }
+    }
+    return reply.status(ready ? 200 : 503).send({ status: ready ? 'ready' : 'not_ready' });
+  });
+
   app.get('/api/v1/health', { config: { rateLimit: false } }, async () => {
     return {
       status: 'ok',
@@ -813,6 +887,8 @@ export async function buildApp(
   // governed review and appeal" (SSOT §Trust) plus their GDPR rights — and
   // nothing else. Erased accounts have no credential and no access at all.
   const RESTRICTED_SESSION_ROUTES = new Set([
+    // The client's bootstrap; returns only the caller's own state (C-01).
+    'GET /api/v1/auth/session',
     'GET /api/v1/profile/me',
     'POST /api/v1/auth/password',
     'POST /api/v1/auth/sign-out',
@@ -872,7 +948,7 @@ export async function buildApp(
       if (!RESTRICTED_SESSION_ROUTES.has(route)) {
         throw new DomainError(
           'FORBIDDEN',
-          'This account is restricted. You can still view your reports, appeal a decision, and export or delete your data.',
+          'This account is restricted. You can still export or delete your data.',
           { accountStatus: account.status }
         );
       }
@@ -925,11 +1001,6 @@ export async function buildApp(
    */
   const ERASED_CREDENTIAL = '!erased';
 
-  /** A referee's emailed link stops working this long after the request was made. */
-  const REFERENCE_LINK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-  const referenceLinkExpired = (reference: { requestedAt: string }): boolean =>
-    Date.now() - Date.parse(reference.requestedAt) > REFERENCE_LINK_TTL_MS;
-
   /** May this session manage the given organization's jobs and pipeline? (BR-12) */
   const canManageJobs = (
     session: { userId: string; roles: Role[] } | null | undefined,
@@ -970,6 +1041,28 @@ export async function buildApp(
   // same time as "wrong password" and response timing does not reveal which
   // addresses are registered.
   const timingDecoyHash = hashPassword(crypto.randomBytes(16).toString('hex'));
+  // Failed sign-ins per email across every client address (C-23). The
+  // per-(IP, email) limiter above does not bound guessing from many
+  // addresses. In memory, per process, like the limiter store.
+  const loginFailuresByEmail = new Map<string, number[]>();
+  let lastLoginFailureSweepMs = 0;
+  const recordLoginFailure = (emailKey: string) => {
+    const now = Date.now();
+    // Only the newest AUTH_ACCOUNT_FAILURE_MAX entries can matter.
+    const list = [...recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], now), now].slice(
+      -env.AUTH_ACCOUNT_FAILURE_MAX
+    );
+    loginFailuresByEmail.set(emailKey, list);
+    // Unknown emails create entries too; drop expired ones so the map stays
+    // bounded — at most once a minute, so a spray is not a full scan per
+    // failure (K-12/K-18).
+    if (loginFailuresByEmail.size > 10_000 && now - lastLoginFailureSweepMs >= 60_000) {
+      lastLoginFailureSweepMs = now;
+      for (const [key, times] of loginFailuresByEmail) {
+        if (recentLoginFailures(times, now).length === 0) loginFailuresByEmail.delete(key);
+      }
+    }
+  };
 
   app.post(
     '/api/v1/auth/register',
@@ -1016,7 +1109,21 @@ export async function buildApp(
     { config: loginRateLimit },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const input = LoginInputSchema.parse(req.body);
-      const user = usersByEmail.get(input.email.toLowerCase());
+      const emailKey = input.email.toLowerCase();
+      const failures = recentLoginFailures(loginFailuresByEmail.get(emailKey) || [], Date.now());
+      if (loginFailureDecision(failures.length, env.AUTH_ACCOUNT_FAILURE_MAX) === 'refuse') {
+        // Same cost as a real check, and the same answer for unknown emails.
+        await verifyPassword(input.password, await timingDecoyHash);
+        throw new DomainError(
+          'RATE_LIMIT_EXCEEDED',
+          'Too many sign-in attempts for this account. Wait 15 minutes, then try again.'
+        );
+      }
+      // Count the attempt before the first await, so parallel guesses are
+      // each evaluated against the attempts already in flight (K-05); a
+      // correct password clears the window, as before.
+      recordLoginFailure(emailKey);
+      const user = usersByEmail.get(emailKey);
       if (!user) {
         await verifyPassword(input.password, await timingDecoyHash);
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
@@ -1026,6 +1133,7 @@ export async function buildApp(
       if (!isValid) {
         throw new DomainError('UNAUTHENTICATED', 'Invalid email or password.');
       }
+      loginFailuresByEmail.delete(emailKey);
 
       // Transparent upgrade: hashes written at the old work factor (10k
       // iterations) are re-hashed at the current one while the plaintext is in
@@ -1122,6 +1230,8 @@ export async function buildApp(
           sessionsValidAfter: cutoff,
         },
       });
+      // Guesses against the old password no longer count against the account.
+      loginFailuresByEmail.delete(user.email.toLowerCase());
       auditLogs.push({
         event: 'auth.password_changed',
         actorId: user.id,
@@ -1253,7 +1363,9 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      const allowed = canViewProfile(profile, viewerId, viewerRoles);
+      const allowed = canViewProfile(profile, viewerId, viewerRoles, {
+        isConnected: viewerIsConnected(viewerId, profile),
+      });
       if (!allowed) {
         throw new DomainError(
           'FORBIDDEN',
@@ -1272,7 +1384,12 @@ export async function buildApp(
   const skillsBySlug = new Map<string, Skill>();
   const skillRelationships: SkillRelationship[] = [];
   const evidenceSkills = new Map<string, Set<string>>();
-  const auditLogs: any[] = [];
+  // In-memory, write-only security/admin event trail: bounded so it cannot
+  // grow without limit between restarts (K-06). Not durable (A05-005, owner).
+  const auditLogEntries: unknown[] = [];
+  const auditLogs = {
+    push: (entry: unknown) => appendBounded(auditLogEntries, entry, AUDIT_LOG_RETENTION),
+  };
 
   // Notification Center Repositories & Helper (F-14, BR-120)
   const notificationsById = new Map<string, Notification>();
@@ -1430,7 +1547,12 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (profile && !canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        profile &&
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to this evidence is restricted by profile privacy.'
@@ -1444,7 +1566,11 @@ export async function buildApp(
             .filter(Boolean)
         : [];
 
-      return reply.status(200).send({ evidence, skills });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const view = canSeeEvidenceInternals(viewerId, viewerRoles, profile?.userId)
+        ? evidence
+        : evidenceSummaryForReviewers(evidence);
+      return reply.status(200).send({ evidence: view, skills });
     }
   );
 
@@ -1470,7 +1596,11 @@ export async function buildApp(
       const viewerId: string | undefined = viewer?.userId;
       const viewerRoles: Role[] = viewer?.roles ?? [];
 
-      if (!canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        !canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         throw new DomainError(
           'FORBIDDEN',
           'Access to evidence is restricted by subject privacy settings.'
@@ -1478,7 +1608,11 @@ export async function buildApp(
       }
 
       const list = evidenceBySubjectId.get(subjectId) || [];
-      return reply.status(200).send({ evidence: list });
+      // Non-owners and non-staff get the reviewer projection (K-03).
+      const evidence = canSeeEvidenceInternals(viewerId, viewerRoles, profile.userId)
+        ? list
+        : list.map(evidenceSummaryForReviewers);
+      return reply.status(200).send({ evidence });
     }
   );
 
@@ -2623,6 +2757,7 @@ export async function buildApp(
               `Evidence item ${evId} does not belong to your profile.`
             );
           }
+          assertAttachableEvidence(ev);
         }
       }
 
@@ -2704,7 +2839,7 @@ export async function buildApp(
       const job = jobsById.get(app.jobId);
       const org = job ? organizationsById.get(job.orgId) : undefined;
       return {
-        ...app,
+        ...applicationForCandidate(app),
         job: job
           ? { ...job, organization: org ? { id: org.id, name: org.name } : undefined }
           : undefined,
@@ -2735,7 +2870,12 @@ export async function buildApp(
         throw new DomainError('FORBIDDEN', 'Access to application is restricted.');
       }
 
-      return reply.status(200).send({ application });
+      // The candidate never sees the hiring team's private rejection note (C-18).
+      const visible =
+        isCandidate && !isOrgMember && !isAdmin
+          ? applicationForCandidate(application)
+          : application;
+      return reply.status(200).send({ application: visible });
     }
   );
 
@@ -2774,7 +2914,10 @@ export async function buildApp(
         return {
           ...app,
           candidate,
-          evidence: app.attachedEvidenceIds.map((evId) => evidenceById.get(evId)).filter(Boolean),
+          evidence: app.attachedEvidenceIds
+            .map((evId) => evidenceById.get(evId))
+            .filter((ev): ev is Evidence => Boolean(ev))
+            .map(evidenceSummaryForReviewers),
           workHistorySummary: {
             roles: histories.length,
             emailVerifiedRoles: histories.filter((h) => h.emailVerifiedAt).length,
@@ -4572,9 +4715,10 @@ export async function buildApp(
       }
 
       const reviews = employerReviewsByOrgId.get(organizationId) || [];
+      const viewer = maybeExtractUser(req);
       return reply.status(200).send({
         organizationId,
-        reviews,
+        reviews: reviews.map((r) => publicEmployerReview(r, viewer ?? undefined)),
         total: reviews.length,
       });
     }
@@ -5270,19 +5414,13 @@ export async function buildApp(
         enrollment.status = 'completed';
         enrollment.completedAt = now;
 
-        // Auto-mint verified Evidence in the Talent Graph (BR-23)
-        const evidence = createEvidence({
+        // Record the completion as evidence in the Talent Graph (BR-23); its
+        // level is a domain rule (unverified: nothing was assessed) (C-20).
+        const evidence = courseCompletionEvidence({
           subjectId: profile.id,
-          type: 'course_completion',
-          title: `Course Certificate: ${course.title}`,
-          description: `Successfully completed all modules and lessons in "${course.title}".`,
-          source: 'TalentSphere LMS',
-          provenance: `course:${course.id}`,
-          recencyDate: now.split('T')[0],
+          course,
+          nowIso: now,
         });
-        // Authority level for platform LMS completion
-        evidence.status = 'verified';
-        evidence.verificationLevel = 'authority_verified';
 
         await persist({ kind: 'evidence', value: evidence });
 
@@ -5899,7 +6037,7 @@ export async function buildApp(
 
     const input = MarkNotificationsReadInputSchema.parse(req.body || {});
     const userNotifs = notificationsByRecipientId.get(profile.id) || [];
-    const targetIds = input.all ? undefined : input.notificationIds;
+    const targetIds = resolveMarkReadTargets(input);
 
     // Mark copies, never the stored objects, and persist them: the read state
     // survives a restart, and only the recipient's own notifications move.
@@ -6098,9 +6236,17 @@ export async function buildApp(
     convMessages.push(userMsg);
 
     // 6. Generate AI response with advisory provenance
+    // The user's real skills: the freshness records keyed by profile id (C-19).
+    const ownProfileId = profilesByUserId.get(session.userId)?.id;
+    const candidateSkills = [
+      ...(skillFreshnessByCandidateId.get(ownProfileId ?? '')?.values() ?? []),
+    ]
+      .map((record) => skillsById.get(record.skillId)?.name)
+      .filter((name): name is string => Boolean(name));
     const aiResult = generateCareerAssistantResponse({
       conversationId: conversation.id,
       prompt: input.prompt,
+      candidateSkills,
     });
 
     convMessages.push(aiResult.message);
@@ -6334,6 +6480,12 @@ export async function buildApp(
   // Professional Networking Repositories & Endpoints (F-09)
   const connectionsById = new Map<string, Connection>();
   const connectionsByUserId = new Map<string, Connection[]>();
+  // Whether a viewer has an accepted connection with a profile's owner, for
+  // connections-only profile visibility (C-29).
+  const viewerIsConnected = (viewerId: string | undefined, profile: { userId: string }) =>
+    viewerId
+      ? areConnected(connectionsByUserId.get(viewerId) ?? [], viewerId, profile.userId)
+      : false;
 
   app.post('/api/v1/connections/request', async (req: FastifyRequest, reply: FastifyReply) => {
     const session = extractUser(req);
@@ -6350,13 +6502,18 @@ export async function buildApp(
     }
 
     const userConnections = connectionsByUserId.get(session.userId) || [];
+    // Read through the durable settings so the choice survives a restart (C-29),
+    // without writing a default settings row in the recipient's name (K-11).
+    const recipientSettings =
+      targetUserId === session.userId ? undefined : await readSettings(targetUserId);
     const connection = requestConnection(
       {
         senderId: session.userId,
         recipientId: targetUserId,
         note: input.note,
       },
-      userConnections
+      userConnections,
+      recipientSettings?.allowConnectionRequests ?? true
     );
 
     connectionsById.set(connection.id, connection);
@@ -8455,7 +8612,12 @@ export async function buildApp(
     const stealth =
       (userSettingsByUserId.get(profile.userId) as any)?.stealthMode === true ||
       declared?.engagementSegment === 'stealth';
-    return !stealth && canViewProfile(profile, session.userId, session.roles);
+    return (
+      !stealth &&
+      canViewProfile(profile, session.userId, session.roles, {
+        isConnected: viewerIsConnected(session.userId, profile),
+      })
+    );
   };
   const assertMayProfileCandidate = (session: AuthPayload, candidateId: string) => {
     if (!candidateProfileFor(candidateId) && candidateId !== session.userId) {
@@ -8968,6 +9130,10 @@ export async function buildApp(
       verificationMethod: input.verificationMethod,
       userEmail,
       institutionDomain,
+      // Account emails are not confirmed at registration (A02-001), so the
+      // address cannot prove the affiliation (C-16). Pass the real flag once
+      // account-email verification exists.
+      userEmailVerified: false,
     });
 
     alumniAffiliationsById.set(affiliation.id, affiliation);
@@ -9016,26 +9182,12 @@ export async function buildApp(
       }
 
       if (input.verificationMethod === 'email_domain') {
+        // Closed until account emails are confirmed (C-16): see the create route.
+        assertEmailDomainVerificationAvailable(false);
         const org = organizationsById.get(affiliation.institutionId);
-        const instDomain = org?.website
-          ? org.website
-              .replace(/^https?:\/\//i, '')
-              .replace(/\/.*$/, '')
-              .toLowerCase()
-          : '';
         const user = usersById.get(affiliation.userId);
         const userEmail = user?.email || session.email;
-        const emailParts = userEmail.split('@');
-        const userDomain = emailParts.length === 2 ? emailParts[1].toLowerCase() : '';
-
-        // Exact domain or a subdomain of it: substring matching accepted
-        // x@stanford.edu.evil.example (SEC-04). Account emails are still not
-        // verified at registration, so this path stays weaker than a seat.
-        if (
-          !instDomain ||
-          !userDomain ||
-          (userDomain !== instDomain && !userDomain.endsWith(`.${instDomain}`))
-        ) {
+        if (!org?.website || !matchesInstitutionDomain(userEmail, org.website)) {
           throw new DomainError(
             'VALIDATION_FAILED',
             'User email domain does not match institution domain.'
@@ -9418,42 +9570,43 @@ export async function buildApp(
   const activityEventsByUserId = new Map<string, ActivityEvent[]>();
   const contributionScoresByUserId = new Map<string, ContributionScore>();
 
-  app.post('/api/v1/activity/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = extractUser(req);
-    const input = RecordActivityEventInputSchema.parse(req.body || {});
+  // Self-reported and kept in memory: a 16 KB body, 60 a minute per account,
+  // metadata limits, and the newest ACTIVITY_EVENT_RETENTION_PER_USER events
+  // per account (M-1).
+  const activityIngestOptions = {
+    bodyLimit: 16 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/activity/events',
+    activityIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = extractUser(req);
+      const input = RecordActivityEventInputSchema.parse(req.body || {});
 
-    const event = recordActivityEvent({
-      userId: session.userId,
-      category: input.category,
-      activityType: input.activityType,
-      weight: input.weight,
-      metadata: input.metadata,
-      occurredAt: input.occurredAt,
-    });
+      const event = recordActivityEvent({
+        userId: session.userId,
+        category: input.category,
+        activityType: input.activityType,
+        weight: input.weight,
+        metadata: input.metadata,
+        occurredAt: input.occurredAt,
+      });
 
-    activityEventsById.set(event.id, event);
+      activityEventsById.set(event.id, event);
 
-    const userEvents = activityEventsByUserId.get(session.userId) || [];
-    userEvents.unshift(event);
-    activityEventsByUserId.set(session.userId, userEvents);
+      const userEvents = activityEventsByUserId.get(session.userId) || [];
+      for (const dropped of prependActivityEvent(userEvents, event)) {
+        activityEventsById.delete(dropped.id);
+      }
+      activityEventsByUserId.set(session.userId, userEvents);
 
-    const score = calculateContributionScores(session.userId, userEvents);
-    contributionScoresByUserId.set(session.userId, score);
+      const score = calculateContributionScores(session.userId, userEvents);
+      contributionScoresByUserId.set(session.userId, score);
 
-    auditLogs.push({
-      event: 'activity.recorded',
-      actorId: session.userId,
-      targetId: event.id,
-      metadata: {
-        category: event.category,
-        activityType: event.activityType,
-        compositeScore: score.compositeScore,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
-    return reply.status(201).send({ event, score });
-  });
+      return reply.status(201).send({ event, score });
+    }
+  );
 
   app.get(
     '/api/v1/activity/events',
@@ -9492,12 +9645,33 @@ export async function buildApp(
   app.get(
     '/api/v1/activity/users/:userId/score',
     async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
-      extractUser(req);
+      const session = extractUser(req);
       const { userId } = req.params;
 
       const user = usersById.get(userId);
-      if (!user) {
+      const profile = profilesByUserId.get(userId);
+      if (!user || !profile) {
         throw new DomainError('NOT_FOUND', `User ${userId} not found.`);
+      }
+
+      // Same privacy as the profile, plus the person's "show activity"
+      // setting (C-26). Settings are read through without writing defaults.
+      const settings = await readSettings(userId);
+      const visibility = canViewActivity({
+        profile,
+        settings,
+        viewerUserId: session.userId,
+        viewerRoles: session.roles,
+        isConnected: viewerIsConnected(session.userId, profile),
+      });
+      if (visibility === 'profile_restricted') {
+        throw new DomainError(
+          'FORBIDDEN',
+          'This profile is private or restricted to authorized roles.'
+        );
+      }
+      if (visibility === 'activity_hidden') {
+        throw new DomainError('FORBIDDEN', 'This person does not share their activity.');
       }
 
       const userEvents = activityEventsByUserId.get(userId) || [];
@@ -9955,8 +10129,23 @@ export async function buildApp(
       byoAiKey: settings.byoAiKey ? '••••••••' : null,
     };
   };
+  // What the person is shown: profile visibility follows the profile (C-25).
+  const settingsView = (settings: UserSettings) =>
+    sanitizeSettings(withProfileVisibility(settings, profilesByUserId.get(settings.userId)));
 
   // Settings are read from PostgreSQL on first access, not reset on restart.
+  // Another user's settings, or the caller's outside the Settings page: cache,
+  // then the durable row; a hit is cached, a miss is NOT created (K-11).
+  const readSettings = async (userId: string): Promise<UserSettings | undefined> => {
+    const cached = userSettingsByUserId.get(userId);
+    if (cached) return cached;
+    const stored = (await storage.accountMetadata.getSettings(userId)) ?? undefined;
+    if (stored) userSettingsByUserId.set(userId, stored);
+    return stored;
+  };
+
+  // The owner's own settings (GET/PATCH /settings, export): creates and saves
+  // defaults on first use.
   const accountSettings = async (userId: string): Promise<UserSettings> => {
     const cached = userSettingsByUserId.get(userId);
     if (cached) return cached;
@@ -9973,7 +10162,7 @@ export async function buildApp(
     const settings = await accountSettings(session.userId);
 
     return reply.status(200).send({
-      settings: sanitizeSettings(settings),
+      settings: settingsView(settings),
     });
   });
 
@@ -10016,7 +10205,7 @@ export async function buildApp(
 
     return reply.status(200).send({
       message: 'Account settings updated successfully.',
-      settings: sanitizeSettings(updated),
+      settings: settingsView(updated),
     });
   });
 
@@ -10038,7 +10227,8 @@ export async function buildApp(
       throw new DomainError('NOT_FOUND', 'Account profile is unavailable for export.');
     }
 
-    const settings = await accountSettings(session.userId);
+    // One visibility value in the archive, the profile's (C-25).
+    const settings = withProfileVisibility(await accountSettings(session.userId), profile);
 
     // Evidence and applications are keyed by PROFILE id; collecting them by
     // user id exported nothing (gap G-20).
@@ -10198,226 +10388,408 @@ export async function buildApp(
   });
 
   // 8. Execute Immediate Account Erasure / Logical Anonymization (§31.4)
-  app.post('/api/v1/settings/erasure/execute', async (req: FastifyRequest, reply: FastifyReply) => {
-    let session: AuthPayload;
-    // Set when this call finishes an erasure whose core transaction already
-    // committed in an earlier, interrupted call.
-    let resumed: DataErasureRequest | undefined;
-    try {
-      session = extractUser(req);
-    } catch (err) {
-      // Once the core transaction commits the account is closed and every
-      // normal session is refused. A still-validly-signed, unrevoked token of
-      // that same user may finish (or re-read) its own erasure and nothing
-      // else; any other failure keeps its original error.
-      const bearer = req.headers.authorization;
-      const raw = bearer?.startsWith('Bearer ')
-        ? verifySessionToken(bearer.substring(7).trim())
-        : null;
-      const closed =
-        raw &&
-        !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
-        usersById.get(raw.userId)?.passwordHash === ERASED_CREDENTIAL &&
-        // Same cut-off rule as resolveSession: sessions ended by a password
-        // change or "sign out other devices" cannot resume either.
-        !(
-          usersById.get(raw.userId)?.sessionsValidAfter &&
-          raw.issuedAt * 1000 < Date.parse(usersById.get(raw.userId)!.sessionsValidAfter!)
-        );
-      if (!raw || !closed) throw err;
-      const history = await storage.erasureRequests.list(raw.userId);
-      resumed = history.find((r) => r.status === 'processing');
-      const done = history.find((r) => r.status === 'completed' && r.anonymizedHash);
-      if (!resumed && !done) throw err;
-      if (!resumed) {
-        return reply.status(200).send({
-          message: 'Account erasure was already completed.',
-          anonymizedHash: done!.anonymizedHash,
-          completedAt: done!.completedAt,
-        });
-      }
-      session = raw;
-    }
-
-    const user = usersById.get(session.userId);
-    const profile = profilesByUserId.get(session.userId);
-
-    if (!user || !profile) {
-      throw new DomainError('NOT_FOUND', 'User or profile not found for erasure execution.');
-    }
-
-    const result = executeLogicalAnonymization(
-      {
-        id: user.id,
-        email: user.email,
-        roles: user.roles as any,
-        status: (user.status as any) || 'active',
-        createdAt: user.createdAt,
-        updatedAt: user.createdAt,
-      },
-      profile
-    );
-    // A resumed run keeps the hash and request recorded before the first
-    // attempt: the original email it was derived from is already gone.
-    const anonymizedHash = resumed?.anonymizedHash ?? result.anonymizedHash;
-    const completedAt = result.completedAt;
-
-    // Durable 'executing' marker, written BEFORE any destructive step so a
-    // process that dies part-way leaves a request that the next call resumes.
-    if (!resumed) {
-      await storage.erasureRequests.beginExecution(
-        session.userId,
-        crypto.randomUUID(),
-        completedAt,
-        anonymizedHash
-      );
-    }
-
-    // Billing first: ends the Stripe customer (and its subscriptions) and
-    // removes local billing records. If Stripe is unreachable this throws
-    // before anything else is changed, so the request is safe to retry.
-    await eraseBillingData(session.userId);
-
-    // Persist the anonymized state in ONE transaction. Now that this data is
-    // durable, erasure has to remove personal data rather than rely on a
-    // restart to forget it:
-    //  - the account can never sign in again (credential destroyed);
-    //  - work history, references and evidence (employer names, titles,
-    //    corporate emails, referee contacts, free text) are deleted;
-    //  - open applications are withdrawn and cover letters blanked, keeping
-    //    only the minimal record an employer's pipeline still points at.
-    // Skipped on resume: the account is already anonymized and its credential
-    // destroyed, so the core transaction is not repeated.
-    if (!resumed) {
-      const erasedAt = completedAt;
-      const erasureOps: CoreOp[] = [
-        {
-          kind: 'user',
-          base: user,
-          value: {
-            ...user,
-            email: result.anonymizedUser.email,
-            status: 'deactivated',
-            passwordHash: ERASED_CREDENTIAL,
+  app.post(
+    '/api/v1/settings/erasure/execute',
+    {
+      config: {
+        // The password check below must not become a guessing oracle for
+        // anyone holding a session: same per-account budget as /auth/password.
+        rateLimit: {
+          max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+          timeWindow: AUTH_WINDOW_MS,
+          keyGenerator: (req: FastifyRequest) => {
+            const auth = req.headers.authorization;
+            const session =
+              typeof auth === 'string' && auth.startsWith('Bearer ')
+                ? verifySessionToken(auth.substring(7).trim())
+                : null;
+            return session ? `erasure:${session.userId}` : `erasure-ip:${req.ip}`;
           },
         },
-        { kind: 'profile', value: result.anonymizedProfile },
-        // Notifications addressed to the person name their applications,
-        // employers and referees.
-        { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
-        // What they wrote, and their place in every conversation.
-        { kind: 'messagesDeleteForProfile', profileId: profile.id },
-      ];
-      const erasedHistoryIds: string[] = [];
-      const erasedReferenceIds: string[] = [];
-      for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
-        erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
-        erasedHistoryIds.push(history.id);
-        for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
-          erasedReferenceIds.push(ref.id);
+      },
+    },
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      let session: AuthPayload;
+      // Set when this call finishes an erasure whose core transaction already
+      // committed in an earlier, interrupted call.
+      let resumed: DataErasureRequest | undefined;
+      try {
+        session = extractUser(req);
+      } catch (err) {
+        // Once the core transaction commits the account is closed and every
+        // normal session is refused. A still-validly-signed, unrevoked token of
+        // that same user may finish (or re-read) its own erasure and nothing
+        // else; any other failure keeps its original error.
+        const bearer = req.headers.authorization;
+        const raw = bearer?.startsWith('Bearer ')
+          ? verifySessionToken(bearer.substring(7).trim())
+          : null;
+        const closed =
+          raw &&
+          !(raw.sessionId && revokedSessions.has(raw.sessionId)) &&
+          usersById.get(raw.userId)?.passwordHash === ERASED_CREDENTIAL &&
+          // Same cut-off rule as resolveSession: sessions ended by a password
+          // change or "sign out other devices" cannot resume either.
+          !(
+            usersById.get(raw.userId)?.sessionsValidAfter &&
+            raw.issuedAt * 1000 < Date.parse(usersById.get(raw.userId)!.sessionsValidAfter!)
+          );
+        if (!raw || !closed) throw err;
+        const history = await storage.erasureRequests.list(raw.userId);
+        resumed = history.find((r) => r.status === 'processing');
+        const done = history.find((r) => r.status === 'completed' && r.anonymizedHash);
+        if (!resumed && !done) throw err;
+        if (!resumed) {
+          return reply.status(200).send({
+            message: 'Account erasure was already completed.',
+            anonymizedHash: done!.anonymizedHash,
+            completedAt: done!.completedAt,
+          });
+        }
+        session = raw;
+      }
+
+      const user = usersById.get(session.userId);
+      const profile = profilesByUserId.get(session.userId);
+
+      if (!user || !profile) {
+        throw new DomainError('NOT_FOUND', 'User or profile not found for erasure execution.');
+      }
+
+      // Re-authenticate a fresh erasure (C-04). A resumed one has no password
+      // left to check: its credential was destroyed by the committed core step.
+      if (!resumed) {
+        const input = ExecuteErasureInputSchema.parse(req.body ?? {});
+        if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
+          throw new DomainError('VALIDATION_FAILED', 'Your current password is not correct.', {
+            field: 'currentPassword',
+          });
+        }
+        // The password check yields to the event loop; a concurrent erasure
+        // of the same account may have committed meanwhile. Never start a
+        // second run from the stale record: the loser gets 409.
+        if (usersById.get(session.userId) !== user) {
+          throw new DomainError('CONFLICT', 'Account erasure is already in progress.');
         }
       }
-      for (const item of evidenceBySubjectId.get(profile.id) || []) {
-        erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+
+      const result = executeLogicalAnonymization(
+        {
+          id: user.id,
+          email: user.email,
+          roles: user.roles as any,
+          status: (user.status as any) || 'active',
+          createdAt: user.createdAt,
+          updatedAt: user.createdAt,
+        },
+        profile
+      );
+      // A resumed run keeps the hash and request recorded before the first
+      // attempt: the original email it was derived from is already gone.
+      const anonymizedHash = resumed?.anonymizedHash ?? result.anonymizedHash;
+      const completedAt = result.completedAt;
+
+      // Durable 'executing' marker, written BEFORE any destructive step so a
+      // process that dies part-way leaves a request that the next call resumes.
+      if (!resumed) {
+        await storage.erasureRequests.beginExecution(
+          session.userId,
+          crypto.randomUUID(),
+          completedAt,
+          anonymizedHash
+        );
       }
-      for (const application of applicationsByCandidateId.get(profile.id) || []) {
-        const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(application.status);
-        erasureOps.push({
-          kind: 'application',
-          base: application,
-          value: {
-            ...application,
-            status: terminal ? application.status : 'withdrawn',
-            withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
-            coverLetter: undefined,
-            attachedEvidenceIds: [],
-            updatedAt: erasedAt,
+
+      // Limiter keys name the person's addresses; read them before the core
+      // step anonymises the account and deletes its work histories (K-12).
+      const erasedLimiterEmail = user.email.toLowerCase();
+      const erasedWorkAddresses = new Set<string>();
+      for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+        if (history.corporateEmail) erasedWorkAddresses.add(history.corporateEmail);
+        const pending = emailChallengesByHistoryId.get(history.id)?.email;
+        if (pending) erasedWorkAddresses.add(pending);
+      }
+
+      // Billing first: ends the Stripe customer (and its subscriptions) and
+      // removes local billing records. If Stripe is unreachable this throws
+      // before anything else is changed, so the request is safe to retry.
+      await eraseBillingData(session.userId);
+
+      // Persist the anonymized state in ONE transaction. Now that this data is
+      // durable, erasure has to remove personal data rather than rely on a
+      // restart to forget it:
+      //  - the account can never sign in again (credential destroyed);
+      //  - work history, references and evidence (employer names, titles,
+      //    corporate emails, referee contacts, free text) are deleted;
+      //  - open applications are withdrawn and cover letters blanked, keeping
+      //    only the minimal record an employer's pipeline still points at.
+      // Skipped on resume: the account is already anonymized and its credential
+      // destroyed, so the core transaction is not repeated.
+      if (!resumed) {
+        const erasedAt = completedAt;
+        const erasureOps: CoreOp[] = [
+          {
+            kind: 'user',
+            base: user,
+            value: {
+              ...user,
+              email: result.anonymizedUser.email,
+              status: 'deactivated',
+              passwordHash: ERASED_CREDENTIAL,
+            },
           },
-        });
+          { kind: 'profile', value: result.anonymizedProfile },
+          // Notifications addressed to the person name their applications,
+          // employers and referees.
+          { kind: 'notificationsDeleteForRecipient', recipientId: profile.id },
+          // What they wrote, and their place in every conversation.
+          { kind: 'messagesDeleteForProfile', profileId: profile.id },
+        ];
+        const erasedHistoryIds: string[] = [];
+        const erasedReferenceIds: string[] = [];
+        for (const history of verifiedWorkHistoriesByCandidateId.get(user.id) || []) {
+          erasureOps.push({ kind: 'workHistoryDelete', id: history.id });
+          erasedHistoryIds.push(history.id);
+          for (const ref of employmentReferencesByHistoryId.get(history.id) || []) {
+            erasedReferenceIds.push(ref.id);
+          }
+        }
+        for (const item of evidenceBySubjectId.get(profile.id) || []) {
+          erasureOps.push({ kind: 'evidenceDelete', id: item.id });
+        }
+        for (const application of applicationsByCandidateId.get(profile.id) || []) {
+          const terminal = ['hired', 'rejected', 'withdrawn', 'expired'].includes(
+            application.status
+          );
+          erasureOps.push({
+            kind: 'application',
+            base: application,
+            value: {
+              ...application,
+              status: terminal ? application.status : 'withdrawn',
+              withdrawnAt: terminal ? application.withdrawnAt : erasedAt,
+              coverLetter: undefined,
+              attachedEvidenceIds: [],
+              updatedAt: erasedAt,
+            },
+          });
+        }
+        // Queued referee emails name the work history being deleted, so they are
+        // cancelled while those ids are still known (best effort, idempotent).
+        await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
+        await persist(...erasureOps);
       }
-      // Queued referee emails name the work history being deleted, so they are
-      // cancelled while those ids are still known (best effort, idempotent).
-      await cancelQueuedWorkHistoryEmails(erasedHistoryIds, erasedReferenceIds);
-      await persist(...erasureOps);
-    }
-    await storage.accountMetadata.erase(session.userId);
+      await storage.accountMetadata.erase(session.userId);
 
-    // Remove the subject's remaining ephemeral private state while this process
-    // is still alive; database persistence for these preview modules remains
-    // an independent release gate.
-    userSettingsByUserId.delete(session.userId);
-    exportRequestsByUserId.delete(session.userId);
-    searchHistoryByUserId.delete(session.userId);
-    await storage.savedJobs.eraseUser(session.userId);
-    salaryReportsByUserId.delete(session.userId);
-    reputationSignalsByUserId.delete(session.userId);
-    xpTransactionsByUserId.delete(session.userId);
-    aiUsageMetersByUserAndDate.forEach((_meter, key) => {
-      if (key.startsWith(`${session.userId}:`)) aiUsageMetersByUserAndDate.delete(key);
-    });
-    const conversations = aiConversationsByUserId.get(session.userId) || [];
-    for (const conversation of conversations) {
-      aiConversationsById.delete(conversation.id);
-      aiMessagesByConversationId.delete(conversation.id);
-    }
-    aiConversationsByUserId.delete(session.userId);
-    const resumes = resumesByUserId.get(session.userId) || [];
-    for (const resume of resumes) {
-      resumesById.delete(resume.id);
-      for (const exported of resumeExportsByResumeId.get(resume.id) || []) {
-        resumeExportsById.delete(exported.id);
+      // Remove the subject's remaining ephemeral private state while this process
+      // is still alive; database persistence for these preview modules remains
+      // an independent release gate. Records indexed in several maps are
+      // removed from every one of them (C-05): deleting only the by-user index
+      // left them served by the by-id and secondary indexes.
+      const dropFromIndex = <T extends { id: string }>(
+        index: Map<string, T[]>,
+        key: string | undefined,
+        id: string
+      ) => {
+        if (!key) return;
+        const list = (index.get(key) || []).filter((x) => x.id !== id);
+        if (list.length) index.set(key, list);
+        else index.delete(key);
+      };
+      userSettingsByUserId.delete(session.userId);
+      exportRequestsByUserId.delete(session.userId);
+      searchHistoryByUserId.delete(session.userId);
+      await storage.savedJobs.eraseUser(session.userId);
+      for (const r of salaryReportsByUserId.get(session.userId) || []) {
+        salaryReportsById.delete(r.id);
       }
-      resumeExportsByResumeId.delete(resume.id);
-    }
-    resumesByUserId.delete(session.userId);
-    const projects = portfolioProjectsByUserId.get(session.userId) || [];
-    for (const project of projects) portfolioProjectsById.delete(project.id);
-    portfolioProjectsByUserId.delete(session.userId);
-    gamificationProfilesByUserId.delete(session.userId);
-    userBadgesByUserId.delete(session.userId);
-    activityEventsByUserId.delete(session.userId);
-    contributionScoresByUserId.delete(session.userId);
-    careerTransitionsByUserId.delete(session.userId);
-    careerMilestoneEvaluationsByUserId.delete(session.userId);
-    learningOutcomesByUserId.delete(session.userId);
-    alumniAffiliationsByUserId.delete(session.userId);
-    warmIntroPrefsByUserId.delete(session.userId);
-    warmIntroRequestsByRequesterId.delete(session.userId);
-    connectionsByUserId.delete(session.userId);
-    skillFreshnessByCandidateId.delete(profile.id);
-    behavioralProfilesByCandidateId.delete(profile.id);
-    interviewAssessmentsByCandidateId.delete(profile.id);
-    assessmentSessionsByCandidateId.delete(profile.id);
-    referralRequestsByCandidateId.delete(profile.id);
-    skillEndorsementsByRecipientId.delete(profile.id);
-    await storage.savedSearches.eraseUser(session.userId);
-    jobAlertsById.forEach((alert, key) => {
-      if (alert.userId === session.userId) jobAlertsById.delete(key);
-    });
-    // Retained multi-party records (reviews, chat, organizational activity)
-    // need an approved per-domain redaction/retention policy before release.
+      salaryReportsByUserId.delete(session.userId);
+      reputationSignalsByUserId.delete(session.userId);
+      xpTransactionsByUserId.delete(session.userId);
+      aiUsageMetersByUserAndDate.forEach((_meter, key) => {
+        if (key.startsWith(`${session.userId}:`)) aiUsageMetersByUserAndDate.delete(key);
+      });
+      const conversations = aiConversationsByUserId.get(session.userId) || [];
+      for (const conversation of conversations) {
+        aiConversationsById.delete(conversation.id);
+        aiMessagesByConversationId.delete(conversation.id);
+      }
+      aiConversationsByUserId.delete(session.userId);
+      const resumes = resumesByUserId.get(session.userId) || [];
+      for (const resume of resumes) {
+        resumesById.delete(resume.id);
+        for (const exported of resumeExportsByResumeId.get(resume.id) || []) {
+          resumeExportsById.delete(exported.id);
+        }
+        resumeExportsByResumeId.delete(resume.id);
+      }
+      resumesByUserId.delete(session.userId);
+      const projects = portfolioProjectsByUserId.get(session.userId) || [];
+      for (const project of projects) portfolioProjectsById.delete(project.id);
+      portfolioProjectsByUserId.delete(session.userId);
+      gamificationProfilesByUserId.delete(session.userId);
+      userBadgesByUserId.delete(session.userId);
+      for (const e of activityEventsByUserId.get(session.userId) || []) {
+        activityEventsById.delete(e.id);
+      }
+      activityEventsByUserId.delete(session.userId);
+      contributionScoresByUserId.delete(session.userId);
+      // Career transitions, milestone evaluations and learning outcomes are
+      // keyed by PROFILE id (the deletes by user id were no-ops). Transitions
+      // also feed the shared benchmark list, outcomes the per-course metrics.
+      const erasedTransitionIds = new Set(
+        (careerTransitionsByUserId.get(profile.id) || []).map((t) => t.id)
+      );
+      for (const id of erasedTransitionIds) careerTransitionsById.delete(id);
+      for (let i = allCareerTransitions.length - 1; i >= 0; i--) {
+        if (erasedTransitionIds.has(allCareerTransitions[i].id)) allCareerTransitions.splice(i, 1);
+      }
+      careerTransitionsByUserId.delete(profile.id);
+      careerMilestoneEvaluationsByUserId.delete(profile.id);
+      for (const o of learningOutcomesByUserId.get(profile.id) || []) {
+        learningOutcomesById.delete(o.id);
+        dropFromIndex(learningOutcomesByCourseId, o.courseId, o.id);
+        learningImpactMetricsByCourseId.delete(o.courseId);
+      }
+      learningOutcomesByUserId.delete(profile.id);
+      for (const a of alumniAffiliationsByUserId.get(session.userId) || []) {
+        alumniAffiliationsById.delete(a.id);
+        dropFromIndex(alumniAffiliationsByInstitutionId, a.institutionId, a.id);
+      }
+      alumniAffiliationsByUserId.delete(session.userId);
+      warmIntroPrefsByUserId.delete(session.userId);
+      for (const w of warmIntroRequestsByRequesterId.get(session.userId) || []) {
+        warmIntroRequestsById.delete(w.id);
+        dropFromIndex(warmIntroRequestsByIntroducerId, w.introducerUserId, w.id);
+        dropFromIndex(warmIntroRequestsByTargetId, w.targetUserId, w.id);
+      }
+      warmIntroRequestsByRequesterId.delete(session.userId);
+      for (const c of connectionsByUserId.get(session.userId) || []) {
+        connectionsById.delete(c.id);
+        dropFromIndex(
+          connectionsByUserId,
+          c.senderId === session.userId ? c.recipientId : c.senderId,
+          c.id
+        );
+      }
+      connectionsByUserId.delete(session.userId);
+      skillFreshnessByCandidateId.delete(profile.id);
+      // Written under either id by the two behavioral-profile routes.
+      behavioralProfilesByCandidateId.delete(profile.id);
+      behavioralProfilesByCandidateId.delete(session.userId);
+      interviewAssessmentsByCandidateId.delete(profile.id);
+      for (const a of assessmentSessionsByCandidateId.get(profile.id) || []) {
+        assessmentSessionsById.delete(a.id);
+      }
+      assessmentSessionsByCandidateId.delete(profile.id);
+      // Referral requests and received endorsements are keyed by USER id (the
+      // former deletes by profile id were no-ops). A forwarded referral is
+      // also listed under the forwardee, so every referrer list is filtered.
+      const erasedReferralIds = new Set(
+        (referralRequestsByCandidateId.get(session.userId) || []).map((r) => r.id)
+      );
+      for (const id of erasedReferralIds) referralRequestsById.delete(id);
+      referralRequestsByReferrerId.forEach((list, key) => {
+        const kept = list.filter((r) => !erasedReferralIds.has(r.id));
+        if (kept.length === list.length) return;
+        if (kept.length) referralRequestsByReferrerId.set(key, kept);
+        else referralRequestsByReferrerId.delete(key);
+      });
+      referralRequestsByCandidateId.delete(session.userId);
+      for (const e of skillEndorsementsByRecipientId.get(session.userId) || []) {
+        skillEndorsementsById.delete(e.id);
+        dropFromIndex(skillEndorsementsByEndorserId, e.endorserId, e.id);
+      }
+      skillEndorsementsByRecipientId.delete(session.userId);
+      await storage.savedSearches.eraseUser(session.userId);
+      jobAlertsById.forEach((alert, key) => {
+        if (alert.userId === session.userId) jobAlertsById.delete(key);
+      });
+      // The person's own records in the remaining in-memory stores (K-12).
+      // Application drafts are keyed by PROFILE id and read only by their owner.
+      for (const [draftId, draft] of applicationDraftsById) {
+        if (draft.candidateId !== profile.id) continue;
+        applicationDraftsById.delete(draftId);
+        applicationDraftVersionsByDraftId.delete(draftId);
+        applicationDraftsByCandidateAndJob.delete(`${profile.id}:${draft.jobId}`);
+      }
+      // Course enrolments (keyed `${profileId}:${courseId}`) and their lesson
+      // progress. Issued certificates stay: public verification (owner #5).
+      for (const [key, enrollment] of enrollmentsByUserAndCourse) {
+        if (!key.startsWith(`${profile.id}:`)) continue;
+        enrollmentsById.delete(enrollment.id);
+        enrollmentsByUserAndCourse.delete(key);
+        for (const progressKey of lessonProgressByEnrollmentAndLesson.keys()) {
+          if (progressKey.startsWith(`${enrollment.id}:`)) {
+            lessonProgressByEnrollmentAndLesson.delete(progressKey);
+          }
+        }
+      }
+      // Alumni group memberships (a group they created stays for its other
+      // members, possibly without an admin) and mentorship they asked for.
+      // Requests where they are the mentor are the mentee's record (owner #5).
+      for (const [groupId, members] of alumniGroupMembersByGroupId) {
+        const kept = members.filter((m) => m.userId !== session.userId);
+        if (kept.length === members.length) continue;
+        if (kept.length) alumniGroupMembersByGroupId.set(groupId, kept);
+        else alumniGroupMembersByGroupId.delete(groupId);
+      }
+      for (const [requestId, request] of alumniMentorshipRequestsById) {
+        if (request.menteeId !== session.userId) continue;
+        alumniMentorshipRequestsById.delete(requestId);
+        dropFromIndex(alumniMentorshipByInstitutionId, request.institutionId, requestId);
+      }
+      // Scores and recovery plans derived from the reputation signals erased above.
+      for (const key of reputationScoresByUserContextDomain.keys()) {
+        if (key.startsWith(`${session.userId}:`)) reputationScoresByUserContextDomain.delete(key);
+      }
+      for (const [planId, plan] of reputationRecoveryPlansById) {
+        if (plan.userId === session.userId) reputationRecoveryPlansById.delete(planId);
+      }
+      // Written under whichever id the caller passed.
+      candidateSegmentationsById.delete(profile.id);
+      candidateSegmentationsById.delete(session.userId);
+      // In place: appendBounded holds this array.
+      for (let i = analyticsEvents.length - 1; i >= 0; i--) {
+        if (analyticsEvents[i].userId === session.userId) analyticsEvents.splice(i, 1);
+      }
+      // Sign-in and sending budgets keyed by the person's ids and addresses.
+      loginFailuresByEmail.delete(erasedLimiterEmail);
+      sendLog.delete(`code-user:${session.userId}`);
+      sendLog.delete(`ref-user:${session.userId}`);
+      for (const address of erasedWorkAddresses) sendLog.delete(`code-addr:${address}`);
 
-    // Mark the durable request history only after core erasure commits.
-    // If this write fails, do not claim the lifecycle was updated.
-    await storage.erasureRequests.completeActive(session.userId, completedAt, anonymizedHash);
+      // Retained multi-party records (reviews, chat, organizational activity)
+      // need an approved per-domain redaction/retention policy before release.
+      // Kept deliberately until then (owner scope): interview assessments and
+      // scorecards (org-owned hiring records; only the candidate index is
+      // dropped above), endorsements the person gave, moderation reports,
+      // reviews, talent-pool memberships, course certificates, mentorship
+      // requests where the person is the mentor, alumni groups they created,
+      // auditLogs.
 
-    await dispatchJob({
-      type: 'gdpr.erasure.completed',
-      payload: {
-        userId: session.userId,
+      // Mark the durable request history only after core erasure commits.
+      // If this write fails, do not claim the lifecycle was updated.
+      await storage.erasureRequests.completeActive(session.userId, completedAt, anonymizedHash);
+
+      await dispatchJob({
+        type: 'gdpr.erasure.completed',
+        payload: {
+          userId: session.userId,
+          anonymizedHash,
+        },
+        enqueuedAt: completedAt,
+      });
+
+      return reply.status(200).send({
+        message:
+          'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
+          'This does not certify full statutory erasure across all modules and backups.',
         anonymizedHash,
-      },
-      enqueuedAt: completedAt,
-    });
-
-    return reply.status(200).send({
-      message:
-        'Core account anonymized, selected personal-data stores cleared and account deactivated. ' +
-        'This does not certify full statutory erasure across all modules and backups.',
-      anonymizedHash,
-      completedAt,
-    });
-  });
+        completedAt,
+      });
+    }
+  );
 
   // ============================================================================
   // Billing & Subscriptions Routes (F-16, Section 64, WF-16, WIT-016)
@@ -10452,7 +10824,10 @@ export async function buildApp(
         extractUser,
         getAccountEmail: (userId) => usersById.get(userId)?.email,
         dispatchJob: (event) => dispatchJob(event),
-        log: { warn: (obj, msg) => app.log.warn(obj, msg) },
+        log: {
+          warn: (obj, msg) => app.log.warn(obj, msg),
+          error: (obj, msg) => app.log.error(obj, msg),
+        },
       }
     : undefined;
   if (stripeDeps) {
@@ -11256,7 +11631,11 @@ export async function buildApp(
     if (type === 'all' || type === 'profiles') {
       for (const profile of profilesById.values()) {
         // Enforce privacy rule: skip if viewer cannot view profile
-        if (!canViewProfile(profile, viewerId, viewerRoles)) {
+        if (
+          !canViewProfile(profile, viewerId, viewerRoles, {
+            isConnected: viewerIsConnected(viewerId, profile),
+          })
+        ) {
           continue;
         }
 
@@ -11444,7 +11823,11 @@ export async function buildApp(
 
     // Collect public profiles
     for (const profile of profilesById.values()) {
-      if (canViewProfile(profile, viewerId, viewerRoles)) {
+      if (
+        canViewProfile(profile, viewerId, viewerRoles, {
+          isConnected: viewerIsConnected(viewerId, profile),
+        })
+      ) {
         candidateItems.push({
           id: profile.id,
           type: 'profile',
@@ -12262,66 +12645,77 @@ export async function buildApp(
   });
 
   // Product Analytics & Telemetry Routes (F-19, F-31, BR-27)
-  app.post('/api/v1/analytics/events', async (req: FastifyRequest, reply: FastifyReply) => {
-    const session = maybeExtractUser(req);
-    let telemetryConsent = true;
+  // Ingestion is anonymous and the store is in memory, so it is bounded: a
+  // 64 KB body, 60 requests a minute per caller, metadata limits (BR-27) and
+  // the newest ANALYTICS_EVENT_RETENTION events kept (C-03).
+  const analyticsIngestOptions = {
+    bodyLimit: 64 * 1024,
+    config: { rateLimit: { max: 60, timeWindow: 60_000 } },
+  };
+  app.post(
+    '/api/v1/analytics/events',
+    analyticsIngestOptions,
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      const session = maybeExtractUser(req);
+      let telemetryConsent = true;
 
-    if (session) {
-      const settings = userSettingsByUserId.get(session.userId);
-      if (
-        settings &&
-        (settings.showActivity === false || (settings as any).telemetryEnabled === false)
-      ) {
-        telemetryConsent = false;
+      if (session) {
+        // The cache is filled only by GET/PATCH /settings, so after a restart
+        // it is empty: read the durable setting through (never creating a
+        // row) so an explicit opt-out survives restarts (C-10).
+        const settings = await readSettings(session.userId);
+        telemetryConsent = telemetryConsentFrom(settings);
       }
-    }
 
-    const body = req.body as Record<string, unknown>;
-    const ipHash = crypto
-      .createHash('sha256')
-      .update(req.ip || '127.0.0.1')
-      .digest('hex');
-    const userAgent =
-      typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+      const body = req.body as Record<string, unknown>;
+      const ipHash = crypto
+        .createHash('sha256')
+        .update(req.ip || '127.0.0.1')
+        .digest('hex');
+      const userAgent =
+        typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
 
-    const recorded: AnalyticsEvent[] = [];
+      const recorded: AnalyticsEvent[] = [];
 
-    if (body && Array.isArray(body.events)) {
-      const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
-      for (const item of batchInput.events) {
+      if (body && Array.isArray(body.events)) {
+        const batchInput = RecordAnalyticsEventBatchInputSchema.parse(body);
+        for (const item of batchInput.events) {
+          const ev = recordAnalyticsEvent({
+            userId: session?.userId,
+            anonymousId: item.anonymousId,
+            eventType: item.eventType,
+            metadata: item.metadata,
+            ipHash,
+            userAgent,
+            telemetryConsent,
+          });
+          appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
+          recorded.push(ev);
+        }
+      } else {
+        const singleInput = RecordAnalyticsEventInputSchema.parse(body);
         const ev = recordAnalyticsEvent({
           userId: session?.userId,
-          anonymousId: item.anonymousId,
-          eventType: item.eventType,
-          metadata: item.metadata,
+          anonymousId: singleInput.anonymousId,
+          eventType: singleInput.eventType,
+          metadata: singleInput.metadata,
           ipHash,
           userAgent,
           telemetryConsent,
         });
-        analyticsEvents.push(ev);
+        appendBounded(analyticsEvents, ev, ANALYTICS_EVENT_RETENTION);
         recorded.push(ev);
       }
-    } else {
-      const singleInput = RecordAnalyticsEventInputSchema.parse(body);
-      const ev = recordAnalyticsEvent({
-        userId: session?.userId,
-        anonymousId: singleInput.anonymousId,
-        eventType: singleInput.eventType,
-        metadata: singleInput.metadata,
-        ipHash,
-        userAgent,
-        telemetryConsent,
-      });
-      analyticsEvents.push(ev);
-      recorded.push(ev);
-    }
 
-    return reply.status(201).send({
-      message: 'Analytics event(s) recorded successfully.',
-      count: recorded.length,
-      events: recorded,
-    });
-  });
+      return reply.status(201).send({
+        message: 'Analytics event(s) recorded successfully.',
+        count: recorded.length,
+        // The caller's address hash and user agent stay server-side (admin
+        // GET /analytics/events keeps the full record).
+        events: recorded.map(({ ipHash: _ipHash, userAgent: _userAgent, ...event }) => event),
+      });
+    }
+  );
 
   app.get(
     '/api/v1/analytics/events',
@@ -12377,6 +12771,45 @@ export async function buildApp(
 
   const EMAIL_CHALLENGE_TTL_MS = 15 * 60 * 1000;
   const EMAIL_CHALLENGE_MAX_ATTEMPTS = 5;
+  // Sliding-window send logs for the budgets in assertEmailCodeIssuable /
+  // assertReferenceRequestAllowed (C-06). Keys: `code-user:<id>`,
+  // `code-addr:<email>`, `ref-user:<id>`. Per process, like the limiter store.
+  // A send is reserved synchronously right after its budget check (no await
+  // in between), so parallel requests see each other; a failed send releases
+  // its reservation (K-05).
+  const HOUR_MS = 60 * 60 * 1000;
+  const sendLog = new Map<string, number[]>();
+  const sendsWithin = (key: string, windowMs: number): number => {
+    const now = Date.now();
+    const recent = (sendLog.get(key) || []).filter((t) => now - t < windowMs);
+    if (recent.length) sendLog.set(key, recent);
+    else sendLog.delete(key);
+    return recent.length;
+  };
+  // Keys are pruned when read again; ones never read again are swept here,
+  // at most once a minute once the log is large (K-12). 24 h is the longest
+  // window any budget reads.
+  let lastSendLogSweepMs = 0;
+  const reserveSends = (...keys: string[]): (() => void) => {
+    // A unique stamp per reservation, so release removes exactly this one.
+    const now = Date.now();
+    const stamp = now + Math.random() / 2;
+    for (const key of keys) sendLog.set(key, [...(sendLog.get(key) || []), stamp]);
+    if (sendLog.size > 10_000 && now - lastSendLogSweepMs >= 60_000) {
+      lastSendLogSweepMs = now;
+      for (const [key, times] of sendLog) {
+        if (now - times[times.length - 1] >= 24 * HOUR_MS) sendLog.delete(key);
+      }
+    }
+    return () => {
+      for (const key of keys) {
+        const list = sendLog.get(key);
+        const at = list ? list.indexOf(stamp) : -1;
+        if (list && at >= 0) list.splice(at, 1);
+        if (list && list.length === 0) sendLog.delete(key);
+      }
+    };
+  };
 
   // Response projections: replay keys and token hashes never leave the API.
   const publicWorkHistory = (h: StoredWorkHistory): VerifiedWorkHistory => {
@@ -12438,6 +12871,28 @@ export async function buildApp(
     });
   });
 
+  /**
+   * Every mailbox the candidate controls (K-01): the account email, each
+   * role's verified work email, and each address with a pending code. None
+   * may vouch for them.
+   */
+  const candidateMailboxes = (candidateId: string): string[] => {
+    const mailboxes: string[] = [];
+    const accountEmail = usersById.get(candidateId)?.email;
+    if (accountEmail) mailboxes.push(accountEmail);
+    for (const history of verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []) {
+      if (history.corporateEmail) mailboxes.push(history.corporateEmail);
+      const pending = emailChallengesByHistoryId.get(history.id)?.email;
+      if (pending) mailboxes.push(pending);
+    }
+    return mailboxes;
+  };
+  /** The candidate's references on all their roles (K-01). */
+  const candidateReferences = (candidateId: string): StoredReference[] =>
+    (verifiedWorkHistoriesByCandidateId.get(candidateId) ?? []).flatMap(
+      (history) => employmentReferencesByHistoryId.get(history.id) ?? []
+    );
+
   // 2. Verify Corporate Email for Work History (F-94) — two steps.
   //
   // Step 1 (no verificationCode): policy check, then a single-use 6-digit code
@@ -12483,6 +12938,13 @@ export async function buildApp(
           );
         }
         assertCorporateEmailEligible(email, companyDomain);
+        assertEmailCodeIssuable({
+          existing: emailChallengesByHistoryId.get(id),
+          issuesByAccountLastHour: sendsWithin(`code-user:${session.userId}`, HOUR_MS),
+          issuesToAddressLastDay: sendsWithin(`code-addr:${email}`, 24 * HOUR_MS),
+          now: new Date(),
+        });
+        const releaseSend = reserveSends(`code-user:${session.userId}`, `code-addr:${email}`);
         const code = crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
         const now = new Date();
         const challenge: EmailChallenge = {
@@ -12493,7 +12955,12 @@ export async function buildApp(
           expiresAt: new Date(now.getTime() + EMAIL_CHALLENGE_TTL_MS).toISOString(),
           createdAt: now.toISOString(),
         };
-        await persist({ kind: 'emailChallenge', value: challenge });
+        try {
+          await persist({ kind: 'emailChallenge', value: challenge });
+        } catch (err) {
+          releaseSend();
+          throw err;
+        }
         // The worker delivers this (email provider) — the code is never
         // returned to the browser that asked for it.
         // Credentials must be durably queued. Failure must not be swallowed
@@ -12504,6 +12971,12 @@ export async function buildApp(
             payload: { workHistoryId: id, to: email, code, expiresAt: challenge.expiresAt },
           });
         } catch {
+          // No code was queued: remove exactly this challenge (a retry must
+          // not hit the re-issue cooldown) and give the budget back (K-05).
+          await persist({ kind: 'emailChallengeDelete', workHistoryId: id, base: challenge }).catch(
+            () => undefined
+          );
+          releaseSend();
           throw new DomainError('SERVICE_UNAVAILABLE', 'Verification email could not be queued.');
         }
         return reply.status(202).send({
@@ -12549,6 +13022,8 @@ export async function buildApp(
         corporateEmail: email,
         companyDomain,
         references: existingRefs,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        otherReferees: candidateReferences(workHistory.candidateId),
       });
 
       const saved: StoredWorkHistory = {
@@ -12609,18 +13084,26 @@ export async function buildApp(
           'Reference invitations are unavailable until email delivery is configured.'
         );
       }
+      assertReferenceRequestAllowed({
+        requestsByAccountLastHour: sendsWithin(`ref-user:${session.userId}`, HOUR_MS),
+      });
 
       const refereeUserId = usersByEmail.get(body.refereeEmail.trim().toLowerCase())?.id;
 
+      // Anti-self checks compare against the candidate, also when an admin
+      // asks on their behalf (C-17).
       const requested = requestEmploymentReference({
         workHistoryId: id,
         candidateId: workHistory.candidateId,
-        candidateUserId: session.userId,
-        candidateEmail: session.email,
+        candidateUserId: workHistory.candidateId,
+        candidateEmail: usersById.get(workHistory.candidateId)?.email,
         refereeUserId,
         refereeName: body.refereeName,
         refereeEmail: body.refereeEmail,
         relationship: body.relationship,
+        roleCorporateEmail: workHistory.corporateEmail,
+        candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        existingReferences: employmentReferencesByHistoryId.get(id) ?? [],
       });
 
       // The one-time token is the referee's credential. It is emailed to the
@@ -12632,7 +13115,13 @@ export async function buildApp(
         tokenHash: token ? sha256Hex(token) : undefined,
         clientRequestId: body.clientRequestId,
       };
-      await persist({ kind: 'reference', value: stored });
+      const releaseSend = reserveSends(`ref-user:${session.userId}`);
+      try {
+        await persist({ kind: 'reference', value: stored });
+      } catch (err) {
+        releaseSend();
+        throw err;
+      }
 
       const candidateName = profilesByUserId.get(workHistory.candidateId)?.fullName;
       try {
@@ -12649,6 +13138,11 @@ export async function buildApp(
           },
         });
       } catch {
+        releaseSend();
+        // Undo the request, so a retry (same or new clientRequestId) asks again (K-02).
+        await persist({ kind: 'referenceDelete', id: stored.id, base: stored }).catch(
+          () => undefined
+        );
         throw new DomainError('SERVICE_UNAVAILABLE', 'Reference invitation could not be queued.');
       }
 
@@ -12766,7 +13260,9 @@ export async function buildApp(
         const refs = (employmentReferencesByHistoryId.get(reference.workHistoryId) || []).map(
           (r) => (r.id === refId ? updatedRef : r)
         );
-        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs);
+        const { score, badgeTier, status } = calculateVerificationScoreAndBadge(workHistory, refs, {
+          candidateMailboxes: candidateMailboxes(workHistory.candidateId),
+        });
         updatedHistory = {
           ...workHistory,
           verificationScore: score,
@@ -12834,7 +13330,9 @@ export async function buildApp(
     const appliedToViewer = !!viewerProfile && appliedToTeamOf(profile, viewerProfile);
     if (
       !appliedToViewer &&
-      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[])
+      !canViewProfile(profile, session?.userId, (session?.roles ?? []) as Role[], {
+        isConnected: viewerIsConnected(session?.userId, profile),
+      })
     ) {
       throw new DomainError(
         'FORBIDDEN',
@@ -13163,6 +13661,16 @@ export async function buildApp(
         emailChallengesByHistoryId.delete(op.id);
         return;
       }
+      case 'referenceDelete': {
+        const ref = employmentReferencesById.get(op.id);
+        if (!ref) return;
+        employmentReferencesById.delete(op.id);
+        removeFrom(employmentReferencesByHistoryId, ref.workHistoryId, op.id);
+        if (ref.clientRequestId) {
+          referencesByClientRequest.delete(`${ref.candidateId}:${ref.clientRequestId}`);
+        }
+        return;
+      }
       case 'evidenceDelete': {
         const item = evidenceById.get(op.id);
         if (!item) return;
@@ -13275,6 +13783,8 @@ export async function buildApp(
         return `workHistory:${op.id}`;
       case 'reference':
         return `reference:${op.value.id}`;
+      case 'referenceDelete':
+        return `reference:${op.id}`;
       case 'emailChallenge':
         return `emailChallenge:${op.value.workHistoryId}`;
       case 'emailChallengeDelete':
@@ -13315,6 +13825,8 @@ export async function buildApp(
         return verifiedWorkHistoriesById.get(op.value.id);
       case 'reference':
         return employmentReferencesById.get(op.value.id);
+      case 'referenceDelete':
+        return employmentReferencesById.get(op.id);
       case 'emailChallenge':
         return emailChallengesByHistoryId.get(op.value.workHistoryId);
       case 'emailChallengeDelete':

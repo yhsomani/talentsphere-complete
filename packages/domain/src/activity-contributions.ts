@@ -1,5 +1,25 @@
 import crypto from 'node:crypto';
 import { DomainError } from './core.js';
+import { assertMetadataWithinLimits } from './analytics.js';
+
+/**
+ * Self-reported events kept per account (newest first). Older ones are dropped
+ * from the in-memory store, so scores are computed over this window (M-1).
+ */
+export const ACTIVITY_EVENT_RETENTION_PER_USER = 1000;
+
+/**
+ * Puts `event` first in a user's newest-first list and removes the events past
+ * ACTIVITY_EVENT_RETENTION_PER_USER. Returns the removed ones so the caller
+ * can drop them from its other indexes.
+ */
+export function prependActivityEvent(
+  events: ActivityEvent[],
+  event: ActivityEvent
+): ActivityEvent[] {
+  events.unshift(event);
+  return events.splice(ACTIVITY_EVENT_RETENTION_PER_USER);
+}
 
 export type ActivityCategory = 'learning' | 'creation' | 'collaboration' | 'social';
 export type EngagementBand = 'passive' | 'active' | 'power_contributor' | 'luminary';
@@ -70,6 +90,8 @@ export function recordActivityEvent(params: RecordActivityEventParams): Activity
       'Activity event weight must be between 0.1 and 10.0.'
     );
   }
+
+  if (params.metadata !== undefined) assertMetadataWithinLimits(params.metadata);
 
   const now = new Date().toISOString();
   return {

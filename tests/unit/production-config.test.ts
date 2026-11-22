@@ -194,3 +194,100 @@ describe('Stripe billing configuration', () => {
     ).toContain('HTTPS');
   });
 });
+
+describe('Empty optional variables (C-14, A07-001)', () => {
+  // Compose files interpolate `${VAR:-}`, which hands the process an empty
+  // string. For an optional setting with no default that means "not set";
+  // it used to fail the schema (EMAIL_FROM="" is not an email) and stop boot.
+  const STAGING = { ...SAFE_PRODUCTION, NODE_ENV: 'staging' };
+
+  it('treats an empty optional variable as unset', () => {
+    const env = validateServerEnv({
+      ...STAGING,
+      EMAIL_PROVIDER: 'none',
+      EMAIL_FROM: '',
+      EMAIL_FROM_NAME: '',
+      EMAIL_REPLY_TO: ' ',
+      BREVO_API_KEY: '',
+      SUPABASE_JWKS_URL: '',
+      SUPABASE_PROJECT_REF: '',
+      STRIPE_SECRET_KEY: '',
+      TRUST_PROXY: '',
+    });
+    expect(env.EMAIL_FROM).toBeUndefined();
+    expect(env.EMAIL_REPLY_TO).toBeUndefined();
+    expect(env.BREVO_API_KEY).toBeUndefined();
+    expect(env.SUPABASE_PROJECT_REF).toBeUndefined();
+    expect(env.STRIPE_SECRET_KEY).toBeUndefined();
+    expect(env.TRUST_PROXY).toBeUndefined();
+    expect(productionConfigProblems(env)).toEqual([]);
+  });
+
+  it('reports an empty TOKEN_SECRET as missing instead of a schema crash', () => {
+    const env = validateServerEnv({ ...STAGING, TOKEN_SECRET: '' });
+    expect(env.TOKEN_SECRET).toBeUndefined();
+    expect(productionConfigProblems(env).join()).toContain('TOKEN_SECRET is required');
+  });
+
+  it('reads an empty PASSWORD_PBKDF2_ITERATIONS as unset, not 0', () => {
+    expect(validateServerEnv({ ...STAGING, PASSWORD_PBKDF2_ITERATIONS: '' }).PASSWORD_PBKDF2_ITERATIONS).toBeUndefined();
+  });
+
+  it('still refuses an empty NODE_ENV (it has a default; empty must not fall back to development)', () => {
+    expect(() => validateServerEnv({ ...STAGING, NODE_ENV: '' })).toThrow(
+      /Invalid server environment configuration/
+    );
+  });
+
+  it('still rejects a malformed non-empty optional value', () => {
+    expect(() => validateServerEnv({ ...STAGING, EMAIL_FROM: 'not-an-email' })).toThrow();
+  });
+});
+
+describe('Transaction-mode pooler refused for the API writer lock (C-09, A09-003)', () => {
+  const ref = 'qidckctwrkxyiwworchd';
+  const withUrl = (DATABASE_URL: string, over: Record<string, string> = {}) =>
+    productionConfigProblems(validateServerEnv({ ...SAFE_PRODUCTION, DATABASE_URL, ...over })).join(
+      ' | '
+    );
+
+  it('refuses the Supabase transaction pooler on 6543', () => {
+    expect(
+      withUrl(
+        `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=verify-full`,
+        { SUPABASE_PROJECT_REF: ref }
+      )
+    ).toMatch(/transaction-mode pooler/);
+  });
+
+  it("refuses the direct host's dedicated PgBouncer on 6543, with or without a project ref", () => {
+    const url = `postgresql://postgres:secret@db.${ref}.supabase.co:6543/postgres?sslmode=verify-full`;
+    expect(withUrl(url, { SUPABASE_PROJECT_REF: ref })).toMatch(/transaction-mode pooler/);
+    expect(withUrl(url)).toMatch(/transaction-mode pooler/);
+  });
+
+  it('refuses pgbouncer=true on any host', () => {
+    expect(withUrl('postgresql://app:s3cret@db.internal:6432/talentsphere?pgbouncer=true')).toMatch(
+      /transaction-mode pooler/
+    );
+  });
+
+  it('accepts session-mode and direct connections on 5432', () => {
+    expect(
+      withUrl(
+        `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=verify-full`,
+        { SUPABASE_PROJECT_REF: ref }
+      )
+    ).toBe('');
+    expect(withUrl('postgresql://app:s3cret@db.internal:5432/talentsphere')).toBe('');
+    // A self-hosted Postgres that happens to listen on 6543 is not a Supabase pooler.
+    expect(withUrl('postgresql://app:s3cret@db.internal:6543/talentsphere')).toBe('');
+  });
+
+  it('never applies in development or test', () => {
+    const url = `postgresql://postgres.${ref}:secret@aws-0-ap-south-1.pooler.supabase.com:6543/postgres`;
+    for (const NODE_ENV of ['development', 'test']) {
+      expect(productionConfigProblems(validateServerEnv({ NODE_ENV, DATABASE_URL: url }))).toEqual([]);
+    }
+  });
+});

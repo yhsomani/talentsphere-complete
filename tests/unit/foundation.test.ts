@@ -132,6 +132,23 @@ describe('Phase 0 Foundation Test Suite', () => {
       expect(env.AI_FREE_USER_PAID_INFERENCE).toBe(false);
     });
 
+    it('reads boolean settings strictly: "false" is false, junk fails boot (C-15)', () => {
+      expect(validateServerEnv({}).AI_ENABLED).toBe(true);
+      expect(validateServerEnv({ AI_ENABLED: 'false' }).AI_ENABLED).toBe(false);
+      expect(validateServerEnv({ AI_ENABLED: 'FALSE' }).AI_ENABLED).toBe(false);
+      expect(validateServerEnv({ AI_ENABLED: '0' }).AI_ENABLED).toBe(false);
+      expect(validateServerEnv({ AI_ENABLED: 'true' }).AI_ENABLED).toBe(true);
+      expect(
+        validateServerEnv({ AI_FREE_USER_PAID_INFERENCE: '1' }).AI_FREE_USER_PAID_INFERENCE
+      ).toBe(true);
+      expect(
+        validateServerEnv({ AI_CLOUD_FALLBACK_ENABLED: 'false' }).AI_CLOUD_FALLBACK_ENABLED
+      ).toBe(false);
+      expect(() => validateServerEnv({ AI_ENABLED: 'yes' })).toThrow(
+        /Invalid server environment configuration/
+      );
+    });
+
     it('provides application constants', () => {
       expect(CONSTANTS.APP_NAME).toBe('TalentSphere');
       expect(CONSTANTS.API_VERSION).toBe('v1');

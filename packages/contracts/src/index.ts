@@ -421,7 +421,7 @@ export type SendMessageInput = z.infer<typeof SendMessageInputSchema>;
  * Notification Center Contracts (F-14, BR-120)
  */
 export const MarkNotificationsReadInputSchema = z.object({
-  notificationIds: z.array(z.string().uuid()).optional(),
+  notificationIds: z.array(z.string().uuid()).max(200).optional(),
   all: z.boolean().optional(),
 });
 
@@ -652,6 +652,18 @@ export const CancelErasureInputSchema = z.object({
 });
 
 export type CancelErasureInput = z.infer<typeof CancelErasureInputSchema>;
+
+// Fresh erasure requires the current password (C-04): a stolen or left-open
+// session alone cannot destroy an account. Not required to resume an
+// interrupted erasure, whose credential is already gone.
+export const ExecuteErasureInputSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(1, 'Enter your current password to delete your account.')
+    .max(1024),
+});
+
+export type ExecuteErasureInput = z.infer<typeof ExecuteErasureInputSchema>;
 
 export const RequestDataExportInputSchema = z.object({
   format: z.enum(['json', 'csv']).default('json'),
@@ -1775,8 +1787,22 @@ export const SubmitEmploymentReferenceInputSchema = z.object({
 
 export type SubmitEmploymentReferenceInput = z.infer<typeof SubmitEmploymentReferenceInputSchema>;
 
+/**
+ * A boolean query-string flag. `z.coerce.boolean()` is `Boolean(value)`, which
+ * reads the string "false" as true; this accepts true/false/1/0 (any case)
+ * and rejects anything else as a validation error (C-15, A08-013).
+ */
+export const queryBoolean = z.preprocess((value) => {
+  if (typeof value === 'string') {
+    const normalised = value.trim().toLowerCase();
+    if (normalised === 'true' || normalised === '1') return true;
+    if (normalised === 'false' || normalised === '0') return false;
+  }
+  return value;
+}, z.boolean());
+
 export const QueryWorkHistoryGraphSchema = z.object({
-  includeUnverified: z.coerce.boolean().default(false),
+  includeUnverified: queryBoolean.default(false),
 });
 
 export type QueryWorkHistoryGraph = z.infer<typeof QueryWorkHistoryGraphSchema>;

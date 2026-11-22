@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { FastifyInstance } from 'fastify';
+import crypto from 'node:crypto';
 import { buildApp } from '../../apps/api/src/server.js';
+import { createSessionToken } from '../../packages/domain/src/index.js';
 
 describe('Integration: Referral Request System (F-142, S-11, BR-233..BR-240)', () => {
   let app: FastifyInstance;
@@ -267,5 +269,44 @@ describe('Integration: Referral Request System (F-142, S-11, BR-233..BR-240)', (
     expect(body.outcomes[0].jobId).toBe(jobId);
     expect(body.outcomes[0].referrerId).toBe(referrerUserId);
     expect(body.outcomes[0].candidateId).toBe(candidateUserId);
+  });
+
+  // GET /referrals/requests/:id had no test (audit A10-003, cross-review C-24 T4).
+  it('shows one referral request only to its candidate, referrer, organization and admins', async () => {
+    const get = (token?: string, id = referralRequestId) =>
+      app.inject({
+        method: 'GET',
+        url: `/api/v1/referrals/requests/${id}`,
+        headers: token ? { authorization: `Bearer ${token}` } : {},
+      });
+    const adminToken = createSessionToken(crypto.randomUUID(), 'admin@talentsphere.io', [
+      'platform_admin',
+    ]);
+    // Carol (recruiter) is a member of the request's organization as its creator.
+    for (const token of [candidateToken, referrerToken, recruiterToken, adminToken]) {
+      const res = await get(token);
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.payload).request.id).toBe(referralRequestId);
+    }
+
+    // A recruiter of another organization: the hiring role alone grants nothing.
+    const otherRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/register',
+      payload: {
+        email: `dave.rec.${Date.now()}@elsewhere.io`,
+        password: 'Password123!',
+        fullName: 'Dave Elsewhere',
+        role: 'recruiter',
+      },
+    });
+    expect(otherRes.statusCode).toBe(201);
+    const unrelated = await get(JSON.parse(otherRes.payload).token);
+    expect(unrelated.statusCode).toBe(403);
+    expect(JSON.parse(unrelated.payload).error.code).toBe('FORBIDDEN');
+
+    const unknown = await get(adminToken, crypto.randomUUID());
+    expect(unknown.statusCode).toBe(404);
+    expect((await get()).statusCode).toBe(401);
   });
 });

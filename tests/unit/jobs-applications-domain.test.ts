@@ -4,6 +4,7 @@ import {
   transitionJobStatus,
   submitJobApplication,
   transitionApplicationState,
+  applicationForCandidate,
   type Job,
   type JobApplication,
 } from '../../packages/domain/src/index.js';
@@ -232,6 +233,48 @@ describe('Job Marketplace & ATS Domain Model (F-04, F-05, F-06, BR-01..41)', () 
       const withdrawn = transitionApplicationState(app, 'withdrawn', candidateAuth);
       expect(withdrawn.status).toBe('withdrawn');
       expect(withdrawn.withdrawnAt).toBeDefined();
+    });
+
+    describe('rejection reason (C-18)', () => {
+      const submitted: JobApplication = {
+        id: 'app-3',
+        jobId,
+        candidateId: candidateProfileId,
+        status: 'submitted',
+        attachedEvidenceIds: [],
+        createdAt: '2026-01-01',
+        updatedAt: '2026-01-01',
+      };
+      const recruiterAuth = {
+        userId: recruiterActor.userId,
+        roles: recruiterActor.roles,
+        isCandidateOwner: false,
+        isRecruiterForJob: true,
+      };
+
+      it('records no reason when none was given', () => {
+        const rejected = transitionApplicationState(submitted, 'rejected', recruiterAuth);
+        expect(rejected.rejectedAt).toBeDefined();
+        expect(rejected.rejectionReason).toBeUndefined();
+      });
+
+      it('treats a blank reason as none', () => {
+        const rejected = transitionApplicationState(submitted, 'rejected', recruiterAuth, '   ');
+        expect(rejected.rejectionReason).toBeUndefined();
+      });
+
+      it('keeps a reason the hiring team wrote', () => {
+        const rejected = transitionApplicationState(
+          submitted,
+          'rejected',
+          recruiterAuth,
+          'Not a fit'
+        );
+        expect(rejected.rejectionReason).toBe('Not a fit');
+        const forCandidate = applicationForCandidate(rejected);
+        expect('rejectionReason' in forCandidate).toBe(false);
+        expect(forCandidate.status).toBe('rejected');
+      });
     });
   });
 });
