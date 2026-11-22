@@ -1,10 +1,10 @@
-# TalentSphere — SSOT.md v6.2
+# TalentSphere — SSOT.md v6.3
 
 ## Final Product, UX, Architecture, Engineering & Operations Source of Truth
 
-> **v6.2 status banner.** This file is the founder-intent SSOT **v6.0**, unchanged in intent except where a contradiction is resolved under an Appendix E item (for example the cohort minimum, V61-04). v6.2 renumbers every heading cleanly and rewrites every internal cross-reference to the new numbers, resolves the v6.1 contradictions in the text itself, renames Appendix F to [Appendix E — v6.1 Amendments and Reconciliation](#appendix-e--v61-amendments-and-reconciliation) with items `V61-01` … `V61-31`, and adds Part VIII (Multi-Agent Evaluation) as a dated evaluation record. Nothing in this file is assumed implemented: no application code exists on this branch, and every capability stays **Planned** until executable evidence exists (V61-29). Target blueprint: [`PROJECT_MASTER_BLUEPRINT.md`](Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md); navigation: [`MASTER_INDEX.md`](Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX.md).
+> **v6.3 status banner.** v6.3 (22 November 2026) is a second review pass over v6.2. Five reviewers covered the ten specialist roles, an independent editor cross-checked their edits, and the §27.10 open issues were worked; v6.3 adds neutral notes that record open issues and corrects citations, and decides no owner question (§27.11). v6.2: This file is the founder-intent SSOT **v6.0**, unchanged in intent except where a contradiction is resolved under an Appendix E item (for example the cohort minimum, V61-04). v6.2 renumbers every heading cleanly and rewrites every internal cross-reference to the new numbers, resolves the v6.1 contradictions in the text itself, renames Appendix F to [Appendix E — v6.1 Amendments and Reconciliation](#appendix-e--v61-amendments-and-reconciliation) with items `V61-01` … `V61-31`, and adds Part VIII (Multi-Agent Evaluation) as a dated evaluation record. Nothing in this file is assumed implemented: no application code exists on this branch, and every capability stays **Planned** until executable evidence exists (V61-29). Target blueprint: [`PROJECT_MASTER_BLUEPRINT.md`](Yash_Final_Project_Document/99_FINAL_MASTER_BLUEPRINT/PROJECT_MASTER_BLUEPRINT.md); navigation: [`MASTER_INDEX.md`](Yash_Final_Project_Document/00_CONTROL_CENTRE/MASTER_INDEX.md).
 
-**Date:** 24 September 2026 (v6.0 founder intent) · v6.2 edition 21 November 2026  
+**Date:** 24 September 2026 (v6.0 founder intent) · v6.2 edition 21 November 2026 · v6.3 edition 22 November 2026  
 **Implementation reality:** **Planned** for this branch: no application code exists here. A partial implementation exists on `main`; its evidence is recorded only as dated history in Part VIII (Multi-Agent Evaluation) and is not status for this branch (V61-01). The earlier report `docs/reports/FEATURE_STATUS_2026-10-21.md` (not on this branch) is history, not status.  
 **Status:** Canonical specification (intent). Implementation status is not recorded in this file.  
 **Authority:** This file is the authoritative definition of intended product/system behavior. Executable code, tests, migrations, runtime evidence and production evidence determine actual implementation status.
@@ -21,7 +21,7 @@ The [system map](#system-map--mind-map-and-flowchart-in-one-diagram) directly be
 6. **Part VI — Quality & operations** (§14–§22).
 7. **Part VII — Execution** (§23–§26).
 8. **Appendices A–E** (Appendix E holds the v6.1 reconciliation items `V61-01` … `V61-31`).
-9. **Part VIII — Multi-Agent Evaluation** (dated history about `main`, not status for this branch).
+9. **Part VIII — Multi-Agent Evaluation** (dated history about `main` and a feature branch cut from it, not status for this branch).
 10. **Current external research basis**.
 11. **Canonical end state**.
 
@@ -56,7 +56,7 @@ Colour key: **loop steps** (blue), **people** (green), **product foundation and 
 
 ```mermaid
 flowchart LR
-  ROOT(("TalentSphere SSOT v6.2<br/>trust-first, evidence-backed<br/>Career Operating System"))
+  ROOT(("TalentSphere SSOT v6.3<br/>trust-first, evidence-backed<br/>Career Operating System"))
 
   subgraph LOOP["Canonical GA loop — Amendment B (flow)"]
     direction TB
@@ -127,7 +127,7 @@ flowchart LR
     E3["§25 governance and traceability<br/>DOCUMENTED ≠ IMPLEMENTED"]
     E4["Appendices A–C adjudications,<br/>register corrections, zero-trust"]
     E5["Appendix E v6.1 reconciliation<br/>V61-01…V61-31"]
-    E6["Part VIII multi-agent evaluation<br/>of main @ 781866f, SSOT-AMD-01…28"]
+    E6["Part VIII multi-agent evaluation<br/>of main @ 781866f, SSOT-AMD-01…28;<br/>second pass §27.11"]
     E7["Owner decisions pending ratification"]
   end
 
@@ -234,7 +234,7 @@ Evidence lineage is append-only in meaning: corrections produce new versions/eve
 
 > v6.1 amendment: see Appendix E, items V61-04 and V61-07
 
-Retention, cohort thresholds, compensation rules and similar values are policy configuration, not universal architectural constants. Cohort and small-cell minimums are one policy parameter, `min_cohort_k`, with default **k ≥ 10** for public and sensitive cells (BR-178); stricter feature values are overrides, and any value below the default needs an owner and counsel decision (V61-04). Erasure uses three separate clocks (cancel window, completion deadline, deactivation purge); a 30-day cancel window and a 30-day completion deadline cannot both hold from the same start, which is an open owner decision (DOR-017); see V61-07. India privacy implementation must be mapped to the applicable DPDP legal timeline and actual controls before compliance is claimed.
+Retention, cohort thresholds, compensation rules and similar values are policy configuration, not universal architectural constants. Cohort and small-cell minimums are one policy parameter, `min_cohort_k`, with default **k ≥ 10** for public and sensitive cells (BR-178; what k counts, distinct people or reports, is open, §27.8 item 18); stricter feature values are overrides, and any value below the default needs an owner and counsel decision (V61-04). Erasure uses three separate clocks (cancel window, completion deadline, deactivation purge); a 30-day cancel window and a 30-day completion deadline cannot both hold from the same start, which is an open owner decision (DOR-017); see V61-07. India privacy implementation must be mapped to the applicable DPDP legal timeline and actual controls before compliance is claimed.
 
 ## H. Production readiness
 
@@ -325,6 +325,8 @@ Every capability must support user value, business value, technical leverage, or
 11. Evidence over popularity.
 12. No deterministic career promises.
 
+Measured: 12 principles are listed here; §24.8.1 locks the P count at 11, and no P- ids are defined in this file (V61-06). Neither figure is edited; reconciling them is a C3 change (§24.8.3) for the owner.
+
 ### 3.2 Invariants
 
 - RLS is a database security boundary, with application authorization layered above it.
@@ -342,6 +344,8 @@ Every capability must support user value, business value, technical leverage, or
 - Anomaly is not guilt.
 - Every consequential side effect is idempotent and auditable.
 - The final SSOT contains one authoritative answer per material concept.
+
+Measured: 15 unnumbered invariants are listed here; §24.8.1 locks the INV count at 16, and no INV- ids are defined in this file (V61-06). Deny-by-default is stated in SSOT ADR-003 (§12.12) and §14.6 but not listed here; nothing records whether it is the uncounted invariant. Reconciling the counts is a C3 change (§24.8.3) for the owner.
 
 ### 3.3 Scope exclusions / gates
 
@@ -369,7 +373,7 @@ External platforms may be adapters or import sources. TalentSphere remains indep
 
 > v6.1 amendment: see Appendix E, item V61-05
 
-Primary actor groups include candidates/learners, instructors/course authors, recruiters, hiring managers, employers/organizations, institution administrators/faculty/proctors, mentors/experts, moderators, verification staff, support operators, and platform administrators. These groups map onto the two-tier role vocabulary of §5.4, which is the role model of record for this file; a group without a §5.4 role has no defined permissions (V61-05).
+Primary actor groups include candidates/learners, instructors/course authors, recruiters, hiring managers, employers/organizations, institution administrators/faculty/proctors, mentors/experts, moderators, verification staff, support operators, and platform administrators. These groups map onto the two-tier role vocabulary of §5.4, which is the role model of record for this file; a group without a §5.4 role has no defined permissions (V61-05). Feature specs also name actors with no §5.4 role: Analyst (F-85, F-86, F-114), Exam Administrator (F-115) and Employer (F-08, F-96); until mapped they have no permissions (open, V61-05).
 
 ### 5.1 Authorization chain
 
@@ -409,7 +413,7 @@ Every journey accounts for incomplete data, mistakes, permission denial, offline
 
 Candidate · Recruiter · Hiring Manager · Interviewer · Org Admin · Agency Recruiter · Finance Admin · Support Agent · Moderator · Platform Admin · Service Account · Instructor · Mentor · Course Author · Institution Admin · Department Admin · Faculty/Proctor · Managed Learner · Billing/Procurement Manager · Student · Peer Reviewer · Contest Participant · Content Author · Company Reviewer.
 
-**Resolution (highest wins):** `ROLE_ADMIN` platform override (audited) → workspace contextual grants → `ROLE_RECRUITER` (requires valid `org_id` membership) → `ROLE_USER` base.
+**Resolution (highest wins):** `ROLE_ADMIN` platform override (audited) → workspace contextual grants → `ROLE_RECRUITER` (requires valid `org_id` membership; how the role is granted, what makes a membership valid and which membership roles carry hiring rights are not specified — open, §27.8 item 8) → `ROLE_USER` base.
 
 Authorization is **deny-by-default**: an actor gets a capability only through a role actually granted to it for that resource, workspace and purpose, decided server-side (§3.2 server-authoritative mutations; deny-by-default as stated in SSOT ADR-003, §12.12, and the RLS policy model, §14.6; §5.1). "Highest wins" orders only the roles an actor has been granted; it never adds a capability that no granted role carries. The target's scoped-grant model (15 roles as scoped, deny-by-default grants) is Proposed and its mapping from this two-tier model is open (V61-05, OPEN-44).
 
@@ -437,6 +441,8 @@ Authorization is **deny-by-default**: an actor gets a capability only through a 
 | P-S | Sara — Hiring Manager           | 42, engineering manager | J-03, J-27       |
 | P-T | Tara — Skills Analyst           | 38, corporate L&D       | J-16, J-28       |
 
+Ids run P-A…P-T without P-P; no source defines a P-P persona, so this is a numbering gap, not a lost persona. P-D's entry is a workflow, not a journey. Where this column names a journey whose §10.2 Persona column omits the persona (P-E for J-27, P-J for J-15), the two disagree (open, see §10.2).
+
 ### 5.6 Personas → Journeys Coverage
 
 ```mermaid
@@ -452,13 +458,21 @@ flowchart LR
     PR[P-R] --> J26[J-26]
     PS[P-S] --> J03 & J27
     PT[P-T] --> J16[J-16] & J28[J-28]
+    PD[P-D] --> WF08[WF-08 workflow]
+    PF[P-F] --> J10[J-10]
+    PH[P-H] --> J08[J-08]
+    PK[P-K] --> J15
+    PL[P-L] --> J16
+    PN[P-N] --> J23[J-23]
+    PO[P-O] --> J22[J-22]
+    PQ[P-Q] --> J21[J-21]
 ```
 
 ### 5.7 Lifecycles
 
 > v6.1 amendment: see Appendix E, items V61-11 and V61-18
 
-**Account:** registered → unverified → verified → active ⇄ suspended → deactivated → deleted | terminated. State sets differ between this lifecycle (starts at `registered`) and the F-01 diagram in §9.1 (no `registered` state; starts at `unverified`) — see V61-11.
+**Account:** registered → unverified → verified → active ⇄ suspended → deactivated → deleted | terminated. State sets differ between this lifecycle (starts at `registered`) and the F-01 diagram in §9.1 (no `registered` state; starts at `unverified`; `suspended → deleted` and no `suspended → deactivated`; `terminated` only from `active`) — see V61-11. Neither defines an exit for an account that never verifies, a reactivation from `deactivated`, or an appeal from `suspended` (open, owner decision).
 
 **Managed learner:** provisioned → invited → claimed → active_managed → graduation_pending → independent | revoked → archived.
 
@@ -492,6 +506,8 @@ Legend: ✅ full · ✅* consent/context-scoped · ⛔ denied.
 | Manage coupons/pricing         | ⛔      | ⛔           | ✅(bounded)   | ⛔            | ⛔             | ⛔               | ⛔           | ✅(inst)    | ⛔        | ✅                  |
 | View instructor earnings       | ⛔      | ⛔           | ✅(own)       | ⛔            | ⛔             | ⛔               | ⛔           | ⛔          | ⛔        | ✅                  |
 | Refunds                        | ⛔      | ⛔           | ⛔            | ⛔            | ⛔             | ⛔               | ⛔           | ⛔          | ⛔        | ✅ (+Finance Admin) |
+
+Open: the Instructor column denies "View instructor earnings", although BR-101 defines instructor earnings and J-18 pays creators. The legend's ✅* is used by no cell, and the cell values `own` and `inst-scoped` are not in the legend.
 
 ### 5.9 Boundary Principles
 
@@ -568,128 +584,128 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 
 ### 7.1 Baseline & Core Features (F-01 … F-120)
 
-| ID    | Feature                                      | Category       | P   | Phase   | Key dependencies       |
-| ----- | -------------------------------------------- | -------------- | --- | ------- | ---------------------- |
-| F-01  | Authentication & Session                     | Identity       | 10  | Ph0     | –                      |
-| F-02  | Landing Page                                 | Shell          | 3   | Ph0     | –                      |
-| F-03  | Dashboard (Role-Adaptive)                    | Shell          | 10  | Ph0     | F-01                   |
-| F-04  | Job Marketplace                              | Marketplace    | 9   | Ph2     | F-01, F-12             |
-| F-05  | Post Job Studio                              | Marketplace    | 8   | Ph2     | F-04                   |
-| F-06  | ATS / Candidate Pipeline                     | Recruiting     | 9   | Ph2–3   | F-04, F-05             |
-| F-07  | Learning Management System                   | Learning       | 9   | Ph1     | F-01, F-12             |
-| F-08  | Challenges Arena                             | Assessment     | 9   | Ph1     | F-01, F-12             |
-| F-09  | Professional Networking                      | Social         | 8   | Ph2     | F-12                   |
-| F-10  | Direct Messaging                             | Communication  | 10  | Ph0     | F-01                   |
-| F-11  | AI Career Assistant (Basic)                  | AI             | 8   | Ph1/Ph4 | F-12                   |
-| F-12  | Profile Management                           | Identity       | 10  | Ph0     | F-01                   |
-| F-13  | Resume Builder                               | Identity       | 7   | Ph1     | F-12                   |
-| F-14  | Notification Center                          | Communication  | 10  | Ph0     | F-01                   |
-| F-15  | Settings                                     | Shell          | 10  | Ph0     | F-01                   |
-| F-16  | Billing & Subscriptions                      | Monetization   | 7   | Ph5     | F-01                   |
-| F-17  | Admin Console                                | Governance     | 10  | Ph0     | F-01                   |
-| F-18  | Chrome Extension Companion                   | Edge           | 5   | Ph2     | F-01                   |
-| F-19  | Product Analytics                            | Telemetry      | 7   | Ph1     | F-01                   |
-| F-20  | Command Search (⌘K)                          | Shell          | 7   | Ph2     | F-01                   |
-| F-21  | Error Recovery & Resilience                  | Shell          | 10  | Ph0     | F-01                   |
-| F-22  | Gamification & XP Ledger                     | Engagement     | 8   | Ph1     | F-07, F-08             |
-| F-23  | Leaderboard & Badges                         | Engagement     | 7   | Ph2     | F-22                   |
-| F-24  | Trust, Safety & Moderation                   | Safety         | 8   | Ph2     | F-01                   |
-| F-25  | Job Detail View                              | Marketplace    | 7   | Ph2     | F-04                   |
-| F-26  | Portfolio Showcase                           | Identity       | 8   | Ph1     | F-12                   |
-| F-27  | Local Resume Match Preview                   | Edge           | 6   | Ph2     | F-18                   |
-| F-28  | External Job Page Scanner                    | Edge           | 6   | Ph2     | F-18                   |
-| F-29  | Scheduled Notification Digest                | Communication  | 7   | Ph2     | F-14                   |
-| F-30  | Networking Stale-Request Nudges              | Engagement     | 6   | Ph2     | F-09                   |
-| F-31  | KPI Aggregation & Rollups                    | Analytics      | 6   | Ph2     | F-19                   |
-| F-32  | Saved Searches & Job Alerts                  | Candidate      | 7   | Ph2     | F-04                   |
-| F-33  | Video Interview Rooms                        | Communication  | 8   | Ph3     | F-10                   |
-| F-34  | Multi-Entity Backend Search                  | Platform       | 7   | Ph2     | F-04, F-07             |
-| F-35  | Feature Flag Console                         | Administration | 6   | Ph2     | F-17                   |
-| F-36  | Application Draft Autosave                   | Candidate      | 7   | Ph1     | F-04                   |
-| F-37  | Job Templates                                | Recruiting     | 6   | Ph2     | F-05                   |
-| F-38  | Legacy Chat Service (DEPRECATED)             | Communication  | 0   | –       | –                      |
-| F-39  | Unified Backend Stub (DEPRECATED)            | Platform       | 0   | –       | –                      |
-| F-40  | Institutional Managed Learning               | Institutions   | 8   | Ph3     | F-01, F-07             |
-| F-41  | Procurement & Seat Licensing                 | Institutions   | 6   | Ph6     | F-40, F-16             |
-| F-42  | Provider-Agnostic Media Engine               | Platform       | 8   | Ph2     | F-07                   |
-| F-43  | B2B2C Graduation Flywheel                    | Institutions   | 6   | Ph3     | F-40                   |
-| F-44  | AI Media Enrichment                          | Learning       | 6   | Ph4     | F-42, F-11             |
-| F-45  | Proctoring (Third-Party, vendor-gated OD-35) | Learning       | 4   | Ph10    | F-40, F-115            |
-| F-46  | Institutional Analytics                      | Institutions   | 6   | Ph3     | F-40                   |
-| F-47  | Faculty Dashboard                            | Institutions   | 6   | Ph3     | F-40                   |
-| F-48  | OS Shell & Workbench                         | OS             | 4   | Ph2+    | F-01, F-03             |
-| F-49  | Automation & Agents                          | OS             | 4   | Ph3+    | F-48                   |
-| F-50  | Institutional Course Marketplace             | Institutions   | 6   | Ph3     | F-40, F-42             |
-| F-51  | Media Health Monitoring                      | Platform       | 6   | Ph4     | F-42                   |
-| F-52  | Certificate Verification                     | Verification   | 8   | Ph3     | F-07                   |
-| F-53  | Professional Social Graph & Feed             | Networking     | 5   | Ph8     | F-12                   |
-| F-54  | Content Publishing                           | Networking     | 5   | Ph8     | F-12                   |
-| F-55  | Groups & Communities                         | Community      | 5   | Ph8     | F-53                   |
-| F-56  | Organization & Institution Pages             | Recruiting     | 5   | Ph8     | F-12, F-40             |
-| F-57  | Events & Webinars                            | Community      | 5   | Ph8     | F-53                   |
-| F-58  | Written Recommendations                      | Networking     | 6   | Ph8     | F-53                   |
-| F-59  | Outreach Credits (TalentMail)                | Recruiting     | 5   | Ph8     | F-10                   |
-| F-60  | Profile Views & Privacy Controls             | Networking     | 6   | Ph8     | F-12                   |
-| F-61  | Premium Candidate Tier (OD-34 gated)         | Business       | 4   | Ph10+   | F-60                   |
-| F-62  | Sponsored Content (NOT RECOMMENDED)          | Business       | 0   | Ph10+   | –                      |
-| F-63  | Business-Development Graph (NOT RECOMMENDED) | Intelligence   | 0   | Ph10+   | –                      |
-| F-64  | LinkedIn Migration Engine                    | Integration    | 5   | Ph1/2   | F-12                   |
-| F-65  | LinkedIn Decoupling & Independence           | Foundation     | 8   | Ph1/2   | F-64                   |
-| F-66  | Course Creation Studio                       | Learning       | 8   | Ph7     | F-07, F-42             |
-| F-67  | Categories, Discovery & Comparison           | Learning       | 6   | Ph7     | F-07, F-145            |
-| F-68  | Quizzes, Practice Tests & Final Exams        | Learning       | 8   | Ph7     | F-07                   |
-| F-69  | Assignments & Peer Review                    | Learning       | 8   | Ph7     | F-07                   |
-| F-70  | Learning Paths, Programs & Specializations   | Learning       | 8   | Ph7     | F-07, F-66             |
-| F-71  | Course Q&A, Discussions, Notes               | Learning       | 6   | Ph7     | F-07                   |
-| F-72  | Course Reviews & Ratings                     | Learning       | 6   | Ph7     | F-07                   |
-| F-73  | Course Commerce                              | Learning       | 6   | Ph7     | F-07, F-16             |
-| F-74  | Instructor Platform                          | Learning       | 6   | Ph7     | F-07, F-66             |
-| F-75  | Employer Insights                            | Intelligence   | 7   | Ph9     | F-12, F-56             |
-| F-76  | Coding Contests & Live Leaderboards          | Assessment     | 5   | Ph9     | F-08                   |
-| F-77  | Skill Certification Exams                    | Assessment     | 8   | Ph3     | F-08                   |
-| F-78  | Practice Sets & Interview Prep               | Learning       | 5   | Ph9     | F-08                   |
-| F-79  | Articles & Newsletters                       | Networking     | 5   | Ph8     | F-54                   |
-| F-80  | Profile Enhancements                         | Profile        | 6   | Ph1/Ph8 | F-12                   |
-| F-81  | Identity Verification                        | Verification   | 3   | Ph9     | F-12                   |
-| F-82  | Student Learning Analytics                   | Analytics      | 6   | Ph7     | F-07                   |
-| F-83  | Admin Platform Expansion                     | Administration | 3   | Ph8     | F-17                   |
-| F-84  | Skills Graph & Taxonomy                      | Platform       | 10  | Ph1–2   | F-12, F-07, F-08       |
-| F-85  | Career Graph & Progression                   | Intelligence   | 9   | Ph3     | F-12, F-04, F-06, F-84 |
-| F-86  | Salary Intelligence                          | Intelligence   | 9   | Ph3     | F-04, F-06, F-56       |
-| F-87  | Interview Experience Repository              | Candidate      | 7   | Ph4     | F-04, F-56, F-88       |
-| F-88  | Technical Interview Platform                 | Hiring         | 9   | Ph3     | F-08, F-33, F-06       |
-| F-89  | Contribution Verification System             | Verification   | 5   | Ph8     | F-26, F-12             |
-| F-90  | Peer Mentorship & Advisor Network            | Community      | 5   | Ph4     | F-12, F-10, F-55       |
-| F-91  | Career Readiness Assessment                  | Career         | 9   | Ph2     | F-84, F-08, F-12       |
-| F-92  | Advanced Recruiter Search                    | Recruiting     | 9   | Ph3     | F-12, F-34, F-08, F-96 |
-| F-93  | Interview Video Recording & AI Feedback      | Hiring         | 7   | Ph4     | F-33, F-06, F-88       |
-| F-94  | Verified Work History & References           | Verification   | 7   | Ph3     | F-12, F-58             |
-| F-95  | Career Transition Planning                   | Career         | 7   | Ph4     | F-84, F-91, F-07       |
-| F-96  | Skill Evidence & Digital Credentials         | Verification   | 10  | Ph2     | F-12, F-26             |
-| F-97  | Real-Time Job Market Analytics               | Intelligence   | 5   | Ph4     | F-04, F-06             |
-| F-98  | Employer Equity & Compensation Intelligence  | Intelligence   | 7   | Ph3     | F-56, F-86             |
-| F-99  | AI Career Coach (Enhanced)                   | AI             | 7   | Ph4     | F-12, F-84, F-91, F-07 |
-| F-100 | Peer Project Collaboration                   | Learning       | 4   | Ph5     | F-07, F-69, F-10       |
-| F-101 | Badge Marketplace & Recognition              | Gamification   | 4   | Ph8     | F-23, F-26             |
-| F-102 | Hiring Manager Portal                        | Recruiting     | 8   | Ph3     | F-06, F-88             |
-| F-103 | Candidate Comparison & Rubric                | Recruiting     | 6   | Ph3     | F-06, F-92             |
-| F-104 | Pre-Hire Assessment Customization            | Hiring         | 7   | Ph3     | F-06, F-08, F-88       |
-| F-105 | Post-Hire Analytics & ROI Tracking           | Analytics      | 4   | Ph4     | F-102, F-93            |
-| F-106 | Skill Prerequisite Engine                    | Learning       | 7   | Ph5     | F-07, F-70, F-84       |
-| F-107 | Live Q&A with Instructors                    | Learning       | 6   | Ph5     | F-07, F-71, F-10       |
-| F-108 | Expert Network Matching                      | Networking     | 4   | Ph7     | F-09, F-12, F-10       |
-| F-109 | Salary Negotiation Guidance                  | Career         | 5   | Ph8     | F-86, F-98             |
-| F-110 | Verified Skill Endorsements                  | Verification   | 7   | Ph8     | F-96, F-12, F-58       |
-| F-111 | Industry-Specific Learning Hubs              | Learning       | 4   | Ph8     | F-07, F-55             |
-| F-112 | Resume Parsing & Optimization                | Candidate      | 6   | Ph8     | F-13, F-12             |
-| F-113 | Recruiter Outreach Analytics                 | Recruiting     | 6   | Ph8     | F-59, F-06             |
-| F-114 | Learning Impact Tracking                     | Analytics      | 9   | Ph4     | F-07, F-04, F-06       |
-| F-115 | Certification Exam Platform                  | Assessment     | 9   | Ph3     | F-77, F-45             |
-| F-116 | Accessibility & Inclusive Learning           | Platform       | 7   | Ph8     | F-07, F-44             |
-| F-117 | Mobile-First Job Application                 | Candidate      | 5   | Ph8     | F-04, F-33             |
-| F-118 | Emerging Skills Detection                    | Intelligence   | 4   | Ph8     | F-84                   |
-| F-119 | Diversity & Inclusion Analytics              | Hiring         | 4   | Ph8     | F-06                   |
-| F-120 | API & Integration Platform                   | Platform       | 2   | Ph10    | F-01, F-34             |
+| ID    | Feature                                      | Category       | P   | Phase   | Key dependencies                    |
+| ----- | -------------------------------------------- | -------------- | --- | ------- | ----------------------------------- |
+| F-01  | Authentication & Session                     | Identity       | 10  | Ph0     | –                                   |
+| F-02  | Landing Page                                 | Shell          | 3   | Ph0     | –                                   |
+| F-03  | Dashboard (Role-Adaptive)                    | Shell          | 10  | Ph0     | F-01                                |
+| F-04  | Job Marketplace                              | Marketplace    | 9   | Ph2     | F-01, F-12                          |
+| F-05  | Post Job Studio                              | Marketplace    | 8   | Ph2     | F-04                                |
+| F-06  | ATS / Candidate Pipeline                     | Recruiting     | 9   | Ph2–3   | F-04, F-05                          |
+| F-07  | Learning Management System                   | Learning       | 9   | Ph1     | F-01, F-12                          |
+| F-08  | Challenges Arena                             | Assessment     | 9   | Ph1     | F-01, F-12                          |
+| F-09  | Professional Networking                      | Social         | 8   | Ph2     | F-12                                |
+| F-10  | Direct Messaging                             | Communication  | 10  | Ph0     | F-01                                |
+| F-11  | AI Career Assistant (Basic)                  | AI             | 8   | Ph1/Ph4 | F-12                                |
+| F-12  | Profile Management                           | Identity       | 10  | Ph0     | F-01                                |
+| F-13  | Resume Builder                               | Identity       | 7   | Ph1     | F-12                                |
+| F-14  | Notification Center                          | Communication  | 10  | Ph0     | F-01                                |
+| F-15  | Settings                                     | Shell          | 10  | Ph0     | F-01                                |
+| F-16  | Billing & Subscriptions                      | Monetization   | 7   | Ph5     | F-01                                |
+| F-17  | Admin Console                                | Governance     | 10  | Ph0     | F-01                                |
+| F-18  | Chrome Extension Companion                   | Edge           | 5   | Ph2     | F-01                                |
+| F-19  | Product Analytics                            | Telemetry      | 7   | Ph1     | F-01                                |
+| F-20  | Command Search (⌘K)                          | Shell          | 7   | Ph2     | F-01                                |
+| F-21  | Error Recovery & Resilience                  | Shell          | 10  | Ph0     | F-01                                |
+| F-22  | Gamification & XP Ledger                     | Engagement     | 8   | Ph1     | F-07, F-08                          |
+| F-23  | Leaderboard & Badges                         | Engagement     | 7   | Ph2     | F-22                                |
+| F-24  | Trust, Safety & Moderation                   | Safety         | 8   | Ph2     | F-01                                |
+| F-25  | Job Detail View                              | Marketplace    | 7   | Ph2     | F-04                                |
+| F-26  | Portfolio Showcase                           | Identity       | 8   | Ph1     | F-12                                |
+| F-27  | Local Resume Match Preview                   | Edge           | 6   | Ph2     | F-18                                |
+| F-28  | External Job Page Scanner                    | Edge           | 6   | Ph2     | F-18                                |
+| F-29  | Scheduled Notification Digest                | Communication  | 7   | Ph2     | F-14                                |
+| F-30  | Networking Stale-Request Nudges              | Engagement     | 6   | Ph2     | F-09                                |
+| F-31  | KPI Aggregation & Rollups                    | Analytics      | 6   | Ph2     | F-19                                |
+| F-32  | Saved Searches & Job Alerts                  | Candidate      | 7   | Ph2     | F-04                                |
+| F-33  | Video Interview Rooms                        | Communication  | 8   | Ph3     | F-10                                |
+| F-34  | Multi-Entity Backend Search                  | Platform       | 7   | Ph2     | F-04, F-07                          |
+| F-35  | Feature Flag Console                         | Administration | 6   | Ph2     | F-17                                |
+| F-36  | Application Draft Autosave                   | Candidate      | 7   | Ph1     | F-04                                |
+| F-37  | Job Templates                                | Recruiting     | 6   | Ph2     | F-05                                |
+| F-38  | Legacy Chat Service (DEPRECATED)             | Communication  | 0   | –       | –                                   |
+| F-39  | Unified Backend Stub (DEPRECATED)            | Platform       | 0   | –       | –                                   |
+| F-40  | Institutional Managed Learning               | Institutions   | 8   | Ph3     | F-01, F-07                          |
+| F-41  | Procurement & Seat Licensing                 | Institutions   | 6   | Ph6     | F-40, F-16                          |
+| F-42  | Provider-Agnostic Media Engine               | Platform       | 8   | Ph2     | F-07                                |
+| F-43  | B2B2C Graduation Flywheel                    | Institutions   | 6   | Ph3     | F-40                                |
+| F-44  | AI Media Enrichment                          | Learning       | 6   | Ph4     | F-42, F-11                          |
+| F-45  | Proctoring (Third-Party, vendor-gated OD-35) | Learning       | 4   | Ph10    | F-40, F-115                         |
+| F-46  | Institutional Analytics                      | Institutions   | 6   | Ph3     | F-40                                |
+| F-47  | Faculty Dashboard                            | Institutions   | 6   | Ph3     | F-40                                |
+| F-48  | OS Shell & Workbench                         | OS             | 4   | Ph2+    | F-01, F-03                          |
+| F-49  | Automation & Agents                          | OS             | 4   | Ph3+    | F-48                                |
+| F-50  | Institutional Course Marketplace             | Institutions   | 6   | Ph3     | F-40, F-42                          |
+| F-51  | Media Health Monitoring                      | Platform       | 6   | Ph4     | F-42                                |
+| F-52  | Certificate Verification                     | Verification   | 8   | Ph3     | F-07                                |
+| F-53  | Professional Social Graph & Feed             | Networking     | 5   | Ph8     | F-12                                |
+| F-54  | Content Publishing                           | Networking     | 5   | Ph8     | F-12                                |
+| F-55  | Groups & Communities                         | Community      | 5   | Ph8     | F-53                                |
+| F-56  | Organization & Institution Pages             | Recruiting     | 5   | Ph8     | F-12, F-40                          |
+| F-57  | Events & Webinars                            | Community      | 5   | Ph8     | F-53                                |
+| F-58  | Written Recommendations                      | Networking     | 6   | Ph8     | F-53                                |
+| F-59  | Outreach Credits (TalentMail)                | Recruiting     | 5   | Ph8     | F-10                                |
+| F-60  | Profile Views & Privacy Controls             | Networking     | 6   | Ph8     | F-12                                |
+| F-61  | Premium Candidate Tier (OD-34 gated)         | Business       | 4   | Ph10+   | F-60                                |
+| F-62  | Sponsored Content (NOT RECOMMENDED)          | Business       | 0   | Ph10+   | –                                   |
+| F-63  | Business-Development Graph (NOT RECOMMENDED) | Intelligence   | 0   | Ph10+   | –                                   |
+| F-64  | LinkedIn Migration Engine                    | Integration    | 5   | Ph1/2   | F-12                                |
+| F-65  | LinkedIn Decoupling & Independence           | Foundation     | 8   | Ph1/2   | F-64                                |
+| F-66  | Course Creation Studio                       | Learning       | 8   | Ph7     | F-07, F-42                          |
+| F-67  | Categories, Discovery & Comparison           | Learning       | 6   | Ph7     | F-07, F-145                         |
+| F-68  | Quizzes, Practice Tests & Final Exams        | Learning       | 8   | Ph7     | F-07                                |
+| F-69  | Assignments & Peer Review                    | Learning       | 8   | Ph7     | F-07                                |
+| F-70  | Learning Paths, Programs & Specializations   | Learning       | 8   | Ph7     | F-07, F-66                          |
+| F-71  | Course Q&A, Discussions, Notes               | Learning       | 6   | Ph7     | F-07                                |
+| F-72  | Course Reviews & Ratings                     | Learning       | 6   | Ph7     | F-07                                |
+| F-73  | Course Commerce                              | Learning       | 6   | Ph7     | F-07, F-16                          |
+| F-74  | Instructor Platform                          | Learning       | 6   | Ph7     | F-07, F-66                          |
+| F-75  | Employer Insights                            | Intelligence   | 7   | Ph9     | F-12, F-56                          |
+| F-76  | Coding Contests & Live Leaderboards          | Assessment     | 5   | Ph9     | F-08                                |
+| F-77  | Skill Certification Exams                    | Assessment     | 8   | Ph3     | F-08                                |
+| F-78  | Practice Sets & Interview Prep               | Learning       | 5   | Ph9     | F-08                                |
+| F-79  | Articles & Newsletters                       | Networking     | 5   | Ph8     | F-54                                |
+| F-80  | Profile Enhancements                         | Profile        | 6   | Ph1/Ph8 | F-12                                |
+| F-81  | Identity Verification                        | Verification   | 3   | Ph9     | F-12                                |
+| F-82  | Student Learning Analytics                   | Analytics      | 6   | Ph7     | F-07                                |
+| F-83  | Admin Platform Expansion                     | Administration | 3   | Ph8     | F-17                                |
+| F-84  | Skills Graph & Taxonomy                      | Platform       | 10  | Ph1–2   | F-12, F-07, F-08                    |
+| F-85  | Career Graph & Progression                   | Intelligence   | 9   | Ph3     | F-12, F-04, F-06, F-84              |
+| F-86  | Salary Intelligence                          | Intelligence   | 9   | Ph3     | F-04, F-06, F-56                    |
+| F-87  | Interview Experience Repository              | Candidate      | 7   | Ph4     | F-04, F-56, F-88                    |
+| F-88  | Technical Interview Platform                 | Hiring         | 9   | Ph3     | F-08, F-33, F-06                    |
+| F-89  | Contribution Verification System             | Verification   | 5   | Ph8     | F-26, F-12                          |
+| F-90  | Peer Mentorship & Advisor Network            | Community      | 5   | Ph4     | F-12, F-10, F-55                    |
+| F-91  | Career Readiness Assessment                  | Career         | 9   | Ph2     | F-84, F-08, F-12                    |
+| F-92  | Advanced Recruiter Search                    | Recruiting     | 9   | Ph3     | F-12, F-34, F-08, F-96              |
+| F-93  | Interview Video Recording & AI Feedback      | Hiring         | 7   | Ph4     | F-33, F-06, F-88                    |
+| F-94  | Verified Work History & References           | Verification   | 7   | Ph3     | F-12, F-58                          |
+| F-95  | Career Transition Planning                   | Career         | 7   | Ph4     | F-84, F-91, F-07                    |
+| F-96  | Skill Evidence & Digital Credentials         | Verification   | 10  | Ph2     | F-12, F-26                          |
+| F-97  | Real-Time Job Market Analytics               | Intelligence   | 5   | Ph4     | F-04, F-06                          |
+| F-98  | Employer Equity & Compensation Intelligence  | Intelligence   | 7   | Ph3     | F-56, F-86                          |
+| F-99  | AI Career Coach (Enhanced)                   | AI             | 7   | Ph4     | F-12, F-84, F-91, F-07              |
+| F-100 | Peer Project Collaboration                   | Learning       | 4   | Ph5     | F-07, F-69, F-10                    |
+| F-101 | Badge Marketplace & Recognition              | Gamification   | 4   | Ph8     | F-23, F-26                          |
+| F-102 | Hiring Manager Portal                        | Recruiting     | 8   | Ph3     | F-06, F-88                          |
+| F-103 | Candidate Comparison & Rubric                | Recruiting     | 6   | Ph3     | F-06, F-92                          |
+| F-104 | Pre-Hire Assessment Customization            | Hiring         | 7   | Ph3     | F-06, F-08, F-88                    |
+| F-105 | Post-Hire Analytics & ROI Tracking           | Analytics      | 4   | Ph4     | F-102, F-93                         |
+| F-106 | Skill Prerequisite Engine                    | Learning       | 7   | Ph5     | F-07, F-70, F-84                    |
+| F-107 | Live Q&A with Instructors                    | Learning       | 6   | Ph5     | F-07, F-71, F-10                    |
+| F-108 | Expert Network Matching                      | Networking     | 4   | Ph7     | F-09, F-12, F-10                    |
+| F-109 | Salary Negotiation Guidance                  | Career         | 5   | Ph8     | F-86, F-98                          |
+| F-110 | Verified Skill Endorsements                  | Verification   | 7   | Ph8     | F-96, F-12, F-58                    |
+| F-111 | Industry-Specific Learning Hubs              | Learning       | 4   | Ph8     | F-07, F-55                          |
+| F-112 | Resume Parsing & Optimization                | Candidate      | 6   | Ph8     | F-13, F-12                          |
+| F-113 | Recruiter Outreach Analytics                 | Recruiting     | 6   | Ph8     | F-59, F-06                          |
+| F-114 | Learning Impact Tracking                     | Analytics      | 9   | Ph4     | F-07, F-04, F-06                    |
+| F-115 | Certification Exam Platform                  | Assessment     | 9   | Ph3     | F-77, F-45 (optional; F-45 is Ph10) |
+| F-116 | Accessibility & Inclusive Learning           | Platform       | 7   | Ph8     | F-07, F-44                          |
+| F-117 | Mobile-First Job Application                 | Candidate      | 5   | Ph8     | F-04, F-33                          |
+| F-118 | Emerging Skills Detection                    | Intelligence   | 4   | Ph8     | F-84                                |
+| F-119 | Diversity & Inclusion Analytics              | Hiring         | 4   | Ph8     | F-06                                |
+| F-120 | API & Integration Platform                   | Platform       | 2   | Ph10    | F-01, F-34                          |
 
 ### 7.2 v2.1 Integration Family (F-121 … F-143) — preserved numbering
 
@@ -720,6 +736,8 @@ Conflicting authoritative evidence becomes explicitly disputed. Revocation trigg
 | F-143 | OSS Contribution Discovery              | Portfolio    | 4   | Ph8   | F-89, F-26              |
 
 ### 7.3 Gap-Analysis Family (F-144 … F-173) — renumbered (former F-121 … F-150)
+
+Amendment E excludes candidate-level predictive or automated hiring-decision capability from GA unless a separate review admits it, and §15.10.2 prohibits predictive performance scoring. F-154 (Interview Prediction & Benchmarking) and F-168 (Hiring Prediction & Success Modeling) carry no such gate in this table; whether they fall under it or are limited to descriptive benchmarking is open (owner decision).
 
 | ID    | Feature                                      | Category        | P   | Phase | Key dependencies   |
 | ----- | -------------------------------------------- | --------------- | --- | ----- | ------------------ |
@@ -794,7 +812,7 @@ The foundational systems below are cross-feature primitives. They are not compet
 | S-09   | Activity & Contribution Tracking | F-146           | Time-series behavioral signals; discovery, engagement, early-adopter detection, expertise ID                                                                                                                                                                                                                     |
 | S-10   | Unified Search & Discovery       | F-147           | One discovery surface for people/jobs/courses/companies/projects/discussions; RLS-safe                                                                                                                                                                                                                           |
 | S-11   | Warm Intro & Referral Network    | F-121 + F-142   | Dignified warm introductions and referral requests with tracking delivery                                                                                                                                                                                                                                        |
-| S-12   | Application Feedback Loop        | F-122           | Every application receives feedback; #1 differentiator (P-02)                                                                                                                                                                                                                                                    |
+| S-12   | Application Feedback Loop        | F-122           | Every application receives feedback (subject to the candidate right-to-feedback setting in F-122 step 5, which allows "None" — open); #1 differentiator (P-02)                                                                                                                                                   |
 | S-13   | Skill Freshness Engine           | F-123           | Decay stale skill evidence so current proof weighs more; refresher resets decay                                                                                                                                                                                                                                  |
 | S-14   | Project Marketplace Infra        | F-124           | Infrastructure for project-based learning, freelance & apprenticeship; escrow via Stripe                                                                                                                                                                                                                         |
 
@@ -802,13 +820,13 @@ The foundational systems below are cross-feature primitives. They are not compet
 
 ### 8.1 Dependency rule
 
-Feature work must declare blocking dependencies, shared primitives, policy prerequisites, external dependencies, data prerequisites, and verification prerequisites. Circular dependencies are prohibited unless deliberately mediated by events/contracts.
+Feature work must declare blocking dependencies, shared primitives, policy prerequisites, external dependencies, data prerequisites, and verification prerequisites. Circular dependencies are prohibited unless deliberately mediated by events/contracts. The §7 "Key dependencies" column is the dependency of record; where the "Feature Dependencies" and "Blocks" lines in §9 differ from it, §7 governs (measured 2026-11-22: 14 of the 15 Blocks lists that name features differ from §7; only F-115's matches). Adding a missing dependency to §7 is an owner decision.
 
 ---
 
 ## 9. Detailed Feature Specifications
 
-The detailed records below cover the highest-leverage features first. The 173-feature register in §7 remains the complete inventory; this section supplies deeper canonical behavior for priority foundation/core features without redefining their identities.
+The detailed records below cover the highest-leverage features first. The 173-feature register in §7 remains the complete inventory; this section supplies deeper canonical behavior for priority foundation/core features without redefining their identities. Where a §9 heading's title differs from the §7 name (F-06, F-84, F-85, F-88, F-92, F-99, F-123, F-144, F-158), the §7 name is the feature's identity.
 
 ### 9.1 Foundation Feature Specifications
 
@@ -834,14 +852,14 @@ The detailed records below cover the highest-leverage features first. The 173-fe
 2. **Email Verification** — User clicks tokenized link (TTL 24h, single-use). `profiles.email_verified_at` set. Account state → `verified`.
 3. **Login** — User submits credentials. Rate limit enforced (10/min/IP for login; 5/min/IP for password reset). On success: Supabase Auth issues JWT (1h access, 30-day sliding refresh) + refresh token. Session cookie set: `sb-access-token` (HttpOnly, Secure, SameSite=Lax).
 4. **Role Normalization** — Edge middleware reads JWT `app_metadata.role` and normalizes to `ROLE_USER` / `ROLE_RECRUITER` / `ROLE_ADMIN`. Missing/invalid role → default `ROLE_USER`.
-5. **Session Restore** — On page load, client checks cookie. If expired, silent refresh attempt. If refresh fails, redirect to `/login` with `?return=` param. Partial session cleared on fatal auth error.
+5. **Session Restore** — On page load, the client asks the server for the session (script cannot read the HttpOnly cookie of step 3). If expired, silent refresh attempt. If refresh fails, redirect to `/login` with `?return=` param; unsaved long-form input is kept as a local draft and offered for recovery after sign-in (Appendix D M-24). Partial session cleared on fatal auth error.
 6. **Logout** — Server revokes JWT via `jti` denylist. Cookie cleared. Redirect to `/`.
 7. **Password Reset** — User submits email → rate limited (5/min/IP). Tokenized link sent (TTL 30 min, single-use). On submission: new password validated → session revoked globally → user re-authenticated.
-8. **OAuth Flow** — Google/GitHub: PKCE exchange → Supabase Auth callback → profile merged with existing email if match (no silent account takeover; consent prompt if email collision).
+8. **OAuth Flow** — Google/GitHub: PKCE exchange → Supabase Auth callback → profile merged with existing email if match (no silent account takeover; consent prompt if email collision). What proof of control links the accounts is not stated; merging into an existing account whose email is unverified would allow a pre-registration takeover (open).
 
 **Business Rules:** BR-001 (auth required), BR-002 (role separation), AUTH-001..017 (§10.14 prints these ids as BR-01 and BR-02, and BR-01's text there is "Only `ROLE_RECRUITER`/`ROLE_ADMIN` may create/edit job postings", not "auth required"; the gloss is unreconciled — open)
 
-**Permissions:** Public: register/login/reset · Authenticated: logout/refresh/change password · Admin: revoke any session
+**Permissions:** Public: register/login/reset · Authenticated: logout/refresh/change password · Admin: revoke any session. Re-authentication before erasure, data export, or a password or email change is not specified in this file; an amendment recorded in Part VIII (SSOT-AMD-01) requires it for erasure, and the target proposes step-up for these actions (Under Review). Open (owner).
 
 **Data Dependencies:** `auth.users` (Supabase-managed), `profiles`, `user_settings`, `audit_logs`
 
@@ -851,7 +869,7 @@ The detailed records below cover the highest-leverage features first. The 173-fe
 
 **External Dependencies:** Supabase Auth (GoTrue), transactional email provider behind a provider port (for example Resend; the target's Brevo default is Proposed, V61-08), Google OAuth, GitHub OAuth
 
-**Security Requirements:** HDN-008 (rate limits, lockout, jti denylist) · HDN-014 (TLS, no plaintext credentials) · MFA readiness (AUTH-008) · age gate (AUTH-017)
+**Security Requirements:** HDN-008 (rate limits, lockout, jti denylist; lockout threshold, duration, unlock and per-recipient caps on reset email are not specified, and §5.3 requires a recovery path for every denial — open, DOR-007) · HDN-014 (TLS, no plaintext credentials) · MFA readiness (AUTH-008) · age gate (AUTH-017)
 
 **Failure Modes:**
 
@@ -888,7 +906,7 @@ stateDiagram-v2
 
 State names are lower `snake_case` (spelling normalisation only, V61-11). The account machine has no row in the §10.9 index, and the target account vocabulary differs (V61-18).
 
-**Erasure clocks (V61-07).** Three clocks apply and must not be read as one "30 days": the **cancel window** (time in which the holder may cancel an erasure request; SSOT intent 30 days, unratified), the **completion deadline** (erasure completed within 30 days of the request) and the **deactivation purge** (`deactivated → deleted` after 30 days, shown above; the diagram applies the same 30-day value to `suspended → deleted`). A 30-day cancel window and a 30-day completion deadline cannot both hold from the same start; this is an open owner decision (DOR-017; the target proposes a 7-day cooling-off, V61-07). On deletion, data referenced by aggregates or legally retained is anonymized and everything else is deleted.
+**Erasure clocks (V61-07).** Three clocks apply and must not be read as one "30 days": the **cancel window** (time in which the holder may cancel an erasure request; SSOT intent 30 days, unratified), the **completion deadline** (erasure completed within 30 days of the request) and the **deactivation purge** (`deactivated → deleted` after 30 days, shown above; the diagram applies the same 30-day value to `suspended → deleted`). A 30-day cancel window and a 30-day completion deadline cannot both hold from the same start; this is an open owner decision (DOR-017; the target proposes a 7-day cooling-off, V61-07). The diagram has no erasure-request state and no edge out of `deactivated` except `deleted`, so a cancel window of any length cannot be exercised. `suspended → deleted` also purges an account its holder did not ask to delete, which conflicts with evidence preservation during an incident (§15.3). Both are open (DOR-017; §27.8 item 5). On deletion, data referenced by aggregates or legally retained is anonymized and everything else is deleted.
 
 **Acceptance Criteria:**
 
@@ -929,7 +947,7 @@ State names are lower `snake_case` (spelling normalisation only, V61-11). The ac
 7. **Portfolio** — CRUD on `profile_portfolios`: `title`, `description`, `demo_url`, `repo_url`, `media_assets` (images/PDFs ≤50MB), `tech_stack` (canonical skills). Public visibility toggle.
 8. **Completeness Score** — Recomputed on every edit. Formula: weighted sum of filled sections (basic 20%, skills 15%, experience 20%, education 15%, certifications 10%, portfolio 10%, summary 10%). Score 0–100.
 9. **Visibility Toggles** — Per-section control: `public` / `connections_only` / `recruiters_only` / `private`.
-10. **Public View** — `/profile/[userId]` renders public-safe columns only. PII columns (`phone_number`, `tax_id`) never exposed.
+10. **Public View** — `/profile/:userId` renders public-safe columns only. PII columns (`phone_number`, `tax_id`) never exposed.
 11. **Data Residency** — `data_residency_region` set at signup from locale (US/EU). Gates AI routing.
 
 **Business Rules:** BR-005 (own-edit only), BR-061 (≥70% completeness for job applications), PROFILE-001..035
@@ -940,7 +958,7 @@ State names are lower `snake_case` (spelling normalisation only, V61-11). The ac
 
 **API Dependencies:** `GET /api/v1/profile`, `PUT /api/v1/profile`, `POST /api/v1/profile/resume/parse`, `POST /api/v1/profile/portfolio`, `GET /api/v1/profile/{userId}/public`
 
-**UI Dependencies:** `/profile`, `/profile/[userId]`, resume upload drawer, portfolio gallery, skills taxonomy typeahead
+**UI Dependencies:** `/profile`, `/profile/:userId`, resume upload drawer, portfolio gallery, skills taxonomy typeahead
 
 **External Dependencies:** Supabase Storage, HaveIBeenPwned (password breach check), AI service (resume parsing)
 
@@ -1079,6 +1097,8 @@ stateDiagram-v2
     rejected --> [*]
 ```
 
+Step 1 lets an admin create and merge skills, and the edge cases merge two skills, but this diagram has no entry for an admin-created skill and merges only from `deprecated` (open).
+
 State names are lower `snake_case` (spelling normalisation only, V61-11). Terminal sets differ between the §10.9 index (Skill (F-84): `merged` only) and this diagram (`merged`, `rejected`) — see V61-11.
 
 **Acceptance Criteria:**
@@ -1132,11 +1152,11 @@ State names are lower `snake_case` (spelling normalisation only, V61-11). Termin
    - Publishes public verification URL: `/verify/{hash}`
    - Updates `profiles.xp_balance` if applicable
    - Emits `EVT-005 verified_signal_added` (if first signal)
-3. **Credential Verification (Public)** — `GET /verify/{hash}` returns: holder name (first name + last initial for privacy), skill, evidence type, issuer, issue date, status. Never exposes full profile or PII.
+3. **Credential Verification (Public)** — `GET /verify/{hash}` returns: holder name (first name + last initial for privacy), skill, evidence type, issuer, issue date, status. Never exposes full profile or PII. A partial name is still personal data, so this step and BR-150 ("no PII") disagree. Whether the page shows a name, and whether a credential's public URL respects the holder's profile visibility (step 2 publishes every credential), are open.
 4. **Credential Revocation** — Admin-only action (academic integrity violation, employer retraction, etc.). Revocation creates a new record with `revoked_at` + `revocation_reason`. Original row retained (append-only). Public URL shows "INVALID" state. XP clawback logged.
 5. **Endorsement Weighting** — When a peer endorses a skill:
    - Endorser's credential weight = `min(their_verified_reputation_score, 1.0)`
-   - Relationship proximity boost: +0.2 if direct connection, +0.1 if 2nd degree
+   - Relationship proximity boost: +0.2 if direct connection, +0.1 if 2nd degree (BR-131 and the Permissions line allow endorsements only between connected users, so the 2nd-degree boost is unreachable — open)
    - Final weight stored in `endorsement_weights`
    - Endorsements from unverified users (no reputation) count as 0.1 (weak signal)
 6. **Evidence Display** — On profile: "Verified by TalentSphere" badge on each skill with ≥1 credential. Click expands evidence list (course, challenge, or endorsement).
@@ -1154,7 +1174,7 @@ State names are lower `snake_case` (spelling normalisation only, V61-11). Termin
 - BR-155: Privacy-preserving proofs allowed
 - BR-156: Credential requires platform-verified achievement
 
-**Permissions:** User: issue (via achievement), view own, export. Public: verify via hash. Admin: revoke. Peer: endorse connected users.
+**Permissions:** User: issue (via achievement), view own, export. Public: verify via hash. Admin: revoke. Peer: endorse connected users. Who may see revocation and dispute reasons, and who disputed, revoked or verified a record, is not specified; BR-150 bars PII on the public URL (open).
 
 **Data Dependencies:** `verified_credentials`, `credential_evidence`, `endorsement_weights`, `profiles`, `xp_transactions`, `skill_endorsements`
 
@@ -1173,7 +1193,7 @@ State names are lower `snake_case` (spelling normalisation only, V61-11). Termin
 **Edge Cases:**
 
 - Credential issued, then course retroactively revoked → credential revoked with reason
-- User deletes account → credentials anonymized (holder name removed), verification URL shows "deleted user". Erasure clocks and anonymize-vs-delete: see F-01 (Erasure clocks, V61-07); the target's opaque-subject-reference design is Proposed (V61-19)
+- User deletes account → credentials anonymized (holder name removed), verification URL shows "deleted user". Erasure clocks and anonymize-vs-delete: see F-01 (Erasure clocks, V61-07); the target's opaque-subject-reference design is Proposed (V61-19). Anonymizing endorsements the erased person gave would create anonymous endorsements, which BR-153 prohibits; their disposition is open
 - Dispute: "I didn't endorse this skill" → endorsement revocable by endorser within 30 days
 - Recruiter needs bulk verification → API with rate limit + audit
 
@@ -1202,6 +1222,8 @@ stateDiagram-v2
     expired --> [*]
 ```
 
+State-machine gaps: see §10.10 Credential (F-96) (open).
+
 **Acceptance Criteria:**
 
 - Credential issuance <500ms
@@ -1225,6 +1247,8 @@ stateDiagram-v2
 
 ### 9.2 Tier 1 Core Intelligence Features (Priority 9)
 
+§7 `P` governs this tier (§7 authority note): F-102 and F-145 below are P8 in §7.
+
 #### F-04 Job Marketplace
 
 > v6.1 amendment: see Appendix E, items V61-18, V61-20 and V61-23
@@ -1242,8 +1266,8 @@ stateDiagram-v2
 
 1. **Search** — Candidate navigates `/jobs`. Faceted filters: keyword, location, work mode (Remote/Hybrid/On-site), job type (Full-time/Part-time/Contract/Internship), level (Entry/Mid/Senior/Lead/Principal), salary range, skills (multi-select from F-84), company, posted-within. Filters are URL-encoded (shareable). Cursor-based pagination (20/page default, 100 max).
 2. **Ranking** — Default sort: relevance (candidate skill match × job requirements). Weights: 0.45 skill + 0.20 experience + 0.10 location + 0.10 title + 0.10 org_rating + 0.05 recency. Transparency: "Why am I seeing this?" disclosure on each card.
-3. **Job Detail** — `/jobs/[id]` shows: title, company (linked), location, work mode, salary (min-max with "hide pay" recruiter toggle), description (sanitized markdown), requirements, benefits, skills required, company overview, similar jobs, apply CTA. If job closed → 410 Gone with "similar jobs" recommendation.
-4. **Apply** — Multi-step modal: select resume (or attach new), optional cover letter (≤5000 chars), confirm profile completeness (≥70% gate). Autosave draft every 5s to localStorage + `application_drafts` (server). On submit: `job_applications` row created (status `submitted`), `application_status_events` append, `EVT-017 application_submitted`, recruiter notified, candidate receives confirmation.
+3. **Job Detail** — `/jobs/:jobId` shows: title, company (linked), location, work mode, salary (min-max with "hide pay" recruiter toggle), description (sanitized markdown), requirements, benefits, skills required, company overview, similar jobs, apply CTA. If job closed → the API answers 410 Gone and the page shows the "closed" banner (see Edge Cases) with a "similar jobs" recommendation.
+4. **Apply** — Multi-step modal: select resume (or attach new), optional cover letter (≤5000 chars), confirm profile completeness (≥70% gate). Autosave draft every 5s to localStorage and every 30s to `application_drafts` (server) (BR-18; Appendix D M-24). On submit: `job_applications` row created (status `submitted`), `application_status_events` append, `EVT-017 application_submitted`, recruiter notified, candidate receives confirmation.
 5. **Duplicate Prevention** — Partial unique constraint `UNIQUE(applicant_id, job_id) WHERE status NOT IN ('rejected','withdrawn','archived')`. If duplicate → 409 with "You've already applied" message.
 6. **Saved Jobs** — Candidate saves jobs to `saved_jobs`. View in `/jobs/saved`.
 7. **Saved Searches** — Candidate saves filter combination to `saved_searches`. Job alert emails sent when new matches appear (new-only, no backfill).
@@ -1327,7 +1351,7 @@ stateDiagram-v2
 2. **Application Detail** — Candidate profile, verified signals, resume drawer, cover letter, timeline, notes, scorecards.
 3. **Stage Transitions** — Server-owned. Invalid transitions blocked. Each writes `application_status_events` (append-only).
 4. **Scorecards** — Structured rubric (technical, communication, problem-solving, culture): 1–5 each + recommendation + notes. Private to hiring team.
-5. **Interview Scheduling** — Calendar integration (Phase 3+). Video room auto-provisioned (F-33).
+5. **Interview Scheduling** — Calendar integration (Phase 3+; OD-09 recommends manual scheduling at MVP and integration at SSOT Ph6 — open). Video room auto-provisioned (F-33).
 6. **Offer Management** — Draft → negotiate → accept/decline. Single active offer per application.
 7. **Rejection** — Template-based feedback (F-122 integration).
 8. **Collaboration** — Internal comments, @-mentions, hiring team visibility.
@@ -1360,9 +1384,9 @@ stateDiagram-v2
 **Core Behavior:**
 
 1. **Catalog Browse** — `/courses` shows published courses with filters: category, difficulty, duration, rating, price (free/paid), language, instructor. Sort: relevance, rating, newest, most enrolled, price.
-2. **Course Detail** — `/courses/[id]` shows syllabus preview (public modules/lessons), instructor bio, reviews, prerequisites (from F-84), learning objectives, estimated duration, enrollment CTA.
+2. **Course Detail** — `/courses/:id` shows syllabus preview (public modules/lessons), instructor bio, reviews, prerequisites (from F-84), learning objectives, estimated duration, enrollment CTA.
 3. **Enrollment** — `POST /api/v1/courses/{id}/enroll`. Checks: prerequisites satisfied (F-106), entitlement (free/paid/Pro/Team/institutional license; plan prices and allowances are not decided in this file — see V61-09), no active duplicate enrollment. On success: `course_enrollments` row (status `active`), `EVT-006 enrollment_created`, welcome notification.
-4. **Learning Player** — `/courses/[id]/learn` immersive layout: video player (via F-42 media engine), curriculum drawer, lesson checklist, notes panel, Q&A panel, progress bar. Video player supports: play/pause/seek, captions (if provided), transcript, playback speed, PiP, fullscreen, resume-from-last-position.
+4. **Learning Player** — `/courses/:id/learn` immersive layout: video player (via F-42 media engine), curriculum drawer, lesson checklist, notes panel, Q&A panel, progress bar. Video player supports: play/pause/seek, captions (if provided), transcript, playback speed, PiP, fullscreen, resume-from-last-position.
 5. **Lesson Progress** — Each lesson has content_items (VIDEO, ARTICLE, PDF, QUIZ, ASSIGNMENT). Completion tracked in `module_progress` (idempotent — UNIQUE(enrollment_id, module_id)). Video completion per provider capability.
 6. **Quizzes** — Inline quizzes between lessons. Configurable: time limit, passing score, attempts. Graded quiz contributes to course grade. Results page shows per-question explanations.
 7. **Prerequisites** — Gated by F-106. Attempting to enroll without prerequisites → soft block with "Complete X and Y first" + link.
@@ -1423,7 +1447,7 @@ stateDiagram-v2
 **Core Behavior:**
 
 1. **Browse Challenges** — `/challenges` shows challenges by category, difficulty, skill tags. Filters: language, difficulty, completion status.
-2. **Attempt UI** — `/challenges/[id]/attempt`: Monaco editor with language selector (Python 3.12, JS/Node 20, TypeScript 5, Java 17, C++17, C, Go 1.22, Rust 1.75, SQL). Problem statement panel, test cases panel, run button, submit button, timer (if timed challenge).
+2. **Attempt UI** — `/challenges/:id/attempt`: Monaco editor with language selector (Python 3.12, JS/Node 20, TypeScript 5, Java 17, C++17, C, Go 1.22, Rust 1.75, SQL). Problem statement panel, test cases panel, run button, submit button, timer (if timed challenge).
 3. **Run (Draft Test)** — `POST /api/v1/challenges/{id}/run` executes against public test cases only. Returns structured output (stdout, stderr, exit code, duration). Does not consume submission slot. Rate limit 30/min.
 4. **Submit (Judged)** — `POST /api/v1/challenges/{id}/submit`. Sandbox execution:
    - Ephemeral container per submission
@@ -1432,7 +1456,7 @@ stateDiagram-v2
    - seccomp syscall filtering
    - Read-only root filesystem
    - Runs hidden test cases
-5. **Async Judging** — Submission enqueued to `background_jobs` (kind `challenge.judge`). Status transitions: `queued → running → passed|failed|error`. Client polls status endpoint every 2s (up to 60s).
+5. **Async Judging** — Submission enqueued to `background_jobs` (kind `challenge.judge`). Status transitions: `queued → running → passed|failed|error`. Client polls status endpoint every 2s (up to 60s); what the user sees when 60s pass without a terminal status is not specified (open; see Appendix D M-06).
 6. **Scoring** — Score = (passed / total) × difficulty_weight × time_bonus. Normalized to 0–100. Pass threshold: ≥70%.
 7. **XP Award** — On pass: XP awarded (20–100 by difficulty) via idempotent ledger. `UNIQUE(user_id, reference_type='challenge.passed', reference_id=challenge_id)` — one award lifetime.
 8. **Anti-cheat** — Async plagiarism detection (AST comparison against corpus) + behavioral timing analysis. Flags suspicious submissions for review.
@@ -1524,7 +1548,7 @@ stateDiagram-v2
 
 **Acceptance Criteria:** Benchmark query <400ms · k-anonymity always enforced · opt-out removes data within 24h · Benchmarks only shown with ≥20 samples (feature override of `min_cohort_k`, V61-04) · Consent captured before any data collection
 
-**Feature Dependencies:** F-12, F-04, F-06 · **Blocks:** F-95, F-97, F-105, F-114
+**Feature Dependencies:** F-12, F-04, F-06, F-84 · **Blocks:** F-95, F-97, F-105, F-114
 
 ---
 
@@ -1605,14 +1629,14 @@ stateDiagram-v2
 4. **Pre-Assessment** — Candidate receives: calendar invite (ICS), pre-join device check (mic/camera/browser), instructions. Consent for video recording (opt-in; default off).
 5. **Live Session** — Video call + collaborative code editor (Monaco) + whiteboard. Interviewer can: assign problem from bank, observe code in real-time, send hints (recorded in transcript), run code against public tests, end session.
 6. **Scoring** — Interviewer completes rubric post-session: technical correctness (1–5), communication (1–5), problem-solving (1–5), code quality (1–5), overall recommendation (Strong Yes / Yes / Neutral / No / Strong No), notes (private).
-7. **AI Feedback (Optional)** — Post-session analysis: communication signals (speaking pace, filler words, clarity), technical correctness commentary, comparison to benchmark. **Never** emotion/sentiment analysis (prohibited).
-8. **Recording** — Optional. Requires dual consent. Encrypted at rest. Retention ≤90 days unless explicitly extended. Never used for model training without consent.
+7. **AI Feedback (Optional)** — Post-session analysis: communication signals (speaking pace, filler words, clarity), technical correctness commentary, comparison to benchmark. **Never** emotion/sentiment analysis (prohibited). Who sees this feedback is not specified; if recruiters or hiring managers see it, AI-derived delivery signals become a screening input, which Amendment E and §15.10.2 restrict (open, owner).
+8. **Recording** — Optional. Requires dual consent. Encrypted at rest. Retention ≤90 days unless explicitly extended (who may extend, the maximum, and whether both parties consent are open). Never used for model training without consent.
 9. **Results** — Candidate receives: pass/fail, high-level feedback, areas for improvement. Interviewer/recruiter see full scorecard.
 10. **Integration with ATS** — Assessment score attached to `job_applications` record. Feeds into F-102 Hiring Manager Portal.
 
 **Business Rules:** BR-169..BR-176
 
-**Data Dependencies:** `interview_assessments`, `interview_recordings`, `interview_scores`, `interview_questions`, `assessment_templates`, `job_applications`, `interviews`
+**Data Dependencies:** `interview_assessments`, `interview_recordings`, `interview_scores`, `interview_questions` (name collision: §14.5 lists `interview_questions` under Employer insights for F-87's crowdsourced, published questions; this confidential, company-scoped bank with hidden test cases cannot share rows with it without a separation rule; whether it is a separate table, and its name, are open), `assessment_templates`, `job_applications`, `interviews`
 
 **API Dependencies:** SCI-38 (assessment lifecycle), SCI-39 (recording)
 
@@ -1790,21 +1814,21 @@ stateDiagram-v2
 
 #### F-115 Certification Exam Platform
 
-| Attribute      | Value                                               |
-| -------------- | --------------------------------------------------- |
-| **Feature ID** | F-115                                               |
-| **Priority**   | 9                                                   |
-| **Phase**      | Ph3                                                 |
-| **Purpose**    | Formal exam infrastructure for skill certifications |
-| **Actors**     | Candidate, Exam Administrator, Proctor (Phase 6)    |
+| Attribute      | Value                                                  |
+| -------------- | ------------------------------------------------------ |
+| **Feature ID** | F-115                                                  |
+| **Priority**   | 9                                                      |
+| **Phase**      | Ph3                                                    |
+| **Purpose**    | Formal exam infrastructure for skill certifications    |
+| **Actors**     | Candidate, Exam Administrator, Proctor (Ph10, §7 F-45) |
 
 **Core Behavior:**
 
 1. **Certification Definition** — Admin defines: title, skill, difficulty, exam format (MCQ / coding / mixed), duration, pass threshold, retake policy, proctoring level.
-2. **Question Bank** — Exam-scoped. MCQ, multi-select, coding, essay. Each has: stem, options, correct answer (encrypted server-side per BR-124), explanation, difficulty, discrimination index (computed post-hoc).
+2. **Question Bank** — Exam-scoped. MCQ, multi-select, coding, essay. Each has: stem, options, correct answer (encrypted server-side; §17.4, VER-024), explanation, difficulty, discrimination index (computed post-hoc).
 3. **Exam Registration** — Candidate registers. Prerequisites: course completion, minimum XP, or explicit eligibility.
 4. **Attempt** — Timed exam. Server-authoritative clock. Questions served one at a time (or in batches, configurable). No client-side answer key.
-5. **Proctoring (Phase 6)** — Third-party vendor. Identity verification, browser lockdown, AI proctoring.
+5. **Proctoring (optional; Ph10, F-45)** — Third-party vendor. Identity verification, browser lockdown, AI proctoring.
 6. **Auto-Grading** — MCQ/multi-select auto-graded. Coding via sandbox (F-08). Essay manual grading queue.
 7. **Results** — Pass/fail with score. Per-section breakdown. Explanations for wrong answers (post-exam).
 8. **Certification Issuance** — On pass: `skill_certifications` row, credential issued (F-96), badge displayed on profile, XP awarded.
@@ -1812,7 +1836,7 @@ stateDiagram-v2
 10. **Item Analysis** — Post-exam: difficulty index, discrimination index per question. Low-performing questions flagged for review.
 11. **Appeal** — Grade dispute path. SLA 7 days.
 
-**Business Rules:** BR-140 (single-attempt pass, retake configurable), BR-124 (answer keys server-side encrypted), VER-024 (key leakage test)
+**Business Rules:** BR-140 (single-attempt pass, retake configurable), answer keys server-side encrypted (no BR row states this; BR-124 is a feed rule — §17.4), VER-024 (key leakage test)
 
 **Data Dependencies:** `skill_certifications`, `certification_attempts`, `questions`, `question_banks`, `assessment_attempts`
 
@@ -1820,7 +1844,7 @@ stateDiagram-v2
 
 **Security Requirements:** Answer keys encrypted · Never sent to client before grading · Server-authoritative timer · Per-attempt question randomization
 
-**Failure Modes:** Timer expires → auto-submit with partial grading · Sandbox down (coding questions) → queue, honest status · Proctor unavailable (Phase 6) → exam postponed
+**Failure Modes:** Timer expires → auto-submit with partial grading · Sandbox down (coding questions) → queue, honest status · Proctor unavailable (when proctoring is enabled, Ph10) → exam postponed
 
 **Edge Cases:** Candidate disconnects → session resumable within 5 min · Browser crashes → auto-save progress every 30s, resumable · Question edited mid-exam → version pinned at exam start
 
@@ -1844,7 +1868,7 @@ stateDiagram-v2
 
 **Acceptance Criteria:** Server-authoritative timer (±100ms) · Answer keys never in client payload · Auto-grading <500ms · Exam submission idempotent · Item analysis computed within 24h
 
-**Feature Dependencies:** F-77, F-45 · **Blocks:** None (terminal)
+**Feature Dependencies:** F-77; F-45 optional (proctoring, Ph10 in §7) · **Blocks:** F-45. Step 8 issues an F-96 credential, but §7 lists no F-96 dependency (open).
 
 ---
 
@@ -1864,7 +1888,7 @@ stateDiagram-v2
 **Core Behavior:**
 
 1. **Feedback Templates (Admin/Org)** — Platform admins and org admins define templates: stage (screening, interview, offer), reason category (skills gap, experience gap, culture fit, overqualified, position filled, no response, other), structured fields (what went well, what didn't, what to improve), optional freeform note.
-2. **Feedback Capture (Recruiter)** — On stage change (shortlist→reject, interview→reject), recruiter prompted: optional quick feedback via template, or skip (records "no feedback provided"). Minimum reason category required.
+2. **Feedback Capture (Recruiter)** — On stage change (shortlist→reject, interview→reject), recruiter prompted: optional quick feedback via template, or skip the detailed feedback (records "no feedback provided"). A minimum reason category is required on every rejection, even when the detailed feedback is skipped (BR-217).
 3. **Feedback Delivery (Candidate)** — On rejection, candidate receives: notification with high-level feedback, link to feedback detail page, aggregate insights, suggested actions (skills to develop, courses to consider).
 4. **Anonymized Aggregate Insights** — Platform-wide: "60% of rejections at this stage cite skills gap", "Candidates who completed course X were 2.3× more likely to pass screening". Only aggregate, never individual.
 5. **Candidate Right to Feedback** — Configurable: Full / Opt-in / Aggregate-only / None.
@@ -1902,6 +1926,8 @@ stateDiagram-v2
     no_response --> [*]
     skipped --> [*]
 ```
+
+BR-222 lets a candidate request feedback that was not provided (30-day window), but `skipped` is terminal here, so the request has no transition (open).
 
 **Acceptance Criteria:** Feedback delivery within 7 days of decision (when provided) · Zero PII leakage in feedback · Aggregate insights always meet `min_cohort_k` (default k ≥ 10; BR-220) · Candidate can request feedback (30-day window enforced) · Recruiter feedback rate >60% (target metric)
 
@@ -1993,7 +2019,7 @@ stateDiagram-v2
 
 **Data Dependencies:** `reputation_scores`, `reputation_signals`, `reputation_history`, `reputation_config`
 
-**API Dependencies:** SCI-55 (reputation query)
+**API Dependencies:** SCI-55 (reputation query; outside the SCI-01..SCI-54 register of §13.1, not defined)
 
 **Security Requirements:** RLS own-row + aggregate public
 
@@ -2030,7 +2056,7 @@ stateDiagram-v2
 
 **Data Dependencies:** `recommendation_signals`, `user_preferences`, `recommendation_history`
 
-**API Dependencies:** SCI-56 (recommendations)
+**API Dependencies:** SCI-56 (recommendations; outside the SCI-01..SCI-54 register of §13.1, not defined)
 
 **Security Requirements:** RLS-scoped · No protected attributes (FAIR-001)
 
@@ -2041,6 +2067,8 @@ stateDiagram-v2
 ---
 
 ### 9.3 Tier 2 Competitive Features (Priority 8)
+
+§7 `P` governs this tier (§7 authority note): F-146 and F-150 below are P7 in §7.
 
 _(Due to length, Priority 8–3 feature specifications follow the same template as Priority 9–10 features; this file calls it a 24-field template but does not list the fields. Full specifications for all 173 features are said to be maintained in the canonical source, which this file does not identify; §7 remains the complete inventory. Representative specifications below.)_
 
@@ -2098,7 +2126,7 @@ _(Due to length, Priority 8–3 feature specifications follow the same template 
 
 **Data:** `search_index` (derived)
 
-**API:** SCI-57 (search)
+**API:** SCI-57 (search; outside the SCI-01..SCI-54 register of §13.1, not defined)
 
 **Acceptance:** Search p95 <300ms · 0 RLS leakage · autocomplete <100ms · typo tolerance active
 
@@ -2194,7 +2222,7 @@ Optional recording (dual consent). Post-session AI analysis: communication signa
 
 > v6.1 amendment: see Appendix E, items V61-17 and V61-20
 
-Employment history with company email verification. Referee system: structured recommendations. Employment dates, title, achievements verified.
+Employment history with company email verification. Referee system: structured recommendations. Who may act as a referee is not specified (for example, a referee address distinct from the candidate's own and from other referees on the role); open (§27.8 item 7). Employment dates, title, achievements verified.
 
 **Data:** `verified_work_history`, `references`
 
@@ -2278,7 +2306,7 @@ Brand perception scoring. Hiring quality. Culture signals. Growth signals. Relia
 
 **Dependencies:** F-75, F-56, F-144
 
-**Acceptance:** Multi-dimensional scoring · transparent factors
+**Acceptance:** Multi-dimensional scoring · transparent factors · review-derived ratings shown only for cohorts that meet `min_cohort_k` (Amendment G) · reviewer identity never in public or employer views (§5.9)
 
 #### F-151 Skill Supply/Demand Forecasting (Priority 7)
 
@@ -2310,15 +2338,15 @@ Course completion → hire rate. Course completion → salary impact. Course com
 
 **Acceptance:** Correlation not causation · k ≥30 (a feature override stricter than the `min_cohort_k` default of k ≥ 10) · all claims labelled
 
-#### F-158 Talent Pool Intelligence (Priority 7)
+#### F-158 Talent Pool Intelligence (Priority 6)
 
 Pool skill composition. Pool gaps. Pool diversity. Pipeline health. Time-to-hire by source. Conversion rates. Talent retention. Cost-per-hire.
 
 **Data:** Derived from F-92
 
-**Acceptance:** Pool analytics computed on-demand · diversity metrics anonymized
+**Acceptance:** Pool analytics computed on-demand · diversity metrics anonymized and suppressed below `min_cohort_k` (default k ≥ 10, Amendment G)
 
-#### F-159 Behavioral Talent Discovery (Priority 7)
+#### F-159 Behavioral Talent Discovery (Priority 6)
 
 Contributor ranking. Engagement scoring. Project activity. Learning trajectory. Community standing. Emerging expertise. Peer endorsements.
 
@@ -2372,6 +2400,8 @@ The canonical journey registry contains **28 journeys (J-01..J-28)**. Historical
 | J-26 | Career Switcher: Assess → Plan → Transition        | P-R               | Role transition confirmed        |
 | J-27 | Hiring Manager: Define → Assess → Hire → Track     | P-S               | Post-hire outcome recorded       |
 | J-28 | Skills Analyst: Analyze → Recommend → Measure      | P-T               | Learning program impact reported |
+
+Open (owner decisions): (1) J-11 ends with a sync ("Profile diff applied"), while BR-30 (§10.18) keeps extension data in `chrome.storage.local` with no sync, fetch or network; one of the two must change (OPEN-LGA-07). (2) The Persona column disagrees with §5.5 for J-15 (§5.5 also gives P-J) and J-27 (§5.5 also gives P-E). `ML` (J-12), "New user" (J-17), "Any verified user" (J-24) and "Student" (J-25) are not §5.5 personas, and `ML` is defined nowhere. (3) Only J-02 and J-26 have detail (§10.3, §10.4); no other journey records its §5.2 stages, §5.3 recovery paths, workflows, routes or place in the Amendment B loop.
 
 ### 10.3 J-02 Apply → Track → Hire (Detailed)
 
@@ -2497,7 +2527,7 @@ This heading groups §10.6 and §10.7 below.
 | WF-65 | PDP Goal → Milestone → Achievement               | Goal achieved                     |
 | WF-66 | Internal Mobility Match → Transition             | Internal move                     |
 
-Measured: 66 rows, WF-01..WF-66; this matches §24.8.1. WF-33 and WF-53 carry the same name (Certification Exam Attempt) and the same terminal; both ids are kept.
+Measured: 66 rows, WF-01..WF-66; this matches §24.8.1. WF-33 and WF-53 carry the same name (Certification Exam Attempt) and the same terminal; both ids are kept. Whether they are one workflow or two is an owner decision (the target crosswalk `06_BUSINESS_PROCESSES/SSOT_WORKFLOW_CROSSWALK.md` keeps both pending owner review). Their terminal `expired` is not reachable in the §10.10 Certification Attempt diagram, whose only terminal is `certified` (V61-11).
 
 ### 10.7 Workflow Integrity Traces (WIT-001..WIT-025)
 
@@ -2541,7 +2571,7 @@ This heading groups §10.9 to §10.11 below.
 
 > v6.1 amendment: see Appendix E, items V61-11 and V61-18
 
-Measured: this index has 45 rows and §10.10 draws 7 canonical diagrams; §24.8.1 locks the state-machine count at 53 (see Appendix E, item V61-10). Certification Attempt appears twice (a generic row and an F-115 row) with different terminal sets. State names are written in lower `snake_case`; where a terminal set below differs from the §10.10 diagram for the same entity, the difference is recorded under that diagram and is not resolved here (V61-11).
+Measured: this index has 45 rows and §10.10 draws 7 canonical diagrams; §24.8.1 locks the state-machine count at 53 (see Appendix E, item V61-10). Certification Attempt appears twice (a generic row and an F-115 row) with different terminal sets. Several rows list a state that later moves on, which §10.11 ("Terminal states are irreversible without a new entity") does not allow for a terminal state: Organization `active` and Instructor `active`, Course Version `current` (superseded by SCI-19), Course (authoring) `published` (BR-114), Certificate `verified` (the Credential machine revokes and expires verified items), Job `closed`, Contest `results_published`, Course Order `enrolled`, and Skill Freshness `demoted` (its F-123 diagram has `demoted --> fresh`). Until OPEN-45 closes, read this column as terminal or long-lived resting states. State names are written in lower `snake_case`; where a terminal set below differs from the §10.10 diagram for the same entity, the difference is recorded under that diagram and is not resolved here (V61-11).
 
 | Entity                        | Terminal States                                                     |
 | ----------------------------- | ------------------------------------------------------------------- |
@@ -2621,7 +2651,7 @@ stateDiagram-v2
     archived --> [*]
 ```
 
-Terminal sets differ between the §10.9 index (hired, rejected, withdrawn, stale_withdrawn, candidate_unresponsive) and this diagram (hired, rejected, withdrawn, archived); the index also lists Offer as a separate machine (hired, closed) while this diagram treats `offer` as an Application state — see V61-11. Target renames (`under_review` → `in_review`, `interview` → `interviewing`, `offer` → `offer_extended`) are Proposed — see V61-18.
+Terminal sets differ between the §10.9 index (hired, rejected, withdrawn, stale_withdrawn, candidate_unresponsive) and this diagram (hired, rejected, withdrawn, archived); the index also lists Offer as a separate machine (hired, closed) while this diagram treats `offer` as an Application state — see V61-11. Target renames (`under_review` → `in_review`, `interview` → `interviewing`, `offer` → `offer_extended`) are Proposed — see V61-18. Further gaps (open, owner decision; OPEN-45): `stale_withdrawn` is the target of BR-069 (auto-transition after 14 days) but is not a state of this diagram, and F-04 step 5's partial unique index does not exclude it, so an application moved there would block re-application to that job (BR-15). `candidate_unresponsive` appears in no rule or transition. Withdrawal is drawn only from `submitted`. Offer outcomes are named three ways (the §10.9 Offer row: hired, closed; WF-06: accepted, expired; this diagram: `offer` → hired, rejected), none has an expiry or a candidate-declined state, and J-02 ends at "Offer accepted" with no candidate-side offer action or route specified.
 
 #### Job
 
@@ -2642,7 +2672,7 @@ stateDiagram-v2
     archived --> [*]
 ```
 
-Terminal sets differ between the §10.9 index (closed, archived) and this diagram (archived only; `closed` leads to `archived`) — see V61-11. Target renames and removed states for Job are Proposed — see V61-18.
+Terminal sets differ between the §10.9 index (closed, archived) and this diagram (archived only; `closed` leads to `archived`) — see V61-11. Both cannot hold under §10.11: either `closed` is terminal and archiving is a flag rather than a state (the target's reading, Proposed under V61-18), or `closed` is non-terminal as drawn (owner decision, OPEN-45). Target renames and removed states for Job are Proposed — see V61-18.
 
 #### Credential (F-96)
 
@@ -2660,6 +2690,8 @@ stateDiagram-v2
     expired --> [*]
 ```
 
+State-machine gaps (open): an `issued` credential reaches `revoked` only through `disputed`, although F-96 step 4 lets an admin revoke; a `verified` credential cannot be disputed; F-96 has `issued → verified` fire on an anonymous public lookup, so a public read changes state and, under §10.11, writes an audit record; and no state represents anonymization on erasure.
+
 #### Certification Attempt (F-115)
 
 ```mermaid
@@ -2676,7 +2708,7 @@ stateDiagram-v2
     certified --> [*]
 ```
 
-This diagram matches the §10.9 F-115 row (certified). The generic §10.9 Certification Attempt row lists passed, failed, expired; terminal sets differ between §10.9 index and diagram — see V61-11.
+This diagram matches the §10.9 F-115 row (certified). SCI-32 keys an attempt by (certification, user, attempt_no), so a retake is a new attempt; the `cooldown --> registered` loop instead reuses one attempt, and the F-115 state diagram (§9.2) places the 7 days on `failed --> cooldown` while this diagram places it on `cooldown --> registered`. Reading `failed` as terminal per attempt, with the cooldown as a precondition of the next registration, would match SCI-32 and the generic row (owner decision, OPEN-45). The generic §10.9 Certification Attempt row lists passed, failed, expired; terminal sets differ between §10.9 index and diagram — see V61-11.
 
 #### Interview Assessment (F-88)
 
@@ -2693,6 +2725,8 @@ stateDiagram-v2
     cancelled --> [*]
     no_show --> [*]
 ```
+
+The machine enters `in_progress` when the join window opens (F-88: T-15 min) and its only exit from `scheduled` is `in_progress`, so an interview cannot be cancelled or rescheduled before then (open).
 
 #### Course Order
 
@@ -2713,7 +2747,7 @@ stateDiagram-v2
     completed --> [*]
 ```
 
-Terminal sets differ between the §10.9 index (enrolled, cancelled, refunded) and this diagram (refunded, cancelled, completed; `enrolled` is not terminal) — see V61-11.
+Terminal sets differ between the §10.9 index (enrolled, cancelled, refunded) and this diagram (refunded, cancelled, completed; `enrolled` is not terminal) — see V61-11. WF-27 and BR-100 (30-day refund window) move an enrolled order to `refund_requested`, so under §10.11 `enrolled` cannot be terminal; changing the index row is an owner decision (OPEN-45).
 
 #### Contest
 
@@ -2729,7 +2763,7 @@ stateDiagram-v2
     archived --> [*]
 ```
 
-Terminal sets differ between the §10.9 index (results_published, archived) and this diagram (archived only) — see V61-11.
+Terminal sets differ between the §10.9 index (results_published, archived) and this diagram (archived only) — see V61-11. Under §10.11 `results_published` cannot be terminal while it leads to `archived`. The diagram has no cancellation path before `active` (open).
 
 ### 10.11 Invariants Across All State Machines
 
@@ -2751,21 +2785,21 @@ This heading groups §10.13 to §10.40 below.
 
 ### 10.13 Canonical Business Rule Identity
 
-The canonical behavioral registry contains **BR-001 through BR-248** with no gaps in the numbered rule set. Measured: 248 distinct ids, each defined by exactly one row in §10.14–§10.40, plus MIG-01..MIG-08 in §10.26; this matches §24.8.1. Ids 1–35 are printed with two digits (BR-01 is BR-001). Any `BR-*` references outside that range in historical feature prose are treated as stale prose references and do not create new canonical rules.
+The canonical behavioral registry contains **BR-001 through BR-248** with no gaps in the numbered rule set. Measured: 248 distinct ids, each defined by exactly one row in §10.14–§10.40, plus MIG-01..MIG-08 in §10.26; this matches §24.8.1. Ids 1–35 are printed with two digits (BR-01 is BR-001). Any `BR-*` references outside that range in historical feature prose are treated as stale prose references and do not create new canonical rules. Four pairs state the same rule twice: BR-037/BR-061 (profile ≥70% gate), BR-25/BR-060 (XP idempotency key), BR-15/BR-039 (no duplicate active application) and BR-16/BR-038 (no application to a closed job); BR-17, BR-20 and BR-041 overlap (application lifecycle). Both ids of each pair stay, one test covers each pair, and the extra clause in the longer row (BR-25's daily cap, BR-15's cooldown) is part of the rule. Consolidating them is an owner decision (OPEN-LGA-02 in `Yash_Final_Project_Document/24_RISKS_AND_DECISIONS/OPEN_DECISIONS_LEGACY_MERGE.md`).
 
 ### 10.14 Access Control Rules (BR-01..BR-09)
 
-| ID    | Rule                                                                        |
-| ----- | --------------------------------------------------------------------------- |
-| BR-01 | Only `ROLE_RECRUITER`/`ROLE_ADMIN` may create/edit job postings             |
-| BR-02 | Only `ROLE_USER` may submit applications; recruiters may not apply          |
-| BR-03 | Candidates review own applications only; recruiters all for their companies |
-| BR-04 | Only recruiters/admins create scorecards and notes                          |
-| BR-05 | User edits own profile only; admin any                                      |
-| BR-06 | Flags, audit, settings, user mgmt, moderation are admin-only                |
-| BR-07 | Billing actions available to recruiters, not users/admins                   |
-| BR-08 | Route-level RBAC matches shared route registry                              |
-| BR-09 | Domain-level authorization backs state-changing commands                    |
+| ID    | Rule                                                                                                                                                                                                                                                      |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Only `ROLE_RECRUITER`/`ROLE_ADMIN` may create/edit job postings                                                                                                                                                                                           |
+| BR-02 | Only `ROLE_USER` may submit applications; recruiters may not apply                                                                                                                                                                                        |
+| BR-03 | Candidates review own applications only; recruiters all for their companies                                                                                                                                                                               |
+| BR-04 | Only recruiters/admins create scorecards and notes                                                                                                                                                                                                        |
+| BR-05 | User edits own profile only; admin any                                                                                                                                                                                                                    |
+| BR-06 | Flags, audit, settings, user mgmt, moderation are admin-only                                                                                                                                                                                              |
+| BR-07 | Billing actions available to recruiters, not users/admins (conflicts with learner course purchase, SCI-26, BR-115 and the §10.10 Course Order machine, and with Platform Admin and Finance Admin refunds in §5.8; plan audience is open — owner decision) |
+| BR-08 | Route-level RBAC matches shared route registry                                                                                                                                                                                                            |
+| BR-09 | Domain-level authorization backs state-changing commands                                                                                                                                                                                                  |
 
 ### 10.15 Job Rules (BR-10..BR-14)
 
@@ -3031,15 +3065,15 @@ The canonical behavioral registry contains **BR-001 through BR-248** with no gap
 
 ### 10.32 Salary Intelligence Rules (BR-177..BR-183)
 
-| ID     | Rule                                                                                                                                                                                                                                                           |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR-177 | Salary reports require verification: self-reported (0.5) or verified via employment (1.0)                                                                                                                                                                      |
-| BR-178 | Aggregated salary data requires policy-defined minimum cohort: one policy parameter `min_cohort_k`, default k ≥ 10 for public and sensitive cells. Stricter feature values stay as feature overrides; lower values need an owner and counsel decision (V61-04) |
-| BR-179 | Salary data displayed in minor units + ISO-4217 currency                                                                                                                                                                                                       |
-| BR-180 | Company-specific salary data shown only if company has ≥3 reports OR opted in. The ≥3 value is an override below the `min_cohort_k` default (k ≥ 10, BR-178) — needs owner and counsel decision; the default applies until then (V61-04)                       |
-| BR-181 | Users may withdraw their salary submission at any time                                                                                                                                                                                                         |
-| BR-182 | Salary intelligence updates quarterly; historical data versioned                                                                                                                                                                                               |
-| BR-183 | Equity data (F-98) separately aggregated from salary                                                                                                                                                                                                           |
+| ID     | Rule                                                                                                                                                                                                                                                                                                                                                              |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-177 | Salary reports require verification: self-reported (0.5) or verified via employment (1.0)                                                                                                                                                                                                                                                                         |
+| BR-178 | Aggregated salary data requires policy-defined minimum cohort: one policy parameter `min_cohort_k`, default k ≥ 10 for public and sensitive cells. Stricter feature values stay as feature overrides; lower values need an owner and counsel decision (V61-04)                                                                                                    |
+| BR-179 | Salary data displayed in minor units + ISO-4217 currency                                                                                                                                                                                                                                                                                                          |
+| BR-180 | Company-specific salary data shown only if company has ≥3 reports OR opted in. The ≥3 value is an override below the `min_cohort_k` default (k ≥ 10, BR-178) — needs owner and counsel decision; the default applies until then (V61-04). Whether an employer's opt-in can lower the minimum that protects the people who report is also open (owner and counsel) |
+| BR-181 | Users may withdraw their salary submission at any time                                                                                                                                                                                                                                                                                                            |
+| BR-182 | Salary intelligence updates quarterly; historical data versioned (F-86 step 2 and the §13.6 `salary.aggregate` job run nightly — cadence open)                                                                                                                                                                                                                    |
+| BR-183 | Equity data (F-98) separately aggregated from salary                                                                                                                                                                                                                                                                                                              |
 
 ### 10.33 Recommendation Rules (BR-184..BR-188)
 
@@ -3063,23 +3097,23 @@ The canonical behavioral registry contains **BR-001 through BR-248** with no gap
 
 ### 10.35 Feature-Specific Rules (BR-194..BR-208)
 
-| ID     | Rule                                                                                                         |
-| ------ | ------------------------------------------------------------------------------------------------------------ |
-| BR-194 | Peer mentorship sessions have a 30-day inactivity auto-close                                                 |
-| BR-195 | Expert network calls may be paid; platform takes a transparent fee                                           |
-| BR-196 | Industry hubs must have ≥3 active contributors to display                                                    |
-| BR-197 | Resume parsing never auto-applies changes without user review                                                |
-| BR-198 | Custom assessments must be approved by Platform Admin before deployment                                      |
-| BR-199 | Candidate comparison requires verified profiles only                                                         |
-| BR-200 | DE&I analytics use aggregated data only; individual demographic data never stored                            |
-| BR-201 | Post-hire analytics require employer consent and are aggregate-only                                          |
-| BR-202 | Badge marketplace prohibits paid badges; all badges earned                                                   |
-| BR-203 | Mobile-first application must maintain feature parity with desktop                                           |
-| BR-204 | Accessibility is a release gate; WCAG 2.2 AA mandatory                                                       |
-| BR-205 | API access requires enterprise tier; rate-limited per CON-006                                                |
-| BR-206 | Emerging skills require platform-wide adoption before taxonomy promotion                                     |
-| BR-207 | Job market analytics require k ≥ 10 data points per geographic cell (`min_cohort_k` default, BR-178; V61-04) |
-| BR-208 | All new AI-powered features inherit AI safety rules §15.10 (AI Safety)                                       |
+| ID     | Rule                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-194 | Peer mentorship sessions have a 30-day inactivity auto-close                                                                                                                     |
+| BR-195 | Expert network calls may be paid; platform takes a transparent fee                                                                                                               |
+| BR-196 | Industry hubs must have ≥3 active contributors to display                                                                                                                        |
+| BR-197 | Resume parsing never auto-applies changes without user review                                                                                                                    |
+| BR-198 | Custom assessments must be approved by Platform Admin before deployment                                                                                                          |
+| BR-199 | Candidate comparison requires verified profiles only                                                                                                                             |
+| BR-200 | DE&I analytics use aggregated data only; individual demographic data never stored                                                                                                |
+| BR-201 | Post-hire analytics require employer consent and are aggregate-only                                                                                                              |
+| BR-202 | Badge marketplace prohibits paid badges; all badges earned                                                                                                                       |
+| BR-203 | Mobile-first application must maintain feature parity with desktop                                                                                                               |
+| BR-204 | Accessibility is a release gate; WCAG 2.2 AA mandatory                                                                                                                           |
+| BR-205 | API access requires enterprise tier; rate-limited per CON-006                                                                                                                    |
+| BR-206 | Emerging skills require platform-wide adoption before taxonomy promotion (no measurable test; BR-148 and F-84 step 6 state a measurable one; which governs is an owner decision) |
+| BR-207 | Job market analytics require k ≥ 10 data points per geographic cell (`min_cohort_k` default, BR-178; V61-04)                                                                     |
+| BR-208 | All new AI-powered features inherit AI safety rules §15.10 (AI Safety)                                                                                                           |
 
 ### 10.36 Warm Introduction Rules (BR-209..BR-216)
 
@@ -3314,6 +3348,8 @@ flowchart TB
 
 ### 12.7 Logical Architecture
 
+> v6.1 amendment: see Appendix E, item V61-14
+
 | Layer          | Contents                                                 | Technology                                                |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------- |
 | Presentation   | Web app, extension, PWA, admin                           | React + TypeScript + Vite PWA, React 18+, Tailwind, Radix |
@@ -3376,7 +3412,7 @@ flowchart TD
 
 ### 12.10 Bounded Contexts — Refined
 
-The high-level contexts remain, but the previous oversized shared kernel is reduced. Domain modules own their invariants; the shared layer contains only genuine cross-cutting primitives.
+The high-level contexts remain, but the previous oversized shared kernel is reduced. Domain modules own their invariants; the shared layer contains only genuine cross-cutting primitives. Measured: §12.4 lists 25 domain boundaries; this table gives no context to Skills & Ontology, Matching, Recommendations, Reputation or AI, and splits Evidence & Verification and Credentials between `governance` and `learning`. Their owning context is open; Amendment A.7 bars AI and trust logic from becoming an indiscriminate shared kernel.
 
 | Context           | Contents                                                                                                                                            | Aggregates                                       |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -3399,6 +3435,8 @@ The high-level contexts remain, but the previous oversized shared kernel is redu
 - Cross-context via events or application-service interfaces (ARCH-018)
 - Zero circular dependencies (ARCH-019)
 - Routes are thin composition (ARCH-020)
+
+ARCH-001…ARCH-012 do not appear in this file, and ARCH is not a register in §24.8.1; ARCH-013…ARCH-020 are defined only by the lines above.
 
 ### 12.12 Architecture decisions — Refined
 
@@ -3434,7 +3472,7 @@ These are the SSOT's own decisions, SSOT ADR-001..ADR-013. They are a different 
 
 **Spacing:** 4px base (0, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192px).
 **Radius:** 6/10/16/50%.
-**Motion:** 120/200/320ms + reduced-motion.
+**Motion:** 120/200/320ms + reduced-motion. Appendix D M-19 (hover ≤80ms), M-73 (utility motion ≤150ms) and M-77 (step slide 80–120ms) use values that are not these tokens, although §11.4 makes the design system the sole motion source (open, owner decision; the target design system proposes 80/150/240/400ms, not ratified).
 **Typography:** xs..4xl ramp.
 **Z-index:** dropdown 30, modal 40, toast 50, palette 60.
 
@@ -3472,6 +3510,8 @@ Route parameters use React Router `:param` syntax (§12.2). `/verify/:hash` appe
 | `/settings`, `/settings/billing`                            | Auth / Org Admin+ | Settings                |
 | `/admin/*`                                                  | Platform Admin    | Admin                   |
 
+Not in this registry although features or journeys need them (open): `/forgot-password`, `/reset-password` and `/verify-email` (F-01), the onboarding wizard (F-01 step 1, WF-12), `/jobs/saved` (F-04), privacy and account deletion (§15.9), and participant routes for J-08, J-10, J-17, J-21, J-23 and J-24. Access levels conflict (owner decision): `/jobs` is "Auth" here but F-04 grants public read of published jobs; `/profile/:userId` is "Auth (RLS)" here but F-12 grants public read of public-safe columns.
+
 **Career Intelligence Routes:** `/career/readiness`, `/career/transition`, `/career/benchmarks`, `/salaries`, `/salaries/:role`, `/companies/:slug/salaries`
 
 **Verification Routes:** `/verify/:hash`, `/credentials`, `/credentials/export`
@@ -3499,7 +3539,7 @@ Route parameters use React Router `:param` syntax (§12.2). `/verify/:hash` appe
 ```text
 src/
 ├── app/                      # React/Vite router: thin shell only
-│   └── (auth)/ (platform)/ api/v1/ api/health/
+│   └── (auth)/ (platform)/       # page groups only; /api/v1 and health are served by Fastify (§12.18)
 ├── domains/
 │   └── identity/ marketplace/ learning/ community/ billing/ governance/ analytics/
 │       ├── domain/{entities,value-objects,aggregates,events,rules,repositories}
@@ -3514,7 +3554,7 @@ src/
 └── config/{routes.ts,roles.ts,env.ts,feature-flags.ts}
 ```
 
-The seven `domains/` folders are the bounded contexts of §12.10. Vendor-named folders (`supabase`, `stripe`, `resend`) hold example adapters behind ports (V61-08, V61-14). The `app/api/v1/` and `app/api/health/` folders sit inside the React/Vite shell, while §12.2 and §12.18 place `/api/v1` in the Fastify application layer; this layout does not decide where API handlers live (open). The layout assumes one bundled frontend; module federation is not part of the SSOT (V61-15).
+The seven `domains/` folders are the bounded contexts of §12.10. Vendor-named folders (`supabase`, `stripe`, `resend`) hold example adapters behind ports (V61-08, V61-14). `/api/v1` and the health endpoint are served by the Fastify application layer (Amendment A.1–A.2, §12.2, §12.18, SSOT ADR-002), so they are not folders of the React/Vite shell. This layout does not show the Fastify server entry point or the dedicated worker process (§13.5), and does not say which folders may be bundled for the browser (open). Server-only folders (`domains/*/infrastructure`, `shared/infrastructure`) hold provider secrets and stay out of the browser bundle (§13.4 "Server-side only for secrets"; §15.4 "No secrets in bundle"). The layout assumes one bundled frontend; module federation is not part of the SSOT (V61-15). Amendment A.7 says AI, automation, media, analytics, trust and domain logic must not become an indiscriminate shared kernel, yet this layout places `shared/platform/{automation,agents,healing,liquidity,data-quality,…}` and `shared/infrastructure/{ai,media}` under `shared/`. Whether each folder is a deliberate shared primitive or belongs to an owning context is open.
 
 ### 12.17 UX State Matrix
 
@@ -3528,6 +3568,8 @@ The seven `domains/` folders are the bounded contexts of §12.10. Vendor-named f
 | Empty     | Actionable CTA; never blank                               |
 | Error     | Friendly message + retry + correlation ID; `role="alert"` |
 | Stale     | Cached banner + refresh option                            |
+
+The six-state names (`populated`, `stale`) and the UXC state names below (`degraded`, `not_found`, `timeout` and others) are not in the §11.2 canonical UI state list, and the three vocabularies are not reconciled (open). "Skeleton ≤400ms" conflicts with Appendix D M-01 ("Skeleton appears <100ms") (open).
 
 **Surface Matrix:**
 
@@ -3576,7 +3618,7 @@ The seven `domains/` folders are the bounded contexts of §12.10. Vendor-named f
 | Provider webhooks        | Edge Function/webhook adapter  | Integration boundary      | Signature verification, replay protection, idempotency |
 | Internal worker commands | Application/service interfaces | Domain/application layer  | Auth context, policy, idempotency                      |
 
-**Direct browser-to-table writes are prohibited for domain-critical mutations.** RLS remains a database boundary, not the business-logic API.
+**Direct browser-to-table writes are prohibited for domain-critical mutations.** RLS remains a database boundary, not the business-logic API. Not yet specified (open): an endpoint contract for the health checks required by §20.2 (path, authentication, rate-limit exemption; semantics in §20.1), and an accepted-then-poll response for long-running requests such as imports, exports and judging (UXC-006; F-08 step 5 polls a status endpoint).
 
 **Deprecation Policy:** ≥6-month lifecycle with Sunset + Deprecation headers. Additive changes within a major version require no bump. The target's minimum 90-day window is Proposed and open (V61-25).
 
@@ -3615,6 +3657,8 @@ SSOT intent: success envelope `{success, data, meta}` with cursor pagination (CO
 | CON-015 | Data lifecycle: retention windows; erasure propagates                                       |
 | CON-016 | Logging / telemetry: structured JSON; redacted                                              |
 
+CON-001, CON-003/CON-004, CON-005, CON-006, CON-009 and CON-012 state intent at headline level; their detailed contracts are the open pre-implementation blockers DOR-001, DOR-008, DOR-009, DOR-007, DOR-010 and DOR-018 (§24.7). Still unstated: how an `Idempotency-Key` is scoped (actor, route), what a reused key with a different body returns, what a request returns while the same key is in flight, and whether a failed (5xx) response is replayed for 24h (CON-005); the rate-limit classes and their numbers (CON-006); how a client sends the expected version for a stale-write check (CON-012).
+
 ### 12.21 Service Contracts (SCI-01..SCI-54)
 
 _(See §13.1 for the complete service contract register.)_
@@ -3626,6 +3670,8 @@ _(See §13.1 for the complete service contract register.)_
 All external and cross-domain interfaces are contract-first. Public API behavior must not accidentally mirror internal tables. Every mutation specifies authorization, validation, idempotency, rate limits, errors, audit, and observability.
 
 ### 13.1 Complete Service Contract Register (SCI-01..SCI-54)
+
+This register gives operation, actor and idempotency only. The authorization, validation, rate-limit, error, audit and observability fields that the §13 preamble requires for every mutation are not given per contract (open; DOR-001, DOR-007, DOR-009). Rows marked `—` include mutations (SCI-35 skill CRUD, SCI-36 opt-in, SCI-41 pool CRUD, SCI-44 exam CRUD, SCI-45, SCI-46), for which CON-005 requires an idempotency mechanism. SCI-01 and SCI-03 name body fields (`jobIdempotencyKey`, `clientMessageId`) where CON-005 names the `Idempotency-Key` header. SCI-42's `UNIQUE(enrollment)` fits only `course_completion` credentials; F-96 step 1 issues credentials from six other sources, and revocation and endorsement are not enrollment-keyed.
 
 | ID     | Operation                                             | Actor                  | Idempotency                                |
 | ------ | ----------------------------------------------------- | ---------------------- | ------------------------------------------ |
@@ -3701,6 +3747,8 @@ All external and cross-domain interfaces are contract-first. Public API behavior
 | Billing failure            | 503                  | Entitlements unchanged                        |
 | Scheduler failure          | Retry / DLQ          | Skip reason surfaced                          |
 
+Not covered by this table (open; DOR-001): whether a malformed or schema-invalid request and a domain-rule or illegal state transition share the 422 row; which status a payment or entitlement denial (§16.4, F-16), an oversized payload (CON-011) or an unexpected server error returns; F-04's 410 Gone for a closed job; when a denial is 403 and when it is 404; the machine-readable error codes (`error_code_catalog` is cited in Appendix D but not defined); and whether the RFC 9457 body carries the correlation ID that §20.3 sends as `x-request-id`.
+
 ---
 
 ### 13.3 Integration Register
@@ -3735,6 +3783,8 @@ Vendor names are examples. Transactional email is a provider behind a provider p
 
 > v6.1 amendment: see Appendix E, item V61-26
 
+This heading cites SSOT ADR-009 for its second clause (Edge Functions for short-lived integration and webhook work, §12.12); §13.5 cites the same ADR for its queue clause. The adapter rules below rest on the shared-kernel `ProviderAdapter` interface (§12.10) and, for media providers, on SSOT ADR-007. The heading text is kept so that existing anchors resolve.
+
 ```text
 Core Domain ← Integration Layer (ProviderAdapter + anti-corruption mappers) ← Provider Adapters
 ```
@@ -3761,6 +3811,8 @@ SSOT intent (SSOT ADR-009). The target replaces Supabase Queues with a transacti
 | Transactional | Postgres `background_jobs` (SKIP LOCKED)      | XP settle, notifications, webhooks, digests, rollups, retention purge, search reindex | Enqueue <10ms; process <5s                          |
 | Heavy async   | Supabase Queues + dedicated workers initially | Video transcode, AI enrichment, large imports/exports, embeddings                     | Durable queue; bounded retries; DLQ/repair workflow |
 
+Measured against §13.6–§13.7: `media.healthcheck`, `feed.fanout`, `earnings.settle`, `coupon.expiry_scan` and `migration.purge-archive` are heavy kinds outside the heavy workload list; exports (including the DSR data export, BR-063) and embeddings have no kind; the §13.6 nightly or weekly compute kinds (`skill.market_signal_update`, `career.benchmark_compute`, `salary.aggregate`, `learning.outcome_correlation`, `emerging_skill.detect`) are not in the transactional workload list and are not shown to fit its <5s processing SLA. Jobs named elsewhere have no catalog row: `challenge.judge` (F-08 step 5), nightly reputation (F-144, F-148) and skill freshness (F-123, BR-225), the WF-22 expiry scan, and verification email for F-94. The rule that assigns a kind to a queue is not stated (open).
+
 ### 13.6 Transactional Job Catalog
 
 | Kind                           | Cadence            | Retries |
@@ -3780,6 +3832,8 @@ SSOT intent (SSOT ADR-009). The target replaces Supabase Queues with a transacti
 | `learning.outcome_correlation` | Nightly            | 3       |
 | `emerging_skill.detect`        | Weekly             | 3       |
 
+Cadence times (07:30, 00:05, 02:00) carry no time zone. CON-009 makes API time UTC, but whether `notification.digest` and `streak.rollover` follow UTC or the user's local day is not stated (open; DOR-010).
+
 ### 13.7 Heavy Job Catalog
 
 | Kind                                             | Cadence               | Retries |
@@ -3797,10 +3851,14 @@ SSOT intent (SSOT ADR-009). The target replaces Supabase Queues with a transacti
 ### 13.8 Job Schema
 
 ```text
-id UUID · kind · payload jsonb · status (queued/running/succeeded/failed/dead/canceled)
+id UUID · kind · payload jsonb · status (queued/running/succeeded/failed/dead/cancelled)
 attempts · run_after · lock_expires_at · last_error (≤4KB)
 idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 ```
+
+The §10.9 Background Job row lists `succeeded` and `dead` as terminal; this list adds `failed` and `cancelled` and does not say whether `failed` is retry-pending or final, or whether `cancelled` is terminal (terminal sets differ — see V61-11). Also not specified (open, owner decision): a per-job maximum of attempts, a lease owner or fencing token, and the rule for a job whose lease expires after its last allowed attempt (`dead` has no entry rule; §13.6–§13.7 give retries per kind).
+
+Also open: whether a job is enqueued in the same transaction as the state change that triggers it; lease renewal and stale-lease recovery for `lock_expires_at`; and what `payload` may hold (whether tokens, codes or addresses may be stored, when they are removed, and whether erasure covers payloads that name a person; §3.2, §15.9.1). The target proposes an outbox and a worker with fenced leases (V61-14, Proposed).
 
 ---
 
@@ -3821,7 +3879,7 @@ idempotency_key UNIQUE(kind, idempotency_key) · created_at · updated_at
 
 - Payload ≤4KB `{type, entity, id, ts}` + monotonic cursor
 - No raw rows; server RLS projection
-- JWT-authenticated channels; RLS applied before event body
+- JWT-authenticated channels; RLS applied before event body (the target's cookie sessions, Proposed under V61-13, would change how channels authenticate)
 - Channel registry `<channelType>:<boundedId>`
 
 ### 13.11 Resilience
@@ -3889,7 +3947,7 @@ PostgreSQL is the system of record. The physical table count is not a product in
 
 ### 14.1 Data integrity requirements
 
-Use foreign keys, appropriate uniqueness, transactions, state constraints, timestamps, versioning, migration parity checks, idempotency records, audit history, and lifecycle states. Derived data must retain provenance and be rebuildable when practical.
+Use foreign keys, appropriate uniqueness, transactions, state constraints, timestamps, versioning, migration parity checks, idempotency records, audit history, and lifecycle states. Derived data must retain provenance and be rebuildable when practical. No personal-data inventory (per table: subject key, erasure disposition, export inclusion) drives erasure (§15.9.1), export and CON-015 (open; enhancement).
 
 ### 14.2 RLS and access
 
@@ -3956,42 +4014,44 @@ Evidence and credentials support issuance, active use, expiration, renewal, susp
 | 49  | `mentorship_relationships`  | Social        |
 | 50  | `course_cohorts`            | Learning      |
 
-**Canonical invariants:** Every table has RLS enabled · UUID primary keys · `created_at`/`updated_at` audit columns · soft delete where applicable.
+**Canonical invariants:** Every table has RLS enabled · UUID primary keys · `created_at`/`updated_at` audit columns · soft delete where applicable. Open: whether person-owned rows reference the account id or `profiles.id`, and how `profiles` and `user_profiles` (2a) divide profile data; the §14.6 patterns assume `user_id`. §14.2 says RLS applies to "applicable tables", while this line says every table.
 
 ### 14.5 Operational Clusters (Non-Canonical, ~185 tables)
 
 > v6.1 amendment: see Appendix E, item V61-10. Counts disagree and are quoted here as measured, without changing the locked figure: the heading says ~185; the stated cluster counts below sum to 168 (measured); the OS layer row names 28 + 4 = 32 tables against its stated 27+4, so 169 names are listed; §24.8.1 locks Operational Tables at ~220. Check a count before copying it into a plan or test.
 
-| Cluster                        | Count | Examples                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Journey                        | 20    | connection_requests, skill_endorsements, job_referrals, career_roadmaps, cohorts, cohort_members, cohort_curriculum, payout_profiles, creator_payouts, mentor_profiles, mentorship_sessions, mentorship_notes, mentor_reviews, institutional_showcases, agency_client_contracts, agency_placements, agency_invoices, job_trackers, course_challenges, talent_pool                                                                                                                                                                                |
-| OS layer                       | 27+4  | workspaces, saved_workspace_layouts, workspace_widgets, user_tasks, os_objects, os_object_links, os_tags, os_bookmarks, os_favorites, os_history, knowledge_graph_nodes, knowledge_graph_edges, domain_events, event_subscriptions, workbench_boards, automation_rules, automation_runs, journey_instances, interventions, liquidity_signals, data_quality_findings, agents, agent_runs, agent_memory, device_trust, session_risk_scores, fraud_cases, audit_findings + os_clipboard_items, os_undo_log, os_mentions, notification_center_events |
-| Institutional                  | 12    | departments, batches, batch_memberships, license_pools, license_assignments, purchase_requests, procurement_orders, institutional_courses, certificates, organization_invitations, import_batches, student_consent_records                                                                                                                                                                                                                                                                                                                       |
-| Media                          | 10    | content_items, media_sources, media_assets, media_versions, playlist_sources, playlist_items, media_progress, media_events, media_provider_configs, media_health_checks                                                                                                                                                                                                                                                                                                                                                                          |
-| Migration/LinkedIn             | 5     | migration_jobs, migration_import_batches, imported_records, migration_consents, external_identity_references                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Learning marketplace           | 27    | course_categories, course_versions, lessons, lesson_resources, quizzes, quiz_questions, quiz_attempts, assignments, assignment_submissions, peer_reviews, course_qna, course_qna_replies, course_discussions, course_discussion_replies, lesson_notes, lesson_bookmarks, course_wishlist, course_announcements, learning_paths, learning_path_courses, learning_path_enrollments, path_progress, course_pricing, coupons, coupon_redemptions, course_orders, instructor_earnings                                                                 |
-| Social/content                 | 24    | follows, posts, post_media, comments, reactions, reposts, bookmarks, hashtags, post_hashtags, mentions, polls, poll_votes, articles, article_versions, newsletters, newsletter_issues, newsletter_subscriptions, post_analytics, feed_ranking_signals, muted_accounts, communities, community_memberships, community_moderation_log, profile_views                                                                                                                                                                                               |
-| Profile expansion              | 11    | profile_media, career_signals, profile_certifications, profile_achievements, profile_publications, profile_test_scores, profile_volunteer, profile_languages, profile_interests, experience_media, identity_verifications                                                                                                                                                                                                                                                                                                                        |
-| Recommendations/outreach/pools | 5     | written_recommendations, outreach_credits, outreach_messages, talent_pools, talent_pool_members                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Pages/events                   | 6     | organization_pages, showcase_pages, events, event_speakers, event_rsvps, event_updates                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Employer insights              | 6     | company_reviews, company_review_ratings, salary_reports, interview_experiences, interview_questions, company_responses                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Contests/certification         | 9     | coding_contests, contest_problems, contest_registrations, contest_submissions, contest_leaderboard, skill_certifications, certification_attempts, practice_problems, problem_discussions                                                                                                                                                                                                                                                                                                                                                         |
-| Commerce ops                   | 2     | refunds, instructor_payouts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Cluster                        | Count | Examples                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------ | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Journey                        | 20    | connection_requests, skill_endorsements, job_referrals, career_roadmaps, cohorts, cohort_members, cohort_curriculum, payout_profiles, creator_payouts, mentor_profiles, mentorship_sessions, mentorship_notes, mentor_reviews, institutional_showcases, agency_client_contracts, agency_placements, agency_invoices, job_trackers, course_challenges, talent_pool (read as `talent_pools`, listed under Recommendations/outreach/pools; the legacy schema reference has `talent_pools` and `talent_pool_members`; read this way, the cluster counts include the table twice) |
+| OS layer                       | 27+4  | workspaces, saved_workspace_layouts, workspace_widgets, user_tasks, os_objects, os_object_links, os_tags, os_bookmarks, os_favorites, os_history, knowledge_graph_nodes, knowledge_graph_edges, domain_events, event_subscriptions, workbench_boards, automation_rules, automation_runs, journey_instances, interventions, liquidity_signals, data_quality_findings, agents, agent_runs, agent_memory, device_trust, session_risk_scores, fraud_cases, audit_findings + os_clipboard_items, os_undo_log, os_mentions, notification_center_events                             |
+| Institutional                  | 12    | departments, batches, batch_memberships, license_pools, license_assignments, purchase_requests, procurement_orders, institutional_courses, certificates, organization_invitations, import_batches, student_consent_records                                                                                                                                                                                                                                                                                                                                                   |
+| Media                          | 10    | content_items, media_sources, media_assets, media_versions, playlist_sources, playlist_items, media_progress, media_events, media_provider_configs, media_health_checks                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Migration/LinkedIn             | 5     | migration_jobs, migration_import_batches, imported_records, migration_consents, external_identity_references                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Learning marketplace           | 27    | course_categories, course_versions, lessons, lesson_resources, quizzes, quiz_questions, quiz_attempts, assignments, assignment_submissions, peer_reviews, course_qna, course_qna_replies, course_discussions, course_discussion_replies, lesson_notes, lesson_bookmarks, course_wishlist, course_announcements, learning_paths, learning_path_courses, learning_path_enrollments, path_progress, course_pricing, coupons, coupon_redemptions, course_orders, instructor_earnings                                                                                             |
+| Social/content                 | 24    | follows, posts, post_media, comments, reactions, reposts, bookmarks, hashtags, post_hashtags, mentions, polls, poll_votes, articles, article_versions, newsletters, newsletter_issues, newsletter_subscriptions, post_analytics, feed_ranking_signals, muted_accounts, communities, community_memberships, community_moderation_log, profile_views                                                                                                                                                                                                                           |
+| Profile expansion              | 11    | profile_media, career_signals, profile_certifications, profile_achievements, profile_publications, profile_test_scores, profile_volunteer, profile_languages, profile_interests, experience_media, identity_verifications                                                                                                                                                                                                                                                                                                                                                    |
+| Recommendations/outreach/pools | 5     | written_recommendations, outreach_credits, outreach_messages, talent_pools, talent_pool_members                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Pages/events                   | 6     | organization_pages, showcase_pages, events, event_speakers, event_rsvps, event_updates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Employer insights              | 6     | company_reviews, company_review_ratings, salary_reports, interview_experiences, interview_questions, company_responses                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Contests/certification         | 9     | coding_contests, contest_problems, contest_registrations, contest_submissions, contest_leaderboard, skill_certifications, certification_attempts, practice_problems, problem_discussions                                                                                                                                                                                                                                                                                                                                                                                     |
+| Commerce ops                   | 2     | refunds, instructor_payouts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
-**Effective schema ≈ 220 tables** (measured: 52 canonical rows in §14.4, counting 2a and 2b, plus 168 from the stated cluster counts = 220). The "50 canonical" lock refers only to the baseline cluster; count is fixed by migrations and verified by VER-002.
+**Effective schema ≈ 220 tables** (measured: 52 canonical rows in §14.4, counting 2a and 2b, plus 168 from the stated cluster counts = 220). The "50 canonical" lock refers only to the baseline cluster; count is fixed by migrations and verified by VER-002. Measured: 64 table names used in feature data dependencies appear in neither §14.4 nor §14.5, among them `skills` (referenced by `profile_skills` and `job_skills`), `verified_credentials`, `credential_evidence`, `endorsement_weights`, `interview_assessments`, `interview_recordings`, `interviews`, `salary_aggregates`, `reputation_scores`, `application_drafts`, `verified_work_history` and `references` (an SQL reserved word); `background_jobs` (§13.8) and the idempotency records of §14.1 are not listed either. Placing them is open (C3); the locked figures are unchanged.
 
 ### 14.6 RLS Policy Model (ADR-010)
 
 **Policy Categories:**
 
-| Category           | Pattern                                                  |
-| ------------------ | -------------------------------------------------------- |
-| Own-row            | `auth.uid() = user_id`                                   |
-| Org-scoped         | Membership subquery on `org_memberships`                 |
-| Application-scoped | `auth.uid() = applicant_id OR recruiter_for_job(job_id)` |
-| Public-read        | Always true for SELECT on published records              |
-| Admin-all          | `auth.jwt()->>'role' = 'ROLE_ADMIN'`                     |
-| Deny-by-default    | No matching policy → access denied                       |
+| Category           | Pattern                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Own-row            | `auth.uid() = user_id`                                                                                                                                                         |
+| Org-scoped         | Membership subquery on `org_memberships`                                                                                                                                       |
+| Application-scoped | `auth.uid() = applicant_id OR recruiter_for_job(job_id)`                                                                                                                       |
+| Public-read        | Always true for SELECT on published records; F-12 step 10 and the fuzz gate below limit this to public-safe views, not base tables with PII, private sections or stealth flags |
+| Admin-all          | `auth_is_admin()`; Supabase binding `auth.jwt()->'app_metadata'->>'role' = 'ROLE_ADMIN'` (the claim F-01 step 4 reads; the top-level `role` claim is the database role)        |
+| Deny-by-default    | No matching policy → access denied                                                                                                                                             |
+
+The categories do not yet express institution and batch scope (§5.9, HDN-018), team scope (F-102), consent-gated disclosure (HDN-019, HDN-028) or double-blind peer review (§5.9, HDN-024); each needs a policy pattern before those features are built (open; V61-05, OPEN-44).
 
 **Generator Model:**
 
@@ -3999,7 +4059,7 @@ Evidence and credentials support issuance, active use, expiration, renewal, susp
 generate_tenant_rls_policy(table, tenant_column, owner_column, is_public_read)
 ```
 
-Creates admin-override, owner, org-member, and optional public-read policies. Helpers: `auth_is_admin()`, `auth_is_org_member(org)`, `auth_is_owner(user)`.
+Creates admin-override, owner, org-member, and optional public-read policies. Helpers: `auth_is_admin()`, `auth_is_org_member(org)`, `auth_is_owner(user)`. Policies call these helpers; the `auth.uid()` and `auth.jwt()` patterns in the table above are their Supabase Auth binding (SSOT ADR-001: identity behind an application-facing abstraction). HDN-001 makes RLS the final boundary, which holds only if API requests made for a user run under a database role that RLS applies to, with the acting user bound; this file does not say how, and the binding for any other identity provider is open (V61-13, V61-14).
 
 **RLS Fuzzing (CI Gate):** On every migration: create Tenant A/B users + orgs, seed rows, assert cross-tenant SELECT returns 0 rows, cross-tenant UPDATE/DELETE fails, owner-only tables deny non-owners, public-read tables expose no PII. Blocks merge on any failure.
 
@@ -4055,6 +4115,8 @@ LAYER 5 — INFRASTRUCTURE
 | `billing_events.payload`   | PCI-adjacent         | KMS_FIN_KEY |
 | `user_settings.byo_ai_key` | Restricted           | KMS_PII_KEY |
 
+Open: the table omits salary reports (F-86), interview recordings (BR-170), identity verifications (§14.5), date of birth for the age gate (F-01) and the EEOC accommodation field (§15.9.2). `byo_ai_key` is a credential, not PII. `tax_id`/SSN sits on `profiles` although only payouts (HDN-023) need it.
+
 ### 15.6 Security Headers
 
 | Header                       | Value                                                                                                                                                                                                                                                                                                                    |
@@ -4067,11 +4129,11 @@ LAYER 5 — INFRASTRUCTURE
 | Cross-Origin-Opener-Policy   | `same-origin`                                                                                                                                                                                                                                                                                                            |
 | Cross-Origin-Resource-Policy | `same-site`                                                                                                                                                                                                                                                                                                              |
 
-`camera=()` and `microphone=()` also disable these for the app's own origin, which conflicts with features that need them (§19.1 capability detection; interview platform, §10.31, and HDN-027). Routes that use capture would need it enabled for `self` on those routes only; the exact policy is open (owner decision). The target security design proposes deny-by-default with per-feature enablement and HSTS `preload` only after review ([`SECURITY_ARCHITECTURE.md`](Yash_Final_Project_Document/14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md), Under Review).
+`camera=()` and `microphone=()` also disable these for the app's own origin, which conflicts with features that need them (§19.1 capability detection; interview platform, §10.31, and HDN-027). Routes that use capture would need it enabled for `self` on those routes only; the exact policy is open (owner decision). Two constraints bound it. (1) In the Vite SPA (§12.2) a response header applies to the whole document and cannot differ by client-side route, so per-route enablement needs the interview room to load as its own document. (2) The F-88 meeting embed (step 3) also needs the provider's origin in `frame-src` and in the Permissions-Policy allowlist, with a matching iframe `allow` attribute; the CSP above lists neither. The target security design proposes deny-by-default with per-feature enablement and HSTS `preload` only after review ([`SECURITY_ARCHITECTURE.md`](Yash_Final_Project_Document/14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md), Under Review).
 
 ### 15.7 Hardening Controls (HDN-001..HDN-032)
 
-Measured: 28 rows are listed (HDN-001..HDN-028); HDN-029..HDN-032 are counted in §24.8.1 (locked at 32) but not defined in this file.
+Measured: 28 rows are listed (HDN-001..HDN-028); HDN-029..HDN-032 are counted in §24.8.1 (locked at 32) but not defined in this file or in any reference document on this branch (searched 2026-11-22); their text needs the owner.
 
 | ID      | Control                                                                                                                                                                                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -4140,11 +4202,11 @@ SEV-1..SEV-4 grade vulnerabilities; operational alerts use P0–P3 (§20.5).
 | 33      | Breach notification                | 72-hour notification                                                                                                                                                                                                                                                                                          |
 | 35      | DPIA                               | Required before launch                                                                                                                                                                                                                                                                                        |
 
-Erasure clocks: a 30-day cancel window and a 30-day completion deadline cannot both hold from the same start. This is an open owner decision (DOR-017, §24.7); the target proposes a 7-day cancellable cooling-off with completion within 30 days of the request (V61-07, not ratified). The target's opaque `subject_ref` erasure design (V61-19) is also Proposed.
+Erasure clocks: a 30-day cancel window and a 30-day completion deadline cannot both hold from the same start. This is an open owner decision (DOR-017, §24.7); the target proposes a 7-day cancellable cooling-off with completion within 30 days of the request (V61-07, not ratified). The target's opaque `subject_ref` erasure design (V61-19) is also Proposed. Until it is decided, erasure conflicts with HDN-009: audit rows that carry a person's id cannot be anonymized in place without breaking the hash chain. Backups and PITR (§22.4) also keep erased data; their retention, and re-applying completed erasures after a restore, are not specified (open, DOR-017).
 
 #### 15.9.2 Other Frameworks
 
-- **EEOC:** No discriminatory screening · accommodation field · quarterly adverse-impact monitoring · 2-year decision retention
+- **EEOC:** No discriminatory screening · accommodation field · quarterly adverse-impact monitoring · 2-year decision retention. Adverse-impact monitoring needs demographic data that no table, consent scope or access rule in this file holds; how it is collected, consented and kept apart from matching and AI (§15.10) is open (owner and counsel).
 - **CCPA/CPRA:** Right to know, right to delete, no sale of personal data, non-discrimination
 - **FERPA:** Protected educational records · explicit opt-in showcase consent · perpetual inspection + revocation right
 
@@ -4172,7 +4234,7 @@ Graduation severance is a disposition distinct from account erasure (§15.9.1, t
 
 #### 15.9.5 DSR Queue (DSR-001..012)
 
-Access and portability (30d) · erasure (completion deadline 30d from request; cancel window and deactivation purge are separate clocks, §15.9.1; open under DOR-017, V61-07) · rectification (30d) · restriction/objection (30d) · consent capture + versioning (immediate) · lawful-basis registry · data residency routing · sub-processor register · breach detection · privacy-by-design reviews · retention + secure disposal · immutable audit
+Access and portability (30d) · erasure (completion deadline 30d from request; cancel window and deactivation purge are separate clocks, §15.9.1; open under DOR-017, V61-07) · rectification (30d) · restriction/objection (30d) · consent capture + versioning (immediate) · lawful-basis registry · data residency routing · sub-processor register · breach detection · privacy-by-design reviews · retention + secure disposal · immutable audit. No job kind in §13.6–§13.7 executes an erasure at the end of the cancel window or watches the completion deadline, and `retention.purge` is not tied to DSR requests (open, DOR-017)
 
 #### 15.9.6 Privacy implementation detail
 
@@ -4375,7 +4437,7 @@ SERVER_REQUIRED?
 SENSITIVE_DATA?
 ```
 
-The service worker/cache is never the business source of truth. Sensitive assessments, authoritative submissions, payments, and privileged actions use server authority.
+The service worker/cache is never the business source of truth. Sensitive assessments, authoritative submissions, payments, and privileged actions use server authority. No feature in this file fills in the contract above, so which actions may be read, written or queued offline is undefined (open); Appendix D M-42 (queued posts, messages, form submissions and comments) and the local drafts of F-04 and M-24 are subject to this rule. Installability, service-worker updates, push permission and clearing local data on logout are not specified (open).
 
 ### 19.3 Sync
 
@@ -4391,6 +4453,8 @@ Design for 10, 100, 1K, 10K, 100K, and 1M+ users by identifying the trigger for 
 
 Every retry is bounded and idempotent. Integrations define timeouts, retry policy, circuit behavior, outage handling, and reconciliation. Major workflows degrade gracefully when a dependency fails.
 
+Open (owner decision): this file does not define health-check semantics (liveness versus readiness, and which dependencies a readiness check must reach), graceful shutdown (stop accepting work, drain in-flight work, and a deadline set against the container grace period and the longest bounded dependency timeout, CON-008), process topology (one writer or several stateless instances), the connection-pooler mode that topology allows, or where rate-limit and lockout counters (HDN-008, DOR-007) are kept across restarts and instances. Target proposals: BE-01 §19, FM-12 and FM-25 (Proposed). See Part VIII, SSOT-AMD-09, AMD-13 and AMD-14.
+
 ### 20.2 Observability
 
 ```text
@@ -4403,7 +4467,7 @@ Provide structured logs, correlation IDs, metrics, traces, audit events, health 
 
 ```
 Client → Edge middleware (inject/validate x-request-id UUIDv4)
-      → React/Vite handler (structured log)
+      → Fastify API handler (structured log; §12.18)
       → PostgreSQL (SET LOCAL app.request_id; captured in audit_logs)
       → AI SDK (metadata: {request_id}; captured in ai_audit_log)
       → Stripe (client_reference_id)
@@ -4454,6 +4518,8 @@ Client → Edge middleware (inject/validate x-request-id UUIDv4)
 
 LCP <2.5s mobile / <2.0s desktop · INP <200ms · CLS <0.1 · TTFB <800ms · FCP <1.8s / <1.5s
 
+The percentile and the measurement source (field data or a named lab profile) are not stated here or in §20.9, so these targets cannot be tested as written. The reference SLO document proposes field p75 and the lab profile RMP-1 (Proposed). Open (owner decision).
+
 ### 20.9 Per-Route Budgets
 
 | Route Class             | LCP   | JS     | CLS   | INP    |
@@ -4470,20 +4536,22 @@ LCP <2.5s mobile / <2.0s desktop · INP <200ms · CLS <0.1 · TTFB <800ms · FCP
 | Institutional analytics | ≤3.5s | ≤350KB | ≤0.1  | ≤300ms |
 | Feed first page         | ≤2.5s | ≤220KB | ≤0.1  | ≤300ms |
 
-Conflict to resolve (owner decision): several route budgets exceed the §20.8 targets (LCP up to 3.5s against <2.5s mobile; INP ≤300ms against <200ms), and JS budgets above 200KB conflict with the §20.10 anti-pattern "Route bundles >200KB gzipped". Until decided, neither value replaces the other.
+Conflict to resolve (owner decision): several route budgets exceed the §20.8 targets (LCP up to 3.5s against <2.5s mobile; INP ≤300ms against <200ms), and JS budgets above 200KB conflict with the §20.10 anti-pattern "Route bundles >200KB gzipped". Until decided, neither value replaces the other. The JS column also does not say whether its sizes are compressed, or whether they cover the route chunk alone or the shell plus the route; §20.10 and M-100 say gzipped. The reference SLO document measures compressed critical-path bytes and leaves the budget open (SLO-19, OPEN-15; Proposed).
 
 ### 20.10 Forbidden Anti-Patterns
 
 - Route bundles >200KB gzipped
 - N+1 queries
-- Client-side fetching for SSR pages
+- Client-side fetching for SSR pages (the Amendment A.1 stack is a client-rendered Vite PWA with no server-side rendering; prerendering public pages is the target proposal ADR-T24, Proposed)
 - Unbounded client lists
 - Synchronous heavy render operations
 - Missing cache headers
 
 ### 20.11 Performance Hot-Paths (PERF-001..PERF-013)
 
-List endpoints p95 <200ms · search p95 <300ms · detail LCP <2.5s · dashboard aggregates p95 <400ms · bounded Realtime subscriptions · zero N+1 · bundle budgets · long tasks never block request path · media lazy + transformed + sized · background jobs batched/idempotent · UnifiedPlayer lazy init, single active instance · institutional drill-down p95 <400ms via rollups · discovery surfaces p95 <300ms via ISR + rollups
+List endpoints p95 <200ms · search p95 <300ms · detail LCP <2.5s · dashboard aggregates p95 <400ms · bounded Realtime subscriptions · zero N+1 · bundle budgets · long tasks never block request path · media lazy + transformed + sized · background jobs batched/idempotent · UnifiedPlayer lazy init, single active instance · institutional drill-down p95 <400ms via rollups · discovery surfaces p95 <300ms via rollups (ISR does not exist in the Amendment A.1 client-rendered Vite PWA; how public discovery pages are rendered is open)
+
+Conflict (owner decision): some feature acceptance criteria set looser values for the same kind of path: F-92 search p95 <500ms against search p95 <300ms here; F-102 dashboard p95 <800ms against dashboard aggregates p95 <400ms; F-121 path, F-125 discovery and F-145 recommendation p95 <500ms against discovery surfaces p95 <300ms. This file states no precedence between §20.11 and a feature's own criteria; until decided, both values stand.
 
 ---
 
@@ -4500,6 +4568,8 @@ UNIT → COMPONENT → INTEGRATION → API/CONTRACT → E2E → SECURITY → ACC
 ### 21.2 Completion evidence
 
 A feature is complete only when behavior, permissions, data integrity, security/privacy, accessibility, observability, analytics, recovery, tests, and acceptance criteria all pass.
+
+Measured: §9 specifies 46 of the 173 features; 26 of those give a one-line Acceptance list, and only 5 (F-01, F-04, F-12, F-84, F-96) give test requirements. Several criteria state no observable pass condition (for example F-84 "relevant results for common typos", F-145 "Diversity injection active", F-150 and F-159 "no gaming vectors", F-94 "zero resume fraud", F-13 "PDF renders correctly"). Until a criterion names an observable result and a threshold, it cannot serve as completion evidence. Open (owner decision).
 
 ### 21.3 Accessibility gate
 
@@ -4524,7 +4594,7 @@ WCAG 2.2 AA is a release requirement. Verify keyboard navigation, visible focus,
 - 3.3.7 Redundant Entry
 - 3.3.8 Accessible Authentication (password-manager fill; pasteable TOTP)
 
-Conflict (owner decision): under the WCAG 2.2 AA release gate (§21.4), 2.4.11, 2.5.7, 2.5.8, 3.2.6, 3.3.7 and 3.3.8 are Level A or AA criteria, so listing them as forward targets conflicts with the gate; only 2.4.13 Focus Appearance (Level AAA) is clearly a target. Until decided, the list above is unchanged.
+Conflict (owner decision): under the WCAG 2.2 AA release gate (§21.4), 2.4.11, 2.5.7, 2.5.8, 3.2.6, 3.3.7 and 3.3.8 are Level A or AA criteria, so listing them as forward targets conflicts with the gate; only 2.4.13 Focus Appearance (Level AAA) is clearly a target. Until decided, the list above is unchanged. BR-204, §21.3 and Appendix A D-21 already make WCAG 2.2 AA mandatory at release, which would place the six Level A and AA criteria inside the gate and leave only 2.4.13 as a forward target; the owner has not confirmed this reading.
 
 ### 21.6 Accessibility Evidence (A11Y-001..010)
 
@@ -4555,6 +4625,8 @@ The project begins with managed infrastructure and reproducible environments. No
 | staging | Pre-production verification/UAT | Anonymized/synthetic at scale | Vault staging                        |
 | prod    | Live                            | Real                          | Vault production scope with rotation |
 
+The CI gates V0–V4 named in the table above are not defined in this file.
+
 ### 22.2 CI/CD Pipeline
 
 ```
@@ -4570,6 +4642,8 @@ Code Push
   → Production Deploy
 ```
 
+Open (owner decision): the pipeline is strictly sequential, so a failure in its first step stops every later gate, and the lint scope (source only, or also documentation) is not stated. The supply-chain scan (HDN-011), the CI axe gate (A11Y-002) and the bundle budgets (§20.9–§20.10) are required elsewhere but have no stage here, and Migration Round-Trip runs after the preview deploy and E2E that need a migrated database. See Part VIII, A10-001.
+
 ### 22.3 Progressive Rollout
 
 | Stage  | %    | Window | Validation                     |
@@ -4580,6 +4654,8 @@ Code Push
 | GA     | 100% | Locked | Flag remains as kill switch    |
 
 **Automated rollback:** p95 degrades >20% or 5xx >0.1% → traffic to previous stable within 15s.
+
+Open (owner decision): if the percentages split traffic between deployments rather than feature-flag cohorts (the GA row's kill switch suggests flags), a rollout with automated rollback needs at least two application versions serving the same database at once, which requires more than one instance and backward-compatible (expand/contract) migrations; neither is stated in this file (see §20.1).
 
 > v6.1 amendment: see Appendix E, item V61-26 (target proposes a statistical canary; not ratified).
 
@@ -4593,6 +4669,8 @@ Code Push
 | managed hosting provider deployment | Reproducible from git      | Per deploy         | n/a       | ≤15m |
 | Env vars                            | `.env.example` + dashboard | As changed         | n/a       | ≤1h  |
 
+Conflict (owner decision): the Auth row is "included in DB backup" yet states a daily frequency and RPO ≤24h, while the PostgreSQL row gives 15-minute WAL and RPO ≤15m; both cannot hold for data in the same database. The Env vars row recovers from `.env.example` and a dashboard, but `.env.example` holds no secret values and §22.1 keeps secrets in a vault; the recovery source for secrets is not stated. Until decided, the rows are unchanged.
+
 > v6.1 amendment: see Appendix E, items V61-14 (Supabase read as one candidate host), V61-26 (target RPO/RTO hypotheses) and V61-27 (DR scope undecided). None is ratified.
 
 ### 22.5 Recovery Testing
@@ -4603,7 +4681,11 @@ Code Push
 - Semi-annual secrets rotation drill
 - Annual full DR simulation
 
+Open (owner decision; enhancement): no drill or step reconciles external systems (payments, email, media providers) whose state is newer than a restored database.
+
 ### 22.6 Go-Live Gates (PROD-001..PROD-024)
+
+Measured: VER-002, VER-006, VER-008, VER-010, VER-013, VER-017 and VER-023 are cited as evidence below, but no VER- row is defined in this file (§24.8.1 locks VER at 27; V61-06). Until their texts are recovered or written, PROD-003, PROD-008, PROD-009, PROD-011, PROD-013, PROD-019 and PROD-021 have no stated pass condition.
 
 | ID       | Gate                              | Evidence                                                                                          |
 | -------- | --------------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -4652,7 +4734,7 @@ The roadmap is capability-driven; phases can shift when dependencies or validate
 
 > v6.1 amendment: see Appendix E, items V61-02, V61-03, V61-14, V61-20 and V61-21
 
-Scale: SSOT capability phases Ph0–Ph10. The canonical GA loop is Amendment B (Goal → Gap → Learn → Practice → Prove → Verify → Discover → Match → Apply → Interview → Outcome → New Evidence); the Ph1 exit loop below is a view of it, not a competing definition (V61-03). "Supabase setup" in Ph0 names one candidate host (V61-14).
+Scale: SSOT capability phases Ph0–Ph10. The canonical GA loop is Amendment B (Goal → Gap → Learn → Practice → Prove → Verify → Discover → Match → Apply → Interview → Outcome → New Evidence); the Ph1 exit loop below is a view of it, not a competing definition (V61-03). "Supabase setup" in Ph0 names one candidate host (V61-14). Where a scope cell below names a capability whose §7 `Phase` differs (for example messaging in Ph3, F-10 is Ph0; licence pools in Ph3, F-41 is Ph6; communities, pages and events in Ph3, F-55–F-57 are Ph8; F-111 in Ph5, §7 Ph8; proctoring in Ph6, F-45 is Ph10), the §7 phase governs (§7 authority note); reconciling the cells is open (OPEN-LGA-05).
 
 | SSOT phase | Title                                                               | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Exit Criteria                                                                                                                          |
 | ---------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -4695,9 +4777,9 @@ Scale: the MVP exit sits on the SSOT capability phases of §23.1; it is not the 
 
 1. Candidate full loop (a view of Amendment B): enroll → complete course → attempt challenge → earn XP → apply → track
 2. Recruiter full loop: create org → verify → post job → review → shortlist → message → offer
-3. RLS verification suite: 100% of policies tested with allow + deny assertions
-4. Accessibility: axe scan 0 critical on all MVP routes
-5. Performance: Core Web Vitals within budgets on mobile 4G
+3. RLS verification suite: 100% of policies tested with allow + deny assertions (application authorization, which §3.2 layers above RLS, has no equivalent route-coverage criterion; open, owner decision)
+4. Accessibility: axe scan 0 critical on all MVP routes (A11Y-002 and F-116 require 0 critical/serious; which applies at MVP is an owner decision)
+5. Performance: Core Web Vitals within budgets on mobile 4G (whether §20.8 or §20.9 applies, and at which percentile, is open; see §20.8 and §20.9)
 6. Reliability: 5 consecutive green staging deploys
 7. Security: external penetration test with 0 critical/high findings
 
@@ -4706,7 +4788,7 @@ Scale: the MVP exit sits on the SSOT capability phases of §23.1; it is not the 
 Scale: SSOT capability phases; these are the "5 institutional MVP exits" of the Ph3 row in §23.1.
 
 1. Tenant + departments + batches + ≥500-student bulk import with dry-run preview
-2. License pool purchase + atomic batch assignment (seats never oversold)
+2. License pool purchase + atomic batch assignment (seats never oversold; F-41 is Ph6 and F-16 is Ph5 in §7, so purchase at the Ph3 exit is open — owner decision)
 3. Managed learner completes course + branded certificate with working public verification URL
 4. Seat revoke + reassign exact (progress retained)
 5. Cross-tenant isolation tests pass for all institutional tables
@@ -4723,7 +4805,7 @@ Every material problem follows: **identify → understand → validate → class
 
 > v6.1 amendment: see Appendix E, items V61-06, V61-08 and V61-09
 
-FC, TD and MVD decision texts are not in this file (V61-06): a gap recorded as resolved or closed by one of those ids stays open until its decision text is recovered or re-decided. No price, AI quota, allowance or cap is decided by these rows (V61-09).
+The Class letters (A–R) in §24.1 and §24.2 have no legend in this file. FC, TD and MVD decision texts are not in this file (V61-06): a gap recorded as resolved or closed by one of those ids stays open until its decision text is recovered or re-decided. No price, AI quota, allowance or cap is decided by these rows (V61-09).
 
 | ID      | Class | Gap                                   | Disposition                                                                                                                             |
 | ------- | ----- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -4760,29 +4842,29 @@ FC, TD and MVD decision texts are not in this file (V61-06): a gap recorded as r
 
 ### 24.2 Expansion Gaps (GAP-031..038)
 
-| ID      | Class | Gap                                           | Disposition                                                                                             |
-| ------- | ----- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| GAP-031 | B, Q  | Migration engine missing from baseline        | Specified Module 29 + SCI-19..25                                                                        |
-| GAP-032 | D     | Native social graph & content cluster missing | Specified Modules 25–26                                                                                 |
-| GAP-033 | D, A  | Structured profile depth missing              | Specified PROFILE-011..021                                                                              |
-| GAP-034 | A     | Events/communities promotion                  | Promoted to Module 27                                                                                   |
-| GAP-035 | Q     | LinkedIn job cross-post dependency            | RE-SCOPED — fallback chain (LIN-010)                                                                    |
-| GAP-036 | A, Q  | Optional LinkedIn OIDC login                  | Specified AUTH-016                                                                                      |
-| GAP-037 | K     | Feed fan-out strategy at scale                | Hybrid fan-out spec (FEED-003)                                                                          |
-| GAP-038 | I     | Connection-email handling legal basis         | Hash-match only (BR-096; the BR-096 row in §10.22 is a course-category rule, so this reference is open) |
+| ID      | Class | Gap                                           | Disposition                                                                                                                                                                                                      |
+| ------- | ----- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GAP-031 | B, Q  | Migration engine missing from baseline        | Specified Module 29 + SCI-19..25                                                                                                                                                                                 |
+| GAP-032 | D     | Native social graph & content cluster missing | Specified Modules 25–26                                                                                                                                                                                          |
+| GAP-033 | D, A  | Structured profile depth missing              | Specified PROFILE-011..021                                                                                                                                                                                       |
+| GAP-034 | A     | Events/communities promotion                  | Promoted to Module 27                                                                                                                                                                                            |
+| GAP-035 | Q     | LinkedIn job cross-post dependency            | RE-SCOPED — fallback chain (LIN-010)                                                                                                                                                                             |
+| GAP-036 | A, Q  | Optional LinkedIn OIDC login                  | Specified AUTH-016                                                                                                                                                                                               |
+| GAP-037 | K     | Feed fan-out strategy at scale                | Hybrid fan-out spec (FEED-003)                                                                                                                                                                                   |
+| GAP-038 | I     | Connection-email handling legal basis         | Hash-match only (MIG-05, §10.26: hashed-email mutual-consent discovery only, hashes TTL-bound; the earlier citation BR-096 is a course-category rule and does not apply). The legal basis is not recorded (open) |
 
 ### 24.3 Schema Gaps (All Closed)
 
-| Gap    | Table                               | Status                       |
-| ------ | ----------------------------------- | ---------------------------- |
-| GAP-T1 | `organization_invitations`          | CLOSED — §14.4–§14.5         |
-| GAP-T2 | `interviews`                        | CLOSED — §14.4–§14.5         |
-| GAP-T3 | `certificates`                      | CLOSED — §14.4–§14.5         |
-| GAP-T4 | `api_keys`, `webhook_subscriptions` | CLOSED — §14.4–§14.5         |
-| GAP-T5 | Org domain events                   | CLOSED — EVT-076..078        |
-| GAP-T6 | `requisitions` relationship         | CLOSED — §14.4–§14.5         |
-| GAP-T7 | Various operational tables          | CLOSED — §14.4–§14.5         |
-| GAP-T8 | `cohorts` vs `course_cohorts`       | RESOLVED — distinct entities |
+| Gap    | Table                               | Status                                                                                |
+| ------ | ----------------------------------- | ------------------------------------------------------------------------------------- |
+| GAP-T1 | `organization_invitations`          | CLOSED — §14.4–§14.5                                                                  |
+| GAP-T2 | `interviews`                        | Recorded CLOSED — §14.4–§14.5, but `interviews` is not listed there (measured) — open |
+| GAP-T3 | `certificates`                      | CLOSED — §14.4–§14.5                                                                  |
+| GAP-T4 | `api_keys`, `webhook_subscriptions` | Recorded CLOSED — §14.4–§14.5, but neither table is listed there (measured) — open    |
+| GAP-T5 | Org domain events                   | CLOSED — EVT-076..078                                                                 |
+| GAP-T6 | `requisitions` relationship         | CLOSED — §14.4–§14.5                                                                  |
+| GAP-T7 | Various operational tables          | CLOSED — §14.4–§14.5                                                                  |
+| GAP-T8 | `cohorts` vs `course_cohorts`       | RESOLVED — distinct entities                                                          |
 
 ---
 
@@ -5059,7 +5141,7 @@ D-2 (job expiry) is contested by the target state machine (V61-18), D-3 (re-appl
 | D-20 | Seat-revocation grace vs licence-expiry grace                                                                                               | Distinct                                                                                                                     |
 | D-21 | WCAG 2.1 vs 2.2                                                                                                                             | 2.2 AA canonical                                                                                                             |
 | D-22 | Early FC-18 (decision text not in this file — treat as open) patch counts vs expanded                                                       | Expanded govern                                                                                                              |
-| D-23 | `proctoring_sessions` dropped                                                                                                               | Retained (SSOT Ph10, F-45; the §23.1 Ph6 row also lists proctoring (F-45) — open)                                            |
+| D-23 | `proctoring_sessions` dropped                                                                                                               | Retained (SSOT Ph10, F-45; the §23.1 Ph6 row also lists proctoring, but §7 governs — see the §23.1 note)                     |
 | D-24 | `b2b_invoices` vs canonical                                                                                                                 | Folded                                                                                                                       |
 | D-25 | XP dual-value retained vs 5,000                                                                                                             | 200/day single cap                                                                                                           |
 | D-26 | F-62/F-63 gap analysis says NOT RECOMMENDED                                                                                                 | Confirmed decision-gated                                                                                                     |
@@ -5186,8 +5268,8 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Symptom:** The spinner spins. And spins. And spins. There is no timeout, no error, no retry. The user closes the tab.
 **Cost:** This is the one that loses the customer. No error, no exit — they just leave. Highest-severity UX defect.
 **Fix:** **Every async operation needs a terminal state.** After 10 seconds, show "Taking longer than expected…" with a cancel option. After 30 seconds, fail with a specific error, correlation ID, and a retry button. Never leave a spinner spinning indefinitely.
-**Applies to:** Every async operation in the platform — no exceptions.
-**Acceptance:** Every `useQuery`/`useMutation`/fetch has a timeout. `error_code_catalog` contains a timeout entry. R-003 runbook covers mass-timeout incidents. Zero infinite spinners in staging soak test.
+**Applies to:** Every async operation in the platform — no exceptions. The 30-second failure conflicts with operations that run longer by design (F-08 judging, bulk import, media processing, timed exams; UXC-006; §13.2 Timeout "idempotent resume"); whether these follow M-04 progress tracking instead is open (owner decision).
+**Acceptance:** Every `useQuery`/`useMutation`/fetch has a timeout. `error_code_catalog` (not defined in this file — treat as open; §13.2 defines error classes, not codes) contains a timeout entry. The R-003 runbook (not defined in this file — treat as open) covers mass-timeout incidents. Zero infinite spinners in staging soak test.
 
 ---
 
@@ -5237,7 +5319,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User clicks a button. It does something, but there's no visual change. Did it work? Did I misclick?
 **Cost:** User clicks again, or gives up.
-**Fix:** Every interactive element has **four distinct visual states**: default, hover, active (pressed), focus. The active state must be _visually different_ from default (not just a cursor change). Focus state must meet WCAG 2.4.13 (≥2px, 3:1 contrast).
+**Fix:** Every interactive element has **four distinct visual states**: default, hover, active (pressed), focus. The active state must be _visually different_ from default (not just a cursor change). Focus state must be ≥2px with 3:1 contrast. The AA criteria in the §21.4 gate are 2.4.7 Focus Visible and 1.4.11 Non-text Contrast; 2.4.13 Focus Appearance, which the 2px size follows, is Level AAA (a §21.5 forward target).
 **Applies to:** Every button, link, tab, card, menu item.
 **Acceptance:** Aura `<Button>`, `<Link>`, `<Card>` components have all four states. Contrast measured. Zero elements missing states.
 
@@ -5247,7 +5329,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User clicks the edge of a button, misses by 2px, nothing happens.
 **Cost:** Micro-frustration repeated hundreds of times per session.
-**Fix:** Every clickable element has a **minimum 44×44px tap target** on touch, **24×24px** on desktop (WCAG 2.5.8 AA). Use padding, not visual size, to expand the hit area when the visual is smaller.
+**Fix:** Every clickable element has a **minimum 44×44px tap target** on touch, **24×24px** on desktop (24×24px is WCAG 2.5.8, AA; 44×44px follows WCAG 2.5.5, AAA, as a design target). Use padding, not visual size, to expand the hit area when the visual is smaller.
 **Applies to:** Icon buttons, close buttons, checkbox labels, table row actions, mobile nav items.
 **Acceptance:** Automated audit reports zero violations on all routes. Manual spot-check on mobile.
 
@@ -5289,7 +5371,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** User re-saves; refresh reveals it worked; trust eroded.
 **Fix:** Every mutation has **explicit success feedback** — either a state change (button → "Saved ✓"), a toast, or an inline message. For major actions (application submitted, course enrolled, offer accepted), use a **full-screen or modal confirmation** with a clear next step.
 **Applies to:** Every mutation.
-**Acceptance:** Every `useMutation` has success UI. Toast duration ≥4s for info, ≥6s for actions requiring acknowledgment.
+**Acceptance:** Every `useMutation` has success UI. Toast duration ≥4s for info, ≥6s for actions requiring acknowledgment (conflicts with M-47: info ≥6s, action toasts never auto-dismiss — open).
 
 ---
 
@@ -5299,7 +5381,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** Destructive actions feel hostile; users hesitate on everything.
 **Fix:** **One confirmation** for reversible actions, **two** for irreversible ones. Use **soft delete with undo** for anything that can be recovered (comments, posts, drafts, saved items). Reserve hard confirms for truly irreversible ops (account deletion, license revocation, payout).
 **Applies to:** Delete, archive, revoke, cancel, unsubscribe, leave.
-**Acceptance:** Audit of all destructive actions. Reversible actions use undo toast. Hard confirms limited to a documented list.
+**Acceptance:** Audit of all destructive actions. Reversible actions use undo toast. Hard confirms limited to a documented list (the list is not in this file — treat as open; offer, hire and reject in F-06 have no confirmation rule).
 
 ---
 
@@ -5471,7 +5553,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User navigates to a page they don't have access to. 404, or worse, a blank screen.
 **Cost:** User thinks the platform is broken, not that they lack access.
-**Fix:** Permission-denied is **explicit and actionable**: "You don't have access to this page. [Request access] or [Return to dashboard]." Never 404 on a permission issue. Never blank.
+**Fix:** Permission-denied is **explicit and actionable**: "You don't have access to this page. [Request access] or [Return to dashboard]." Never 404 on a permission issue. Never blank. This conflicts with §13.2 and F-12, which answer an object-level authorization denial with a 404-equivalent so that existence does not leak; whether this pattern applies only to route- and role-level denial is open (owner decision).
 **Applies to:** Admin routes, institutional routes, recruiter-only views, org-scoped resources.
 **Acceptance:** Zero 404s on permission-denied. Every denied state has a contact/request path.
 
@@ -5515,7 +5597,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** User cannot recover; abandons.
 **Fix:** Every error message must: **(1) say what happened**, **(2) say why**, **(3) say what to do**. Never blame the user. Never use system jargon. Never expose a stack trace or correlation ID without explanation.
 **Applies to:** Every user-facing error.
-**Acceptance:** Error message audit per release. `error_code_catalog` maps every code to a human-readable message + action.
+**Acceptance:** Error message audit per release. `error_code_catalog` (not defined in this file — treat as open; §13.2 gives class-level messages) maps every code to a human-readable message + action.
 
 ---
 
@@ -5645,7 +5727,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User gets 12 notifications in 5 minutes. Follow, comment, mention, reaction, follow, comment…
 **Cost:** Notification fatigue; user disables notifications entirely.
-**Fix:** **Group and coalesce** (NTF-012). "3 people reacted to your post." "2 new comments." "5 new followers." Digest when >5 events in 15 minutes. Never one notification per event when events cluster.
+**Fix:** **Group and coalesce** (NTF-012; not defined in this file — treat as open). "3 people reacted to your post." "2 new comments." "5 new followers." Digest when >5 events in 15 minutes. Never one notification per event when events cluster.
 **Applies to:** Social notifications, community notifications, course announcements.
 **Acceptance:** Grouping rules per event type. Digest threshold configurable. Verified in staging.
 
@@ -5657,7 +5739,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** User cannot access account; support ticket; potential churn.
 **Fix:** After sending, show **explicit confirmation**: "We sent a reset link to raj@example.com. Check your spam folder if it doesn't arrive within 2 minutes." Add a "Resend" button (rate-limited) after 30 seconds.
 **Applies to:** Password reset, verification email, job alert email, digest.
-**Acceptance:** Every email-triggering action shows recipient + spam guidance + resend.
+**Acceptance:** Every email-triggering action shows recipient + spam guidance + resend. Whether registration and password-reset responses must be identical for known and unknown addresses is not specified (F-01 requires duplicate-email rejection) — open.
 
 ---
 
@@ -5739,7 +5821,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** Broken sharing; lost viral loop.
 **Fix:** Deep links **preserve destination**. Login page accepts `?return=` param. Post-login redirect honors it. Never drop the destination.
 **Applies to:** Jobs, courses, profiles, posts, articles, events.
-**Acceptance:** Deep-link login flow tested. `return` param preserved.
+**Acceptance:** Deep-link login flow tested. `return` param preserved. How `return` is validated (for example, same-origin relative paths only, against open redirect, CWE-601) and whether it survives sign-up are not specified (open, owner decision).
 
 ---
 
@@ -5757,7 +5839,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User is on the "Jobs" page but the sidebar shows "Dashboard" as active. They're lost.
 **Cost:** User can't tell where they are.
-**Fix:** Active state matches the **current page**, not the last clicked link. Sub-routes activate their parent (`/jobs/[id]` → "Jobs" active). Persistent across reloads.
+**Fix:** Active state matches the **current page**, not the last clicked link. Sub-routes activate their parent (`/jobs/:jobId` → "Jobs" active). Persistent across reloads.
 **Applies to:** Sidebar, top nav, tab bars.
 **Acceptance:** Active state test on every route. Sub-route parent activation verified.
 
@@ -5891,7 +5973,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User loads the page. For 200ms, raw HTML with no CSS is visible. Then the stylesheet kicks in.
 **Cost:** Perceived as broken/slow; trust damaged.
-**Fix:** **Inline critical CSS** in the initial HTML. Load the rest asynchronously. Never let raw HTML flash. Server-render above-the-fold styles.
+**Fix:** **Inline critical CSS** in the initial HTML. Load the rest asynchronously. Never let raw HTML flash. Server-render above-the-fold styles (the §12.2 stack is a client-rendered Vite PWA with no server rendering; read as critical styles in the static HTML shell until decided).
 **Applies to:** Every page load.
 **Acceptance:** Zero FOUC in Lighthouse CI. Critical CSS inlined.
 
@@ -5993,7 +6075,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User rotates phone to landscape. The layout breaks — elements overlap, buttons vanish, content is cut off.
 **Cost:** Unusable in landscape; accessibility issue (users who can only use landscape).
-**Fix:** Every screen **works in both orientations**. Or explicitly lock to portrait with a clear reason. Never silently break.
+**Fix:** Every screen **works in both orientations**. Or explicitly lock to portrait with a clear reason. Never silently break. WCAG 1.3.4 Orientation (AA, inside the §21.4 gate) allows a lock only where one orientation is essential, which is narrower than "a clear reason" (open, owner decision).
 **Applies to:** Every screen (or documented portrait-lock list).
 **Acceptance:** Landscape audit on every critical screen.
 
@@ -6005,7 +6087,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 
 **Symptom:** User tabs through a page. They can't see where focus is. Every element looks the same.
 **Cost:** Keyboard users cannot navigate; accessibility failure.
-**Fix:** **Visible focus ring on every focusable element** (2px solid, ≥3:1 contrast — WCAG 2.4.13). Never `outline: none` without replacement. Never a subtle 1px ring.
+**Fix:** **Visible focus ring on every focusable element** (2px solid, ≥3:1 contrast — WCAG 2.4.7 and 1.4.11 at AA; the 2px size follows 2.4.13, Level AAA). Never `outline: none` without replacement. Never a subtle 1px ring.
 **Applies to:** Every focusable element.
 **Acceptance:** Focus-visible audit. Contrast measured. Zero missing focus rings.
 
@@ -6149,7 +6231,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Cost:** Slow load; wasted bandwidth; high bounce.
 **Fix:** **Route-based code splitting**. Each route loads only its code. Shared code is cached. Never load the whole app on the first page.
 **Applies to:** Every route.
-**Acceptance:** Route bundles ≤200KB gzipped (§20.9 Per-Route Budgets). No shared bundle >150KB.
+**Acceptance:** Route bundles ≤200KB gzipped (§20.10 Forbidden Anti-Patterns; §20.9 Per-Route Budgets allows up to 400KB for some route classes, see the conflict note there). No shared bundle >150KB.
 
 ---
 
@@ -6199,7 +6281,7 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 | V61-23 | §10.16 (BR-15); Appendix A D-3                                                                                                                        | SSOT: no duplicate ACTIVE application per user per job, with a partial UNIQUE index and a 90-day cooldown after a terminal state. Target: one active application per candidate and job (BR-T001); only after `withdrawn` may the candidate re-apply as a new linked application (`reapplied_from`) after a cooldown, placeholder {24 h} [OPEN] (BR-T125, SM-APPLICATION t12); `rejected`, `hired` and `offer_declined` never qualify; a recruiter-invited reconsideration uses `reconsidered_from`. The 90-day SSOT value conflicts until the product owner chooses                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Re-application after withdrawal was an unresolved gap (OPEN-B20, closed on paper only)                                                            | `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md#record-business-rules-registry-rev2` BR-T125, CONST-S14; `06_BUSINESS_PROCESSES/STATE_MACHINES.md#record-state-machines-rev2` §2.5; `27_INDEPENDENT_REVIEWS/REVIEW_RESOLUTION_DECISIONS.md` REVW-27                                                                                                                                                                                 | Proposed — not ratified; pointer at F-04, §10.16, Appendix A; 90-day value stands until the owner decides                                           | Proposed        |
 | V61-24 | §9.1 F-01 (step 1, acceptance criteria "Age gate blocks <16", AUTH-017)                                                                               | SSOT fixes the age gate at date of birth ≥16. Target: the minimum-age value is open for counsel; prefer an attestation (checkbox, timestamp, policy version) and collect a date of birth only if counsel requires it (BR-T120). Treat 16 as a provisional value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Minimum age is a legal parameter that varies by jurisdiction and is not yet reviewed                                                              | `06_BUSINESS_PROCESSES/BUSINESS_RULES_REGISTRY.md#record-business-rules-registry-rev2` BR-T120; `27_INDEPENDENT_REVIEWS/REVIEW_FIX_STATUS.md` row 29; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-08                                                                                                                                                                                                                              | Proposed — not ratified; pointer at F-01                                                                                                            | Proposed        |
 | V61-25 | §12.18 (API Architecture); §12.19 (Response Envelope)                                                                                                 | SSOT: success envelope `{success,data,meta}`, cursor pagination with default limit 20, deprecation lifecycle of at least 6 months. Target standard: list responses `{items,page}` with default limit 25 (maximum 100) and a minimum 90-day deprecation window; errors as RFC 9457 problem+json, which can coexist with either success shape. Neither is adopted until OPEN-46 closes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Installed PWAs update lazily, so the target argues for its own window; the SSOT value is the founder baseline                                     | `13_API_EVENTS_AND_INTEGRATIONS/API_DESIGN_STANDARDS.md` (opening reconciliation note, pagination and deprecation rows); `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-46                                                                                                                                                                                                                                                           | Proposed — not ratified; pointer at §12.18, §12.19, §12.20 (CON-003)                                                                                | Proposed (open) |
-| V61-26 | §15.8 (Vulnerability SLAs); §20.9 (Per-Route Budgets); §22.3, §22.4, §22.5; §13.4 (VER-021)                                                           | SSOT: critical <24 h mitigation plus 72 h patch, high <72 h or 7 d with a blocking control, medium <14 d; route JS budgets of 120–400 KB (search ≤200 KB); rollout 5/25/50 % with automated rollback within 15 s; PostgreSQL RPO ≤15 min and RTO ≤2 h with quarterly drills; an integration-removal drill for every integration-touching release. Target hypotheses: critical 72 h, high 14 d, medium 60 d; PITR RPO ≤5 min and RTO ≤1 h to a verified restored copy; list and search latency of 350/400 ms, route bundles of 220–400 KB, a statistical canary and semiannual game days (the latency, bundle, canary and game-day values are taken from the audit and are UNVERIFIED against the SLO documents). Both sets are kept; neither replaces the other until measured and chosen. Do not report both as one target                                                                                                                                                                                                                                                                                                                                                                                                           | Targets differ by evidence and design phase                                                                                                       | `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Security, privacy, and AI controls", "Reliability, release, and service operations"); `14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md`; `15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md` SLO-31; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-49                                                                                             | Proposed — not ratified; pointer at §13.4, §15.8, §20.7 (covers §20.9), §22.3, §22.4                                                                | Proposed (open) |
+| V61-26 | §15.8 (Vulnerability SLAs); §20.9 (Per-Route Budgets); §22.3, §22.4, §22.5; §13.4 (VER-021)                                                           | SSOT: critical <24 h mitigation plus 72 h patch, high <72 h or 7 d with a blocking control, medium <14 d; route JS budgets of 120–400 KB (search ≤200 KB); rollout 5/25/50 % with automated rollback within 15 s; PostgreSQL RPO ≤15 min and RTO ≤2 h with quarterly drills; an integration-removal drill for every integration-touching release. Target hypotheses: critical 72 h, high 14 d, medium 60 d; PITR RPO ≤5 min and RTO ≤1 h to a verified restored copy; list and search latency of 350/400 ms, route bundles of 220–400 KB (from `SSOT_RECONCILIATION_AUDIT.md`; the target frontend document instead proposes, as hypotheses, a shell of at most 150 KB gzip, entry-route JS of at most 60 KB gzip and lazy heavy chunks of at most 250 KB each), a statistical canary and semiannual game days (the latency, bundle, canary and game-day values are taken from the audit and are UNVERIFIED against the SLO documents). Both sets are kept; neither replaces the other until measured and chosen. Do not report both as one target                                                                                                                                                                                    | Targets differ by evidence and design phase                                                                                                       | `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md` ("Security, privacy, and AI controls", "Reliability, release, and service operations"); `14_SECURITY_PRIVACY_COMPLIANCE/SECURITY_ARCHITECTURE.md`; `15_RELIABILITY_AND_PERFORMANCE/SLO_AND_PERFORMANCE_TARGETS.md` SLO-31; `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-49                                                                                             | Proposed — not ratified; pointer at §13.4, §15.8, §20.7 (covers §20.9), §22.3, §22.4                                                                | Proposed (open) |
 | V61-27 | §15.9.3 (Data Residency); §22.4 (Backup & DR)                                                                                                         | SSOT fixes primary residency at US-East with an EU partition as a Ph3 target and EU-only AI egress. The target treats the region, the managed-Postgres vendor and the DR scope as undecided, and wants the graduation (FERPA) severance kept as a separate disposition. The v6.0 value stays as founder intent; the target does not adopt it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Region depends on hosting (OPEN-14), counsel (OPEN-08) and customer needs (OPEN-30)                                                               | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-14, OPEN-23, OPEN-30; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md`                                                                                                                                                                                                                                                                                                     | Proposed — not ratified; pointer at F-12, §15.9.3, §15.9.4, §22.4                                                                                   | Proposed (open) |
 | V61-28 | §2.4 (Success metrics)                                                                                                                                | SSOT names the primary outcome as "career progress with verifiable evidence". The target metrics catalog proposes "Evidence-Backed Hiring Conversations" as the north star. Select one, or define an owner-approved hierarchy, before baselining or making success claims                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | A single primary metric is needed before outcome claims                                                                                           | `24_RISKS_AND_DECISIONS/OPEN_DECISIONS.md` OPEN-51; `20_ANALYTICS_AND_MEASUREMENT/METRICS_CATALOG.md`; `28_TRACEABILITY_AND_COVERAGE/SSOT_RECONCILIATION_AUDIT.md`                                                                                                                                                                                                                                                                    | Proposed — not ratified; pointer at §2.4                                                                                                            | Proposed (open) |
 
@@ -6236,10 +6318,10 @@ _The video's topic. Waiting is the single most common UX failure because it's th
 **Evaluation date:** 20–21 November 2026 · **Code evaluated:** `main` at `781866f` (PR #77) · **Evidence class:** `FACT` where a command was executed or a line was read; `INFERENCE` where marked.
 
 > [!NOTE]
-> **This branch contains no application code.** This Part records two passes. §27.1–§27.9 record the multi-agent evaluation of the partial implementation that exists on `main` at `781866f`; every file path, line number and test result in them refers to `main`, not to this branch, and none of it is status for this branch (V61-29). The SSOT-AMD-01…28 amendments in §27.5 were approved for `main`; they are not merged into §1–§26 of this file, and whether they bind this branch's specification is an open owner decision. The record was first merged to `main` in PR #78 (merged 2026-11-20 UTC) and is carried here unchanged in substance. §27.10 records the v6.2 documentation fix of this file. Section numbers inside §27.1–§27.9 that point into this specification have been rewritten to the v6.2 numbering.
+> **This branch contains no application code.** This Part records three passes. §27.1–§27.9 record the multi-agent evaluation of the partial implementation that exists on `main` at `781866f`; every file path, line number and test result in them refers to `main`, not to this branch, and none of it is status for this branch (V61-29). The SSOT-AMD-01…28 amendments in §27.5 were approved for `main`; they are not merged into §1–§26 of this file, and whether they bind this branch's specification is an open owner decision. The record was first merged to `main` in PR #78 (merged 2026-11-20 UTC) and is carried here unchanged in substance. §27.10 records the v6.2 documentation fix of this file, and §27.11 records the second pass on the code (a feature branch cut from `main`) and on this file. Section numbers inside §27.1–§27.9 that point into this specification have been rewritten to the v6.2 numbering.
 
 > [!IMPORTANT]
-> **Owner instruction (21 Nov 2026): no change to application code in the codebase.** Every improvement below is specified here as an implementation-ready requirement. None of it is applied to the codebase. A local, unapplied reference implementation was produced and tested in a sandbox before that instruction. It is kept outside the repository as four patch files so the owner can review, adopt or discard it (§27.6). In this part, "Implemented" means **implemented in that unapplied patch only**. The codebase status of every item is **Not implemented**.
+> **Owner instruction (21 Nov 2026): no change to application code in the codebase.** Later that day the owner asked for the work to be committed and pushed, which ended this instruction only for the code integrated on a feature branch (§27.11); for `main` it still describes the status. Every improvement below is specified here as an implementation-ready requirement. None of it is applied to the codebase. A local, unapplied reference implementation was produced and tested in a sandbox before that instruction. It is kept outside the repository as four patch files so the owner can review, adopt or discard it (§27.6). In this part, "Implemented" means **implemented in that unapplied patch only**. The codebase status of every item is **Not implemented**.
 
 ### 27.1 Method
 
@@ -6359,7 +6441,7 @@ flowchart TD
 | A06 Database & data                 | Schema, constraints, RLS, transactions, lifecycle  | 55 migrations, `storage/*`, DATABASE.md                                                       | 16 (0/4/8/4)            | Irreversible erasure on a bearer token. Grace-period requests never run (A06-001, G-09). Erasure leaves personal data and deletes billing records that may need retention (A06-002). Evidence history is overwritten (A06-004, G-21 open). Admin audit is now durable (G-07 partly fixed), but 44 user-level audit writes go to an array nothing reads, and admin audit rows are written outside the action's transaction (A06-005).                                                                                               |
 | A07 API & integrations              | Validation, envelopes, Stripe, email, worker       | Routes vs contracts, `billing-stripe.ts`, `apps/worker/src/email`, claim/queue                | 15 (1/5/5/4)            | Staging compose passes `EMAIL_FROM=""` and the old `RESEND_API_KEY`, never `BREVO_API_KEY`. The empty string fails env validation, so the API should refuse to boot (A07-001, P0, `deploy/` is protected). Anonymous analytics grows without limit (A07-002). `/health` ignores the DB, and lease loss gives a permanent 503 (A07-008). Stripe events applied by arrival order within one second (A07-007). Worker double execution (D-02) is fixed; retry gaps remain (A07-011).                                                  |
 | A08 Security, privacy & permissions | OWASP/CWE, authz across routes, secrets, privacy   | auth.ts, every route's object-level checks, helmet/CORS, webhooks, k-anonymity                | 17 (0/8/5/4)            | Core auth holds: signing, expiry, revocation, hashing, reference tokens and webhooks. Erasure lacks re-authentication (A08-006, CWE-306). Erasure leaves salary reports and alumni affiliations public (A08-007, CWE-359). Alumni domain verification trusts unverified emails (A08-003, CWE-287). Self-chosen recruiter role privileges (A08-001/002). Per-account login throttle missing (A08-011, CWE-307). Prior fixes G-03, G-25, G-27, G-30 and G-31 hold. G-01 is partly fixed.                                             |
-| A09 Performance & reliability       | Startup, memory, shutdown, leases, pooling, bundle | entry points, storage, limiter, worker, bundle                                                | 18 (0/4/9/5)            | No SIGTERM handling in API or worker (A09-001). Lease loss gives 503 forever, and there is no healthcheck (A09-002). Production config accepts a transaction-mode pooler, which breaks the writer lock (A09-003). Anonymous analytics can exhaust the heap (A09-004). There is no route-level code splitting (one 492 KB chunk against the §20.9 per-route budgets). G-17 and G-23 are still open.                                                                                                                                 |
+| A09 Performance & reliability       | Startup, memory, shutdown, leases, pooling, bundle | entry points, storage, limiter, worker, bundle                                                | 18 (0/4/9/5)            | No SIGTERM handling in API or worker (A09-001). Lease loss gives 503 forever, and there is no healthcheck (A09-002). Production config accepts a transaction-mode pooler, which breaks the writer lock (A09-003). Anonymous analytics can exhaust the heap (A09-004). There is no route-level code splitting (one chunk of 492 KB raw and 143.6 KB gzip, measured in §27.1, against the §20.9 per-route budgets, whose compression basis is not stated). G-17 and G-23 are still open.                                             |
 | A10 Testing & QA                    | Suites, CI, assertion strength, coverage           | 5 suites, configs, CI, TESTING.md                                                             | 16 (1/6/5/3; 1 unrated) | CI fails at its first step, so nothing after it has run on GitHub (A10-001, P0, protected files). SQLi, XSS and SSRF tests certify guard functions that no production code calls (A10-002). 8 of 278 routes are untested, and no suite checks authentication on every route (A10-003/005). `canViewProfile` is untested (A10-004).                                                                                                                                                                                                 |
 
 **Totals:** 169 findings. P0 2, P1 52, P2 71, P3 43, 1 unrated, by the agents' own ratings, before deduplication.
@@ -6457,12 +6539,12 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
 
 ### 27.6 Implementation summary
 
-| Group | Branch, sandbox only, not pushed | Commits | Files              | Items     |
-| ----- | -------------------------------- | ------- | ------------------ | --------- |
-| A     | `impl/a-security`                | 7       | 33 (+1,552 / −293) | AMD-01…06 |
-| B     | `impl/b-reliability`             | 10      | 39 (+2,091 / −193) | AMD-07…16 |
-| C     | `impl/c-functional`              | 13      | 40 (+1,244 / −171) | AMD-17…27 |
-| D     | `impl/d-tests`                   | 3       | 6 (+903)           | AMD-28    |
+| Group | Branch (sandbox only, not pushed as of 21 Nov 2026) | Commits | Files              | Items     |
+| ----- | --------------------------------------------------- | ------- | ------------------ | --------- |
+| A     | `impl/a-security`                                   | 7       | 33 (+1,552 / −293) | AMD-01…06 |
+| B     | `impl/b-reliability`                                | 10      | 39 (+2,091 / −193) | AMD-07…16 |
+| C     | `impl/c-functional`                                 | 13      | 40 (+1,244 / −171) | AMD-17…27 |
+| D     | `impl/d-tests`                                      | 3       | 6 (+903)           | AMD-28    |
 
 - **New features introduced:** readiness probe (AMD-13), graceful shutdown (AMD-14), route authorization sweep (AMD-28).
 - **Existing features enhanced:** AMD-01…12 and AMD-15…27.
@@ -6470,7 +6552,7 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
 - **Affected modules:** auth/session, settings/erasure, evidence, work history/references, notifications, connections/profile visibility, alumni, analytics/activity, LMS completion, AI assistant, billing/Stripe, config, worker, landing page, Settings/Profile/Evidence/Hiring pages.
 - **Protected build files touched:** none. **Migrations added:** none.
 
-**Codebase status of every item: Not implemented, by owner instruction.** To adopt any group, apply its patch on a branch, run the §27.7 checks, run the e2e and browser checks that were not done (§27.7), and review the owner acknowledgements (§27.8).
+**Codebase status of every item (as of 21 Nov 2026): Not implemented, by owner instruction.** To adopt any group, apply its patch on a branch, run the §27.7 checks, run the e2e and browser checks that were not done (§27.7), and review the owner acknowledgements (§27.8).
 
 ### 27.7 Validation summary
 
@@ -6530,7 +6612,7 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
 - Two process incidents occurred, and neither left a trace in the codebase:
   1. An evaluation agent wrote scratch analysis files into the lead's sandbox copy. They were deleted.
   2. `git stash` is shared across worktrees, so one implementer popped another's stash. It was detected, reverted, and the affected work was confirmed intact.
-- This part records evaluation evidence as of 21 Nov 2026. It does not change §1–§26 intent, and SSOT-AMD-01…28 were approved as requirements for `main` and are pending there as implementation; whether they bind this branch is an open owner decision (see the note at the start of this Part).
+- §27.1–§27.9 record evaluation evidence as of 21 Nov 2026; §27.11 records the later passes. This Part does not change §1–§26 intent, and SSOT-AMD-01…28 were approved as requirements for `main` and are pending there as implementation; whether they bind this branch is an open owner decision (see the note at the start of this Part).
 
 ---
 
@@ -6565,19 +6647,85 @@ Each requirement below is **Approved**. **Codebase status: Not implemented.** Th
 - **Diagrams:** the system map is new, two Mermaid diagrams were repaired in §12, and state names are normalised.
 - **Unchanged:** founder intent, every register id and every locked count (§24.8.1). Measured counts appear next to wrong figures rather than replacing them.
 
-**Open issues found during the fix.** Each needs an owner decision or source text, so none has been settled here. Each is noted inline where it occurs.
+**Open issues found during the fix.** v6.2 listed these issues as needing an owner decision or source text. The v6.3 editorial pass resolved some by the file's own precedence rules or by citation fixes; the rest stay open. Every issue still open is noted inline where it occurs, except the phase-inversion count, which is recorded only here.
 
-| Area              | Issue                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| §5                | Persona P-P missing from the sequence. The §5.6 coverage diagram shows 11 of 19 personas. The §5.7 lifecycle states (`registered`) differ from F-01's (`unverified`). §3.2 has no literal deny-by-default invariant; the rule is stated in SSOT ADR-003 (§12.12) and §14.6.                                                                                                                                 |
-| §7–§9             | Dependency cycle F-45 ↔ F-115. 24 features depend on a feature in a later SSOT capability phase. "Blocks" lists disagree with dependency rows. Priority and title mismatches between §9 and §7: F-102, F-145, F-146, F-150, F-158, F-159; §9.4 is titled "Priority 7–4" but holds Priority 7 entries. F-01 cites SCI-04 and BR-001 incorrectly. F-84's merge edge case is not allowed by its state diagram. |
-| §10               | Two Certification Attempt state rows. WF-33 duplicates WF-53. J-11 (local-first sync) contradicts BR-30 (no sync for extension data). BR-148 and BR-206 give different emerging-skill criteria. Duplicated rules: BR-037/BR-061, BR-25/BR-060, BR-15/BR-039. Terminal state sets differ in five machines (V61-11).                                                                                          |
-| §12–§13           | The repository layout puts `api/v1` inside the web shell, although Fastify owns `/api/v1` (§12.2). Two headings cite SSOT ADR-009 for different subjects. The heavy-queue workload list is incomplete.                                                                                                                                                                                                      |
-| §14–§22           | `talent_pool` vs `talent_pools`. SSR and ISR wording sits in a Vite SPA. The RLS model assumes Supabase Auth (V61-13/V61-14). Permissions-Policy blocks the camera and microphone that interviews need. Route budgets exceed the §20.10 200 KB rule. WCAG 2.2 AA criteria are listed as forward targets. HDN-029…HDN-032 are counted but not defined.                                                       |
-| §23–§24, App. A–B | GAP-038 cites BR-096 (a course-category rule). The D-7 BR ranges disagree with §10 headings. Proctoring is in Ph6 in §23.1 but Ph10 in D-23 and OD-35. §24.4 is an empty parent. Appendix B's "Q" register is undefined. Principles and invariants: §3.1 lists 12 against a locked P count of 11, and §3.2 lists 15 against INV 16.                                                                         |
-| App. D            | Two cited targets do not exist (a "Dense Profile" section numbered 5.4.1 and a notification matrix numbered 2.6). Motion timings conflict with §12.13 tokens. M-11 cites WCAG 2.4.13 (AAA), while §21 sets AA. NTF-012, R-003 and `error_code_catalog` are cited but not defined.                                                                                                                           |
+| Area              | Issue                                                                                         | v6.3 status                                                                                                                                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §5                | Persona P-P missing from the sequence                                                         | Still open as a fact, explained inline under §5.5: no source defines P-P, so it is a numbering gap.                                                                                                                       |
+| §5                | §5.6 coverage diagram shows 11 of 19 personas                                                 | Resolved: the 8 missing personas were added from the §5.5 Primary Journeys column.                                                                                                                                        |
+| §5                | §5.7 lifecycle states (`registered`) differ from F-01's (`unverified`)                        | Still open (V61-11; owner): the §5.7 note now lists the full difference and the missing exits.                                                                                                                            |
+| §5                | §3.2 has no literal deny-by-default invariant                                                 | Still open (owner, C3): noted under §3.2 with the measured INV count.                                                                                                                                                     |
+| §7–§9             | Dependency cycle F-45 ↔ F-115                                                                 | Resolved in this file by §7 precedence: F-45 is Ph10, so F-115 (Ph3) treats it as optional and blocks it; the reference register still lists the cycle under OPEN-LGA-05. The missing F-115 → F-96 dependency stays open. |
+| §7–§9             | Features depending on a feature in a later SSOT capability phase                              | Still open (owner, OPEN-LGA-05). Measured count corrected: 24 dependency edges across 21 features.                                                                                                                        |
+| §7–§9             | "Blocks" lists disagree with dependency rows                                                  | Resolved by precedence: §8.1 now states that §7 governs. Adding missing dependencies to §7 stays open.                                                                                                                    |
+| §7–§9             | Priority and title mismatches (F-102, F-145, F-146, F-150, F-158, F-159); §9.4 "Priority 7–4" | Resolved: notes under §9.2 and §9.3, F-158 and F-159 headings corrected to Priority 6, title note in the §9 intro. The §9.4 title is consistent with its entries.                                                         |
+| §7–§9             | F-01 cites SCI-04 and BR-001 incorrectly                                                      | Still open (owner): no authentication contract exists in the locked SCI register; noted inline in F-01.                                                                                                                   |
+| §7–§9             | F-84's merge edge case is not allowed by its state diagram                                    | Still open (owner): noted under the F-84 diagram.                                                                                                                                                                         |
+| §10               | Two Certification Attempt state rows                                                          | Still open (OPEN-45): the §10.10 note now records the SCI-32 per-attempt key that a resolution would follow.                                                                                                              |
+| §10               | WF-33 duplicates WF-53                                                                        | Still open (owner; both ids locked): noted inline, with the unreachable `expired` terminal.                                                                                                                               |
+| §10               | J-11 (local-first sync) contradicts BR-30                                                     | Still open (owner, OPEN-LGA-07): now noted under §10.2.                                                                                                                                                                   |
+| §10               | BR-148 and BR-206 give different emerging-skill criteria                                      | Still open (owner, OPEN-LGA-02): noted at BR-206.                                                                                                                                                                         |
+| §10               | Duplicated rules BR-037/BR-061, BR-25/BR-060, BR-15/BR-039                                    | Still open (owner consolidates): §10.13 records these pairs, BR-16/BR-038 and the BR-17/BR-20/BR-041 overlap; both ids stay and one test covers each pair.                                                                |
+| §10               | Terminal state sets differ in five machines (V61-11)                                          | Still open (OPEN-45): §10.9 and §10.10 notes now record that the index conflicts with §10.11 more widely, and name the consistent options.                                                                                |
+| §12–§13           | Repository layout puts `api/v1` inside the web shell                                          | Resolved by precedence (Part I A.1–A.2, §12.18): the layout no longer shows API folders. Server and worker location and the bundle boundary stay open.                                                                    |
+| §12–§13           | Two headings cite SSOT ADR-009 for different subjects                                         | Resolved: a §13.4 note explains the two clauses of ADR-009; heading kept for anchors.                                                                                                                                     |
+| §12–§13           | The heavy-queue workload list is incomplete                                                   | Still open (owner): the missing kinds are now listed under §13.5; the rule that assigns a kind to a queue is not stated.                                                                                                  |
+| §14–§22           | `talent_pool` vs `talent_pools`                                                               | Resolved in text: `talent_pool` is read as `talent_pools`, as in the legacy schema reference.                                                                                                                             |
+| §14–§22           | SSR and ISR wording sits in a Vite SPA                                                        | Resolved by precedence (Amendment A.1): §20.10, §20.11 and M-75 are annotated (§20.3's trace now names the Fastify handler); how public pages are rendered stays open.                                                    |
+| §14–§22           | The RLS model assumes Supabase Auth (V61-13/V61-14)                                           | Partly resolved: §14.6 states that policies call identity helpers and that the `auth.*` patterns are their Supabase binding. The binding for other providers and the API's database identity stay open.                   |
+| §14–§22           | Permissions-Policy blocks the camera and microphone that interviews need                      | Still open (owner): §15.6 now records the two constraints that bound the choice.                                                                                                                                          |
+| §14–§22           | Route budgets exceed the §20.10 200 KB rule                                                   | Still open (V61-26): §20.9 also records that its JS column has no compression basis; M-100's citation corrected.                                                                                                          |
+| §14–§22           | WCAG 2.2 AA criteria are listed as forward targets                                            | Still open (owner): §21.5 records that BR-204, §21.3 and D-21 would place them inside the gate.                                                                                                                           |
+| §14–§22           | HDN-029…HDN-032 are counted but not defined                                                   | Still open (source text): no reference document on this branch defines them.                                                                                                                                              |
+| §23–§24, App. A–B | GAP-038 cites BR-096                                                                          | Resolved: the citation is MIG-05; the legal basis stays open.                                                                                                                                                             |
+| §23–§24, App. A–B | The D-7 BR ranges disagree with §10 headings                                                  | Still open: noted in the D-7 row.                                                                                                                                                                                         |
+| §23–§24, App. A–B | Proctoring is in Ph6 in §23.1 but Ph10 in D-23 and OD-35                                      | Resolved by §7 precedence: a §23.1 note states that §7 phases govern the scope cells; reconciling the cells stays open (OPEN-LGA-05).                                                                                     |
+| §23–§24, App. A–B | §24.4 is an empty parent                                                                      | Description corrected: §24.4 has a scope sentence, but §24.5–§24.7 are numbered as its siblings, not its children. Renumbering is optional (owner).                                                                       |
+| §23–§24, App. A–B | Appendix B's "Q" register is undefined                                                        | Still open (source text); the GAP Class letters A–R also have no legend, now noted under §24.1.                                                                                                                           |
+| §23–§24, App. A–B | §3.1 lists 12 principles against P 11; §3.2 lists 15 against INV 16                           | Still open (owner, C3): measured counts now noted under §3.1 and §3.2.                                                                                                                                                    |
+| App. D            | "Dense Profile" (5.4.1) and notification matrix (2.6) do not exist                            | Still open (source text): noted inline.                                                                                                                                                                                   |
+| App. D            | Motion timings conflict with §12.13 tokens                                                    | Still open (owner): now also noted at the §12.13 motion tokens.                                                                                                                                                           |
+| App. D            | M-11 cites WCAG 2.4.13 (AAA), while §21 sets AA                                               | Resolved: M-11 and M-86 cite the AA criteria (2.4.7, 1.4.11) and label 2.4.13 as AAA; the 2px and 3:1 values are unchanged.                                                                                               |
+| App. D            | NTF-012, R-003 and `error_code_catalog` are cited but not defined                             | Still open (source text): each is marked inline.                                                                                                                                                                          |
 
 **Status of this pass (§27.6–§27.7 vocabulary):** documentation only. **Implemented:** the v6.2 text of this file. **Verified:** the mechanical checks above. No application code, test or runtime behaviour was created or changed, and closing a documentation contradiction is not evidence of implementation (V61-29).
+
+### 27.11 Second pass (21–22 November 2026)
+
+Later on 21 Nov 2026 the owner asked for all work to be committed and pushed, and the four reference branches of §27.6 were pushed. That ended the "no code change" status of §27.1–§27.9 for the code delivered on branch `feat/integrate-audit-fixes-2026-11-21`, and for no other branch. The owner then asked for the full brief to be run a second time, on the code and on this specification. This section records both. **Nothing in it is status for this branch, which still contains no application code (V61-29).**
+
+#### 27.11.1 Code pass (dated history of branch `feat/integrate-audit-fixes-2026-11-21`, not of `main`)
+
+| Stage            | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Where recorded                 |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Integration      | The four reference branches from §27.6 were merged onto `main` @ `6b36d20`. The first combined run, on `50d9861`, gave: build and typecheck pass; Vitest 1,534 pass; Postgres 63 pass; Playwright 258 passed, 0 failed.                                                                                                                                                                                                                                                                                                                                                    | That branch's `SSOT.md` §27.11 |
+| Re-evaluation    | Ten fresh specialist agents (the §27.3 roles) re-checked pass-1 findings, reviewed the integration diff and reported 97 new findings (by the agents' own counts). Two cross-reviewers verified 22 candidates: 17 approved, 1 rejected and replaced, 4 left to the owner.                                                                                                                                                                                                                                                                                                   | As above                       |
+| Implementation   | Three implementers built the approved items (written "pass-2 K-01…K-21" here, because a reference document, `30_PRIOR_IMPLEMENTATION_REFERENCE/08-ROADMAP-AND-DECISIONS.md`, has its own K-nn table; that branch's §27.11 calls them K-01…K-21) in 22 commits. Highlights: referee independence enforced at request, work-email verification and scoring; evidence and employer-review reads no longer leak internals; race-free limiters; a flood-safe `/ready`; Stripe idempotency-key renewal after failure; an honest restricted-account interface; new browser tests. | As above                       |
+| Final validation | On `2cb736a`: build and typecheck pass; Vitest 146 files / 1,571 pass; Postgres 15 files / 66 pass; Playwright (Chromium) 265 passed, 0 failed. Reticle did not run (no tools in the session), so "verified in a browser" means Playwright only.                                                                                                                                                                                                                                                                                                                           | As above                       |
+| Delivery         | Pull request #80 to `main`, open and unmerged. Its CI stops at `pnpm lint` on 182 pre-existing non-source files, the same as on `main` (§27.8 item 3).                                                                                                                                                                                                                                                                                                                                                                                                                     | PR #80                         |
+
+On 22 Nov 2026 `main` was still at `6b36d20`. Until PR #80 is merged, every SSOT-AMD item and every approved pass-2 K item remains **not implemented on `main`**. K-18, K-20, K-22 and parts of K-14 and K-19 are owner decisions and are not implemented on any branch.
+
+#### 27.11.2 Specification pass (this file, v6.2 → v6.3)
+
+| Stage                        | What was done                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Independent review           | Five reviewers, each combining two of the ten roles, reviewed v6.2 against itself, the reference documents and (for silence only) what `main`'s implementation had to decide. They were: product and functional; micro-features and UX; architecture and API; data and security; performance and testing. They worked the §27.10 open issues and proposed exact edits. |
+| Cross-review and application | An editor who wrote none of the edits checked each one against its evidence and against the rulings. It applied only justified edits, merged overlaps, turned owner questions into neutral "open — needs owner decision" notes, and logged every decision with its reason.                                                                                             |
+| Checks                       | The lead's mechanical checks (citations, anchors, paths, tables, Mermaid parse, register ids, Prettier) and an independent final review — results in §27.11.3.                                                                                                                                                                                                         |
+
+#### 27.11.3 Results of the specification pass
+
+| Measure                                        | Result                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Review output                                  | About 121 findings and 172 proposed exact edits from the five reviewers                                                                                                                                                                                                                                                                                                                   |
+| Editor decisions                               | 112 applied · 50 applied with changes (overlaps merged, wording narrowed) · 8 rejected · 2 left to the owner · plus one editor note merging three proposals (§13.8)                                                                                                                                                                                                                       |
+| Examples of rejections                         | An edit that would have decided the open WCAG target question (owner, §21.5) · an edit that changed a terminal-state set (V61-11, OPEN-45) · edits that depended on this record, which the lead wrote instead                                                                                                                                                                             |
+| Mechanical checks on the assembled file (lead) | Every `§` citation resolves, except the deliberate old-number mention in the §25.3 renumbering record · 0 missing in-page anchors · 0 missing relative paths on this branch · 0 table column mismatches · 31 of 31 Mermaid blocks parse with `mermaid@11` (headless parse, not a visual render) · Prettier clean                                                                          |
+| Register ids                                   | No id present in v6.1 or v6.2 is missing. New ids cited: `A11Y-002` (the A11Y-001..010 range of §21.6); `OPEN-15`, `OPEN-LGA-02`, `OPEN-LGA-05`, `OPEN-LGA-07`, `BE-01`, `FM-12`, `FM-25`, `SLO-19` and `RMP-1` (reference documents on this branch); `K-01…K-21` (pass-2 items, §27.11.1); `CWE-601` (external). `ARCH-001…ARCH-012` are named only as absent. No register id is minted. |
+| Independent final review                       | Reviewer RV-C, who neither proposed nor applied any edit, checked all 146 changed hunks and found 23 defects (3 must-fix, 11 should-fix, 9 nits). All were fixed before commit, apart from two layout-only readability nits left as they are.                                                                                                                                             |
+
+Owner decisions raised in this pass are recorded inline as "open — needs owner decision" where they occur; §27.10's table covers only the issues v6.2 listed. Among them: the 64 tables the specification uses but the locked schema lacks; the API's database identity and the admin RLS claim; recruiter role grant and lockout recovery; the erasure cancel window and executor; the reliability contract (§20); untestable acceptance criteria and missing VER texts; and terminal-state sets.
 
 ---
 
