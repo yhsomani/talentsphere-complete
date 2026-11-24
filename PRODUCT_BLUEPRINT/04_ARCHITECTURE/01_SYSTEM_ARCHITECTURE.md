@@ -528,7 +528,7 @@ A failure domain is a component whose failure must not take down the others. Eac
 | API replica | Requests on that replica | Health-checked load balancer; stateless replicas | Retried by client for idempotent requests |
 | Outbox dispatcher | Async effects delayed (notifications, search, projections) | Standby leader; outbox persists | Notifications late; search freshness banner if lag exceeds `search.freshness_banner_seconds` default 300 [PROP] |
 | Worker pool (any class) | That class of jobs only | Separate pools and connection budgets per class | Email late; media "processing"; export "building" |
-| Email or push provider | Delivery of that channel | Circuit breaker; job retry policy; in-app notification is written inline and is unaffected | In-app notification still appears; email retried for up to the per-kind span ([04 §7](04_EVENTS_AND_ASYNC.md)) |
+| Email or push provider | Delivery of that channel | Circuit breaker; job retry policy; in-app notification is written inline and is unaffected | In-app notification still appears; email retried for up to the per-kind span ([04 §6](04_EVENTS_AND_ASYNC.md)) |
 | AI provider | AI features | Per-provider breaker; fallback chain; heuristic or non-AI fallback | Badge "AI unavailable, showing basic suggestions"; never blocks a core workflow such as applying [SRC: SSOT §13.2 AI failure row] |
 | Payment provider | New purchases, plan changes | Breaker; entitlements unchanged on failure | "Payments temporarily unavailable"; existing entitlements continue [SRC: SSOT §13.2 billing row] |
 | Realtime gateway | Live updates | Separate process; client falls back to polling with cursor after 3 failed reconnects [SRC: SSOT §13.11] | Slower message arrival; "reconnecting" indicator |
@@ -549,7 +549,7 @@ SSOT asks for a design that names the trigger for each evolution step rather tha
 |---|---|---|---|
 | S0 | One API replica, one worker, PostgreSQL primary, CDN | Launch baseline | n/a |
 | S1 | Multiple API replicas behind a load balancer | DEC-ARC-002 complete (no in-process read model) and either availability needs or CPU saturation | `scale.api_cpu_p95_pct` default 70 [PROP] |
-| S2 | Separate worker pools per queue class | Any class's oldest-ready-age exceeds its target while another class is idle | `queue.<class>.max_ready_age_seconds` (defaults in [04 §7](04_EVENTS_AND_ASYNC.md)) |
+| S2 | Separate worker pools per queue class | Any class's oldest-ready-age exceeds its target while another class is idle | `queue.<class>.max_ready_age_seconds` (defaults in [04 §5.4](04_EVENTS_AND_ASYNC.md)) |
 | S3 | PostgreSQL read replica for public and analytics reads | Primary CPU or I/O saturation from read traffic | `scale.pg_primary_cpu_p95_pct` default 70 [PROP] |
 | S4 | Redis for rate-limit counters and realtime fan-out | `auth_throttle` writes exceed 5% of primary write IOPS, limit-check p95 above 5 ms, a Sev-2 credential-stuffing incident, or three or more API replicas [SRC: BE-01-R2 §5] | as stated |
 | S5 | Table partitioning for high-volume append tables | A table's size or vacuum time exceeds the threshold in [02 §6](02_DATA_MODEL.md) | `partition.trigger_rows` default 100 million [PROP] |
@@ -687,7 +687,7 @@ All entries are `Proposed`. They become binding only after owner ratification. W
 - **Context:** as-built leases are not fenced; a timed-out handler's promise is not aborted; expired leases can be reclaimed and executed twice [SRC: ARCHITECTURE.md §18].
 - **Options considered:** (a) keep the claim loop and accept duplicates; (b) add `lease_token` fencing, lease renewal, abort signals and per-kind policy to `background_jobs`; (c) adopt an external queue library or service.
 - **Decision:** (b). Keeps INVARIANT-012 (one durable queue path) [SRC: ARCHITECTURE.md §25].
-- **Consequences:** schema migration of `background_jobs` (additive columns plus status set change, [04 §6](04_EVENTS_AND_ASYNC.md)); `JobQueueEngine` memory engine is removed after ratification [SRC: ADR-008].
+- **Consequences:** schema migration of `background_jobs` (additive columns plus status set change, [04 §5](04_EVENTS_AND_ASYNC.md)); `JobQueueEngine` memory engine is removed after ratification [SRC: ADR-008].
 - **Revisit when:** job throughput exceeds what PostgreSQL claims sustain under load tests.
 - **Source:** [SRC: ADR-T09; BE-01-R2 §3].
 

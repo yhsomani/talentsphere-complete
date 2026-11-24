@@ -814,7 +814,7 @@ flowchart LR
 - **Roles and permissions:** `Interviewers, REC, HMG: submit` · `Coordinator: chase`
 - **Preconditions and entry points:** Interview `completed`; feedback task created.
 - **User interactions and actions:** 1) After the interview, the interviewer receives a task with the scorecard form prefilled with live notes. 2) Complete ratings and recommendation (FR-ATS-027). 3) Submit. 4) If unable, "Cannot assess" with reason (no signal gathered).
-- **System behaviour:** INT creates the feedback request (SM-INT-06) for each non-observer participant using the round's scorecard template; due 24 hours after the end by default (BR-INT-018). Reminders at 12 and 24 hours, escalation to hiring manager at 3 business days and to EAD at 7 (FR-ATS-041). Submission occurs in ATS; INT tracks completion and updates the interview record. Feedback is blind until each person submits (FR-ATS-017 rule, BR-ATS-017).
+- **System behaviour:** INT creates the feedback request (SM-INT-06) for each non-observer participant using the round's scorecard template; due 24 hours after the end by default (BR-INT-018). Reminders at 12 and 24 hours, escalation to hiring manager at 3 business days and to EAD at 7 (FR-ATS-041). Submission occurs in ATS; INT tracks completion and updates the interview record. Feedback is blind until each person submits (BR-ATS-017).
 - **UI elements and controls:** Task card with due date, Open scorecard button, Cannot assess option, overdue chip with text.
 - **Configuration options:** Org: due hours (24), escalation offsets.
 - **Business rules:** BR-INT-018, BR-INT-016

@@ -266,7 +266,7 @@ Columns: **Owner** is the module code that owns writes. **Class** is the ownersh
 | `analytics_events` | partitioned daily: `event_name`, `occurred_at`, `pseudonymous_actor_id` (rotating per `analytics.actor_salt_period`), `tenant_org_id` nullable, `properties jsonb` (allowlisted keys) | ANL | PLATFORM | `tenant_org_id` | RC-OPS (13 months [PROP]) | DC-INTERNAL | Yes [SRC: 00020] |
 | `metric_snapshots` | `metric_code`, `scope_kind`, `scope_id`, `period`, `value`, `population_n`; suppressed when `population_n < min_cohort_k` | ANL | PLATFORM or OWN-ORG | `tenant_org_id` | RC-AGGREGATE | DC-INTERNAL | No |
 | `device_installs` | `id`, `account_id`, `platform`, `app_version`, `last_seen_at` | PWA | OWN-PERSON | `owner_account_id` | 1 year after last seen | DC-PRIVATE | No |
-| `outbox_events`, `consumer_inbox`, `background_jobs`, `job_schedules`, `idempotency_records`, `worker_health` | Defined in [04 §3–§6](04_EVENTS_AND_ASYNC.md) | Platform core (owned by PLT as infrastructure) | PLATFORM | carried in payload | RC-OPS-SHORT / RC-TRANSIENT | Up to DC-PRIVATE | `background_jobs` [SRC: 00042], `worker_health` [SRC: 00049] |
+| `outbox_events`, `consumer_inbox`, `background_jobs`, `job_schedules`, `idempotency_records`, `worker_health` | Defined in [04 §3, §5, §8, §10](04_EVENTS_AND_ASYNC.md) | Platform core (owned by PLT as infrastructure) | PLATFORM | carried in payload | RC-OPS-SHORT / RC-TRANSIENT | Up to DC-PRIVATE | `background_jobs` [SRC: 00042], `worker_health` [SRC: 00049] |
 
 ### 3.11 As-built tables without a target home
 

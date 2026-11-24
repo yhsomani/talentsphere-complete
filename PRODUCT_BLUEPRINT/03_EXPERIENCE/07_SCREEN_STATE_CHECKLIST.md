@@ -186,3 +186,533 @@ Common properties on every event (set once by the shell): `screen_id`, `route_te
 
 `data-testid` pattern: `{screen}-{region}-{element}` (`job-search-filters-clear`). Copy keys: `{module}.{screen}.{element}.{variant}` (`job.search.empty.noResults.title`).
 
+## 4. Reference screens
+
+Conventions in the wireframes: `[ ]` button, `( )` radio, `[x]` checked box, `[v]` select, `< >` link, `[====    ]` progress, `[ Skeleton ]` loading placeholder, `|` and `+--+` containers, `...` more content. Widths are indicative: desktop content area 1280 px wide, phone 360 px. Role codes per `CONVENTIONS` §5. Domain data names are examples of entities owned by other modules (`planned` where not yet specified).
+
+### REFSCR-01 Dashboard (candidate home)
+
+**Pattern for:** the Home screen of every workspace (employer, institution, enterprise and console homes reuse regions with different tiles).
+**Route:** `/dashboard` (personal workspace). **Parent:** none (root). **Roles:** CAN, STD, INS, MNT, FRL (the Home for the personal workspace). **Chrome:** `app`.
+**Purpose:** show what needs the user's attention today and the next best action toward their goal. **Primary task:** act on the top "needs attention" item. **Document title:** "Home - Personal - TalentSphere". **Focus on arrival:** `h1` "Home".
+
+**Desktop wireframe (content area, 12 columns)**
+
+```text
++------------------------------------------------------------------------------------------+
+| Home                                                              [ + New v ]            |
+| Good morning, Dana. Here's what needs you today.                                         |
++------------------------------------------------------------------------------------------+
+| NEEDS YOUR ATTENTION (cols 1-8)                      | PROFILE STRENGTH (cols 9-12)      |
+| [!] Confirm interview with Northwind  Tue 10:00 CET  | [========    ] 68 percent         |
+|     [ Choose a time ]                                | 3 of 5 steps done                 |
+| [i] Acme asked for a work sample      Due 14 Mar     |  [x] Add work history            |
+|     [ Upload sample ]                                |  [x] Add 5 skills                |
+| [i] Degree check needs one more detail               |  [ ] Verify one credential       |
+|     [ Fix now ]                      < See all 5 >   |  [ ] Set job alerts   [ ] ...    |
++------------------------------------------------------+-----------------------------------+
+| APPLICATIONS (cols 1-6)              | CONTINUE LEARNING (cols 7-12)                     |
+| 4 active   1 interview   0 offers    | [thumb] Data analysis foundations                 |
+| Applied > In review > Interview      | Module 3 of 8   [===========      ] 42 percent    |
+| 2         1           1              | [ Continue lesson 3.2 ]                           |
+| < View applications >                |                                                   |
++--------------------------------------+---------------------------------------------------+
+| RECOMMENDED FOR YOU (cols 1-12)                     AI  < Why these? >                   |
+| [JobCard] [JobCard] [JobCard] [JobCard]       Match: Strong skills match, 2 of 3 required |
+| < See all recommended jobs >                                                             |
++------------------------------------------------------------------------------------------+
+| VERIFICATION AND EVIDENCE (cols 1-6)       | CAREER GOAL (cols 7-12)                     |
+| 6 verified, 2 pending, 1 needs action      | Goal: Data analyst   Readiness: Good        |
+| < Open evidence >                          | Next: Learn SQL window functions < Plan >   |
++--------------------------------------------+---------------------------------------------+
+```
+
+**Phone wireframe (single column, bottom tab bar visible)**
+
+```text
++------------------------------+
+| Home                  [?] [B]|   app bar: title, search, bell (badge)
++------------------------------+
+| Good morning, Dana           |
+| NEEDS YOUR ATTENTION (3)     |
+| [!] Confirm interview...     |
+|     [ Choose a time ]        |
+| [i] Acme asked for a sample  |
+| < See all 5 >                |
+| ---------------------------- |
+| Profile strength 68 percent  |
+| [=========      ] 3 of 5     |
+| < Finish setup >             |
+| ---------------------------- |
+| Continue learning            |
+| Data analysis foundations    |
+| [ Continue lesson 3.2 ]      |
+| ---------------------------- |
+| Applications  4 active ...   |
+| Recommended for you  AI      |
+| [JobCard] (horizontal list)  |
++------------------------------+
+| Home  Jobs  Learn  Msgs  Me  |
++------------------------------+
+```
+
+**Regions and components**
+
+| Region | Components | Notes |
+|---|---|---|
+| Page header | h1, greeting paragraph (time of day from device clock), `CMP-Menu` "New" | Greeting uses the first name only when the user set one; otherwise "Welcome back" |
+| Needs your attention | `CMP-List` of `CMP-NotificationItem`-style rows with inline primary action, `CMP-Notice` icon per severity | Max 3 shown, then "See all N" to `/notifications?filter=actions`; ordered by due time then severity; excludes informational items |
+| Profile strength | `CMP-ProgressBar` with text, `CMP-List` of checklist items (links) | Appears until all done or dismissed; the percentage derives from the checklist, not from a hidden score |
+| Applications | `CMP-StatTile` set (active, interview, offers) and a mini stage bar | Counts link to `/applications?status=...` |
+| Continue learning | `CMP-CourseCard` compact with `CMP-ProgressBar` | Shows the most recently active enrollment; hidden if none |
+| Recommended jobs | `CMP-JobCard` x4 (carousel replaced by a grid: 4 columns desktop, horizontal scroll list phone), `CMP-MatchExplanation`, AI marker | Hidden with a "Turn on recommendations" empty state if personalization off |
+| Verification and evidence | `CMP-StatTile` trio and link | Counts from EVD; "needs action" count also appears in nav badge |
+| Career goal | Goal summary and next step | From AIC and MKT; hidden if no goal, replaced by "Set a goal" card |
+
+**Data**
+
+| Region | Source | Freshness | Pagination | Privacy |
+|---|---|---|---|---|
+| Needs attention | Aggregated tasks from JOB, INT, EVD, BGV, LRN (planned) | Real time (push) with refresh on focus; stale after 60 s | Top 3 | Private |
+| Profile strength | PRF checklist | On load | n/a | Private |
+| Applications | JOB application counts by stage | On load, refresh on focus | n/a | Private |
+| Continue learning | LRN enrollment progress | On load | n/a | Private |
+| Recommended jobs | AIC recommendations (planned) | Cached 1 hour | 4 | Private; features used listed in "Why these?" |
+| Evidence | EVD counts | On load | n/a | Private |
+
+Each region loads independently; the page is interactive when the header and the first region resolve.
+
+**Actions**
+
+| Action | Permission | Pending | Success | Failure | Undo/confirm | Offline class |
+|---|---|---|---|---|---|---|
+| Inline task action (Choose a time) | CAN | Button loading | Item changes to "Confirmed", leaves list after 5 s with undo | Notice in row with Retry | Tier 0 (undo) | O |
+| Dismiss a checklist item | CAN | none | Item removed | Toast failure | Tier 0 | W |
+| Bookmark job | CAN | optimistic | Icon filled | Revert and toast | Tier 0 | W |
+| "Why these?" | CAN | popover | Explanation | Compact error | none | R |
+| Hide recommendations | CAN | | Region replaced by empty state | | Tier 0 | W |
+
+**States**
+
+| State | Behavior |
+|---|---|
+| Loading | Regional skeletons; no spinner; header text appears immediately |
+| First run (new user) | Needs attention replaced by the onboarding checklist (`03` section 2); other regions show first-use empty states with one action each; no empty charts |
+| Empty "needs attention" | "You're all caught up." with next best action (Find jobs) |
+| Region error | Compact `ErrorState` in that region only with Retry; others unaffected |
+| Offline | Cached tiles with "Saved 12 minutes ago"; inline actions `aria-disabled` "Needs a connection"; banner global |
+| Restricted account | Single notice explaining restriction and allowed actions; other regions hidden (`01` as-built restricted nav) |
+| Stale | "Updated 20 minutes ago. Refresh" at the top of Needs attention if over limit |
+| Permission | Not applicable (own data); regions for capabilities not enabled are absent |
+| Long content | Titles clamp to 2 lines; company names to 1 line with title attribute |
+| 0/1/many | 0 interviews hides stage; 1 shows singular copy via ICU; counts over 99 show 99+ |
+| RTL and expansion | Layout uses logical properties; progress bars mirror |
+
+**Permissions:** CAN family: all regions own data only. STD adds a Campus tile (deadlines, drives). INS adds Studio tile (to grade, unanswered). MNT adds Sessions tile. FRL adds Contracts tile. Server returns only the user's data; tile visibility from the manifest.
+
+**Notifications:** none triggered; consumes real-time task updates (`03` section 11: no reordering, "N new" pill).
+
+**Analytics:** `ui.dashboard.view`; `ui.dashboard.task.click` (task_type); `ui.dashboard.task.complete` (task_type); `ui.dashboard.recommendation.click` (position); `ui.dashboard.recommendation_why.open`; `ui.dashboard.checklist_item.click` (item_key); `ui.dashboard.region.error` (region_key). No job ids of other users; job ids are not personal and allowed as `job_ref` hashed.
+
+**Accessibility:** landmarks: `main` with `h1` Home; each tile is a `section` with `aria-labelledby` its `h2`; task list is a `ul`; inline action buttons named "Choose a time for interview with Northwind"; progress bar `role="progressbar"` with text; recommendation grid is a list; "New" pill live region polite; keyboard order follows visual order; focus after completing an inline task moves to the next task or the region heading; no autoplay; the carousel-like list on phone is a native horizontal scroller with visible scroll buttons for keyboard users. Reduced motion: no tile entrance animation.
+
+**Copy keys (sample):** `shell.dashboard.title` "Home"; `shell.dashboard.attention.empty` "You're all caught up."; `shell.dashboard.rec.why` "Why these?".
+
+**Acceptance criteria**
+
+- Given a candidate with one interview to confirm, when Home loads, then that task is first in Needs your attention with a "Choose a time" button and the nav Interviews badge shows 1.
+- Given the recommendations service times out, when Home loads, then only the recommendations region shows an error with Retry and every other region renders normally.
+- Given the user is offline, when they open Home, then cached tiles show "Saved {time}", task buttons are `aria-disabled` with the reason, and no spinner remains.
+- Given a screen reader user completes a task inline, when the item leaves the list, then focus lands on the next task and "Interview confirmed" is announced politely once.
+- Negative: given a suspended account, when Home loads, then no recommendation or application regions are shown and the restriction notice lists allowed actions.
+
+### REFSCR-02 List with filters (job search)
+
+**Pattern for:** every searchable list (courses, candidates, mentors, gigs, events, students, applications). **Route:** `/jobs` (public and signed-in; query parameters below). **Parent:** none. **Roles:** GUE, CAN and others (read); actions needing sign-in prompt sign-in. **Chrome:** `pub` (signed out) or `app`. **Document title:** "Find jobs - TalentSphere" (with query: "{query} jobs - TalentSphere").
+
+**Desktop wireframe**
+
+```text
++----------------------------------------------------------------------------------------------+
+| Find jobs                                                                                    |
+| [ Search jobs, skills or companies...                    ] [ City or Remote  v ] [ Search ]  |
++----------------------------------------------------------------------------------------------+
+| FILTERS            [Clear all]| 248 jobs   Applied filters: [Remote x] [Full-time x] [Data x]|
+| > Work mode                   |                          Sort by [Best match v]  [Save search]|
+|   [x] Remote  [ ] Hybrid  ... | +----------------------------------------------------------+ |
+| > Job type                    | | [logo] Data Analyst                          [bookmark]| |
+|   [x] Full-time [ ] Contract  | | Northwind - Berlin or Remote - $70k to $90k a year     | |
+| > Experience level            | | Matches your SQL and Excel. Missing: Tableau   AI      | |
+| > Salary  [ 40k ]----[ 120k ] | | Posted 2 days ago - Verified employer                  | |
+|   [ ] Include jobs w/o salary | +----------------------------------------------------------+ |
+| > Skills  [ Add skill... ]    | | [logo] Junior Data Engineer ...                         | |
+| > Date posted                 | +----------------------------------------------------------+ |
+| > Company [ Search... ]       |   ... 25 results per page                                    |
+| > Verified employers only     |   < Previous  1 2 3 ... 10  Next >      Showing 1 to 25 of 248|
++-------------------------------+----------------------------------------------------------------+
+```
+
+**Phone wireframe**
+
+```text
++------------------------------+
+| Find jobs             [S] [B]|
+| [ Search jobs...           ] |
+| [ Filters (3) ]  [Sort v]    |
+| 248 jobs                     |
+| [Remote x][Full-time x] ...  |
+| +--------------------------+ |
+| | Data Analyst    [bookm.] | |
+| | Northwind - Remote       | |
+| | $70k-$90k   2 days ago   | |
+| +--------------------------+ |
+| ...                          |
+| [ Load more (20) ]           |
++------------------------------+
+| Home  Jobs  Learn  Msgs  Me  |
++------------------------------+
+Filters sheet: header "Filters" [Close]; groups; bottom bar [Clear all] [Show 248 jobs]
+```
+
+**Regions and components:** search form (`CMP-SearchField`, `CMP-LocationPicker`, `[Search]` primary); filter panel (accordion groups: `CMP-Checkbox`, `CMP-Slider` + number inputs, `CMP-SkillPicker`, `CMP-Combobox`); applied filter chips (`CMP-Tag` filter/removable); toolbar (count live region, `CMP-Select` sort, `[Save search]` button); results list (`CMP-JobCard`); pagination (`CMP-Pagination` desktop; "Load more" button phone); saved searches menu.
+
+**Parameters (URL):** `q`, `loc` (place id) and `radius` (km, 5/10/25/50/100), `mode` (repeat: remote, hybrid, onsite), `type` (repeat: full_time, part_time, contract, internship), `level` (repeat), `min_salary`, `max_salary`, `inc_nosalary` (0/1, default 1), `skill` (repeat, slug), `posted` (24h, 7d, 30d), `company` (id), `verified` (0/1), `sort` (`match`, `-posted`, `-salary`, default `match` if signed in with profile, else `-posted`; `relevance` when `q` present), `page` (1..40). Unknown values ignored.
+
+**Data:** job summary from JOB (title, company, location, mode, salary range and currency and period when disclosed, posted date, employer verification), match explanation from AIC only when signed in with consent for personalization. Result count exact to 1,000 then "1,000+". Freshness: results fetched on parameter change; cached 5 minutes per query; "N new jobs" pill after 5 minutes of inactivity when new matches exist.
+
+**Behavior:** filter changes apply after 300 ms (desktop) and update URL with `replace` while typing and `push` on commit; phone sheet applies on "Show N jobs". Zero-count facets disabled. "Save search" opens a dialog (name, alert frequency, channel) requiring sign-in (sign-in preserves filters via `returnTo`). Results region `aria-busy` during update with a thin top progress bar; old results stay.
+
+**Actions:** Bookmark (optimistic, class W, requires sign-in: guests see sign-in dialog), Save search (O), Open job (navigation, focus on target h1), Clear all, Remove chip, Change sort (resets page 1, focus to results heading), Pagination.
+
+**States:** loading (8 skeleton cards), empty first (guest default query always has results; if the index is empty "No jobs yet" for new regions), no results ("No jobs match your search" with remove-most-restrictive buttons and "Create an alert for this search"), error (region ErrorState with Retry; search form remains), offline (cached last query results marked "Saved {time}", filters disabled except removal, sort disabled), rate limited (notice and 10 s retry), partial (company logos failing fall back to initials), stale (pill), permission (none), long titles clamp 2 lines.
+
+**Permissions:** public read; Bookmark, Save search, Match explanation need sign-in; employer-hidden jobs (confidential) never appear; blocked companies (user's block list) are excluded and a footnote "Hiding 3 companies you blocked. Manage" appears.
+
+**Analytics:** `ui.job_search.view`; `ui.job_search.query.submit` (query_hash, query_length, filter_count); `ui.job_search.filter.change` (filter_key, value_count); `ui.job_search.sort.change` (sort_key); `ui.job_search.result.click` (position, page, job_ref); `ui.job_search.bookmark.click` (state); `ui.job_search.save_search.complete`; `ui.job_search.no_results.view` (filter_count); `ui.job_search.pagination.click` (page).
+
+**Accessibility:** search form `role="search"`; filter panel `aside` labeled "Filters"; each group a `fieldset`/accordion; count in `role="status"` ("248 jobs"); results `ul`; JobCard stretched link with one tab stop for the card and one for the bookmark; salary slider has numeric inputs and `aria-valuetext`; chips removable by keyboard, `Delete` on a focused chip; after filter change via keyboard focus stays; after Apply on phone focus goes to the results heading; pagination moves focus to the heading and announces "Page 2 of 10".
+
+**Acceptance criteria**
+
+- Given a user selects Remote and Full-time, when they press Back after opening a job, then the results show with the same filters, page and scroll position.
+- Given a filter combination with zero results, when it renders, then "No jobs match your search" shows with buttons to remove each filter and the number of jobs each removal would return.
+- Given a guest taps the bookmark, when the dialog completes sign-in, then the job is bookmarked and the user returns to the same results.
+- Given the user changes sort via keyboard, when results update, then focus remains on the sort control and the count is announced.
+- Negative: given the URL contains `sort=hacker` and `min_salary=abc`, when the page loads, then those parameters are ignored, defaults apply, no error is shown, and the URL is corrected on the next change.
+
+### REFSCR-03 Detail (job detail)
+
+**Pattern for:** public or private object detail pages (course landing, company, candidate profile view, application detail). **Route:** `/jobs/{slug}-{id}`. **Parent:** `/jobs` (Back goes to results with filters). **Roles:** GUE and all (read). **Chrome:** `pub` or `app`. **Title:** "{Job title} at {Company} - TalentSphere". **Focus on arrival:** `h1` job title.
+
+**Desktop wireframe**
+
+```text
+< Back to jobs
++---------------------------------------------------------------------+-----------------------+
+| [logo] Data Analyst                                      [bookmark] | APPLY CARD (sticky)   |
+| Northwind - Berlin, Germany or Remote - Full-time                   | $70,000 to $90,000    |
+| Posted 2 days ago - 38 applicants      Verified employer            | per year (employer)   |
++---------------------------------------------------------------------+ [ Apply ]            |
+| MATCH (signed in)                                           AI      | [ Save ]  [ Share ]   |
+| Strong match. You have SQL, Excel. Missing: Tableau.  < Details >  | Closes 30 Apr 2026    |
++---------------------------------------------------------------------+-----------------------+
+| About the role   (rich text, sanitized)                             | About Northwind       |
+| Responsibilities / Requirements / Nice to have                      | 500 people, Fintech   |
+| Skills: [SQL] [Excel] [Tableau]  (your match marked with text)      | < Company page >      |
+| Benefits, Location, Hiring process (stages shown)                   | Recruiter: Sam K.     |
++---------------------------------------------------------------------+-----------------------+
+| Similar jobs   [JobCard] [JobCard] [JobCard]                                                 |
++----------------------------------------------------------------------------------------------+
+```
+
+Phone: header block, match block, tabs "Overview / Company" or stacked sections; sticky bottom bar with `[ Apply ]` (primary, full width less icons) and bookmark icon; the Apply card content (salary, closing date) is part of the overview.
+
+**Data:** Job (title, description rich text, requirements list, skills with required/preferred, salary disclosed range with currency and period and source label "Employer provided", location(s), work mode, type, level, posted date, closing date, applicant count (shown only if employer allows, rounded), pipeline stages summary (if employer shares), employer name, verification state, recruiter display name (if employer opts in), benefits). Company summary (EMP). Candidate-specific: match explanation, whether already applied or saved, profile completeness blockers for applying. Freshness: server-rendered for SEO with structured data (JobPosting JSON-LD); client refresh on focus for closed state.
+
+**Actions:** Apply (signed out: sign in then wizard; signed in: starts REFSCR-04; if already applied the primary becomes "View application" with status), Save/Bookmark (W), Share (Web Share or copy link, O not required), Report job (dialog with reasons; tier 0; O), Follow company (W), Message recruiter (only if employer allows; needs sign-in), View match details (popover). Apply blocked states: profile missing required items shows inline list "Add these to apply: {items}" with links; job closed shows state; user is the poster's colleague sees "You can't apply to your own organization's job".
+
+**States:** loading (header skeleton, description lines); not found or removed: HTTP 410 page "This job is no longer available" with 3 similar jobs and Back to search; closed: banner "Applications closed on {date}" Apply disabled with reason, Save kept; draft/unpublished viewed by owner: "Preview" banner; unverified employer: neutral notice "This employer hasn't been verified yet" with `Learn how we verify`; salary undisclosed: the field is omitted (not "Not disclosed" text) except "Salary not shown by employer" in the facts list for clarity; offline: cached viewed jobs readable, Apply "Needs a connection to start" (draft saves later), error with Retry; rate limited; permission (none for public); conflict none; very long description collapses with "Show more" after 600 words but all content in DOM for search and screen readers (collapse with `aria-expanded`).
+
+**Permissions:** public read; sign-in required for match, save, apply, message; blocked users cannot apply (generic denied "You can't apply to this job"); jobs for restricted audiences (internal mobility ENT, institution drives) 404 for non-members.
+
+**Analytics:** `ui.job_detail.view` (source: search/alert/share/recommendation); `ui.job_detail.apply.click`; `ui.job_detail.save.click`; `ui.job_detail.share.complete` (method); `ui.job_detail.match_details.open`; `ui.job_detail.report.complete` (reason_key); `ui.job_detail.scroll_end`.
+
+**Accessibility:** single h1; sections as h2 ("About the role", "Requirements", "About the company"); skills list with match text ("SQL, you have this") not color alone; apply bar is a `region` labeled "Apply"; sticky bar does not cover focused content (scroll-padding); "Show more" toggle `aria-expanded`; structured text sanitized so headings in descriptions render at h3 or below; external links to employer site flagged "(opens in new tab)".
+
+**Acceptance criteria**
+
+- Given a signed-out visitor opens a job link from a message, when the page loads, then job details render without sign-in, and "Apply" leads to sign-in with `returnTo` set to this job.
+- Given the user already applied, when they open the job, then the primary action reads "View application" and the status pill shows the current stage.
+- Given the job was closed by the employer, when the page loads, then the HTTP status is 410 for removed jobs or 200 with a "closed" banner for closed-but-visible jobs, and Apply is `aria-disabled` with the reason.
+- Negative: given the viewer's profile lacks a required resume, when they press Apply, then no wizard starts and the page lists the missing item with a link to add it, and focus moves to that list.
+- Given a screen reader user, when the page loads, then the first heading announced is the job title and the match explanation is reachable by heading navigation.
+
+### REFSCR-04 Form wizard (apply to a job)
+
+**Pattern for:** multi-step creation or submission (create job, create course, import, checkout, mentor application). **Route:** `/applications/new/{jobId}/{step}` with `step` in `contact`, `resume`, `questions`, `documents`, `review`. **Parent:** `/jobs/{slug}-{id}` (Exit returns there). **Roles:** CAN family. **Chrome:** `focus`. **Title:** "Apply to {Job title} - Step {n} of {total} - TalentSphere". **Focus on step arrival:** the step heading.
+
+**Desktop wireframe**
+
+```text
++----------------------------------------------------------------------------------------------+
+| Apply to Data Analyst at Northwind                                [ Save and exit ]          |
++--------------------+-------------------------------------------------------------------------+
+| STEPS              |  Step 2 of 5: Resume                                                    |
+| (v) Contact        |  Choose the resume Northwind will see.                                  |
+| (2) Resume  <cur>  |  ( ) Data Analyst 2026 (saved Mar 3)     < Preview >                    |
+| ( ) Questions      |  ( ) Generalist resume (saved Jan 9)     < Preview >                    |
+| ( ) Documents      |  ( ) Upload a new resume   [ Choose file ]  PDF or DOCX, up to 10 MB   |
+| ( ) Review         |  [x] Include my profile link (https://.../u/dana-kim)                   |
+|                    |                                                                         |
+| Saved 2 min ago   |                                    [ Back ]  [ Continue ]               |
++--------------------+-------------------------------------------------------------------------+
+```
+
+**Phone wireframe**
+
+```text
++------------------------------+
+| [X]  Apply          Saved    |
+| Step 2 of 5: Resume          |
+| [=========        ]          |
+|                              |
+| Choose the resume Northwind  |
+| will see.                    |
+| ( ) Data Analyst 2026        |
+|     < Preview >              |
+| ( ) Generalist resume        |
+| ( ) Upload a new resume      |
+|                              |
++------------------------------+
+| [ Back ]       [ Continue ]  |  sticky action bar
++------------------------------+
+```
+
+**Steps and fields**
+
+| Step | Fields | Required | Validation | Prefill |
+|---|---|---|---|---|
+| Contact | Full name, email (verified), phone (optional unless job requires), location (city, country), links (portfolio, optional up to 3) | Name, email | Email must be verified (else dialog "Verify your email to apply" with Resend); phone per `03` section 3.6 | From profile PRF |
+| Resume | Choose existing resume, upload new, or build from profile; include profile link toggle | One resume | Type PDF/DOCX, 10 MB; scan must be Ready before Submit | Last used resume |
+| Questions | Employer-defined: short text (max 500), long text (max 2000), single/multi choice, yes/no, number, date, file; knockout questions flagged internally (not visible to candidate as knockout) | Per question `required` flag | Per type; counters; no paste blocking | Reuse prior answers to identical standard questions (work authorization, notice period) with "Reuse" notice (`04` `NFR-AXS-044`) |
+| Documents | Cover letter (rich text light or upload), certificates, work samples (up to 5 files, 20 MB each) | Per job config | As upload table `03` section 13 | Evidence picker from EVD (attach verified items) |
+| Review | Summary per step with Edit links; consent checkbox for sharing profile data with employer (required, unticked); optional "Share demographic information" (voluntary section, separate, prefer not to say) | Consent | All previous steps valid | |
+
+**Behavior:** autosave per step (class: draft, `03` section 8); `Continue` validates the current step only; Review shows a validity list; `Submit application` primary on Review; Back never loses data; deep link to a step with prior invalid steps redirects to the first incomplete; draft resumes from `/applications` ("Continue your application"); drafts expire after 90 days with a reminder at 7 days before [PROP]; Submit uses an idempotency key; duplicates blocked server side (one active application per job per user: second attempt shows "You've already applied. View application."); job closing during the draft shows banner "This job closed on {date}. Your draft is saved" and blocks submit; application edits after submit follow JOB rules (withdraw, update answers if employer allows).
+
+**Actions:** Continue (validate and save, advance), Back, Save and exit (saves invalid data too, returns to job), Exit (X) with dirty prompt (autosave means no prompt unless pending), Submit application (O: offline shows "Ready to submit when you're online" and keeps draft; the user must press Submit after reconnect), Edit from Review, Upload file, Attach evidence.
+
+**States:** loading (step skeleton), resume parse in progress (inline status "Reading your resume"), upload errors (per file states), validation errors (summary + inline), server error on submit (notice with Retry, same idempotency key), session expired (resume in place), job closed, job removed (410 page with draft kept for 30 days), offline (editing allowed; submit disabled with reason), rate limited, conflict (draft edited on another device: compare dialog per `03` section 8.3), conditional step count change announced ("Now 6 steps").
+
+**Permissions:** CAN with verified email and profile minimum; HMG/REC of the same organization blocked from applying to own jobs (reason shown); suspended accounts blocked; applying on behalf of someone else not allowed.
+
+**Notifications:** on submit: candidate "Application received" (template `application.submitted.candidate`), employer new applicant (`application.new.employer`); draft reminder (`application.draft.reminder`, opt-out class `reminders`).
+
+**Analytics:** `ui.apply.view` (step); `ui.apply.step.complete` (step_key); `ui.apply.step.error` (step_key, error_count); `ui.apply.resume.upload.complete`; `ui.apply.submit.click`; `ui.apply.submit.complete`; `ui.apply.abandon` (last_step_key, on exit or 24 hours idle); no answers recorded.
+
+**Accessibility:** `Stepper` as `nav` with `aria-label="Application steps"`, current `aria-current="step"`; step heading is `h1`? the page `h1` is "Apply to {Job}", step heading `h2` focus target on step change with announcement "Step 2 of 5: Resume"; radio groups use `fieldset/legend`; resume previews open in a dialog (focus trap, `Esc`); error summary per step; time-based expiry none; phone sticky bar respects keyboard (hides when keyboard opens only if the Continue button remains reachable via the keyboard `Done`/`Go` key on the last field).
+
+**Acceptance criteria**
+
+- Given a candidate completes Contact and leaves, when they reopen the application later, then they land on Resume with Contact data saved and the draft listed in `/applications`.
+- Given a required question is empty, when they press Continue, then no step change occurs, an error summary appears and focus moves to it, and the first invalid field is next in tab order.
+- Given the network drops on Review, when they press Submit, then the button explains "Needs a connection", nothing is lost, and after reconnect pressing Submit sends once with the same idempotency key.
+- Negative: given the candidate already has an active application for the job, when the wizard is opened via an old link, then they are redirected to the application detail with the message "You've already applied" and no second application is created.
+- Given the job closes mid-draft, when they press Submit, then the server rejects, the UI shows the closed state and keeps the draft.
+
+### REFSCR-05 Course player (lesson view)
+
+**Pattern for:** consuming sequenced content (courses, onboarding academies, enterprise mandates). **Route:** `/learn/courses/{id}/lessons/{lessonId}`. **Parent:** `/learn/courses/{id}`. **Roles:** CAN, STD (enrolled or preview), INS (preview). **Chrome:** `app` with optional `focus` toggle (theater mode). **Title:** "{Lesson title} - {Course title} - TalentSphere". **Focus on arrival:** lesson `h1`.
+
+**Desktop wireframe**
+
+```text
++----------------------------------------------------------------------+-------------------------+
+| < Data analysis foundations     Module 3: Queries  Lesson 2 of 6   [Theater] | COURSE OUTLINE     |
+| +------------------------------------------------------------------+ | v 1 Getting started    |
+| |                                                                  | |   (v) Welcome  3:10    |
+| |                      VIDEO / CONTENT SURFACE                     | | v 2 Spreadsheets       |
+| |                                                                  | |   (v) Formulas 8:20    |
+| | [>] 04:12 / 12:30 ======o=============  [CC] [1x] [HD] [PiP] [FS] | | v 3 Queries            |
+| +------------------------------------------------------------------+ |   (v) Select basics    |
+| 3.2 Joining tables                                  [ Mark complete ] |   (>) Joining tables   |
+| Tabs: [Overview] [Transcript] [Notes] [Q and A] [Resources]          |   ( ) Quiz: Joins      |
+| Overview text...                                                     | Progress 42 percent    |
+| [ < Previous ]                                      [ Next lesson > ] | Downloaded: 2 lessons  |
++----------------------------------------------------------------------+-------------------------+
+```
+
+**Phone wireframe**
+
+```text
++------------------------------+
+| < Course          3.2     [..]|
+| +--------------------------+ |  video pinned at top (sticky)
+| |      VIDEO               | |
+| | [>] 04:12 ====o=======   | |
+| +--------------------------+ |
+| Joining tables               |
+| [Overview][Transcript][Notes]|
+| [Q and A][Outline]           |
+| ... tab content scrolls ...  |
++------------------------------+
+| [ < ]  [ Mark complete ] [ > ]|  sticky bar
++------------------------------+
+```
+
+**Regions and components:** header (course link, location in course), `CMP-MediaPlayer` (`03` section 14), lesson meta, action bar, `CMP-Tabs` (Overview, Transcript, Notes, Q and A, Resources), outline `CMP-TreeView`/accordion with status icons (completed check, current, locked, quiz, downloaded), progress.
+
+**Content types:** video (default), reading (rich text), PDF/slides, interactive exercise, quiz (inline `CMP-QuestionRenderer`), code lab, discussion prompt, live session link. Each type specifies completion rule: video: watched at least 90 percent (or end reached) and required checks passed; reading: reached end and dwell above a minimum? (avoid dwell checks); manual "Mark complete" always available except where the instructor requires a quiz; quiz: score at least the pass mark; assignment: submitted (and graded if required). Completion rules are LRN-owned; the screen displays them ("Complete this lesson by watching it and passing the check").
+
+**Data:** Lesson content and media (STU), enrollment progress, resume position, notes (user private), Q and A threads (LRN), transcripts, captions, outline with lock rules (sequential locks shown with reason "Finish Select basics to unlock"), downloaded status. Freshness: progress saves every 15 s of playback and on pause, end, tab hidden; position resume on next open.
+
+**Actions:** Play and keyboard controls (`03` section 14.2), Mark complete (W; toggles with Undo), Next/Previous, jump via outline, add note at timestamp (W, autosave), bookmark (W), ask question (O), download lesson (D), change speed and captions (settings persisted), report content (O), theater mode (UI only), leave feedback (rating after course).
+
+**States:** loading (player skeleton with poster, outline skeleton), video processing ("This video is still being prepared" for instructors; learners see "Not available yet"), network lost (player inline retry), buffering, locked lesson (reason and link to the blocker), not enrolled (preview-only lessons play; others show enroll prompt via `EntitlementGate`), enrollment expired or revoked (read-only access per policy and message), offline (downloaded lessons play; others "Download to watch offline"), content updated by the instructor while the learner is mid-lesson (banner "This lesson was updated. Reload" never auto reloads), completed (check, optional certificate path at course end), region blocked, DRM errors, session expired (resume in place), conflict (notes edited on two devices: merge append).
+
+**Permissions:** enrolled learners view; previews per `preview` flag; INS course owners can preview with a "Preview mode" banner and no progress written; institution-assigned students with cohort rules; paid content requires entitlement (`CMP-EntitlementGate`); downloaded content respects license expiry.
+
+**Notifications:** deadline reminders (`course.deadline.upcoming`), instructor replies (`course.qa.reply`), certificate issued (`course.certificate.issued`).
+
+**Analytics:** `ui.player.view` (content_type); `ui.player.play`/`pause` (position_bucket); `ui.player.complete` (rule_met); `ui.player.speed.change`; `ui.player.captions.toggle`; `ui.player.note.add`; `ui.player.next.click`; `ui.player.error` (error_class); `ui.player.download.click`. Watch time sampled at 30 s granularity; no keystroke or screen content capture.
+
+**Accessibility:** captions on by user setting; transcript tab synchronized and readable without the player; controls labeled and operable (`03` section 14.2); no autoplay; autoplay-next off by default with a visible 10 s countdown when on; progress `role="progressbar"`; outline is a tree with proper roles and arrow navigation; "Mark complete" is a toggle button `aria-pressed` with label constant ("Mark complete"); status icons have text ("Completed"); tab order: player, action bar, tabs, outline; at 200 percent zoom the outline moves below content (reflow); reduced motion disables hover previews.
+
+**Acceptance criteria**
+
+- Given a learner watches 90 percent of a video lesson that has no quiz, when playback ends, then the lesson is marked complete, the outline shows a check with text "Completed", and "Next lesson" receives focus only if the user activates it (no auto navigation).
+- Given the learner closes the tab at 04:12, when they return, then the lesson opens at 04:12 with "Resume from 4:12" and a "Start over" link.
+- Given the user is offline with the lesson downloaded, when they open it, then it plays, notes save locally, and on reconnect progress syncs with a summary toast.
+- Negative: given the next lesson is locked by a prerequisite, when the user activates it in the outline, then it does not open and a message names the prerequisite with a link.
+- Given a keyboard user focused on the player, when pressing `Space`, then play toggles and the page does not scroll; pressing `Esc` in fullscreen exits fullscreen only.
+
+### REFSCR-06 Assessment runner
+
+**Pattern for:** timed, integrity-sensitive tasks (employer assessments, course exams, challenges). **Route:** `/assess/{attemptId}/run`. **Parent:** `/assess` (Exit with confirmation). **Roles:** CAN, STD (attempt owner), invited guests with a limited session. **Chrome:** `focus`. **Title:** "{Assessment name} - In progress - TalentSphere". **Focus on arrival:** question heading.
+
+**Desktop wireframe**
+
+```text
++----------------------------------------------------------------------------------------------+
+| SQL Fundamentals - Northwind            Time left [ 38:12 ] [Hide timer]    Saved 10 s ago  |
++----------------------+-----------------------------------------------------------------------+
+| QUESTIONS            |  Question 4 of 12                              [ ] Flag for review    |
+| (v)1 (v)2 (v)3 [4]  |  Write a query that returns each customer and their total orders.     |
+| ( )5 (F)6 ( )7 ...   |                                                                       |
+| ( )12                |  [ Code editor (SQL)                    ] [Plain text mode] [Run]     |
+|                      |  [                                      ]                             |
+| Legend: v answered   |  Output / test results (status region)                               |
+| F flagged ( ) not    |                                                                       |
+| [ Review and submit ]|  [ < Previous ]                                      [ Next > ]       |
++----------------------+-----------------------------------------------------------------------+
+| Integrity: this attempt is monitored per the rules you accepted. < Rules >                   |
++----------------------------------------------------------------------------------------------+
+```
+
+**Phone wireframe**
+
+```text
++------------------------------+
+| SQL Fundamentals  [38:12]    |
+| Q 4 of 12     [Flag] [List]  |
+| +--------------------------+ |
+| | Question text...         | |
+| | ( ) A  ( ) B  ( ) C ...  | |
+| +--------------------------+ |
++------------------------------+
+| [ < Prev ]          [ Next > ]|
++------------------------------+
+```
+
+The question list opens as a bottom sheet. The code editor type is not offered on phones unless the module supports it (`05` MJ-04).
+
+**Lifecycle:** Invitation → Pre-check (`/assess/{attemptId}/start`: rules, accommodations summary, device check, consent) → Run → Review → Submitted → Results (`/results`). An attempt has one state at a time: not started, in progress, paused (approved break), submitted, expired (auto-submitted), voided. Resumption after a technical break follows the policy: the attempt resumes with saved answers and the timer continues unless a platform fault is verified (then compensated time).
+
+**Behavior:** autosave every answer on change and every 15 s (class: draft; local first); timer synchronized to server time (display from server `deadline`, never from the local clock; clock drift corrected on each save response); extra-time multiplier applied from the approved accommodation and shown ("Time includes your approved extra time"); warnings: polite announcement at 50 percent (if configured), 10 min, 5 min, 1 min (assertive at 1 min), 30 s; at deadline auto-submit with announcement "Time is up. Your answers were submitted."; question navigation unrestricted unless the assessment is sequential-only (then Previous is absent and stated up front); flag for review; Review screen lists status per question with counts and a "Submit" confirmation (tier 2 style text: "You have 2 unanswered and 1 flagged. You can't change answers after submitting."); Exit leaves the attempt running (timer continues) with a warning; `visibilitychange` and fullscreen exits are logged as integrity events per policy and disclosed in the rules (never silently); no screen capture unless the assessment declares proctoring and the user consented.
+
+**Question types and renderers:** single choice, multiple choice, short text, long text (counter, no paste restriction unless disclosed), numeric, code (CMP-CodeEditor, run against sample tests, hidden tests on submit), file upload, ordering, matching, fill-in-the-blank, audio/video response (with accessible alternatives). Each has keyboard operation and a text alternative as in `04` section 11.2.
+
+**Actions:** Answer, Next/Previous, Flag, Open list, Run code (O), Pause (approved breaks only), Request help (opens a support dialog, O), Submit (O: offline shows "Reconnect to submit; your answers are saved on this device"; the timer policy for offline periods is stated in the rules), Exit.
+
+**States:** pre-check failures (camera, mic, network, battery, browser unsupported with alternatives: "Continue on a computer"), loading question (skeleton), question load failure (retry, timer paused for platform faults per policy), save failure (SaveIndicator "Couldn't save. Your answer is kept on this device. Retrying"), offline (editing continues locally, banner and status), session expired (resume in place without losing the timer), paused, time warning, auto-submitted, submitted success page ("Submitted. Results {when}"), voided (explains and offers appeal), accommodations active chip ("Adjustments applied"), rate limited code runs ("You can run code once every 5 seconds"), conflict (attempt opened on two devices: the later device takes over and the earlier shows "This attempt is open on another device").
+
+**Permissions:** attempt owner only; invited guests with token scoped to the attempt; proctors and graders via separate screens; employers never see answers before submission; no peeking APIs. Answers and integrity logs are sensitive (retention per ASM).
+
+**Analytics:** `ui.assess_run.view`; `ui.assess_run.question.view` (index); `ui.assess_run.answer.change` (question_type, no content); `ui.assess_run.flag.toggle`; `ui.assess_run.timer_warning.show` (threshold); `ui.assess_run.review.open`; `ui.assess_run.submit.complete` (reason: manual/auto); `ui.assess_run.error` (error_class); integrity events are domain events owned by ASM, not UI analytics.
+
+**Accessibility:** question region is a `section` labeled by "Question 4 of 12"; navigator is a `nav` with a list of buttons with state text ("Question 6, flagged, answered"); timer is not announced every second; `Alt R` announces remaining time; `Hide timer` hides visual only; `Alt N`/`Alt P`/`Alt F`/`Alt Q` per `04` section 3.2; error summary on Review; code editor plain-text mode; math via MathML; images with authored alt text required at publish; extra time and breaks per `04` section 11; proctoring alternatives; high contrast and dark theme honored; no content flashing; focus after Next moves to the new question heading with announcement "Question 5 of 12".
+
+**Acceptance criteria**
+
+- Given a user with a 50 percent extra-time accommodation, when the attempt starts, then the timer shows the adjusted total, every section timer is scaled, and the attempt record stores the multiplier.
+- Given the browser crashes with 12 minutes left, when the user reopens the attempt, then saved answers are restored, the timer reflects server time, and a notice states the time remaining.
+- Given a screen reader user, when 1 minute remains, then an assertive announcement states it once, and `Alt R` repeats the remaining time on request.
+- Negative: given the device is offline at the deadline, when time ends, then the app stores the final answers locally, shows "Time is up. Reconnect to submit", and on reconnect submits answers with their timestamps; the server accepts only answers saved before the deadline per its rules.
+- Negative: given the user opens the attempt on a second device, when the second device loads, then the first shows "This attempt is open on another device" and becomes read-only.
+
+### REFSCR-07 ATS pipeline board
+
+**Pattern for:** stage-based workflows (applications, mentoring requests, gig proposals, placement drives). **Route:** `/employer/{org}/jobs/{id}/pipeline` (query `view=board|list`, `stage`, `assignee`, `q`, `sort`). **Parent:** `/employer/{org}/jobs/{id}`. **Roles:** REC, EAD (full); HMG (scoped to assigned jobs, limited actions). **Chrome:** `app`. **Title:** "Pipeline - {Job title} - {Org} - TalentSphere".
+
+**Desktop wireframe**
+
+```text
+< Jobs / Data Analyst
+Data Analyst - Berlin - Open       [Board | List]  [ Add candidate ]  [ ... ]
+[ Search candidates ] [Stage v][Assignee v][Match v][Source v]  Selected: 0
++--------------+--------------+--------------+--------------+--------------+------------+
+| New (18)     | Screen (12)  | Interview (6)| Offer (1)    | Hired (0)    | Closed (9) |
+| +----------+ | +----------+ | +----------+ | +----------+ |              |            |
+| |[ ] S.Chen| | |[ ] R.Vega| | |[ ] A.Roy | | |[ ] T.Ito | |  drop here   |            |
+| | Strong   | | | Good     | | | Interview| | | Offer    | |              |            |
+| | 3d  SQL  | | | 5d       | | | Tue 10:00| | | Sent     | |              |            |
+| +----------+ | +----------+ | +----------+ | +----------+ |              |            |
+| | ...      | | | ...      | |              |              |              |            |
++--------------+--------------+--------------+--------------+--------------+------------+
+```
+
+**Phone wireframe**
+
+```text
++------------------------------+
+| < Data Analyst       [Board|List]
+| [New 18][Screen 12][Intv 6]> |   stage tabs (horizontal)
+| [ Search ] [ Filters ]       |
+| +--------------------------+ |
+| | S. Chen          Strong  | |
+| | Analyst at Contoso  3d   | |
+| | [ Move to... ] [ ... ]   | |
+| +--------------------------+ |
+| ...                          |
++------------------------------+
+Selection mode: top bar shows "2 selected" [Move] [Message] [...] 
+```
+
+**Card (CMP-CandidateCard compact):** avatar (or hidden in blind mode), name, headline or current role, match chip with explanation popover (words: Strong, Good, Partial), top three skills with verified marks, days in stage, source, assignee avatar, scorecard summary (n of m submitted), flags (needs action, duplicate), unread messages icon with text, checkbox. Whole card opens a drawer (`?open={applicationId}`), not a new page, on desktop; a full screen on phone.
+
+**Rules and behavior:** columns are the job's stages (configured in JOB/ATS); column header shows count and optional WIP hint; stage order and names editable by REC/EAD in settings; moving a card requires the target stage's gate (reason for Not selected, schedule for Interview optional, offer details for Offer). Move methods: drag and drop (`03` section 6), keyboard pick-up, "Move to" menu on every card, bulk "Move to" in selection mode. A move to a rejecting stage opens a dialog: reason (required list), message template (preview, editable within guardrails), schedule send (default immediate [PROP: 24-hour delay option]); "Reject without message" allowed where the org policy permits. Moves are saved immediately with optimistic UI limited to non-notifying stages (internal); notifying moves wait for the server (pending state on the card). Concurrent changes: a card moved by someone else shows a toast "A. Roy was moved to Interview by Sam" and re-renders; same card dropped by two users resolves by server order with a notice to the later one.
+
+**Filters, search and sort:** text search (name, skills, resume text where permitted), stage, assignee, match band, source, tags, date applied, scorecard status, "Needs action". Sort within columns: newest, oldest, match, last activity. Filters in URL. Counts per column reflect filters ("12 of 18").
+
+**Bulk actions:** selection per column or across columns (`03` section 5): Move to stage, Assign recruiter, Add tag, Add to pool, Send message (template), Reject with reason. Limits: 100 per action synchronous; above this background task; ineligible items listed.
+
+**Data:** Application summary (JOB/ATS), candidate summary respecting visibility and blind-review settings, scorecards (aggregates visible after the viewer submits their own), messages unread, schedule state. Freshness: real time (`03` section 11) with "N new" pill for new applicants; counts update silently; cards update in place.
+
+**States:** loading (column skeletons, 3 per column), empty column ("No candidates in {Stage}" plus hint "Drag candidates here" and "Move to" alternative text), empty job ("No applicants yet" with Share job and Promote actions; entitlements gate promotion), filtered empty, error per column (Retry), offline (read cached board "Saved {time}"; moves disabled with reason; notes queueable), permission (HMG sees only their assigned stages and cannot move to Not selected if policy denies; actions `aria-disabled` with reason), rate limited (bulk), conflict (above), closed job (read-only board banner "Job closed. Reopen to move candidates"), large boards (virtualized columns above 100 cards; "Load more" per column), blind mode.
+
+**Permissions:** REC and EAD: view all, move, reject, message, assign, export (EAD, audited); HMG: view assigned job applicants, comment, score, move only to review-type stages (policy); no access to candidates of other organizations; candidate PII fields (phone, email) are shown to REC and EAD after stage `Screen`? [PROP: gated by org setting]. Every view of a full profile, export and bulk reject is audit-logged.
+
+**Notifications:** triggered: stage change messages to candidates (templates per `06` section 7), interview scheduling, assignment notifications to recruiters (`application.assigned`), new applicant digests.
+
+**Analytics:** `ui.pipeline.view` (view_mode); `ui.pipeline.card.open`; `ui.pipeline.move.complete` (from_stage_type, to_stage_type, method: drag/keyboard/menu/bulk); `ui.pipeline.reject.complete` (reason_key); `ui.pipeline.filter.change`; `ui.pipeline.bulk.complete` (action, count_bucket); `ui.pipeline.error`.
+
+**Accessibility:** board is a group of `region`s per column labeled "{Stage}, 12 candidates"; cards are `li` items; keyboard drag as `03` section 6 with announcements; the list view (table) is always available and is the default for screen reader users when `prefers-reduced-motion`? no, the default is the user's last choice; every action available in both; selection checkboxes with labels "Select Sam Chen"; match chip includes text; drawer focus management per `CMP-Drawer`; column scroll buttons for keyboard; "N new" pill polite; sticky column headers do not obscure focus.
+
+**Acceptance criteria**
+
+- Given a recruiter drags a card from Screen to Interview, when dropped, then the card appears at the drop position within 150 ms, saves, and an Undo toast appears; if the save fails the card returns to Screen with a message.
+- Given a keyboard user focuses a card and presses `Space`, `Right`, `Space`, then the card moves to the next stage and "Moved Sam Chen to Interview, position 1 of 7" is announced.
+- Given a recruiter selects 12 candidates and chooses Reject, when the dialog opens, then it states "12 candidates will be told they were not selected" with a reason required and templates, and the action is audit logged.
+- Negative: given an HMG tries to move a candidate to Offer, when they use any method, then the action is unavailable (`aria-disabled` with "Only recruiters can send offers") and the server rejects direct API attempts with 403.
+- Given a job with 1,500 applicants, when the board loads, then each column loads 50 cards with "Load more" and the list view offers pagination; no browser freeze.
+

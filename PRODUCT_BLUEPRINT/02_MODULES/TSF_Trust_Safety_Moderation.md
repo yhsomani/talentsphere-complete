@@ -573,3 +573,383 @@ flowchart LR
 
 ### 4.5 TSF-E Enforcement and due process
 
+### FR-TSF-019 — Content actions (label, limit reach, hide, remove, restore)
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT §10 BR-122 hidden_by_moderation, removed_by_moderation states; §2.6 states] [DER]
+- **Purpose and outcome:** Moderators and the system can proportionately limit content, reversibly where possible, across every module through one consistent action contract.
+- **Roles and permissions:** `MOD-1..3, MOD-S: apply per matrix` · system: apply holds per FR-TSF-013 · `PAD: configure`
+- **Preconditions and entry points:** A decision (FR-TSF-009), a detection hold (FR-TSF-013), or a legal order (FR-TSF-028).
+- **User interactions and actions:** Reviewers choose among: None, Label (for example "Sponsored", "Disputed", "Sensitive media"), Reduce reach (exclude from recommendations and feed ranking, keep visible on profile and by link), Hide pending review, Remove (not visible to anyone except the author with notice and TSF), Geo-restrict (legal orders), Restore (reverse).
+- **System behaviour:** The action API (signed, idempotent by decision id) is implemented by each content-owning module and updates content state: NET `SM-NET-03` `hidden_by_moderation`; MSG tombstones with TSF preservation (`FR-MSG-002`); JOB listing takedown; EVD claim label. Authors see removed content with the reason (`BR-NET-037`). Restoration after appeal reverses the state and any reach limit and removes the sanction strike if it was the basis. Removal does not delete evidence (FR-TSF-027). Content counts, labels and reach changes are recorded in the action log. Emits `tsf.content.actioned`, `tsf.content.restored`.
+- **UI elements and controls:** Action selector in the case workspace; module-side banners (author view "Removed because ...", viewer view "This content is not available").
+- **Configuration options:** Platform: label set, geo-restriction regions.
+- **Business rules:** `BR-TSF-008`, `BR-TSF-009`, `BR-TSF-012`, `BR-TSF-013`
+- **Validation:** Action must be allowed by the matrix; the object must still exist in a state the action applies to.
+- **Inputs and outputs:** In: decision id, object ref, action. Out: acknowledged state change.
+- **Filters, sorting, search:** Action log filter by object, action, date.
+- **Notifications and communication:** Statement of reasons to the author (FR-TSF-021).
+- **Error handling and edge cases:** Module unavailable: retried with backoff, escalates after 24 hours. Content already deleted by the author: action recorded as no-op with note.
+- **Dependencies:** NET, MSG, JOB, EVD, LRN, STU and others (planned), `ENT-TSF-08`.
+- **Security and privacy:** Actions signed; action log append-only.
+- **Acceptance criteria:**
+  - Given a Remove decision on a post, then it is invisible to all but the author and TSF and the author sees the reason.
+  - Given a restore after appeal, then the post returns and the strike is lifted.
+  - Given a retried action with the same decision id, then there is no duplicate effect.
+
+### FR-TSF-020 — Account sanctions ladder
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT WF-08 "two-human review on bans"; §5.9; §18.3] [PROP] for ladder detail
+- **Purpose and outcome:** Account-level consequences are proportionate, escalate predictably, are scoped to the harmed capability where possible, and are always reviewable.
+- **Roles and permissions:** `MOD-1: warnings` · `MOD-2: restrictions and suspensions up to 30 days` · `MOD-2 plus second reviewer: permanent actions` · `SAD, PAD: override with audit`
+- **Preconditions and entry points:** A decision with an account action; repeat violations tracked as strikes.
+- **User interactions and actions:** Reviewers choose a rung: 1. Notice (educational, no strike). 2. Warning (strike 1). 3. Feature restriction (examples: no posting for 7 days, no outreach for 30 days, no messaging to non-connections, no group creation, no referral requests, no job posting, no instructor publishing, reach limitation of all content). 4. Temporary suspension (1, 7, 30 days; sign-in allowed to read notices, view data and appeal; no public presence). 5. Permanent ban (two humans). Severe harms skip rungs (matrix).
+- **System behaviour:** `SM-TSF-04`: scheduled, active, expired, lifted, under_appeal (still active unless suspended pending appeal), superseded. Strike model [PROP]: strikes accumulate per policy area; low and medium severity strikes expire after 12 months, high severity after 36 months; critical severities do not expire. Repeat violation increases the default rung but the reviewer may choose a lower rung with a reason (`BR-TSF-013`). Feature restrictions propagate to owning modules via a `Restriction` object (capability code, expiry) enforced at their write paths (`BR-TSF-026`): NET posting, requests, referrals, MSG outreach and requests, JOB posting, STU publishing. Suspension and ban revoke sessions through IDN (planned) and hide the profile; connections are preserved during temporary suspension; ban retains data per retention policy and blocks re-registration signals (FR-TSF-023). Employer account sanctions affect only that organization and its users; they do not become a cross-employer blacklist (`BR-TSF-027`). Sanctions never silently change candidate-facing application outcomes; if a candidate is suspended during a process, ATS (planned) shows "candidate unavailable" without reasons. Interaction with assessments: sanctions from integrity violations are handled via ASM referral (`POL-17`), decided here with the same ladder. Emits `tsf.sanction.proposed`, `tsf.sanction.applied`, `tsf.sanction.lifted`.
+- **UI elements and controls:** Ladder selector with consequence text; strike history table; schedule and duration fields; "lift sanction" action (MOD-2); user-facing banner "Your posting is limited until <date>" with details link.
+- **Configuration options:** Platform: strike windows, default rungs by policy area, durations.
+- **Business rules:** `BR-TSF-011`, `BR-TSF-013`, `BR-TSF-026`, `BR-TSF-027`, `BR-TSF-008`
+- **Validation:** Duration within allowed set; permanent action requires quorum; sanction target must be the account responsible (for organization accounts, the organization or a named user, per case).
+- **Inputs and outputs:** In: decision with account action. Out: sanction record and restrictions.
+- **Filters, sorting, search:** Sanction list filter by state, type, expiry.
+- **Notifications and communication:** Statement of reasons plus effect and expiry (FR-TSF-021); expiry notice.
+- **Error handling and edge cases:** Sanction applied to compromised account: IDN recovery flow lifts after verification and the case is re-evaluated. Account deletion request during sanction: honored after the legal retention period but the sanction record persists for ban-evasion defense (`BR-TSF-032`).
+- **Dependencies:** IDN, NET, MSG, JOB, STU, ATS (planned), FR-TSF-010, FR-TSF-022, `ENT-TSF-09`.
+- **Security and privacy:** Sanction records are PRIVATE; shared with law enforcement only through FR-TSF-028; never shared with other employers or third parties.
+- **Acceptance criteria:**
+  - Given a first low-severity violation, then the default rung is notice or warning, not suspension.
+  - Given a 7-day posting restriction, then posting is blocked and messaging still works.
+  - Given a permanent ban with one reviewer, then it does not execute.
+  - Given a strike older than 12 months of low severity, then it no longer counts.
+
+### FR-TSF-021 — Statements of reasons and notices to affected users
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT WF-08 "Resolution logged + notice sent"] [DER] from DSA reasoning duties
+- **Purpose and outcome:** Everyone affected by a moderation action knows what happened, why, under which rule, whether a machine was involved, and how to contest it.
+- **Roles and permissions:** system; `affected users: view` · `MOD-3: maintain templates`
+- **Preconditions and entry points:** Any content action, sanction, restriction, pre-moderation rejection, automated hold, or verification downgrade.
+- **User interactions and actions:** The user receives an in-app notice and an email, and can open the notice page showing the statement.
+- **System behaviour:** Required statement fields (`BR-TSF-008`): what was done (content action and account action), the object (with excerpt where safe), the facts and circumstances relied on (summary), the policy name and version, whether automated detection was used and whether the decision was automated or human, the effective date and duration, the territorial scope (for legal restrictions, the legal basis), how to appeal and the deadline (30 days from notice [PROP]), the availability of out-of-court dispute settlement where applicable (FR-TSF-030), and how to contact support. Notices never name the reporter and avoid disclosing detection internals that enable evasion (`BR-TSF-033`). For legal-order restrictions where law prohibits notice, the notice is delayed or omitted per the order with SAD approval and a record. Statements are written to a restricted database that feeds transparency counts (FR-TSF-029). Templates are localized. Emits `tsf.statement_of_reasons.issued`.
+- **UI elements and controls:** Notice page with sections; "Appeal this decision" button; "See the policy"; "Download statement" PDF.
+- **Configuration options:** Platform: templates per action and language; appeal deadline.
+- **Business rules:** `BR-TSF-008`, `BR-TSF-033`, `BR-TSF-014`, `BR-TSF-035`
+- **Validation:** All required fields present or the action cannot execute (the execution step checks completeness).
+- **Inputs and outputs:** In: decision. Out: notice and statement record.
+- **Filters, sorting, search:** User notice list by date.
+- **Notifications and communication:** Template `tsf.statement_of_reasons`; channels in-app (mandatory), email (mandatory for sanctions), push (optional); class `account_safety` (non-optional).
+- **Error handling and edge cases:** Email bounces: in-app notice persists and banner shown at sign-in. User with no access (account suspended): the notice page remains reachable via a signed link.
+- **Dependencies:** FR-TSF-009, FR-TSF-019, FR-TSF-020, NTF (planned), `ENT-TSF-10`.
+- **Security and privacy:** Statements are PRIVATE to the user; excerpts avoid third-party personal data.
+- **Acceptance criteria:**
+  - Given an automated hold, then the statement says it was automated and offers an appeal.
+  - Given a sanction, then the notice includes policy, duration and appeal deadline.
+  - Given a decision missing a policy id, then it cannot execute.
+  - Given a reported content removal, then the notice never names the reporter.
+
+### FR-TSF-022 — Appeals
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-154 "appeal path exists for disputed credentials; SLA at most 7 days"; §18.3 "governed review and appeal"]
+- **Purpose and outcome:** Any person affected by an enforcement action can contest it and get an independent human review.
+- **Roles and permissions:** `affected users (any role): appeal own actions` · `reporters: appeal no-violation outcomes in qualifying cases (FR-TSF-003)` · `MOD-2, MOD-3: decide` · `SAD: final escalation`
+- **Preconditions and entry points:** Statement of reasons page; sanction banner; reporter outcome page.
+- **User interactions and actions:** 1. Select Appeal within 30 days. 2. Explain why (up to 3,000 characters) and attach evidence (up to 5 files). 3. Receive a reference and expected decision date. 4. See the decision with reasoning, or request the information needed. 5. If upheld the user may ask for a final review (MOD-3 or SAD) once.
+- **System behaviour:** `SM-TSF-03`. Appeals are assigned to a reviewer who did not take the original decision and is at least one tier above for permanent actions (`BR-TSF-014`). Review is fresh (not deferential), considers new evidence and the policy at the time (and the current policy if more lenient). Targets: decision within 7 days for credential disputes and account suspensions, within 14 days for others, with automated holds reviewed within 72 hours [PROP, `OD-TSF-06`]. Outcomes: overturned (action reversed, strike removed, statement updated), partially overturned, upheld, withdrawn, or `expired` (no appeal in 30 days). Sanctions that are less than 24 hours old at appeal time may be paused only for critical-error claims. Appeals are free and never lead to a harsher penalty than the original (no reformatio in peius) unless fraud in the appeal is shown. Users are told about external out-of-court dispute bodies where they exist (FR-TSF-030). Emits `tsf.appeal.submitted`, `tsf.appeal.decided`.
+- **UI elements and controls:** Appeal form with counter and uploader; timeline; decision page; "Request final review".
+- **Configuration options:** Platform: windows (30 days to appeal), SLAs by type.
+- **Business rules:** `BR-TSF-014`, `BR-TSF-012`, `BR-TSF-008`, `BR-TSF-024`
+- **Validation:** One appeal per action plus one final review; text 20 to 3,000 characters; evidence up to 5 files of 10 MB.
+- **Inputs and outputs:** In: appeal. Out: decision.
+- **Filters, sorting, search:** Appeals queue filter by age, action type, tier needed.
+- **Notifications and communication:** Acknowledgement, decision, SLA slip notice (class `account_safety`).
+- **Error handling and edge cases:** Appeal for an action already lifted: closed as moot with a note and the strike removed if applicable. Reviewer conflict: reassigned. Appeal volume spikes: surge handling with priority to suspensions and bans.
+- **Dependencies:** FR-TSF-009, FR-TSF-021, FR-TSF-032, `ENT-TSF-11`.
+- **Security and privacy:** Appeal text and evidence PRIVATE; reviewers see only case-scope data.
+- **Acceptance criteria:**
+  - Given a suspension, when the member appeals within 30 days, then a different reviewer decides within 7 days.
+  - Given an upheld removal, then the user can request one final review.
+  - Given the appeal succeeds, then the content returns, the strike is removed and the statement is updated.
+  - Given an appeal after 31 days, then the system explains it is closed and offers to contact support for exceptional circumstances.
+
+### FR-TSF-023 — Ban evasion and repeat-offender handling
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Should · R4
+- **Source:** [PROP]
+- **Purpose and outcome:** Banned or restricted people cannot trivially return, while ordinary people who share devices or networks are not wrongly punished.
+- **Roles and permissions:** system; `MOD-S: review matches` · `MOD-2: confirm` · `SAD: access to sensitive identifiers`
+- **Preconditions and entry points:** Registration, sign-in and profile edits of new accounts.
+- **User interactions and actions:** New accounts matching a banned identity signal are held for verification (email and phone verification, ID check where available) and a human review before activation; confirmed evasion leads to the ban being extended to the new account with a statement and an appeal.
+- **System behaviour:** Signals: salted hashes of verified email, phone, payment identifier, government ID (only where an ID verification partner returns a stable hash), device fingerprint classes and behavioral similarity; hashes of banned accounts retained for 36 months [PROP, `BR-TSF-032`]. A match is a signal, not proof (`BR-TSF-010`): confirmation requires a human with two independent signals. Repeat offenders (3 strikes in 12 months across policy areas) are escalated to MOD-2 for rung review. Appeals can lift evasion findings. Emits `tsf.sanction.proposed`.
+- **UI elements and controls:** Verification gate screen for held accounts ("We need to verify your account"); moderator match view.
+- **Configuration options:** Platform: hash retention, signal weights, verification steps by region.
+- **Business rules:** `BR-TSF-010`, `BR-TSF-025`, `BR-TSF-032`
+- **Validation:** At least two independent signals to confirm.
+- **Inputs and outputs:** In: identity hashes. Out: holds and cases.
+- **Filters, sorting, search:** Match queue by signals.
+- **Notifications and communication:** Held-account notice; statement of reasons on confirmation.
+- **Error handling and edge cases:** Shared family device: single device-class signal never confirms. Person's genuine second account after a mistaken ban: appeal restores.
+- **Dependencies:** IDN, BGV (planned), FR-TSF-020, `ENT-TSF-09`.
+- **Security and privacy:** Only hashes retained; data minimization; no cross-platform sharing except legal obligations.
+- **Acceptance criteria:**
+  - Given a new account with the same verified phone as a banned account, then it is held for review and not auto-banned.
+  - Given a shared device alone, then no evasion finding is made.
+  - Given confirmed evasion, then the user receives a statement and can appeal.
+
+### FR-TSF-024 — Minors safety
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-128 minors 16+ private-by-default, restricted outreach; cross-module `BR-NET-011`, `BR-MSG-008`, `BR-AIC-030`] [DER]
+- **Purpose and outcome:** Young members get protective defaults, and any sexualization, grooming or exploitation of minors is removed immediately and reported to authorities as required.
+- **Roles and permissions:** `MOD-S (minors specialists): handle` · `SAD: authority reporting oversight` · system: protective defaults
+- **Preconditions and entry points:** Age claim at registration (16 to 17 are allowed minors; under 16 not permitted), reports under child-safety reasons, detector hits, institution reports.
+- **User interactions and actions:** 1. Minors see safety information on first use and a visible "Report a concern" link. 2. Specialists review minors-related cases in a restricted queue. 3. Institutions' safety contacts (IAD, PLO) can raise concerns about learners.
+- **System behaviour:** Protective defaults enforced across modules (NET `BR-NET-011`, MSG `BR-MSG-008`, AIC `BR-AIC-030`): private profile, restricted discovery, no recruiter outreach, limited groups, no contact-data collection. Suspected under-16 accounts are held for age review with the user able to provide proof. Child-sexual-abuse material and grooming patterns: immediate removal or block, evidence preserved under legal hold, MOD-S review, account suspension pending review, mandatory report to the competent authority or national hotline in the user's and the platform's jurisdictions within the statutory time (`BR-TSF-017`, `OD-TSF-07`). Employers contacting minors outside permitted contexts (for example a recruiter messaging a minor) is a violation under `POL-01` or `POL-08`. Specialists are the only staff who may handle this material; viewing is minimized (hash-based handling, no re-sharing, restricted tooling). Parent or guardian reporting channel exists [PROP]. Emits `tsf.minor_safety.escalated`.
+- **UI elements and controls:** Restricted queue; specialist workspace with hash-only views; authority report form; age review gate.
+- **Configuration options:** Platform: authority contacts by jurisdiction, statutory deadlines.
+- **Business rules:** `BR-TSF-017`, `BR-TSF-015`, `BR-TSF-020`
+- **Validation:** Authority report requires case id, evidence hold id, SAD or MOD-S approval.
+- **Inputs and outputs:** In: child-safety signals and reports. Out: removals, holds, authority reports.
+- **Filters, sorting, search:** Restricted queue only.
+- **Notifications and communication:** Reporters get a neutral acknowledgement; affected minors receive supportive guidance and resources where appropriate; guardians per policy.
+- **Error handling and edge cases:** Uncertain age appearance: never decided by appearance alone. Authority portal down: retry and escalate to SAD for manual submission.
+- **Dependencies:** IDN, NET, MSG, AIC, FR-TSF-027, FR-TSF-028, `ENT-TSF-03`.
+- **Security and privacy:** Strictest access: specialists only, dual logging, no export; wellbeing support for specialists (FR-TSF-031).
+- **Acceptance criteria:**
+  - Given a hash match to known CSAM, then the content is removed, preserved under hold, the case is P0, and an authority report is prepared within the statutory time.
+  - Given a minor, then recruiter outreach is refused and the profile is private by default.
+  - Given appearance-based suspicion of under-16 age, then no action occurs without a documented age review.
+
+### FR-TSF-025 — Imminent harm and crisis escalation
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Must · R2
+- **Source:** [PROP]; [SRC: SSOT §12.9 safety flow]
+- **Purpose and outcome:** Credible threats of violence and expressions of intent to self-harm get fast human attention and, where required, emergency disclosure to authorities.
+- **Roles and permissions:** `MOD-S: handle` · `SAD: approve emergency disclosure` · system: first responses
+- **Preconditions and entry points:** Reports with reasons "Violence or threats" or "Self-harm", detector hits (FR-TSF-014), assistant crisis detection (`FR-AIC-029`), messages reported.
+- **User interactions and actions:** 1. The reporter or the person in crisis sees supportive resources immediately (hotlines by country, "if you are in immediate danger contact local emergency services"). 2. A specialist reviews within 15 minutes (P0). 3. For credible threats against identifiable people, the specialist may initiate an emergency disclosure to authorities with SAD approval. 4. Content may be hidden or reach-limited to prevent harm; the account may receive a welfare outreach message.
+- **System behaviour:** Triage matrix: credible and imminent (identifiable target, means, timeframe) goes to P0 and emergency disclosure; non-imminent threats follow the ladder; self-harm expressions receive supportive outreach templates and are never sanctioned for the expression alone (`BR-TSF-018`). Emergency disclosure is the only case where private content beyond report scope may be accessed without a legal order, under SAD approval with a recorded basis, a minimum necessary rule, and retroactive review (`BR-TSF-016`, `BR-TSF-018`). On-call coverage is defined by region and hours (`OD-TSF-07`). Emits `tsf.imminent_harm.escalated`.
+- **UI elements and controls:** Crisis resource interstitial; specialist playbook panel; emergency disclosure form.
+- **Configuration options:** Platform: resource lists by country, on-call schedule, templates.
+- **Business rules:** `BR-TSF-016`, `BR-TSF-017`, `BR-TSF-018`
+- **Validation:** Emergency disclosure requires SAD approval and a written basis.
+- **Inputs and outputs:** In: reports and signals. Out: outreach, holds, disclosures.
+- **Filters, sorting, search:** Restricted queue only.
+- **Notifications and communication:** Supportive notice to the person; no accusatory language.
+- **Error handling and edge cases:** On-call unreachable in 5 minutes: escalate to next on-call and SAD. Language unsupported: use translation and flag for native review.
+- **Dependencies:** FR-TSF-008, FR-TSF-014, FR-TSF-028, FR-TSF-031, AIC, MSG.
+- **Security and privacy:** Disclosures logged with minimum data; post-incident review within 7 days.
+- **Acceptance criteria:**
+  - Given a credible threat report, then a specialist reviews within 15 minutes.
+  - Given a self-harm expression, then the user sees support resources and no sanction is applied.
+  - Given an emergency disclosure without SAD approval, then the system refuses it.
+
+### FR-TSF-026 — Scam warnings and safety education
+
+- **Sub-module:** TSF-E Enforcement and due process
+- **Priority / tier:** Should · R2
+- **Source:** [PROP]
+- **Purpose and outcome:** Job seekers recognize and avoid scams through contextual warnings, a safety center and safe-use tips.
+- **Roles and permissions:** all users: view · `MOD-3, PAD: manage content`
+- **Preconditions and entry points:** Banners in MSG (`FR-MSG-019`), job pages for restricted or unverified employers, application flow when asked for sensitive data, the Safety Center, onboarding.
+- **User interactions and actions:** 1. See warnings (for example "This employer is not verified yet"). 2. Open the Safety Center: how to spot fake jobs, what a real recruiter will never ask, how to report, how to protect your identity. 3. Take a short safety quiz during onboarding (optional). 4. Receive targeted alerts when a scam pattern affects people they interacted with.
+- **System behaviour:** Warning content library with severity, trigger rule and localization. Alerts to recipients of confirmed scam messages ("A message you received matched a known scam; do not respond or pay"). Aggregated trend notices ("Fake internship offers via messengers rising") appear in the Safety Center. Warnings never state a person is guilty; they describe the pattern. Emits `tsf.scam_warning.shown`.
+- **UI elements and controls:** Banner component; Safety Center pages; targeted alert cards.
+- **Configuration options:** Platform: warning rules and text, regions.
+- **Business rules:** `BR-TSF-023`, `BR-TSF-033`
+- **Validation:** Content reviewed by MOD-3 before publish.
+- **Inputs and outputs:** In: confirmed patterns. Out: warnings.
+- **Filters, sorting, search:** Safety Center searchable.
+- **Notifications and communication:** Targeted alert (class `account_safety`).
+- **Error handling and edge cases:** False alarm: correction notice. Overexposure: frequency cap of 1 alert per week per user.
+- **Dependencies:** MSG, JOB, FR-TSF-015, FR-TSF-016.
+- **Security and privacy:** Alerts do not reveal reporters or other victims.
+- **Acceptance criteria:**
+  - Given a job from an unverified employer, then a warning appears on the job page.
+  - Given a confirmed scam message, then recipients get a targeted alert once.
+  - Given a pattern description, then no individual is named.
+
+### 4.6 TSF-F Evidence, legal, transparency and moderator operations
+
+### FR-TSF-027 — Evidence preservation and legal hold
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Must · R2
+- **Source:** [DER]; [SRC: SSOT §5.9 legal basis]
+- **Purpose and outcome:** Evidence needed for moderation, appeals and lawful requests is captured intact, kept as long as needed and no longer, and access to it is controlled.
+- **Roles and permissions:** system; `MOD-S, MOD-3: place holds for safety cases` · `SAD: legal holds` · `PAD: view metadata`
+- **Preconditions and entry points:** Reports (snapshot), automated holds, sanctions, legal requests, authority referrals.
+- **User interactions and actions:** Moderators see "Evidence preserved" status; SAD manages legal holds (add, extend, release) with reason and reference.
+- **System behaviour:** `SM-TSF-08`: active, released, expired. At report time and at decision time the system stores an evidence package: object content, metadata (author, time, edits), context window, reporter statement, detection signals, action log, and a SHA-256 hash chain (each package hashes the previous one for the case) (`BR-TSF-015`). Packages are encrypted, stored in restricted storage, and access is logged. Retention (`BR-TSF-032`): case evidence 24 months after case closure [PROP]; sanction records 36 months; legal holds until released by SAD with review every 6 months; child-safety evidence per statute. Deleted content, deleted accounts and user erasure requests do not delete evidence under hold (SET planned interplay with the lawful basis stated to the user). Evidence export requires SAD approval and creates a signed bundle. Emits `tsf.evidence.preserved`, `tsf.evidence.released`.
+- **UI elements and controls:** Evidence tab in the case; hold manager for SAD; verification tool to recompute hashes.
+- **Configuration options:** Platform: retention windows by category and region.
+- **Business rules:** `BR-TSF-015`, `BR-TSF-032`, `BR-TSF-012`
+- **Validation:** Hold needs reason code and reference; release needs approver other than placer for legal holds.
+- **Inputs and outputs:** In: content refs, case data. Out: sealed evidence package, hold state.
+- **Filters, sorting, search:** Hold list filter by state, reference, expiry.
+- **Notifications and communication:** SAD reminders for hold reviews.
+- **Error handling and edge cases:** Hash mismatch on verification: incident opened. Storage failure: write retried, case marked "evidence incomplete".
+- **Dependencies:** PLT storage (planned), MSG `FR-MSG-027`, NET `FR-NET-037`, `ENT-TSF-11`, `ENT-TSF-02`.
+- **Security and privacy:** Encryption, dual control for export, immutable log.
+- **Acceptance criteria:**
+  - Given a report, then a hashed snapshot is stored before any action.
+  - Given a user erasure request for content under hold, then it remains in restricted storage until the hold is released.
+  - Given a tampered package, then verification fails and an incident opens.
+
+### FR-TSF-028 — Legal requests handling
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Must · R3
+- **Source:** [DER]; [SRC: SSOT §5.9 "no cross-user mutation without consent/legal basis"]
+- **Purpose and outcome:** Government and court orders, takedown requests, preservation requests and emergency requests are validated, tracked, answered minimally and recorded.
+- **Roles and permissions:** `SAD: handle` · `PAD: view metadata` · counsel (external, via SAD workflow)
+- **Preconditions and entry points:** A dedicated legal contact channel and a documented process page; orders received by mail or portal.
+- **User interactions and actions:** 1. Intake clerk logs a request with type (disclosure, removal, preservation, emergency), authority, jurisdiction, legal basis, deadline. 2. Counsel validates authenticity and scope. 3. SAD decides: comply, narrow, challenge, reject. 4. Data is gathered by a restricted tool and delivered securely. 5. The affected user is notified unless prohibited by law or an applicable gag order, in which case a delayed-notice timer is set.
+- **System behaviour:** `SM-TSF-06`: received, validated, rejected, in_progress, fulfilled, closed, challenged. Rules (`BR-TSF-016`): only designated staff handle; verify authority; minimum necessary data; no bulk or fishing disclosures; jurisdiction and competence checks; record everything; user notice by default; legal-order removals are geo-restricted when the law allows (FR-TSF-019). Emergency requests follow FR-TSF-025. Requests from regimes without adequate legal protections follow an escalation policy (`OD-TSF-08`). Counts feed the transparency report (FR-TSF-029). Emits `tsf.legal_request.received`, `tsf.legal_request.fulfilled`.
+- **UI elements and controls:** Request log, validation checklist, data collection tool, notification scheduler, template responses.
+- **Configuration options:** Platform: authorized authorities list by jurisdiction, response templates, statutory deadlines.
+- **Business rules:** `BR-TSF-016`, `BR-TSF-032`
+- **Validation:** Authority identity verified through an independent channel; scope matched to the order text.
+- **Inputs and outputs:** In: legal request. Out: response bundle, notices, records.
+- **Filters, sorting, search:** Filter by type, authority, jurisdiction, state.
+- **Notifications and communication:** User notice template `tsf.legal_notice` (unless barred).
+- **Error handling and edge cases:** Overbroad order: narrowed or challenged. Deadline risk: escalation to counsel at 50 percent elapsed.
+- **Dependencies:** FR-TSF-027, FR-TSF-029, MSG `FR-MSG-029`, `ENT-TSF-12`.
+- **Security and privacy:** Secure transfer; dual approval for message content; full audit.
+- **Acceptance criteria:**
+  - Given an unauthenticated demand, then it is rejected and logged.
+  - Given a valid order for account data, then only the data within scope is disclosed and the user is notified unless barred.
+  - Given a gag order, then notice is delayed and a timer is set to review.
+
+### FR-TSF-029 — Transparency reporting
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Should · R4
+- **Source:** [DER] from DSA transparency obligations [PROP]
+- **Purpose and outcome:** The platform publishes regular, comparable data about reports, actions, appeals, automation and legal requests.
+- **Roles and permissions:** `PAD, SAD: produce and approve` · `all users incl. GUE: read`
+- **Preconditions and entry points:** Public Transparency Center; scheduled generation.
+- **User interactions and actions:** 1. System generates a draft report each period. 2. PAD reviews the draft, adds commentary. 3. SAD approves and publishes. 4. Visitors read, filter by period and policy area, and download CSV.
+- **System behaviour:** Cadence [PROP, `OD-TSF-09`]: semiannual (and annual summary). Contents: reports received by category and source (user, trusted flagger, automated); actions by type and policy area; median and p90 time to first review and to decision; appeals received, upheld and overturned; share of decisions made or assisted by automation and detector accuracy; legal requests received and fulfilled by country and type; trusted flaggers' counts and accuracy; moderator staffing by language and region (numbers of reviewers); content restored; fraud takedowns (jobs and employers); statement of reasons count; minors-related referrals (counts only); average active users by region if required by law. Small counts under 5 are suppressed or banded. Data derived from the statements-of-reasons database and case tables with reconciliation checks. Emits `tsf.transparency_report.published`.
+- **UI elements and controls:** Transparency Center with charts and tables (with text alternatives); CSV download; methodology page.
+- **Configuration options:** Platform: periods, metrics list, suppression threshold.
+- **Business rules:** `BR-TSF-030`, `BR-TSF-008`
+- **Validation:** Reconciliation passes (counts match case totals within 0.5 percent) before publish.
+- **Inputs and outputs:** In: case data. Out: published report.
+- **Filters, sorting, search:** By period, policy area, region.
+- **Notifications and communication:** Announcement to subscribers (class `policy_updates`).
+- **Error handling and edge cases:** Reconciliation failure: delay publication with an explanatory note. Data gaps: stated in methodology.
+- **Dependencies:** FR-TSF-021, FR-TSF-033, `ENT-TSF-19`.
+- **Security and privacy:** Aggregate only; no individual data; suppression for small cells.
+- **Acceptance criteria:**
+  - Given a period end, then a draft report is generated automatically.
+  - Given a cell with fewer than 5 cases, then it is banded or suppressed.
+  - Given a failed reconciliation, then publication is blocked.
+
+### FR-TSF-030 — DSA and online-safety compliance workflows
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Should · R4
+- **Source:** [DER] [PROP]; applicability `OD-TSF-01`
+- **Purpose and outcome:** Where the EU Digital Services Act or similar online-safety laws apply, the platform can show it meets their procedural duties.
+- **Roles and permissions:** `SAD, counsel: own compliance` · `PAD: operate` · `MOD-3: operational duties`
+- **Preconditions and entry points:** Compliance register in the admin console; public contact pages.
+- **User interactions and actions:** 1. Publish a single electronic point of contact for authorities and a separate point for users. 2. Maintain the notice-and-action mechanism (FR-TSF-001) with required notice elements for illegal content notices (explanation, exact location (URL), name and email of the notifier where required, statement of good faith) and acknowledgments. 3. Maintain statements of reasons (FR-TSF-021) and submit anonymized statements to the regulator's transparency database where required. 4. Internal complaint handling (FR-TSF-022) at no cost for at least six months after a decision. 5. Provide information about certified out-of-court dispute settlement bodies and engage in good faith where selected. 6. Suspend the provision of services to frequent infringers and the processing of complaints from frequent misusers after a prior warning (FR-TSF-005). 7. Traceability of business users (employers) with identity data and self-certification (FR-TSF-016). 8. Risk assessment and mitigation documentation if the platform reaches obligations that require it; crisis response protocol. 9. Clear terms of service explaining moderation, including policy summaries and the use of automated tools. 10. Cooperate with trusted flaggers and prioritize their notices (FR-TSF-004).
+- **System behaviour:** Compliance register ties each obligation to the feature, owner, evidence of operation (reports, dashboards) and last review date; quarterly self-audit creates tasks for gaps; jurisdiction flags enable region-specific flows (`BR-TSF-034`). Systemic risk assessments (for illegal content, fundamental rights, civic discourse, minors, mental wellbeing, gender-based violence) are recorded with mitigations, reviewed annually. Emits `tsf.policy.version_published` for terms updates.
+- **UI elements and controls:** Compliance register table with status and links; evidence attachments; audit tasks.
+- **Configuration options:** Jurisdiction toggles and thresholds.
+- **Business rules:** `BR-TSF-034`, `BR-TSF-008`, `BR-TSF-014`, `BR-TSF-029`
+- **Validation:** Each obligation needs an owner and a review date within 12 months.
+- **Inputs and outputs:** In: obligations and evidence. Out: compliance status.
+- **Filters, sorting, search:** Filter by obligation, region, status.
+- **Notifications and communication:** Review reminders to owners.
+- **Error handling and edge cases:** Law changes: counsel updates the register and tasks are created. Regulator information request: logged as a legal request (FR-TSF-028).
+- **Dependencies:** FR-TSF-001, FR-TSF-004, FR-TSF-005, FR-TSF-016, FR-TSF-021, FR-TSF-022, FR-TSF-029, `ENT-TSF-19`.
+- **Security and privacy:** Register internal; public pages for contact and terms.
+- **Acceptance criteria:**
+  - Given a jurisdiction flag for the EU, then the notice-and-action fields for illegal content appear in the report form.
+  - Given a quarterly audit, then each obligation shows an owner and evidence link or an open task.
+  - Given a regulator request, then it is logged under FR-TSF-028.
+
+### FR-TSF-031 — Moderator wellbeing
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Must · R2
+- **Source:** [PROP]
+- **Purpose and outcome:** People who review harmful content are protected from harm through exposure limits, tooling, support and choice.
+- **Roles and permissions:** `MOD (all tiers): use own settings and support` · `MOD-3: manage rotations` · `PAD, SAD: view aggregate wellbeing data` · HR or an external provider: confidential support
+- **Preconditions and entry points:** Moderator console profile; shift scheduler; support portal.
+- **User interactions and actions:** 1. Set personal exposure preferences (categories to opt out of where staffing allows, blur strength, audio mute). 2. Take scheduled breaks with a break timer; reviewers see a reminder after 50 minutes. 3. Request a rotation off a category. 4. Access confidential counselling through an external provider. 5. Complete periodic wellbeing check-ins (anonymous aggregate).
+- **System behaviour:** Exposure limits (`BR-TSF-021`) [PROP, `OD-TSF-10`]: maximum daily time on graphic content (default 3 hours), maximum consecutive cases of critical severity (20) then a mandatory 10-minute break, minimum weekly rotation to non-graphic queues, no solo night shifts on critical queues. The system measures exposure through case severity and reveal events and enforces limits by pausing assignment. Specialists in minors and imminent harm queues get stricter limits and mandatory debriefs after P0 cases. Wellbeing data is aggregated; individual data is visible only to the individual and, with consent, to a supervisor. Emits `tsf.moderator.exposure_limit_reached`.
+- **UI elements and controls:** Exposure dashboard for self; break prompts; preferences; support links.
+- **Configuration options:** Platform: limits per queue and tier.
+- **Business rules:** `BR-TSF-021`, `BR-TSF-020`
+- **Validation:** Limits cannot be disabled by the individual or lead without SAD approval.
+- **Inputs and outputs:** In: case exposure events. Out: assignment pauses, prompts.
+- **Filters, sorting, search:** Aggregate dashboard by queue and period.
+- **Notifications and communication:** Break and limit notices.
+- **Error handling and edge cases:** Surge mode: limits remain; extra staff are called rather than relaxing limits.
+- **Dependencies:** FR-TSF-008, FR-TSF-011, `ENT-TSF-18`.
+- **Security and privacy:** Individual wellbeing data is confidential and excluded from performance evaluation.
+- **Acceptance criteria:**
+  - Given a reviewer hits the daily graphic limit, then assignment from graphic queues pauses.
+  - Given 20 consecutive critical cases, then a 10-minute break is enforced.
+  - Given a supervisor, then individual wellbeing data is hidden unless the reviewer consents.
+
+### FR-TSF-032 — Moderator QA and calibration
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Must · R2
+- **Source:** [PROP]; [SRC: SSOT WF-08 audit]
+- **Purpose and outcome:** Decisions are consistent and correct; errors are found and corrected without scoring reviewers on speed alone.
+- **Roles and permissions:** `MOD-3: QA lead` · `MOD-2: QA reviewers` · `MOD-1: receive feedback` · `PAD: view metrics`
+- **Preconditions and entry points:** QA console.
+- **User interactions and actions:** 1. System samples decisions (5 percent of all, 100 percent of departures from the matrix, 100 percent of overturned appeals, 20 percent of automated-assist decisions) [PROP]. 2. A QA reviewer blind-reviews and compares. 3. Differences are classified (policy misapplication, evidence missed, wrong severity, procedural error). 4. Feedback and coaching are logged. 5. Monthly calibration sessions use gold cases and new policy edge cases; results produce guidance updates.
+- **System behaviour:** Accuracy is measured against QA consensus and appeal outcomes; quality metrics are used with equal weight to throughput; reviewers are not penalized for appeals overturned due to new information. Persistent systematic errors trigger retraining or policy clarification. Policy ambiguities discovered go to FR-TSF-006 as change requests. QA data feeds the transparency numbers (accuracy of automated tools) and AI evaluation (`FR-AIC-032`). Emits `tsf.qa.review_completed`.
+- **UI elements and controls:** Sample queue; side-by-side comparison; error taxonomy; calibration session tool with discussion notes; coaching log.
+- **Configuration options:** Sampling rates; accuracy targets (`OD-TSF-05`).
+- **Business rules:** `BR-TSF-022`, `BR-TSF-035`
+- **Validation:** QA reviewer must not have worked the original case.
+- **Inputs and outputs:** In: sampled decisions. Out: QA results and coaching.
+- **Filters, sorting, search:** By reviewer, policy, error type, period.
+- **Notifications and communication:** Feedback notices to reviewers.
+- **Error handling and edge cases:** QA finds a wrong action still in force: correction decision created and user notified with an apology and restoration.
+- **Dependencies:** FR-TSF-009, FR-TSF-022, `ENT-TSF-17`.
+- **Security and privacy:** QA results visible to the reviewer and leads only.
+- **Acceptance criteria:**
+  - Given a decision overturned on appeal, then it is automatically sampled for QA.
+  - Given a QA finding of an erroneous action, then a correction is issued and the user is notified.
+  - Given QA reviewer assignment to a case they decided, then it is refused.
+
+### FR-TSF-033 — Moderation analytics and SLA monitoring
+
+- **Sub-module:** TSF-F Evidence, legal, transparency and moderator operations
+- **Priority / tier:** Should · R2
+- **Source:** [SRC: SSOT §21 UGC Health (posts, moderation queue, SLA); PROD-022 UGC moderation live "SLA dashboard"]
+- **Purpose and outcome:** Leads and executives see whether safety operations meet their targets and where the risks are.
+- **Roles and permissions:** `MOD-3: operational view` · `PAD, SAD: full view` · `FIN: cost view`
+- **Preconditions and entry points:** Admin console > Safety dashboard.
+- **User interactions and actions:** View live queue health, SLA attainment by priority, backlog age, reviewer capacity, decision outcomes, appeal overturn rate, automation precision and recall, scam and fraud prevalence, repeat offender trend, time to remove P0 content, user-reported versus proactively detected share, region and language coverage. Set alert thresholds. Export weekly summaries.
+- **System behaviour:** Metrics computed from case, decision, signal and action tables; prevalence estimated by sampling (a random sample of content reviewed monthly to estimate violating prevalence [PROP]). Alerts when SLA attainment drops below targets (`OD-TSF-05`) or when a detector's precision falls. Dashboards respect small-cell suppression where aggregate data is shared externally. Emits no events.
+- **UI elements and controls:** Dashboard with time series and tables (text alternatives), filters, alert settings, export.
+- **Configuration options:** Targets, alert thresholds.
+- **Business rules:** `BR-TSF-004`, `BR-TSF-030`, `BR-TSF-022`
+- **Validation:** Thresholds numeric within ranges.
+- **Inputs and outputs:** In: operational data. Out: metrics and alerts.
+- **Filters, sorting, search:** By period, queue, policy area, region, language.
+- **Notifications and communication:** Alerts to MOD-3 and PAD.
+- **Error handling and edge cases:** Data lag: displayed with last-updated timestamp. Metric definition changes: versioned.
+- **Dependencies:** All TSF features, ANL (planned), ADM (planned).
+- **Security and privacy:** Aggregates only except for authorized leads' per-reviewer queue stats (no wellbeing data).
+- **Acceptance criteria:**
+  - Given P1 SLA attainment below target, then MOD-3 receives an alert.
+  - Given a monthly prevalence sample, then results appear in the dashboard with the sampling method.
+  - Given a detector precision drop, then an alert links to the detector.
+

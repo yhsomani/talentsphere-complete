@@ -219,7 +219,7 @@ Order of operations: read raw body → verify signature and timestamp tolerance 
 | Subscription | `webhook_endpoints` per organization with event types from the partner event list (a curated subset of domain events, never internal event payloads directly) |
 | Payload | `{ id, type, version, occurredAt, orgId, data }` where `data` is a partner DTO with ids and non-sensitive facts; the receiver fetches details through the partner API under its scopes |
 | Signature | Header `TS-Signature: t=<unix>,v1=<hex hmac-sha256(secret, t + "." + body)>`; two active secrets during rotation [SRC: API-STD §13] |
-| Delivery | At-least-once via `plt.webhook.deliver` jobs; retry schedule from [04 §7](04_EVENTS_AND_ASYNC.md); endpoint disabled after `webhook.max_consecutive_failures` (default 100 [PROP]) with admin notification |
+| Delivery | At-least-once via `plt.webhook.deliver` jobs; retry schedule from [04 §6](04_EVENTS_AND_ASYNC.md); endpoint disabled after `webhook.max_consecutive_failures` (default 100 [PROP]) with admin notification |
 | Ordering | Not guaranteed; `occurredAt` and resource `version` let receivers discard stale events |
 | Tools | Test delivery, delivery log (14 days), manual redelivery |
 
