@@ -82,8 +82,8 @@ Rules: an `API` principal acts only within its client's scopes and tenant; it ca
 | B | Webhooks and events | FR-PLT-011 to FR-PLT-014 |
 | C | Integrations | FR-PLT-015 to FR-PLT-027 |
 | D | Developer experience | FR-PLT-028 to FR-PLT-029 |
-| E | Files and media | FR-PLT-030 to FR-PLT-036 |
-| F | Data movement and background work | FR-PLT-037 to FR-PLT-043 |
+| E | Files and media | FR-PLT-030 to FR-PLT-036, FR-PLT-043 |
+| F | Data movement, background work and outbound safety | FR-PLT-037 to FR-PLT-042 |
 
 ## 4. Feature specifications
 
@@ -1029,4 +1029,156 @@ Conventions used by every feature (not repeated in each field):
   - Given a private video link, when validated, then it is rejected with "This video isn't public".
   - Given a link on a domain not in the tenant allowlist, when published, then the server refuses it.
   - Given a provider outage, when a course page loads, then only the affected item shows an error.
+
+### F. Data movement, background work and outbound safety
+
+### FR-PLT-037 — Import tooling
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT WF-17 Bulk Student Import, validate-then-commit; §13.7 `institutional.import`, `migration.parse` / `.commit` / `.purge-archive`] · [SRC: SSOT §13.3 LinkedIn migration source]
+- **Purpose and outcome:** Admins load many records (students, employees, jobs, candidates, course rosters, skills) from files or integrations through one guided tool that validates everything before changing anything and reports each row's outcome.
+- **Roles and permissions:** `IAD: students, rosters, cohorts` · `EAD, REC (granted): jobs, candidates` · `EXA: employees and skills` · `CAN: personal data migration from another platform (own profile only)` · `PAD: all (support-assisted)`
+- **Preconditions and entry points:** Importable entity types are registered by owning modules with a schema, a template and a commit handler. Entry: module screens "Import", Settings > Data > Imports, API `POST /api/v1/imports`.
+- **User interactions and actions:** 1. Choose the entity type and download the CSV or XLSX template (headers, example rows, allowed values). 2. Upload the file (FR-PLT-030, purpose `import_file`). 3. Map columns to fields (auto-matched by header, editable; saved as a reusable mapping). 4. Choose options (update existing, create only, skip duplicates, notify new users yes or no). 5. Click "Validate": the system returns counts (valid, warnings, errors) and a downloadable row-level report. 6. Fix the file or accept warnings. 7. Click "Import": confirm with the counts. 8. Watch progress; at the end download the result report. 9. Within the rollback window (24 hours `[PROP]`) click "Undo import" where the entity type supports it.
+- **System behaviour:** Run states per `SM-PLT-08`: `uploaded`, `validating`, `validated`, `committing`, `committed`, `rolled_back`, `failed`, `cancelled`. Validate-then-commit (BR-PLT-028): the validation pass parses the file in a job (kind `import.parse`), applies schema and business rules from the owning module (dry run in a transaction that is rolled back), detects duplicates (within the file and against existing data by natural keys), and writes nothing else. Commit (`import.commit`) processes in batches of 100 inside transactions with per-row idempotency keys (hash of run id and row number), so a retry never duplicates rows; a row failure does not abort the batch unless the option "stop on first error" is selected. Limits `[PROP]`: 20 MB, 50,000 rows per file, columns ≤ 100; larger files use API chunking. Encoding detection (UTF-8, UTF-16, Windows-1252 fallback with preview), delimiter detection, date format selection with preview, locale-aware numbers. CSV injection neutralized on both import (formula prefixes stripped from text fields) and export. Required-consent fields (for example inviting imported students by email) are explicit options with a notice of the sender identity. Undo: entity handlers declare `rollback(runId)` that removes or reverts records created by the run when not modified since; modified records are skipped and listed. Source files are deleted after 30 days; reports kept 12 months. One active import per entity type per tenant. Personal data uploaded is processed under the tenant as controller; the run is audited with row counts only.
+- **UI elements and controls:** Stepper (Upload, Map, Validate, Review, Import, Report), template download buttons, mapping table with dropdowns and sample values, options checkboxes with explanations, validation summary with filters (errors, warnings), progress bar with counts, report download, "Undo import" button with confirmation.
+- **Configuration options:** Platform: limits, templates, retention. Tenant: default mapping, notify new users default off.
+- **Business rules:** BR-PLT-028, BR-PLT-035, BR-PLT-021
+- **Validation:** File type CSV, XLSX (no macros) or JSON for API; header row present; required fields mapped; per-field rules from the entity schema; duplicates policy chosen before commit.
+- **Inputs and outputs:** Input: file and mapping. Output: validation report, import result, events `plt.import.validated`, `plt.import.committed`, `plt.import.failed`.
+- **Filters, sorting, search:** Run history filter by entity type, status, date; report filter by row outcome.
+- **Notifications and communication:** Completion or failure summary to the initiator (in-app and email, operational class); imported users receive invitations only if the option is on (NTF template `account.invited`).
+- **Error handling and edge cases:** File changed after validation: the commit refuses (`file_changed_since_validation`) and requires re-validation. Partial commit failure: successful rows stay, a failure report lists rows with reasons and the run is `committed` with `hasErrors`; "Retry failed rows" creates a follow-up run. Worker crash: resumes from the last committed batch. Mapping missing required column: validation blocked with the column named. Import would exceed seat or plan limits: validation error `seat_limit_exceeded` with counts (INS).
+- **Dependencies:** FR-PLT-030, FR-PLT-031, FR-PLT-039, owning modules' handlers (INS, EMP, ATS, ENT, PRF planned), FR-PLT-018, ENT-PLT-16.
+- **Security and privacy:** Tenant-scoped; files scanned; reports masked per viewer role; no content in logs; imported personal data subject to the same retention and erasure as native data.
+- **Acceptance criteria:**
+  - Given a file with 3 invalid rows out of 1,000, when validated, then the report lists the 3 rows with reasons and no data has changed.
+  - Given a commit interrupted at row 450, when the worker restarts, then the import resumes and no row is duplicated.
+  - Given an import run younger than 24 hours, when "Undo import" is used, then unmodified created records are removed and modified ones are reported as skipped.
+
+### FR-PLT-038 — Export tooling and data portability
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-063 DSR data export; WF-35; Resume exports append-only BR-26] · [SRC: Yash 18 PROC-09 data access and export] · [PROP] for self-service exports
+- **Purpose and outcome:** Users and organizations obtain their data in open formats (reports, candidate lists, learning records, the full personal data package) through asynchronous, authorized, expiring exports.
+- **Roles and permissions:** `all signed-in roles: export own data package (via SET)` · `EAD, REC (granted): export org candidates and applications` · `IAD: export roster, progress, results` · `INS: export own course analytics` · `PAD, SAD: platform exports via ADM (FR-ADM-036)` · `API: exports scope`
+- **Preconditions and entry points:** Exportable datasets are registered by modules with a schema, filters, authorization policy and format writers. Entry: "Export" buttons on tables, Settings > Privacy > Download my data (SET), API `POST /api/v1/exports`.
+- **User interactions and actions:** 1. Choose dataset, filters and format (CSV, XLSX, JSON, NDJSON; PDF for reports; ZIP for packages). 2. Review "What's included" with the data classes and a warning when the file will contain personal data of others. 3. Confirm; receive an export id. 4. Wait or leave; get notified when ready. 5. Download from "My exports" via a signed link (single use or limited downloads). 6. Delete early.
+- **System behaviour:** Export run states per `SM-PLT-10`: `requested`, `preparing`, `ready`, `downloaded`, `expired`, `failed`. Authorization is evaluated at request time and again at generation time (data the requester can no longer see is excluded) (BR-PLT-029). The export job (kind `export.generate`, heavy queue) streams rows to a temp file in batches, never loading all rows in memory, writes to the file service with purpose `export_file`, encrypts at rest, and issues a signed link valid 24 hours (7 days for personal data packages) (FR-PLT-034). Row limits per plan; very large exports are split into parts. Sealed data classes are excluded unless the requester is the data subject exporting their own data via SET or an authorized legal-process export through ADM with 2P (BR-PLT-041). Column selection from a whitelist; headers use stable field names plus labels; dates RFC 3339; money as minor units and currency columns. A manifest file (`manifest.json`) lists contents, counts, filters, generation time, schema version and checksums. The personal data package (SET) includes profile, resume versions, evidence metadata and files, applications, messages the user sent, course progress, certificates, consent history, notification settings, and logs of staff access to their data, in machine-readable formats and an HTML index; third parties' personal data is redacted from messages. Concurrency: max 3 active exports per user, 10 per org. Downloads and creation are audited; watermark column for staff exports (FR-ADM-036).
+- **UI elements and controls:** Export dialog (dataset, filters, format, included data summary, confirm), "My exports" table (status chips, created, expires, size, Download, Delete), progress, error messages.
+- **Configuration options:** Platform: row limits by plan, link validity, concurrency caps, formats per dataset. Tenant: restrict exports to admins (default off for members).
+- **Business rules:** BR-PLT-029, BR-PLT-041, BR-PLT-035, BR-PLT-021
+- **Validation:** Dataset registered; filters valid; format supported by dataset; requester authorized; concurrency not exceeded.
+- **Inputs and outputs:** Input: export request. Output: file, manifest, signed link; events `plt.export.ready`, `plt.export.expired`.
+- **Filters, sorting, search:** "My exports" filter by status and dataset.
+- **Notifications and communication:** Ready notice (in-app and email, with a link to sign in, never the file itself), expiry reminder 3 days before for data packages.
+- **Error handling and edge cases:** Generation failure: automatic retry twice then `failed` with a retry button. Requester loses access during generation: rows excluded and noted in the manifest. Link expired: re-request. Dataset schema version changed mid-run: run uses the version at start.
+- **Dependencies:** FR-PLT-030, FR-PLT-034, FR-PLT-039, SET (planned), FR-ADM-036, ENT-PLT-17.
+- **Security and privacy:** Encrypted at rest; signed single-use links; exports of others' personal data restricted by role and logged; automatic deletion at expiry.
+- **Acceptance criteria:**
+  - Given a recruiter whose access to a job was revoked after requesting an export, when generation runs, then that job's rows are absent and the manifest says so.
+  - Given a ready export, when the link is opened after 24 hours, then it returns expired and the file is deleted.
+  - Given an export of a dataset containing a sealed class, when requested by an org admin, then sealed columns are not offered.
+
+### FR-PLT-039 — Background job platform and dead-letter handling
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.5 dual queue, §13.6 transactional catalog, §13.7 heavy catalog, §13.8 job schema; CON-008 retry and timeout] ·  [SRC: ARCHITECTURE: worker claims `background_jobs` with `FOR UPDATE SKIP LOCKED`]
+- **Purpose and outcome:** All asynchronous work in the product (notifications, scans, transcodes, imports, exports, webhooks, digests, reindexing, retention) runs on one engine that bounds retries, prevents duplicate effects, exposes health, and never loses a job silently.
+- **Roles and permissions:** `engineers: define kinds` · `PAD: operate through the ADM job console (FR-ADM-037)` · `modules: enqueue`
+- **Preconditions and entry points:** A module enqueues a job in the same transaction as the state change that requires it (via the outbox, FR-PLT-042) or directly through the job API.
+- **User interactions and actions:** End users see only effects (an export becoming ready). Operators use the console: inspect, retry, requeue, cancel, pause a kind.
+- **System behaviour:** Job record (`ENT-PLT-18`): id, kind, payload (≤ 64 KB; large data by reference to files), status, attempts, `maxAttempts`, `runAfter`, `leaseOwner`, `leaseExpiresAt`, `fencingToken`, `idempotencyKey` (UNIQUE per kind), `tenantId`, `traceId`, `lastError` (≤ 4 KB, redacted), timestamps. States per `SM-PLT-06`: `queued`, `running`, `retrying` (the SSOT "failed, retry pending" state, made explicit), `succeeded`, `dead`, `cancelled`; terminal: `succeeded`, `dead`, `cancelled` (BR-PLT-031 resolves the legacy ambiguity). Claiming uses `FOR UPDATE SKIP LOCKED` with a lease (default 5 minutes, heartbeat extension) and a monotonically increasing fencing token; a worker whose lease expired and whose fencing token is stale cannot commit side effects (the commit checks the token). A job whose lease expires after its last allowed attempt becomes `dead`, not `queued` (BR-PLT-030). Retries: per-kind policy (attempts, backoff exponential with jitter, max delay, retry on error classes only); non-retryable errors (validation, forbidden, permanent provider rejection) go straight to `dead`. Queue assignment rule (OD-PLT-05 default): a kind is **transactional** if its p95 runtime is under 5 seconds, it needs no heavy CPU, memory or large IO, and its failure cost is low; otherwise **heavy**. Transactional kinds run on the Postgres table queue with `enqueue < 10 ms`, processing within 5 seconds; heavy kinds run on a durable queue with dedicated workers sized separately (kinds from the SSOT catalogs: `media.transcode`, `media.enrich`, `media.healthcheck`, `institutional.import`, `migration.*`, `feed.fanout`, `earnings.settle`, `coupon.expiry_scan`, `interview.ai_analysis`, plus `export.generate`, `import.parse`, `import.commit`, `file.scan`, `embedding.compute`, `retention.purge`, `search.reindex`, `webhook.deliver`, `notification.fanout`, `notification.digest`, `xp.settle`, `streak.rollover`, `leaderboard.rebuild`, `metrics.rollup`, `stripe.sync`, `skill.market_signal_update`, `career.benchmark_compute`, `salary.aggregate`, `learning.outcome_correlation`, `emerging_skill.detect`). Each kind registers: owner module, queue class, payload schema, idempotency key function, retry policy, timeout, `replaySafe` flag, concurrency cap, per-tenant fairness weight, degraded behavior. Fair scheduling: per-tenant concurrency caps prevent one tenant from starving others (round-robin across tenants). Dead-letter: jobs reaching `dead` stay inspectable and replayable (FR-ADM-037) for 30 days with payloads redacted; replay of a non-replay-safe kind is refused. Backpressure and metrics: queue depth, oldest age, runtime percentiles, failure rate by kind and error class, lease expiries; alerts on age and dead counts. Graceful shutdown: workers stop claiming, finish or release in-flight jobs within the grace period, and heartbeat until done; a draining worker never leaves a job leased without heartbeat. Idempotent handlers are mandatory: effects use idempotency keys at the next hop (email, payment, webhook).
+- **UI elements and controls:** n/a — engine; operator UI in ADM (FR-ADM-037).
+- **Configuration options:** Platform: kinds registry, retry policies, lease durations, concurrency caps, fairness weights, DLQ retention (30 days). Kind-level pause is a kill switch (FR-ADM-015).
+- **Business rules:** BR-PLT-030, BR-PLT-031, BR-PLT-035, BR-PLT-040
+- **Validation:** Kind registered; payload valid against the schema; idempotency key present for non-singleton kinds; `runAfter` ≤ 30 days ahead.
+- **Inputs and outputs:** Input: enqueue requests. Output: executed work, job records, events `plt.job.dead` (to ADM), `plt.job.replayed`.
+- **Filters, sorting, search:** Operator filtering by kind, status, tenant, age, error class (ADM console).
+- **Notifications and communication:** Alerts to on-call for dead counts and age thresholds.
+- **Error handling and edge cases:** Duplicate enqueue with the same idempotency key: returns the existing job id. Poison payload crashing workers: attempts cap prevents loops; quarantined as `dead`. Database failover during claim: leases expire and jobs are re-claimed. Clock differences: lease times use the database clock.
+- **Dependencies:** PostgreSQL, FR-PLT-040, FR-PLT-042, FR-ADM-037, FR-ADM-015, ENT-PLT-18.
+- **Security and privacy:** Payloads minimized and classified; redacted errors; tenant id and trace id propagated into worker logs.
+- **Acceptance criteria:**
+  - Given a worker that dies mid-job, when its lease expires, then another worker re-claims the job and the stale worker cannot commit side effects.
+  - Given a job at its last allowed attempt whose lease expires, when the sweeper runs, then it becomes `dead`.
+  - Given two enqueue calls with the same kind and idempotency key, when processed, then one job exists and both callers get its id.
+
+### FR-PLT-040 — Scheduler and recurring job registry
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.6 cadences (daily 07:30, 00:05, 02:00, hourly, nightly, weekly); BR-31 schedulers dry-run default, idempotent delivery keys] · [SRC: SSOT §13.6 open: cadence time zone not stated]
+- **Purpose and outcome:** Recurring work runs exactly once per slot across many instances, in a declared time zone, with defined behavior after downtime.
+- **Roles and permissions:** `engineers: register schedules` · `PAD: pause, run now, edit within bounds (via ADM)` · `SAD: view`
+- **Preconditions and entry points:** Schedules are registered in code with a kind, cron expression and time zone; an operator view lists them (ADM Operations > Jobs > Schedules).
+- **User interactions and actions:** 1. Operator sees each schedule: next run, last run and outcome, missed runs, owner. 2. "Run now" enqueues one execution (dry-run option for kinds that support it). 3. Pause or resume a schedule with reason. 4. View history of slot executions.
+- **System behaviour:** A scheduler tick (every 15 seconds) uses a database lock (advisory lock or `schedule_slots` unique key on `(schedule, slot_time)`) so only one instance creates the job for each slot (BR-PLT-032); the job then runs through the normal engine with idempotency key `schedule:slot`. Time zone is explicit per schedule: platform maintenance schedules use UTC; user-facing digests and streak rollovers use each user's local day by fan-out (the schedule runs hourly and processes users whose local time matches), resolving the legacy open question (OD-PLT-05 records the decision request). Missed-run policy per schedule: `skip` (default for time-sensitive), `catch_up_one` (run once for the latest missed slot), `catch_up_all` (rare, idempotent kinds only). Jitter option to avoid thundering herds (for example up to 120 seconds). Overlap policy: `skip_if_running` default. Schedulers that have side effects start in dry-run in non-production and as configured in production: a schedule can be flagged `dryRunDefault` so new schedules first record what they would do (SSOT BR-31). Daylight saving transitions handled by the declared zone library; ambiguous or skipped local times follow documented rules (run once at the first occurrence; skipped times run at the next valid time). Cadences carried from the SSOT: `notification.digest` daily 07:30 (user local), `streak.rollover` daily 00:05 (user local), `retention.purge` daily 02:00 UTC, `metrics.rollup` hourly and daily, `leaderboard.rebuild` daily off-peak, `search.reindex` nightly, benchmark and market-signal kinds nightly, `emerging_skill.detect` weekly, `earnings.settle` monthly, `coupon.expiry_scan` daily.
+- **UI elements and controls:** In ADM: schedule table, "Run now" and "Pause" buttons, slot history.
+- **Configuration options:** Platform: per-schedule policy fields; paused flag. 
+- **Business rules:** BR-PLT-032, BR-PLT-030
+- **Validation:** Cron expression valid; time zone is an IANA name; catch-up policy valid for the kind; minimum interval 1 minute.
+- **Inputs and outputs:** Input: registry, clock. Output: scheduled jobs; event `plt.schedule.missed` when a slot is skipped.
+- **Filters, sorting, search:** Table filter by kind and state.
+- **Notifications and communication:** Alert if a schedule has not produced a slot for 2 expected intervals.
+- **Error handling and edge cases:** Scheduler instance dies: another instance takes over within one tick. Clock jump: slots computed from the database clock. Long outage: policy decides catch-up; large catch-up bounded by caps.
+- **Dependencies:** FR-PLT-039, FR-ADM-037, FR-ADM-019.
+- **Security and privacy:** Schedules contain no personal data; run-now is audited.
+- **Acceptance criteria:**
+  - Given three app instances, when 02:00 UTC arrives, then exactly one `retention.purge` job is created for that slot.
+  - Given a 30-minute outage covering a `skip` schedule, when service resumes, then the missed slot is recorded and not run.
+  - Given a schedule paused with a reason, when its slot passes, then no job is created and the pause is visible in history.
+
+### FR-PLT-041 — SSRF-safe outbound HTTP and egress control
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.16 SSRF allow-list on server fetches; reject `javascript:`, `data:`, unknown iframes] · [SRC: SSOT §13.4 server-side secrets]
+- **Purpose and outcome:** Every server-initiated request to a user- or tenant-supplied URL (webhooks, oEmbed, imports from URL, link previews, LTI JWKS, SSO metadata) goes through one hardened client that cannot be turned into an attack on internal systems.
+- **Roles and permissions:** `system` · `PAD: manage global allow and deny lists` · `SAD: egress policy`
+- **Preconditions and entry points:** Any code path fetching a URL not under a platform-owned hostname must use the egress client; direct use of raw HTTP clients for such URLs is blocked by lint and review.
+- **User interactions and actions:** Users see the effects: errors such as "This address isn't allowed" when entering a URL pointing to a blocked destination.
+- **System behaviour:** The client enforces: scheme `https` (http only where a purpose explicitly allows, never for webhooks); port allowlist (443 by default); DNS resolution performed by the client, with all resolved addresses checked against deny ranges (loopback, link-local, private RFC 1918, carrier-grade NAT, multicast, cloud metadata addresses, IPv6 equivalents including IPv4-mapped forms) and the connection pinned to the checked address to defeat DNS rebinding; redirects not followed by default (or followed up to 3 hops with each hop re-validated); response size cap (default 1 MB, up to 25 MB for explicit file imports), timeout (10 seconds default, CON-008), content-type checks per purpose, no cookies or ambient credentials, fixed user agent identifying TalentSphere with a contact URL, per-destination rate limits and circuit breakers. Internal service calls never use this client and the egress client runs on network segments with no route to internal services (defense in depth: infrastructure-level egress rules allow only public internet). Secrets are attached only for purposes and hosts that require them. Every blocked attempt emits `plt.egress.blocked` with purpose and reason class (no URL query strings). Deny list is code; allow lists (for example provider domains for oEmbed) are configuration with review.
+- **UI elements and controls:** n/a — library; user messages as above.
+- **Configuration options:** Platform: size and timeout per purpose, allowlists, redirect policy.
+- **Business rules:** BR-PLT-012, BR-PLT-040
+- **Validation:** URL parse strictness (reject userinfo, unusual encodings, fragments, nonstandard IP notations such as octal, decimal or hex hosts).
+- **Inputs and outputs:** Input: URL and purpose. Output: bounded response or a classified error.
+- **Filters, sorting, search:** n/a — library.
+- **Notifications and communication:** Alert on bursts of blocked attempts from one tenant (possible probing).
+- **Error handling and edge cases:** DNS returns both public and private addresses: request refused. Slowloris responses: total deadline enforced. Redirect to a blocked address: refused at that hop.
+- **Dependencies:** FR-PLT-011, FR-PLT-043, FR-PLT-020, FR-PLT-021, FR-PLT-013.
+- **Security and privacy:** Core control against SSRF; test suite includes a corpus of known bypass forms; penetration tests target it.
+- **Acceptance criteria:**
+  - Given a URL whose hostname resolves to 169.254.169.254, when fetched, then the request is refused and `plt.egress.blocked` is emitted.
+  - Given a hostname returning a public address at validation and a private one at connect time (rebinding), when fetched, then the connection stays pinned to the validated address or fails.
+  - Given a redirect chain of 5 hops, when fetched with the default policy, then redirects are not followed.
+
+### FR-PLT-042 — Transactional outbox and domain event dispatch
+
+- **Sub-module:** F. Data movement, background work and outbound safety
+- **Priority / tier:** Must · R1
+- **Source:** [SRC: SSOT §13.5 target replaces Supabase Queues with a transactional outbox (ADR-T05, ADR-T09)] · [SRC: Yash 13 EVENT_CATALOG] · [DER]
+- **Purpose and outcome:** State changes and the events they imply are committed atomically, and every interested consumer (webhooks, notifications, search indexing, analytics, audit) receives each event at least once without dual-write bugs.
+- **Roles and permissions:** `modules: emit and consume` · `PAD: inspect via console`
+- **Preconditions and entry points:** Producers call `emit(event)` inside the same database transaction as the change.
+- **User interactions and actions:** None directly; developers see event traces in the portal logs for their webhooks.
+- **System behaviour:** `outbox_events` rows (id, type, version, tenantId, actor, subject ids, payload, `createdAt`, per-aggregate sequence) are inserted in the producer's transaction. A dispatcher claims unpublished rows (SKIP LOCKED), fans out to consumers by subscription (internal handlers as jobs with idempotency key `event:consumer`, webhook subscriptions through FR-PLT-013, audit sink, analytics stream), and marks the event published after all durable hand-offs. Delivery is at-least-once; consumers are idempotent by event id (BR-PLT-036). Ordering: guaranteed per aggregate through the sequence number for consumers that request ordered delivery; global ordering is not promised. Event types are registered with a JSON schema and version; changes are additive within a version (BR-PLT-037); breaking changes publish a new version in parallel for a deprecation period. Retention: published events kept 30 days for replay, audit-class events 7 years via the audit store (FR-ADM-032). Replays of events to a single consumer are possible by range for recovery (operator action, audited). Poison events: a consumer failure after retries marks that (event, consumer) pair `dead` without blocking others; visible in the job console. Naming `module.entity.action`; payloads carry ids and minimal snapshots, never sealed-class data (BR-PLT-041).
+- **UI elements and controls:** n/a — engine; optional event inspector in ADM.
+- **Configuration options:** Platform: consumer registry, retention, batch sizes.
+- **Business rules:** BR-PLT-036, BR-PLT-037, BR-PLT-041, BR-PLT-035
+- **Validation:** Event type registered and payload valid; tenant id present.
+- **Inputs and outputs:** Input: events. Output: dispatches, consumer jobs.
+- **Filters, sorting, search:** Inspector filter by type, tenant, time, consumer state.
+- **Notifications and communication:** Alert when oldest unpublished event age exceeds 60 seconds.
+- **Error handling and edge cases:** Dispatcher down: events accumulate safely and publish on recovery. Consumer added later: starts from "now" or from a replay range by choice. Event schema registry mismatch: producer fails fast in tests, not at runtime.
+- **Dependencies:** FR-PLT-039, FR-PLT-013, FR-ADM-032, ENT-PLT-20.
+- **Security and privacy:** Payload minimization; tenant isolation of dispatch; audit-class events immutable downstream.
+- **Acceptance criteria:**
+  - Given a transaction that rolls back after `emit`, when the dispatcher runs, then no event is published.
+  - Given a consumer that fails permanently, when retries are exhausted, then only that consumer's delivery is `dead` and other consumers still receive the event.
+  - Given two events for one aggregate, when an ordered consumer receives them, then they arrive by sequence number.
 
