@@ -290,3 +290,286 @@ flowchart LR
 
 ### 4.3 TSF-C Moderation queue and tooling
 
+### FR-TSF-008 — Moderation queue and triage
+
+- **Sub-module:** TSF-C Moderation queue and tooling
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT WF-08 "append-only queue"; BR-34; BR-059] [PROP]
+- **Purpose and outcome:** Reports and automated signals reach the right reviewer in priority order with enough context, and nothing gets lost.
+- **Roles and permissions:** `MOD-1..3: work assigned queues` · `MOD-3: manage queues and assignment` · `MOD-S: restricted queues` · `PAD: configure`
+- **Preconditions and entry points:** Moderator console > Queues. A report or signal creates a queue item.
+- **User interactions and actions:** 1. Choose a queue (General, Fraud, Minors and imminent harm, Legal, Appeals, Pre-moderation, Employer trust, Trusted flagger lane). 2. Click "Take next" (system assigns by priority and age and skill) or pick from a list if the tier allows. 3. Work the case in FR-TSF-009. 4. Release, reassign or escalate. 5. MOD-3 views queue health (counts, age, SLA risk) and rebalances.
+- **System behaviour:** Priority tiers (`BR-TSF-004`): P0 immediate (page on-call; target first human review within 15 minutes) for child safety, imminent harm, terrorism or credible violent threats; P1 within 24 hours for scams in progress, doxxing, sexual harassment, hate, fake employer with active postings; P2 within 72 hours for other policy reports; P3 within 7 days for low-severity spam and professional conduct. Sorting within a tier: trusted flagger, report count, reach (views), time waiting. Items are locked to a reviewer for 30 minutes of inactivity then returned. Automated-only signals with no human report expire after 7 days to `lapsed` unless they hit a risk threshold (`BR-TSF-003`, `OD-TSF-02`); any item with a human report never expires. Duplicate reports merge (`BR-TSF-007`). SLA clocks pause when awaiting information from a reporter or agency. Content under automated hold is reviewed within 72 hours or released automatically with the case kept open (`BR-TSF-037`). Queue assignments never route a case to a reviewer with a declared conflict (`BR-TSF-020`). Emits `tsf.report.triaged`, `tsf.case.created`, `tsf.case.assigned`.
+- **UI elements and controls:** Queue picker with counts; list with priority chips (text and color), age, reason, reach, flags; "Take next" primary; filters; bulk actions limited to non-sensitive duplicates; SLA risk indicators; keyboard shortcuts.
+- **Configuration options:** Platform: priority mapping by reason, SLA targets, lock timeout, queue skills and languages.
+- **Business rules:** `BR-TSF-002`, `BR-TSF-003`, `BR-TSF-004`, `BR-TSF-007`, `BR-TSF-020`, `BR-TSF-037`
+- **Validation:** Assignment requires tier and language skill match; MOD-S queues require specialist training flag.
+- **Inputs and outputs:** In: reports and signals. Out: assigned cases.
+- **Filters, sorting, search:** Filter by policy area, region, language, priority, age, source (user, flagger, automated); sort by priority then age; search by case id, object id, reporter id (restricted fields hidden unless needed).
+- **Notifications and communication:** SLA risk alerts to MOD-3; P0 pages to on-call.
+- **Error handling and edge cases:** No reviewer with the language: machine translation assist is shown with the original (`FR-TSF-011`), and the case is flagged for a native reviewer if the decision is severe. Queue backlog above thresholds: lead can enable "surge mode" (priority-only handling, content reach limits for pending P1 items). On-call unavailable: escalation to the next tier after 5 minutes.
+- **Dependencies:** FR-TSF-001, FR-TSF-013, FR-TSF-009, `ENT-TSF-03`, `ENT-TSF-23`.
+- **Security and privacy:** Queue views show the minimum data; reporter identity visible to MOD-2 and above only when needed; all views logged.
+- **Acceptance criteria:**
+  - Given a P0 report, then the on-call specialist is paged and the case is first in the Minors and imminent harm queue.
+  - Given a reviewer has declared a conflict with the reported party, then the case is never assigned to them.
+  - Given an automated flag without human reports older than 7 days, then it lapses and is counted in metrics.
+  - Given a hold older than 72 hours with no decision, then the content is restored and the case stays open.
+
+### FR-TSF-009 — Case workspace and decisions
+
+- **Sub-module:** TSF-C Moderation queue and tooling
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT WF-08 "Resolution logged + notice sent"; BR-34] [PROP]
+- **Purpose and outcome:** A reviewer sees everything needed to decide, selects a policy-based decision, and the system executes, records and notifies correctly.
+- **Roles and permissions:** `MOD-1..3, MOD-S: decide within tier` · `MOD-2: second review` · `SAD: access to restricted data with legal basis`
+- **Preconditions and entry points:** A case assigned from the queue.
+- **User interactions and actions:** 1. Open the case: reported object, evidence snapshot, context (conversation window, post thread, profile history), reporter reasons (anonymized for the reviewed party), prior reports and prior actions on the object and the account (last 24 months), automated signals with reason codes, applicable policies. 2. Choose Violation or No violation. 3. For violation: choose policy and severity, then actions from the matrix (FR-TSF-007) for content and account. 4. Write a rationale (required, at least 30 characters, using a macro or free text). 5. Choose reviewer notes (internal). 6. Submit; if the action needs a second human (FR-TSF-010) the case moves to `pending_second_review`.
+- **System behaviour:** `SM-TSF-02`. Decisions are append-only; changes create a new decision that supersedes the old with a reason (`BR-TSF-012`). Submitting executes actions via owning modules through a signed action API (content hide or remove, account restriction, feature restriction, reach limit), idempotent by decision id. A statement of reasons is generated (FR-TSF-021). Reports linked to the case are resolved with outcomes (FR-TSF-003). Related items found during review can be added to the case ("also affects 3 other posts by this account") with the same decision applied after confirmation. Time spent is recorded for workload and wellbeing metrics (FR-TSF-031). Decision requires policy id, version, severity and rationale (`BR-TSF-035`). Emits `tsf.decision.made`, `tsf.content.actioned`.
+- **UI elements and controls:** Three-pane workspace (queue strip, evidence, decision panel); sensitive media blurred by default with click to reveal and a per-session reveal counter; policy side drawer; macros menu; "Request second review"; "Escalate to specialist"; "Needs information" (from reporter or from an agency); timer; keyboard-first controls.
+- **Configuration options:** Platform: blur defaults, rationale minimum length, case age limits.
+- **Business rules:** `BR-TSF-009`, `BR-TSF-010`, `BR-TSF-012`, `BR-TSF-035`, `BR-TSF-038`
+- **Validation:** Rationale at least 30 characters; policy and severity from catalogue; action in matrix or departure with reason.
+- **Inputs and outputs:** In: decision. Out: executed actions, notices, updated case state.
+- **Filters, sorting, search:** Evidence history filter by type; case search in FR-TSF-011.
+- **Notifications and communication:** Notices per FR-TSF-021; reporter outcome per FR-TSF-003.
+- **Error handling and edge cases:** Owning module action fails: case stays `decided_pending_execution`, retried with backoff for 24 hours, then escalated to PAD; the reviewer sees the status. Content deleted by the author while under review: case continues for account-level assessment. Concurrent edits: the lock prevents it; expired lock shows "Case reassigned".
+- **Dependencies:** FR-TSF-007, FR-TSF-010, FR-TSF-019 to 021, all content-owning modules, `ENT-TSF-03`, `ENT-TSF-04`.
+- **Security and privacy:** Reviewer access limited to the case scope; for messages only the selected window (`BR-TSF-038`); every view and action audited; no export of case data except by SAD.
+- **Acceptance criteria:**
+  - Given a violation decision with policy `POL-07`, then the content action executes and the affected user receives a statement of reasons.
+  - Given a rationale shorter than 30 characters, then submit is refused.
+  - Given a failed content action, then the case shows "execution pending" and retries without losing the decision.
+  - Given a decision correction, then the earlier decision remains visible in history.
+
+### FR-TSF-010 — Quorum review for severe actions
+
+- **Sub-module:** TSF-C Moderation queue and tooling
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT §5.9 "Moderation escalations are quorum-based"; WF-08 "two-human review on bans"]
+- **Purpose and outcome:** Irreversible or high-impact actions are never made by one person.
+- **Roles and permissions:** `MOD-2, MOD-3, MOD-S: first and second reviewers (different people)` · `PAD, SAD: tiebreak for permanent bans of verified employers`
+- **Preconditions and entry points:** A decision proposing a permanent ban, removal of a verified employer account or its job inventory, deletion of a group with more than 1,000 members, action on a person holding a TalentSphere staff role, or any action that matrix marks "two humans".
+- **User interactions and actions:** 1. First reviewer proposes the action with rationale. 2. The system assigns a second reviewer who has not seen the first rationale until after recording their own independent verdict (blind review). 3. If both agree the action executes. 4. If they disagree a third reviewer (MOD-3) decides; tie rules in `BR-TSF-011`.
+- **System behaviour:** Second reviewer must be MOD-2 or above, different person, no conflict of interest, and not in the same shift pod where practical. The action is held in `pending_second_review` with the content restricted (hidden or limited) if the severity is critical, otherwise remains live. SLA for second review: 24 hours (P1) or 72 hours (P2). Both verdicts, rationales and timestamps are stored. Emits `tsf.case.second_review_requested`.
+- **UI elements and controls:** "Propose permanent action" form; blind second-review pane that hides the first rationale until the second verdict is submitted; outcome banner.
+- **Configuration options:** Platform: list of actions requiring quorum; SLAs; pod separation toggle.
+- **Business rules:** `BR-TSF-011`, `BR-TSF-012`, `BR-TSF-020`
+- **Validation:** Second reviewer identity differs from first and from anyone who handled prior appeals on the same account.
+- **Inputs and outputs:** In: proposal. Out: executed or rejected action.
+- **Filters, sorting, search:** Second-review queue filter by action type.
+- **Notifications and communication:** Second reviewer assigned; first reviewer informed of outcome.
+- **Error handling and edge cases:** Second reviewer unavailable beyond SLA: reassigned automatically. Disagreement unresolved after the third reviewer: lesser action applies and the case is flagged for lead review.
+- **Dependencies:** FR-TSF-009, `ENT-TSF-03`, `ENT-TSF-04`.
+- **Security and privacy:** Blind review prevents anchoring; all verdicts auditable.
+- **Acceptance criteria:**
+  - Given a proposed permanent ban, then it does not execute with one verdict.
+  - Given the second reviewer is the same person as the first, then assignment is refused.
+  - Given disagreement, then a third reviewer decides and the lesser action applies if still tied.
+
+### FR-TSF-011 — Moderator tooling (search, context, macros, translation, redaction)
+
+- **Sub-module:** TSF-C Moderation queue and tooling
+- **Priority / tier:** Should · R2
+- **Source:** [PROP]
+- **Purpose and outcome:** Moderators work faster and more consistently, with less exposure to harmful material.
+- **Roles and permissions:** `MOD-1..3, MOD-S: use` · `MOD-3: manage macros and saved searches` · `PAD: configure`
+- **Preconditions and entry points:** Moderator console.
+- **User interactions and actions:** 1. Search cases by id, object, account, policy, date, reviewer, outcome. 2. Open an account's moderation history (reports, actions, sanctions, appeals) and a timeline of related content. 3. Use macros for rationales and notices with variable fields. 4. See machine translation of foreign-language content beside the original with a "machine translated" label. 5. Use media tools: blur levels, grayscale, audio mute by default, frame sampling for video, OCR text extraction. 6. Use "related content" clustering (same text, same image hash, same links, same account network). 7. Use saved views and keyboard shortcuts.
+- **System behaviour:** Search is restricted by tier (MOD-1 sees cases in assigned queues and own history; MOD-2 and above wider). Macros are versioned and approved by MOD-3; macros fill policy citations automatically. Translation never replaces the original in the record. Media tools reduce exposure (`BR-TSF-021`). Image hashing (perceptual) clusters near duplicates and checks against internal block lists. Searching private message content is impossible except inside a case's authorized window (`BR-TSF-038`). All searches are audited. Emits no business events.
+- **UI elements and controls:** Global search; account history page; macro picker; translation toggle; media toolbar; cluster view; shortcuts help.
+- **Configuration options:** Platform: tier access, macros, blur defaults.
+- **Business rules:** `BR-TSF-021`, `BR-TSF-038`, `BR-TSF-020`
+- **Validation:** Macro variables resolved before send; search date ranges bounded to 24 months for non-SAD.
+- **Inputs and outputs:** In: queries, selections. Out: results, derived views.
+- **Filters, sorting, search:** As listed.
+- **Notifications and communication:** None.
+- **Error handling and edge cases:** Translation unavailable for a language: marks "needs native reviewer". Clustering false positives: reviewers confirm before bulk actions.
+- **Dependencies:** FR-TSF-009, AIC translation via gateway (no decisions), `ENT-TSF-22`.
+- **Security and privacy:** Audit trail on every search; moderators cannot export data; translation requests pass the AI gateway with redaction rules.
+- **Acceptance criteria:**
+  - Given a MOD-1, when they search for an account outside their queues, then access is denied and logged.
+  - Given a macro with an unfilled variable, then it cannot be sent.
+  - Given a graphic image, then it is blurred until revealed and the reveal is counted.
+
+### FR-TSF-012 — Pre-moderation of high-risk user-generated content
+
+- **Sub-module:** TSF-C Moderation queue and tooling
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-138; §7 F-75 company reviews; BR-136, BR-137]
+- **Purpose and outcome:** Content with high potential for harm to individuals or employers is reviewed before it is public.
+- **Roles and permissions:** `MOD-1..2: review` · `PAD: configure categories` · authors: view status
+- **Preconditions and entry points:** Submissions of company reviews, salary reports, interview questions and interview experiences, employer replies to reviews, first posts of new accounts containing links, job postings from unverified or new employers (FR-TSF-016), group creation with a name matching an organization, new instructor course publication (STU planned), and content flagged by detectors above a threshold.
+- **User interactions and actions:** 1. Author submits; sees "Pending review" with an expected time (typically within 48 hours, P2). 2. Reviewer checks against policy (no personal identification of individuals, no defamation, no confidential information, no solicitation, no abusive language, no fake review signals). 3. Approve, Request changes (with specific feedback), or Reject (with reasons). 4. On approval the item publishes.
+- **System behaviour:** `BR-TSF-019`: anonymous reviews hide identity from the employer and the public, never from PAD or legal (a restricted lookup requires dual approval and a recorded basis); interview questions require approval before public display; employer responses are appended and never edit the original review. Salary reports show only in aggregates above `min_cohort_k` (SSOT BR-135 defers the exact k). The review checks for fake-review signals (same device, same IP range, new account, review burst, text similarity, incentives) via FR-TSF-013 signals. Authors can edit and resubmit once per rejection. Items not reviewed within 7 days publish with a "recently posted" label only if the author is established and the category is not critical; otherwise remain pending with an apology notice to the author [PROP]. Emits `tsf.content.actioned` (approve or reject).
+- **UI elements and controls:** Pre-moderation queue; reviewer checklist per type; feedback templates; author status chip and feedback message.
+- **Configuration options:** Platform: categories subject to pre-moderation, auto-approve rules for established authors in low-risk categories, SLA.
+- **Business rules:** `BR-TSF-019`, `BR-TSF-035`, `BR-TSF-016`
+- **Validation:** Feedback required for Request changes and Reject (at least 20 characters).
+- **Inputs and outputs:** In: pending submissions. Out: published or rejected items.
+- **Filters, sorting, search:** Queue filter by type, employer, age.
+- **Notifications and communication:** Author notices (approved, changes requested, rejected) with policy links.
+- **Error handling and edge cases:** Review contains a named individual: reviewer requests redaction rather than rejecting. Employer contests: handled through appeals or a legal request, never by editing the review.
+- **Dependencies:** FR-TSF-008, FR-TSF-013, EVD, SRC (planned), `ENT-TSF-03`.
+- **Security and privacy:** Reviewer sees the author identity only when needed for abuse checks (MOD-2 and above), never revealed to employers.
+- **Acceptance criteria:**
+  - Given a submitted interview question, then it is not visible publicly until approved.
+  - Given an anonymous review, then the employer view shows no identifying data.
+  - Given an employer reply, then the original review is unchanged.
+  - Given a rejected review with feedback, when the author edits and resubmits, then it re-enters the queue.
+
+### 4.4 TSF-D Automated detection and fraud
+
+### FR-TSF-013 — Detection platform and signal registry
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT §18.3 "Anomaly is not guilt"; §17.4 signals are indicators] [DER]
+- **Purpose and outcome:** One platform collects, scores and routes safety signals from every module, with the rule that signals inform humans and never convict.
+- **Roles and permissions:** system; `PAD, SAD: configure thresholds` · `MOD-3: tune rules` · `AIC owners: register classifiers`
+- **Preconditions and entry points:** Modules emit signals (content created, message sent, account created, referral integrity flag `EVT-NET-030`, spam flag `EVT-MSG-020`, scam warning `EVT-MSG-022`, assessment integrity events from ASM planned, verification mismatches from EVD or BGV planned).
+- **User interactions and actions:** Moderators see signals in cases with reason codes. Admins manage rules and thresholds in the console.
+- **System behaviour:** `ENT-TSF-13` `DetectionSignal`: source module, object ref, signal type, reason code, score, detector id and version, created_at. Detectors are rules, statistical models or AIC classifiers registered in the model registry (`FR-AIC-024`) with evaluation and bias results. Actions by score band: low: log only; medium: add to queue at P2 or P3 with signal context; high: apply a reversible hold (hide pending review, delay delivery up to 24 hours, limit reach, require verification step) and queue at P1; critical (confirmed illegal-content hash match): remove immediately, preserve evidence and escalate to MOD-S, with human review following (`BR-TSF-009`). Automated systems never apply permanent bans, never delete accounts and never impose suspensions longer than 24 hours without human review (`BR-TSF-009`, `BR-TSF-010`). Every automated action produces a statement of reasons that says it was automated and offers an appeal (FR-TSF-021). Detectors report precision and recall monthly from reviewed outcomes (FR-TSF-033). Emits `tsf.detection.signal_raised`.
+- **UI elements and controls:** Detector catalogue; rule editor with test harness on historical cases; threshold sliders with impact preview; kill switch per detector.
+- **Configuration options:** Per detector: thresholds, actions per band, enabled regions, kill switch.
+- **Business rules:** `BR-TSF-009`, `BR-TSF-010`, `BR-TSF-025`
+- **Validation:** Detector must be registered with an owner, evaluation date and version; thresholds within bounds; new actions in the high band need SAD approval.
+- **Inputs and outputs:** In: signals. Out: scored signals, holds, queue items.
+- **Filters, sorting, search:** Signal explorer by type, score, module, detector.
+- **Notifications and communication:** Detector kill-switch alerts to PAD; affected users per FR-TSF-021.
+- **Error handling and edge cases:** Detector outage: signals missing; coverage metric alerts and queue reliance increases. High false-positive rate (precision under target for 7 days): auto-downgrade to medium band and alert.
+- **Dependencies:** All emitting modules, AIC registry, FR-TSF-008, `ENT-TSF-13`.
+- **Security and privacy:** Signals use metadata and limited content analysis; no use of protected attributes; message content only per MSG scanning boundary (`BR-MSG-020`); signal data retained 12 months [PROP].
+- **Acceptance criteria:**
+  - Given a high-band signal, then content is reversibly held and a queue item appears at P1.
+  - Given a detector claiming to permanently ban an account, then configuration is refused.
+  - Given precision below target for 7 days, then the detector is downgraded and an alert is raised.
+
+### FR-TSF-014 — Content abuse detection (text, media, links)
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-125 pre-publish abuse scan; BR-059 flags]
+- **Purpose and outcome:** Posts, comments, profiles and listings are scanned before and after publish for harassment, hate, sexual content, violence, self-harm and illegal content.
+- **Roles and permissions:** system
+- **Preconditions and entry points:** Pre-publish hook (NET `FR-NET-014`, comments, profile edits, job posts), post-publish rescans, media upload pipeline (PLT planned).
+- **User interactions and actions:** Authors may see "We could not publish this. Review the guidelines." with a link and an option to request review. Content may publish immediately with delayed scan for media.
+- **System behaviour:** Pre-publish synchronous checks for text (patterns, lexicons by language, classifier scores) complete within 300 ms p95; media scans are asynchronous (image classifiers, perceptual hash against known-illegal hash lists via an accredited provider, malware scanning, OCR on images for text policies). Outcomes by band (FR-TSF-013): allow; allow and log; hold for review (not published or hidden); block with explanation for critical patterns (for example credible threats, known illegal hashes). A blocked author can request human review (`BR-TSF-014`). Context-aware handling reduces false positives for quoted or reclaiming speech through human review rather than lexicon alone. Reclassification when a new policy version applies is run as batch scans with human review for removals. Emits `tsf.detection.signal_raised`.
+- **UI elements and controls:** Author-facing blocked message with "Request review"; moderator detector context.
+- **Configuration options:** Per language lexicons and thresholds; region-specific legal lists.
+- **Business rules:** `BR-TSF-009`, `BR-TSF-010`, `BR-TSF-014`
+- **Validation:** Text up to 50,000 characters scanned; languages detected automatically.
+- **Inputs and outputs:** In: content. Out: verdict and reason code.
+- **Filters, sorting, search:** n/a — pipeline.
+- **Notifications and communication:** Author notice per FR-TSF-021.
+- **Error handling and edge cases:** Unsupported language: published with a lower-confidence flag and sampled for human review. Scanner latency above budget: publishes text and continues scanning (hold applies if triggered).
+- **Dependencies:** FR-TSF-013, PLT (planned), AIC classifiers, `ENT-TSF-13`.
+- **Security and privacy:** Hash-list provider contracts audited; content not shared with third parties beyond hash matching; media retention in scanning ends at verdict.
+- **Acceptance criteria:**
+  - Given text with a credible threat pattern, then publish is blocked and a P0 or P1 case opens with context.
+  - Given a media hash match to known illegal content, then the media is removed and MOD-S is paged.
+  - Given an author disputes a block, then a human review task is created.
+
+### FR-TSF-015 — Spam and scam pattern detection
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Must · R2
+- **Source:** [SRC: SSOT BR-125; F-24] [PROP]
+- **Purpose and outcome:** Mass messaging, link farms, advance-fee and recruitment scams are detected and slowed.
+- **Roles and permissions:** system; `MOD-2: tune patterns` · `PAD: thresholds`
+- **Preconditions and entry points:** Signals from MSG (`EVT-MSG-020`, `EVT-MSG-022`, `EVT-MSG-030`), NET (connection spam, comment spam), JOB (postings), profile text, group creation.
+- **User interactions and actions:** Users encounter friction (challenge, delay) or advisory banners (FR-TSF-026); moderators see clustered cases.
+- **System behaviour:** Patterns: advance-fee requests, equipment-purchase scams, check-cashing, gift cards and crypto, "pay to apply" or "training fee", requests to move to external messengers, overseas "recruiter" patterns with mismatched domains, QR codes, fake interview invitations, identical text blasts, link shorteners, newly created accounts with high outbound volume, shared payment or contact details across accounts. Scoring combines pattern, sender trust (account age, verification, history), recipient reports, and network features (same device or IP clusters, shared domains). Actions per FR-TSF-013 bands; for scams in progress the case is P1 and affected recipients can be warned (FR-TSF-026). Known-bad domains and numbers are added to a blocklist after human review. Emits `tsf.detection.signal_raised`, `tsf.scam_warning.shown`.
+- **UI elements and controls:** Moderator cluster view; blocklist manager; pattern editor.
+- **Configuration options:** Patterns, trust weights, blocklists by region.
+- **Business rules:** `BR-TSF-009`, `BR-TSF-010`, `BR-TSF-025`
+- **Validation:** Blocklist entries need reviewer and reason; patterns tested on a sample before activation.
+- **Inputs and outputs:** In: events. Out: signals, holds, warnings.
+- **Filters, sorting, search:** Cluster search by domain, phone hash, text hash.
+- **Notifications and communication:** Targeted user warnings (FR-TSF-026).
+- **Error handling and edge cases:** Legitimate recruiter flagged: appeal restores and trust score adjusts. Evolving scams: patterns updated weekly through a change log.
+- **Dependencies:** FR-TSF-013, MSG, NET, JOB.
+- **Security and privacy:** Phone numbers and emails stored as salted hashes in the blocklist.
+- **Acceptance criteria:**
+  - Given a message requesting a "training fee", then a scam signal is raised and the recipient sees a warning.
+  - Given identical text sent to 6 recipients in an hour, then throttling and a case occur.
+  - Given a blocklisted domain in a post, then the link is blocked at publish.
+
+### FR-TSF-016 — Fake job and fake employer detection and verification gating
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Must · R2
+- **Source:** [PROP]; [SRC: SSOT §18.3 fake projects and credentials resistance]
+- **Purpose and outcome:** Job seekers rarely meet fake jobs or sham employers: employers are verified before posting and suspicious listings are reviewed.
+- **Roles and permissions:** system; `MOD-S (fraud): investigate` · `EAD: respond to inquiries` · `PAD: configure`
+- **Preconditions and entry points:** Job posting submit (JOB planned), employer registration (EMP planned), employer profile changes, candidate reports ("Misleading job").
+- **User interactions and actions:** 1. New employers complete verification in EMP (domain email, business registration, payment method for paid plans, contact verification). 2. Unverified or new employers' job posts go to pre-moderation (FR-TSF-012) with limits (for example 3 live jobs, no outreach). 3. Fraud reviewers contact employers for evidence through the platform. 4. Candidates see a verification status badge on employer pages and job posts.
+- **System behaviour:** Risk features: domain age and mismatch between email domain and claimed company, free-mail domains, company registry lookup failure, duplicated job text across unrelated employers, impossible salary versus role, requests for payment or sensitive documents, vague remote roles with high pay, contact via messengers only, copied descriptions of real companies (brand impersonation), employer account created recently with many postings, reports per posting. `SM-TSF-07` governs investigations: flagged, verifying, verified_legit, restricted, removed, banned. Restricted state: jobs hidden from recommendations and outreach disabled until verification completes. Removal: jobs taken down with notices to affected applicants where applications exist ("This listing was removed because we could not verify the employer") and application data is protected. Verification outcomes inform EMP badges (`EVT-TSF-022`). Employers are "traders" under DSA-like rules: traceability data (name, address, contact, registration) is collected and kept (`BR-TSF-034`, FR-TSF-030). Paid-plan fraud (chargebacks) is shared with BIL (planned). Emits `tsf.fraud.case_opened`, `tsf.fraud.employer_restricted`, `tsf.fraud.job_removed`.
+- **UI elements and controls:** Fraud investigation workspace (employer timeline, job list, evidence, registry results); verification request message templates; candidate-facing badge and "Report this job" link.
+- **Configuration options:** Platform: risk thresholds, posting limits for new employers, evidence requirements by region.
+- **Business rules:** `BR-TSF-023`, `BR-TSF-009`, `BR-TSF-010`, `BR-TSF-011`, `BR-TSF-027`
+- **Validation:** Verification evidence formats (PDF, image) scanned; contact attempts limited to 3 per case.
+- **Inputs and outputs:** In: employer and job data, reports. Out: case state, restrictions, badges.
+- **Filters, sorting, search:** Fraud queue filter by risk, employer, state, region.
+- **Notifications and communication:** Employer inquiry (`tsf.employer_inquiry`), restriction notice, applicant notice on removal (class `account_safety`).
+- **Error handling and edge cases:** Legitimate small employer lacking registry data: manual verification path with alternative evidence. Employer disputes: appeal (FR-TSF-022). Mass-posting recruitment agencies: agency verification tier with additional checks.
+- **Dependencies:** EMP (planned), JOB (planned), BIL (planned), FR-TSF-012, FR-TSF-013, `ENT-TSF-14`.
+- **Security and privacy:** Business registration documents are RESTRICTED; access limited to fraud staff; no cross-employer sharing of findings.
+- **Acceptance criteria:**
+  - Given an unverified employer posting a job, then the posting is pre-moderated and capped.
+  - Given a job asking applicants to pay a fee, then it is removed and the employer enters investigation.
+  - Given a legitimate employer verified manually, then restrictions lift and the badge appears.
+  - Given removal of a job with applications, then applicants are notified and data is retained per policy.
+
+### FR-TSF-017 — Fake credential and document fraud detection
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §18.3; BR-154 appeal path for disputed credentials, SLA 7 days]
+- **Purpose and outcome:** Forged certificates, degrees, employment claims and references are caught and handled fairly, with a dispute path for the credential holder.
+- **Roles and permissions:** system; `MOD-S (fraud): review` · `CAN, STD: dispute` · issuers: confirm or deny
+- **Preconditions and entry points:** Evidence submission (EVD planned), credential imports, credential disputes, issuer denials, employer reports.
+- **User interactions and actions:** 1. A claim is flagged (document manipulation signals, issuer mismatch, impossible dates, duplicate documents across accounts, known template forgeries, unverifiable issuer). 2. The member sees "We could not verify this credential" and may submit more evidence or request a manual review. 3. Reviewer contacts the issuer through verified channels or uses verification partners (BGV planned). 4. Outcome: verified, unverifiable (remains self-reported), or fraudulent (sanction path).
+- **System behaviour:** Detection: file forensics (metadata, error level analysis, font and layout anomalies) as signals, hash duplicate detection, issuer registry checks, cross-account duplicates. "Unverifiable" never equals "fraudulent": the claim downgrades to self-reported, with a clear label, and no sanction (`BR-TSF-024`, `BR-TSF-010`). Findings of fraud require human review and, for a sanction, the ladder (FR-TSF-020). Credential holders can dispute any adverse finding; disputes are decided within 7 days (`BR-TSF-024`, SRC SSOT BR-154). Employers see only the current verification state of a credential, never the dispute details. A confirmed forger's published claims are labelled "removed after review" in affected applications. Emits `tsf.detection.signal_raised`, `tsf.fraud.case_opened`.
+- **UI elements and controls:** Moderator evidence viewer with forensics panel; member dispute form with document upload; status chips.
+- **Configuration options:** Platform: forensic thresholds, dispute SLA 7 days.
+- **Business rules:** `BR-TSF-024`, `BR-TSF-010`, `BR-TSF-013`, `BR-TSF-014`
+- **Validation:** Dispute evidence up to 5 files of 10 MB.
+- **Inputs and outputs:** In: claims and evidence. Out: verification outcome and case.
+- **Filters, sorting, search:** Queue filter by credential type, issuer, risk.
+- **Notifications and communication:** Member notices at flag, outcome and dispute decision.
+- **Error handling and edge cases:** Issuer unresponsive: remains unverifiable after 14 days with explanation. Honest mistake (wrong file): corrected without sanction.
+- **Dependencies:** EVD, BGV (planned), FR-TSF-020, FR-TSF-022, `ENT-TSF-14`.
+- **Security and privacy:** Documents RESTRICTED; forensics output internal only.
+- **Acceptance criteria:**
+  - Given a certificate with manipulated metadata and issuer mismatch, then it is flagged for review and the member is told it is unverified.
+  - Given an unverifiable credential, then no sanction is applied and the claim is labelled self-reported.
+  - Given a dispute, then it is decided within 7 days.
+
+### FR-TSF-018 — Fake account, duplicate identity and coordinated behavior detection
+
+- **Sub-module:** TSF-D Automated detection and fraud
+- **Priority / tier:** Should · R4
+- **Source:** [SRC: SSOT §18.3 "endorsement rings, review manipulation, assessment farming, duplicate identities"] [PROP]
+- **Purpose and outcome:** Networks of fake or duplicate accounts and coordinated manipulation are found and reviewed together, without punishing coincidence.
+- **Roles and permissions:** system; `MOD-S (fraud): investigate` · `MOD-3: approve network actions`
+- **Preconditions and entry points:** Signals from IDN (device, IP, signup patterns planned), NET (endorsement rings, follow farms, referral rings `EVT-NET-030`), reviews, assessments.
+- **User interactions and actions:** 1. Fraud analysts view a network graph of linked accounts with link reasons (shared device, shared payment, same text, synchronized actions, reciprocal endorsements). 2. They confirm a network (human), choose actions per account or for the network, and record rationale. 3. Affected members get notices and appeals.
+- **System behaviour:** Links are scored; shared residential or institutional IP addresses and shared devices at libraries or colleges are recognized and weighted down to avoid penalizing shared networks. Anomalies create cases; humans classify as inauthentic, coincidence, or legitimate shared use. Network actions affect only accounts a reviewer confirmed individually (batch UI requires per-account confirmation of the evidence). Reach limits and feature restrictions may be applied immediately as reversible holds; suspensions and bans follow the ladder (`BR-TSF-013`, `BR-TSF-025`). Duplicate identity of one person (multiple personal accounts) leads to merge or closure requests rather than sanction when no harm is shown. Emits `tsf.detection.signal_raised`, `tsf.sanction.proposed`.
+- **UI elements and controls:** Graph explorer with link-type filters, per-account confirmation list, timeline.
+- **Configuration options:** Link weights, shared-network allowlists (institutions), thresholds.
+- **Business rules:** `BR-TSF-025`, `BR-TSF-010`, `BR-TSF-013`
+- **Validation:** Network actions require per-account confirmation; network size over 50 accounts requires MOD-3 approval.
+- **Inputs and outputs:** In: signals. Out: networks, cases, actions.
+- **Filters, sorting, search:** Filter by network size, link type, state.
+- **Notifications and communication:** Per-account notices (FR-TSF-021).
+- **Error handling and edge cases:** Institution lab IP: allowlist reduces weight. A wrongly linked account: removed from the network with note and any holds lifted.
+- **Dependencies:** IDN (planned), NET, FR-TSF-013, FR-TSF-020, `ENT-TSF-13`, `ENT-TSF-14`.
+- **Security and privacy:** Device and IP data pseudonymized for analysis; retention 12 months; no protected attributes.
+- **Acceptance criteria:**
+  - Given 20 new accounts endorsing each other, then a network case opens and no sanction is automatic.
+  - Given accounts sharing a university lab IP, then the weight is reduced and no network case opens on that link alone.
+  - Given a confirmed network, then each account's action is individually confirmed before execution.
+
+### 4.5 TSF-E Enforcement and due process
+

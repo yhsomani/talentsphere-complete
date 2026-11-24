@@ -1531,3 +1531,344 @@ sequenceDiagram
 - **Failure branches:**
   - F1 — Request for individual skill list → denied (`BR-XCT-001`).
 - **Source:** [SRC: SSOT J-28]
+
+## 13. Moderator journeys
+
+### JRN-MOD-01 — Work the report queue and take down content
+
+- **Role · persona · tier:** MOD · P-W Wen · R0
+- **Modules touched:** TSF, NTF, ADM, JOB, NET, MSG
+- **Trigger:** Queue item "Job post: suspected scam" severity high.
+- **Preconditions:** Staff account with `MOD`.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens item | Content, reporter count, reporter reliability, prior actions on the account, policy clauses suggested |
+| 2 | Chooses action: no violation, label, restrict, take down, suspend account | Reason code required |
+| 3 | Confirms take down | Content hidden; copy preserved under hold (`BR-XCT-054`); applicants to a scam job notified with safety advice |
+| 4 | Notice sent to the poster with appeal path | Template by reason code |
+
+- **Success outcome:** Action with reason, notice and appeal path; time-to-action recorded.
+- **Failure branches:**
+  - F1 — Moderator is connected to the poster → item auto-reassigned (`BR-XCT-059`).
+  - F2 — Suspension beyond 7 days [PROP] → needs a second moderator (`IDN.account.suspend_other` `P`).
+- **Source:** [SRC: UJ-19]
+
+### JRN-MOD-02 — Decide an appeal as a second moderator
+
+- **Role · persona · tier:** MOD · R0
+- **Modules touched:** TSF, NTF
+- **Trigger:** Appeal filed (`JRN-CAN-21`).
+- **Preconditions:** Different moderator from the original.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens appeal | Original decision, appeal statement, new evidence |
+| 2 | Upholds or overturns with reason | Overturn restores content and annotates the account record |
+
+- **Success outcome:** Appeal decided; overturn rate tracked.
+- **Failure branches:**
+  - F1 — Original moderator opens the appeal → blocked.
+- **Source:** [SRC: SSOT §5.9 quorum moderation]
+
+### JRN-MOD-03 — Review an assessment integrity flag
+
+- **Role · persona · tier:** MOD · R1
+- **Modules touched:** ASM, TSF, EVD, NTF
+- **Trigger:** Attempt held "Under review" (`JRN-CAN-06` F3).
+- **Preconditions:** Flag with signals.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens case | Signals with base rates and uncertainty; no single signal shown as proof |
+| 2 | Requests explanation from the candidate (optional) | Candidate responds within 7 days [PROP] |
+| 3 | Decides: clear, invalidate attempt, or restrict assessments | Sanctions beyond invalidation need a second reviewer |
+
+- **Success outcome:** Fair decision; cleared attempts release their credential.
+- **Failure branches:**
+  - F1 — Insufficient evidence → cleared by default (anomaly is not guilt, `BR-XCT-025`).
+- **Source:** [SRC: SSOT §3.2, §17.4]
+
+## 14. Support agent journeys
+
+### JRN-SUP-01 — Resolve a ticket with time-boxed scoped access
+
+- **Role · persona · tier:** SUP · P-Z Zoe · R0
+- **Modules touched:** ADM, IDN, SET, NTF
+- **Trigger:** Ticket "My application shows submitted twice".
+- **Preconditions:** Staff account with `SUP`.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens ticket, clicks "Open support view" | Requires reason code and ticket id; scope: this user's applications only; expiry 60 minutes [PROP] |
+| 2 | Inspects | Read-only view; every read audited; user's access log shows a support access entry |
+| 3 | Finds a display duplicate (one record) | Files a defect; replies to user |
+| 4 | Session ends | Access revoked automatically |
+
+- **Success outcome:** Resolved without editing user data or impersonating.
+- **Failure branches:**
+  - F1 — Agent needs to change data → creates a request to the owning module's admin action or to the user; no direct edit.
+  - F2 — Ticket is about the agent's own account → refused (`BR-XCT-060`).
+- **Source:** [SRC: UJ-18]
+
+### JRN-SUP-02 — Assist an identity-proofed account recovery
+
+- **Role · persona · tier:** SUP · R0
+- **Modules touched:** IDN, ADM, NTF
+- **Trigger:** Recovery request from `JRN-CAN-13`.
+- **Preconditions:** Request open.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Follows checklist: control of registered email, recent activity facts, device history | Score of proofs recorded |
+| 2 | Approves recovery | 24-hour delayed reset with notices to all known channels |
+| 3 | Insufficient proofs | Refuses with the reason category and next options |
+
+- **Success outcome:** Recovery granted only with sufficient proof.
+- **Failure branches:**
+  - F1 — Account is privileged (`EAD` owner, `IAD`) → requires `SAD` approval.
+- **Source:** [SRC: UJ-10]
+
+## 15. Finance operator journeys
+
+### JRN-FIN-01 — Process a refund and a chargeback
+
+- **Role · persona · tier:** FIN · P-X Xavier · R2
+- **Modules touched:** BIL, ADM, NTF
+- **Trigger:** Refund request from an org; separately a chargeback notice.
+- **Preconditions:** Payment record exists.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens refund request | Purchase, usage, policy rule result |
+| 2 | Approves | Refund via processor; entitlement change only when webhook confirms; above threshold a second `FIN` approves |
+| 3 | Opens chargeback | Evidence package assembled from delivery and access logs |
+| 4 | Submits response before deadline | Outcome recorded on reconciliation |
+
+- **Success outcome:** Refund issued by rule; chargeback answered in time.
+- **Failure branches:**
+  - F1 — Processor error → retry with idempotency key; no double refund.
+- **Source:** [SRC: COMMERCIAL_OPERATIONS §5]
+
+### JRN-FIN-02 — Run monthly reconciliation and a payout batch
+
+- **Role · persona · tier:** FIN · R5 (payouts R6 gated `OD-PRD-04`)
+- **Modules touched:** BIL, ANL, ADM
+- **Trigger:** Period close.
+- **Preconditions:** Period ended.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Opens reconciliation | Processor records vs internal ledger; breaks listed |
+| 2 | Resolves breaks | Each with reason |
+| 3 | Creates payout batch | Payees `payout_ready`; held funds for open disputes excluded |
+| 4 | Second `FIN` approves | Batch sent; payees notified |
+
+- **Success outcome:** Closed period, approved payouts.
+- **Failure branches:**
+  - F1 — Payee KYC lapsed → payee excluded with notice.
+- **Source:** [SRC: COMMERCIAL_OPERATIONS §7]
+
+## 16. Platform admin journeys
+
+### JRN-PAD-01 — Roll out a feature flag and use the kill switch
+
+- **Role · persona · tier:** PAD · P-D Dev · R0
+- **Modules touched:** ADM, ANL, PWA
+- **Trigger:** New scheduling feature ready.
+- **Preconditions:** Flag exists.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Sets exposure to internal accounts, then a percentage | Change requires a second `PAD` approval in production |
+| 2 | Watches error and guardrail metrics | Dashboard per flag |
+| 3 | Errors spike → kills the flag | Kill is one-person and immediate; clients pick it up on next request |
+
+- **Success outcome:** Controlled rollout; reversible.
+- **Failure branches:**
+  - F1 — Flag removal while still referenced → blocked.
+- **Source:** [SRC: SSOT §22.3]
+
+### JRN-PAD-02 — Change the skill taxonomy safely
+
+- **Role · persona · tier:** PAD · R1
+- **Modules touched:** SRC, ADM, AIC, EVD, JOB, PRF
+- **Trigger:** Two skills should merge ("ReactJS" and "React").
+- **Preconditions:** Both skills exist.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Proposes merge | Impact preview: profiles, jobs, courses, evidence affected |
+| 2 | Applies | Old id becomes an alias; references remapped by background job; no evidence rung changes |
+
+- **Success outcome:** Taxonomy consistent; search and matching use the merged skill.
+- **Failure branches:**
+  - F1 — Job fails midway → resumable; aliases keep old ids resolvable.
+- **Source:** [SRC: SSOT §6.2]
+
+### JRN-PAD-03 — Grant a privileged role with two-person approval
+
+- **Role · persona · tier:** PAD, SAD · R0
+- **Modules touched:** ADM, IDN
+- **Trigger:** New moderator hired.
+- **Preconditions:** Staff account created.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | `PAD` requests `MOD` grant with training record | Request pending |
+| 2 | `SAD` approves | Grant active; review date set (monthly) |
+
+- **Success outcome:** Privileged grant with two approvers.
+- **Failure branches:**
+  - F1 — Requester tries to approve → denied (`BR-XCT-062`).
+- **Source:** [SRC: USR-01 §6]
+
+## 17. Security officer journeys
+
+### JRN-SAD-01 — Use break-glass access during an incident
+
+- **Role · persona · tier:** SAD · P-Y Yusuf · R0
+- **Modules touched:** ADM, IDN, SET, NTF
+- **Trigger:** Incident: suspected account takeover ring.
+- **Preconditions:** Incident id open.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Requests break-glass for named accounts | Second `SAD` approves; session 60 minutes [PROP] |
+| 2 | Investigates | All access audited |
+| 3 | Session closes | Post-incident review scheduled; notices decided per 04 §7 |
+
+- **Success outcome:** Fast, accountable access.
+- **Failure branches:**
+  - F1 — No incident id → refused.
+- **Source:** [PROP; 04 §7]
+
+### JRN-SAD-02 — Respond to a suspected cross-tenant exposure
+
+- **Role · persona · tier:** SAD · R0
+- **Modules touched:** ADM, PLT, NTF, SET, ANL
+- **Trigger:** Canary test or report shows org B data in org A view.
+- **Preconditions:** Alert.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Declares critical incident | Affected feature flag killed |
+| 2 | Scopes exposure from audit logs | List of records and viewers |
+| 3 | Notifies affected tenants and people per legal requirements | Templates with what, when, what we did |
+| 4 | Records in incident register | `grd.cross_tenant_exposures` incremented |
+
+- **Success outcome:** Exposure contained and disclosed.
+- **Failure branches:**
+  - F1 — Audit gap prevents scoping → treat all possibly affected as affected.
+- **Source:** [SRC: SSOT §3.2 "Cross-tenant exposure is a critical incident"]
+
+## 18. Integration principal journeys
+
+### JRN-API-01 — Partner ATS syncs jobs and applications through the public API
+
+- **Role · persona · tier:** API · R5
+- **Modules touched:** PLT, JOB, ATS, SET, EMP
+- **Trigger:** Org connects its external ATS.
+- **Preconditions:** `EAD` created an OAuth client with scopes `jobs.write`, `applications.read`.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Partner pushes job with external id | Upsert by external id; idempotent |
+| 2 | Partner reads applications | Only for the org's jobs and only within the snapshot grant; contact only if shared |
+| 3 | Partner updates stage | Recorded as a human action only if the payload names the acting user; otherwise refused (`BR-XCT-021`) |
+
+- **Success outcome:** Two-way sync without consent leaks.
+- **Failure branches:**
+  - F1 — Rate limit → `429` with retry-after.
+  - F2 — Scope missing → `403` naming the scope.
+- **Source:** [SRC: SSOT §13.3]
+
+### JRN-API-02 — Webhook delivery fails, retries and is replayed
+
+- **Role · persona · tier:** API · R5
+- **Modules touched:** PLT, NTF, ADM
+- **Trigger:** Partner endpoint down.
+- **Preconditions:** Webhook subscription active.
+
+| # | Actor action | System response |
+|---|---|---|
+| 1 | Event emitted | Signed delivery attempted |
+| 2 | Endpoint returns 500 | Exponential backoff retries over 24 hours [PROP] |
+| 3 | Retries exhausted | Subscription marked failing; `EAD` notified |
+| 4 | `EAD` replays from the delivery log | Deliveries resent with original event ids |
+
+- **Success outcome:** No silent data loss.
+- **Failure branches:**
+  - F1 — Signature secret rotated → both secrets valid during rotation window.
+- **Source:** [PROP]
+
+## 19. Coverage check
+
+### 19.1 Modules touched
+
+| Module | Journeys |
+|---|---|
+| IDN | GUE-01, CAN-01, CAN-12, CAN-13, STD-01, STD-04, REC-01, EAD-01, EAD-02, EAD-04, IAD-01, SUP-01, SUP-02, PAD-03, SAD-01 |
+| SET | GUE-01, CAN-01, CAN-02, CAN-11, CAN-12, STD-01, STD-04, REC-04, REC-07, PLO-02, EXA-01, SAD-01, API-01 |
+| NTF | Most journeys; notably CAN-01, CAN-08, REC-02, MOD-01, SAD-02 |
+| REP | CAN-05, CAN-22 |
+| PRF | GUE-01, CAN-02, CAN-04, CAN-09, CAN-17, FRL-01, MNT-01 |
+| EVD | GUE-02, GUE-03, CAN-03, CAN-05, CAN-06, CAN-09, CAN-14, INS-03, IAD-03, HMG-03 |
+| BGV | GUE-03, CAN-03, CAN-20, INS-01, EAD-01 |
+| SRC | GUE-01, GUE-04, CAN-04, CAN-07, REC-04, PAD-02 |
+| LRN | GUE-04, CAN-05, STD-02, INS-02, EXA-02 |
+| STU | INS-01, INS-02 |
+| ASM | CAN-06, STD-02, INS-03, HMG-01, MOD-03 |
+| JOB | GUE-01, CAN-07, CAN-09, REC-02, REC-03, STD-03, API-01 |
+| ATS | CAN-07, CAN-08, REC-02, REC-03, REC-06, HMG-03, API-01 |
+| INT | CAN-08, REC-05, HMG-02, MNT-01 |
+| EMP | EAD-01 to EAD-05, REC-01, REC-07 |
+| NET | CAN-15, CAN-22 |
+| MSG | CAN-08, CAN-10, REC-04, MNT-02, FRL-02 |
+| AIC | CAN-04, CAN-07, CAN-17, REC-02, REC-03 |
+| TSF | GUE-03, CAN-14, CAN-21, MOD-01 to MOD-03, EAD-05 |
+| INS | STD-01 to STD-04, IAD-01 to IAD-03, PLO-01, PLO-02, REC-08 |
+| BIL | CAN-16, EAD-03, FIN-01, FIN-02, MNT-03, FRL-02 |
+| MEN | MNT-01 to MNT-03 |
+| GIG | FRL-01 to FRL-03 |
+| EVT | CAN-22 |
+| MKT | CAN-04, CAN-18, EXA-03 |
+| ENT | EXA-01 to EXA-03 |
+| ANL | CAN-01, INS-04, IAD-02, PLO-02, PAD-01 |
+| ADM | CAN-13, SUP-01, SUP-02, PAD-01 to PAD-03, SAD-01, SAD-02 |
+| PWA | GUE-01, CAN-05, CAN-19, PAD-01 |
+| PLT | CAN-02, REC-05, API-01, API-02, EXA-02 |
+
+All 30 modules are touched by at least one journey.
+
+### 19.2 Diagrams
+
+Sequence diagrams: `JRN-CAN-07`, `JRN-CAN-12`, `JRN-STD-04`, `JRN-REC-04`, `JRN-REC-05`. Flowcharts: `JRN-INS-02`, `JRN-FRL-02`.
+
+## 20. Legacy journey mapping
+
+| Legacy | New journeys |
+|---|---|
+| J-01 Learn → Prove → Showcase | CAN-05, CAN-06, CAN-02 |
+| J-02 Apply → Track → Hire | CAN-07, CAN-08, CAN-09 |
+| J-03 Post → Source → Hire | REC-02 to REC-06 |
+| J-04 Org setup | EAD-01, EAD-02 |
+| J-05 Referral | CAN-15 |
+| J-06, J-26 Career path, switcher | CAN-04 |
+| J-07, J-13, J-18 Creator | INS-01, INS-02 (monetization gated `OD-PRD-04`) |
+| J-08 Mentor | MNT-01 to MNT-03 |
+| J-09, J-12 Institution, graduation | PLO-01, PLO-02, STD-03, STD-04 |
+| J-10 Agency | REC-07 |
+| J-11 Extension | CAN-19 (extension sync conflict `OD-PRD-36`) |
+| J-14 Procurement | IAD-01 |
+| J-15 Faculty | INS-04 |
+| J-16, J-28 Corporate L&D, skills analyst | EXA-02, EXA-03 |
+| J-17 LinkedIn migration | CAN-02 |
+| J-19, J-20 Self-paced learner, path | GUE-04, CAN-05 |
+| J-21 Contestant | CAN-06, CAN-22 |
+| J-22 Researcher | CAN-18, EAD-05 |
+| J-23 Author, newsletter | Not mapped: community content gated `OD-PRD-16` |
+| J-24 Reviewer | EAD-05 (`OD-PRD-17`) |
+| J-25 Peer reviewer | STD-02 |
+| J-27 Hiring manager | HMG-01 to HMG-03 |
+| UJ-01 to UJ-20 (target blueprint) | Covered by GUE-01, CAN-01 to CAN-03, CAN-05 to CAN-13, REC-01, REC-03, REC-04, HMG-02, EAD-02, INS-02, IAD-02, GUE-03, SUP-01, MOD-01, PAD-01 |

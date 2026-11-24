@@ -487,3 +487,210 @@ Notification opt-out classes (owned by NTF, planned): `TRANSACTIONAL` (cannot be
   2. Given weights 40, 40, 30, when saving, then it is rejected because the total is 110.
   3. Negative: Given sign-off required and the only member being the owner, when the owner is also a learner, then the check warns that self sign-off is not allowed.
 
+### FR-STU-014 — Course landing page editor
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT BR-098; §9.2 F-07 step 2] [DER]
+- **Purpose and outcome:** Instructors craft the public course page: image, promo video, description and SEO. Success is pages that pass the quality checks and convert.
+- **Roles and permissions:** `INS Owner, Co-instructor: edit`
+- **Preconditions and entry points:** Course workspace, Landing page tab.
+- **User interactions and actions:**
+  1. Upload the course image (crop to 16:9) and optionally a promo video up to 2 minutes.
+  2. Write the description (rich text subset), "who this is for", and FAQ items.
+  3. Choose which sections are shown (outcomes, skills, curriculum, instructors, FAQ).
+  4. Edit SEO fields: slug (before first publication), meta title and description, social preview image.
+  5. Preview the page as a guest, tablet and phone.
+- **System behavior:** Image validated against BR-STU-006 (minimum 750 by 422 pixels, up to 4 MB) and resized into variants. Promo video goes through the media pipeline and needs captions. Slug locks at first publication; later changes create redirects and need support approval. Meta fields default from the description. Claims language lint warns on prohibited promises (for example guaranteed jobs or salary).
+- **UI elements and controls:** Image cropper with dimension feedback, promo video slot, rich text editor, FAQ list editor, section toggles, SEO fields with length counters, device preview tabs.
+- **Configuration options:** Platform: prohibited-claims list, image rules.
+- **Business rules:** BR-STU-006, BR-STU-007, BR-STU-009
+- **Validation:** Description 200 to 5,000 characters; meta title up to 60; meta description up to 160; FAQ up to 15 items; slug `[a-z0-9-]{3,80}` unique.
+- **Inputs and outputs:** In: page content. Out: stored page model.
+- **Filters, sorting, search:** n/a — editor.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Image too small: cannot continue, with dimensions shown. Promo video processing: page preview shows placeholder. Prohibited claim detected: warning at edit and blocking issue at submit if not changed.
+- **Dependencies:** FR-STU-021, FR-STU-040, FR-LRN-008.
+- **Security and privacy:** Public content only; no personal data of learners.
+- **Acceptance criteria:**
+  1. Given an image of 700 by 400 pixels, when uploading, then it is rejected with the minimum size.
+  2. Given a published course, when the slug is edited, then the change is refused without support approval.
+  3. Negative: Given a description claiming "guaranteed job", when submitting for review, then the check blocks with the phrase highlighted.
+
+### FR-STU-015 — Autosave, drafts and edit locking
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT §19.3 sync (operation ids, entity versions)] [DER]
+- **Purpose and outcome:** Authors never lose work and never silently overwrite a colleague. Success is zero lost edits in failure tests.
+- **Roles and permissions:** `INS Owner, Co-instructor: edit`
+- **Preconditions and entry points:** Any editor surface.
+- **User interactions and actions:**
+  1. Type or change anything; see "Saving…" then "Saved at 14:02".
+  2. When another member is editing the same lesson, see a banner "Priya is editing this lesson" with Request control or Edit anyway (read-only by default).
+  3. After a conflict, open a side-by-side diff and choose per block: keep mine, keep theirs, both.
+  4. Restore a previous revision from history.
+- **System behavior:** Autosave debounced 2 seconds and on blur; each save carries a version token (BR-STU-036); stale saves fail with `409` and a merge view. Soft locks are leases of 5 minutes renewed by activity; expired leases free automatically. Offline edits queue locally (IndexedDB) and sync on reconnect with conflict handling; the latest 20 revisions per lesson are kept for 90 days. Working drafts persist indefinitely.
+- **UI elements and controls:** Save indicator, presence avatars, lock banner, merge dialog, revision drawer with Restore.
+- **Configuration options:** Platform: debounce, lease length, revision count.
+- **Business rules:** BR-STU-036, BR-STU-049
+- **Validation:** Version tokens must match; payload size limits per field.
+- **Inputs and outputs:** In: edits with token. Out: new token or conflict payload.
+- **Filters, sorting, search:** Revision list by time and author.
+- **Notifications and communication:** n/a — in-app indicators only.
+- **Error handling and edge cases:** Save failure: banner with retry and local copy retained. Lock holder disconnects: lease expires in 5 minutes. Network flaps: queue ordering preserved. Browser crash: recovered draft offered on reopen.
+- **Dependencies:** FR-STU-008, FR-STU-010, PWA (planned).
+- **Security and privacy:** Revisions follow course access; authors can delete a revision containing sensitive data (audited).
+- **Acceptance criteria:**
+  1. Given two editors on one lesson, when the second saves a stale version, then `409` and a diff are shown and no content is lost.
+  2. Given the browser closed mid-edit, when reopened, then the unsaved text is offered for recovery.
+  3. Negative: Given a lease held by another member, when "Edit anyway" is not chosen, then the editor stays read-only.
+
+### FR-STU-016 — Co-instructors and ownership
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Should · R3
+- **Source:** [SRC: SSOT §7 F-74] [PROP] for roles and transfer
+- **Purpose and outcome:** Courses can be built and run by a team with clear roles, revenue split and ownership continuity. Success is no orphaned courses.
+- **Roles and permissions:** `INS Owner: invite, change roles, remove, transfer` · `IAD: manage for institution-owned` · `PAD: reassign with audit`
+- **Preconditions and entry points:** Course workspace, Team tab.
+- **User interactions and actions:**
+  1. Invite an instructor by handle or email with a role (Co-instructor, Assistant, Viewer) and, if paid, a revenue share percentage.
+  2. The invitee accepts or declines; roles can be changed or removed later.
+  3. Choose which co-instructors are displayed publicly on the course page.
+  4. Transfer ownership to another instructor or organization: the target must accept; the previous owner may stay as co-instructor.
+  5. Leave the course (non-owner) or request ownership reassignment (owner leaving).
+- **System behavior:** Exactly one owner (BR-STU-013). Invitations SM-STU-10 expire in 14 days. Revenue split must total 100 percent of the instructor share and every member accepts their share (BR-STU-014); split changes apply to future earnings only. Public display requires the member's consent (BR-STU-053). When the owner account is closed, ownership goes to a named successor or the organization; else to PAD for custody and courses stay live. Organization-owned courses persist when instructors leave (BR-STU-039).
+- **UI elements and controls:** Member table with role selects and share inputs, Invite dialog, Transfer wizard, "Display publicly" toggle.
+- **Configuration options:** Platform: max members (10), allowed roles.
+- **Business rules:** BR-STU-013, BR-STU-014, BR-STU-039, BR-STU-053
+- **Validation:** Shares integers summing to 100; invitee must be an approved instructor for co-instructor role; assistants may be any verified account.
+- **Inputs and outputs:** In: invitation, role, split. Out: membership records.
+- **Filters, sorting, search:** Member list by role.
+- **Notifications and communication:** `stu.team.invited`, `stu.team.role_changed`, `stu.team.ownership_transfer` (`TRANSACTIONAL`).
+- **Error handling and edge cases:** Invitation to an unapproved instructor: blocked with reason. Owner removes themselves without successor: refused. Split sum mismatch: save disabled with the difference shown. Disputes over ownership: staff mediation path.
+- **Dependencies:** FR-STU-035, FR-LRN-011, ENT-STU-15.
+- **Security and privacy:** Role changes audited; assistants cannot see revenue.
+- **Acceptance criteria:**
+  1. Given a transfer to another instructor, when they accept, then they become owner and the previous owner is demoted to the chosen role.
+  2. Given shares 60 and 50, when saving, then the request fails with `422 share_total`.
+  3. Negative: Given an assistant, when calling the Invite endpoint, then `403` is returned.
+
+### FR-STU-017 — Course import
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Could · R4
+- **Source:** [SRC: SSOT §10.26 MIG-01..MIG-08 migration principles; F-42 playlist import] [PROP]
+- **Purpose and outcome:** Instructors bring existing material (playlists, documents, Markdown, packages) instead of re-creating it. Success is import-to-publish time reduction without rights or safety shortcuts.
+- **Roles and permissions:** `INS Owner, Co-instructor: import into drafts`
+- **Preconditions and entry points:** New course wizard, Curriculum tab "Import".
+- **User interactions and actions:**
+  1. Choose a source: external playlist (provider allowlist), Markdown or ZIP of documents and media, SCORM or xAPI package (read-only content import), or another course export.
+  2. See a preview mapping: sections, lessons, media found, problems.
+  3. Choose which items to import and where; confirm rights attestation.
+  4. Track import progress; resolve warnings.
+- **System behavior:** Import creates draft content only and never publishes automatically (BR-STU-040). Media enters the pipeline; external playlists become external lessons only if the provider is allowlisted and embedding is allowed (BR-STU-009). SCORM content is imported as static learning content inside a sandboxed frame or converted when possible; tracking beyond completion is not supported at first [PROP]. Imported data is owned by the instructor, editable and deletable. Import jobs are idempotent per source hash.
+- **UI elements and controls:** Source picker, mapping preview tree, rights attestation checkbox, progress panel, issues list.
+- **Configuration options:** Platform: allowed sources, size limits.
+- **Business rules:** BR-STU-008, BR-STU-009, BR-STU-040
+- **Validation:** ZIP up to 5 GB, entries scanned; playlists up to 200 items; path traversal rejected.
+- **Inputs and outputs:** In: source. Out: draft sections and lessons, import report.
+- **Filters, sorting, search:** n/a — wizard.
+- **Notifications and communication:** `stu.import.completed`, `stu.import.failed` (`OPERATIONAL`).
+- **Error handling and edge cases:** Duplicate import of the same source detected and offered as update. Malformed package: file-level errors listed. Provider rate limits: backoff and resume. Imported items failing virus scan are skipped.
+- **Dependencies:** FR-STU-021, FR-STU-027, FR-STU-040, ENT-STU-30.
+- **Security and privacy:** Imported archives scanned and never executed; SCORM scripts run only in sandboxed frames.
+- **Acceptance criteria:**
+  1. Given a playlist of 12 allowlisted videos, when imported, then 12 external lessons are created as drafts.
+  2. Given a ZIP with `../` paths, when importing, then the archive is rejected.
+  3. Negative: Given an import completes, when the course draft is viewed, then it is not published or submitted automatically.
+
+### FR-STU-018 — Course duplication and templates
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Could · R4
+- **Source:** [PROP]
+- **Purpose and outcome:** Instructors and organizations reuse proven structures. Success is faster creation of similar courses and consistent organization templates.
+- **Roles and permissions:** `INS Owner: duplicate own, save templates` · `IAD: organization templates` · `PAD: platform templates`
+- **Preconditions and entry points:** Course menu "Duplicate"; "Save as template"; wizard template picker.
+- **User interactions and actions:**
+  1. Choose Duplicate, then what to copy (structure only, structure and content, plus assessments); name the copy.
+  2. Or Save as template (structure and placeholders) with a name and visibility (private, organization).
+  3. Create a course from a template in the wizard.
+- **System behavior:** Copies create a new course with new ids; enrollments, reviews, ratings, coupons, announcements and analytics are never copied (BR-STU-041). Media references are shared through the media library with usage tracking, not duplicated storage. Rights attestations are not copied; the new course requires its own. Question content is copied from the pinned version; pool membership is copied.
+- **UI elements and controls:** Duplicate dialog with checkboxes, template manager, template picker.
+- **Configuration options:** Platform: template availability.
+- **Business rules:** BR-STU-041, BR-STU-008
+- **Validation:** New title required; copy size limit follows course limits.
+- **Inputs and outputs:** In: source course, options. Out: new draft course.
+- **Filters, sorting, search:** Template list by owner and category.
+- **Notifications and communication:** n/a — none.
+- **Error handling and edge cases:** Source contains media the actor cannot access (co-instructor of a different owner): item replaced by placeholder with note. Very large course: duplication runs as a job with progress.
+- **Dependencies:** FR-STU-007, FR-STU-025.
+- **Security and privacy:** Templates never include learner data.
+- **Acceptance criteria:**
+  1. Given a published course, when duplicated with content, then a new draft has the same structure and no reviews or enrollments.
+  2. Given a copy, when submitting for review, then a new rights attestation is required.
+  3. Negative: Given a course the user cannot edit, when duplicating, then `403` is returned.
+
+### FR-STU-019 — Course versioning
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Must · R3
+- **Source:** [SRC: SSOT BR-093, BR-105; YASH-G3 SPEC-06 §3.1] [DER]
+- **Purpose and outcome:** Published courses can improve without breaking learners: structure changes create new versions, small fixes publish as patches. Success is zero progress loss on updates.
+- **Roles and permissions:** `INS Owner: create version, publish` · `Co-instructor: edit draft` · `PAD: view`
+- **Preconditions and entry points:** Published course; "Create new version" or "Edit" actions.
+- **User interactions and actions:**
+  1. Click "Create new version" to fork the live version into a working draft (SM-STU-02).
+  2. Edit; see the change summary (added, changed, removed lessons, rule changes) generated automatically.
+  3. Write a learner-facing change note; mark the update "recommended" for notifying learners.
+  4. Submit for review (if structural) or publish a patch directly (non-structural).
+  5. Compare versions side by side; retire superseded versions after no active enrollments remain.
+- **System behavior:** Published versions are immutable (BR-STU-004). Structural changes: adding or removing lessons or sections, changing completion rules, prerequisites, skills or weights, replacing media with different content. Patches: typo fixes, caption corrections, resource replacement, description edits, thumbnail changes; patches pass automated checks only and publish into the same version as a patch revision with a log. `lessonKey` stability is enforced; lessons removed keep their key retired. Learners remain pinned (LRN BR-LRN-006) until they migrate. One working draft at a time (BR-STU-049).
+- **UI elements and controls:** Version list, "Create new version", diff view, change note editor, "Publish patch" button with checklist, retire button.
+- **Configuration options:** Platform: patch eligibility rules; notification threshold.
+- **Business rules:** BR-STU-002, BR-STU-004, BR-STU-049
+- **Validation:** Change note 20 to 1,000 characters for structural updates; `lessonKey` uniqueness.
+- **Inputs and outputs:** In: draft changes. Out: version or patch revision.
+- **Filters, sorting, search:** Version list by state.
+- **Notifications and communication:** `stu.version.published` (`OPERATIONAL`); learners per LRN FR-LRN-012.
+- **Error handling and edge cases:** Patch attempted for a structural change: refused with the offending diff items. Concurrent draft by another owner request: `409 draft_exists`. Retiring a version with active learners: blocked.
+- **Dependencies:** FR-LRN-012, FR-STU-038, FR-STU-041, ENT-STU-06.
+- **Security and privacy:** Version history retained for audit and certificate verification.
+- **Acceptance criteria:**
+  1. Given a live course, when creating a new version and adding a lesson, then the draft shows 1 lesson added and the live version is unchanged.
+  2. Given a typo fix, when published as a patch, then learners on the version see it within 5 minutes and no review is needed.
+  3. Negative: Given a patch that adds a lesson, when publishing as a patch, then `409 structural_change` is returned.
+
+### FR-STU-020 — Preview as learner
+
+- **Sub-module:** B. Course authoring
+- **Priority / tier:** Must · R3
+- **Source:** [DER]
+- **Purpose and outcome:** Authors and reviewers experience the course exactly as a learner would before it goes live. Success is fewer post-publish defects.
+- **Roles and permissions:** `INS (all roles), reviewers, PAD: preview`
+- **Preconditions and entry points:** "Preview" button in the workspace; reviewer queue.
+- **User interactions and actions:**
+  1. Open the preview in a new tab; choose learner state (new learner, mid-course, completed) and device frame.
+  2. Navigate lessons, play media, attempt quizzes in preview mode, see locked and drip states with a "simulate day N" control.
+  3. Toggle captions, transcript, playback speed and quality like a learner.
+  4. Leave comments pinned to lessons for the team (private to members and reviewers).
+- **System behavior:** Preview uses the LRN player in preview mode with a synthetic enrollment that never produces progress, grades, evidence, certificates, analytics or notifications for real accounts. Media is served via short-lived preview tokens. Quiz attempts in preview do not mint anything and answers are visible to authors only. Reviewer comments attach to the version.
+- **UI elements and controls:** Preview toolbar (state, device, day simulator), comment pins, "Exit preview".
+- **Configuration options:** Platform: preview token TTL (30 minutes).
+- **Business rules:** BR-STU-002, BR-STU-012
+- **Validation:** Preview states from enumerated set.
+- **Inputs and outputs:** In: state choices. Out: rendered preview.
+- **Filters, sorting, search:** Comments filter by lesson and resolved state.
+- **Notifications and communication:** `stu.preview.comment` (`OPERATIONAL`) to members.
+- **Error handling and edge cases:** Media not ready: placeholder with status. Expired token: silent refresh. Preview of a draft with errors renders what exists with markers.
+- **Dependencies:** LRN FR-LRN-026, FR-STU-026.
+- **Security and privacy:** Preview access restricted to members and assigned reviewers; unpublished content is never reachable by other users.
+- **Acceptance criteria:**
+  1. Given a preview session, when completing all lessons, then no enrollment, certificate or XP exists for any account.
+  2. Given "simulate day 7", when opening a drip lesson set for day 7, then it unlocks in preview only.
+  3. Negative: Given a non-member user, when opening a preview URL, then `404` is returned.
+
+### C. Media production pipeline
+
