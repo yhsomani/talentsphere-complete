@@ -5,7 +5,7 @@
 
 Measurable quality requirements. Thresholds marked [PROP] need a decision.
 
-**Total: 492.**
+**Total: 511.**
 
 ## 03_EXPERIENCE/01_INFORMATION_ARCHITECTURE.md
 
@@ -155,6 +155,25 @@ Source: [03_EXPERIENCE/04_ACCESSIBILITY_AND_INCLUSION.md](../03_EXPERIENCE/04_AC
 | NFR-AXS-047 | Status messages (saved, results count, errors, new content) are exposed through live regions without moving focus | 4.1.3 | A, AT |  |
 | NFR-AXS-048 | First rule of ARIA: use native elements; custom widgets follow WAI-ARIA Authoring Practices patterns (as listed in the component catalogue) | 4.1.2 | M |  |
 | NFR-AXS-049 | Pages work in forced-colors mode (Windows High Contrast) and with user stylesheets | 1.4.3, 1.4.11 | M |  |
+| NFR-AXS-050 | Focus is never lost to `body` after an action; automated check: after each recorded test step, `document.activeElement` is not `body` unless the page just loaded. |  |  |  |
+| NFR-AXS-051 | Focus traps exist only in modal dialogs, with `inert` on the background; they release on close. |  |  |  |
+| NFR-AXS-052 | Programmatic focus uses `preventScroll` only when the target is already visible; else it scrolls into view with offset for sticky bars. |  |  |  |
+| NFR-AXS-053 | Focus styles are never removed (`outline: none` without replacement fails lint). |  |  |  |
+| NFR-AXS-054 | At most one primary decision per screen region; at most 7 plus or minus 2 items in a choice list before grouping or search; progressive disclosure for advanced options ("More options"). |  |  |  |
+| NFR-AXS-055 | Consistent patterns: the same action has the same label, icon, position and behavior across modules (enforced by shared components). |  |  |  |
+| NFR-AXS-056 | No time pressure by default. Countdown timers appear only where the timer is real (assessment, session expiry). No fake urgency or scarcity messages (DP-10). |  |  |  |
+| NFR-AXS-057 | Users can always see where they are and what happens next: titles, breadcrumbs, step counts, confirmations that say what will happen. |  |  |  |
+| NFR-AXS-058 | Instructions are written before the control, one idea per sentence; long instructions are chunked with headings; examples are provided for formats. |  |  |  |
+| NFR-AXS-059 | Avoid memory burden: autofill, remember recent choices, show previously entered data in review steps; recognition over recall. |  |  |  |
+| NFR-AXS-060 | Distraction control: a "Focus mode" (hide non-essential chrome, banners, recommendations) is available in settings and automatically in assessment, interview and course player [PROP]. Notification interruptions are suppressed in focus shells by default. |  |  |  |
+| NFR-AXS-061 | Consent and privacy defaults are the protective option; consent texts are readable (section 10), unbundled, and as easy to refuse as to accept. |  |  |  |
+| NFR-AXS-062 | No dark patterns: no pre-checked consent, no hidden unsubscribe, no confirm-shaming copy, no obstruction of cancellation (cancel plan in as few steps as sign-up), no misleading countdowns. |  |  |  |
+| NFR-AXS-063 | Error tolerance: undo (`03` section 9), clear confirmations, saved drafts, forgiving input formats. |  |  |  |
+| NFR-AXS-064 | Credentials and identity checks avoid requiring puzzles or memory tests; alternatives exist for biometric or document steps (manual review path). |  |  |  |
+| NFR-AXS-065 | No hiring or assessment decision may depend on a feature a user with an approved accommodation cannot operate; where a flow has such a feature, an alternative path with equal outcome exists. |  |  |  |
+| NFR-AXS-066 | Accommodation grants take effect without requiring the user to disclose a diagnosis for the pre-approved set. |  |  |  |
+| NFR-AXS-067 | Extra-time multipliers apply to every timer in an attempt consistently, including section timers and auto-submit, and are shown in the attempt record. |  |  |  |
+| NFR-AXS-068 | Proctoring technology must be compatible with assistive technology on the supported matrix or be disabled automatically for the user's session when an approved accommodation says so. |  |  |  |
 
 ## 03_EXPERIENCE/05_RESPONSIVE_MOBILE_PWA_UX.md
 

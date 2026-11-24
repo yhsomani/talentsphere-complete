@@ -5,7 +5,7 @@
 
 Risks identified per module and per area.
 
-**Total: 379.**
+**Total: 428.**
 
 ## 01_PRODUCT/01_VISION_AND_STRATEGY.md
 
@@ -71,6 +71,26 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | RSK-ANL-06 | Cost and load of analytic queries affecting the product | Outages · Separate store, query budgets, rollups (BR-ANL-026) |
 | RSK-ANL-07 | Scope breadth across all roles delays core value | Delivery risk · `OD-ANL-01` minimal slice; dashboards follow module readiness |
 | RSK-ANL-08 | Dashboard overload with vanity metrics | Poor decisions · Decision-supported rule (BR-ANL-001), counter-metrics (BR-ANL-025) |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-ASM-01 | Sandbox escape or abuse (crypto mining, network probing) | Medium, high · Network-less isolation, seccomp, limits, security tests, separate pools |
+| RSK-ASM-02 | False-positive integrity flags harm candidates or disproportionately affect groups | Medium, high · Human review, disclosure, appeals, fairness monitoring, thresholds validated before enabling |
+| RSK-ASM-03 | AI misuse outside the platform cannot be detected | High, medium · Honest policy statements, proctoring levels for high stakes, item design resistant to lookup |
+| RSK-ASM-04 | Item leaks undermine exams | Medium, high · Pools, rotation, exposure caps, watermarking, leak scans, response playbook |
+| RSK-ASM-05 | Runner outages cause backlogs and many `unverified` attempts | Medium, medium · Multiple pools, autoscaling, honest status, re-grade window |
+| RSK-ASM-06 | Proctoring privacy and legal exposure | Medium, high · Consent, alternatives, DPIA, minimal retention, vendor contracts |
+| RSK-ASM-07 | Accommodation data exposure | Low, high · Special-category controls, access logs, no employer visibility |
+| RSK-ASM-08 | Employers misuse assessments for discriminatory screening | Medium, high · Job-relatedness mapping, disallowed content rules, consent, audit |
+| RSK-ASM-09 | Evidence inflation from poorly calibrated or short assessments | Medium, high · Calibration, standard setting, eligibility gate, level bands |
+| RSK-ASM-10 | Sandbox compute cost grows unbounded | Medium, medium · Rate limits, caps per user, queue priorities, cost dashboards |
+| RSK-ASM-11 | Timer, clock or session manipulation | Low, high · Server authority, session binding, signals, tests |
+| RSK-ASM-12 | Content licensing disputes for imported item banks | Medium, medium · License matrix, provenance fields, takedown path (STU process reuse) |
+| RSK-ASM-13 | Candidate anxiety and perceived unfairness reduce adoption | Medium, medium · Clear disclosure, accessible design, practice mode, appeals |
 
 ## ATS
 
@@ -354,6 +374,25 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | RSK-NTF-07 | Live delivery assumed from source but never verified | M / M · Outbox labeling and an explicit provider readiness check before launch |
 | RSK-NTF-08 | Quiet-hours or time-zone errors cause wrong-time sends | M / L · DST-safe tests, user-confirmed zone |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-PLT-01 | SSRF through webhooks, oEmbed, imports or metadata fetch reaches internal services. | Medium / Critical · Single egress client, pinned DNS, network-level egress rules, bypass corpus tests (FR-PLT-041). |
+| RSK-PLT-02 | Webhook or API secret leakage. | Medium / High · Hashing and vault, scanner revocation, short overlap rotations, IP allowlists. |
+| RSK-PLT-03 | Malicious uploads (malware, polyglots, active documents) reach users. | Medium / High · Fail-closed scan, sandbox origin, re-scan, type sniffing. |
+| RSK-PLT-04 | Vendor outage or lock-in (storage, transcode, email, payments). | Medium / High · Ports, degraded modes, breakers, removal drills, export of renditions. |
+| RSK-PLT-05 | Bulk scraping of candidate or profile data through the public API. | High / High · Scope limits, sealed classes excluded, rate limits and anomaly detection, developer terms, app review. |
+| RSK-PLT-06 | Breaking changes slip into a stable version. | Medium / Medium · Contract diff in CI, pinned SDK tests, long deprecation window. |
+| RSK-PLT-07 | Dead-letter growth hides data loss. | Medium / High · Alerts by age and count, console replay, ownership per kind (FR-ADM-037). |
+| RSK-PLT-08 | Storage and transcoding costs grow faster than plan revenue. | Medium / Medium · Quotas, renditions caps, lifecycle tiers, per-tenant cost tracking. |
+| RSK-PLT-09 | Poor integration data quality (duplicates, mapping errors) damages customer trust. | Medium / Medium · Dry runs, mapping validation, duplicate review, undo windows. |
+| RSK-PLT-10 | Marketplace ambitions drift into the SSOT §4.2 general-marketplace non-goal. | Medium / Medium · Decision gate, career-domain limit, unlisted-first policy. |
+| RSK-PLT-11 | Rate-limit counters inconsistent across instances (SSOT §20.1 open issue). | Medium / Medium · Shared store, documented fail modes, tests with multiple instances. |
+| RSK-PLT-12 | Enforced SSO locks out an organization when the IdP fails. | Low / High · Break-glass owner account requirement, certificate expiry alerts. |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -385,6 +424,22 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | RSK-PWA-08 | Conflict dialogs frustrate users or lead to wrong choices. | Medium / Medium · Field-level diffs, safe automatic rules for monotonic data, telemetry on conflict rate. |
 | RSK-PWA-09 | Parser breakage as job sites change markup. | High / Low · Versioned adapters, JSON-LD first, parse-success monitoring, remote disable. |
 | RSK-PWA-10 | The offline registry drifts from reality and consequential actions become reachable offline. | Low / High · CI tests that exercise each action offline, default ON, security review for reclassification. |
+
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-REP-01 | XP farming and collusion undermine trust | H / M · Server-side rules, diminishing returns, weighting, sanctions (FR-REP-024, 025) |
+| RSK-REP-02 | Dark patterns and anxiety from streaks | M / M · Humane copy rule, protection, opt-out, vacation mode (BR-REP-014, 027) |
+| RSK-REP-03 | Reputation seen as verified evidence by recruiters | M / H · Labeling, advisory-only rule, explanation (BR-REP-024, 034) |
+| RSK-REP-04 | Discriminatory effects of reputation or detection | M / H · No protected attributes, fairness audit, human gate (BR-REP-030) |
+| RSK-REP-05 | Privacy leakage through leaderboards or small cohorts | M / H · Opt-in identity, k-minimum, aliases (BR-REP-016) |
+| RSK-REP-06 | Rule changes cause inflation or user distrust | M / M · Simulation, guardrails, notice (BR-REP-029) |
+| RSK-REP-07 | Enterprise boards drift into employee monitoring | L / H · Opt-in, aggregate-only, no HR export (BR-REP-035) |
+| RSK-REP-08 | Review bombing or reputation attacks | M / M · Independence discounts, minimum samples, contest path |
+| RSK-REP-09 | Ledger and projection drift | L / M · Nightly verification and rebuild |
 
 ## SET
 
@@ -418,6 +473,24 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | RSK-SRC-08 | Engine migration causes outages or inconsistent results | Downtime · Adapter interface, versioned indexes, shadow reads, rollback |
 | RSK-SRC-09 | Query logs hold sensitive data | Privacy risk · Redaction, short retention, restricted access |
 | RSK-SRC-10 | Recruiters over-trust evidence filters or rankings | Unfair rejections · Default "Any", explanation, no automatic rejection, training text |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-STU-01 | Media pipeline cost and latency grow faster than revenue | Medium, high · Provider interface, ladder tuning, quotas, lazy re-processing, cost dashboards |
+| RSK-STU-02 | Low-quality or inaccurate courses reach learners | High, high · Review, quality checks, post-publish reports, quality components, takedown path |
+| RSK-STU-03 | Copyright infringement and unlicensed third-party material | High, high · Attestation, license matrix, notice process, repeat infringer policy |
+| RSK-STU-04 | Instructor fraud (fake credentials, self-sign-off, review manipulation) | Medium, high · Verification levels, independence checks (BR-STU-015), anomaly flags |
+| RSK-STU-05 | Payout errors or compliance gaps (tax, KYC) | Medium, high · Decision gating, BIL ledger source of truth, reconciliation, holds |
+| RSK-STU-06 | Review backlog slows publishing and discourages instructors | Medium, medium · SLA escalation, risk-based sampling, reviewer capacity metrics |
+| RSK-STU-07 | Version and `lessonKey` mistakes corrupt learner progress mapping | Low, high · Permanent keys, structural check, patch eligibility rules, tests |
+| RSK-STU-08 | Accessibility shortfalls (low-quality ASR captions published unreviewed) | Medium, high · Review confirmation, labeling, accessibility metrics, audits |
+| RSK-STU-09 | Instructor privacy overreach into learner data | Medium, medium · Scope limits, suppression thresholds, audits (BR-STU-029) |
+| RSK-STU-10 | Scope creep into a generic marketplace or CMS | Medium, medium · Tier gating, OD-STU-01, boundaries with BIL and PLT |
+| RSK-STU-11 | Provider lock-in for transcoding, ASR or DRM | Medium, medium · Provider-agnostic interfaces and conformance tests |
 
 ## TSF
 
@@ -526,7 +599,7 @@ Source: [04_ARCHITECTURE/01_SYSTEM_ARCHITECTURE.md](../04_ARCHITECTURE/01_SYSTEM
 | RSK-ARC-08 | Vendor lock-in through provider-specific features leaking into domain logic | Medium · Medium · Ports with capability flags; adapters normalize to domain types; removal drill per provider [SRC: SSOT §13.4 VER-021] · Architect |
 | RSK-ARC-09 | AI cost overrun from fan-out features (matching, recommendations) | Medium · High · Budget reservation before every call; batch embeddings; free-user invariant [SRC: SSOT §16.4] · AIC owner with finance |
 | RSK-ARC-10 | Realtime gateway leaks data through channel subscriptions | Low · High · Per-subscription policy check; signals carry no personal fields; re-authorize on membership change events · Security officer |
-| RSK-ARC-11 | Build-file restrictions delay structural changes (new packages, entrypoints, dependencies) | High · Medium · Batch the needed build-file changes into one owner-approved change early (see [08 §4](08_TECHNICAL_SPECIFICATION_INDEX.md)) · Architect |
+| RSK-ARC-11 | Build-file restrictions delay structural changes (new packages, entrypoints, dependencies) | High · Medium · Batch the needed build-file changes into one owner-approved change early (see 08 §4) · Architect |
 | RSK-ARC-12 | OS-expansion modules dilute the core loop or conflict with SSOT §4.2 non-goals (not generic HR, not ad network, not social clone, not general marketplace) | Medium · High · Context map keeps them as separate modules behind `DEC-002` and module ODs; GIG and ENT data boundaries specified narrowly · Product owner |
 
 ## 04_ARCHITECTURE/02_DATA_MODEL.md
@@ -575,6 +648,24 @@ Source: [04_ARCHITECTURE/06_AI_ARCHITECTURE.md](../04_ARCHITECTURE/06_AI_ARCHITE
 | RSK-ARC-22 | Prompt injection via resumes, job descriptions or messages manipulates recruiter-facing summaries | High · High · Fencing, output validation, summaries labelled, no tool access from summarization, adversarial evals · AIC owner |
 | RSK-ARC-23 | Hidden bias in ranking harms candidates and creates legal exposure | Medium · Very high · Fairness evals, no protected attributes or proxies, display-only ordering, audits (OD-ARC-30) · AIC owner with counsel |
 | RSK-ARC-24 | AI spend grows faster than revenue | Medium · High · Budget ledger, per-capability caps, cheap-model defaults, batch embeddings, cost dashboards · Finance |
+
+## 04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md
+
+Source: [04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md](../04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-ARC-25 | Vector search on PostgreSQL degrades write and vacuum performance as candidate volume grows | Medium · Medium · Partition by doc type, batch re-embedding, monitor HNSW build times, external engine trigger · Database lead |
+| RSK-ARC-26 | Malicious files reach users through preview rendering | Low · High · Fail-closed quarantine, type detection, preview generation in the sandboxed heavy pool, separate content domain, `Content-Disposition: attachment` · Security officer |
+
+## 04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md
+
+Source: [04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md](../04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md)
+
+| ID | Risk | Mitigation / control |
+|---|---|---|
+| RSK-ARC-27 | Module specs written in parallel diverge further on names and ownership | High · Medium · This register; generated registries from headings; architecture review before each module starts build · Architect |
+| RSK-ARC-28 | Foundation work (F1–F10) is underestimated and modules start on the as-built single-writer model | Medium · High · Treat F-steps as release gates; no new module enabled in a deployed environment before F9 · Product owner |
 
 ## 05_SECURITY_PRIVACY/01_SECURITY_ARCHITECTURE.md
 

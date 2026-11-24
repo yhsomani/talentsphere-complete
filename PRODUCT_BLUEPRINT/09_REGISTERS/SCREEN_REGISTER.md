@@ -5,7 +5,7 @@
 
 Every screen with its proposed route, roles and states.
 
-**Total: 778.**
+**Total: 930.**
 
 ## ADM
 
@@ -131,6 +131,60 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | SCR-ANL-028 | API and embed grants | `/settings/analytics/api` | EAD, IAD, EXA, PAD | Grants, embeds, usage | Pending, revoked |
 | SCR-ANL-029 | Unit economics | `/admin/analytics/economics` | FIN, PAD | Revenue, cost, margin | Forecast label, break flagged |
 | SCR-ANL-030 | Changelog and certification | `/admin/analytics/changes` | PAD (steward) | Impact preview, approvals | Review overdue |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Screen | Route | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-ASM-001 | Challenge catalog | `/challenges` | GUE, CAN, STD, INS | Browse and filter (FR-ASM-001) | no results, approximate counts |
+| SCR-ASM-002 | Challenge and assessment detail | `/challenges/:id`, `/assessments/:id` | GUE, CAN, STD, INS | Rules, policy box and start (FR-ASM-002) | cooldown, not eligible, resume, acknowledgment pending |
+| SCR-ASM-003 | Coding workspace | `/challenges/:id/attempt` | CAN, STD, INS | Edit, run, submit (FR-ASM-003, 004) | queued, running, rate limited, runner unavailable, unverified |
+| SCR-ASM-004 | Objective attempt | `/assessments/:id/attempt` | CAN, STD, INS | Questions, navigator, timer (FR-ASM-005, 029, 030) | saved, offline queue, deadline passed, submit confirm |
+| SCR-ASM-005 | Scenario attempt | `/assessments/:id/scenario` | CAN, STD, INS | Branching scenario (FR-ASM-006) | awaiting manual review |
+| SCR-ASM-006 | Project submission | `/challenges/:id/project` | CAN, STD, INS | Project submit and status (FR-ASM-007) | link unreachable, in review |
+| SCR-ASM-007 | System design workspace | `/challenges/:id/design` | CAN, STD, INS | Canvas and notes (FR-ASM-008) | outline mode |
+| SCR-ASM-008 | SQL workspace | `/challenges/:id/sql` | CAN, STD, INS | Schema, editor, results (FR-ASM-009) | timeout, syntax error |
+| SCR-ASM-009 | Data workspace | `/challenges/:id/notebook` | CAN, STD, INS | Notebook and submit (FR-ASM-010) | kernel restart |
+| SCR-ASM-010 | Practice hub | `/practice` | CAN, STD, INS | Practice entry and history (FR-ASM-011) | none |
+| SCR-ASM-011 | Hints and editorial panel | panel within SCR-ASM-003 | CAN, STD, INS | Hints and solutions (FR-ASM-012) | locked, assisted warning |
+| SCR-ASM-012 | Challenge discussion | `/challenges/:id/discuss` | CAN, STD, INS | Threads (FR-ASM-013) | spoiler hidden, disabled |
+| SCR-ASM-013 | Challenge sets | `/challenges/sets`, `/challenges/sets/:id` | CAN, STD, INS | Sets and mock rounds (FR-ASM-014) | retired item |
+| SCR-ASM-014 | Contest lobby | `/contests/:id` | CAN, STD, INS | Register and enter (FR-ASM-015) | before start, live, ended |
+| SCR-ASM-015 | Contest standings | `/contests/:id/standings` | all signed-in | Live standings | frozen, final |
+| SCR-ASM-016 | Result page | `/assessments/:id/attempts/:attemptId/result` | CAN, STD, INS | Results and feedback (FR-ASM-050) | passed, failed, under review, unverified, pending manual, voided |
+| SCR-ASM-017 | Share dialog and shared view | dialog; `/r/:shareId` | CAN; recipients | Consented sharing (FR-ASM-051) | revoked, expired |
+| SCR-ASM-018 | My assessments | `/me/assessments` | CAN, STD, INS | History, reports (FR-ASM-053) | no attempts |
+| SCR-ASM-019 | Score report verification | `/verify/report/:id` | GUE, all | Verify score report | valid, under review, voided |
+| SCR-ASM-020 | Leaderboard | `/challenges/leaderboard` | GUE, all | Rankings (FR-ASM-052) | opted out, refresh lag |
+| SCR-ASM-021 | Certification catalog | `/certifications` | GUE, CAN, STD | Browse certifications (FR-ASM-048) | none |
+| SCR-ASM-022 | Certification detail and registration | `/certifications/:id` | CAN, STD | Eligibility and slots (FR-ASM-042) | full, not eligible, registered |
+| SCR-ASM-023 | Exam check-in and system check | `/exams/:regId/check-in` | CAN, STD | Pre-exam steps | camera failed, ready |
+| SCR-ASM-024 | Proctoring consent | `/exams/:regId/consent` | CAN, STD | Consent and alternative (FR-ASM-036) | declined, alternative chosen |
+| SCR-ASM-025 | Identity check | `/exams/:regId/identity` | CAN, STD | Identity verification (FR-ASM-035) | pending, failed |
+| SCR-ASM-026 | Accommodations | `/me/accommodations` | CAN, STD | Request and view (FR-ASM-041) | pending, active, denied |
+| SCR-ASM-027 | Appeal | `/appeals/:id` | CAN, STD, INS, MOD | File and track (FR-ASM-038) | window closed, decided |
+| SCR-ASM-028 | Author assessment list | `/author/assessments` | INS, EAD, IAD, PAD | Manage assessments | filters |
+| SCR-ASM-029 | Assessment builder | `/author/assessments/:id` | INS, EAD, IAD, PAD | Build and publish (FR-ASM-016, 022) | validation errors, version conflict |
+| SCR-ASM-030 | Composition and integrity settings | `/author/assessments/:id/composition` | INS, EAD, IAD, PAD | Blueprint, randomization, integrity (FR-ASM-021, 031) | unsatisfiable blueprint |
+| SCR-ASM-031 | Question editor | `/author/questions/:id` | INS, EAD, IAD, PAD | Item authoring (FR-ASM-017) | review needed |
+| SCR-ASM-032 | Question bank | `/author/bank` | INS, EAD, IAD, PAD | Bank (FR-ASM-018) | import report |
+| SCR-ASM-033 | Test suite editor | `/author/challenges/:id/tests` | INS, EAD, IAD, PAD | Tests and checkers (FR-ASM-019) | validation run |
+| SCR-ASM-034 | Rubric editor | `/author/rubrics/:id` | INS, EAD, IAD, PAD | Rubrics (FR-ASM-020) | total mismatch |
+| SCR-ASM-035 | Author analytics and item analysis | `/author/assessments/:id/analytics` | INS, EAD, IAD, PAD | Results and item stats (FR-ASM-044, 056) | insufficient data |
+| SCR-ASM-036 | Grading queue and workbench | `/grading`, `/grading/:taskId` | graders | Manual grading (FR-ASM-027) | claimed, moderation |
+| SCR-ASM-037 | Integrity review queue | `/staff/integrity` | MOD, PAD | Cases queue (FR-ASM-037) | SLA warning |
+| SCR-ASM-038 | Integrity case workbench | `/staff/integrity/:caseId` | MOD, PAD | Evidence and decision | awaiting candidate |
+| SCR-ASM-039 | Exam administration | `/staff/exams` | PAD, IAD | Definitions, sessions, seats (FR-ASM-048, 042) | capacity |
+| SCR-ASM-040 | Runtime and sandbox operations | `/staff/runtimes` | PAD | Runtimes and pools (FR-ASM-023, 024) | degraded pool |
+| SCR-ASM-041 | Fairness dashboard | `/staff/fairness` | PAD, analyst | Fairness reports (FR-ASM-055) | suppressed groups |
+| SCR-ASM-042 | Issue triage and regrade | `/author/issues` | authors, MOD, PAD | Reports and remediation (FR-ASM-057) | impact preview |
+| SCR-ASM-043 | Employer assignments | `/employer/assessments` | EAD, REC, HMG | Assign and track (FR-ASM-046) | declined, expired |
+| SCR-ASM-044 | Employer invitation | `/assessments/invite/:token` | CAN, STD | Consent and accept (FR-ASM-046) | expired, declined |
+| SCR-ASM-045 | Employer template builder | `/employer/assessment-templates` | EAD, REC, HMG | Templates (FR-ASM-047) | policy blocked |
+| SCR-ASM-046 | Certification record and verification | `/me/certifications`, `/verify/cert/:id` | CAN, GUE | Validity and renewal (FR-ASM-049) | expiring, revoked |
+| SCR-ASM-047 | Assessment privacy settings | `/settings/assessments` | CAN, STD | Retention, export, leaderboard visibility (FR-ASM-058) | export pending |
 
 ## ATS
 
@@ -776,6 +830,47 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | SCR-NTF-023 | Dev outbox | `/dev/outbox` | non-production only | Captured messages | list, viewer |
 | SCR-NTF-024 | Digest preview | `/settings/notifications/digest-preview` | all authenticated | See what the next digest holds | preview, empty |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Screen | Route | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-PLT-001 | Developer portal home | `developers /` | GUE and all | Docs entry, quickstart, status, changelog | default, maintenance banner |
+| SCR-PLT-002 | API reference and try-it | `developers /docs/*` | GUE and all | Endpoint docs, sandbox console | loading, search no results, try-it error |
+| SCR-PLT-003 | Changelog and versions | `developers /changelog` | GUE and all | Versions, deprecations, migration guides | filtered, subscribed |
+| SCR-PLT-004 | App list and create wizard | `developers /apps`, `/apps/new` | developers | Register apps | empty, draft, in review, approved, suspended |
+| SCR-PLT-005 | App detail: credentials, scopes, redirect URIs | `developers /apps/:id` | developers | Secrets, scopes, review status | secret shown once, rotating, review needed |
+| SCR-PLT-006 | OAuth consent screen | `/oauth/authorize` | all signed-in roles | Allow or deny scopes | consent, reduced scopes, denied, admin approval needed |
+| SCR-PLT-007 | Connected apps | `/settings/connected-apps` | signed-in roles | Review and revoke app access | empty, list, revoked |
+| SCR-PLT-008 | API keys | `/settings/developer/keys` | EAD, IAD, EXA, developers | Create, rotate, revoke keys | empty, one-time secret panel, expiring |
+| SCR-PLT-009 | Usage and limits | `/settings/developer/usage` | EAD, developers | Requests, 429s, quotas, increase request | normal, near quota, exhausted |
+| SCR-PLT-010 | Request logs | `/settings/developer/logs` | EAD, developers | Search requests, debug capture | filtered, delayed, capture on |
+| SCR-PLT-011 | Webhook endpoints | `/settings/developer/webhooks` | EAD, developers | List and manage endpoints | empty, healthy, degraded, disabled |
+| SCR-PLT-012 | Add or edit webhook endpoint | wizard | EAD, developers | URL, events, verify, secret | verifying, verification failed, secret once |
+| SCR-PLT-013 | Webhook deliveries | `/settings/developer/webhooks/:id` | EAD, developers | Attempts, replay | list, detail, replay in progress |
+| SCR-PLT-014 | Sandbox tenants and simulator | `developers /sandbox` | developers | Seeded data, scenarios, outbox | create, reset, inactive warning |
+| SCR-PLT-015 | Integrations catalog | `/settings/integrations` | EAD, IAD, EXA, signed-in roles (personal) | Browse and connect | plan-gated, connected, needs sign-in |
+| SCR-PLT-016 | Integration detail and settings | `/settings/integrations/:id` | EAD, IAD, EXA | Mapping, schedule, test, disconnect | healthy, degraded, reauth, syncing |
+| SCR-PLT-017 | Sync run history and report | `/settings/integrations/:id/runs` | EAD, IAD, EXA | Run results and errors | running, failed rows, completed |
+| SCR-PLT-018 | SSO and SCIM setup | `/settings/security/sso` | EAD, IAD, EXA | Configure IdP, test, enforce, SCIM | not configured, tested, enforced, cert expiring |
+| SCR-PLT-019 | LMS and LTI registration | `/settings/integrations/lti` | IAD | Platform registration, tool config | registering, active, passback errors |
+| SCR-PLT-020 | Connected accounts (calendar, video) | `/settings/connected-accounts` | signed-in roles | Personal connections | none, connected, reconnect |
+| SCR-PLT-021 | Uploader component and file chips | component | signed-in roles | Upload with progress, states | idle, uploading, paused, scanning, ready, rejected |
+| SCR-PLT-022 | Storage usage | `/settings/storage` | signed-in roles | Meter, breakdown, delete | normal, 80%, full |
+| SCR-PLT-023 | Recently deleted files | `/settings/storage/deleted` | signed-in roles | Restore within 30 days | empty, list |
+| SCR-PLT-024 | Share link dialog | modal | file owners | Expiry and revoke | default, copied, revoked |
+| SCR-PLT-025 | Media processing status and player | component | INS, MNT, authors, viewers | Status, retry, captions | processing, ready, failed |
+| SCR-PLT-026 | External media validation card | component | authors | Link validation result | valid, blocked, unsupported, attest needed |
+| SCR-PLT-027 | Import wizard | `/imports/new` | IAD, EAD, REC (granted), EXA, PAD | Upload, map, validate, import | each step, errors, undo |
+| SCR-PLT-028 | Import history and report | `/imports` | same | Past runs | list, report, rolled back |
+| SCR-PLT-029 | Export dialog and My exports | modal, `/exports` | signed-in roles | Request and download exports | preparing, ready, expired |
+| SCR-PLT-030 | Admin: integrations fleet health | admin origin `/ops/integrations` | PAD, SUP | Adapter state, breakers | healthy, degraded, unknown |
+| SCR-PLT-031 | Admin: quarantine review | admin origin `/ops/quarantine` | PAD, MOD | Review suspicious files | queue, decision |
+| SCR-PLT-032 | Admin: developer app review | admin origin `/ops/dev-apps` | PAD | Approve, reject, suspend apps | queue, decision |
+| SCR-PLT-033 | Admin: schedules and event inspector | admin origin `/ops/schedules`, `/ops/events` | PAD, SAD | Run now, pause, inspect | list, history |
+| SCR-PLT-034 | Admin: marketplace gate | admin origin `/ops/marketplace-gate` | PAD, SAD | Metrics and decision | monitoring, decided |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -848,6 +943,40 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | SCR-PWA-027 | Mobile review (admin) | admin origin `/ops/mobile-review` | PAD, SAD | Trigger dashboard and decisions | monitoring, trigger fired, evaluating |
 | SCR-PWA-028 | Release and store checklist (admin) | admin origin `/ops/store-releases` | PAD, SAD | Submission checklist and status | incomplete, ready, in review, rejected |
 | SCR-PWA-029 | PWA health dashboard (admin) | admin origin `/ops/pwa-health` | PAD | Install, offline, push, vitals | healthy, degraded, no data |
+
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Screen | Route | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-REP-001 | Progress overview | `/progress` | participating roles | Level, XP, streak, goals, badges summary | loading, loaded, empty, hidden (opted out) |
+| SCR-REP-002 | XP history | `/progress/xp` | same | Ledger table | list, empty, error |
+| SCR-REP-003 | How XP works | `/progress/rules` | same, GUE | Rule list and limits | loaded |
+| SCR-REP-004 | Levels | `/progress/levels` | same | Threshold table | loaded |
+| SCR-REP-005 | Badges | `/progress/badges` | same | Earned and locked badges, visibility | list, locked with progress |
+| SCR-REP-006 | Badge catalog and detail | `/badges`, `/badges/:id` | all authenticated | Criteria and rarity | catalog, detail |
+| SCR-REP-007 | Public badge page and verification | `/b/:token` | GUE | Verify a badge | valid, expired, revoked, not found |
+| SCR-REP-008 | Streaks and goals | `/progress/streaks` | participating roles | Streak, protection, vacation, goals | active, at risk, protected, vacation, broken |
+| SCR-REP-009 | Leaderboards | `/progress/leaderboards` | participating roles | Boards and invitation | list, small board, not participating, error |
+| SCR-REP-010 | Leaderboard privacy | `/settings/privacy/leaderboards` | participating roles | Name, alias or exclude | not chosen, name, alias, excluded |
+| SCR-REP-011 | Cohort board | `/cohorts/:id/board` | STD, INS, IAD | Institution board | disabled, enabled, closed |
+| SCR-REP-012 | Organization challenge | `/org/:id/learning/challenges/:cid` | employees, EXA | Enterprise board | draft, active, closed |
+| SCR-REP-013 | Reputation overview | `/progress/reputation` | participating roles | Labels per domain and context | not enough signals, computed |
+| SCR-REP-014 | Reputation explanation | `/progress/reputation/:domain` | subject | Breakdown and tips | computed, recalculating |
+| SCR-REP-015 | Reputation visibility | `/settings/privacy/reputation` | subject | Who can see | private, shared |
+| SCR-REP-016 | Gamification configuration | `/admin/gamification` | PAD, SAD | Rules, thresholds, simulations | draft, simulated, active |
+| SCR-REP-017 | Badge administration | `/admin/gamification/badges` | PAD | Badge definitions | draft, in review, active |
+| SCR-REP-018 | Signal registry | `/admin/gamification/signals` | PAD | Reputation signal types | list, edit |
+| SCR-REP-019 | Integrity queue | `/admin/gamification/cases` | MOD, PAD | Cases and decisions | queue, case, appeal |
+| SCR-REP-020 | Seasons | `/admin/gamification/seasons` | PAD | Define and monitor | scheduled, active, archived |
+| SCR-REP-021 | Fairness report | `/admin/gamification/fairness` | SAD, PAD | Audit reports and actions | ready, actions open |
+| SCR-REP-022 | Progress and rewards settings | `/settings/privacy/progress` | all authenticated | Intensity and data choices | standard, minimal, off |
+| SCR-REP-023 | Share card dialog and list | overlay, `/progress/shared` | participating roles | Create, revoke share cards | preview, generated, revoked |
+| SCR-REP-024 | Recognition inbox | `/progress/recognition` | participating roles | Recognitions given and received | list, empty |
+| SCR-REP-025 | Recovery plan | `/progress/reputation/recovery` | subject | Steps and dates | none, in progress, completed |
+| SCR-REP-026 | Sanction notice and appeal | `/progress/notice/:id` | subject | Notice and appeal form | notice, drafting, submitted, decided |
+| SCR-REP-027 | What changed | `/progress/changes` | all | Published rule changes | list |
 
 ## SET
 
@@ -927,6 +1056,57 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | SCR-SRC-030 | Search analytics | `/admin/search/analytics` | PAD, EAD, IAD | Aggregates (FR-SRC-031) | suppressed cells |
 | SCR-SRC-031 | Degraded status | banner and `/admin/search/status` | all, PAD | Mode (FR-SRC-034) | live, degraded, down |
 | SCR-SRC-032 | Location picker | component | all | Place resolve (FR-SRC-033) | ambiguous, denied location |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Screen | Route | Roles | Purpose | Key states |
+|---|---|---|---|---|---|
+| SCR-STU-001 | Instructor application | `/teach/apply` | CAN | Apply to teach (FR-STU-001) | draft, submitted, needs info, rejected with reapply date |
+| SCR-STU-002 | Application status | `/teach/application` | CAN | Track application | in verification, approved |
+| SCR-STU-003 | Verification center | `/studio/verification` | INS | Identity and expertise (FR-STU-002) | pending, failed, expiring |
+| SCR-STU-004 | Agreements | `/studio/agreements` | INS | Accept terms and declare conflicts (FR-STU-003) | update required, grace ending |
+| SCR-STU-005 | Instructor profile editor | `/studio/profile` | INS | Public teaching profile (FR-STU-004) | hidden by moderation |
+| SCR-STU-006 | Payout setup | `/studio/earnings/payout-setup` | INS Owner | Payout and tax profile (FR-STU-005) | incomplete, verified, restricted, feature off |
+| SCR-STU-007 | Studio home | `/studio` | INS, IAD | Courses and attention list (FR-STU-006) | no courses, attention items |
+| SCR-STU-008 | Course workspace overview | `/studio/courses/:id` | INS | Hub with checklist and status | draft, in review, live, taken down |
+| SCR-STU-009 | Course creation wizard | `/studio/courses/new` | INS, IAD | Start a course (FR-STU-007) | step errors, template pick |
+| SCR-STU-010 | Curriculum builder | `/studio/courses/:id/curriculum` | INS | Sections and lessons, drag and drop (FR-STU-008) | stale version conflict, bulk selection |
+| SCR-STU-011 | Lesson editor | `/studio/courses/:id/lessons/:lessonKey` | INS | Video, text, resource authoring (FR-STU-009 to 011) | media processing, locked by another editor |
+| SCR-STU-012 | Landing page editor | `/studio/courses/:id/landing` | INS | Public page and SEO (FR-STU-014) | image too small, claims warning |
+| SCR-STU-013 | Rules and prerequisites | `/studio/courses/:id/rules` | INS | Completion and navigation rules (FR-STU-013) | unsatisfiable rule, test result |
+| SCR-STU-014 | Skills and objectives | `/studio/courses/:id/skills` | INS | Skill tagging (FR-STU-012) | evidence preview gaps |
+| SCR-STU-015 | Team | `/studio/courses/:id/team` | INS Owner | Co-instructors and ownership (FR-STU-016) | invitation pending, split mismatch |
+| SCR-STU-016 | Versions | `/studio/courses/:id/versions` | INS Owner | Version list and diff (FR-STU-019) | draft exists, patch eligible |
+| SCR-STU-017 | Learner preview | `/studio/courses/:id/preview` | INS, reviewers | Preview as learner (FR-STU-020) | simulated day, media not ready |
+| SCR-STU-018 | Media library | `/studio/library` | INS | Assets and usage (FR-STU-025) | quota near, asset in use |
+| SCR-STU-019 | Asset detail and status | `/studio/library/:assetId` | INS, SUP | Pipeline status (FR-STU-026) | processing step, failed with reason |
+| SCR-STU-020 | Caption editor | `/studio/library/:assetId/captions` | INS | Edit captions (FR-STU-023) | low-confidence highlights, ASR pending |
+| SCR-STU-021 | Quiz settings | `/studio/courses/:id/quizzes/:lessonKey` | INS | Quiz placement and policy (FR-STU-029) | pool too small |
+| SCR-STU-022 | Assignment and rubric editor | `/studio/courses/:id/assignments/:lessonKey` | INS | Assignment authoring (FR-STU-030) | rubric total mismatch |
+| SCR-STU-023 | Grading queue | `/studio/grading` | INS, Assistant | Pending submissions (FR-STU-031) | claimed, late, flagged |
+| SCR-STU-024 | Grading workbench | `/studio/grading/:taskId` | INS, Assistant | Grade and feedback | draft, released, dispute |
+| SCR-STU-025 | Pricing | `/studio/courses/:id/pricing` | INS Owner, FIN | Price and schedule (FR-STU-033) | scheduled change, below minimum |
+| SCR-STU-026 | Promotions | `/studio/courses/:id/promotions` | INS Owner | Coupons (FR-STU-034) | exhausted, expiring |
+| SCR-STU-027 | Earnings and statements | `/studio/earnings` | INS (role-limited), FIN | Revenue views (FR-STU-035, 037) | ledger lag, feature off |
+| SCR-STU-028 | Payouts | `/studio/earnings/payouts` | INS, FIN | Schedule and history (FR-STU-036) | held, failed, paid |
+| SCR-STU-029 | Publish and submit | `/studio/courses/:id/publish` | INS Owner | Checklist, attestation, publish (FR-STU-038, 040, 041, 052) | blocking items, scheduled |
+| SCR-STU-030 | Review queue | `/staff/course-review` | MOD, PAD | Reviewer queue (FR-STU-039) | SLA warning, conflict |
+| SCR-STU-031 | Review workbench | `/staff/course-review/:caseId` | MOD, PAD | Checklist and decision | second reviewer required |
+| SCR-STU-032 | Q&A inbox | `/studio/qa` | INS, Assistant | Answer questions (FR-STU-043) | unanswered backlog |
+| SCR-STU-033 | Announcements | `/studio/courses/:id/announcements` | INS | Author announcements (FR-STU-044) | daily limit reached |
+| SCR-STU-034 | Reviews | `/studio/reviews` | INS | Read, reply, report (FR-STU-045) | reply exists |
+| SCR-STU-035 | Learners | `/studio/courses/:id/learners` | INS, Assistant, Viewer (aggregate) | Roster (FR-STU-046) | private learner, export |
+| SCR-STU-036 | Live schedule and host console | `/studio/courses/:id/live` | INS | Sessions (FR-STU-047) | live, ended, recording processing |
+| SCR-STU-037 | Analytics | `/studio/analytics` | INS, Viewer | Funnels and engagement (FR-STU-048) | insufficient data |
+| SCR-STU-038 | Content moderation console | `/staff/content-moderation` | MOD, PAD | Cases and strikes (FR-STU-049) | emergency takedown |
+| SCR-STU-039 | Copyright notice form | `/legal/copyright` | GUE, CAN | Submit notice (FR-STU-050) | incomplete, receipt |
+| SCR-STU-040 | Copyright case console | `/staff/copyright` | MOD, PAD | Handle notices | counter-notice window running |
+| SCR-STU-041 | Localization | `/studio/courses/:id/languages` | INS, Translator | Translations (FR-STU-051) | outdated track |
+| SCR-STU-042 | Quality | `/studio/quality` | INS | Quality components (FR-STU-053) | insufficient data |
+| SCR-STU-043 | Course import | `/studio/courses/:id/import` | INS | Import wizard (FR-STU-017) | mapping issues |
+| SCR-STU-044 | Sign-off queue | `/studio/signoff` | INS | Completion sign-off (FR-STU-042) | held for review |
 
 ## TSF
 

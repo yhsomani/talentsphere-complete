@@ -5,7 +5,7 @@
 
 State machines declared per module. Transitions and guards are in the owning module file section 6.
 
-**Total: 175.**
+**Total: 224.**
 
 ## ADM
 
@@ -50,6 +50,25 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | SM-ANL-05 | Experiment |
 | SM-ANL-06 | Data access request |
 | SM-ANL-07 | Alert |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Name |
+|---|---|
+| SM-ASM-01 | Attempt |
+| SM-ASM-02 | Assessment version |
+| SM-ASM-03 | Question item |
+| SM-ASM-04 | Judge job |
+| SM-ASM-05 | Integrity case |
+| SM-ASM-06 | Appeal |
+| SM-ASM-07 | Certification record |
+| SM-ASM-08 | Exam registration |
+| SM-ASM-09 | Contest |
+| SM-ASM-10 | Employer assignment |
+| SM-ASM-11 | Manual grading task |
+| SM-ASM-12 | Accommodation grant |
 
 ## ATS
 
@@ -224,6 +243,23 @@ Source: [02_MODULES/JOB_Job_Marketplace_Candidate_Applications.md](../02_MODULES
 | SM-JOB-04 | Saved search alert subscription |
 | SM-JOB-05 | Imported listing |
 
+## LRN
+
+Source: [02_MODULES/LRN_Learning_Course_Experience.md](../02_MODULES/LRN_Learning_Course_Experience.md)
+
+| ID | Name |
+|---|---|
+| SM-LRN-01 | Enrollment |
+| SM-LRN-02 | Lesson progress |
+| SM-LRN-03 | Certificate |
+| SM-LRN-04 | Assignment submission |
+| SM-LRN-05 | Review |
+| SM-LRN-06 | Path enrollment |
+| SM-LRN-07 | Offline license |
+| SM-LRN-08 | Live session attendance |
+| SM-LRN-09 | Q&A thread |
+| SM-LRN-10 | Playback session |
+
 ## MEN
 
 Source: [02_MODULES/MEN_Mentorship_Coaching_Career_Services.md](../02_MODULES/MEN_Mentorship_Coaching_Career_Services.md)
@@ -292,6 +328,24 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | SM-NTF-03 | Admin broadcast |
 | SM-NTF-04 | Channel endpoint (push device or SMS number) |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Name |
+|---|---|
+| SM-PLT-01 | Webhook delivery |
+| SM-PLT-02 | Webhook endpoint |
+| SM-PLT-03 | Integration connection |
+| SM-PLT-04 | Stored file |
+| SM-PLT-05 | Media asset processing |
+| SM-PLT-06 | Background job |
+| SM-PLT-07 | API credential (key, client secret) |
+| SM-PLT-08 | Import run |
+| SM-PLT-09 | Developer application |
+| SM-PLT-10 | Export run |
+| SM-PLT-11 | API version |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -318,6 +372,19 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | SM-PWA-06 | Extension pairing |
 | SM-PWA-07 | Native wrapper decision |
 
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Name |
+|---|---|
+| SM-REP-01 | XP event evaluation |
+| SM-REP-02 | Badge award |
+| SM-REP-03 | Streak |
+| SM-REP-04 | Integrity case |
+| SM-REP-05 | Season |
+| SM-REP-06 | Gamification configuration version |
+
 ## SET
 
 Source: [02_MODULES/SET_Settings_Privacy_Consent.md](../02_MODULES/SET_Settings_Privacy_Consent.md)
@@ -341,6 +408,23 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | SM-SRC-03 | Taxonomy skill |
 | SM-SRC-04 | Ranking or synonym release |
 | SM-SRC-05 | Index document |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Name |
+|---|---|
+| SM-STU-01 | Course |
+| SM-STU-02 | Course version |
+| SM-STU-03 | Instructor application |
+| SM-STU-04 | Media asset |
+| SM-STU-05 | Publish review case |
+| SM-STU-06 | Payout |
+| SM-STU-07 | Coupon |
+| SM-STU-08 | Copyright case |
+| SM-STU-09 | Grading task |
+| SM-STU-10 | Co-instructor invitation |
 
 ## TSF
 

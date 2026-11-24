@@ -5,7 +5,52 @@
 
 Every question that needs stakeholder input. Nothing here has been silently resolved; the default proposal is what the blueprint assumes until a decision is recorded.
 
-**Total: 488.**
+**Total: 586.**
+
+## 01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md
+
+Source: [01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md](../01_PRODUCT/08_STAKEHOLDER_DECISIONS_NEEDED.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-PRD-01 | North-star metric and metric hierarchy: Which single north-star metric, or which approved hierarchy, governs success claims? | A: `ns.career_progress_verified` (SSOT §2.4). B: `ns.evidence_backed_conversations` (target metrics catalogue). C: A as north star, B as the leading indicator. | C [PROP]: outcome as north star, conversations as leading indicator; all targets set only after a measured baseline. Also define the "active candidate" window (default 30 days [PROP]). |  | U1: instrumenting R1 metrics. |
+| OD-PRD-02 | Admission of each OS-expansion module: Which of `MEN`, `GIG`, `EVT`, `MKT`, `ENT` are admitted into the product, and in what order? | Per module: admit, admit narrowed, defer, reject. | [PROP] Admit `EVT` (free events, no ticketing) and `MKT` (aggregate career paths) first because they need no money flow; admit `MEN` after `OD-PRD-04`; admit `ENT` only with `OD-PRD-20` boundary; decide `GIG` last after `OD-PRD-03`. |  | U4. |
+| OD-PRD-03 | Freelance marketplace boundary: How far does `GIG` go? | A: Listing only (offerings and projects, contracts off-platform). B: Managed contracts with milestones and held funds. C: Out of scope. | A first [PROP], restricted to career-related professional services, with B only after `OD-PRD-04`. |  | U4. |
+| OD-PRD-04 | Seller of record and money flow for third-party sales: Who is the seller of record for paid courses, mentoring, gigs and event tickets; how are payouts, tax, refunds and disputes handled? | A: Platform sells first-party content only; no third-party payouts. B: Merchant-of-record provider handles tax and payouts. C: Marketplace model with connected accounts; platform takes commission. | A until a money-flow ADR is approved [PROP]; then B or C chosen with finance and legal advice. Commission rate and refund window decided then (SSOT recommendations of 70/30 and 30 days are noted, not adopted). |  | U3 (paid first-party courses), U4 (marketplaces). |
+| OD-PRD-05 | Candidate premium tier: Is there a paid candidate tier, what does it include, at what price? | A: No candidate tier. B: Tools-only tier (variants, analytics, AI quota). C: B plus career services credits. | B [PROP], with the free core loop protected (`BR-XCT-027`); price set by owner with cost data. Coded price recommendations in `docs/PRICING.md` are not adopted. |  | U3. |
+| OD-PRD-06 | Employer packaging and free posting policy: Seat, job-slot or hybrid pricing; how many free active jobs; quota values; grace period. | A: Per seat. B: Per active job. C: Hybrid seats plus slot bundles. Free tier: none, limited, unlimited. | C with a limited free tier [PROP] so small employers can close the loop for candidates; values set by owner. |  | U1 for the free tier (R1 needs employers), U2 for paid packaging. |
+| OD-PRD-07 | Institution licensing model: Per seat, per cohort or campus licence; what happens to seats at graduation. | A: Per provisioned seat per term. B: Per cohort. C: Campus licence. | A with seat release at graduation [PROP]. |  | U2. |
+| OD-PRD-08 | Billing owner inside organizations: Do entitlements in an org context come from the org subscription, the acting user's plan, or both? | A: Org subscription only. B: Acting user only. C: Org, with personal plans adding personal tools only. | C [PROP]. |  | U2. |
+| OD-PRD-09 | R1 pilot scope: Which loop does the first pilot prove? | A: Full GA loop including first-party learning and practice. B: Prove → Showcase → Apply with non-AI matching; learning in R1 limited to free first-party courses. C: Narrow beta (identity, profile, evidence verification, jobs, applications, messaging) without learning. | B [PROP]: proves evidence and hiring value early while keeping `DEC-003` (learning in scope) with a minimal catalog. |  | U1. |
+| OD-PRD-10 | Launch jurisdictions, data residency and legal regime: Which countries at launch; where data is hosted; which privacy and employment laws apply. | A: Single country first. B: One region (for example one economic area). C: Global from launch. | A or B with counsel [PROP]; no compliance claim before mapping (SSOT Amendment G India note). |  | U1. |
+| OD-PRD-11 | Minimum age and minors policy: Minimum age for independent accounts; whether minors can be managed learners; what is locked for them. | A: 16 (SSOT provisional). B: 18. C: Jurisdiction-specific with attestation. | C with attestation and no date of birth unless counsel requires it [PROP]; minors only as managed learners with discoverability, outreach and marketplaces locked (`BR-XCT-071`). |  | U1. |
+| OD-PRD-12 | `min_cohort_k` default and overrides: Value of the small-cell threshold; what k counts; permitted overrides. | Default k of 5, 10 or 20; k counts distinct people or reports. | k ≥ 10 distinct people for public and sensitive cells [SRC: SSOT Amendment G]; lower values need owner and counsel approval. |  | U2 (institution analytics). |
+| OD-PRD-13 | Erasure clocks: Cancel window, completion deadline and deactivation purge values. | Cancel window 7 or 30 days; completion within 30 days of request or of window end. | 7-day cancel window, completion within 30 days of the request [PROP, target BR-T060]. |  | U1. |
+| OD-PRD-14 | Predictive or automated hiring decisions: Are candidate-level predictive scores or automated screening ever admitted? | A: Permanently excluded. B: Excluded from GA; admission only through a governance process with validation, fairness, human control and legal review. | B [SRC: SSOT Amendment E]; advisory suggested order with explanation stays allowed. |  | U3. |
+| OD-PRD-15 | Proctoring: Is remote proctoring offered; vendor or in-house; webcam and screen capture? | A: No proctoring; integrity by design and review. B: Live human proctoring for institution-run exams only. C: Vendor automated proctoring. | A until institution demand is shown, then B [PROP]. |  | U3. |
+| OD-PRD-16 | Community content breadth: Posts, articles, groups and newsletters: which are offered? | A: None beyond referrals and messaging. B: Topic groups and Q&A only. C: Posts, articles and groups with non-viral ordering. | B [PROP]. |  | U2. |
+| OD-PRD-17 | Company reviews and salary reports: Are company reviews and salary reports allowed; anonymous or not? | A: Neither. B: Salary reports (aggregate only) without reviews. C: Both, anonymous to employers and public, with verified-employment signal. | B first, C after moderation capacity exists [PROP]. |  | U2 (reviews), U4 (salary). |
+| OD-PRD-18 | Promoted placements: Is any paid visibility offered? | A: None. B: Labelled promoted jobs in separate slots only. | A [PROP]. |  | U3. |
+| OD-PRD-19 | Background-check scope and vendor model: Which checks (employment, education, criminal), which vendor model, which countries? | A: None; referee and employer confirmation only. B: Employment and education via vendor. C: Full vendor catalog. | A in R1–R3, B in R4 [PROP]. |  | U3. |
+| OD-PRD-20 | Enterprise internal mobility boundary: Where does `ENT` stop relative to HR systems? | A: Skills inventory and internal roles only. B: A plus mandated learning and read-only HRIS sync. C: B plus performance data (rejected by default as an HR non-goal). | B [PROP]; manager notification on internal application defaults to off. |  | U4. |
+| OD-PRD-21 | AI funding and provider strategy: How are AI costs funded for free users; which providers; is bring-your-own-key allowed? | A: No paid inference for free users. B: Small platform-funded quota under a cost policy. C: Bring-your-own-key for power users. | A in R1 (non-AI matching), B from R4 with a cost policy [PROP]. |  | U3. |
+| OD-PRD-22 | Real-time video: Build, integrate or omit video for interviews, mentoring and events? | A: External meeting links only. B: Embedded third-party video. C: First-party media servers. | A [PROP]. |  | U2. |
+| OD-PRD-23 | External integration priorities: Which integrations first: LinkedIn data import, calendar, partner ATS, HRIS, SIS/LMS, background-check vendor, public API pricing? | Any order; API enterprise-only or metered. | Calendar and résumé/LinkedIn-export import in R1–R2; SIS roster import in R3; ATS and HRIS in R5; API enterprise-only at launch [SRC: SSOT OD-53]. |  | U2. |
+| OD-PRD-24 | White-label and co-branding: Can institutions or enterprises brand the experience? | A: None. B: Co-branded pages. C: Full white-label. | B first [SRC: SSOT OD-20]. |  | U3. |
+| OD-PRD-25 | User research before R1: Commission research to validate personas and journeys before building R1? | A: Yes, before R1 build. B: In parallel with R1 build. C: After the pilot. | B [PROP]. |  | U1. |
+| OD-PRD-26 | Government identity verification: Is identity-document verification offered or required (for mentors, freelancers, payees, or anyone)? | A: Never. B: Only where a payment provider requires it. C: Optional for anyone as an evidence signal. | B [PROP]. |  | U3. |
+| OD-PRD-27 | Monetary referral bonuses: Does the platform track or pay referral bonuses? | A: No. B: Track eligibility only; employers pay outside. C: Pay through the platform. | A [PROP]. |  | U3. |
+| OD-PRD-28 | Public gamification: Are XP, levels and leaderboards public? | A: Private only. B: Opt-in public badges, no leaderboards. C: Public leaderboards for contests. | B, with C only inside events [PROP]. |  | U2. |
+| OD-PRD-29 | Commercial use of aggregate data: May k-anonymous aggregates be sold as insights or used for research? | A: No. B: Inside paid tiers only, never person-level. C: Research partnerships with consent `data.research_aggregate`. | B [PROP]; C stays hidden until decided. |  | U4. |
+| OD-PRD-30 | Legacy code disposition: Is the blueprint built by evolving the existing code or by rebuilding? | A: Evolve existing modules where they match the blueprint. B: Rebuild. C: Module-by-module decision. | C [PROP], recorded in `11_LEGACY_DISPOSITION`. |  | U1. |
+| OD-PRD-31 | Blueprint ratification governance: Who ratifies `[PROP]` items, and when does the blueprint supersede `SSOT.md`? | A: Owner ratifies per module. B: Owner ratifies per tier. C: Blueprint supersedes SSOT at once. | A [PROP]; SSOT stays founder intent until each module is ratified. |  | U1. |
+| OD-PRD-32 | Restore a green CI gate before further pushes: Should further pushes to `main` wait until the lint gate is green? | A: Yes, fix lint first. B: Allow documentation-only pushes while red. C: Keep pushing. | A [PROP]. Fixing requires touching files outside this blueprint and possibly Prettier configuration, which is a build file reserved to humans by the repository instructions. |  | U1. |
+| OD-PRD-33 | Accessibility commitment and independent audit: Commit to WCAG 2.2 AA conformance and fund an independent audit? | A: Yes before GA. B: Target only, audit later. | A [PROP]; no conformance claim until an audit report exists. |  | U1. |
+| OD-PRD-34 | Support model: Channels, hours, free-user support, support access-session length. | A: Help center and email for all; chat for paid. B: Email for all. | A, access sessions 60 minutes [PROP]. |  | U1. |
+| OD-PRD-35 | Moderation operating model: In-house or outsourced moderators; degree of automated triage. | A: In-house with automated triage for spam. B: Outsourced first-line with in-house appeals. | A [SRC: SSOT OD-05 "AI-triage for spam; human for bans"]. |  | U1. |
+| OD-PRD-36 | Native apps and browser-extension sync: Are native apps ever built; may the browser extension sync to the server? | Extension: local-only (SSOT BR-30) or opt-in sync (J-11). Native: never, later, wrappers. | Extension opt-in sync with explicit consent [PROP]; no native apps until PWA limits are measured. |  | U3. |
+| OD-PRD-37 | Managed learners applying before graduation: Can a `STD` apply to jobs outside placement drives before graduation? | A: Never (SSOT §5.9). B: Institution decides per cohort. C: Always. | B [PROP]. |  | U2. |
+| OD-PRD-38 | Languages and locales at launch: Which languages, scripts and currencies are supported at launch? | A: One language. B: A short list tied to `OD-PRD-10`. | B [PROP]; all strings externalized from R0. |  | U1. |
 
 ## ADM
 
@@ -61,6 +106,27 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | OD-ANL-09 | Predictive hiring or success models (SSOT F-168) | Allow; defer; forbid | Defer until fairness and consent gates pass | Product owner, Counsel | FR-ANL-025 |
 | OD-ANL-10 | First-party analytics only or an analytics SaaS | First-party; SaaS with server-side forwarding | First-party; SaaS only server-side and allow-listed | Engineering lead, Privacy | FR-ANL-002, 007 |
 | OD-ANL-11 | Do employer admins see individual recruiter metrics? | Never; team-level; individual with consent of the recruiter | Team-level only | Product owner, Counsel | FR-ANL-013, 015 |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-ASM-01 | Sandbox technology, isolation model and resource limits (the TD-05 decision text is missing from the SSOT) | Container with seccomp; microVM; managed service | Isolated, network-less runner with signed results; limits as in BR-ASM-011; until it exists, code attempts stay `unverified` (SSOT V61-22) | Engineering, Security | FR-ASM-023, 025 |
+| OD-ASM-02 | Proctoring vendor, which exams need L3, and the alternative for candidates who refuse | Vendor live; vendor recorded; none; test centre | Vendor behind an adapter at SSOT Ph10 (OD-35); L3 only for high-stakes certifications with an alternative | Founder, Legal | FR-ASM-036 |
+| OD-ASM-03 | Show correct answers after a pass or fail on evidence-eligible assessments? | Never; after retake window; immediately | After the retake window closes, for secure items never (YASH-G3 decision pending) | Product, Assessment lead | FR-ASM-050 |
+| OD-ASM-04 | Attempt and cooldown defaults for evidence-eligible assessments | 24 h and 3 per 7 days; stricter; per assessment | 24 h and 3 per 7 days; certification 7 days | Product | FR-ASM-040 |
+| OD-ASM-05 | Certification validity default and renewal | Perpetual; 2 years; per certification | Perpetual default, configurable; renewal by retake or recertification exam (SSOT OD-18) | Product | FR-ASM-049 |
+| OD-ASM-06 | Leaderboard display rules and minors | Public; opt-in only; institution only | Opt-out available, display names only, minors excluded from public boards | Legal, Product | FR-ASM-052 |
+| OD-ASM-07 | Role mapping: Exam Administrator, Proctor, Employer actors have no SSOT §5.4 role | Map to PAD, IAD, MOD, EAD as in section 2; create new roles | Map as in section 2 | Product, Security | Section 2 |
+| OD-ASM-08 | Calibration thresholds, sample sizes and the standard-setting method | Angoff; bookmark; empirical | 200 attempts, 50 per item, reliability threshold set by psychometrician, Angoff for exams | Assessment lead | FR-ASM-044, 055 |
+| OD-ASM-09 | Is AI-assisted grading allowed, and where? | Off; practice and assignments only; all | Off for evidence-eligible; optional for assignments and practice | Product, Legal | FR-ASM-028 |
+| OD-ASM-10 | Similarity corpus scope and fingerprint retention | Platform only; platform plus public web | Platform plus approved public corpus; fingerprints retained with the case | Security, Legal | FR-ASM-033 |
+| OD-ASM-11 | Employer assessment data retention and delivery to ATS | Delete with requisition; retain per employer agreement | Delete on requisition close plus {12 months}, subject to candidate rights | Legal | FR-ASM-046 |
+| OD-ASM-12 | Contest infrastructure and rated contests | Separate sandbox pool; shared | Separate pool (SSOT OD-44); rated contests after unrated pilot | Engineering | FR-ASM-015 |
+| OD-ASM-13 | Which integrity signals and thresholds may be enabled before validation | All at L1; only after false-positive study | Enable flagging only after a fairness review (YASH-G3 testing note) | Integrity lead, Legal | FR-ASM-032 |
+| OD-ASM-14 | Publish practice item content or keep secure | Public statements; hidden | Public for practice challenges; secure for exam pools | Product | FR-ASM-039 |
 
 ## ATS
 
@@ -384,6 +450,29 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | OD-NTF-07 | Org-branded sender for employer messages. | allowed, never | never (`Won't-now`); org identity appears in the body | Product director | FR-NTF-007 |
 | OD-NTF-08 | Retention of delivery detail. | 30, 90, 180 days | 90 days | Counsel | FR-NTF-022 |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-PLT-01 | Deprecation window for the public API: SSOT §12.18 says at least 6 months; the target API standard proposes 90 days. | 90 days; 6 months; 12 months for enterprise | 6 months `[PROP]` (stricter wins) | Product owner and platform lead | FR-PLT-001 |
+| OD-PLT-02 | Success response shape: SSOT `{success, data, meta}` versus target `{items, page}` and bare resources (OPEN-46). | SSOT envelope; bare resources with `items`/`page` | Bare resources and `{items, page}` for lists, problem+json for errors `[PROP]`; the envelope is not used | Platform lead | FR-PLT-006, SDKs |
+| OD-PLT-03 | Interface defaults in conflict: list page default 20 (SSOT CON-003) versus 25 (target); idempotency replay window 24 hours (CON-005) versus 14 days (offline clients). | 20 or 25; 24 hours or 14 days | 25 and 14 days `[PROP]` | Platform lead | FR-PLT-006, FR-PLT-007 |
+| OD-PLT-04 | Which plans and roles may use the public API, personal tokens and webhooks. | Paid only; all with low limits | Free: personal read tokens; paid: org keys, OAuth apps and webhooks; enterprise: higher limits and SSO `[PROP]` | Product owner with BIL owner | FR-PLT-003, FR-PLT-011 |
+| OD-PLT-05 | Rule assigning kinds to the transactional versus heavy queue; user-local versus UTC cadence for digests and streaks; legacy ambiguity about `failed`; infrastructure for heavy jobs. | Runtime and resource rule; local-day fan-out | Rule in FR-PLT-039; local-day fan-out for user-facing schedules, UTC for platform schedules `[PROP]` | Platform lead | FR-PLT-039, FR-PLT-040, BR-PLT-031 |
+| OD-PLT-06 | Object storage provider, regions and data residency per tenant. | Single region; per-region buckets; customer-chosen | Single primary region with residency tiers added for institutions later `[PROP]` | Security lead and product owner | FR-PLT-030 |
+| OD-PLT-07 | Antivirus engine choice and acceptable scan latency. | ClamAV self-hosted; commercial API; both | ClamAV plus a second engine for suspicious cases `[PROP]` | Security lead | FR-PLT-031 |
+| OD-PLT-08 | Video processing vendor (Mux, Cloudflare Stream, self-hosted), DRM and offline need. | Vendor; self-host; DRM yes or no | Managed vendor, no DRM in v1 `[PROP]` (legacy OD-14 open) | Platform lead and LRN owner | FR-PLT-035 |
+| OD-PLT-09 | Does HRIS sync, even read-only, brush the SSOT §4.2 non-goal of generic HR? | Exclude; read-only directory sync only | Read-only directory sync with field allowlist `[PROP]` | Product owner | FR-PLT-019 |
+| OD-PLT-10 | Lawful basis and notification duties for candidates imported from an employer's ATS. | Employer controller, no outreach; outreach with acknowledgment | Employer is controller; no automatic outreach unless the org acknowledges lawful basis `[PROP]` | Legal and privacy lead | FR-PLT-018 |
+| OD-PLT-11 | Criteria and thresholds (N apps, abuse record) for opening an integration directory to third-party apps. | Never; unlisted private only; curated directory | Unlisted private apps first; curated directory only after gate review `[PROP]` | Product owner | FR-PLT-027 |
+| OD-PLT-12 | Is SMS in scope and for what purposes (OTP, reminders, marketing)? | None; OTP and security only; reminders too | OTP and security only until legal review `[PROP]` | Product owner and legal | FR-PLT-023 |
+| OD-PLT-13 | Retention periods per file class and for logs. | Values per class | Defaults in FR-PLT-033 `[PROP]` | Legal and privacy lead | FR-PLT-033, FR-PLT-010 |
+| OD-PLT-14 | Rate-limit and quota values per plan and endpoint class; storage per plan. | Values | Placeholders in FR-PLT-005 and FR-PLT-032 `[PROP]`; calibrate with load tests | Product owner with BIL | FR-PLT-005, FR-PLT-032 |
+| OD-PLT-15 | Payment provider(s) per region and whether a second provider is supported. | Stripe only; Stripe plus regional | Stripe only for v1 `[PROP]` | Finance owner and product owner | FR-PLT-022 |
+| OD-PLT-16 | Priority list of ATS, HRIS, LMS and identity verification vendors to build first. | Ranked list | Greenhouse, Lever for ATS; Canvas and Moodle for LTI; Entra and Okta for SSO; vendor RFP for IDV `[PROP]` | Product owner | FR-PLT-018 to FR-PLT-025 |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -419,6 +508,25 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | OD-PWA-10 | Supported browser versions and minimum OS versions (compatibility matrix). | Evergreen two latest; wider | Latest two major versions of Chrome, Edge, Safari (iOS 16.4 or newer for web push), Firefox `[PROP]` | Frontend platform lead | FR-PWA-029 |
 | OD-PWA-11 | Which job sites may the scanner support given their terms of service and scraping rules? | User-viewed pages only; allowlist after legal review | Structured-data and user-click only; site adapters only after legal review `[PROP]` | Legal and product owner | FR-PWA-033, FR-PWA-036 |
 | OD-PWA-12 | Who owns store developer accounts and signing keys; is Safari extension support required? | Company-owned; contractor | Company-owned with two-person key access; Safari later `[PROP]` | Security lead | FR-PWA-031 |
+
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-REP-01 | Daily XP cap value and per-category caps (legacy 200 XP/day). | 200, per-category caps | 200 total with category caps | Product director | FR-REP-002 |
+| OD-REP-02 | Level thresholds and names. | linear, gentle curve | gentle curve tuned after a simulation, neutral names | Product director | FR-REP-004 |
+| OD-REP-03 | Leaderboard and streak reset time zone and cadence (legacy GAP-006 open; weekly and all-time tabs proposed; DOR-010). | UTC, user local | per-user local day for streaks; UTC week for boards with local display | Product director | FR-REP-011, 014, 027 |
+| OD-REP-04 | May enterprise internal boards exist given the non-goal "not generic HR"? | no, narrow opt-in learning challenges only | narrow opt-in learning challenges with no HR use (BR-REP-035) | Owner | FR-REP-017 |
+| OD-REP-05 | Dedicated consent scope for reputation display (`reputation.share_summary`). | new scope, reuse `evidence.share_summary` | new scope in the SET catalog | Privacy lead | FR-REP-021 |
+| OD-REP-06 | Employer reputation from anonymous candidate reviews: allowed, credibility rules, legal review. | allowed with rules, never | allowed with credibility checks and k-minimum | Owner and counsel | FR-REP-023 |
+| OD-REP-07 | May reputation labels be an input to recruiter-facing ranking or matching? | no, advisory display only, allowlisted input | advisory display only until the fairness audit and kill-switch conditions of the matching rules are met | Owner | BR-REP-024 |
+| OD-REP-08 | Default gamification intensity per role. | Standard for all, role-based | Standard learning, Minimal recruiter and employer | Product director | FR-REP-026 |
+| OD-REP-09 | Half-life and recovery periods. | 12, 24, 36 months | 24 months half-life; 12 months negative expiry | Product director | FR-REP-019, 020 |
+| OD-REP-10 | Public leaderboard for all users or only within cohorts and connections. | global public, cohort and connections only | opt-in global plus cohort | Product director | FR-REP-014 |
+| OD-REP-11 | Badge marketplace claims by issuers other than the platform (F-101). | platform and instructors only, open issuers | platform, instructors and institutions with issuer class shown | Product director | FR-REP-010 |
+| OD-REP-12 | Gamification for minors if allowed by region. | none, private only | private only | Owner and counsel | BR-REP-032 |
 
 ## SET
 
@@ -457,6 +565,26 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | OD-SRC-10 | Can guests search people at all? | No; public indexable only with caps; yes | Public indexable only, 20 results, no pagination | Product owner + privacy officer | FR-SRC-004 |
 | OD-SRC-11 | Should searching people be possible for employers without verified organization status? | No; limited | No (verified orgs only for talent search); normal people search for all signed-in users | Product owner | FR-SRC-021 |
 | OD-SRC-12 | Is a global "search everything including private messages" feature intended? | No; own messages only (MSG) | Own messages only, owned by MSG, not SRC | Product owner | Scope |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-STU-01 | Is a third-party instructor marketplace with payouts in scope, and under what revenue share, seller of record, tax and payout rules? | First-party only; marketplace; both | First-party only first; marketplace behind a separate decision (SSOT V61-21); default share 70/30 as a starting proposal (OD-28) | Founder, Finance, Legal | FR-STU-005, 033, 035, 036 |
+| OD-STU-02 | Review model: all submissions human-reviewed, sampled for trusted instructors, or automated-only for low-risk topics | Full; risk-based sampling; automated | Full review for first course and structural versions; risk-based sampling afterwards; SLA 72 hours (SSOT OD-42) | Operations, Product | FR-STU-038, 039 |
+| OD-STU-03 | Content license and IP terms, including what happens to learner access if an instructor terminates | Perpetual for enrolled learners; limited; per-agreement | Learners keep access for their access period; platform license continues for that period | Legal | BR-STU-047 |
+| OD-STU-04 | Copyright process jurisdiction, windows and agent registration | US DMCA style; EU notice-and-action; both | Both, selected by claimant region, with windows set by Legal | Legal | FR-STU-050 |
+| OD-STU-05 | ASR and machine translation providers and the sensitive-content opt-out | Managed provider; self-hosted model; manual only | Managed provider behind an interface with opt-out for sensitive courses | Engineering, Legal | FR-STU-023, 051 |
+| OD-STU-06 | Verification levels required to publish free and paid courses | Email only; identity for paid; identity for all | Identity required for paid courses and payouts; email for free | Product, Trust | FR-STU-002, BR-STU-037 |
+| OD-STU-07 | Open instructor onboarding or curated invitation | Open application; invite only; mixed | Open application with review, institution invitations as a fast lane | Founder | FR-STU-001 |
+| OD-STU-08 | Strike thresholds and suspension rules | 3 in 12 months; 2; severity-weighted | 3 in 12 months with severity weighting | Trust and safety | FR-STU-049 |
+| OD-STU-09 | Policy on AI-generated or synthetic course content | Prohibit; allow with disclosure; allow with labeling to learners | Allow with mandatory disclosure and learner-visible label for synthetic voices or video | Product, Legal | FR-STU-038, 052 |
+| OD-STU-10 | Price tiers, minimum price and regional bands | Fixed tiers; free-form price | Fixed tiers owned by BIL | Finance, Product | FR-STU-033 |
+| OD-STU-11 | Free-coupon allowance | 0, 20 per month, unlimited | 20 redemptions per month | Product | FR-STU-034 |
+| OD-STU-12 | Media size limits and storage quotas per instructor | Fixed; tiered by status | 10 GB per video, quota by verification level | Product, Engineering | FR-STU-021, 025 |
+| OD-STU-13 | DRM level availability and provider | Signed URLs only; encrypted HLS; multi-DRM | Signed URLs and encrypted HLS first; DRM for premium courses when cost justified (SSOT OD-03, OD-14) | Founder, Engineering | FR-STU-024 |
 
 ## TSF
 
@@ -575,7 +703,7 @@ Source: [04_ARCHITECTURE/01_SYSTEM_ARCHITECTURE.md](../04_ARCHITECTURE/01_SYSTEM
 | OD-ARC-04 | Server-state library in the web client | Keep fetch helper; TanStack Query; other | TanStack Query over `apiJson` [DEC-REQ]; requires a dependency change | Frontend lead with product owner | Web feature-module work at scale |
 | OD-ARC-05 | Hosting platform and managed PostgreSQL vendor | As-built Oracle VM with Compose; managed container platform on a major cloud; Supabase-hosted PostgreSQL | Managed containers plus managed PostgreSQL with point-in-time recovery; vendor open [DEC-REQ] (legacy OPEN-14) | Product owner and finance | Production deployment |
 | OD-ARC-06 | Home region and residency partitions | Single region; region plus EU partition; per-customer region | Single region with `data_region` readiness (DEC-ARC-024) [DEC-REQ] | Product owner with counsel | Enterprise and institution sales in regulated markets |
-| OD-ARC-07 | Which module owns the skills taxonomy (no dedicated module code exists)? | PRF sub-module; EVD; MKT; new module code | PRF owns `skills` as a reference sub-module; MKT consumes it for market signals [DEC-REQ] | Product owner | PRF, EVD, JOB, LRN, ASM all reference skills |
+| OD-ARC-07 | Which module owns the skills taxonomy (no dedicated module code exists)? | PRF sub-module; EVD; MKT; new module code | MKT owns the taxonomy (its module spec claims it, ENT-MKT-01); because MKT is OS-expansion scope, the taxonomy sub-module must be built and released at R1 ahead of the rest of MKT, with SRC holding only a search projection (ENT-SRC-08) [DEC-REQ] | Product owner | PRF, EVD, JOB, LRN, ASM all reference skills |
 | OD-ARC-08 | Realtime transport hosting and live interview media vendor | Own gateway; managed realtime service; for video: a WebRTC provider or external meeting links only | Own gateway for signals; WebRTC provider behind `VideoRoomPort` for INT with external-link fallback [DEC-REQ] | Architect and product owner | INT live interviews, MSG presence |
 | OD-ARC-09 | Code runner: self-hosted sandbox or vendor | gVisor or Firecracker self-hosted; vendor API | Decide after a security review spike; until then no verified code scores [DEC-REQ] (legacy OPEN-27) | Security officer and product owner | ASM verified scores; EVD `challenge_pass` credentials |
 | OD-ARC-10 | Numeric trigger values for scale steps S1–S7 | Defaults in §21 or measured baselines | Use §21 defaults until the first load baseline, then replace [DEC-REQ] | Architect | Capacity planning |
@@ -637,13 +765,32 @@ Source: [04_ARCHITECTURE/06_AI_ARCHITECTURE.md](../04_ARCHITECTURE/06_AI_ARCHITE
 | OD-ARC-31 | Free-user AI allowance and its cost policy | Zero-cost targets only; a funded allowance | Zero-cost targets only until finance approves a cost policy [DEC-REQ] (V61-09) | Finance and product owner | AIC tiers |
 | OD-ARC-32 | Interview recording and AI notes | Not offered; opt-in per interview with all-party consent | Opt-in per interview, off by default, jurisdiction check [DEC-REQ] | Counsel | INT AI features |
 
+## 04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md
+
+Source: [04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md](../04_ARCHITECTURE/07_SEARCH_MEDIA_REALTIME_ARCHITECTURE.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-ARC-33 | Geo search implementation | Geohash prefix in plain PostgreSQL; PostGIS extension | Geohash prefix first; PostGIS if radius accuracy complaints or managed host supports it at no extra cost [DEC-REQ] | Architect | Job location radius search |
+| OD-ARC-34 | Sponsored or promoted job slots | Not offered; labelled sponsored slot separate from ranking | Not offered; any sponsored slot needs a product decision because it brushes the ad-network non-goal (SSOT §4.2) [DEC-REQ] | Product owner | JOB monetization |
+| OD-ARC-35 | DRM or download protection for course video | None (signed tokens only); DRM for institution content | Signed tokens only; DRM only on contract requirement [DEC-REQ] | Product owner | STU, INS premium content |
+
+## 04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md
+
+Source: [04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md](../04_ARCHITECTURE/08_TECHNICAL_SPECIFICATION_INDEX.md)
+
+| ID | Question | Options | Default proposal | Decider | Blocks |
+|---|---|---|---|---|---|
+| OD-ARC-36 | Normalize event prefixes to module codes (C-01)? | Rename spec events; keep and map in the registry | Rename before any event is emitted in code, since nothing is built; until then keep a mapping [DEC-REQ] | Architect with module owners | AsyncAPI generation |
+| OD-ARC-37 | Organization and tenant ownership split (C-03) | IDN tenant registry plus kind aggregates; EMP, INS, ENT each own a separate tenant table | IDN tenant registry plus kind aggregates [DEC-REQ] | Architect with EMP, INS, ENT owners | RLS generator; IDN and EMP build |
+
 ## 05_SECURITY_PRIVACY/01_SECURITY_ARCHITECTURE.md
 
 Source: [05_SECURITY_PRIVACY/01_SECURITY_ARCHITECTURE.md](../05_SECURITY_PRIVACY/01_SECURITY_ARCHITECTURE.md)
 
 | ID | Question | Options | Default proposal | Decider | Blocks |
 |---|---|---|---|---|---|
-| OD-SEC-nn | Security decision for stakeholders | OD-SEC-01..OD-SEC-16 (§25). OD-SEC-17 onward live in [03_COMPLIANCE_MAP.md](03_COMPLIANCE_MAP.md) |  |  |  |
+| OD-SEC-nn | Security decision for stakeholders | OD-SEC-01..OD-SEC-16 (§25). OD-SEC-17 onward live in 03_COMPLIANCE_MAP.md |  |  |  |
 | OD-SEC-01 | Session constants in §8.1 (refresh idle and absolute, shared-device cap, privileged cap, step-up window) | A: values in §8.1; B: shorter (7/30 days) for stronger stolen-token bounds; C: longer for PWA convenience | A | Product owner + `SAD` | IDN session features, PWA offline sign-in |
 | OD-SEC-02 | Password minimum length and server-side pepper | A: 12 chars, no pepper; B: 8 chars (NIST minimum) plus mandatory breached check; C: 12 chars plus KMS pepper | A | `SAD` | IDN sign-up |
 | OD-SEC-03 | Which roles must use MFA | A: all tenant roles mandatory, personal roles optional (§7.1); B: tenant admins only; C: everyone | A | Product owner + `SAD` | Recruiter onboarding |

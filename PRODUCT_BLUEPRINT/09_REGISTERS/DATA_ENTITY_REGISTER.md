@@ -5,7 +5,7 @@
 
 Data entities owned by each module.
 
-**Total: 581.**
+**Total: 691.**
 
 ## ADM
 
@@ -96,6 +96,45 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | ENT-ANL-22 | Annotation | scope, date, text, releaseOrExperimentRef | N:1 dashboard | Permanent |
 | ENT-ANL-23 | ErasureRecord | requestRef, completedAt, scopeSummary | Link to `SET` request | 24 months |
 | ENT-ANL-24 | CostFact | period, category, amountMinor, currency, allocation, source | Aggregate only | 7 years [PROP] |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-ASM-01 | Challenge | id, type, title, statement, difficulty, skills[], languages[], state, suiteId, visibility (public, employer, institution), solveRate | n Attempts; TestSuite | SECURE for tests; public for statement |
+| ENT-ASM-02 | Assessment | id, context, mode, title, ownerRef, skills[], integrityLevel, aiPolicy, state | n AssessmentVersion | LEGAL while versions referenced |
+| ENT-ASM-03 | AssessmentVersion | id, assessmentId, number, config, composition, thresholds, releasePolicy, state (SM-ASM-02), publishedAt | n Attempt | SECURE |
+| ENT-ASM-04 | QuestionItem and ItemVersion | id, bankId, type, stem, options, keyRef, explanation, skills, difficulty, securityLevel, state (SM-ASM-03) | Bank; used in versions | SECURE |
+| ENT-ASM-05 | QuestionBank | id, ownerRef, scope, sharing | n Items | ACCT of owner or org |
+| ENT-ASM-06 | TestSuite | id, challengeId, tests[] (public, hidden), checkers, weights, version | Challenge | SECURE |
+| ENT-ASM-07 | Rubric and RubricVersion | id, criteria[], levels[], points, version | Used by items, assignments | LEGAL |
+| ENT-ASM-08 | Attempt | id, accountId, assessmentVersionId, context, state (SM-ASM-01), startedAt, deadlineAt, multiplier, seed, score, result, autoSubmitted, evidenceId, policyHash | n Answers; Case | EVID; answers {24 months} |
+| ENT-ASM-09 | AttemptAnswer | attemptId, questionId, value, clientSeq, savedAt | Attempt | {24 months} |
+| ENT-ASM-10 | SubmissionSnapshot | attemptId, hash, filesRef, createdAt | Attempt | {24 months} |
+| ENT-ASM-11 | RunnerJob | id, attemptId, snapshotHash, generation, state (SM-ASM-04), runnerVersion, resultSignature | Attempt | LOG90 |
+| ENT-ASM-12 | AttemptSignal | attemptId, kind, count, detailMin, at | Attempt | LOG90 unless case open |
+| ENT-ASM-13 | IntegrityCase | id, attemptId, state (SM-ASM-05), priority, signalsConsidered, reviewerIds, decision, reasonCode, notes | Attempt; Appeal | LEGAL |
+| ENT-ASM-14 | Appeal | id, caseOrAttemptRef, type, state (SM-ASM-06), reviewerId, outcome | Case | LEGAL |
+| ENT-ASM-15 | PrincipalRestriction | principal, kind, attemptId, until | Attempt | LOG90 |
+| ENT-ASM-16 | AccommodationGrant | accountId, kind, multiplier, state (SM-ASM-12), grantedBy, reasonCode, validFrom, expiresAt, docRef | Account | LEGAL; restricted |
+| ENT-ASM-17 | CertificationDefinition | id, title, skills, blueprint, threshold, retakePolicy, integrityLevel, validity, price | n Records | LEGAL |
+| ENT-ASM-18 | CertificationRecord | id, accountId, definitionId, attemptId, state (SM-ASM-07), issuedAt, expiresAt, revokedReason | Account | EVID |
+| ENT-ASM-19 | ExamRegistration | id, accountId, definitionId, slot, state (SM-ASM-08), paymentRef | Account | LEGAL |
+| ENT-ASM-20 | EmployerAssignment | id, employerRef, candidateId, assessmentVersionId, state (SM-ASM-10), consentScope, deadline | Attempt | LEGAL while employer relation |
+| ENT-ASM-21 | ResultShare | id, attemptId, scope, recipientRef, expiresAt, revokedAt, accessLog | Attempt | LEGAL |
+| ENT-ASM-22 | LeaderboardEntry | accountId, board, points, solved, updatedAt | Account | ACCT |
+| ENT-ASM-23 | Contest | id, title, window, scoring, rated, freeze, problems[], state (SM-ASM-09) | n Entries | LEGAL |
+| ENT-ASM-24 | ItemStatistic | itemVersionId, n, difficulty, discrimination, distractors, timeStats, flags | Item | AGG |
+| ENT-ASM-25 | FairnessReport | id, scope, period, metrics, suppressed, actions | Assessment | AGG |
+| ENT-ASM-26 | LanguageRuntime | id, language, version, imageDigest, limits, libs, state | Used by challenges | LEGAL |
+| ENT-ASM-27 | ProctoringSession | attemptId, vendorRef, mode, consentRef, flags[], reviewState | Attempt | REC30 for media; flags LOG90 unless case |
+| ENT-ASM-28 | IdentityCheckRef | accountId, method, result, at, providerRef | Account | EVID or {24 months} |
+| ENT-ASM-29 | HintUnlock | attemptId or practiceId, hintIndex, solutionViewed, at | Attempt | ACCT |
+| ENT-ASM-30 | ChallengeSet | id, title, items[], ordered | Challenges | PUBLIC |
+| ENT-ASM-31 | ScoreReport | id, attemptId, hash, verificationId, createdAt | Attempt | EVID |
+| ENT-ASM-32 | ItemIssueReport | id, reporterId, itemRef, category, note, state, outcome | Item | ACCT; outcome AGG |
 
 ## ATS
 
@@ -634,6 +673,40 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | ENT-NTF-13 | CatalogEntry | key, class, channels, defaults, lane, ttl_hours, digest_eligible, groupable, throttle_group, sensitive_content, owner_module, status | Template | Permanent |
 | ENT-NTF-14 | OrgRoutingRule | org_id, event, condition, recipients, channels, detail_mode | Organization | While the org exists |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-PLT-01 | ApiClient | id, ownerType and id, name, type, redirectUris, scopes, status, publisherVerified, environment, reviewState | has ApiCredential, OAuthGrant, WebhookEndpoint | Life of app plus 2 years |
+| ENT-PLT-02 | ApiCredential | id, clientId or ownerId, prefix, secretHash, scopes, ipAllowlist, expiresAt, lastUsedAt, status | ApiClient | 13 months after revoke or expiry |
+| ENT-PLT-03 | OAuthGrant | id, userId, clientId, scopes, catalogVersion, authorizedAt, refreshFamilyId, status | ApiClient, user | Life of grant plus 13 months |
+| ENT-PLT-04 | RateLimitPolicy | class, window, limit, burst, scope, failMode, planOverrides | tenant | Versioned config, 2 years |
+| ENT-PLT-05 | RequestLog and UsageRecord | requestId, tenantId, principalId, route template, status, latencyMs, ts, rateLimitState, idempotencyKey | ApiClient | Metadata 30 days; aggregates 13 months |
+| ENT-PLT-06 | IdempotencyRecord | principalId, route, key, fingerprint, status, responseRef, createdAt | principal | 14 days |
+| ENT-PLT-07 | WebhookEndpoint | id, tenantId, url, apiVersion, eventTypes, secretRef, state, environment, createdBy | has WebhookDelivery | Life plus 13 months |
+| ENT-PLT-08 | WebhookDelivery | id, endpointId, eventId, attempts[], state, responseSnippet, replayOf | WebhookEndpoint, OutboxEvent | 30 days |
+| ENT-PLT-09 | IntegrationDefinition | id, category, adapterId, authType, scopes, dataRead, dataWritten, directions, planGates, status | has IntegrationConnection | Versioned, permanent in release history |
+| ENT-PLT-10 | IntegrationConnection | id, tenantId or userId, definitionId, state, config, secretRefs, lastSuccessAt, health, consentSummaryVersion | IntegrationDefinition, SyncRun | Life plus 13 months |
+| ENT-PLT-11 | VaultSecret | id, ownerRef, kind, ciphertext, keyVersion, rotatedAt, lastUsedAt | connections, endpoints | Deleted at disconnect; versions kept for overlap only |
+| ENT-PLT-12 | SyncRun | id, connectionId, mode, startedAt, counts, errors, cursor, state | IntegrationConnection | 12 months |
+| ENT-PLT-13 | StoredFile | id, ownerRef, tenantId, purpose, state, size, sniffedType, checksum, storageKey, retentionClass, legalHold, version | has ScanResult, MediaAsset | By retention class |
+| ENT-PLT-14 | MediaAsset and Rendition | id, fileId, kind, state, profileVersion, renditions[], posterRef, captionsRef, durationMs | StoredFile | Life of content |
+| ENT-PLT-15 | UploadSession | id, userId, purpose, declaredSize, parts, expiresAt, checksum | StoredFile | 24 hours |
+| ENT-PLT-16 | ImportRun | id, tenantId, entityType, fileId, mapping, options, state, counts, reportRef, rollbackUntil | StoredFile | Report 12 months; source file 30 days |
+| ENT-PLT-17 | ExportJob | id, requesterId, dataset, filters, format, state, fileId, expiresAt, manifestRef | StoredFile | Metadata 13 months; file 24 hours to 7 days |
+| ENT-PLT-18 | BackgroundJob | id, kind, payload, status, attempts, maxAttempts, runAfter, leaseOwner, leaseExpiresAt, fencingToken, idempotencyKey, tenantId, lastError | JobSchedule | Succeeded 14 days; dead 30 days then archived metadata 13 months |
+| ENT-PLT-19 | JobSchedule | id, kind, cron, timeZone, missedPolicy, overlapPolicy, paused, dryRunDefault, lastSlot | BackgroundJob | Versioned config |
+| ENT-PLT-20 | OutboxEvent | id, type, version, tenantId, aggregateId, sequence, payload, createdAt, publishedAt | WebhookDelivery, consumers | 30 days; audit class to the audit store |
+| ENT-PLT-21 | DeveloperAccount | userId, termsAcceptedAt, verifiedPublisher, status | ApiClient | Life plus 2 years |
+| ENT-PLT-22 | SandboxTenant | id, developerId, seedProfile, createdAt, lastActiveAt | ApiClient | Deleted after 90 days inactivity |
+| ENT-PLT-23 | ApiVersion | version, state, announcedAt, sunsetAt, migrationGuideRef | changelog | Permanent |
+| ENT-PLT-24 | StorageQuota | ownerRef, limitBytes, usedBytes, reservedBytes, updatedAt | StoredFile, BIL entitlement | Life of owner |
+| ENT-PLT-25 | RetentionPolicy | class, duration, trigger, legalBasisNote, version | StoredFile | Versioned config |
+| ENT-PLT-26 | ExternalMediaProvider | id, domains, parserVersion, capabilities, status, allowlistScope | media references | Versioned config |
+| ENT-PLT-27 | ScanResult | fileId, engine, signatureVersion, verdict, scannedAt, details | StoredFile | 13 months |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -683,6 +756,33 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | ENT-PWA-10 | PwaTelemetryAggregate | metric, dimensions (platform, version, routeClass), period, value | ANL | 13 months |
 | ENT-PWA-11 | AppVersionManifest | version, minSupported, requiredFrom, releasedAt | release pipeline | 2 years |
 | ENT-PWA-12 | DraftCountHint | deviceId, accountId, count, updatedAt | DeviceRegistration | Deleted when count is 0 or after 30 days |
+
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-REP-01 | XpRule and RuleVersion | id, version, event_type, amount_fn, cap_group, effective_from, effective_to, description, status | Config version | Permanent |
+| ENT-REP-02 | XpLedgerEntry | id, subject_ref, amount, rule_id, rule_version, reference_type, reference_id, kind, reason, occurred_at, posted_at, source_event_id | Subject, XpRule | Permanent with opaque ref; mapping deleted on erasure |
+| ENT-REP-03 | XpBalance (projection) | subject_ref, xp_total, xp_week, xp_by_skill, level, as_of | Ledger | Rebuildable |
+| ENT-REP-04 | LevelDefinition | version, level, threshold, name | Config version | Permanent |
+| ENT-REP-05 | BadgeDefinition | id, version, name, issuer_class, criteria, expiry_policy, category, status, image_ref, alt_text | Issuer | Permanent |
+| ENT-REP-06 | BadgeAward | subject_ref, definition_id, version, awarded_at, evidence_refs, expires_at, state, visibility, featured | Subject, Definition | Until erasure; revocation history kept |
+| ENT-REP-07 | Streak | subject_ref, cadence, current, longest, state, last_credit_period, protection_tokens | Subject | Until erasure |
+| ENT-REP-08 | StreakProtectionAndVacation | subject_ref, kind, used_at, vacation_start, vacation_end | Streak | 12 months |
+| ENT-REP-09 | Goal | id, subject_ref, type, target, period, progress, status | Subject | 12 months after end |
+| ENT-REP-10 | LeaderboardSnapshot | board_id, scope, period, taken_at, rows (rank, subject_ref or alias, score) | Season, Cohort | 24 months; identity rows removed on erasure |
+| ENT-REP-11 | LeaderboardPreference | subject_ref, mode (name, alias, excluded), alias, show_level | Subject | Until erasure |
+| ENT-REP-12 | ReputationSignal | id, subject_ref, context, domain, type_id, source_ref, source_class, value, occurred_at, evidence_ref, weight_components, status | Subject | 36 months or until source erasure |
+| ENT-REP-13 | ReputationScore | subject_ref, context, domain, score, label, confidence, as_of, config_version, input_hash | Subject | History 24 months |
+| ENT-REP-14 | ReputationConfig | version, weights, half_life, thresholds, min_sources, status | Config | Permanent |
+| ENT-REP-15 | Recognition | id, giver_ref, recipient_ref, type, target_ref, note, created_at, hidden | Subjects | 24 months |
+| ENT-REP-16 | IntegrityFlagAndCase | flag id, rule_family, subject_ref, evidence_codes, decision, reviewers, appeal, closed_at | Subject | 12 months after closure |
+| ENT-REP-17 | Season | id, name, start, end, boards, scoring, bands, state | Config | Permanent |
+| ENT-REP-18 | GamificationPreference | subject_ref, intensity, data_choice, sub-toggles, reputation_opt_out | Subject | Until erasure |
+| ENT-REP-19 | ShareCard | id, subject_ref, kind, fields, token_hash, created_at, revoked_at, views | Subject | Until revoke or erasure |
+| ENT-REP-20 | FairnessReport and Action | id, period, findings, actions, owners, status | Config | 5 years aggregate |
 
 ## SET
 
@@ -737,6 +837,44 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | ENT-SRC-20 | SearchAbuseSignal | id, actorKey, type, severity, action, at | n:1 actor | 90 days |
 | ENT-SRC-21 | PlaceRecord | id, name, hierarchy, coordinates, aliases | referenced by documents | Permanent |
 | ENT-SRC-22 | SearchAnalyticsAggregate | metric, dimensions, period, value, k | aggregate | 24 months |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Entity | Key attributes | Relationships | Retention |
+|---|---|---|---|---|
+| ENT-STU-01 | InstructorApplication | id, accountId, state, topics[], links[], sampleRef, declarations, decisionReasonCodes, submittedAt, decidedAt | 1 account | LEGAL for decision; materials {24 months} if rejected |
+| ENT-STU-02 | InstructorProfile | accountId, handle, displayName, headline, bio, visibility map, verificationLevels, badgeScopes, state | 1 account; n CourseMember | ACCT |
+| ENT-STU-03 | AgreementAcceptance | accountId, documentId, version, hash, acceptedAt, reauthResult, declarations[] | Account | LEGAL |
+| ENT-STU-04 | PayoutProfileRef | accountId, bilProfileRef, state, lastChangedAt | BIL profile | TXN |
+| ENT-STU-05 | Course | id, ownerType, ownerId, slug, state, currentLiveVersionId, workingVersionId, createdAt | n Version, n CourseMember | PUBLIC |
+| ENT-STU-06 | CourseVersion | id, courseId, number, kind (structural, patch), state, ruleJson, skills[], changeNote, attestationId, checksSnapshot, publishedAt | Course; n Section | PUBLIC; AUDIT of transitions |
+| ENT-STU-07 | Section | id, versionId, key, title, position, releaseRule | n Lesson | PUBLIC |
+| ENT-STU-08 | Lesson | id, versionId, sectionId, lessonKey, type, title, position, flags (preview, optional, downloadable), body or mediaRef, completionRule, estimatedMinutes | Section; MediaAsset | PUBLIC |
+| ENT-STU-09 | MediaAsset | id, ownerId, kind, sourceRef, checksum, state, durationMs, probe, providerRef, protectionLevel, deletedAt | n Rendition, n CaptionTrack | ACCT while referenced; renditions regenerable |
+| ENT-STU-10 | MediaRendition | assetId, profile, codec, bitrate, resolution, manifestRef, validatedAt | Asset | Regenerable |
+| ENT-STU-11 | CaptionTrack | assetId, language, kind (caption, transcript, description), autoGenerated, reviewed, vttRef, confidence | Asset | PUBLIC with asset |
+| ENT-STU-12 | Resource | id, lessonId, name, fileRef, scanState, downloadable | Lesson | PUBLIC with version |
+| ENT-STU-13 | QuizPlacement | lessonId, assessmentRef (ASM), weight, policyOverrides, snapshotVersion | Lesson; ASM assessment | PUBLIC |
+| ENT-STU-14 | AssignmentConfig | lessonId, brief, submissionTypes, dueRule, latePolicy, revisions, rubricRef, gradingMode, aiPolicyText | Lesson; ASM rubric | PUBLIC |
+| ENT-STU-15 | CourseMember | courseId, accountId, role, sharePercent, displayPublic, invitationState | Course; Account | ACCT; AUDIT |
+| ENT-STU-16 | PriceSetting | courseId, mode, tier, regionBands, scheduledChange, effectiveFrom | Course | TXN |
+| ENT-STU-17 | Coupon | id, courseId, type, codeOrHash, limits, window, state, redemptionCount | Course | TXN |
+| ENT-STU-18 | EarningsStatement | memberId, period, lines[], closedAt | BIL ledger | TXN |
+| ENT-STU-19 | PayoutRecord | id, memberId, amount, currency, state, runKey, providerRef | Statement | TXN |
+| ENT-STU-20 | PublishReviewCase | id, versionId, state, reviewerIds, checklistResults, decision, reasons, sla, appeal | Version | LEGAL |
+| ENT-STU-21 | QualityCheckResult | versionId, ruleVersion, findings[], runAt, dismissals[] | Version | LOG90 (latest per version kept) |
+| ENT-STU-22 | ModerationAction | id, targetType, targetId, severity, action, policyRef, reason, actorId, appealState | Course or account | LEGAL |
+| ENT-STU-23 | CopyrightCase | id, claimant, workDescription, targetRefs, state, notices, counterNotice, decisions | Course content | LEGAL |
+| ENT-STU-24 | LocalizationTrack | versionId, language, scope, state (draft, machine, reviewed, outdated), sourceHash | Version | PUBLIC |
+| ENT-STU-25 | LiveSessionPlan | id, courseId, runId, schedule, capacity, recordingFlag, providerRoomRef, state | Course | LOG90 after end; recording per policy |
+| ENT-STU-26 | AnnouncementPost | id, courseId, audience, body, sentAt, stats | Course | ACCT |
+| ENT-STU-27 | QualityScore | scopeId, components[], computedAt, inputs | Course or instructor | AGG private |
+| ENT-STU-28 | DraftRevision | entityId, token, authorId, snapshotRef, at | Lesson or course | {90 days}, last 20 |
+| ENT-STU-29 | RightsAttestation | id, versionId, ownerId, thirdPartyItems[], aiDisclosure, signedAt | Version | LEGAL |
+| ENT-STU-30 | ImportJob | id, courseId, sourceHash, mapping, state, report | Course | LOG90 |
+| ENT-STU-31 | GradingTask | id, submissionRef, graderId, leaseUntil, scores, state, releaseAt, disputes[] | LRN submission | ACCT of learner; AUDIT |
 
 ## TSF
 

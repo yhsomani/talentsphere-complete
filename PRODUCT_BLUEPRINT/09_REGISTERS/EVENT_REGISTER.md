@@ -5,7 +5,7 @@
 
 Events emitted and consumed per module.
 
-**Total: 766.**
+**Total: 891.**
 
 ## ADM
 
@@ -138,6 +138,48 @@ Source: [02_MODULES/ANL_Analytics_Reporting_Insights.md](../02_MODULES/ANL_Analy
 | EVT-ANL-022 | analytics.policy.changed | Suppression policy changed | parameter, decisionRecordId |
 | EVT-ANL-023 | analytics.api.grant_changed | API or embed grant changed | grantId, state |
 | EVT-ANL-024 | analytics.dashboard.shared | Snapshot link created | dashboardId, expiresAt |
+
+## ASM
+
+Source: [02_MODULES/ASM_Assessments_Challenges_Integrity.md](../02_MODULES/ASM_Assessments_Challenges_Integrity.md)
+
+| ID | Event name | Trigger | Consumers |
+|---|---|---|---|
+| EVT-ASM-001 | `assessment.attempt.started` | Attempt created | attemptId, versionId, context, policyHash · AI gateway (restriction), ANL |
+| EVT-ASM-002 | `assessment.attempt.submitted` | Submit or deadline | attemptId, autoSubmitted · grading |
+| EVT-ASM-003 | `assessment.attempt.graded` | Final grade (passed or failed) | attemptId, score, passed, versionId, context, courseRef · LRN, EVD, ATS, REP, NTF |
+| EVT-ASM-004 | `assessment.attempt.unverified` | Runner unavailable | attemptId, reason · NTF, ops |
+| EVT-ASM-005 | `assessment.attempt.voided` | Void decision | attemptId, reasonClass · LRN, EVD, ATS, REP |
+| EVT-ASM-006 | `assessment.attempt.abandoned` | Inactivity or cancel | attemptId · ANL |
+| EVT-ASM-007 | `assessment.challenge.solved` | Challenge passed (graded or practice, flagged assisted or not) | accountId, challengeId, assisted · REP, AIC |
+| EVT-ASM-008 | `assessment.evidence.requested` | Qualifying pass | attemptId, skills, levels, issuerRef · EVD |
+| EVT-ASM-009 | `assessment.integrity.flagged` | Case opened | caseId, attemptId, priority · MOD queue, NTF |
+| EVT-ASM-010 | `assessment.integrity.decided` | Case decision | caseId, decision · EVD, LRN, ATS, NTF |
+| EVT-ASM-011 | `assessment.appeal.filed` | Appeal filed | appealId · MOD queue |
+| EVT-ASM-012 | `assessment.appeal.decided` | Appeal decided | appealId, outcome · NTF, EVD |
+| EVT-ASM-013 | `assessment.accommodation.granted` | Grant active | accountId, scope (no details) · ASM internal |
+| EVT-ASM-014 | `assessment.version.published` | Publish | versionId, state · catalogs |
+| EVT-ASM-015 | `assessment.version.eligible` | Evidence-eligible | versionId · EVD, catalogs |
+| EVT-ASM-016 | `assessment.version.retired` | Retired | versionId · LRN, STU |
+| EVT-ASM-017 | `assessment.item.retired` | Item retired | itemId · authors |
+| EVT-ASM-018 | `assessment.item.stats_updated` | Nightly stats | itemVersionId, aggregates · STU, authors |
+| EVT-ASM-019 | `assessment.item.flagged` | Flag raised | itemId, reason · authors |
+| EVT-ASM-020 | `assessment.regrade.applied` | Regrade done | assessmentId, affected, changes · LRN, EVD, NTF |
+| EVT-ASM-021 | `assessment.certification.issued` | Certification issued | recordId, definitionId · EVD, PRF, REP, NTF |
+| EVT-ASM-022 | `assessment.certification.revoked` | Revoked | recordId, reasonClass · EVD, PRF, ATS |
+| EVT-ASM-023 | `assessment.certification.expired` | Validity ended | recordId · EVD, PRF |
+| EVT-ASM-024 | `assessment.exam.registered` | Registered | registrationId · NTF, proctoring |
+| EVT-ASM-025 | `assessment.exam.cancelled` | Cancelled | registrationId · NTF, seats |
+| EVT-ASM-026 | `assessment.assignment.invited` | Employer invitation | assignmentId · NTF |
+| EVT-ASM-027 | `assessment.assignment.completed` | Completed and consented | assignmentId, scope · ATS |
+| EVT-ASM-028 | `assessment.share.created` | Share created | shareId, scope · audit |
+| EVT-ASM-029 | `assessment.share.revoked` | Revoked | shareId · recipients |
+| EVT-ASM-030 | `assessment.contest.started` | Contest live | contestId · ANL |
+| EVT-ASM-031 | `assessment.contest.ended` | Contest ended | contestId · leaderboard |
+| EVT-ASM-032 | `assessment.leaderboard.updated` | Board refreshed | board · ANL |
+| EVT-ASM-033 | `assessment.ai_restriction.set` | Restriction written | principal, until · AI gateway |
+| EVT-ASM-034 | `assessment.proctoring.flagged` | Vendor flag | attemptId, flagType · integrity queue |
+| EVT-ASM-035 | `assessment.runner.degraded` | Pool unhealthy | pool, severity · ops |
 
 ## ATS
 
@@ -788,6 +830,53 @@ Source: [02_MODULES/NTF_Notifications_Communication.md](../02_MODULES/NTF_Notifi
 | EVT-NTF-017 | ntf.reminder.fired | reminder sent | reminder id |
 | EVT-NTF-018 | ntf.stream.paused | deliverability pause | stream, reason |
 
+## PLT
+
+Source: [02_MODULES/PLT_Platform_API_Integrations_Media_Files.md](../02_MODULES/PLT_Platform_API_Integrations_Media_Files.md)
+
+| ID | Event name | Trigger | Consumers |
+|---|---|---|---|
+| EVT-PLT-001 | `plt.apiclient.registered` | App registered | clientId, ownerId, environment · ADM, ANL |
+| EVT-PLT-002 | `plt.apiclient.approved` | Live approval or suspension decision | clientId, decision · NTF, ADM |
+| EVT-PLT-003 | `plt.credential.created` | Key or secret created | credentialId, ownerRef, scopes · NTF (notice), audit |
+| EVT-PLT-004 | `plt.credential.revoked` | Key revoked or expired | credentialId, reason · NTF, audit |
+| EVT-PLT-005 | `plt.credential.rotated` | Rotation started | credentialId, successorId · NTF, audit |
+| EVT-PLT-006 | `plt.grant.authorized` | OAuth consent granted | userId, clientId, scopes · NTF (notice), audit |
+| EVT-PLT-007 | `plt.grant.revoked` | Grant revoked | grantId, reason · audit |
+| EVT-PLT-008 | `plt.ratelimit.exceeded` | Limit tripped (sampled) | principalId, class · ANL, ADM alerts |
+| EVT-PLT-009 | `plt.quota.threshold_reached` | 80% or 100% of quota | tenantId, quotaType, percent · NTF, BIL |
+| EVT-PLT-010 | `plt.apiversion.deprecated` | Version deprecation announced | version, sunsetAt · NTF, changelog subscribers |
+| EVT-PLT-011 | `plt.webhook.endpoint_created` | Endpoint created or verified | endpointId, tenantId · audit |
+| EVT-PLT-012 | `plt.webhook.endpoint_disabled` | Endpoint disabled or auto-disabled | endpointId, reason · NTF, audit |
+| EVT-PLT-013 | `plt.webhook.delivery_failed` | Attempt failed | deliveryId, attempt, errorClass · ANL, ADM health |
+| EVT-PLT-014 | `plt.webhook.delivery_dead` | Delivery exhausted | deliveryId, eventId · NTF (digest), ADM |
+| EVT-PLT-015 | `plt.webhook.replayed` | Delivery replayed | deliveryId, by · audit |
+| EVT-PLT-016 | `plt.integration.connected` | Connection active | connectionId, definitionId · audit, ANL |
+| EVT-PLT-017 | `plt.integration.disconnected` | Connection ended | connectionId, dataDisposition · audit |
+| EVT-PLT-018 | `plt.integration.health_changed` | Health state transition | connectionId or adapterId, from, to · ADM (EVT consumed), NTF |
+| EVT-PLT-019 | `plt.integration.sync_completed` | Sync run done | runId, counts · owning module, audit |
+| EVT-PLT-020 | `plt.integration.sync_failed` | Sync run failed | runId, errorClass · NTF, ADM |
+| EVT-PLT-021 | `plt.sso.connection_verified` | SSO test sign-in succeeded | tenantId, protocol · audit |
+| EVT-PLT-022 | `plt.scim.user_deprovisioned` | SCIM deactivation applied | userId, tenantId · IDN, audit |
+| EVT-PLT-023 | `plt.file.upload_started` | Upload session created | fileId, purpose · ANL |
+| EVT-PLT-024 | `plt.file.available` | Scan clean | fileId, purpose, size · owning modules |
+| EVT-PLT-025 | `plt.file.quarantined` | File quarantined | fileId, reasonClass · TSF, NTF |
+| EVT-PLT-026 | `plt.file.deleted` | Soft delete | fileId, by · owning modules, search |
+| EVT-PLT-027 | `plt.file.purged` | Purge complete | fileId · audit, SET |
+| EVT-PLT-028 | `plt.media.transcode_completed` | Media ready | assetId · STU, LRN |
+| EVT-PLT-029 | `plt.media.transcode_failed` | Media failed | assetId, reasonClass · STU, NTF |
+| EVT-PLT-030 | `plt.storage.quota_threshold` | Storage quota threshold | ownerRef, percent · NTF, BIL |
+| EVT-PLT-031 | `plt.import.validated` | Validation complete | runId, counts · NTF |
+| EVT-PLT-032 | `plt.import.committed` | Import finished | runId, counts · owning module, audit |
+| EVT-PLT-033 | `plt.import.failed` | Import failed | runId, errorClass · NTF, ADM |
+| EVT-PLT-034 | `plt.export.ready` | Export ready | exportId, expiresAt · NTF |
+| EVT-PLT-035 | `plt.export.expired` | Export link expired | exportId · audit |
+| EVT-PLT-036 | `plt.job.dead` | Job became dead | jobId, kind, errorClass · ADM (FR-ADM-037) |
+| EVT-PLT-037 | `plt.job.replayed` | Operator replay | jobId, by · audit |
+| EVT-PLT-038 | `plt.schedule.missed` | Slot skipped or late | scheduleId, slot, policy · ADM alerts |
+| EVT-PLT-039 | `plt.sandbox.reset` | Sandbox reset or deleted | sandboxId · ANL |
+| EVT-PLT-040 | `plt.egress.blocked` | Outbound request refused | purpose, reasonClass, tenantId · security alerts, ADM |
+
 ## PRF
 
 Source: [02_MODULES/PRF_Profile_Resume_Portfolio.md](../02_MODULES/PRF_Profile_Resume_Portfolio.md)
@@ -860,6 +949,32 @@ Source: [02_MODULES/PWA_PWA_Offline_Mobile_Extension.md](../02_MODULES/PWA_PWA_O
 | EVT-PWA-030 | `pwa.wrapper.trigger_fired` | Trigger threshold crossed | trigger, snapshotRef · ADM, product owner |
 | EVT-PWA-031 | `pwa.version.unsupported_blocked` | API returned 426 | clientVersion · ANL, ADM health |
 
+## REP
+
+Source: [02_MODULES/REP_Gamification_Reputation.md](../02_MODULES/REP_Gamification_Reputation.md)
+
+| ID | Event name | Trigger | Consumers |
+|---|---|---|---|
+| EVT-REP-001 | rep.xp.awarded | ledger award posted | subject ref, amount, rule, reference |
+| EVT-REP-002 | rep.xp.reversed | reversal posted | subject ref, original id, reason code |
+| EVT-REP-003 | rep.xp.capped | cap note written | subject ref, amount capped |
+| EVT-REP-004 | rep.level.changed | level up or down | subject ref, from, to |
+| EVT-REP-005 | rep.badge.awarded | badge issued | subject ref, definition, version |
+| EVT-REP-006 | rep.badge.revoked | badge revoked | subject ref, definition, reason code |
+| EVT-REP-007 | rep.badge.expiring | 30 days before expiry | subject ref, definition |
+| EVT-REP-008 | rep.streak.updated | streak state change | subject ref, state, count |
+| EVT-REP-009 | rep.goal.completed | goal complete | subject ref, goal type |
+| EVT-REP-010 | rep.leaderboard.snapshot | snapshot finalized | board id, period |
+| EVT-REP-011 | rep.season.closed | season finalized | season id |
+| EVT-REP-012 | rep.reputation.updated | score label change | subject ref, context, domain, label |
+| EVT-REP-013 | rep.reputation.signal_removed | signal removed or contested | subject ref, signal id |
+| EVT-REP-014 | rep.recognition.given | recognition created | giver ref, recipient ref, type |
+| EVT-REP-015 | rep.integrity.case_opened | case opened | case id, family |
+| EVT-REP-016 | rep.integrity.sanction_applied | sanction executed | case id, effect |
+| EVT-REP-017 | rep.preference.changed | intensity or opt-out change | subject ref, intensity |
+| EVT-REP-018 | rep.config.activated | new config version active | area, version |
+| EVT-REP-019 | rep.sharecard.created | share card generated | subject ref, kind |
+
 ## SET
 
 Source: [02_MODULES/SET_Settings_Privacy_Consent.md](../02_MODULES/SET_Settings_Privacy_Consent.md)
@@ -915,6 +1030,44 @@ Source: [02_MODULES/SRC_Search_Discovery.md](../02_MODULES/SRC_Search_Discovery.
 | EVT-SRC-020 | `src.abuse.detected` | Abuse signal action | actorKey, type, action · ADM, EMP (for orgs) |
 | EVT-SRC-021 | `src.mode.changed` | Live/degraded/down | mode · ADM, status page |
 | EVT-SRC-022 | `src.leak_canary.failed` | Leakage test failure | entityType · SAD, ADM |
+
+## STU
+
+Source: [02_MODULES/STU_Instructor_Studio_Content_Production.md](../02_MODULES/STU_Instructor_Studio_Content_Production.md)
+
+| ID | Event name | Trigger | Consumers |
+|---|---|---|---|
+| EVT-STU-001 | `studio.instructor.applied` | Application submitted | applicationId · ADM, NTF |
+| EVT-STU-002 | `studio.instructor.approved` | Application approved | accountId · NTF, LRN, ANL |
+| EVT-STU-003 | `studio.instructor.rejected` | Application rejected | accountId, reasonCodes · NTF |
+| EVT-STU-004 | `studio.instructor.verified` | Verification level reached | accountId, level, scope · EVD, LRN |
+| EVT-STU-005 | `studio.instructor.suspended` | Suspension | accountId, reason class · LRN, BIL, TSF |
+| EVT-STU-006 | `studio.course.created` | Course shell created | courseId, ownerType · ANL |
+| EVT-STU-007 | `studio.version.submitted` | Submit for review | versionId · ADM review queue |
+| EVT-STU-008 | `studio.version.approved` | Reviewer approves | versionId · NTF |
+| EVT-STU-009 | `studio.version.changes_requested` | Reviewer requests changes | versionId, items · NTF |
+| EVT-STU-010 | `studio.course.published` | Version goes live | courseId, versionId, snapshotRef · LRN, SRC, ANL |
+| EVT-STU-011 | `studio.course.patched` | Patch published | courseId, versionId, patchId · LRN |
+| EVT-STU-012 | `studio.course.unpublished` | Owner unpublishes | courseId · LRN, SRC |
+| EVT-STU-013 | `studio.course.archived` | Owner archives | courseId · LRN, SRC |
+| EVT-STU-014 | `studio.course.taken_down` | Moderation or legal takedown | courseId, scope, reasonClass · LRN, SRC, BIL |
+| EVT-STU-015 | `studio.media.uploaded` | Upload complete | assetId · pipeline |
+| EVT-STU-016 | `studio.media.ready` | Asset ready | assetId, durationMs · lessons, NTF |
+| EVT-STU-017 | `studio.media.failed` | Processing failed | assetId, reasonClass · NTF, ADM |
+| EVT-STU-018 | `studio.captions.published` | Track reviewed or uploaded | assetId, language · LRN |
+| EVT-STU-019 | `studio.coupon.created` | Coupon created | couponId · BIL |
+| EVT-STU-020 | `studio.coupon.revoked` | Coupon revoked | couponId · BIL |
+| EVT-STU-021 | `studio.price.changed` | Price set or scheduled | courseId, effectiveFrom · BIL, LRN |
+| EVT-STU-022 | `studio.team.changed` | Members, roles, splits | courseId · BIL, LRN |
+| EVT-STU-023 | `studio.signoff.granted` | Instructor sign-off | enrollmentId, signerId · LRN |
+| EVT-STU-024 | `studio.announcement.posted` | Announcement sent | courseId, announcementId · LRN, NTF |
+| EVT-STU-025 | `studio.grading.released` | Grades released | submissionRef · LRN, NTF |
+| EVT-STU-026 | `studio.moderation.action_taken` | Moderator action | targetRef, action · TSF, LRN |
+| EVT-STU-027 | `studio.copyright.content_disabled` | Notice accepted | targetRefs · LRN |
+| EVT-STU-028 | `studio.copyright.content_restored` | Counter-notice window ends | targetRefs · LRN |
+| EVT-STU-029 | `studio.live.scheduled` | Session scheduled | sessionId · LRN, NTF |
+| EVT-STU-030 | `studio.live.cancelled` | Session cancelled | sessionId · LRN, NTF |
+| EVT-STU-031 | `studio.quality.checked` | Checks run on submit | versionId, blockingCount · ANL |
 
 ## TSF
 
